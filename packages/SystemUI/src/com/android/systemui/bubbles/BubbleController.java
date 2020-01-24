@@ -429,12 +429,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
-        mNotificationEntryManager.setNotificationRemoveInterceptor(
+        mNotificationEntryManager.addNotificationRemoveInterceptor(
                 new NotificationRemoveInterceptor() {
                     @Override
-                    public boolean onNotificationRemoveRequested(String key, int reason) {
-                        NotificationEntry entry =
-                                mNotificationEntryManager.getActiveNotificationUnfiltered(key);
+                    public boolean onNotificationRemoveRequested(
+                            String key, NotificationEntry entry, int reason) {
                         return shouldInterceptDismissal(entry, reason);
                     }
                 });

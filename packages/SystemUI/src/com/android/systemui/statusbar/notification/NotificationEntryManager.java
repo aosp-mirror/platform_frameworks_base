@@ -135,6 +135,7 @@ public class NotificationEntryManager implements
     private final NotificationGroupManager mGroupManager;
     private final NotificationRankingManager mRankingManager;
     private final FeatureFlags mFeatureFlags;
+    private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
 
     private NotificationPresenter mPresenter;
     private RankingMap mLatestRankingMap;
@@ -144,7 +145,7 @@ public class NotificationEntryManager implements
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
     private final List<NotificationEntryListener> mNotificationEntryListeners = new ArrayList<>();
-    private NotificationRemoveInterceptor mRemoveInterceptor;
+    private final List<NotificationRemoveInterceptor> mRemoveInterceptors = new ArrayList<>();
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -156,6 +157,14 @@ public class NotificationEntryManager implements
             for (NotificationEntry entry : mPendingNotifications.values()) {
                 pw.println(entry.getSbn());
             }
+        }
+        pw.println("  Remove interceptors registered:");
+        for (NotificationRemoveInterceptor interceptor : mRemoveInterceptors) {
+            pw.println("    " + interceptor.getClass().getSimpleName());
+        }
+        pw.println("  Lifetime extenders registered:");
+        for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
+            pw.println("    " + extender.getClass().getSimpleName());
         }
         pw.println("  Lifetime-extended notifications:");
         if (mRetainedNotifications.isEmpty()) {
@@ -178,7 +187,8 @@ public class NotificationEntryManager implements
             FeatureFlags featureFlags,
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
-            LeakDetector leakDetector) {
+            LeakDetector leakDetector,
+            ForegroundServiceDismissalFeatureController fgsFeatureController) {
         mNotifLog = notifLog;
         mGroupManager = groupManager;
         mRankingManager = rankingManager;
@@ -187,6 +197,7 @@ public class NotificationEntryManager implements
         mNotificationRowBinderLazy = notificationRowBinderLazy;
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
+        mFgsFeatureController = fgsFeatureController;
     }
 
     /** Once called, the NEM will start processing notification events from system server. */
@@ -207,9 +218,14 @@ public class NotificationEntryManager implements
         mNotificationEntryListeners.remove(listener);
     }
 
-    /** Sets the {@link NotificationRemoveInterceptor}. */
-    public void setNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
-        mRemoveInterceptor = interceptor;
+    /** Add a {@link NotificationRemoveInterceptor}. */
+    public void addNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
+        mRemoveInterceptors.add(interceptor);
+    }
+
+    /** Remove a {@link NotificationRemoveInterceptor} */
+    public void removeNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
+        mRemoveInterceptors.remove(interceptor);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -398,14 +414,16 @@ public class NotificationEntryManager implements
             boolean removedByUser,
             int reason) {
 
-        if (mRemoveInterceptor != null
-                && mRemoveInterceptor.onNotificationRemoveRequested(key, reason)) {
-            // Remove intercepted; log and skip
-            mNotifLog.log(NotifEvent.REMOVE_INTERCEPTED);
-            return;
+        final NotificationEntry entry = getActiveNotificationUnfiltered(key);
+
+        for (NotificationRemoveInterceptor interceptor : mRemoveInterceptors) {
+            if (interceptor.onNotificationRemoveRequested(key, entry, reason)) {
+                // Remove intercepted; log and skip
+                mNotifLog.log(NotifEvent.REMOVE_INTERCEPTED);
+                return;
+            }
         }
 
-        final NotificationEntry entry = getActiveNotificationUnfiltered(key);
         boolean lifetimeExtended = false;
 
         // Notification was canceled before it got inflated
@@ -528,7 +546,10 @@ public class NotificationEntryManager implements
         Ranking ranking = new Ranking();
         rankingMap.getRanking(key, ranking);
 
-        NotificationEntry entry = new NotificationEntry(notification, ranking);
+        NotificationEntry entry = new NotificationEntry(
+                notification,
+                ranking,
+                mFgsFeatureController.isForegroundServiceDismissalEnabled());
 
         mLeakDetector.trackInstance(entry);
 

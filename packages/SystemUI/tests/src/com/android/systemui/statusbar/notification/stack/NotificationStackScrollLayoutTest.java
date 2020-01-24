@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
@@ -178,7 +179,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(FeatureFlags.class),
                 () -> mock(NotificationRowBinder.class),
                 () -> mRemoteInputManager,
-                mock(LeakDetector.class));
+                mock(LeakDetector.class),
+                mock(ForegroundServiceDismissalFeatureController.class)
+        );
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, mHeadsUpManager);
 
@@ -203,7 +206,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 mock(NotificationGutsManager.class),
                 mZenModeController,
-                mNotificationSectionsManager);
+                mNotificationSectionsManager,
+                mock(ForegroundServiceSectionController.class),
+                mock(ForegroundServiceDismissalFeatureController.class)
+        );
         verify(mLockscreenUserManager).addUserChangedListener(userChangedCaptor.capture());
         mUserChangedListener = userChangedCaptor.getValue();
         mStackScroller = spy(mStackScrollerInternal);
@@ -394,8 +400,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mStackScroller.onUpdateRowStates();
 
+        // Expecting the footer to be the last child
+        int expected = mStackScroller.getChildCount() - 1;
+
         // move footer to end
-        verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(-1 /* end */));
+        verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(expected));
     }
 
     @Test

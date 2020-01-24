@@ -237,7 +237,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mEntryListener = mEntryListenerCaptor.getValue();
         // And the remove interceptor
         verify(mNotificationEntryManager, atLeastOnce())
-                .setNotificationRemoveInterceptor(mRemoveInterceptorCaptor.capture());
+                .addNotificationRemoveInterceptor(mRemoveInterceptorCaptor.capture());
         mRemoveInterceptor = mRemoveInterceptorCaptor.getValue();
     }
 
@@ -581,7 +581,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Simulate notification cancellation.
         mRemoveInterceptor.onNotificationRemoveRequested(
-                mRow.getEntry().getKey(), REASON_APP_CANCEL);
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_APP_CANCEL);
 
         mBubbleController.expandStackAndSelectBubble(key);
     }
@@ -649,7 +649,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
-                mRow.getEntry().getKey(), REASON_APP_CANCEL);
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_APP_CANCEL);
 
         // Cancels always remove so no need to intercept
         assertFalse(intercepted);
@@ -666,7 +666,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry()));
 
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
-                mRow.getEntry().getKey(), REASON_CANCEL_ALL);
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_CANCEL_ALL);
 
         // Intercept!
         assertTrue(intercepted);
@@ -689,7 +689,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mRow.getEntry()));
 
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
-                mRow.getEntry().getKey(), REASON_CANCEL);
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_CANCEL);
 
         // Intercept!
         assertTrue(intercepted);
@@ -718,7 +718,7 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Dismiss the notification
         boolean intercepted = mRemoveInterceptor.onNotificationRemoveRequested(
-                mRow.getEntry().getKey(), REASON_CANCEL);
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_CANCEL);
 
         // It's no longer a bubble so we shouldn't intercept
         assertFalse(intercepted);
@@ -736,7 +736,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
 
-        mRemoveInterceptor.onNotificationRemoveRequested(mRow.getEntry().getKey(), REASON_CANCEL);
+        mRemoveInterceptor.onNotificationRemoveRequested(
+                mRow.getEntry().getKey(), mRow.getEntry(), REASON_CANCEL);
 
         // Should update show in shade state
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
