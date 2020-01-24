@@ -374,7 +374,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static final String[] EMPTY_STRING_ARRAY = new String[]{};
 
-    private static final FileFilter sAddedFilter = new FileFilter() {
+    private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
             // Installers can't stage directories, so it's fine to ignore
@@ -383,6 +383,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             if (DexMetadataHelper.isDexMetadataFile(file)) return false;
             if (VerityUtils.isFsveritySignatureFile(file)) return false;
+            return true;
+        }
+    };
+    private static final FileFilter sAddedFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            // Installers can't stage directories, so it's fine to ignore
+            // entries like "lost+found".
+            if (file.isDirectory()) return false;
+            if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             return true;
         }
     };
@@ -730,9 +740,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private File[] getAddedFilesLocked() {
+    private File[] getAddedApksLocked() {
         String[] names = getNamesLocked();
-        return filterFiles(stageDir, names, sAddedFilter);
+        return filterFiles(stageDir, names, sAddedApkFilter);
     }
 
     @GuardedBy("mLock")
@@ -1709,7 +1719,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void validateApexInstallLocked()
             throws PackageManagerException {
-        final File[] addedFiles = getAddedFilesLocked();
+        final File[] addedFiles = getAddedApksLocked();
         if (ArrayUtils.isEmpty(addedFiles)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
@@ -1797,7 +1807,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        final File[] addedFiles = getAddedFilesLocked();
+        final File[] addedFiles = getAddedApksLocked();
         if (ArrayUtils.isEmpty(addedFiles) && removeSplitList.size() == 0) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
