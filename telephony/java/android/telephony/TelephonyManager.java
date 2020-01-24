@@ -7310,7 +7310,9 @@ public class TelephonyManager {
      *
      * @return the preferred network type.
      * @hide
+     * @deprecated Use {@link #getPreferredNetworkTypeBitmask} instead.
      */
+    @Deprecated
     @RequiresPermission((android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE))
     @UnsupportedAppUsage
     public @PrefNetworkMode int getPreferredNetworkType(int subId) {
@@ -7352,6 +7354,30 @@ public class TelephonyManager {
             Rlog.e(TAG, "getPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return 0;
+    }
+
+    /**
+     * Get the allowed network types.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return the allowed network type bitmask
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public @NetworkTypeBitMask long getAllowedNetworkTypes() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getAllowedNetworkTypes(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getAllowedNetworkTypes RemoteException", ex);
+        }
+        return -1;
     }
 
     /**
@@ -7609,7 +7635,9 @@ public class TelephonyManager {
      * @param networkType the preferred network type
      * @return true on success; false on any failure.
      * @hide
+     * @deprecated Use {@link #setPreferredNetworkTypeBitmask} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean setPreferredNetworkType(int subId, @PrefNetworkMode int networkType) {
         try {
@@ -7624,7 +7652,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type bitmask.
+     * Set the preferred network type bitmask but if {@link #setAllowedNetworkTypes} has been set,
+     * only the allowed network type will set to the modem.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -7649,6 +7678,29 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkTypeBitmask RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Set the allowed network types of the device. This is for carrier or privileged apps to
+     * enable/disable certain network types on the device. The user preferred network types should
+     * be set through {@link #setPreferredNetworkTypeBitmask}.
+     *
+     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean setAllowedNetworkTypes(@NetworkTypeBitMask long allowedNetworkTypes) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setAllowedNetworkTypes(getSubId(), allowedNetworkTypes);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setAllowedNetworkTypes RemoteException", ex);
         }
         return false;
     }
