@@ -4910,7 +4910,10 @@ public class WifiManager {
      */
     @Nullable
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public Network getCurrentNetwork() {
         try {
             return mService.getCurrentNetwork();
@@ -5012,10 +5015,8 @@ public class WifiManager {
      * and ipconfig.txt file.
      * @param supplicantData bytes representing wpa_supplicant.conf
      * @param ipConfigData bytes representing ipconfig.txt
-     * @deprecated this is no longer supported.
      * @hide
      */
-    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void restoreSupplicantBackupData(

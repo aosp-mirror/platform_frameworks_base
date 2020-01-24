@@ -1037,10 +1037,8 @@ public class WifiScanner {
 
     /**
      * Retrieve the most recent scan results from a single scan request.
-     * {@hide}
      */
     @NonNull
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public List<ScanResult> getSingleScanResults() {
         validateChannel();
