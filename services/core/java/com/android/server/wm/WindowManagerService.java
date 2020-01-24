@@ -122,6 +122,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
@@ -2996,7 +2997,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void showGlobalActions() {
+    @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @Override
+    public void showGlobalActions() {
+        if (!checkCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW,
+                "showGlobalActions()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
         mPolicy.showGlobalActions();
     }
 

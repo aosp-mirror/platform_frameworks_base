@@ -3802,6 +3802,7 @@
   <java-symbol type="string" name="accessibility_system_action_recents_label" />
   <java-symbol type="string" name="accessibility_system_action_screenshot_label" />
   <java-symbol type="string" name="accessibility_system_action_toggle_split_screen_label" />
+  <java-symbol type="string" name="accessibility_system_action_accessibility_menu_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
 

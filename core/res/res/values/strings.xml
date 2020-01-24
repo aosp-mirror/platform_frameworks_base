@@ -5313,7 +5313,8 @@
     <string name="accessibility_system_action_lock_screen_label">Lock Screen</string>
     <!-- Label for taking screenshot action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_screenshot_label">Screenshot</string>
-
+    <!-- Label for showing accessibility menu action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_accessibility_menu_label">Accessibility Menu</string>
     <!-- Accessibility description of caption view -->
     <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 
