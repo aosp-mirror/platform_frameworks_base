@@ -1101,6 +1101,9 @@ public class ResolverActivity extends Activity implements
         }
 
         if (target != null) {
+            if (intent != null) {
+                intent.fixUris(UserHandle.myUserId());
+            }
             safelyStartActivity(target);
 
             // Rely on the ActivityManager to pop up a dialog regarding app suspension
