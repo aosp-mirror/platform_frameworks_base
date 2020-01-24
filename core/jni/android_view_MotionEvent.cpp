@@ -369,9 +369,10 @@ static jlong android_view_MotionEvent_nativeInitialize(
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->initialize(deviceId, source, displayId, INVALID_HMAC, action, 0, flags, edgeFlags,
-                      metaState, buttonState, static_cast<MotionClassification>(classification),
-                      1 /*xScale*/, 1 /*yScale*/, xOffset, yOffset, xPrecision, yPrecision,
+    event->initialize(InputEvent::nextId(), deviceId, source, displayId, INVALID_HMAC, action, 0,
+                      flags, edgeFlags, metaState, buttonState,
+                      static_cast<MotionClassification>(classification), 1 /*xScale*/, 1 /*yScale*/,
+                      xOffset, yOffset, xPrecision, yPrecision,
                       AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION,
                       downTimeNanos, eventTimeNanos, pointerCount, pointerProperties,
                       rawPointerCoords);
@@ -592,6 +593,11 @@ static jlong android_view_MotionEvent_nativeCopy(jlong destNativePtr, jlong sour
     return reinterpret_cast<jlong>(destEvent);
 }
 
+static jint android_view_MotionEvent_nativeGetId(jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getId();
+}
+
 static jint android_view_MotionEvent_nativeGetDeviceId(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->getDeviceId();
@@ -790,6 +796,7 @@ static const JNINativeMethod gMotionEventMethods[] = {
         // --------------- @CriticalNative ------------------
 
         {"nativeCopy", "(JJZ)J", (void*)android_view_MotionEvent_nativeCopy},
+        {"nativeGetId", "(J)I", (void*)android_view_MotionEvent_nativeGetId},
         {"nativeGetDeviceId", "(J)I", (void*)android_view_MotionEvent_nativeGetDeviceId},
         {"nativeGetSource", "(J)I", (void*)android_view_MotionEvent_nativeGetSource},
         {"nativeSetSource", "(JI)V", (void*)android_view_MotionEvent_nativeSetSource},

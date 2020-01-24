@@ -5311,7 +5311,8 @@ public final class ViewRootImpl implements ViewParent,
             if (mTracePrefix == null) {
                 mTracePrefix = getClass().getSimpleName();
             }
-            Trace.traceBegin(traceTag, mTracePrefix + " seq#=" + q.mEvent.getSequenceNumber());
+            Trace.traceBegin(traceTag, mTracePrefix + " id=0x"
+                    + Integer.toHexString(q.mEvent.getId()));
         }
     }
 
@@ -7937,12 +7938,13 @@ public final class ViewRootImpl implements ViewParent,
 
     private void deliverInputEvent(QueuedInputEvent q) {
         Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent",
-                q.mEvent.getSequenceNumber());
+                q.mEvent.getId());
 
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent src=0x"
                     + Integer.toHexString(q.mEvent.getSource()) + " eventTimeNano="
-                    + q.mEvent.getEventTimeNano() + " seq#=" + q.mEvent.getSequenceNumber());
+                    + q.mEvent.getEventTimeNano() + " id=0x"
+                    + Integer.toHexString(q.mEvent.getId()));
         }
         try {
             if (mInputEventConsistencyVerifier != null) {
@@ -7983,7 +7985,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private void finishInputEvent(QueuedInputEvent q) {
         Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "deliverInputEvent",
-                q.mEvent.getSequenceNumber());
+                q.mEvent.getId());
 
         if (q.mReceiver != null) {
             boolean handled = (q.mFlags & QueuedInputEvent.FLAG_FINISHED_HANDLED) != 0;
