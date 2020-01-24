@@ -4349,6 +4349,25 @@ public class WifiManager {
     }
 
     /**
+     * Sets the user's choice of metered override for a Passpoint profile.
+     *
+     * @param fqdn the FQDN (fully qualified domain name) of the passpoint profile.
+     * @param meteredOverride One of three values: {@link WifiConfiguration#METERED_OVERRIDE_NONE},
+     *                        {@link WifiConfiguration#METERED_OVERRIDE_METERED},
+     *                        {@link WifiConfiguration#METERED_OVERRIDE_NOT_METERED}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setMeteredOverridePasspoint(@NonNull String fqdn, int meteredOverride) {
+        try {
+            mService.setMeteredOverridePasspoint(fqdn, meteredOverride);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Disable an ephemeral network.
      *
      * @param ssid in the format of WifiConfiguration's SSID.

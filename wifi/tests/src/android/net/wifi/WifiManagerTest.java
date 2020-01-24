@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_METERED;
 import static android.net.wifi.WifiManager.ActionListener;
 import static android.net.wifi.WifiManager.BUSY;
 import static android.net.wifi.WifiManager.ERROR;
@@ -1796,6 +1797,16 @@ public class WifiManagerTest {
         verify(mWifiService).setMacRandomizationSettingPasspointEnabled(fqdn, true);
     }
 
+    /**
+     * Test behavior of
+     * {@link WifiManager#setMacRandomizationSettingPasspointEnabled(String, boolean)}
+     */
+    @Test
+    public void testSetMeteredOverridePasspoint() throws Exception {
+        final String fqdn = "FullyQualifiedDomainName";
+        mWifiManager.setMeteredOverridePasspoint(fqdn, METERED_OVERRIDE_METERED);
+        verify(mWifiService).setMeteredOverridePasspoint(fqdn, METERED_OVERRIDE_METERED);
+    }
 
     /**
      * Test behavior of {@link WifiManager#disconnect()}

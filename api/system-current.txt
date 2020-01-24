@@ -7639,6 +7639,7 @@ package android.net.wifi {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean setSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE) public boolean setWifiConnectedNetworkScorer(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.WifiConnectedNetworkScorer);
@@ -8004,6 +8005,7 @@ package android.net.wifi.hotspot2 {
   }
 
   public final class PasspointConfiguration implements android.os.Parcelable {
+    method public int getMeteredOverride();
     method public boolean isAutoJoinEnabled();
     method public boolean isMacRandomizationEnabled();
   }
