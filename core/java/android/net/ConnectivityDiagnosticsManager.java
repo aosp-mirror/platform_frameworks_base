@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -542,6 +543,53 @@ public class ConnectivityDiagnosticsManager {
                         return new DataStallReport[size];
                     }
                 };
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static class ConnectivityDiagnosticsBinder
+            extends IConnectivityDiagnosticsCallback.Stub {
+        @NonNull private final ConnectivityDiagnosticsCallback mCb;
+        @NonNull private final Executor mExecutor;
+
+        /** @hide */
+        @VisibleForTesting
+        public ConnectivityDiagnosticsBinder(
+                @NonNull ConnectivityDiagnosticsCallback cb, @NonNull Executor executor) {
+            this.mCb = cb;
+            this.mExecutor = executor;
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public void onConnectivityReport(@NonNull ConnectivityReport report) {
+            Binder.withCleanCallingIdentity(() -> {
+                mExecutor.execute(() -> {
+                    mCb.onConnectivityReport(report);
+                });
+            });
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public void onDataStallSuspected(@NonNull DataStallReport report) {
+            Binder.withCleanCallingIdentity(() -> {
+                mExecutor.execute(() -> {
+                    mCb.onDataStallSuspected(report);
+                });
+            });
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public void onNetworkConnectivityReported(
+                @NonNull Network network, boolean hasConnectivity) {
+            Binder.withCleanCallingIdentity(() -> {
+                mExecutor.execute(() -> {
+                    mCb.onNetworkConnectivityReported(network, hasConnectivity);
+                });
+            });
+        }
     }
 
     /**
