@@ -277,6 +277,10 @@ final class UsageStatsProtoV2 {
                     event.mTaskRootClassToken = proto.readInt(
                             EventObfuscatedProto.TASK_ROOT_CLASS_TOKEN) - 1;
                     break;
+                case (int) EventObfuscatedProto.LOCUS_ID_TOKEN:
+                    event.mLocusIdToken = proto.readInt(
+                            EventObfuscatedProto.LOCUS_ID_TOKEN) - 1;
+                    break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     // timeStamp was not read, assume default value 0 plus beginTime
                     if (event.mTimeStamp == 0) {
@@ -396,6 +400,11 @@ final class UsageStatsProtoV2 {
             case UsageEvents.Event.SHORTCUT_INVOCATION:
                 if (event.mShortcutIdToken != PackagesTokenData.UNASSIGNED_TOKEN) {
                     proto.write(EventObfuscatedProto.SHORTCUT_ID_TOKEN, event.mShortcutIdToken + 1);
+                }
+                break;
+            case UsageEvents.Event.LOCUS_ID_SET:
+                if (event.mLocusIdToken != PackagesTokenData.UNASSIGNED_TOKEN) {
+                    proto.write(EventObfuscatedProto.LOCUS_ID_TOKEN, event.mLocusIdToken + 1);
                 }
                 break;
             case UsageEvents.Event.NOTIFICATION_INTERRUPTION:

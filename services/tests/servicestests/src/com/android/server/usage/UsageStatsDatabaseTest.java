@@ -52,6 +52,7 @@ import java.util.Set;
 public class UsageStatsDatabaseTest {
 
     private static final int MAX_TESTED_VERSION = 5;
+    private static final int OLDER_VERSION_MAX_EVENT_TYPE = 29;
     protected Context mContext;
     private UsageStatsDatabase mUsageStatsDatabase;
     private File mTestDir;
@@ -79,7 +80,7 @@ public class UsageStatsDatabaseTest {
         mUsageStatsDatabase = new UsageStatsDatabase(mTestDir);
         mUsageStatsDatabase.readMappingsLocked();
         mUsageStatsDatabase.init(1);
-        populateIntervalStats();
+        populateIntervalStats(MAX_TESTED_VERSION);
         clearUsageStatsFiles();
     }
 
@@ -117,7 +118,7 @@ public class UsageStatsDatabaseTest {
         return sb.toString();
     }
 
-    private void populateIntervalStats() {
+    private void populateIntervalStats(int minVersion) {
         final int numberOfEvents = 3000;
         final int timeProgression = 23;
         long time = System.currentTimeMillis() - (numberOfEvents*timeProgression);
@@ -147,8 +148,11 @@ public class UsageStatsDatabaseTest {
             final int instanceId = i % 11;
             event.mClass = ".fake.class.name" + instanceId;
             event.mTimeStamp = time;
-            event.mEventType = i % (MAX_EVENT_TYPE + 1); //"random" event type
             event.mInstanceId = instanceId;
+
+            int maxEventType = (minVersion < 5) ? OLDER_VERSION_MAX_EVENT_TYPE : MAX_EVENT_TYPE;
+            event.mEventType = i % (maxEventType + 1); //"random" event type
+
 
 
             final int rootPackageInt = (i % 5); // 5 "apps" start each task
@@ -173,6 +177,9 @@ public class UsageStatsDatabaseTest {
                 case Event.NOTIFICATION_INTERRUPTION:
                     //"random" channel
                     event.mNotificationChannelId = "channel" + (i % 5);
+                    break;
+                case Event.LOCUS_ID_SET:
+                    event.mLocusId = "locus" + (i % 7); //"random" locus
                     break;
             }
 
@@ -279,6 +286,10 @@ public class UsageStatsDatabaseTest {
                         break;
                     case Event.NOTIFICATION_INTERRUPTION:
                         assertEquals(e1.mNotificationChannelIdToken, e2.mNotificationChannelIdToken,
+                                "Usage event " + debugId);
+                        break;
+                    case Event.LOCUS_ID_SET:
+                        assertEquals(e1.mLocusIdToken, e2.mLocusIdToken,
                                 "Usage event " + debugId);
                         break;
                 }
@@ -392,6 +403,7 @@ public class UsageStatsDatabaseTest {
      * version and read the automatically upgraded files on disk in the new file format.
      */
     void runVersionChangeTest(int oldVersion, int newVersion, int interval) throws IOException {
+        populateIntervalStats(oldVersion);
         // Write IntervalStats to disk in old version format
         UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir, oldVersion);
         prevDB.readMappingsLocked();

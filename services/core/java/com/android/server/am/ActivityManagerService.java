@@ -199,6 +199,7 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
@@ -19640,6 +19641,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "Unable to create pipe", e);
                 return null;
             }
+        }
+    }
+
+    @Override
+    public void setActivityLocusContext(ComponentName activity, LocusId locusId, IBinder appToken) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getCallingUserId();
+        if (getPackageManagerInternalLocked().getPackageUid(activity.getPackageName(),
+                /*flags=*/ 0, userId) != callingUid) {
+            throw new SecurityException("Calling uid " + callingUid + " cannot set locusId"
+                    + "for package " + activity.getPackageName());
+        }
+
+        if (mUsageStatsService != null) {
+            mUsageStatsService.reportLocusUpdate(activity, userId, locusId, appToken);
         }
     }
 }

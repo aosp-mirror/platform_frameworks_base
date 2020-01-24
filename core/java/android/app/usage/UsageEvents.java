@@ -290,10 +290,16 @@ public final class UsageEvents implements Parcelable {
         public static final int USER_STOPPED = 29;
 
         /**
+         * An event type denoting that new locusId has been set for a given activity.
+         * @hide
+         */
+        public static final int LOCUS_ID_SET = 30;
+
+        /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 29;
+        public static final int MAX_EVENT_TYPE = 30;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
@@ -435,6 +441,18 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public int mNotificationChannelIdToken = UNASSIGNED_TOKEN;
+
+        /**
+         * LocusId.
+         * Currently LocusId only present for {@link #LOCUS_ID_SET} event types.
+         * {@hide}
+         */
+        public String mLocusId;
+
+        /**
+         * {@hide}
+         */
+        public int mLocusIdToken = UNASSIGNED_TOKEN;
 
         /** @hide */
         @EventFlags
@@ -609,6 +627,16 @@ public final class UsageEvents implements Parcelable {
             return ret;
         }
 
+        /**
+         * Returns the locusId for this event if the event is of type {@link #LOCUS_ID_SET},
+         * otherwise it returns null.
+         * @hide
+         */
+        @Nullable
+        public String getLocusId() {
+            return mLocusId;
+        }
+
         private void copyFrom(Event orig) {
             mPackage = orig.mPackage;
             mClass = orig.mClass;
@@ -625,6 +653,7 @@ public final class UsageEvents implements Parcelable {
             mFlags = orig.mFlags;
             mBucketAndReason = orig.mBucketAndReason;
             mNotificationChannelId = orig.mNotificationChannelId;
+            mLocusId = orig.mLocusId;
         }
     }
 
@@ -823,6 +852,9 @@ public final class UsageEvents implements Parcelable {
             case Event.NOTIFICATION_INTERRUPTION:
                 p.writeString(event.mNotificationChannelId);
                 break;
+            case Event.LOCUS_ID_SET:
+                p.writeString(event.mLocusId);
+                break;
         }
         p.writeInt(event.mFlags);
     }
@@ -871,6 +903,7 @@ public final class UsageEvents implements Parcelable {
         eventOut.mContentType = null;
         eventOut.mContentAnnotations = null;
         eventOut.mNotificationChannelId = null;
+        eventOut.mLocusId = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -890,6 +923,9 @@ public final class UsageEvents implements Parcelable {
                 break;
             case Event.NOTIFICATION_INTERRUPTION:
                 eventOut.mNotificationChannelId = p.readString();
+                break;
+            case Event.LOCUS_ID_SET:
+                eventOut.mLocusId = p.readString();
                 break;
         }
         eventOut.mFlags = p.readInt();
