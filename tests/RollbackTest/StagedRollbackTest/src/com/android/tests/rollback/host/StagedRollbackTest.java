@@ -329,6 +329,46 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     }
 
     /**
+     * Tests that data in DE (user) apex data directory is restored when apex is rolled back.
+     */
+    @Test
+    public void testRollbackApexDataDirectories_DeUser() throws Exception {
+        pushTestApex();
+
+        // Push files to apex data directory
+        String oldFilePath1 = apexDataDirDeUser(
+                APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_1;
+        String oldFilePath2 =
+                apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
+        assertTrue(getDevice().pushString(TEST_STRING_1, oldFilePath1));
+        assertTrue(getDevice().pushString(TEST_STRING_2, oldFilePath2));
+
+        // Install new version of the APEX with rollback enabled
+        runPhase("testRollbackApexDataDirectories_Phase1");
+        getDevice().reboot();
+
+        // Replace files in data directory
+        getDevice().deleteFile(oldFilePath1);
+        getDevice().deleteFile(oldFilePath2);
+        String newFilePath3 =
+                apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + "/" + TEST_FILENAME_3;
+        String newFilePath4 =
+                apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_4;
+        assertTrue(getDevice().pushString(TEST_STRING_3, newFilePath3));
+        assertTrue(getDevice().pushString(TEST_STRING_4, newFilePath4));
+
+        // Roll back the APEX
+        runPhase("testRollbackApexDataDirectories_Phase2");
+        getDevice().reboot();
+
+        // Verify that old files have been restored and new files are gone
+        assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
+        assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
+        assertNull(getDevice().pullFile(newFilePath3));
+        assertNull(getDevice().pullFile(newFilePath4));
+    }
+
+    /**
      * Tests that data in CE apex data directory is restored when apex is rolled back.
      */
     @Test
@@ -380,6 +420,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     private static String apexDataDirDeSys(String apexName) {
         return String.format("/data/misc/apexdata/%s", apexName);
+    }
+
+    private static String apexDataDirDeUser(String apexName, int userId) {
+        return String.format("/data/misc_de/%d/apexdata/%s", userId, apexName);
     }
 
     private static String apexDataDirCe(String apexName, int userId) {
