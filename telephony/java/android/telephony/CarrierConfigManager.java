@@ -3758,26 +3758,26 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_5G_NR_SSRSRP_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-140 dB, -44 dB]
                 new int[] {
-                    -125, /* SIGNAL_STRENGTH_POOR */
-                    -115, /* SIGNAL_STRENGTH_MODERATE */
-                    -105, /* SIGNAL_STRENGTH_GOOD */
-                    -95,  /* SIGNAL_STRENGTH_GREAT */
+                    -110, /* SIGNAL_STRENGTH_POOR */
+                    -90, /* SIGNAL_STRENGTH_MODERATE */
+                    -80, /* SIGNAL_STRENGTH_GOOD */
+                    -65,  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-20 dB, -3 dB]
                 new int[] {
-                    -14, /* SIGNAL_STRENGTH_POOR */
-                    -12, /* SIGNAL_STRENGTH_MODERATE */
-                    -10, /* SIGNAL_STRENGTH_GOOD */
-                    -8  /* SIGNAL_STRENGTH_GREAT */
+                    -16, /* SIGNAL_STRENGTH_POOR */
+                    -11, /* SIGNAL_STRENGTH_MODERATE */
+                    -9, /* SIGNAL_STRENGTH_GOOD */
+                    -7  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-23 dB, 40 dB]
                 new int[] {
-                    -8, /* SIGNAL_STRENGTH_POOR */
-                    0, /* SIGNAL_STRENGTH_MODERATE */
-                    8, /* SIGNAL_STRENGTH_GOOD */
-                    16  /* SIGNAL_STRENGTH_GREAT */
+                    -5, /* SIGNAL_STRENGTH_POOR */
+                    5, /* SIGNAL_STRENGTH_MODERATE */
+                    15, /* SIGNAL_STRENGTH_GOOD */
+                    30  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
