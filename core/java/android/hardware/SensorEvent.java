@@ -630,6 +630,16 @@ public class SensorEvent {
      * x_bias, y_bias, z_bias are the estimated biases.
      * </p>
      *
+     * <h4>{@link android.hardware.Sensor#TYPE_HINGE_ANGLE Sensor.TYPE_HINGE_ANGLE}:</h4>
+     *
+     * A sensor of this type measures the angle, in degrees, between two integral parts of the
+     * device. Movement of a hinge measured by this sensor type is expected to alter the ways in
+     * which the user may interact with the device, for example by unfolding or revealing a display.
+     *
+     * <ul>
+     *  <li> values[0]: Measured hinge angle between 0 and 360 degrees inclusive</li>
+     * </ul>
+     *
      * @see GeomagneticField
      */
     public final float[] values;
