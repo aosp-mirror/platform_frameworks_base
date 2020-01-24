@@ -16,10 +16,13 @@
 
 package com.android.server.usage;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import static com.android.internal.util.ArrayUtils.defeatNullable;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -160,18 +163,33 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     }
 
     private void enforceStatsPermission(int callingUid, String callingPackage) {
-        final int mode = mAppOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
-                callingUid, callingPackage);
+        final String errMsg = checkStatsPermission(callingUid, callingPackage, true);
+        if (errMsg != null) {
+            throw new SecurityException(errMsg);
+        }
+    }
+
+    private String checkStatsPermission(int callingUid, String callingPackage, boolean noteOp) {
+        final int mode;
+        if (noteOp) {
+            mode = mAppOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS, callingUid, callingPackage);
+        } else {
+            mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS, callingUid, callingPackage);
+        }
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
-                return;
+                return null;
             case AppOpsManager.MODE_DEFAULT:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.PACKAGE_USAGE_STATS, TAG);
-                return;
+                if (mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.PACKAGE_USAGE_STATS) == PERMISSION_GRANTED) {
+                    return null;
+                } else {
+                    return "Caller does not have " + Manifest.permission.PACKAGE_USAGE_STATS
+                            + "; callingPackage=" + callingPackage + ", callingUid=" + callingUid;
+                }
             default:
-                throw new SecurityException("Package " + callingPackage + " from UID " + callingUid
-                        + " blocked by mode " + mode);
+                return "Package " + callingPackage + " from UID " + callingUid
+                        + " blocked by mode " + mode;
         }
     }
 
@@ -280,10 +298,15 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             throw new ParcelableException(e);
         }
 
+        final boolean callerHasStatsPermission;
         if (Binder.getCallingUid() == appInfo.uid) {
-            // No permissions required when asking about themselves
+            // No permissions required when asking about themselves. We still check since it is
+            // needed later on but don't throw if caller doesn't have the permission.
+            callerHasStatsPermission = checkStatsPermission(
+                    Binder.getCallingUid(), callingPackage, false) == null;
         } else {
             enforceStatsPermission(Binder.getCallingUid(), callingPackage);
+            callerHasStatsPermission = true;
         }
 
         if (defeatNullable(mPackage.getPackagesForUid(appInfo.uid)).length == 1) {
@@ -313,7 +336,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
                 forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
                     storageStatsAugmenter.augmentStatsForPackage(stats,
-                            packageName, userId, callingPackage);
+                            packageName, userId, callerHasStatsPermission);
                 }, "queryStatsForPackage");
             }
             return translate(stats);
@@ -330,10 +353,15 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
         }
 
+        final boolean callerHasStatsPermission;
         if (Binder.getCallingUid() == uid) {
-            // No permissions required when asking about themselves
+            // No permissions required when asking about themselves. We still check since it is
+            // needed later on but don't throw if caller doesn't have the permission.
+            callerHasStatsPermission = checkStatsPermission(
+                    Binder.getCallingUid(), callingPackage, false) == null;
         } else {
             enforceStatsPermission(Binder.getCallingUid(), callingPackage);
+            callerHasStatsPermission = true;
         }
 
         final String[] packageNames = defeatNullable(mPackage.getPackagesForUid(uid));
@@ -372,7 +400,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
             forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
-                storageStatsAugmenter.augmentStatsForUid(stats, uid, callingPackage);
+                storageStatsAugmenter.augmentStatsForUid(stats, uid, callerHasStatsPermission);
             }, "queryStatsForUid");
         }
         return translate(stats);
@@ -400,12 +428,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             }
         } catch (InstallerException e) {
             throw new ParcelableException(new IOException(e.getMessage()));
-        }
-
-        if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            forEachStorageStatsAugmenter((storageStatsAugmenter) -> {
-                storageStatsAugmenter.augmentStatsForUser(stats, userId, callingPackage);
-            }, "queryStatsForUser");
         }
         return translate(stats);
     }

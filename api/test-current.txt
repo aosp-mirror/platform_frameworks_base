@@ -2224,6 +2224,8 @@ package android.os {
 
   public final class FileUtils {
     method public static boolean contains(java.io.File, java.io.File);
+    method @NonNull public static byte[] digest(@NonNull java.io.File, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
+    method @NonNull public static byte[] digest(@NonNull java.io.InputStream, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
   }
 
   public class HidlMemory implements java.io.Closeable {

@@ -52,6 +52,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageStats;
 import android.content.res.ResourceId;
 import android.os.Binder;
 import android.os.Handler;
@@ -85,6 +86,8 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.blob.BlobMetadata.Committer;
+import com.android.server.usage.StorageStatsManagerInternal;
+import com.android.server.usage.StorageStatsManagerInternal.StorageStatsAugmenter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -101,6 +104,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * Service responsible for maintaining and facilitating access to data blobs published by apps.
@@ -164,6 +169,8 @@ public class BlobStoreManagerService extends SystemService {
 
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         registerReceivers();
+        LocalServices.getService(StorageStatsManagerInternal.class)
+                .registerStorageStatsAugmenter(new BlobStorageStatsAugmenter(), TAG);
     }
 
     @Override
@@ -943,6 +950,71 @@ public class BlobStoreManagerService extends SystemService {
                 fout.decreaseIndent();
             }
             fout.decreaseIndent();
+        }
+    }
+
+    private class BlobStorageStatsAugmenter implements StorageStatsAugmenter {
+        @Override
+        public void augmentStatsForPackage(@NonNull PackageStats stats, @NonNull String packageName,
+                @UserIdInt int userId, boolean callerHasStatsPermission) {
+            final AtomicLong blobsDataSize = new AtomicLong(0);
+            forEachSessionInUser(session -> {
+                if (session.getOwnerPackageName().equals(packageName)) {
+                    blobsDataSize.getAndAdd(session.getSize());
+                }
+            }, userId);
+
+            forEachBlobInUser(blobMetadata -> {
+                if (blobMetadata.isALeasee(packageName)) {
+                    if (!blobMetadata.hasOtherLeasees(packageName) || !callerHasStatsPermission) {
+                        blobsDataSize.getAndAdd(blobMetadata.getSize());
+                    }
+                }
+            }, userId);
+
+            stats.dataSize += blobsDataSize.get();
+        }
+
+        @Override
+        public void augmentStatsForUid(@NonNull PackageStats stats, int uid,
+                boolean callerHasStatsPermission) {
+            final int userId = UserHandle.getUserId(uid);
+            final AtomicLong blobsDataSize = new AtomicLong(0);
+            forEachSessionInUser(session -> {
+                if (session.getOwnerUid() == uid) {
+                    blobsDataSize.getAndAdd(session.getSize());
+                }
+            }, userId);
+
+            forEachBlobInUser(blobMetadata -> {
+                if (blobMetadata.isALeasee(uid)) {
+                    if (!blobMetadata.hasOtherLeasees(uid) || !callerHasStatsPermission) {
+                        blobsDataSize.getAndAdd(blobMetadata.getSize());
+                    }
+                }
+            }, userId);
+
+            stats.dataSize += blobsDataSize.get();
+        }
+    }
+
+    private void forEachSessionInUser(Consumer<BlobStoreSession> consumer, int userId) {
+        synchronized (mBlobsLock) {
+            final LongSparseArray<BlobStoreSession> userSessions = getUserSessionsLocked(userId);
+            for (int i = 0, count = userSessions.size(); i < count; ++i) {
+                final BlobStoreSession session = userSessions.valueAt(i);
+                consumer.accept(session);
+            }
+        }
+    }
+
+    private void forEachBlobInUser(Consumer<BlobMetadata> consumer, int userId) {
+        synchronized (mBlobsLock) {
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(userId);
+            for (int i = 0, count = userBlobs.size(); i < count; ++i) {
+                final BlobMetadata blobMetadata = userBlobs.valueAt(i);
+                consumer.accept(blobMetadata);
+            }
         }
     }
 

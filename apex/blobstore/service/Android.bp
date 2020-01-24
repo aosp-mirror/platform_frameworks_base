@@ -23,5 +23,6 @@ java_library {
     libs: [
         "framework",
         "services.core",
+        "services.usage",
     ],
 }
