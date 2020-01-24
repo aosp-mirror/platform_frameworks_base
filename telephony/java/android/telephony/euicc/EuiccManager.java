@@ -38,6 +38,9 @@ import com.android.internal.telephony.euicc.IEuiccController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * EuiccManager is the application interface to eUICCs, or eSIMs/embedded SIMs.
@@ -1242,6 +1245,138 @@ public class EuiccManager {
         }
         try {
             getIEuiccController().retainSubscriptionsForFactoryReset(mCardId, callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the supported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * <p>The supported country list will be replaced by {@code supportedCountries}. For how we
+     * determine whether a country is supported please check {@link #isSupportedCountry}.
+     *
+     * @param supportedCountries is a list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void setSupportedCountries(@NonNull List<String> supportedCountries) {
+        if (!isEnabled()) {
+            return;
+        }
+        try {
+            getIEuiccController().setSupportedCountries(
+                    true /* isSupported */,
+                    supportedCountries.stream()
+                        .map(String::toUpperCase).collect(Collectors.toList()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the unsupported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * <p>The unsupported country list will be replaced by {@code unsupportedCountries}. For how we
+     * determine whether a country is supported please check {@link #isSupportedCountry}.
+     *
+     * @param unsupportedCountries is a list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void setUnsupportedCountries(@NonNull List<String> unsupportedCountries) {
+        if (!isEnabled()) {
+            return;
+        }
+        try {
+            getIEuiccController().setSupportedCountries(
+                    false /* isSupported */,
+                    unsupportedCountries.stream()
+                        .map(String::toUpperCase).collect(Collectors.toList()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the supported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @return list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    @NonNull
+    public List<String> getSupportedCountries() {
+        if (!isEnabled()) {
+            return Collections.emptyList();
+        }
+        try {
+            return getIEuiccController().getSupportedCountries(true /* isSupported */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the unsupported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @return list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    @NonNull
+    public List<String> getUnsupportedCountries() {
+        if (!isEnabled()) {
+            return Collections.emptyList();
+        }
+        try {
+            return getIEuiccController().getSupportedCountries(false /* isSupported */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the given country supports eUICC.
+     *
+     * <p>Supported country list has a higher prority than unsupported country list. If the
+     * supported country list is not empty, {@code countryIso} will be considered as supported when
+     * it exists in the supported country list. Otherwise {@code countryIso} is not supported. If
+     * the supported country list is empty, {@code countryIso} will be considered as supported if it
+     * does not exist in the unsupported country list. Otherwise {@code countryIso} is not
+     * supported. If both supported and unsupported country lists are empty, then all countries are
+     * consider be supported. For how to set supported and unsupported country list, please check
+     * {@link #setSupportedCountries} and {@link #setUnsupportedCountries}.
+     *
+     * @param countryIso should be the ISO-3166 country code is provided in uppercase 2 character
+     * format.
+     * @return whether the given country supports eUICC or not.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public boolean isSupportedCountry(@NonNull String countryIso) {
+        if (!isEnabled()) {
+            return false;
+        }
+        try {
+            return getIEuiccController().isSupportedCountry(countryIso.toUpperCase());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

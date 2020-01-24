@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
+import java.util.List;
 
 /** @hide */
 interface IEuiccController {
@@ -47,4 +48,7 @@ interface IEuiccController {
     oneway void eraseSubscriptionsWithOptions(
         int cardId, int options, in PendingIntent callbackIntent);
     oneway void retainSubscriptionsForFactoryReset(int cardId, in PendingIntent callbackIntent);
+    void setSupportedCountries(boolean isSupported, in List<String> countriesList);
+    List<String> getSupportedCountries(boolean isSupported);
+    boolean isSupportedCountry(String countryIso);
 }
