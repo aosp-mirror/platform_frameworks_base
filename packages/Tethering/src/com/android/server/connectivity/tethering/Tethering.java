@@ -66,6 +66,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
+import android.net.IIntResultListener;
 import android.net.INetd;
 import android.net.ITetheringEventCallback;
 import android.net.IpPrefix;
@@ -74,7 +75,9 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.TetherStatesParcel;
+import android.net.TetheringCallbackStartedParcel;
 import android.net.TetheringConfigurationParcel;
+import android.net.TetheringRequestParcel;
 import android.net.ip.IpServer;
 import android.net.shared.NetdUtils;
 import android.net.util.BaseNetdUnsolicitedEventListener;
@@ -423,9 +426,10 @@ public class Tethering {
         }
     }
 
-    void startTethering(int type, ResultReceiver receiver, boolean showProvisioningUi) {
-        mEntitlementMgr.startProvisioningIfNeeded(type, showProvisioningUi);
-        enableTetheringInternal(type, true /* enabled */, receiver);
+    void startTethering(final TetheringRequestParcel request, final IIntResultListener listener) {
+        mEntitlementMgr.startProvisioningIfNeeded(request.tetheringType,
+                request.showProvisioningUi);
+        enableTetheringInternal(request.tetheringType, true /* enabled */, listener);
     }
 
     void stopTethering(int type) {
@@ -437,29 +441,32 @@ public class Tethering {
      * Enables or disables tethering for the given type. If provisioning is required, it will
      * schedule provisioning rechecks for the specified interface.
      */
-    private void enableTetheringInternal(int type, boolean enable, ResultReceiver receiver) {
+    private void enableTetheringInternal(int type, boolean enable,
+            final IIntResultListener listener) {
         int result;
         switch (type) {
             case TETHERING_WIFI:
                 result = setWifiTethering(enable);
-                sendTetherResult(receiver, result);
+                sendTetherResult(listener, result);
                 break;
             case TETHERING_USB:
                 result = setUsbTethering(enable);
-                sendTetherResult(receiver, result);
+                sendTetherResult(listener, result);
                 break;
             case TETHERING_BLUETOOTH:
-                setBluetoothTethering(enable, receiver);
+                setBluetoothTethering(enable, listener);
                 break;
             default:
                 Log.w(TAG, "Invalid tether type.");
-                sendTetherResult(receiver, TETHER_ERROR_UNKNOWN_IFACE);
+                sendTetherResult(listener, TETHER_ERROR_UNKNOWN_IFACE);
         }
     }
 
-    private void sendTetherResult(ResultReceiver receiver, int result) {
-        if (receiver != null) {
-            receiver.send(result, null);
+    private void sendTetherResult(final IIntResultListener listener, int result) {
+        if (listener != null) {
+            try {
+                listener.onResult(result);
+            } catch (RemoteException e) { }
         }
     }
 
@@ -485,12 +492,12 @@ public class Tethering {
         return TETHER_ERROR_MASTER_ERROR;
     }
 
-    private void setBluetoothTethering(final boolean enable, final ResultReceiver receiver) {
+    private void setBluetoothTethering(final boolean enable, final IIntResultListener listener) {
         final BluetoothAdapter adapter = mDeps.getBluetoothAdapter();
         if (adapter == null || !adapter.isEnabled()) {
             Log.w(TAG, "Tried to enable bluetooth tethering with null or disabled adapter. null: "
                     + (adapter == null));
-            sendTetherResult(receiver, TETHER_ERROR_SERVICE_UNAVAIL);
+            sendTetherResult(listener, TETHER_ERROR_SERVICE_UNAVAIL);
             return;
         }
 
@@ -519,7 +526,7 @@ public class Tethering {
                 final int result = (((BluetoothPan) proxy).isTetheringOn() == enable)
                         ? TETHER_ERROR_NO_ERROR
                         : TETHER_ERROR_MASTER_ERROR;
-                sendTetherResult(receiver, result);
+                sendTetherResult(listener, result);
                 adapter.closeProfileProxy(BluetoothProfile.PAN, proxy);
             }
         }, BluetoothProfile.PAN);
@@ -951,6 +958,7 @@ public class Tethering {
                 mWrapper.showTetheredNotification(
                         R.drawable.stat_sys_tether_general, false);
                 mWrapper.untetherAll();
+                // TODO(b/148139325): send tetheringSupported on restriction change
             }
         }
     }
@@ -1844,9 +1852,13 @@ public class Tethering {
     void registerTetheringEventCallback(ITetheringEventCallback callback) {
         mHandler.post(() -> {
             mTetheringEventCallbacks.register(callback);
+            final TetheringCallbackStartedParcel parcel = new TetheringCallbackStartedParcel();
+            parcel.tetheringSupported = mDeps.isTetheringSupported();
+            parcel.upstreamNetwork = mTetherUpstream;
+            parcel.config = mConfig.toStableParcelable();
+            parcel.states = mTetherStatesParcel;
             try {
-                callback.onCallbackStarted(mTetherUpstream, mConfig.toStableParcelable(),
-                        mTetherStatesParcel);
+                callback.onCallbackStarted(parcel);
             } catch (RemoteException e) {
                 // Not really very much to do here.
             }
@@ -1881,6 +1893,7 @@ public class Tethering {
             for (int i = 0; i < length; i++) {
                 try {
                     mTetheringEventCallbacks.getBroadcastItem(i).onConfigurationChanged(config);
+                    // TODO(b/148139325): send tetheringSupported on configuration change
                 } catch (RemoteException e) {
                     // Not really very much to do here.
                 }
