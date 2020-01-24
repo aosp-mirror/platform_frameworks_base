@@ -131,7 +131,7 @@ public class ApplicationPackageManager extends PackageManager {
     private static final int DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES = 16384; // 16KB
 
     // Default flags to use with PackageManager when no flags are given.
-    private final static int sDefaultFlags = PackageManager.GET_SHARED_LIBRARY_FILES;
+    private static final int sDefaultFlags = GET_SHARED_LIBRARY_FILES;
 
     // Name of the resource which provides background permission button string
     public static final String APP_PERMISSION_BUTTON_ALLOW_ALWAYS =
@@ -907,7 +907,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean hasSigningCertificate(
-            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+            String packageName, byte[] certificate, @CertificateInputType int type) {
         try {
             return mPM.hasSigningCertificate(packageName, certificate, type);
         } catch (RemoteException e) {
@@ -917,7 +917,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean hasSigningCertificate(
-            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+            int uid, byte[] certificate, @CertificateInputType int type) {
         try {
             return mPM.hasUidSigningCertificate(uid, certificate, type);
         } catch (RemoteException e) {
@@ -1464,8 +1464,7 @@ public class ApplicationPackageManager extends PackageManager {
             return getActivityIcon(intent.getComponent());
         }
 
-        ResolveInfo info = resolveActivity(
-            intent, PackageManager.MATCH_DEFAULT_ONLY);
+        ResolveInfo info = resolveActivity(intent, MATCH_DEFAULT_ONLY);
         if (info != null) {
             return info.activityInfo.loadIcon(this);
         }
@@ -1500,7 +1499,7 @@ public class ApplicationPackageManager extends PackageManager {
         }
 
         ResolveInfo info = resolveActivity(
-                intent, PackageManager.MATCH_DEFAULT_ONLY);
+                intent, MATCH_DEFAULT_ONLY);
         if (info != null) {
             return info.activityInfo.loadBanner(this);
         }
@@ -1532,8 +1531,7 @@ public class ApplicationPackageManager extends PackageManager {
             return getActivityLogo(intent.getComponent());
         }
 
-        ResolveInfo info = resolveActivity(
-            intent, PackageManager.MATCH_DEFAULT_ONLY);
+        ResolveInfo info = resolveActivity(intent, MATCH_DEFAULT_ONLY);
         if (info != null) {
             return info.activityInfo.loadLogo(this);
         }
@@ -2017,7 +2015,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int installExistingPackage(String packageName) throws NameNotFoundException {
-        return installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN);
+        return installExistingPackage(packageName, INSTALL_REASON_UNKNOWN);
     }
 
     @Override
@@ -2029,7 +2027,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public int installExistingPackageAsUser(String packageName, int userId)
             throws NameNotFoundException {
-        return installExistingPackageAsUser(packageName, PackageManager.INSTALL_REASON_UNKNOWN,
+        return installExistingPackageAsUser(packageName, INSTALL_REASON_UNKNOWN,
                 userId);
     }
 
@@ -2404,7 +2402,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer,
             int flags, int userId) {
         try {
-            mPM.deletePackageAsUser(packageName, PackageManager.VERSION_CODE_HIGHEST,
+            mPM.deletePackageAsUser(packageName, VERSION_CODE_HIGHEST,
                     observer, userId, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2651,11 +2649,11 @@ public class ApplicationPackageManager extends PackageManager {
     public void setSyntheticAppDetailsActivityEnabled(String packageName, boolean enabled) {
         try {
             ComponentName componentName = new ComponentName(packageName,
-                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);
+                    APP_DETAILS_ACTIVITY_CLASS_NAME);
             mPM.setComponentEnabledSetting(componentName, enabled
-                    ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                    : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP, getUserId());
+                    ? COMPONENT_ENABLED_STATE_DEFAULT
+                    : COMPONENT_ENABLED_STATE_DISABLED,
+                    DONT_KILL_APP, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2665,10 +2663,10 @@ public class ApplicationPackageManager extends PackageManager {
     public boolean getSyntheticAppDetailsActivityEnabled(String packageName) {
         try {
             ComponentName componentName = new ComponentName(packageName,
-                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);
+                    APP_DETAILS_ACTIVITY_CLASS_NAME);
             int state = mPM.getComponentEnabledSetting(componentName, getUserId());
-            return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    || state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+            return state == COMPONENT_ENABLED_STATE_ENABLED
+                    || state == COMPONENT_ENABLED_STATE_DEFAULT;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2737,6 +2735,30 @@ public class ApplicationPackageManager extends PackageManager {
     public boolean getApplicationHiddenSettingAsUser(String packageName, UserHandle user) {
         try {
             return mPM.getApplicationHiddenSettingAsUser(packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void setSystemAppState(String packageName, @SystemAppState int state) {
+        try {
+            switch (state) {
+                case SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN:
+                    mPM.setSystemAppHiddenUntilInstalled(packageName, true);
+                    break;
+                case SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE:
+                    mPM.setSystemAppHiddenUntilInstalled(packageName, false);
+                    break;
+                case SYSTEM_APP_STATE_INSTALLED:
+                    mPM.setSystemAppInstallState(packageName, true, getUserId());
+                    break;
+                case SYSTEM_APP_STATE_UNINSTALLED:
+                    mPM.setSystemAppInstallState(packageName, false, getUserId());
+                    break;
+                default:
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

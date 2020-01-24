@@ -124,8 +124,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ApplicationPackageManager;
 import android.app.AppOpsManager;
+import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -20211,8 +20211,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
-        CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
-                mPermissionManagerService, UserHandle.USER_SYSTEM, mContext);
+        CarrierAppUtils.disableCarrierAppsUntilPrivileged(
+                mContext.getOpPackageName(), UserHandle.USER_SYSTEM, mContext);
 
         disableSkuSpecificApps();
 
