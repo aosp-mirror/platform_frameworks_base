@@ -1750,21 +1750,149 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
         return;
     }
 
-    NativeCryptoInfo cryptoInfo{env, cryptoInfoObj};
+    jint numSubSamples =
+        env->GetIntField(cryptoInfoObj, gFields.cryptoInfoNumSubSamplesID);
+
+    jintArray numBytesOfClearDataObj =
+        (jintArray)env->GetObjectField(
+                cryptoInfoObj, gFields.cryptoInfoNumBytesOfClearDataID);
+
+    jintArray numBytesOfEncryptedDataObj =
+        (jintArray)env->GetObjectField(
+                cryptoInfoObj, gFields.cryptoInfoNumBytesOfEncryptedDataID);
+
+    jbyteArray keyObj =
+        (jbyteArray)env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoKeyID);
+
+    jbyteArray ivObj =
+        (jbyteArray)env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoIVID);
+
+    jint jmode = env->GetIntField(cryptoInfoObj, gFields.cryptoInfoModeID);
+    enum CryptoPlugin::Mode mode;
+    if (jmode == gCryptoModes.Unencrypted) {
+        mode = CryptoPlugin::kMode_Unencrypted;
+    } else if (jmode == gCryptoModes.AesCtr) {
+        mode = CryptoPlugin::kMode_AES_CTR;
+    } else if (jmode == gCryptoModes.AesCbc) {
+        mode = CryptoPlugin::kMode_AES_CBC;
+    }  else {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    jobject patternObj = env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoPatternID);
+
+    CryptoPlugin::Pattern pattern;
+    if (patternObj == NULL) {
+        pattern.mEncryptBlocks = 0;
+        pattern.mSkipBlocks = 0;
+    } else {
+        pattern.mEncryptBlocks = env->GetIntField(patternObj, gFields.patternEncryptBlocksID);
+        pattern.mSkipBlocks = env->GetIntField(patternObj, gFields.patternSkipBlocksID);
+    }
+
+    status_t err = OK;
+
+    CryptoPlugin::SubSample *subSamples = NULL;
+    jbyte *key = NULL;
+    jbyte *iv = NULL;
+
+    if (numSubSamples <= 0) {
+        err = -EINVAL;
+    } else if (numBytesOfClearDataObj == NULL
+            && numBytesOfEncryptedDataObj == NULL) {
+        err = -EINVAL;
+    } else if (numBytesOfEncryptedDataObj != NULL
+            && env->GetArrayLength(numBytesOfEncryptedDataObj) < numSubSamples) {
+        err = -ERANGE;
+    } else if (numBytesOfClearDataObj != NULL
+            && env->GetArrayLength(numBytesOfClearDataObj) < numSubSamples) {
+        err = -ERANGE;
+    // subSamples array may silently overflow if number of samples are too large.  Use
+    // INT32_MAX as maximum allocation size may be less than SIZE_MAX on some platforms
+    } else if ( CC_UNLIKELY(numSubSamples >= (signed)(INT32_MAX / sizeof(*subSamples))) ) {
+        err = -EINVAL;
+    } else {
+        jboolean isCopy;
+
+        jint *numBytesOfClearData =
+            (numBytesOfClearDataObj == NULL)
+                ? NULL
+                : env->GetIntArrayElements(numBytesOfClearDataObj, &isCopy);
+
+        jint *numBytesOfEncryptedData =
+            (numBytesOfEncryptedDataObj == NULL)
+                ? NULL
+                : env->GetIntArrayElements(numBytesOfEncryptedDataObj, &isCopy);
+
+        subSamples = new CryptoPlugin::SubSample[numSubSamples];
+
+        for (jint i = 0; i < numSubSamples; ++i) {
+            subSamples[i].mNumBytesOfClearData =
+                (numBytesOfClearData == NULL) ? 0 : numBytesOfClearData[i];
+
+            subSamples[i].mNumBytesOfEncryptedData =
+                (numBytesOfEncryptedData == NULL)
+                    ? 0 : numBytesOfEncryptedData[i];
+        }
+
+        if (numBytesOfEncryptedData != NULL) {
+            env->ReleaseIntArrayElements(
+                    numBytesOfEncryptedDataObj, numBytesOfEncryptedData, 0);
+            numBytesOfEncryptedData = NULL;
+        }
+
+        if (numBytesOfClearData != NULL) {
+            env->ReleaseIntArrayElements(
+                    numBytesOfClearDataObj, numBytesOfClearData, 0);
+            numBytesOfClearData = NULL;
+        }
+    }
+
+    if (err == OK && keyObj != NULL) {
+        if (env->GetArrayLength(keyObj) != 16) {
+            err = -EINVAL;
+        } else {
+            jboolean isCopy;
+            key = env->GetByteArrayElements(keyObj, &isCopy);
+        }
+    }
+
+    if (err == OK && ivObj != NULL) {
+        if (env->GetArrayLength(ivObj) != 16) {
+            err = -EINVAL;
+        } else {
+            jboolean isCopy;
+            iv = env->GetByteArrayElements(ivObj, &isCopy);
+        }
+    }
+
     AString errorDetailMsg;
 
-    status_t err = cryptoInfo.mErr;
     if (err == OK) {
         err = codec->queueSecureInputBuffer(
                 index, offset,
-                cryptoInfo.mSubSamples, cryptoInfo.mNumSubSamples,
-                (const uint8_t *)cryptoInfo.mKey, (const uint8_t *)cryptoInfo.mIv,
-                cryptoInfo.mMode,
-                cryptoInfo.mPattern,
+                subSamples, numSubSamples,
+                (const uint8_t *)key, (const uint8_t *)iv,
+                mode,
+                pattern,
                 timestampUs,
                 flags,
                 &errorDetailMsg);
     }
+
+    if (iv != NULL) {
+        env->ReleaseByteArrayElements(ivObj, iv, 0);
+        iv = NULL;
+    }
+
+    if (key != NULL) {
+        env->ReleaseByteArrayElements(keyObj, key, 0);
+        key = NULL;
+    }
+
+    delete[] subSamples;
+    subSamples = NULL;
 
     throwExceptionAsNecessary(
             env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
