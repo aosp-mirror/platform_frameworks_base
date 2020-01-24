@@ -73,11 +73,13 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionInfo.StagedSessionErrorCode;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -99,6 +101,7 @@ import android.os.UserHandle;
 import android.os.incremental.IncrementalFileStorages;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
+import android.provider.Settings.Secure;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
 import android.system.Int64Ref;
@@ -1115,6 +1118,28 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /**
+     * Returns whether or not a package can be installed while Secure FRP is enabled.
+     * <p>
+     * Only callers with the INSTALL_PACKAGES permission are allowed to install. However,
+     * prevent the package installer from installing anything because, while it has the
+     * permission, it will allows packages to be installed from anywhere.
+     */
+    private static boolean isSecureFrpInstallAllowed(Context context, int callingUid) {
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final String[] systemInstaller = pmi.getKnownPackageNames(
+                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM);
+        final AndroidPackage callingInstaller = pmi.getPackage(callingUid);
+        if (callingInstaller != null
+                && ArrayUtils.contains(systemInstaller, callingInstaller.getPackageName())) {
+            // don't allow the system package installer to install while under secure FRP
+            return false;
+        }
+
+        // require caller to hold the INSTALL_PACKAGES permission
+        return context.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                == PackageManager.PERMISSION_GRANTED;
+    }
 
     /**
      * Sanity checks to make sure it's ok to commit the session.
@@ -1125,13 +1150,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotDestroyedLocked("commit");
             assertNoWriteFileTransfersOpenLocked();
 
-            final boolean enforceInstallPackages = forTransfer
-                    || (android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
-                                android.provider.Settings.Secure.SECURE_FRP_MODE, 0) == 1);
-            if (enforceInstallPackages) {
-                mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, null);
+            final boolean isSecureFrpEnabled =
+                    (Secure.getInt(mContext.getContentResolver(), Secure.SECURE_FRP_MODE, 0) == 1);
+            if (isSecureFrpEnabled
+                    && !isSecureFrpInstallAllowed(mContext, Binder.getCallingUid())) {
+                throw new SecurityException("Can't install packages while in secure FRP");
             }
+
             if (forTransfer) {
+                mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, null);
                 if (mInstallerUid == mOriginalInstallerUid) {
                     throw new IllegalArgumentException("Session has not been transferred");
                 }
