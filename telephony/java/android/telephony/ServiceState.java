@@ -317,6 +317,14 @@ public class ServiceState implements Parcelable {
      */
     public static final int UNKNOWN_ID = -1;
 
+    /**
+     * A parcelable extra used with {@link Intent#ACTION_SERVICE_STATE} representing the service
+     * state.
+     * @hide
+     */
+    private static final String EXTRA_SERVICE_STATE = "android.intent.extra.SERVICE_STATE";
+
+
     private String mOperatorAlphaLong;
     private String mOperatorAlphaShort;
     private String mOperatorNumeric;
@@ -1292,7 +1300,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
-        ServiceState ssFromBundle = m.getParcelable(Intent.EXTRA_SERVICE_STATE);
+        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE);
         if (ssFromBundle != null) {
             copyFrom(ssFromBundle);
         }
@@ -1310,7 +1318,7 @@ public class ServiceState implements Parcelable {
      */
     @SystemApi
     public void fillInNotifierBundle(@NonNull Bundle m) {
-        m.putParcelable(Intent.EXTRA_SERVICE_STATE, this);
+        m.putParcelable(EXTRA_SERVICE_STATE, this);
         // serviceState already consists of below entries.
         // for backward compatibility, we continue fill in below entries.
         m.putInt("voiceRegState", mVoiceRegState);
