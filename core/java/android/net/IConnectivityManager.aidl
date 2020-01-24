@@ -18,6 +18,7 @@ package android.net;
 
 import android.app.PendingIntent;
 import android.net.ConnectionInfo;
+import android.net.IConnectivityDiagnosticsCallback;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgentConfig;
@@ -210,6 +211,10 @@ interface IConnectivityManager
     int getConnectionOwnerUid(in ConnectionInfo connectionInfo);
     boolean isCallerCurrentAlwaysOnVpnApp();
     boolean isCallerCurrentAlwaysOnVpnLockdownApp();
+
+    void registerConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback,
+            in NetworkRequest request);
+    void unregisterConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback);
 
     IBinder startOrGetTestNetworkService();
 }
