@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Tests for {@link ParallelPackageParser}
@@ -43,7 +44,8 @@ public class ParallelPackageParserTest {
 
     @Before
     public void setUp() {
-        mParser = new TestParallelPackageParser();
+        mParser = new TestParallelPackageParser(new PackageParser(),
+                ParallelPackageParser.makeExecutorService());
     }
 
     @Test(timeout = 1000)
@@ -68,15 +70,14 @@ public class ParallelPackageParserTest {
         }
     }
 
-    class TestParallelPackageParser extends ParallelPackageParser {
+    private class TestParallelPackageParser extends ParallelPackageParser {
 
-        TestParallelPackageParser() {
-            super(null, false, null, null, null);
+        TestParallelPackageParser(PackageParser packageParser, ExecutorService executorService) {
+            super(packageParser, executorService);
         }
 
         @Override
-        protected ParsedPackage parsePackage(PackageParser packageParser, File scanFile,
-                int parseFlags) throws PackageParser.PackageParserException {
+        protected ParsedPackage parsePackage(File scanFile, int parseFlags) {
             // Do not actually parse the package for testing
             return null;
         }
