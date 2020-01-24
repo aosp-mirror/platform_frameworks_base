@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.os.Parcelable;
 import android.view.inline.InlinePresentationSpec;
@@ -45,6 +46,17 @@ public final class InlineSuggestionInfo implements Parcelable {
      */
     public static final @Source String SOURCE_PLATFORM = "android:platform";
 
+    /**
+     * UI type: the UI contains an Autofill suggestion that will autofill the fields when tapped.
+     */
+    public static final @Type String TYPE_SUGGESTION = "android:autofill:suggestion";
+
+    /**
+     * UI type: the UI contains an widget that will launch an intent when tapped.
+     */
+    @SuppressLint({"IntentName"})
+    public static final @Type String TYPE_ACTION = "android:autofill:action";
+
     /** The presentation spec to which the inflated suggestion view abides. */
     private final @NonNull InlinePresentationSpec mPresentationSpec;
 
@@ -53,6 +65,9 @@ public final class InlineSuggestionInfo implements Parcelable {
 
     /** Hints for the type of data being suggested. */
     private final @Nullable String[] mAutofillHints;
+
+    /** The type of the UI. */
+    private final @NonNull @Type String mType;
 
     /**
      * Creates a new {@link InlineSuggestionInfo}, for testing purpose.
@@ -65,7 +80,8 @@ public final class InlineSuggestionInfo implements Parcelable {
             @NonNull InlinePresentationSpec presentationSpec,
             @NonNull @Source String source,
             @Nullable String[] autofillHints) {
-        return new InlineSuggestionInfo(presentationSpec, source, autofillHints);
+        // TODO(b/147394280): Add CTS test for the type field.
+        return new InlineSuggestionInfo(presentationSpec, source, autofillHints, TYPE_SUGGESTION);
     }
 
 
@@ -92,6 +108,15 @@ public final class InlineSuggestionInfo implements Parcelable {
     @DataClass.Generated.Member
     public @interface Source {}
 
+    /** @hide */
+    @android.annotation.StringDef(prefix = "TYPE_", value = {
+        TYPE_SUGGESTION,
+        TYPE_ACTION
+    })
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)
+    @DataClass.Generated.Member
+    public @interface Type {}
+
     /**
      * Creates a new InlineSuggestionInfo.
      *
@@ -101,13 +126,16 @@ public final class InlineSuggestionInfo implements Parcelable {
      *   The source from which the suggestion is provided.
      * @param autofillHints
      *   Hints for the type of data being suggested.
+     * @param type
+     *   The type of the UI.
      * @hide
      */
     @DataClass.Generated.Member
     public InlineSuggestionInfo(
             @NonNull InlinePresentationSpec presentationSpec,
             @NonNull @Source String source,
-            @Nullable String[] autofillHints) {
+            @Nullable String[] autofillHints,
+            @NonNull @Type String type) {
         this.mPresentationSpec = presentationSpec;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPresentationSpec);
@@ -124,6 +152,18 @@ public final class InlineSuggestionInfo implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSource);
         this.mAutofillHints = autofillHints;
+        this.mType = type;
+
+        if (!(java.util.Objects.equals(mType, TYPE_SUGGESTION))
+                && !(java.util.Objects.equals(mType, TYPE_ACTION))) {
+            throw new java.lang.IllegalArgumentException(
+                    "type was " + mType + " but must be one of: "
+                            + "TYPE_SUGGESTION(" + TYPE_SUGGESTION + "), "
+                            + "TYPE_ACTION(" + TYPE_ACTION + ")");
+        }
+
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mType);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -152,6 +192,14 @@ public final class InlineSuggestionInfo implements Parcelable {
         return mAutofillHints;
     }
 
+    /**
+     * The type of the UI.
+     */
+    @DataClass.Generated.Member
+    public @NonNull @Type String getType() {
+        return mType;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -161,7 +209,8 @@ public final class InlineSuggestionInfo implements Parcelable {
         return "InlineSuggestionInfo { " +
                 "presentationSpec = " + mPresentationSpec + ", " +
                 "source = " + mSource + ", " +
-                "autofillHints = " + java.util.Arrays.toString(mAutofillHints) +
+                "autofillHints = " + java.util.Arrays.toString(mAutofillHints) + ", " +
+                "type = " + mType +
         " }";
     }
 
@@ -180,7 +229,8 @@ public final class InlineSuggestionInfo implements Parcelable {
         return true
                 && java.util.Objects.equals(mPresentationSpec, that.mPresentationSpec)
                 && java.util.Objects.equals(mSource, that.mSource)
-                && java.util.Arrays.equals(mAutofillHints, that.mAutofillHints);
+                && java.util.Arrays.equals(mAutofillHints, that.mAutofillHints)
+                && java.util.Objects.equals(mType, that.mType);
     }
 
     @Override
@@ -193,6 +243,7 @@ public final class InlineSuggestionInfo implements Parcelable {
         _hash = 31 * _hash + java.util.Objects.hashCode(mPresentationSpec);
         _hash = 31 * _hash + java.util.Objects.hashCode(mSource);
         _hash = 31 * _hash + java.util.Arrays.hashCode(mAutofillHints);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mType);
         return _hash;
     }
 
@@ -208,6 +259,7 @@ public final class InlineSuggestionInfo implements Parcelable {
         dest.writeTypedObject(mPresentationSpec, flags);
         dest.writeString(mSource);
         if (mAutofillHints != null) dest.writeStringArray(mAutofillHints);
+        dest.writeString(mType);
     }
 
     @Override
@@ -225,6 +277,7 @@ public final class InlineSuggestionInfo implements Parcelable {
         InlinePresentationSpec presentationSpec = (InlinePresentationSpec) in.readTypedObject(InlinePresentationSpec.CREATOR);
         String source = in.readString();
         String[] autofillHints = (flg & 0x4) == 0 ? null : in.createStringArray();
+        String type = in.readString();
 
         this.mPresentationSpec = presentationSpec;
         com.android.internal.util.AnnotationValidations.validate(
@@ -242,6 +295,18 @@ public final class InlineSuggestionInfo implements Parcelable {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSource);
         this.mAutofillHints = autofillHints;
+        this.mType = type;
+
+        if (!(java.util.Objects.equals(mType, TYPE_SUGGESTION))
+                && !(java.util.Objects.equals(mType, TYPE_ACTION))) {
+            throw new java.lang.IllegalArgumentException(
+                    "type was " + mType + " but must be one of: "
+                            + "TYPE_SUGGESTION(" + TYPE_SUGGESTION + "), "
+                            + "TYPE_ACTION(" + TYPE_ACTION + ")");
+        }
+
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mType);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -261,10 +326,10 @@ public final class InlineSuggestionInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1578972121865L,
+            time = 1579806757327L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestionInfo.java",
-            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mPresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.view.inline.InlinePresentationSpec,java.lang.String,java.lang.String[])\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
+            inputSignatures = "public static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_AUTOFILL\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String SOURCE_PLATFORM\npublic static final @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_SUGGESTION\npublic static final @android.annotation.SuppressLint({\"IntentName\"}) @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String TYPE_ACTION\nprivate final @android.annotation.NonNull android.view.inline.InlinePresentationSpec mPresentationSpec\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Source java.lang.String mSource\nprivate final @android.annotation.Nullable java.lang.String[] mAutofillHints\nprivate final @android.annotation.NonNull @android.view.inputmethod.InlineSuggestionInfo.Type java.lang.String mType\npublic static @android.annotation.TestApi @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(android.view.inline.InlinePresentationSpec,java.lang.String,java.lang.String[])\nclass InlineSuggestionInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 
