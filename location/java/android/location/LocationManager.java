@@ -74,7 +74,7 @@ import java.util.function.Consumer;
  * still return location results, but the exact location will be obfuscated to a coarse level of
  * accuracy.
  */
-@SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
+@SuppressWarnings({"deprecation"})
 @SystemService(Context.LOCATION_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_LOCATION)
 public class LocationManager {

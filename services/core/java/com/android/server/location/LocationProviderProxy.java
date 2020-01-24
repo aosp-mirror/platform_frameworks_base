@@ -97,8 +97,8 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
         // executed on binder thread
         @Override
-        public void onSetEnabled(boolean enabled) {
-            setEnabled(enabled);
+        public void onSetAllowed(boolean allowed) {
+            setAllowed(allowed);
         }
 
         // executed on binder thread
@@ -165,6 +165,14 @@ public class LocationProviderProxy extends AbstractLocationProvider {
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
             service.sendExtraCommand(command, extras);
+        });
+    }
+
+    @Override
+    public void onRequestSetAllowed(boolean allowed) {
+        mServiceWatcher.runOnBinder(binder -> {
+            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
+            service.requestSetAllowed(allowed);
         });
     }
 

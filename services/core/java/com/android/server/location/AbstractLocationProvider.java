@@ -79,9 +79,9 @@ public abstract class AbstractLocationProvider {
                 Collections.emptySet());
 
         /**
-         * The provider's enabled state.
+         * The provider's allowed state.
          */
-        public final boolean enabled;
+        public final boolean allowed;
 
         /**
          * The provider's properties.
@@ -93,18 +93,18 @@ public abstract class AbstractLocationProvider {
          */
         public final Set<String> providerPackageNames;
 
-        private State(boolean enabled, ProviderProperties properties,
+        private State(boolean allowed, ProviderProperties properties,
                 Set<String> providerPackageNames) {
-            this.enabled = enabled;
+            this.allowed = allowed;
             this.properties = properties;
             this.providerPackageNames = Objects.requireNonNull(providerPackageNames);
         }
 
-        private State withEnabled(boolean enabled) {
-            if (enabled == this.enabled) {
+        private State withAllowed(boolean allowed) {
+            if (allowed == this.allowed) {
                 return this;
             } else {
-                return new State(enabled, properties, providerPackageNames);
+                return new State(allowed, properties, providerPackageNames);
             }
         }
 
@@ -112,7 +112,7 @@ public abstract class AbstractLocationProvider {
             if (properties.equals(this.properties)) {
                 return this;
             } else {
-                return new State(enabled, properties, providerPackageNames);
+                return new State(allowed, properties, providerPackageNames);
             }
         }
 
@@ -120,7 +120,7 @@ public abstract class AbstractLocationProvider {
             if (providerPackageNames.equals(this.providerPackageNames)) {
                 return this;
             } else {
-                return new State(enabled, properties, providerPackageNames);
+                return new State(allowed, properties, providerPackageNames);
             }
         }
 
@@ -133,13 +133,13 @@ public abstract class AbstractLocationProvider {
                 return false;
             }
             State state = (State) o;
-            return enabled == state.enabled && properties == state.properties
+            return allowed == state.allowed && properties == state.properties
                     && providerPackageNames.equals(state.providerPackageNames);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(enabled, properties, providerPackageNames);
+            return Objects.hash(allowed, properties, providerPackageNames);
         }
     }
 
@@ -259,10 +259,10 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * The current enabled state of this provider.
+     * The current allowed state of this provider.
      */
-    protected boolean isEnabled() {
-        return mInternalState.get().state.enabled;
+    protected boolean isAllowed() {
+        return mInternalState.get().state.allowed;
     }
 
     /**
@@ -281,10 +281,10 @@ public abstract class AbstractLocationProvider {
     }
 
     /**
-     * Call this method to report a change in provider enabled/disabled status.
+     * Call this method to report a change in provider allowed status.
      */
-    protected void setEnabled(boolean enabled) {
-        setState(state -> state.withEnabled(enabled));
+    protected void setAllowed(boolean allowed) {
+        setState(state -> state.withAllowed(allowed));
     }
 
     /**
@@ -356,6 +356,19 @@ public abstract class AbstractLocationProvider {
      * Always invoked on the provider executor.
      */
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
+
+    /**
+     * Requests a provider to enable itself for the given user id.
+     */
+    public final void requestSetAllowed(boolean allowed) {
+        // all calls into the provider must be moved onto the provider thread to prevent deadlock
+        mExecutor.execute(() -> onRequestSetAllowed(allowed));
+    }
+
+    /**
+     * Always invoked on the provider executor.
+     */
+    protected void onRequestSetAllowed(boolean allowed) {}
 
     /**
      * Dumps debug or log information. May be invoked from any thread.

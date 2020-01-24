@@ -205,7 +205,7 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onSetEnabled(boolean enabled) {
+        public void onSetAllowed(boolean allowed) {
 
         }
 
