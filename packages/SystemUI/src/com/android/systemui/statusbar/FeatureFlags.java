@@ -56,7 +56,7 @@ public class FeatureFlags {
     }
 
     public boolean isNewNotifPipelineEnabled() {
-        return getDeviceConfigFlag("notification.newpipeline.enabled", false);
+        return getDeviceConfigFlag("notification.newpipeline.enabled", true);
     }
 
     public boolean isNewNotifPipelineRenderingEnabled() {
