@@ -4911,6 +4911,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mTouchSlop;
 
     /**
+     * Cache the ambiguous gesture multiplier from the context that created the view.
+     */
+    private float mAmbiguousGestureMultiplier;
+
+    /**
      * Object that handles automatic animation of view properties.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -5224,7 +5229,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 (TEXT_ALIGNMENT_DEFAULT << PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT) |
                 (PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT) |
                 (IMPORTANT_FOR_ACCESSIBILITY_DEFAULT << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT);
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mAmbiguousGestureMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
+
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
@@ -15642,15 +15651,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             motionClassification == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE;
                     int touchSlop = mTouchSlop;
                     if (ambiguousGesture && hasPendingLongPressCallback()) {
-                        final float ambiguousMultiplier =
-                                ViewConfiguration.getAmbiguousGestureMultiplier();
                         if (!pointInView(x, y, touchSlop)) {
                             // The default action here is to cancel long press. But instead, we
                             // just extend the timeout here, in case the classification
                             // stays ambiguous.
                             removeLongPressCallback();
                             long delay = (long) (ViewConfiguration.getLongPressTimeout()
-                                    * ambiguousMultiplier);
+                                    * mAmbiguousGestureMultiplier);
                             // Subtract the time already spent
                             delay -= event.getEventTime() - event.getDownTime();
                             checkForLongClick(
@@ -15659,7 +15666,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                     y,
                                     TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS);
                         }
-                        touchSlop *= ambiguousMultiplier;
+                        touchSlop *= mAmbiguousGestureMultiplier;
                     }
 
                     // Be lenient about moving outside of buttons

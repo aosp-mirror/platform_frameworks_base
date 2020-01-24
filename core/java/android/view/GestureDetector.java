@@ -231,6 +231,7 @@ public class GestureDetector {
     private int mTouchSlopSquare;
     private int mDoubleTapTouchSlopSquare;
     private int mDoubleTapSlopSquare;
+    private float mAmbiguousGestureMultiplier;
     @UnsupportedAppUsage
     private int mMinimumFlingVelocity;
     private int mMaximumFlingVelocity;
@@ -452,6 +453,7 @@ public class GestureDetector {
             //noinspection deprecation
             mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();
             mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();
+            mAmbiguousGestureMultiplier = ViewConfiguration.getAmbiguousGestureMultiplier();
         } else {
             final ViewConfiguration configuration = ViewConfiguration.get(context);
             touchSlop = configuration.getScaledTouchSlop();
@@ -459,6 +461,7 @@ public class GestureDetector {
             doubleTapSlop = configuration.getScaledDoubleTapSlop();
             mMinimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();
             mMaximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();
+            mAmbiguousGestureMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         }
         mTouchSlopSquare = touchSlop * touchSlop;
         mDoubleTapTouchSlopSquare = doubleTapTouchSlop * doubleTapTouchSlop;
@@ -661,7 +664,6 @@ public class GestureDetector {
                             hasPendingLongPress && ambiguousGesture;
                     if (shouldInhibitDefaultAction) {
                         // Inhibit default long press
-                        final float multiplier = ViewConfiguration.getAmbiguousGestureMultiplier();
                         if (distance > slopSquare) {
                             // The default action here is to remove long press. But if the touch
                             // slop below gets increased, and we never exceed the modified touch
@@ -675,13 +677,14 @@ public class GestureDetector {
                                             LONG_PRESS,
                                             TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS,
                                             0 /* arg2 */),
-                                    ev.getDownTime() + (long) (longPressTimeout * multiplier));
+                                    ev.getDownTime()
+                                        + (long) (longPressTimeout * mAmbiguousGestureMultiplier));
                         }
                         // Inhibit default scroll. If a gesture is ambiguous, we prevent scroll
                         // until the gesture is resolved.
                         // However, for safety, simply increase the touch slop in case the
                         // classification is erroneous. Since the value is squared, multiply twice.
-                        slopSquare *= multiplier * multiplier;
+                        slopSquare *= mAmbiguousGestureMultiplier * mAmbiguousGestureMultiplier;
                     }
 
                     if (distance > slopSquare) {
