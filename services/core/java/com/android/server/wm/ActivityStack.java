@@ -658,8 +658,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     @Override
-    public void resolveOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveOverrideConfiguration(newParentConfig);
+    public void resolveTileOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveTileOverrideConfiguration(newParentConfig);
         if (mTile != null) {
             // If this is a virtual child of a tile, simulate the parent-child relationship
             mTile.updateResolvedConfig(getResolvedOverrideConfiguration());
@@ -1118,20 +1118,15 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         return r.getTask().mTaskId != taskId && r.appToken != notTop && r.canBeTopRunning();
     }
 
-    ActivityRecord isInStackLocked(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return isInStackLocked(r);
-    }
-
     ActivityRecord isInStackLocked(ActivityRecord r) {
         if (r == null) {
             return null;
         }
-        final Task task = r.getTask();
-        final ActivityStack stack = r.getRootTask();
-        if (stack != null && task.mChildren.contains(r) && mChildren.contains(task)) {
-            if (stack != this) Slog.w(TAG,
-                    "Illegal state! task does not point to stack it is in.");
+        final Task task = r.getRootTask();
+        if (task != null && r.isDescendantOf(task)) {
+            if (task != this) Slog.w(TAG, "Illegal state! task does not point to stack it is in. "
+                    + "stack=" + this + " task=" + task + " r=" + r
+                    + " callers=" + Debug.getCallers(15, "\n"));
             return r;
         }
         return null;
@@ -1207,7 +1202,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
 
         getDisplay().positionStackAtBottom(this, reason);
-        if (task != null) {
+        if (task != null && task != this) {
             positionChildAtBottom(task);
         }
 
@@ -1251,12 +1246,12 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         mCurrentUser = userId;
 
         super.switchUser(userId);
-        forAllTasks((t) -> {
-            if (t.showToCurrentUser()) {
+        forAllLeafTasks((t) -> {
+            if (t.showToCurrentUser() && t != this) {
                 mChildren.remove(t);
                 mChildren.add(t);
             }
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
     }
 
     void minimalResumeActivityLocked(ActivityRecord r) {
@@ -2450,16 +2445,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         Task rTask = r.getTask();
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
-        final boolean hasTask = hasChild(rTask);
+        final boolean isOrhasTask = rTask == this || hasChild(rTask);
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
-        if (!r.mLaunchTaskBehind && allowMoveToFront && (!hasTask || newTask)) {
+        if (!r.mLaunchTaskBehind && allowMoveToFront && (!isOrhasTask || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
             positionChildAtTop(rTask);
         }
         Task task = null;
-        if (!newTask && hasTask) {
+        if (!newTask && isOrhasTask) {
             final ActivityRecord occludingActivity = getActivity(
                     (ar) -> !ar.finishing && ar.occludesParent(), true, rTask);
             if (occludingActivity != null) {
@@ -2717,7 +2712,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     void finishVoiceTask(IVoiceInteractionSession session) {
         final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::finishIfVoiceTask,
                 PooledLambda.__(Task.class), session.asBinder());
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
@@ -2818,8 +2813,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return false;
         }
         final Task task = srec.getTask();
-
-        if (!mChildren.contains(task) || !task.hasChild(srec)) {
+        if (!srec.isDescendantOf(this)) {
             return false;
         }
 
@@ -2932,20 +2926,20 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         getDisplay().mDisplayContent.prepareAppTransition(transit, false);
     }
 
-    final void moveTaskToFrontLocked(Task tr, boolean noAnimation, ActivityOptions options,
+    final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,
             AppTimeTracker timeTracker, String reason) {
-        moveTaskToFrontLocked(tr, noAnimation, options, timeTracker, !DEFER_RESUME, reason);
+        moveTaskToFront(tr, noAnimation, options, timeTracker, !DEFER_RESUME, reason);
     }
 
-    final void moveTaskToFrontLocked(Task tr, boolean noAnimation, ActivityOptions options,
+    final void moveTaskToFront(Task tr, boolean noAnimation, ActivityOptions options,
             AppTimeTracker timeTracker, boolean deferResume, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
-        final ActivityRecord topActivity = topStack != null ? topStack.getTopNonFinishingActivity() : null;
-        final int numTasks = getChildCount();
-        final int index = mChildren.indexOf(tr);
-        if (numTasks == 0 || index < 0)  {
+        final ActivityRecord topActivity = topStack != null
+                ? topStack.getTopNonFinishingActivity() : null;
+
+        if (tr != this && !tr.isDescendantOf(this)) {
             // nothing to do!
             if (noAnimation) {
                 ActivityOptions.abort(options);
@@ -3113,7 +3107,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStack::processTaskResizeBounds, PooledLambda.__(Task.class),
                     taskBounds, tempTaskInsetBounds);
-            forAllTasks(c, true /* traverseTopToBottom */, this);
+            forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
 
             setBounds(bounds);
@@ -3150,7 +3144,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::setTaskBounds,
                 PooledLambda.__(Task.class), bounds);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
@@ -3166,7 +3160,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
         final PooledConsumer c = PooledLambda.obtainConsumer(ActivityStack::setTaskDisplayedBounds,
                 PooledLambda.__(Task.class), bounds);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
@@ -3262,7 +3256,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return false;
         }
         final String prefix = "    ";
-        forAllTasks((task) -> {
+        forAllLeafTasks((task) -> {
             if (needSep) {
                 pw.println("");
             }
@@ -3280,7 +3274,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                     false /* traverseTopToBottom */);
             dumpHistoryList(fd, pw, activities, prefix, "Hist", true, !dumpAll, dumpClient,
                     dumpPackage, false, null, task);
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
         return true;
     }
 
@@ -3331,19 +3325,33 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
-    Task createTask(int taskId, ActivityInfo info, Intent intent, boolean toTop) {
-        return createTask(taskId, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
+    Task reuseOrCreateTask(ActivityInfo info, Intent intent, boolean toTop) {
+        return reuseOrCreateTask(info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 toTop, null /*activity*/, null /*source*/, null /*options*/);
     }
+    // TODO: Can be removed once we change callpoints creating stacks to be creating tasks.
+    /** Either returns this current task to be re-used or creates a new child task. */
+    Task reuseOrCreateTask(ActivityInfo info, Intent intent, IVoiceInteractionSession voiceSession,
+            IVoiceInteractor voiceInteractor, boolean toTop, ActivityRecord activity,
+            ActivityRecord source, ActivityOptions options) {
 
-    Task createTask(int taskId, ActivityInfo info, Intent intent,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            boolean toTop, ActivityRecord activity, ActivityRecord source,
-            ActivityOptions options) {
-        final Task task = Task.create(
-                mAtmService, taskId, info, intent, voiceSession, voiceInteractor, this);
-        // add the task to stack first, mTaskPositioner might need the stack association
-        addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+        Task task;
+        if (DisplayContent.alwaysCreateStack(getWindowingMode(), getActivityType())) {
+            // This stack will only contain one task, so just return itself since all stacks ara now
+            // tasks and all tasks are now stacks.
+            task = reuseAsLeafTask(voiceSession, voiceInteractor, info, activity);
+        } else {
+            // Create child task since this stack can contain multiple tasks.
+            final int taskId = activity != null
+                    ? mStackSupervisor.getNextTaskIdForUser(activity.mUserId)
+                    : mStackSupervisor.getNextTaskIdForUser();
+            task = Task.create(
+                    mAtmService, taskId, info, intent, voiceSession, voiceInteractor, this);
+
+            // add the task to stack first, mTaskPositioner might need the stack association
+            addChild(task, toTop, (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+        }
+
         int displayId = getDisplayId();
         if (displayId == INVALID_DISPLAY) displayId = DEFAULT_DISPLAY;
         final boolean isLockscreenShown = mAtmService.mStackSupervisor.getKeyguardController()
@@ -3353,6 +3361,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
             task.setBounds(getRequestedOverrideBounds());
         }
+
         return task;
     }
 
@@ -3559,10 +3568,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                     "Can't exit pinned mode if it's not pinned already.");
         }
 
-        if (mChildren.size() != 1) {
-            throw new RuntimeException("There should be only one task in a pinned stack.");
-        }
-
         // give pinned stack a chance to save current bounds, this should happen before reparent.
         final ActivityRecord top = topRunningNonOverlayTaskActivity();
         if (top != null && top.isVisible()) {
@@ -3592,12 +3597,12 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ActivityStackSupervisor::updatePictureInPictureMode, mStackSupervisor,
                 PooledLambda.__(Task.class), targetStackBounds, forceUpdate);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, true /* traverseTopToBottom */);
         c.recycle();
     }
 
     void prepareFreezingTaskBounds() {
-        forAllTasks(Task::prepareFreezingBounds, true /* traverseTopToBottom */, this);
+        forAllLeafTasks(Task::prepareFreezingBounds, true /* traverseTopToBottom */);
     }
 
     /**
@@ -3629,7 +3634,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             final PooledConsumer c = PooledLambda.obtainConsumer(Task::alignToAdjustedBounds,
                     PooledLambda.__(Task.class), adjusted ? mAdjustedBounds : getRawBounds(),
                     insetBounds, alignBottom);
-            forAllTasks(c, true /* traverseTopToBottom */, this);
+            forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         }
 
@@ -3899,6 +3904,12 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     void positionChildAtTop(Task child) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
+            return;
+        }
+
+        if (child == this) {
+            // TODO: Fix call-points
+            moveToFront("positionChildAtTop");
             return;
         }
 
@@ -4316,19 +4327,19 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
      * to the list of to be drawn windows the service is waiting for.
      */
     void beginImeAdjustAnimation() {
-        forAllTasks((t) -> {
+        forAllLeafTasks((t) -> {
             if (t.hasContentToDisplay()) {
                 t.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
                 t.setWaitingForDrawnIfResizingChanged();
             }
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
     }
 
     /** Resets the resizing state of all windows. */
     void endImeAdjustAnimation() {
-        forAllTasks((t) -> {
+        forAllLeafTasks((t) -> {
             t.setDragResizing(false, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
-        }, true /* traverseTopToBottom */, this);
+        }, true /* traverseTopToBottom */);
     }
 
     private int getMinTopStackBottom(final Rect displayContentRect, int originalStackBottom) {
@@ -4730,7 +4741,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     /** Called immediately prior to resizing the tasks at the end of the pinned stack animation. */
     void onPipAnimationEndResize() {
         mBoundsAnimating = false;
-        forAllTasks(Task::clearPreserveNonFloatingState, false /* traverseTopToBottom */, this);
+        forAllLeafTasks(Task::clearPreserveNonFloatingState, false /* traverseTopToBottom */);
         mWmService.requestTraversal();
     }
 

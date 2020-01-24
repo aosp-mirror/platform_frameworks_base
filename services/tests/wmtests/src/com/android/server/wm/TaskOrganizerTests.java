@@ -28,6 +28,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -300,6 +301,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         Rect newSize = new Rect(10, 10, 300, 300);
         Configuration c = new Configuration(tile1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(newSize);
+        doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any());
         tile1.onRequestedOverrideConfigurationChanged(c);
         assertEquals(newSize, stack.getBounds());
 

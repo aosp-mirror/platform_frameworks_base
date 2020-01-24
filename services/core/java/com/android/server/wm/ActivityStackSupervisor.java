@@ -419,14 +419,29 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mTopTask = fromStack.getTopMostTask();
 
             final PooledConsumer c = PooledLambda.obtainConsumer(
-                    MoveTaskToFullscreenHelper::processTask, this, PooledLambda.__(Task.class));
-            fromStack.forAllTasks(c, false /* traverseTopToBottom */, fromStack);
+                    MoveTaskToFullscreenHelper::processLeafTask, this, PooledLambda.__(Task.class));
+            fromStack.forAllLeafTasks(c, false /* traverseTopToBottom */);
             c.recycle();
             mToDisplay = null;
             mTopTask = null;
         }
 
-        private void processTask(Task task) {
+        private void processLeafTask(Task task) {
+            // This is a one level task that we don't need to create stack for reparenting to.
+            if (task.isRootTask() && DisplayContent.alwaysCreateStack(WINDOWING_MODE_FULLSCREEN,
+                    task.getActivityType())) {
+                final ActivityStack stack = (ActivityStack) task;
+                stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                if (mToDisplay.getDisplayId() != stack.getDisplayId()) {
+                    mToDisplay.moveStackToDisplay(stack, mOnTop);
+                } else if (mOnTop) {
+                    mToDisplay.positionStackAtTop(stack, false /* includingParents */);
+                } else {
+                    mToDisplay.positionStackAtBottom(stack);
+                }
+                return;
+            }
+
             final ActivityStack toStack = mToDisplay.getOrCreateStack(
                     null, mTmpOptions, task, task.getActivityType(), mOnTop);
 
@@ -1443,7 +1458,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         final ActivityRecord r = task.getTopNonFinishingActivity();
-        currentStack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
+        currentStack.moveTaskToFront(task, false /* noAnimation */, options,
                 r == null ? null : r.appTimeTracker, reason);
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
@@ -1742,7 +1757,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         } else {
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStackSupervisor::processRemoveTask, this, PooledLambda.__(Task.class));
-            stack.forAllTasks(c, true /* traverseTopToBottom */, stack);
+            stack.forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         }
     }
@@ -2755,6 +2770,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 deferUpdateRecentsHomeStackBounds();
                 // TODO(multi-display): currently recents animation only support default display.
                 mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
+                // TODO(task-hierarchy): Remove when tiles are in hierarchy.
+                // Unset launching windowing mode to prevent creating split-screen-primary stack
+                // in RWC#anyTaskForId() below.
+                activityOptions.setLaunchWindowingMode(WINDOWING_MODE_UNDEFINED);
             }
 
             task = mRootWindowContainer.anyTaskForId(taskId,
@@ -2764,6 +2783,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 mWindowManager.executeAppTransition();
                 throw new IllegalArgumentException(
                         "startActivityFromRecents: Task " + taskId + " not found.");
+            } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    && task.getWindowingMode() != windowingMode) {
+                mService.moveTaskToSplitScreenPrimaryTile(task, true /* toTop */);
             }
 
             if (windowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {

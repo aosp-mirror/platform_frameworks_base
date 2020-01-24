@@ -225,8 +225,8 @@ class Task extends WindowContainer<WindowContainer> {
 
     String affinity;        // The affinity name for this task, or null; may change identity.
     String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
-    final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
-    final IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
+    IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
+    IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
     Intent intent;          // The original intent that started the task. Note that this value can
                             // be null.
     Intent affinityIntent;  // Intent of affinity-moved activity that started this task.
@@ -569,6 +569,15 @@ class Task extends WindowContainer<WindowContainer> {
             mMinHeight = minHeight;
         }
         mAtmService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
+    }
+
+    Task reuseAsLeafTask(IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
+            ActivityInfo info, ActivityRecord activity) {
+        voiceSession = _voiceSession;
+        voiceInteractor = _voiceInteractor;
+        setIntent(activity);
+        setMinDimensions(info);
+        return this;
     }
 
     private void cleanUpResourcesForDestroy(ConfigurationContainer oldParent) {
@@ -1004,7 +1013,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /** Sets the original minimal width and height. */
-    private void setMinDimensions(ActivityInfo info) {
+    void setMinDimensions(ActivityInfo info) {
         if (info != null && info.windowLayout != null) {
             mMinWidth = info.windowLayout.minWidth;
             mMinHeight = info.windowLayout.minHeight;
@@ -2176,16 +2185,20 @@ class Task extends WindowContainer<WindowContainer> {
         return Configuration.reduceScreenLayout(sourceScreenLayout, longSize, shortSize);
     }
 
+    void resolveTileOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveOverrideConfiguration(newParentConfig);
+    }
+
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfig) {
-        if (isRootTask()) {
-            super.resolveOverrideConfiguration(newParentConfig);
+        if (!isLeafTask()) {
+            resolveTileOverrideConfiguration(newParentConfig);
             return;
         }
         mTmpBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
-        super.resolveOverrideConfiguration(newParentConfig);
+        resolveTileOverrideConfiguration(newParentConfig);
         int windowingMode =
-                getRequestedOverrideConfiguration().windowConfiguration.getWindowingMode();
+                getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
             windowingMode = newParentConfig.windowConfiguration.getWindowingMode();
         }
@@ -2392,7 +2405,7 @@ class Task extends WindowContainer<WindowContainer> {
         final int[] currentCount = {0};
         final PooledConsumer c = PooledLambda.obtainConsumer((t, count) -> { count[0]++; },
                 PooledLambda.__(Task.class), currentCount);
-        forAllTasks(c, false /* traverseTopToBottom */, this);
+        forAllLeafTasks(c, false /* traverseTopToBottom */);
         c.recycle();
         return currentCount[0];
     }
@@ -3074,16 +3087,33 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom, Task excludedTask) {
-        super.forAllTasks(callback, traverseTopToBottom, excludedTask);
-        if (excludedTask != this) {
-            callback.accept(this);
+    void forAllLeafTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        final int count = mChildren.size();
+        boolean isLeafTask = true;
+        if (traverseTopToBottom) {
+            for (int i = count - 1; i >= 0; --i) {
+                final Task child = mChildren.get(i).asTask();
+                if (child != null) {
+                    isLeafTask = false;
+                    child.forAllLeafTasks(callback, traverseTopToBottom);
+                }
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                final Task child = mChildren.get(i).asTask();
+                if (child != null) {
+                    isLeafTask = false;
+                    child.forAllLeafTasks(callback, traverseTopToBottom);
+                }
+            }
         }
+        if (isLeafTask) callback.accept(this);
     }
 
     @Override
     void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
-        forAllTasks(callback, traverseTopToBottom, null /* excludedTask */);
+        super.forAllTasks(callback, traverseTopToBottom);
+        callback.accept(this);
     }
 
     @Override
@@ -3265,7 +3295,7 @@ class Task extends WindowContainer<WindowContainer> {
         pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
         pw.print(" mCallingUid="); UserHandle.formatUid(pw, mCallingUid);
         pw.print(" mUserSetupComplete="); pw.print(mUserSetupComplete);
-        pw.print(" mCallingPackage="); pw.println(mCallingPackage);
+        pw.print(" mCallingPackage="); pw.print(mCallingPackage);
         pw.print(" mCallingFeatureId="); pw.println(mCallingFeatureId);
         if (affinity != null || rootAffinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.print(affinity);

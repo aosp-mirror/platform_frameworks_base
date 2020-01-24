@@ -2137,10 +2137,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         r.getActivityType(), ON_TOP, r.info, r.intent);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
-
-                Task newTask = stack.createTask(mStackSupervisor.getNextTaskIdForUser(r.mUserId),
-                        r.info, r.intent, true);
-                r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
+                r.reparent(stack, MAX_VALUE, "moveActivityToStack");
             }
 
             stack.setWindowingMode(WINDOWING_MODE_PINNED);
@@ -2407,7 +2404,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 RootWindowContainer::processTaskForStackInfo, PooledLambda.__(Task.class), info,
                 currentIndex);
-        stack.forAllTasks(c, false /* traverseTopToBottom */, stack);
+        stack.forAllLeafTasks(c, false /* traverseTopToBottom */);
         c.recycle();
 
         final ActivityRecord top = stack.topRunningActivity();
@@ -3302,7 +3299,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     RootWindowContainer::taskTopActivityIsUser, this, PooledLambda.__(Task.class),
                     userId);
-            forAllTasks(c);
+            forAllLeafTasks(c, true /* traverseTopToBottom */);
             c.recycle();
         } finally {
             mService.continueWindowLayout();
@@ -3321,14 +3318,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @return {@code true} if the top activity looks like it belongs to {@param userId}.
      */
     private void taskTopActivityIsUser(Task task, @UserIdInt int userId) {
-        // TODO(b/80414790): having utilities to loop for all leaf tasks from caller vs. checking
-        //  leaf tasks here.
-        if (!task.isLeafTask()) {
-            // No op if not a leaf task since we don't want to report root tasks to
-            // TaskStackListeners.
-            return;
-        }
-
         // To handle the case that work app is in the task but just is not the top one.
         final ActivityRecord activityRecord = task.getTopNonFinishingActivity();
         final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
@@ -3430,18 +3419,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     ActivityRecord isInAnyStack(IBinder token) {
-        int numDisplays = getChildCount();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent display = getChildAt(displayNdx);
-            for (int stackNdx = display.getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getStackAt(stackNdx);
-                final ActivityRecord r = stack.isInStackLocked(token);
-                if (r != null) {
-                    return r;
-                }
-            }
-        }
-        return null;
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        return (r != null && r.isDescendantOf(this)) ? r : null;
     }
 
     @VisibleForTesting

@@ -2760,9 +2760,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
                     + " non-standard task " + taskId + " to split-screen windowing mode");
         }
+        if (!task.supportsSplitScreenWindowingMode()) {
+            return false;
+        }
 
         final int prevMode = task.getWindowingMode();
-        final ActivityStack stack = task.getStack();
+        moveTaskToSplitScreenPrimaryTile(task, toTop);
+        return prevMode != task.getWindowingMode();
+    }
+
+    void moveTaskToSplitScreenPrimaryTile(Task task, boolean toTop) {
+        ActivityStack stack = task.getStack();
         TaskTile tile = null;
         for (int i = stack.getDisplay().getStackCount() - 1; i >= 0; --i) {
             tile = stack.getDisplay().getStackAt(i).asTile();
@@ -2776,7 +2784,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(stack.mRemoteToken, tile.mRemoteToken, toTop);
         mTaskOrganizerController.applyContainerTransaction(wct, null);
-        return prevMode != task.getWindowingMode();
     }
 
     /**
@@ -3247,8 +3254,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final ActivityStack stack = r.getRootTask();
-                final Task task = stack.createTask(
-                        mStackSupervisor.getNextTaskIdForUser(r.mUserId), ainfo, intent, !ON_TOP);
+                final Task task = stack.getDisplay().createStack(stack.getWindowingMode(),
+                        stack.getActivityType(), !ON_TOP, ainfo, intent);
+
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
                     stack.removeChild(task, "addAppTask");

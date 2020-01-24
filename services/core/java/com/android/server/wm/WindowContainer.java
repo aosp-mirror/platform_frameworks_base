@@ -615,7 +615,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void positionChildAt(int position, E child, boolean includingParents) {
 
         if (child.getParent() != this) {
-            throw new IllegalArgumentException("removeChild: container=" + child.getName()
+            throw new IllegalArgumentException("positionChildAt: container=" + child.getName()
                     + " is not a child of container=" + getName()
                     + " current parent=" + child.getParent());
         }
@@ -1459,15 +1459,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom, Task excludedTask) {
+    void forAllLeafTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
         final int count = mChildren.size();
         if (traverseTopToBottom) {
             for (int i = count - 1; i >= 0; --i) {
-                mChildren.get(i).forAllTasks(callback, traverseTopToBottom, excludedTask);
+                mChildren.get(i).forAllLeafTasks(callback, traverseTopToBottom);
             }
         } else {
             for (int i = 0; i < count; i++) {
-                mChildren.get(i).forAllTasks(callback, traverseTopToBottom, excludedTask);
+                mChildren.get(i).forAllLeafTasks(callback, traverseTopToBottom);
             }
         }
     }
