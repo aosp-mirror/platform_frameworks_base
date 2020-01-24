@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package android.content.pm.parsing;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
@@ -28,23 +29,23 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
+import android.content.pm.parsing.ComponentParseUtils.ParsedProcess;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.os.Bundle;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.SparseArray;
 
 import java.security.PublicKey;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Methods used for mutation during direct package parsing.
  *
- * Java disallows defining this as an inner interface, so this must be a separate file.
- *
  * @hide
  */
-public interface ParsingPackage extends AndroidPackage {
+@SuppressWarnings("UnusedReturnValue")
+public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addActivity(ParsedActivity parsedActivity);
 
@@ -66,17 +67,17 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage addOverlayable(String overlayableName, String actorName);
 
-    ParsingPackage addFeature(ParsedFeature permission);
-
     ParsingPackage addPermission(ParsedPermission permission);
 
     ParsingPackage addPermissionGroup(ParsedPermissionGroup permissionGroup);
 
-    ParsingPackage addPreferredActivityFilter(ParsedActivityIntentInfo activityIntentInfo);
+    ParsingPackage addPreferredActivityFilter(ParsedActivityIntentInfo intentInfo);
 
     ParsingPackage addProtectedBroadcast(String protectedBroadcast);
 
     ParsingPackage addProvider(ParsedProvider parsedProvider);
+
+    ParsingPackage addFeature(ParsedFeature permission);
 
     ParsingPackage addReceiver(ParsedActivity parsedReceiver);
 
@@ -102,7 +103,7 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage addQueriesProvider(String authority);
 
-    ParsingPackage setProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> processes);
+    ParsingPackage setProcesses(@NonNull Map<String, ParsedProcess> processes);
 
     ParsingPackage asSplit(
             String[] splitNames,
@@ -111,15 +112,13 @@ public interface ParsingPackage extends AndroidPackage {
             @Nullable SparseArray<int[]> splitDependencies
     );
 
-    ParsingPackage setAppMetaData(Bundle appMetaData);
+    ParsingPackage setMetaData(Bundle metaData);
 
     ParsingPackage setForceQueryable(boolean forceQueryable);
 
     ParsingPackage setMaxAspectRatio(float maxAspectRatio);
 
     ParsingPackage setMinAspectRatio(float minAspectRatio);
-
-    ParsingPackage setName(String name);
 
     ParsingPackage setPermission(String permission);
 
@@ -137,9 +136,9 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setBaseHardwareAccelerated(boolean baseHardwareAccelerated);
 
-    ParsingPackage setActivitiesResizeModeResizeable(boolean resizeable);
+    ParsingPackage setResizeableActivity(Boolean resizeable);
 
-    ParsingPackage setActivitiesResizeModeResizeableViaSdkVersion(boolean resizeableViaSdkVersion);
+    ParsingPackage setResizeableActivityViaSdkVersion(boolean resizeableViaSdkVersion);
 
     ParsingPackage setAllowAudioPlaybackCapture(boolean allowAudioPlaybackCapture);
 
@@ -151,7 +150,7 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setAllowTaskReparenting(boolean allowTaskReparenting);
 
-    ParsingPackage setIsOverlay(boolean isOverlay);
+    ParsingPackage setOverlay(boolean isOverlay);
 
     ParsingPackage setBackupInForeground(boolean backupInForeground);
 
@@ -173,7 +172,7 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setHasFragileUserData(boolean hasFragileUserData);
 
-    ParsingPackage setIsGame(boolean isGame);
+    ParsingPackage setGame(boolean isGame);
 
     ParsingPackage setIsolatedSplitLoading(boolean isolatedSplitLoading);
 
@@ -221,8 +220,6 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setAppComponentFactory(String appComponentFactory);
 
-    ParsingPackage setApplicationVolumeUuid(String applicationVolumeUuid);
-
     ParsingPackage setBackupAgentName(String backupAgentName);
 
     ParsingPackage setBanner(int banner);
@@ -232,8 +229,6 @@ public interface ParsingPackage extends AndroidPackage {
     ParsingPackage setClassLoaderName(String classLoaderName);
 
     ParsingPackage setClassName(String className);
-
-    ParsingPackage setCodePath(String codePath);
 
     ParsingPackage setCompatibleWidthLimitDp(int compatibleWidthLimitDp);
 
@@ -246,8 +241,6 @@ public interface ParsingPackage extends AndroidPackage {
     ParsingPackage setFullBackupContent(int fullBackupContent);
 
     ParsingPackage setHasDomainUrls(boolean hasDomainUrls);
-
-    ParsingPackage setIcon(int icon);
 
     ParsingPackage setIconRes(int iconRes);
 
@@ -307,17 +300,17 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setSupportsSmallScreens(int supportsSmallScreens);
 
-    ParsingPackage setSupportsXLargeScreens(int supportsXLargeScreens);
+    ParsingPackage setSupportsExtraLargeScreens(int supportsExtraLargeScreens);
 
     ParsingPackage setTargetSandboxVersion(int targetSandboxVersion);
 
     ParsingPackage setTheme(int theme);
 
-    ParsingPackage setUpgradeKeySets(ArraySet<String> upgradeKeySets);
+    ParsingPackage setUpgradeKeySets(@NonNull Set<String> upgradeKeySets);
 
     ParsingPackage setUse32BitAbi(boolean use32BitAbi);
 
-    ParsingPackage setVolumeUuid(String volumeUuid);
+    ParsingPackage setVolumeUuid(@Nullable String volumeUuid);
 
     ParsingPackage setZygotePreloadName(String zygotePreloadName);
 
@@ -327,11 +320,7 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage sortServices();
 
-    ParsedPackage hideAsParsed();
-
     ParsingPackage setBaseRevisionCode(int baseRevisionCode);
-
-    ParsingPackage setPreferredOrder(int preferredOrder);
 
     ParsingPackage setVersionName(String versionName);
 
@@ -339,5 +328,16 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setCompileSdkVersionCodename(String compileSdkVersionCodename);
 
-    boolean usesCompatibilityMode();
+    // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
+    //  for moving to the next step
+    @Deprecated
+    Object hideAsParsed();
+
+    //TODO(b/135203078): Remove in favor of individual methods
+    @Deprecated
+    int getFlags();
+
+    //TODO(b/135203078): Remove in favor of individual methods
+    @Deprecated
+    int getPrivateFlags();
 }

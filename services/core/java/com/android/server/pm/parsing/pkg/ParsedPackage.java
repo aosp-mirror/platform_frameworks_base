@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.content.pm.parsing;
+package com.android.server.pm.parsing.pkg;
 
+import android.annotation.Nullable;
 import android.content.pm.PackageParser;
 
 /**
@@ -42,20 +43,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage clearProtectedBroadcasts();
 
-    /**
-     * TODO(b/135203078): Use non-AppInfo method
-     * @deprecated use {@link #setCodePath(String)}
-     */
-    @Deprecated
-    ParsedPackage setApplicationInfoCodePath(String applicationInfoCodePath);
-
-    /**
-     * TODO(b/135203078): Use non-AppInfo method
-     * @deprecated use {@link #setCodePath(String)}
-     */
-    @Deprecated
-    ParsedPackage setApplicationInfoResourcePath(String applicationInfoResourcePath);
-
     ParsedPackage setBaseCodePath(String baseCodePath);
 
     ParsedPackage setCodePath(String codePath);
@@ -70,9 +57,7 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setPrimaryCpuAbi(String primaryCpuAbi);
 
-    ParsedPackage setProcessName(String processName);
-
-    ParsedPackage setRealPackage(String realPackage);
+    ParsedPackage setRealPackage(@Nullable String realPackage);
 
     ParsedPackage setSecondaryCpuAbi(String secondaryCpuAbi);
 
@@ -80,6 +65,7 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setSplitCodePaths(String[] splitCodePaths);
 
+    @Deprecated
     ParsedPackage initForUser(int userId);
 
     ParsedPackage setNativeLibraryRootRequiresIsa(boolean nativeLibraryRootRequiresIsa);
@@ -104,8 +90,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setSystemExt(boolean systemExt);
 
-    ParsedPackage setUpdatedSystemApp(boolean updatedSystemApp);
-
     ParsedPackage setVendor(boolean vendor);
 
     ParsedPackage removePermission(int index);
@@ -114,19 +98,9 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage removeUsesOptionalLibrary(String libraryName);
 
-    ParsedPackage setApplicationInfoBaseResourcePath(String applicationInfoBaseResourcePath);
-
-    ParsedPackage setApplicationInfoSplitResourcePaths(
-            String[] applicationInfoSplitResourcePaths);
-
-    ParsedPackage setApplicationVolumeUuid(String applicationVolumeUuid);
-
     ParsedPackage setCoreApp(boolean coreApp);
 
-    ParsedPackage setIsStub(boolean isStub);
-
-    // TODO(b/135203078): Remove entirely
-    ParsedPackage setPackageSettingCallback(PackageSettingCallback packageSettingCallback);
+    ParsedPackage setStub(boolean isStub);
 
     ParsedPackage setRestrictUpdateHash(byte[] restrictUpdateHash);
 
@@ -149,7 +123,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setPersistent(boolean persistent);
 
-    interface PackageSettingCallback {
-        default void setAndroidPackage(AndroidPackage pkg){}
-    }
+    @Deprecated
+    ParsedPackage setUpdatedSystemApp(boolean updatedSystemApp);
 }
