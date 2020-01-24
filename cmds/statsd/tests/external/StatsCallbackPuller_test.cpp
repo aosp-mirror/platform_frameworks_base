@@ -116,7 +116,7 @@ TEST_F(StatsCallbackPullerTest, PullSuccess) {
     pullSuccess = true;
     values.push_back(value);
 
-    StatsCallbackPuller puller(pullTagId, cb, pullTimeoutNs);
+    StatsCallbackPuller puller(pullTagId, cb, pullCoolDownNs, pullTimeoutNs, {});
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
     int64_t startTimeNs = getElapsedRealtimeNs();
@@ -137,7 +137,7 @@ TEST_F(StatsCallbackPullerTest, PullFail) {
     int64_t value = 1234;
     values.push_back(value);
 
-    StatsCallbackPuller puller(pullTagId, cb, pullTimeoutNs);
+    StatsCallbackPuller puller(pullTagId, cb, pullCoolDownNs, pullTimeoutNs, {});
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
     EXPECT_FALSE(puller.PullInternal(&dataHolder));
@@ -152,7 +152,7 @@ TEST_F(StatsCallbackPullerTest, PullTimeout) {
     int64_t value = 4321;
     values.push_back(value);
 
-    StatsCallbackPuller puller(pullTagId, cb, pullTimeoutNs);
+    StatsCallbackPuller puller(pullTagId, cb, pullCoolDownNs, pullTimeoutNs, {});
 
     vector<std::shared_ptr<LogEvent>> dataHolder;
     int64_t startTimeNs = getElapsedRealtimeNs();

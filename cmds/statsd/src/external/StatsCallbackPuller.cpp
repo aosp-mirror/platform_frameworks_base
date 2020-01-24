@@ -36,8 +36,9 @@ namespace os {
 namespace statsd {
 
 StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback,
-                                         int64_t timeoutNs)
-    : StatsPuller(tagId), mCallback(callback), mTimeoutNs(timeoutNs) {
+                                         const int64_t coolDownNs, int64_t timeoutNs,
+                                         const vector<int> additiveFields)
+    : StatsPuller(tagId, coolDownNs, timeoutNs, additiveFields), mCallback(callback) {
     VLOG("StatsCallbackPuller created for tag %d", tagId);
 }
 
@@ -86,7 +87,7 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     {
         unique_lock<mutex> unique_lk(*cv_mutex);
         // Wait until the pull finishes, or until the pull timeout.
-        cv->wait_for(unique_lk, chrono::nanoseconds(mTimeoutNs),
+        cv->wait_for(unique_lk, chrono::nanoseconds(mPullTimeoutNs),
                      [pullFinish] { return *pullFinish; });
         if (!*pullFinish) {
             // Note: The parent stats puller will also note that there was a timeout and that the

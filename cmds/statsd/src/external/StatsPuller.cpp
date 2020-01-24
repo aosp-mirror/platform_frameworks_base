@@ -32,17 +32,20 @@ using std::lock_guard;
 sp<UidMap> StatsPuller::mUidMap = nullptr;
 void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 
-StatsPuller::StatsPuller(const int tagId)
-    : mTagId(tagId), mLastPullTimeNs(0) {
+StatsPuller::StatsPuller(const int tagId, const int64_t coolDownNs, const int64_t pullTimeoutNs,
+                         const std::vector<int> additiveFields)
+    : mTagId(tagId),
+      mPullTimeoutNs(pullTimeoutNs),
+      mCoolDownNs(coolDownNs),
+      mAdditiveFields(additiveFields),
+      mLastPullTimeNs(0) {
 }
 
 bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
     int64_t elapsedTimeNs = getElapsedRealtimeNs();
     StatsdStats::getInstance().notePull(mTagId);
-    const bool shouldUseCache =
-            elapsedTimeNs - mLastPullTimeNs <
-            StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).coolDownNs;
+    const bool shouldUseCache = elapsedTimeNs - mLastPullTimeNs < mCoolDownNs;
     if (shouldUseCache) {
         if (mHasGoodData) {
             (*data) = mCachedData;
@@ -64,9 +67,7 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     }
     const int64_t pullDurationNs = getElapsedRealtimeNs() - elapsedTimeNs;
     StatsdStats::getInstance().notePullTime(mTagId, pullDurationNs);
-    const bool pullTimeOut =
-            pullDurationNs >
-            StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).pullTimeoutNs;
+    const bool pullTimeOut = pullDurationNs > mPullTimeoutNs;
     if (pullTimeOut) {
         // Something went wrong. Discard the data.
         clearCacheLocked();
@@ -78,7 +79,7 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     }
 
     if (mCachedData.size() > 0) {
-        mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
+        mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId, mAdditiveFields);
     }
 
     (*data) = mCachedData;
@@ -102,8 +103,7 @@ int StatsPuller::clearCacheLocked() {
 }
 
 int StatsPuller::ClearCacheIfNecessary(int64_t timestampNs) {
-    if (timestampNs - mLastPullTimeNs >
-        StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).coolDownNs) {
+    if (timestampNs - mLastPullTimeNs > mCoolDownNs) {
         return clearCache();
     } else {
         return 0;
