@@ -326,6 +326,7 @@ public class LinkAddressTest {
         assertParcelSane(l, 6);
     }
 
+    /*
     @Test
     public void testDeprecationTime() {
         try {
@@ -392,7 +393,7 @@ public class LinkAddressTest {
                 SystemClock.elapsedRealtime() + 100000);
         // Check if the permanent flag is removed
         assertTrue((l.getFlags() & IFA_F_PERMANENT) == 0);
-    }
+    }*/
 
 
     private void assertGlobalPreferred(LinkAddress l, String msg) {
