@@ -182,12 +182,13 @@ public class ActivityTaskManager {
      * @param taskId The id of the task to set the windowing mode for.
      * @param windowingMode The windowing mode to set for the task.
      * @param toTop If the task should be moved to the top once the windowing mode changes.
+     * @return Whether the task was successfully put into the specified windowing mode.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop)
+    public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop)
             throws SecurityException {
         try {
-            getService().setTaskWindowingMode(taskId, windowingMode, toTop);
+            return getService().setTaskWindowingMode(taskId, windowingMode, toTop);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -208,13 +209,14 @@ public class ActivityTaskManager {
      *                      docked stack. Pass {@code null} to use default bounds.
      * @param showRecents If the recents activity should be shown on the other side of the task
      *                    going into split-screen mode.
+     * @return Whether the task was successfully put into splitscreen.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public void setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
             boolean animate, Rect initialBounds, boolean showRecents) throws SecurityException {
         try {
-            getService().setTaskWindowingModeSplitScreenPrimary(taskId, createMode, toTop, animate,
-                    initialBounds, showRecents);
+            return getService().setTaskWindowingModeSplitScreenPrimary(taskId, createMode, toTop,
+                    animate, initialBounds, showRecents);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

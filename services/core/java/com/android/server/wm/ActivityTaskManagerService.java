@@ -2247,11 +2247,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
+    public boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            setTaskWindowingModeSplitScreenPrimary(taskId, SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
+            return setTaskWindowingModeSplitScreenPrimary(taskId,
+                    SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
                     toTop, ANIMATE, null /* initialBounds */, true /* showRecents */);
-            return;
         }
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
         synchronized (mGlobalLock) {
@@ -2261,7 +2261,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
-                    return;
+                    return false;
                 }
 
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "setTaskWindowingMode: moving task=" + taskId
@@ -2278,6 +2278,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     stack.moveToFront("setTaskWindowingMode", task);
                 }
                 stack.setWindowingMode(windowingMode);
+                return true;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2696,6 +2697,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *                      stack. Pass {@code null} to use default bounds.
      * @param showRecents If the recents activity should be shown on the other side of the task
      *                    going into split-screen mode.
+     * @return Whether the task was successfully put into splitscreen.
      */
     @Override
     public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode,
@@ -2705,20 +2707,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
+                if (isInLockTaskMode()) {
+                    Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: Is in lock task mode="
+                            + getLockTaskModeState());
+                    return false;
+                }
+
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
                     return false;
                 }
-                if (DEBUG_STACK) Slog.d(TAG_STACK,
-                        "setTaskWindowingModeSplitScreenPrimary: moving task=" + taskId
-                                + " to createMode=" + createMode + " toTop=" + toTop);
                 if (!task.isActivityTypeStandardOrUndefined()) {
                     throw new IllegalArgumentException("setTaskWindowingMode: Attempt to move"
                             + " non-standard task " + taskId + " to split-screen windowing mode");
                 }
 
+                if (DEBUG_STACK) Slog.d(TAG_STACK,
+                        "setTaskWindowingModeSplitScreenPrimary: moving task=" + taskId
+                                + " to createMode=" + createMode + " toTop=" + toTop);
                 mWindowManager.setDockedStackCreateStateLocked(createMode, initialBounds);
                 final int windowingMode = task.getWindowingMode();
                 final ActivityStack stack = task.getStack();
