@@ -1833,7 +1833,7 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns the list of currently available DVB devices on the system.
+     * Returns the list of currently available DVB frontend devices on the system.
      *
      * @return the list of {@link DvbDeviceInfo} objects representing available DVB devices.
      * @hide
@@ -1850,16 +1850,17 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns a {@link ParcelFileDescriptor} of a specified DVB device for a given
-     * {@link DvbDeviceInfo}
+     * Returns a {@link ParcelFileDescriptor} of a specified DVB device of a given type for a given
+     * {@link DvbDeviceInfo}.
      *
      * @param info A {@link DvbDeviceInfo} to open a DVB device.
-     * @param deviceType A DVB device type. The type can be {@link #DVB_DEVICE_DEMUX},
-     *            {@link #DVB_DEVICE_DVR} or {@link #DVB_DEVICE_FRONTEND}.
+     * @param deviceType A DVB device type.
      * @return a {@link ParcelFileDescriptor} of a specified DVB device for a given
-     *         {@link DvbDeviceInfo}, or {@code null} if the given {@link DvbDeviceInfo}
-     *         failed to open.
+     * {@link DvbDeviceInfo}, or {@code null} if the given {@link DvbDeviceInfo}
+     * failed to open.
      * @throws IllegalArgumentException if {@code deviceType} is invalid or the device is not found.
+
+     * @see <a href="https://www.linuxtv.org/docs/dvbapi/dvbapi.html">Linux DVB API v3</a>
      * @hide
      */
     @SystemApi
