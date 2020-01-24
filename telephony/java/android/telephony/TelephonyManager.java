@@ -7348,6 +7348,30 @@ public class TelephonyManager {
         }
     }
 
+
+    /**
+     * Resets the {@link android.telephony.ims.ImsService} associated with the specified sim slot.
+     * Used by diagnostic apps to force the IMS stack to be disabled and re-enabled in an effort to
+     * recover from scenarios where the {@link android.telephony.ims.ImsService} gets in to a bad
+     * state.
+     *
+     * @param slotIndex the sim slot to reset the IMS stack on.
+     * @hide */
+    @SystemApi
+    @WorkerThread
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void resetIms(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.resetIms(slotIndex);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "toggleImsOnOff, RemoteException: "
+                    + e.getMessage());
+        }
+    }
+
     /**
      * Enables IMS for the framework. This will trigger IMS registration and ImsFeature capability
      * status updates, if not already enabled.

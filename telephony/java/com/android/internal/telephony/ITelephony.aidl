@@ -831,6 +831,11 @@ interface ITelephony {
     void disableIms(int slotId);
 
     /**
+    * Toggle framework IMS disables and enables.
+    */
+    void resetIms(int slotIndex);
+
+    /**
      *  Get IImsMmTelFeature binder from ImsResolver that corresponds to the subId and MMTel feature
      *  as well as registering the MmTelFeature for callbacks using the IImsServiceFeatureCallback
      *  interface.
