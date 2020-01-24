@@ -58,8 +58,8 @@ class UsbPermissionManager {
         synchronized (mPermissionsByUser) {
             UsbUserPermissionManager permissions = mPermissionsByUser.get(userId);
             if (permissions == null) {
-                permissions = new UsbUserPermissionManager(mContext, UserHandle.of(userId),
-                        mUsbService.getSettingsForUser(userId));
+                permissions = new UsbUserPermissionManager(mContext.createContextAsUser(
+                        UserHandle.of(userId), 0), mUsbService.getSettingsForUser(userId));
                 mPermissionsByUser.put(userId, permissions);
             }
             return permissions;
