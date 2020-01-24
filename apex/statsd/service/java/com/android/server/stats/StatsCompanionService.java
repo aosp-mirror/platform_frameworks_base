@@ -85,6 +85,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StatsFrameworkInitializer;
 import android.os.StatFs;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
@@ -750,7 +751,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      * sStatsd with a null check.
      */
     private static IStatsd fetchStatsdService() {
-        return IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
+        return IStatsd.Stub.asInterface(StatsFrameworkInitializer
+            .getStatsServiceManager()
+            .getStatsdServiceRegisterer()
+            .get());
     }
 
     /**

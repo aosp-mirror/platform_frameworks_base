@@ -111,6 +111,8 @@ import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StatsFrameworkInitializer;
+import android.os.StatsServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -7523,6 +7525,7 @@ public final class ActivityThread extends ClientTransactionHandler {
      */
     public static void initializeMainlineModules() {
         TelephonyFrameworkInitializer.setTelephonyServiceManager(new TelephonyServiceManager());
+        StatsFrameworkInitializer.setStatsServiceManager(new StatsServiceManager());
     }
 
     private void purgePendingResources() {
