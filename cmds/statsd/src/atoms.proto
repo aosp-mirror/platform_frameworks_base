@@ -8082,7 +8082,7 @@ message UserspaceRebootReported {
 message IntegrityCheckResultReported {
     optional string package_name = 1;
     optional string app_certificate_hash = 2;
-    optional int32 version_code = 3;
+    optional int64 version_code = 3;
     optional string installer_package_name = 4;
     enum Response {
         UNKNOWN = 0;
