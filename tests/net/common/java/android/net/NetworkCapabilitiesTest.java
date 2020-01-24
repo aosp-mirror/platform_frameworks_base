@@ -269,6 +269,7 @@ public class NetworkCapabilitiesTest {
             .setUids(uids)
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
+        netCap.setOwnerUid(123);
         assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
         assertParcelSane(netCap, 13);
