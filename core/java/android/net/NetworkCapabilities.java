@@ -35,6 +35,9 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -83,6 +86,7 @@ public final class NetworkCapabilities implements Parcelable {
         mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
         mUids = null;
         mEstablishingVpnAppUid = INVALID_UID;
+        mAdministratorUids.clear();
         mSSID = null;
         mPrivateDnsBroken = false;
     }
@@ -101,6 +105,7 @@ public final class NetworkCapabilities implements Parcelable {
         mSignalStrength = nc.mSignalStrength;
         setUids(nc.mUids); // Will make the defensive copy
         mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
+        setAdministratorUids(nc.mAdministratorUids);
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
         mSSID = nc.mSSID;
         mPrivateDnsBroken = nc.mPrivateDnsBroken;
@@ -833,6 +838,56 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * UIDs of packages that are administrators of this network, or empty if none.
+     *
+     * <p>This field tracks the UIDs of packages that have permission to manage this network.
+     *
+     * <p>Network owners will also be listed as administrators.
+     *
+     * <p>For NetworkCapability instances being sent from the System Server, this value MUST be
+     * empty unless the destination is 1) the System Server, or 2) Telephony. In either case, the
+     * receiving entity must have the ACCESS_FINE_LOCATION permission and target R+.
+     */
+    private final List<Integer> mAdministratorUids = new ArrayList<>();
+
+    /**
+     * Sets the list of UIDs that are administrators of this network.
+     *
+     * <p>UIDs included in administratorUids gain administrator privileges over this Network.
+     * Examples of UIDs that should be included in administratorUids are:
+     * <ul>
+     *     <li>Carrier apps with privileges for the relevant subscription
+     *     <li>Active VPN apps
+     *     <li>Other application groups with a particular Network-related role
+     * </ul>
+     *
+     * <p>In general, user-supplied networks (such as WiFi networks) do not have an administrator.
+     *
+     * <p>An app is granted owner privileges over Networks that it supplies. Owner privileges
+     * implicitly include administrator privileges.
+     *
+     * @param administratorUids the UIDs to be set as administrators of this Network.
+     * @hide
+     */
+    @SystemApi
+    public void setAdministratorUids(@NonNull final List<Integer> administratorUids) {
+        mAdministratorUids.clear();
+        mAdministratorUids.addAll(administratorUids);
+    }
+
+    /**
+     * Retrieves the list of UIDs that are administrators of this Network.
+     *
+     * @return the List of UIDs that are administrators of this Network
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public List<Integer> getAdministratorUids() {
+        return Collections.unmodifiableList(mAdministratorUids);
+    }
+
+    /**
      * Value indicating that link bandwidth is unspecified.
      * @hide
      */
@@ -1471,6 +1526,7 @@ public final class NetworkCapabilities implements Parcelable {
     public int describeContents() {
         return 0;
     }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mNetworkCapabilities);
@@ -1484,6 +1540,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeArraySet(mUids);
         dest.writeString(mSSID);
         dest.writeBoolean(mPrivateDnsBroken);
+        dest.writeList(mAdministratorUids);
     }
 
     public static final @android.annotation.NonNull Creator<NetworkCapabilities> CREATOR =
@@ -1504,6 +1561,7 @@ public final class NetworkCapabilities implements Parcelable {
                         null /* ClassLoader, null for default */);
                 netCap.mSSID = in.readString();
                 netCap.mPrivateDnsBroken = in.readBoolean();
+                netCap.setAdministratorUids(in.readArrayList(null));
                 return netCap;
             }
             @Override
@@ -1555,6 +1613,10 @@ public final class NetworkCapabilities implements Parcelable {
         }
         if (mEstablishingVpnAppUid != INVALID_UID) {
             sb.append(" EstablishingAppUid: ").append(mEstablishingVpnAppUid);
+        }
+
+        if (!mAdministratorUids.isEmpty()) {
+            sb.append(" AdministratorUids: ").append(mAdministratorUids);
         }
 
         if (null != mSSID) {

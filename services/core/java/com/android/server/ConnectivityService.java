@@ -210,6 +210,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -1632,6 +1633,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (newNc.getNetworkSpecifier() != null) {
             newNc.setNetworkSpecifier(newNc.getNetworkSpecifier().redact());
         }
+        newNc.setAdministratorUids(Collections.EMPTY_LIST);
         return newNc;
     }
 
@@ -1662,6 +1664,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!checkSettingsPermission()) {
             nc.setSingleUid(Binder.getCallingUid());
         }
+        nc.setAdministratorUids(Collections.EMPTY_LIST);
     }
 
     private void restrictBackgroundRequestForCaller(NetworkCapabilities nc) {
