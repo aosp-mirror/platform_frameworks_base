@@ -21,7 +21,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
@@ -51,7 +50,6 @@ public class SoftInputWindow extends Dialog {
     final int mWindowType;
     final int mGravity;
     final boolean mTakesFocus;
-    final boolean mAutomotiveHideNavBarForKeyboard;
     private final Rect mBounds = new Rect();
 
     @Retention(SOURCE)
@@ -136,8 +134,6 @@ public class SoftInputWindow extends Dialog {
         mWindowType = windowType;
         mGravity = gravity;
         mTakesFocus = takesFocus;
-        mAutomotiveHideNavBarForKeyboard = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
         initDockWindow();
     }
 
@@ -251,11 +247,6 @@ public class SoftInputWindow extends Dialog {
             windowModFlags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
 
-        if (isAutomotive() && mAutomotiveHideNavBarForKeyboard) {
-            windowSetFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-            windowModFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-        }
-
         getWindow().setFlags(windowSetFlags, windowModFlags);
     }
 
@@ -345,10 +336,6 @@ public class SoftInputWindow extends Dialog {
             }
         }
         mWindowState = newState;
-    }
-
-    private boolean isAutomotive() {
-        return getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     private static String stateToString(@SoftInputWindowState int state) {
