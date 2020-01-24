@@ -2042,8 +2042,8 @@ package android.content.om {
   public class OverlayManager {
     method @Nullable public android.content.om.OverlayInfo getOverlayInfo(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(@NonNull String, @NonNull android.os.UserHandle);
-    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public void setEnabled(@NonNull String, boolean, @NonNull android.os.UserHandle);
-    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public void setEnabledExclusiveInCategory(@NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public void setEnabled(@NonNull String, boolean, @NonNull android.os.UserHandle) throws java.lang.IllegalStateException, java.lang.SecurityException;
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public void setEnabledExclusiveInCategory(@NonNull String, @NonNull android.os.UserHandle) throws java.lang.IllegalStateException, java.lang.SecurityException;
   }
 
 }
