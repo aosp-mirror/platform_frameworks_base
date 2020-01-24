@@ -33,7 +33,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.net.SocketKeepalive.Callback;
+import android.net.TetheringManager.StartTetheringCallback;
 import android.net.TetheringManager.TetheringEventCallback;
+import android.net.TetheringManager.TetheringRequest;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -2453,10 +2455,12 @@ public class ConnectivityManager {
      *
      * @param iface the interface name to tether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
+     * @deprecated Use {@link TetheringManager#startTethering} instead
      *
      * {@hide}
      */
     @UnsupportedAppUsage
+    @Deprecated
     public int tether(String iface) {
         return getTetheringManager().tether(iface);
     }
@@ -2513,9 +2517,12 @@ public class ConnectivityManager {
 
     /**
      * Callback for use with {@link #startTethering} to find out whether tethering succeeded.
+     *
+     * @deprecated Use {@link TetheringManager.StartTetheringCallback} instead.
      * @hide
      */
     @SystemApi
+    @Deprecated
     public static abstract class OnStartTetheringCallback {
         /**
          * Called when tethering has been successfully started.
@@ -2532,9 +2539,12 @@ public class ConnectivityManager {
      * Convenient overload for
      * {@link #startTethering(int, boolean, OnStartTetheringCallback, Handler)} which passes a null
      * handler to run on the current thread's {@link Looper}.
+     *
+     * @deprecated Use {@link TetheringManager#startTethering} instead.
      * @hide
      */
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback) {
@@ -2558,26 +2568,44 @@ public class ConnectivityManager {
      * @param callback an {@link OnStartTetheringCallback} which will be called to notify the caller
      *         of the result of trying to tether.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     *
+     * @deprecated Use {@link TetheringManager#startTethering} instead.
      * @hide
      */
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void startTethering(int type, boolean showProvisioningUi,
             final OnStartTetheringCallback callback, Handler handler) {
         Preconditions.checkNotNull(callback, "OnStartTetheringCallback cannot be null.");
 
-        ResultReceiver wrappedCallback = new ResultReceiver(handler) {
+        final Executor executor = new Executor() {
             @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                if (resultCode == TETHER_ERROR_NO_ERROR) {
-                    callback.onTetheringStarted();
+            public void execute(Runnable command) {
+                if (handler == null) {
+                    command.run();
                 } else {
-                    callback.onTetheringFailed();
+                    handler.post(command);
                 }
             }
         };
 
-        getTetheringManager().startTethering(type, wrappedCallback, showProvisioningUi);
+        final StartTetheringCallback tetheringCallback = new StartTetheringCallback() {
+            @Override
+            public void onTetheringStarted() {
+                callback.onTetheringStarted();
+            }
+
+            @Override
+            public void onTetheringFailed(final int resultCode) {
+                callback.onTetheringFailed();
+            }
+        };
+
+        final TetheringRequest request = new TetheringRequest.Builder(type)
+                .setSilentProvisioning(!showProvisioningUi).build();
+
+        getTetheringManager().startTethering(request, executor, tetheringCallback);
     }
 
     /**
@@ -2750,10 +2778,12 @@ public class ConnectivityManager {
      *
      * @param enable a boolean - {@code true} to enable tethering
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
+     * @deprecated Use {@link TetheringManager#startTethering} instead
      *
      * {@hide}
      */
     @UnsupportedAppUsage
+    @Deprecated
     public int setUsbTethering(boolean enable) {
         return getTetheringManager().setUsbTethering(enable);
     }

@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -326,27 +327,171 @@ public class TetheringManager {
     }
 
     /**
+     *  Use with {@link #startTethering} to specify additional parameters when starting tethering.
+     */
+    public static class TetheringRequest {
+        /** A configuration set for TetheringRequest. */
+        private final TetheringRequestParcel mRequestParcel;
+
+        private TetheringRequest(final TetheringRequestParcel request) {
+            mRequestParcel = request;
+        }
+
+        /** Builder used to create TetheringRequest. */
+        public static class Builder {
+            private final TetheringRequestParcel mBuilderParcel;
+
+            /** Default constructor of Builder. */
+            public Builder(final int type) {
+                mBuilderParcel = new TetheringRequestParcel();
+                mBuilderParcel.tetheringType = type;
+                mBuilderParcel.localIPv4Address = null;
+                mBuilderParcel.exemptFromEntitlementCheck = false;
+                mBuilderParcel.showProvisioningUi = true;
+            }
+
+            /**
+             * Configure tethering with static IPv4 assignment (with DHCP disabled).
+             *
+             * @param localIPv4Address The preferred local IPv4 address to use.
+             */
+            @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+            @NonNull
+            public Builder useStaticIpv4Addresses(@NonNull final LinkAddress localIPv4Address) {
+                mBuilderParcel.localIPv4Address = localIPv4Address;
+                return this;
+            }
+
+            /** Start tethering without entitlement checks. */
+            @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+            @NonNull
+            public Builder setExemptFromEntitlementCheck(boolean exempt) {
+                mBuilderParcel.exemptFromEntitlementCheck = exempt;
+                return this;
+            }
+
+            /** Start tethering without showing the provisioning UI. */
+            @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+            @NonNull
+            public Builder setSilentProvisioning(boolean silent) {
+                mBuilderParcel.showProvisioningUi = silent;
+                return this;
+            }
+
+            /** Build {@link TetheringRequest] with the currently set configuration. */
+            @NonNull
+            public TetheringRequest build() {
+                return new TetheringRequest(mBuilderParcel);
+            }
+        }
+
+        /**
+         * Get a TetheringRequestParcel from the configuration
+         * @hide
+         */
+        public TetheringRequestParcel getParcel() {
+            return mRequestParcel;
+        }
+
+        /** String of TetheringRequest detail. */
+        public String toString() {
+            return "TetheringRequest [ type= " + mRequestParcel.tetheringType
+                    + ", localIPv4Address= " + mRequestParcel.localIPv4Address
+                    + ", exemptFromEntitlementCheck= "
+                    + mRequestParcel.exemptFromEntitlementCheck + ", showProvisioningUi= "
+                    + mRequestParcel.showProvisioningUi + " ]";
+        }
+    }
+
+    /**
+     * Callback for use with {@link #startTethering} to find out whether tethering succeeded.
+     */
+    public abstract static class StartTetheringCallback {
+        /**
+         * Called when tethering has been successfully started.
+         */
+        public void onTetheringStarted() {}
+
+        /**
+         * Called when starting tethering failed.
+         *
+         * @param resultCode One of the {@code TETHER_ERROR_*} constants.
+         */
+        public void onTetheringFailed(final int resultCode) {}
+    }
+
+    /**
      * Starts tethering and runs tether provisioning for the given type if needed. If provisioning
      * fails, stopTethering will be called automatically.
-     * @hide
+     *
+     * <p>Without {@link android.Manifest.permission.TETHER_PRIVILEGED} permission, the call will
+     * fail if a tethering entitlement check is required.
+     *
+     * @param request a {@link TetheringRequest} which can specify the preferred configuration.
+     * @param executor {@link Executor} to specify the thread upon which the callback of
+     *         TetheringRequest will be invoked.
+     * @param callback A callback that will be called to indicate the success status of the
+     *                 tethering start request.
      */
-    // TODO: improve the usage of ResultReceiver, b/145096122
-    public void startTethering(final int type, @NonNull final ResultReceiver receiver,
-            final boolean showProvisioningUi) {
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.TETHER_PRIVILEGED,
+            android.Manifest.permission.WRITE_SETTINGS
+    })
+    public void startTethering(@NonNull final TetheringRequest request,
+            @NonNull final Executor executor, @NonNull final StartTetheringCallback callback) {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "startTethering caller:" + callerPkg);
 
+        final IIntResultListener listener = new IIntResultListener.Stub() {
+            @Override
+            public void onResult(final int resultCode) {
+                executor.execute(() -> {
+                    if (resultCode == TETHER_ERROR_NO_ERROR) {
+                        callback.onTetheringStarted();
+                    } else {
+                        callback.onTetheringFailed(resultCode);
+                    }
+                });
+            }
+        };
         try {
-            mConnector.startTethering(type, receiver, showProvisioningUi, callerPkg);
+            mConnector.startTethering(request.getParcel(), callerPkg, listener);
         } catch (RemoteException e) {
             throw new IllegalStateException(e);
         }
     }
 
     /**
+     * Starts tethering and runs tether provisioning for the given type if needed. If provisioning
+     * fails, stopTethering will be called automatically.
+     *
+     * <p>Without {@link android.Manifest.permission.TETHER_PRIVILEGED} permission, the call will
+     * fail if a tethering entitlement check is required.
+     *
+     * @param type The tethering type, on of the {@code TetheringManager#TETHERING_*} constants.
+     * @param executor {@link Executor} to specify the thread upon which the callback of
+     *         TetheringRequest will be invoked.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.TETHER_PRIVILEGED,
+            android.Manifest.permission.WRITE_SETTINGS
+    })
+    public void startTethering(int type, @NonNull final Executor executor,
+            @NonNull final StartTetheringCallback callback) {
+        startTethering(new TetheringRequest.Builder(type).build(), executor, callback);
+    }
+
+    /**
      * Stops tethering for the given type. Also cancels any provisioning rechecks for that type if
      * applicable.
+     *
+     * <p>Without {@link android.Manifest.permission.TETHER_PRIVILEGED} permission, the call will
+     * fail if a tethering entitlement check is required.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.TETHER_PRIVILEGED,
+            android.Manifest.permission.WRITE_SETTINGS
+    })
     public void stopTethering(final int type) {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "stopTethering caller:" + callerPkg);
@@ -386,6 +531,9 @@ public class TetheringManager {
      * {@link #TETHER_ERROR_ENTITLEMENT_UNKNOWN} will be returned. If {@code showEntitlementUi} is
      * true, entitlement will be run.
      *
+     * <p>Without {@link android.Manifest.permission.TETHER_PRIVILEGED} permission, the call will
+     * fail if a tethering entitlement check is required.
+     *
      * @param type the downstream type of tethering. Must be one of {@code #TETHERING_*} constants.
      * @param showEntitlementUi a boolean indicating whether to run UI-based entitlement check.
      * @param executor the executor on which callback will be invoked.
@@ -393,7 +541,10 @@ public class TetheringManager {
      *         notify the caller of the result of entitlement check. The listener may be called zero
      *         or one time.
      */
-    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.TETHER_PRIVILEGED,
+            android.Manifest.permission.WRITE_SETTINGS
+    })
     public void requestLatestTetheringEntitlementResult(int type, boolean showEntitlementUi,
             @NonNull Executor executor,
             @NonNull final OnTetheringEntitlementResultListener listener) {
@@ -562,6 +713,7 @@ public class TetheringManager {
      * @param executor the executor on which callback will be invoked.
      * @param callback the callback to be called when tethering has change events.
      */
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     public void registerTetheringEventCallback(@NonNull Executor executor,
             @NonNull TetheringEventCallback callback) {
         final String callerPkg = mContext.getOpPackageName();
@@ -669,6 +821,10 @@ public class TetheringManager {
      *
      * @param callback previously registered callback.
      */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.TETHER_PRIVILEGED,
+            Manifest.permission.ACCESS_NETWORK_STATE
+    })
     public void unregisterTetheringEventCallback(@NonNull final TetheringEventCallback callback) {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "unregisterTetheringEventCallback caller:" + callerPkg);
@@ -833,7 +989,14 @@ public class TetheringManager {
 
     /**
      * Stop all active tethering.
+     *
+     * <p>Without {@link android.Manifest.permission.TETHER_PRIVILEGED} permission, the call will
+     * fail if a tethering entitlement check is required.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.TETHER_PRIVILEGED,
+            android.Manifest.permission.WRITE_SETTINGS
+    })
     public void stopAllTethering() {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "stopAllTethering caller:" + callerPkg);
