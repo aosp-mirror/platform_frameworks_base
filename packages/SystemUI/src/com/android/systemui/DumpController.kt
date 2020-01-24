@@ -19,10 +19,10 @@ package com.android.systemui
 import android.util.ArraySet
 import android.util.Log
 import androidx.annotation.GuardedBy
-import com.android.internal.util.Preconditions
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.util.Objects.requireNonNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,7 +58,7 @@ class DumpController @Inject constructor() : Dumpable {
      * @param dumpable the [Dumpable] to be added
      */
     fun registerDumpable(dumpable: Dumpable) {
-        Preconditions.checkNotNull(dumpable, "The dumpable to be added cannot be null")
+        requireNonNull(dumpable, "The dumpable to be added cannot be null")
         registerDumpable(dumpable.javaClass.simpleName, dumpable)
     }
 
@@ -71,7 +71,7 @@ class DumpController @Inject constructor() : Dumpable {
      * @param dumpable the [Dumpable] to be added
      */
     fun registerDumpable(tag: String, dumpable: Dumpable) {
-        Preconditions.checkNotNull(dumpable, "The dumpable to be added cannot be null")
+        requireNonNull(dumpable, "The dumpable to be added cannot be null")
         if (DEBUG) Log.v(TAG, "*** register callback for $dumpable")
         synchronized<Unit>(listeners) {
             if (listeners.any { it.tag == tag }) {
