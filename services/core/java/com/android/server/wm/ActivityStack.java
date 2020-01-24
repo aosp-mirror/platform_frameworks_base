@@ -4034,7 +4034,9 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     @Override
     void onDisplayChanged(DisplayContent dc) {
         super.onDisplayChanged(dc);
-        updateSurfaceBounds();
+        if (isRootTask()) {
+            updateSurfaceBounds();
+        }
     }
 
     /**
