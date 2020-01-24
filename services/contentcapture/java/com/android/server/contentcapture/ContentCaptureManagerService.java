@@ -646,6 +646,7 @@ public final class ContentCaptureManagerService extends
 
         @Override
         public void shareData(@NonNull DataShareRequest request,
+                @NonNull ICancellationSignal clientCancellationSignal,
                 @NonNull IDataShareWriteAdapter clientAdapter) {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(clientAdapter);
@@ -667,7 +668,8 @@ public final class ContentCaptureManagerService extends
                 }
 
                 service.onDataSharedLocked(request,
-                        new DataShareCallbackDelegate(request, clientAdapter));
+                        new DataShareCallbackDelegate(request, clientCancellationSignal,
+                                clientAdapter));
             }
         }
 
@@ -920,17 +922,20 @@ public final class ContentCaptureManagerService extends
     private class DataShareCallbackDelegate extends IDataShareCallback.Stub {
 
         @NonNull private final DataShareRequest mDataShareRequest;
+        @NonNull private final ICancellationSignal mClientCancellationSignal;
         @NonNull private final IDataShareWriteAdapter mClientAdapter;
 
         DataShareCallbackDelegate(@NonNull DataShareRequest dataShareRequest,
+                @NonNull ICancellationSignal clientCancellationSignal,
                 @NonNull IDataShareWriteAdapter clientAdapter) {
             mDataShareRequest = dataShareRequest;
+            mClientCancellationSignal = clientCancellationSignal;
             mClientAdapter = clientAdapter;
         }
 
         @Override
-        public void accept(IDataShareReadAdapter serviceAdapter)
-                            throws RemoteException {
+        public void accept(ICancellationSignal serviceCancellationSignal,
+                IDataShareReadAdapter serviceAdapter) throws RemoteException {
             Slog.i(mTag, "Data share request accepted by Content Capture service");
 
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
@@ -962,15 +967,12 @@ public final class ContentCaptureManagerService extends
             mClientAdapter.write(source_in);
             serviceAdapter.start(sink_out, cancellationSignalTransport);
 
-            // TODO(b/148264965): use cancellation signals for timeouts and cancelling
             CancellationSignal cancellationSignal =
                     CancellationSignal.fromTransport(cancellationSignalTransport);
 
             cancellationSignal.setOnCancelListener(() -> {
                 try {
-                    // TODO(b/148264965): this should propagate with the cancellation signal to the
-                    // client
-                    mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                    mClientCancellationSignal.cancel();
                 } catch (RemoteException e) {
                     Slog.e(mTag, "Failed to propagate cancel operation to the caller", e);
                 }
@@ -1029,14 +1031,14 @@ public final class ContentCaptureManagerService extends
 
                     if (!finishedSuccessfully) {
                         try {
-                            mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                            mClientCancellationSignal.cancel();
                         } catch (RemoteException e) {
-                            Slog.e(mTag, "Failed to call error() to client", e);
+                            Slog.e(mTag, "Failed to cancel() the client operation", e);
                         }
                         try {
-                            serviceAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                            serviceCancellationSignal.cancel();
                         } catch (RemoteException e) {
-                            Slog.e(mTag, "Failed to call error() to service", e);
+                            Slog.e(mTag, "Failed to cancel() the service operation", e);
                         }
                     }
                 }

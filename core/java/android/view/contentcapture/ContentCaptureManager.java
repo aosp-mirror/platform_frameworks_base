@@ -35,6 +35,7 @@ import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -655,9 +656,12 @@ public final class ContentCaptureManager {
         Preconditions.checkNotNull(dataShareWriteAdapter);
         Preconditions.checkNotNull(executor);
 
+        ICancellationSignal cancellationSignalTransport = CancellationSignal.createTransport();
+
         try {
-            mService.shareData(request,
-                    new DataShareAdapterDelegate(executor, dataShareWriteAdapter));
+            mService.shareData(request, cancellationSignalTransport,
+                    new DataShareAdapterDelegate(executor,
+                            cancellationSignalTransport, dataShareWriteAdapter));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -715,20 +719,30 @@ public final class ContentCaptureManager {
 
         private final WeakReference<DataShareWriteAdapter> mAdapterReference;
         private final WeakReference<Executor> mExecutorReference;
+        private final WeakReference<ICancellationSignal> mCancellationSignal;
 
-        private DataShareAdapterDelegate(Executor executor, DataShareWriteAdapter adapter) {
+        private DataShareAdapterDelegate(Executor executor,
+                ICancellationSignal cancellationSignalTransport, DataShareWriteAdapter adapter) {
             Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(cancellationSignalTransport);
             Preconditions.checkNotNull(adapter);
 
             mExecutorReference = new WeakReference<>(executor);
             mAdapterReference = new WeakReference<>(adapter);
+            mCancellationSignal = new WeakReference<>(cancellationSignalTransport);
         }
 
         @Override
         public void write(ParcelFileDescriptor destination)
                 throws RemoteException {
-            // TODO(b/148264965): implement this.
-            CancellationSignal cancellationSignal = new CancellationSignal();
+            ICancellationSignal cancellationSignalTransport = mCancellationSignal.get();
+            if (cancellationSignalTransport == null) {
+                Slog.w(TAG, "Can't execute write(), reference to cancellation signal has been "
+                        + "GC'ed");
+            }
+            CancellationSignal cancellationSignal =
+                    CancellationSignal.fromTransport(cancellationSignalTransport);
+
             executeAdapterMethodLocked(adapter -> adapter.onWrite(destination, cancellationSignal),
                     "onWrite");
         }

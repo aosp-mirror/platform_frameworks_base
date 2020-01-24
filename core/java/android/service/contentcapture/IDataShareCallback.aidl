@@ -16,10 +16,11 @@
 
 package android.service.contentcapture;
 
+import android.os.ICancellationSignal;
 import android.service.contentcapture.IDataShareReadAdapter;
 
 /** @hide */
 oneway interface IDataShareCallback {
-    void accept(in IDataShareReadAdapter adapter);
+    void accept(in ICancellationSignal cancellationSignal, in IDataShareReadAdapter adapter);
     void reject();
 }
