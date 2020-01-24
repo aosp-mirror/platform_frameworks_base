@@ -473,4 +473,7 @@ interface IDevicePolicyManager {
 
     int getPersonalAppsSuspendedReasons(in ComponentName admin);
     void setPersonalAppsSuspended(in ComponentName admin, boolean suspended);
+
+    long getManagedProfileMaximumTimeOff(in ComponentName admin);
+    void setManagedProfileMaximumTimeOff(in ComponentName admin, long timeoutMs);
 }

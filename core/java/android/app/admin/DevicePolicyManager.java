@@ -2403,11 +2403,19 @@ public class DevicePolicyManager {
     public static final int PERSONAL_APPS_SUSPENDED_EXPLICITLY = 1 << 0;
 
     /**
+     * Flag for {@link #getPersonalAppsSuspendedReasons} return value. Set when personal apps are
+     * suspended by framework because managed profile was off for longer than allowed by policy.
+     * @see #setManagedProfileMaximumTimeOff
+     */
+    public static final int PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT = 1 << 1;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "PERSONAL_APPS_" }, value = {
             PERSONAL_APPS_NOT_SUSPENDED,
-            PERSONAL_APPS_SUSPENDED_EXPLICITLY
+            PERSONAL_APPS_SUSPENDED_EXPLICITLY,
+            PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppSuspensionReason {}
@@ -11763,6 +11771,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param suspended Whether personal apps should be suspended.
+     * @throws IllegalStateException if the profile owner doesn't have an activity that handles
+     *        {@link #ACTION_CHECK_POLICY_COMPLIANCE}
      */
     public void setPersonalAppsSuspended(@NonNull ComponentName admin, boolean suspended) {
         throwIfParentInstance("setPersonalAppsSuspended");
@@ -11773,5 +11783,53 @@ public class DevicePolicyManager {
                 throw re.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to set maximum time
+     * the profile is allowed to be turned off. If the profile is turned off for longer, personal
+     * apps are suspended on the device.
+     *
+     * <p>When personal apps are suspended, an ongoing notification about that is shown to the user.
+     * When the user taps the notification, system invokes {@link #ACTION_CHECK_POLICY_COMPLIANCE}
+     * in the profile owner package. Profile owner implementation that uses personal apps suspension
+     * must handle this intent.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param timeoutMs Maximum time the profile is allowed to be off in milliseconds or 0 if
+     *        not limited.
+     * @throws IllegalStateException if the profile owner doesn't have an activity that handles
+     *        {@link #ACTION_CHECK_POLICY_COMPLIANCE}
+     * @see #setPersonalAppsSuspended
+     */
+    public void setManagedProfileMaximumTimeOff(@NonNull ComponentName admin, long timeoutMs) {
+        throwIfParentInstance("setManagedProfileMaximumTimeOff");
+        if (mService != null) {
+            try {
+                mService.setManagedProfileMaximumTimeOff(admin, timeoutMs);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+     /**
+     * Called by a profile owner of an organization-owned managed profile to get maximum time
+     * the profile is allowed to be turned off.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @return Maximum time the profile is allowed to be off in milliseconds or 0 if not limited.
+     * @see #setPersonalAppsSuspended
+     */
+    public long getManagedProfileMaximumTimeOff(@NonNull ComponentName admin) {
+        throwIfParentInstance("getManagedProfileMaximumTimeOff");
+        if (mService != null) {
+            try {
+                return mService.getManagedProfileMaximumTimeOff(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return 0;
     }
 }
