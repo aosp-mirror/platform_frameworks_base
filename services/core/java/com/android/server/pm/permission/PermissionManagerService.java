@@ -346,6 +346,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     PermissionManagerService(Context context,
             @NonNull Object externalLock) {
+        // The package info cache is the cache for package and permission information.
+        PackageManager.invalidatePackageInfoCache();
+        PermissionManager.disablePermissionCache();
+        PermissionManager.disablePackageNamePermissionCache();
+
         mContext = context;
         mLock = externalLock;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
