@@ -88,6 +88,7 @@ import android.net.RouteInfo;
 import android.net.TetherStatesParcel;
 import android.net.TetheringCallbackStartedParcel;
 import android.net.TetheringConfigurationParcel;
+import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServer;
@@ -468,6 +469,16 @@ public class TetheringTest {
         return new Tethering(mTetheringDependencies);
     }
 
+    private TetheringRequestParcel createTetheringRquestParcel(final int type) {
+        final TetheringRequestParcel request = new TetheringRequestParcel();
+        request.tetheringType = type;
+        request.localIPv4Address = null;
+        request.exemptFromEntitlementCheck = false;
+        request.showProvisioningUi = false;
+
+        return request;
+    }
+
     @After
     public void tearDown() {
         mServiceContext.unregisterReceiver(mBroadcastReceiver);
@@ -573,7 +584,7 @@ public class TetheringTest {
                 .thenReturn(upstreamState);
 
         // Emulate pressing the USB tethering button in Settings UI.
-        mTethering.startTethering(TETHERING_USB, null, false);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_USB), null);
         mLooper.dispatchAll();
         verify(mUsbManager, times(1)).setCurrentFunctions(UsbManager.FUNCTION_RNDIS);
 
@@ -819,7 +830,7 @@ public class TetheringTest {
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.startTethering(TETHERING_WIFI, null, false);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
@@ -846,7 +857,7 @@ public class TetheringTest {
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.startTethering(TETHERING_WIFI, null, false);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
@@ -923,7 +934,7 @@ public class TetheringTest {
         doThrow(new RemoteException()).when(mNetd).ipfwdEnableForwarding(TETHERING_NAME);
 
         // Emulate pressing the WiFi tethering button.
-        mTethering.startTethering(TETHERING_WIFI, null, false);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_WIFI), null);
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
@@ -1188,7 +1199,7 @@ public class TetheringTest {
         tetherState = callback.pollTetherStatesChanged();
         assertArrayEquals(tetherState.availableList, new String[] {TEST_WLAN_IFNAME});
 
-        mTethering.startTethering(TETHERING_WIFI, null, false);
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_WIFI), null);
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, TEST_WLAN_IFNAME, IFACE_IP_MODE_TETHERED);
         mLooper.dispatchAll();
         tetherState = callback.pollTetherStatesChanged();
