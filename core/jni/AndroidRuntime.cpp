@@ -47,6 +47,7 @@
 #include <signal.h>
 #include <dirent.h>
 #include <assert.h>
+#include <bionic/malloc.h>
 
 #include <string>
 #include <vector>
@@ -279,6 +280,14 @@ static void com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup(JNIE
     gCurRuntime->setExitWithoutCleanup(exitWithoutCleanup);
 }
 
+static void com_android_internal_os_RuntimeInit_nativeDisableHeapPointerTagging(
+        JNIEnv* env, jobject clazz) {
+    HeapTaggingLevel tag_level = M_HEAP_TAGGING_LEVEL_NONE;
+    if (!android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &tag_level, sizeof(tag_level))) {
+        ALOGE("ERROR: could not disable heap pointer tagging\n");
+    }
+}
+
 /*
  * JNI registration.
  */
@@ -286,10 +295,12 @@ static void com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup(JNIE
 int register_com_android_internal_os_RuntimeInit(JNIEnv* env)
 {
     const JNINativeMethod methods[] = {
-        { "nativeFinishInit", "()V",
-            (void*) com_android_internal_os_RuntimeInit_nativeFinishInit },
-        { "nativeSetExitWithoutCleanup", "(Z)V",
-            (void*) com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup },
+            {"nativeFinishInit", "()V",
+             (void*)com_android_internal_os_RuntimeInit_nativeFinishInit},
+            {"nativeSetExitWithoutCleanup", "(Z)V",
+             (void*)com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup},
+            {"nativeDisableHeapPointerTagging", "()V",
+             (void*)com_android_internal_os_RuntimeInit_nativeDisableHeapPointerTagging},
     };
     return jniRegisterNativeMethods(env, "com/android/internal/os/RuntimeInit",
         methods, NELEM(methods));
