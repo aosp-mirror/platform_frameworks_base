@@ -17,7 +17,8 @@
 package android.service.notification;
 
 import static android.app.NotificationChannel.PLACEHOLDER_CONVERSATION_ID;
-import static android.util.FeatureFlagUtils.*;
+import static android.util.FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ;
+import static android.util.FeatureFlagUtils.isEnabled;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -33,7 +34,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.FeatureFlagUtils;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -454,11 +454,23 @@ public class StatusBarNotification implements Parcelable {
         return conversationId;
     }
 
-    private String getGroupLogTag() {
+    /**
+     *  Returns a probably-unique string based on the notification's group name,
+     *  with no more than MAX_LOG_TAG_LENGTH characters.
+     * @return String based on group name of notification.
+     * @hide
+     */
+    public String getGroupLogTag() {
         return shortenTag(getGroup());
     }
 
-    private String getChannelIdLogTag() {
+    /**
+     *  Returns a probably-unique string based on the notification's channel ID,
+     *  with no more than MAX_LOG_TAG_LENGTH characters.
+     * @return String based on channel ID of notification.
+     * @hide
+     */
+    public String getChannelIdLogTag() {
         if (notification.getChannelId() == null) {
             return null;
         }

@@ -675,6 +675,10 @@ public final class NotificationRecord {
         }
     }
 
+    String getAdjustmentIssuer() {
+        return mAdjustmentIssuer;
+    }
+
     public void setIsAppImportanceLocked(boolean isAppImportanceLocked) {
         mIsAppImportanceLocked = isAppImportanceLocked;
         calculateUserSentiment();
@@ -783,8 +787,20 @@ public final class NotificationRecord {
         return mImportance;
     }
 
+    int getInitialImportance() {
+        return stats.naturalImportance;
+    }
+
     public float getRankingScore() {
         return mRankingScore;
+    }
+
+    int getImportanceExplanationCode() {
+        return mImportanceExplanationCode;
+    }
+
+    int getInitialImportanceExplanationCode() {
+        return mInitialImportanceExplanationCode;
     }
 
     public CharSequence getImportanceExplanation() {
