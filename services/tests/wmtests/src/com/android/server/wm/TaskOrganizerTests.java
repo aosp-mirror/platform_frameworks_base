@@ -80,7 +80,6 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         task.setTaskOrganizer(organizer);
         verify(organizer).taskAppeared(any(), any());
-        assertTrue(task.isControlledByTaskOrganizer());
 
         task.removeImmediately();
         verify(organizer).taskVanished(any());
@@ -106,48 +105,13 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
 
-        task.setTaskOrganizer(organizer);
+        stack.setTaskOrganizer(organizer);
         verify(organizer).taskAppeared(any(), any());
-        assertTrue(task.isControlledByTaskOrganizer());
+        assertTrue(stack.isControlledByTaskOrganizer());
 
-        task.setTaskOrganizer(null);
+        stack.setTaskOrganizer(null);
         verify(organizer).taskVanished(any());
-        assertFalse(task.isControlledByTaskOrganizer());
-    }
-
-    @Test
-    public void testTransferStackToOrganizer() throws RemoteException {
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
-        final Task task2 = createTaskInStack(stack, 0 /* userId */);
-        final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
-
-        stack.transferToTaskOrganizer(organizer);
-
-        verify(organizer, times(2)).taskAppeared(any(), any());
-        assertTrue(task.isControlledByTaskOrganizer());
-        assertTrue(task2.isControlledByTaskOrganizer());
-
-        stack.transferToTaskOrganizer(null);
-
-        verify(organizer, times(2)).taskVanished(any());
-        assertFalse(task.isControlledByTaskOrganizer());
-        assertFalse(task2.isControlledByTaskOrganizer());
-    }
-
-    @Test
-    public void testRegisterTaskOrganizerTaskWindowingModeChanges() throws RemoteException {
-        final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
-
-        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
-        task.setWindowingMode(WINDOWING_MODE_PINNED);
-        verify(organizer).taskAppeared(any(), any());
-        assertTrue(task.isControlledByTaskOrganizer());
-
-        task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        verify(organizer).taskVanished(any());
-        assertFalse(task.isControlledByTaskOrganizer());
+        assertFalse(stack.isControlledByTaskOrganizer());
     }
 
     @Test
@@ -158,13 +122,9 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final Task task2 = createTaskInStack(stack, 0 /* userId */);
         stack.setWindowingMode(WINDOWING_MODE_PINNED);
-        verify(organizer, times(2)).taskAppeared(any(), any());
-        assertTrue(task.isControlledByTaskOrganizer());
-        assertTrue(task2.isControlledByTaskOrganizer());
+        verify(organizer, times(1)).taskAppeared(any(), any());
 
         stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        verify(organizer, times(2)).taskVanished(any());
-        assertFalse(task.isControlledByTaskOrganizer());
-        assertFalse(task2.isControlledByTaskOrganizer());
+        verify(organizer, times(1)).taskVanished(any());
     }
 }
