@@ -362,6 +362,10 @@ public class UserInfo implements Parcelable {
             // Don't support switching to an ephemeral user with removal in progress.
             return false;
         }
+        if (preCreated) {
+            // Don't support switching to pre-created users until they become "real" users.
+            return false;
+        }
         return !isProfile();
     }
 
