@@ -22,7 +22,7 @@ import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAG
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 import android.util.Xml;
 
@@ -128,7 +128,8 @@ public class RuleXmlSerializer implements RuleSerializer {
         xmlSerializer.endTag(NAMESPACE, RULE_TAG);
     }
 
-    private void serializeFormula(Formula formula, XmlSerializer xmlSerializer) throws IOException {
+    private void serializeFormula(IntegrityFormula formula, XmlSerializer xmlSerializer)
+            throws IOException {
         if (formula instanceof AtomicFormula) {
             serializeAtomicFormula((AtomicFormula) formula, xmlSerializer);
         } else if (formula instanceof CompoundFormula) {
@@ -147,7 +148,7 @@ public class RuleXmlSerializer implements RuleSerializer {
         xmlSerializer.startTag(NAMESPACE, COMPOUND_FORMULA_TAG);
         serializeAttributeValue(
                 CONNECTOR_ATTRIBUTE, String.valueOf(compoundFormula.getConnector()), xmlSerializer);
-        for (Formula formula : compoundFormula.getFormulas()) {
+        for (IntegrityFormula formula : compoundFormula.getFormulas()) {
             serializeFormula(formula, xmlSerializer);
         }
         xmlSerializer.endTag(NAMESPACE, COMPOUND_FORMULA_TAG);
@@ -171,14 +172,14 @@ public class RuleXmlSerializer implements RuleSerializer {
                     String.valueOf(
                             ((AtomicFormula.StringAtomicFormula) atomicFormula).getIsHashedValue()),
                     xmlSerializer);
-        } else if (atomicFormula.getTag() == AtomicFormula.INT_ATOMIC_FORMULA_TAG) {
+        } else if (atomicFormula.getTag() == AtomicFormula.LONG_ATOMIC_FORMULA_TAG) {
             serializeAttributeValue(
                     OPERATOR_ATTRIBUTE,
-                    String.valueOf(((AtomicFormula.IntAtomicFormula) atomicFormula).getOperator()),
+                    String.valueOf(((AtomicFormula.LongAtomicFormula) atomicFormula).getOperator()),
                     xmlSerializer);
             serializeAttributeValue(
                     VALUE_ATTRIBUTE,
-                    String.valueOf(((AtomicFormula.IntAtomicFormula) atomicFormula).getValue()),
+                    String.valueOf(((AtomicFormula.LongAtomicFormula) atomicFormula).getValue()),
                     xmlSerializer);
         } else if (atomicFormula.getTag() == AtomicFormula.BOOLEAN_ATOMIC_FORMULA_TAG) {
             serializeAttributeValue(

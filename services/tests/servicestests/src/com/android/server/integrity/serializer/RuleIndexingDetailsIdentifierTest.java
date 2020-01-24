@@ -27,7 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 
 import androidx.annotation.NonNull;
@@ -71,9 +71,11 @@ public class RuleIndexingDetailsIdentifierTest {
                     SAMPLE_INSTALLER_CERTIFICATE,
                     /* isHashedValue= */ false);
     private static final AtomicFormula ATOMIC_FORMULA_WITH_VERSION_CODE =
-            new AtomicFormula.IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 12);
+            new AtomicFormula.LongAtomicFormula(AtomicFormula.VERSION_CODE,
+                    AtomicFormula.EQ, 12);
     private static final AtomicFormula ATOMIC_FORMULA_WITH_ISPREINSTALLED =
-            new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, /* booleanValue= */
+            new AtomicFormula.BooleanAtomicFormula(
+                    AtomicFormula.PRE_INSTALLED, /* booleanValue= */
                     true);
 
 
@@ -284,16 +286,16 @@ public class RuleIndexingDetailsIdentifierTest {
                 Rule.DENY);
     }
 
-    private Formula getInvalidFormula() {
-        return new Formula() {
-            @Override
-            public boolean isSatisfied(AppInstallMetadata appInstallMetadata) {
-                return false;
-            }
-
+    private IntegrityFormula getInvalidFormula() {
+        return new AtomicFormula(0) {
             @Override
             public int getTag() {
                 return 4;
+            }
+
+            @Override
+            public boolean matches(AppInstallMetadata appInstallMetadata) {
+                return false;
             }
 
             @Override

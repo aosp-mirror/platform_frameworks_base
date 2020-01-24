@@ -1898,26 +1898,6 @@ package android.content {
 
 package android.content.integrity {
 
-  public final class AppInstallMetadata {
-    method @NonNull public String getAppCertificate();
-    method @Nullable public String getInstallerCertificate();
-    method @Nullable public String getInstallerName();
-    method @NonNull public String getPackageName();
-    method public int getVersionCode();
-    method public boolean isPreInstalled();
-  }
-
-  public static final class AppInstallMetadata.Builder {
-    ctor public AppInstallMetadata.Builder();
-    method @NonNull public android.content.integrity.AppInstallMetadata build();
-    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setAppCertificate(@NonNull String);
-    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setInstallerCertificate(@NonNull String);
-    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setInstallerName(@NonNull String);
-    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setIsPreInstalled(boolean);
-    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setPackageName(@NonNull String);
-    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setVersionCode(int);
-  }
-
   public class AppIntegrityManager {
     method @NonNull public String getCurrentRuleSetProvider();
     method @NonNull public String getCurrentRuleSetVersion();
@@ -1927,84 +1907,28 @@ package android.content.integrity {
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }
 
-  public abstract class AtomicFormula implements android.content.integrity.Formula {
-    ctor public AtomicFormula(int);
-    method public int getKey();
-    field public static final int APP_CERTIFICATE = 1; // 0x1
-    field public static final int EQ = 0; // 0x0
-    field public static final int GE = 4; // 0x4
-    field public static final int GT = 3; // 0x3
-    field public static final int INSTALLER_CERTIFICATE = 3; // 0x3
-    field public static final int INSTALLER_NAME = 2; // 0x2
-    field public static final int LE = 2; // 0x2
-    field public static final int LT = 1; // 0x1
-    field public static final int PACKAGE_NAME = 0; // 0x0
-    field public static final int PRE_INSTALLED = 5; // 0x5
-    field public static final int VERSION_CODE = 4; // 0x4
-  }
-
-  public static final class AtomicFormula.BooleanAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.BooleanAtomicFormula(int, boolean);
-    method public int describeContents();
-    method public int getTag();
-    method public boolean getValue();
-    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.BooleanAtomicFormula> CREATOR;
-  }
-
-  public static final class AtomicFormula.IntAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.IntAtomicFormula(int, int, int);
-    method public int describeContents();
-    method public int getOperator();
-    method public int getTag();
-    method public int getValue();
-    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.IntAtomicFormula> CREATOR;
-  }
-
-  public static final class AtomicFormula.StringAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
-    ctor public AtomicFormula.StringAtomicFormula(int, @NonNull String, boolean);
-    method public int describeContents();
-    method public boolean getIsHashedValue();
-    method public int getTag();
-    method @NonNull public String getValue();
-    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.StringAtomicFormula> CREATOR;
-  }
-
-  public final class CompoundFormula implements android.content.integrity.Formula android.os.Parcelable {
-    ctor public CompoundFormula(int, @NonNull java.util.List<android.content.integrity.Formula>);
-    method public int describeContents();
-    method public int getConnector();
-    method @NonNull public java.util.List<android.content.integrity.Formula> getFormulas();
-    method public int getTag();
-    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int AND = 0; // 0x0
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.CompoundFormula> CREATOR;
-    field public static final int NOT = 2; // 0x2
-    field public static final int OR = 1; // 0x1
-  }
-
-  public interface Formula {
-    method public int getTag();
-    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
-    method @NonNull public static android.content.integrity.Formula readFromParcel(@NonNull android.os.Parcel);
-    method public static void writeToParcel(@NonNull android.content.integrity.Formula, @NonNull android.os.Parcel, int);
-    field public static final int BOOLEAN_ATOMIC_FORMULA_TAG = 3; // 0x3
-    field public static final int COMPOUND_FORMULA_TAG = 0; // 0x0
-    field public static final int INT_ATOMIC_FORMULA_TAG = 2; // 0x2
-    field public static final int STRING_ATOMIC_FORMULA_TAG = 1; // 0x1
+  public abstract class IntegrityFormula {
+    method @NonNull public static android.content.integrity.IntegrityFormula all(@NonNull android.content.integrity.IntegrityFormula...);
+    method @NonNull public static android.content.integrity.IntegrityFormula any(@NonNull android.content.integrity.IntegrityFormula...);
+    method @NonNull public android.content.integrity.IntegrityFormula equalTo(@NonNull String);
+    method @NonNull public android.content.integrity.IntegrityFormula equalTo(boolean);
+    method @NonNull public android.content.integrity.IntegrityFormula equalTo(long);
+    method @NonNull public android.content.integrity.IntegrityFormula greaterThan(long);
+    method @NonNull public android.content.integrity.IntegrityFormula greaterThanOrEquals(long);
+    method @NonNull public static android.content.integrity.IntegrityFormula not(@NonNull android.content.integrity.IntegrityFormula);
+    field @NonNull public static final android.content.integrity.IntegrityFormula APP_CERTIFICATE;
+    field @NonNull public static final android.content.integrity.IntegrityFormula INSTALLER_CERTIFICATE;
+    field @NonNull public static final android.content.integrity.IntegrityFormula INSTALLER_NAME;
+    field @NonNull public static final android.content.integrity.IntegrityFormula PACKAGE_NAME;
+    field @NonNull public static final android.content.integrity.IntegrityFormula PRE_INSTALLED;
+    field @NonNull public static final android.content.integrity.IntegrityFormula VERSION_CODE;
   }
 
   public final class Rule implements android.os.Parcelable {
-    ctor public Rule(@NonNull android.content.integrity.Formula, int);
+    ctor public Rule(@NonNull android.content.integrity.IntegrityFormula, int);
     method public int describeContents();
     method public int getEffect();
-    method @NonNull public android.content.integrity.Formula getFormula();
+    method @NonNull public android.content.integrity.IntegrityFormula getFormula();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.Rule> CREATOR;
     field public static final int DENY = 0; // 0x0

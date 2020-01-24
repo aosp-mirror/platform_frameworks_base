@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,48 +14,44 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity;
+package android.content.integrity;
 
-import static com.android.server.integrity.IntegrityUtils.getBytesFromHexDigest;
-import static com.android.server.integrity.IntegrityUtils.getHexDigest;
-import static com.android.server.testutils.TestUtils.assertExpectException;
+import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import androidx.test.runner.AndroidJUnit4;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-/** Unit test for {@link com.android.server.integrity.IntegrityUtils} */
-@RunWith(AndroidJUnit4.class)
+/** Unit test for {@link IntegrityUtils} */
+@RunWith(JUnit4.class)
 public class IntegrityUtilsTest {
 
     private static final String HEX_DIGEST = "1234567890ABCDEF";
     private static final byte[] BYTES =
-            new byte[] {0x12, 0x34, 0x56, 0x78, (byte) 0x90, (byte) 0xAB, (byte) 0xCD, (byte) 0xEF};
+            new byte[]{0x12, 0x34, 0x56, 0x78, (byte) 0x90, (byte) 0xAB, (byte) 0xCD, (byte) 0xEF};
 
     @Test
     public void testGetBytesFromHexDigest() {
-        assertArrayEquals(BYTES, getBytesFromHexDigest(HEX_DIGEST));
+        assertArrayEquals(BYTES, IntegrityUtils.getBytesFromHexDigest(HEX_DIGEST));
     }
 
     @Test
     public void testGetHexDigest() {
-        assertEquals(HEX_DIGEST, getHexDigest(BYTES));
+        assertThat(IntegrityUtils.getHexDigest(BYTES)).isEqualTo(HEX_DIGEST);
     }
 
     @Test
     public void testInvalidHexDigest() {
-        assertExpectException(
+        TestUtils.assertExpectException(
                 IllegalArgumentException.class,
                 "must have even length",
-                () -> getBytesFromHexDigest("ABC"));
+                () -> IntegrityUtils.getBytesFromHexDigest("ABC"));
 
-        assertExpectException(
+        TestUtils.assertExpectException(
                 IllegalArgumentException.class,
                 "Invalid hex char",
-                () -> getBytesFromHexDigest("GH"));
+                () -> IntegrityUtils.getBytesFromHexDigest("GH"));
     }
 }

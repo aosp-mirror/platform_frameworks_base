@@ -9737,6 +9737,15 @@ public final class Settings {
         */
        public static final String PACKAGE_VERIFIER_INCLUDE_ADB = "verifier_verify_adb_installs";
 
+        /**
+         * Run integrity checks for integrity rule providers.
+         * 0 = bypass integrity verification on installs from rule providers (default)
+         * 1 = perform integrity verification on installs from rule providers
+         * @hide
+         */
+        public static final String INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER =
+                "verify_integrity_for_rule_provider";
+
        /**
         * Time since last fstrim (milliseconds) after which we force one to happen
         * during device startup.  If unset, the default is 3 days.

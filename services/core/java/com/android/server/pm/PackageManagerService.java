@@ -27,6 +27,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
+import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.EXTRA_VERSION_CODE;
 import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
@@ -124,8 +125,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ApplicationPackageManager;
 import android.app.AppOpsManager;
+import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -14375,6 +14376,7 @@ public class PackageManagerService extends IPackageManager.Stub
             integrityVerification.putExtra(EXTRA_VERIFICATION_ID, verificationId);
             integrityVerification.putExtra(EXTRA_PACKAGE_NAME, pkgLite.packageName);
             integrityVerification.putExtra(EXTRA_VERSION_CODE, pkgLite.versionCode);
+            integrityVerification.putExtra(EXTRA_LONG_VERSION_CODE, pkgLite.getLongVersionCode());
             populateInstallerExtras(integrityVerification);
 
             // send to integrity component only.

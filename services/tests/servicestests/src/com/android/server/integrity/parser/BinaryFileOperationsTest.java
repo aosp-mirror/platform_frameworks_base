@@ -26,7 +26,8 @@ import static com.android.server.integrity.utils.TestUtils.getValueBits;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.android.server.integrity.IntegrityUtils;
+import android.content.integrity.IntegrityUtils;
+
 import com.android.server.integrity.model.BitInputStream;
 
 import org.junit.Test;

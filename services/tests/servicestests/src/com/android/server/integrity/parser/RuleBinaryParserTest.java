@@ -36,9 +36,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
+import android.content.integrity.IntegrityUtils;
 import android.content.integrity.Rule;
-
-import com.android.server.integrity.IntegrityUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -345,7 +344,7 @@ public class RuleBinaryParserTest {
                         + ATOMIC_FORMULA_START_BITS
                         + VERSION_CODE
                         + EQ
-                        + getBits(versionCode, /* numOfBits= */ 32)
+                        + getBits(versionCode, /* numOfBits= */ 64)
                         + DENY
                         + END_BIT;
         byte[] ruleBytes = getBytes(ruleBits);
@@ -356,7 +355,7 @@ public class RuleBinaryParserTest {
         RuleParser binaryParser = new RuleBinaryParser();
         Rule expectedRule =
                 new Rule(
-                        new AtomicFormula.IntAtomicFormula(
+                        new AtomicFormula.LongAtomicFormula(
                                 AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1),
                         Rule.DENY);
 
@@ -384,7 +383,8 @@ public class RuleBinaryParserTest {
         RuleParser binaryParser = new RuleBinaryParser();
         Rule expectedRule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(
+                                AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
 
         List<Rule> rules = binaryParser.parse(rule.array());
@@ -400,7 +400,7 @@ public class RuleBinaryParserTest {
                         + ATOMIC_FORMULA_START_BITS
                         + VERSION_CODE
                         + EQ
-                        + getBits(versionCode, /* numOfBits= */ 32)
+                        + getBits(versionCode, /* numOfBits= */ 64)
                         + DENY;
         byte[] ruleBytes = getBytes(ruleBits);
         ByteBuffer rule =
@@ -488,7 +488,7 @@ public class RuleBinaryParserTest {
                         + ATOMIC_FORMULA_START_BITS
                         + VERSION_CODE
                         + INVALID_OPERATOR
-                        + getBits(versionCode, /* numOfBits= */ 32)
+                        + getBits(versionCode, /* numOfBits= */ 64)
                         + COMPOUND_FORMULA_END_BITS
                         + DENY
                         + END_BIT;
