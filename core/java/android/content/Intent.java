@@ -36,6 +36,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.SuspendDialogInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -2665,6 +2666,34 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SHOW_SUSPENDED_APP_DETAILS =
             "android.intent.action.SHOW_SUSPENDED_APP_DETAILS";
+
+    /**
+     * Broadcast Action: Sent to indicate that the user unsuspended a package.
+     *
+     * <p>This can happen when the user taps on the neutral button of the
+     * {@linkplain SuspendDialogInfo suspend-dialog} which was created by using
+     * {@link SuspendDialogInfo#BUTTON_ACTION_UNSUSPEND}. This broadcast is only sent to the
+     * suspending app that originally specified this dialog while calling
+     * {@link PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, SuspendDialogInfo)}.
+     *
+     * <p>Includes an extra {@link #EXTRA_PACKAGE_NAME} which is the name of the package that just
+     * got unsuspended.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. <em>This will be delivered to {@link BroadcastReceiver} components declared in
+     * the manifest.</em>
+     *
+     * @see PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, SuspendDialogInfo)
+     * @see PackageManager#isPackageSuspended()
+     * @see SuspendDialogInfo#BUTTON_ACTION_MORE_DETAILS
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_UNSUSPENDED_MANUALLY =
+            "android.intent.action.PACKAGE_UNSUSPENDED_MANUALLY";
 
     /**
      * Broadcast Action: Sent to a package that has been unsuspended.

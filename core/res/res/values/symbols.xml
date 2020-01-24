@@ -3039,6 +3039,7 @@
 
   <java-symbol type="string" name="app_suspended_title" />
   <java-symbol type="string" name="app_suspended_more_details" />
+  <java-symbol type="string" name="app_suspended_unsuspend_message" />
   <java-symbol type="string" name="app_suspended_default_message" />
 
   <!-- Used internally for assistant to launch activity transitions -->
