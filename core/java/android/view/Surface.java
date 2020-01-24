@@ -858,11 +858,12 @@ public class Surface implements Parcelable {
      * surface is consumed by something other than the system compositor, e.g. a media
      * codec, this call has no effect.
      *
-     * @param frameRate The intended frame rate of this surface. 0 is a special value that
-     * indicates the app will accept the system's choice for the display frame rate, which
-     * is the default behavior if this function isn't called. The frameRate param does
-     * *not* need to be a valid refresh rate for this device's display - e.g., it's fine
-     * to pass 30fps to a device that can only run the display at 60fps.
+     * @param frameRate The intended frame rate of this surface, in frames per second. 0
+     * is a special value that indicates the app will accept the system's choice for the
+     * display frame rate, which is the default behavior if this function isn't
+     * called. The frameRate param does *not* need to be a valid refresh rate for this
+     * device's display - e.g., it's fine to pass 30fps to a device that can only run the
+     * display at 60fps.
      */
     public void setFrameRate(@FloatRange(from = 0.0) float frameRate) {
         int error = nativeSetFrameRate(mNativeObject, frameRate);
