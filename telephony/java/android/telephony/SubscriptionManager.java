@@ -516,13 +516,6 @@ public class SubscriptionManager {
     public static final String ISO_COUNTRY_CODE = SimInfo.ISO_COUNTRY_CODE;
 
     /**
-     * TelephonyProvider column name for the sim provisioning status associated with a SIM.
-     * <P>Type: INTEGER (int)</P>
-     * @hide
-     */
-    public static final String SIM_PROVISIONING_STATUS = SimInfo.SIM_PROVISIONING_STATUS;
-
-    /**
      * TelephonyProvider column name for whether a subscription is embedded (that is, present on an
      * eSIM).
      * <p>Type: INTEGER (int), 1 for embedded or 0 for non-embedded.
