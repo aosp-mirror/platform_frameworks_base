@@ -178,7 +178,7 @@ public class WifiInfo implements Parcelable {
      * If connected to a network suggestion or specifier, store the package name of the app,
      * else null.
      */
-    private String mAppPackageName;
+    private String mRequestingPackageName;
 
     /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
@@ -201,68 +201,68 @@ public class WifiInfo implements Parcelable {
      */
     public long rxSuccess;
 
-    private double mTxBadRate;
+    private double mLostTxPacketsPerSecond;
 
     /**
      * Average rate of lost transmitted packets, in units of packets per second.
      * @hide
      */
     @SystemApi
-    public double getTxBadRate() {
-        return mTxBadRate;
+    public double getLostTxPacketsPerSecond() {
+        return mLostTxPacketsPerSecond;
     }
 
     /** @hide */
-    public void setTxBadRate(double txBadRate) {
-        mTxBadRate = txBadRate;
+    public void setLostTxPacketsPerSecond(double lostTxPacketsPerSecond) {
+        mLostTxPacketsPerSecond = lostTxPacketsPerSecond;
     }
 
-    private double mTxRetriesRate;
+    private double mTxRetriedTxPacketsPerSecond;
 
     /**
      * Average rate of transmitted retry packets, in units of packets per second.
      * @hide
      */
     @SystemApi
-    public double getTxRetriesRate() {
-        return mTxRetriesRate;
+    public double getRetriedTxPacketsPerSecond() {
+        return mTxRetriedTxPacketsPerSecond;
     }
 
     /** @hide */
-    public void setTxRetriesRate(double txRetriesRate) {
-        mTxRetriesRate = txRetriesRate;
+    public void setRetriedTxPacketsRate(double txRetriedTxPacketsPerSecond) {
+        mTxRetriedTxPacketsPerSecond = txRetriedTxPacketsPerSecond;
     }
 
-    private double mTxSuccessRate;
+    private double mSuccessfulTxPacketsPerSecond;
 
     /**
      * Average rate of successfully transmitted unicast packets, in units of packets per second.
      * @hide
      */
     @SystemApi
-    public double getTxSuccessRate() {
-        return mTxSuccessRate;
+    public double getSuccessfulTxPacketsPerSecond() {
+        return mSuccessfulTxPacketsPerSecond;
     }
 
     /** @hide */
-    public void setTxSuccessRate(double txSuccessRate) {
-        mTxSuccessRate = txSuccessRate;
+    public void setSuccessfulTxPacketsPerSecond(double successfulTxPacketsPerSecond) {
+        mSuccessfulTxPacketsPerSecond = successfulTxPacketsPerSecond;
     }
 
-    private double mRxSuccessRate;
+    private double mSuccessfulRxPacketsPerSecond;
 
     /**
      * Average rate of received unicast data packets, in units of packets per second.
      * @hide
      */
     @SystemApi
-    public double getRxSuccessRate() {
-        return mRxSuccessRate;
+    public double getSuccessfulRxPacketsPerSecond() {
+        return mSuccessfulRxPacketsPerSecond;
     }
 
     /** @hide */
-    public void setRxSuccessRate(double rxSuccessRate) {
-        mRxSuccessRate = rxSuccessRate;
+    public void setSuccessfulRxPacketsPerSecond(double successfulRxPacketsPerSecond) {
+        mSuccessfulRxPacketsPerSecond = successfulRxPacketsPerSecond;
     }
 
     /** @hide */
@@ -319,17 +319,17 @@ public class WifiInfo implements Parcelable {
         setMeteredHint(false);
         setEphemeral(false);
         setOsuAp(false);
-        setAppPackageName(null);
+        setRequestingPackageName(null);
         setFQDN(null);
         setProviderFriendlyName(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
         txRetries = 0;
-        mTxBadRate = 0;
-        mTxSuccessRate = 0;
-        mRxSuccessRate = 0;
-        mTxRetriesRate = 0;
+        mLostTxPacketsPerSecond = 0;
+        mSuccessfulTxPacketsPerSecond = 0;
+        mSuccessfulRxPacketsPerSecond = 0;
+        mTxRetriedTxPacketsPerSecond = 0;
         score = 0;
     }
 
@@ -353,8 +353,8 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
-            mAppPackageName =
-                    source.mAppPackageName;
+            mRequestingPackageName =
+                    source.mRequestingPackageName;
             mOsuAp = source.mOsuAp;
             mFqdn = source.mFqdn;
             mProviderFriendlyName = source.mProviderFriendlyName;
@@ -362,10 +362,10 @@ public class WifiInfo implements Parcelable {
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
             rxSuccess = source.rxSuccess;
-            mTxBadRate = source.mTxBadRate;
-            mTxRetriesRate = source.mTxRetriesRate;
-            mTxSuccessRate = source.mTxSuccessRate;
-            mRxSuccessRate = source.mRxSuccessRate;
+            mLostTxPacketsPerSecond = source.mLostTxPacketsPerSecond;
+            mTxRetriedTxPacketsPerSecond = source.mTxRetriedTxPacketsPerSecond;
+            mSuccessfulTxPacketsPerSecond = source.mSuccessfulTxPacketsPerSecond;
+            mSuccessfulRxPacketsPerSecond = source.mSuccessfulRxPacketsPerSecond;
             score = source.score;
             mWifiStandard = source.mWifiStandard;
             mMaxSupportedTxLinkSpeed = source.mMaxSupportedTxLinkSpeed;
@@ -777,8 +777,8 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
-    public void setAppPackageName(@Nullable String packageName) {
-        mAppPackageName = packageName;
+    public void setRequestingPackageName(@Nullable String packageName) {
+        mRequestingPackageName = packageName;
     }
 
     /**
@@ -788,8 +788,8 @@ public class WifiInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    public @Nullable String getAppPackageName() {
-        return mAppPackageName;
+    public @Nullable String getRequestingPackageName() {
+        return mRequestingPackageName;
     }
 
 
@@ -956,16 +956,16 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
-        dest.writeDouble(mTxSuccessRate);
+        dest.writeDouble(mSuccessfulTxPacketsPerSecond);
         dest.writeLong(txRetries);
-        dest.writeDouble(mTxRetriesRate);
+        dest.writeDouble(mTxRetriedTxPacketsPerSecond);
         dest.writeLong(txBad);
-        dest.writeDouble(mTxBadRate);
+        dest.writeDouble(mLostTxPacketsPerSecond);
         dest.writeLong(rxSuccess);
-        dest.writeDouble(mRxSuccessRate);
+        dest.writeDouble(mSuccessfulRxPacketsPerSecond);
         mSupplicantState.writeToParcel(dest, flags);
         dest.writeInt(mOsuAp ? 1 : 0);
-        dest.writeString(mAppPackageName);
+        dest.writeString(mRequestingPackageName);
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
         dest.writeInt(mWifiStandard);
@@ -1000,16 +1000,16 @@ public class WifiInfo implements Parcelable {
                 info.mTrusted = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
-                info.mTxSuccessRate = in.readDouble();
+                info.mSuccessfulTxPacketsPerSecond = in.readDouble();
                 info.txRetries = in.readLong();
-                info.mTxRetriesRate = in.readDouble();
+                info.mTxRetriedTxPacketsPerSecond = in.readDouble();
                 info.txBad = in.readLong();
-                info.mTxBadRate = in.readDouble();
+                info.mLostTxPacketsPerSecond = in.readDouble();
                 info.rxSuccess = in.readLong();
-                info.mRxSuccessRate = in.readDouble();
+                info.mSuccessfulRxPacketsPerSecond = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 info.mOsuAp = in.readInt() != 0;
-                info.mAppPackageName = in.readString();
+                info.mRequestingPackageName = in.readString();
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
                 info.mWifiStandard = in.readInt();

@@ -507,7 +507,7 @@ public class AccessPointTest {
         WifiInfo wifiInfo = new WifiInfo();
         wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
         wifiInfo.setEphemeral(true);
-        wifiInfo.setAppPackageName(appPackageName);
+        wifiInfo.setRequestingPackageName(appPackageName);
         wifiInfo.setRssi(rssi);
 
         Context context = mock(Context.class);
