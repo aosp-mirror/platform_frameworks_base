@@ -1726,6 +1726,24 @@ package android.net {
     method public void teardownTestNetwork(@NonNull android.net.Network);
   }
 
+  public final class TetheredClient implements android.os.Parcelable {
+    ctor public TetheredClient(@NonNull android.net.MacAddress, @NonNull java.util.Collection<android.net.TetheredClient.AddressInfo>, int);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.net.TetheredClient.AddressInfo> getAddresses();
+    method @NonNull public android.net.MacAddress getMacAddress();
+    method public int getTetheringType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.TetheredClient> CREATOR;
+  }
+
+  public static final class TetheredClient.AddressInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.net.LinkAddress getAddress();
+    method @Nullable public String getHostname();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.TetheredClient.AddressInfo> CREATOR;
+  }
+
   public class TetheringManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheringEventCallback);
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void requestLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.OnTetheringEntitlementResultListener);
@@ -1774,6 +1792,7 @@ package android.net {
 
   public abstract static class TetheringManager.TetheringEventCallback {
     ctor public TetheringManager.TetheringEventCallback();
+    method public void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
     method public void onError(@NonNull String, int);
     method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
     method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
