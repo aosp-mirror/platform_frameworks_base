@@ -49,6 +49,7 @@ import android.util.Log;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
@@ -98,6 +99,7 @@ import javax.inject.Singleton;
 @Singleton
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
+    private final FeatureFlags mFeatureFlags;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -111,10 +113,14 @@ public class NotifCollection implements Dumpable {
     private boolean mAmDispatchingToOtherCode;
 
     @Inject
-    public NotifCollection(IStatusBarService statusBarService, DumpController dumpController) {
+    public NotifCollection(
+            IStatusBarService statusBarService,
+            DumpController dumpController,
+            FeatureFlags featureFlags) {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
         dumpController.registerDumpable(TAG, this);
+        mFeatureFlags = featureFlags;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -301,9 +307,12 @@ public class NotifCollection implements Dumpable {
                 // TODO: (b/145659174) update the sbn's overrideGroupKey in
                 //  NotificationEntry.setRanking instead of here once we fully migrate to the
                 //  NewNotifPipeline
-                final String newOverrideGroupKey = ranking.getOverrideGroupKey();
-                if (!Objects.equals(entry.getSbn().getOverrideGroupKey(), newOverrideGroupKey)) {
-                    entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+                    final String newOverrideGroupKey = ranking.getOverrideGroupKey();
+                    if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
+                            newOverrideGroupKey)) {
+                        entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                    }
                 }
             }
         }

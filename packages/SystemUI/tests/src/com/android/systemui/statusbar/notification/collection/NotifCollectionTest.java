@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
@@ -51,6 +52,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
@@ -86,6 +88,7 @@ public class NotifCollectionTest extends SysuiTestCase {
     @Mock private GroupCoalescer mGroupCoalescer;
     @Spy private RecordingCollectionListener mCollectionListener;
     @Mock private CollectionReadyForBuildListener mBuildListener;
+    @Mock private FeatureFlags mFeatureFlags;
 
     @Spy private RecordingLifetimeExtender mExtender1 = new RecordingLifetimeExtender("Extender1");
     @Spy private RecordingLifetimeExtender mExtender2 = new RecordingLifetimeExtender("Extender2");
@@ -105,7 +108,12 @@ public class NotifCollectionTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
 
-        mCollection = new NotifCollection(mStatusBarService, mock(DumpController.class));
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
+        when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(true);
+
+        mCollection = new NotifCollection(mStatusBarService,
+                mock(DumpController.class),
+                mFeatureFlags);
         mCollection.attach(mGroupCoalescer);
         mCollection.addCollectionListener(mCollectionListener);
         mCollection.setBuildListener(mBuildListener);
