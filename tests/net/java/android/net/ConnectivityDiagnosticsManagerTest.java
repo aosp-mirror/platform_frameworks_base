@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.net.ConnectivityDiagnosticsManager.ConnectivityDiagnosticsBinder;
+import static android.net.ConnectivityDiagnosticsManager.ConnectivityDiagnosticsCallback;
 import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
 import static android.net.ConnectivityDiagnosticsManager.DataStallReport;
 
@@ -25,12 +27,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.os.PersistableBundle;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+
+import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class ConnectivityDiagnosticsManagerTest {
@@ -40,6 +49,19 @@ public class ConnectivityDiagnosticsManagerTest {
     private static final String INTERFACE_NAME = "interface";
     private static final String BUNDLE_KEY = "key";
     private static final String BUNDLE_VALUE = "value";
+
+    private static final Executor INLINE_EXECUTOR = x -> x.run();
+
+    @Mock private ConnectivityDiagnosticsCallback mCb;
+
+    private ConnectivityDiagnosticsBinder mBinder;
+
+    @Before
+    public void setUp() {
+        mCb = mock(ConnectivityDiagnosticsCallback.class);
+
+        mBinder = new ConnectivityDiagnosticsBinder(mCb, INLINE_EXECUTOR);
+    }
 
     private ConnectivityReport createSampleConnectivityReport() {
         final LinkProperties linkProperties = new LinkProperties();
@@ -192,5 +214,35 @@ public class ConnectivityDiagnosticsManagerTest {
     @Test
     public void testDataStallReportParcelUnparcel() {
         assertParcelSane(createSampleDataStallReport(), 4);
+    }
+
+    @Test
+    public void testConnectivityDiagnosticsCallbackOnConnectivityReport() {
+        mBinder.onConnectivityReport(createSampleConnectivityReport());
+
+        // The callback will be invoked synchronously by inline executor. Immediately check the
+        // latch without waiting.
+        verify(mCb).onConnectivityReport(eq(createSampleConnectivityReport()));
+    }
+
+    @Test
+    public void testConnectivityDiagnosticsCallbackOnDataStallSuspected() {
+        mBinder.onDataStallSuspected(createSampleDataStallReport());
+
+        // The callback will be invoked synchronously by inline executor. Immediately check the
+        // latch without waiting.
+        verify(mCb).onDataStallSuspected(eq(createSampleDataStallReport()));
+    }
+
+    @Test
+    public void testConnectivityDiagnosticsCallbackOnNetworkConnectivityReported() {
+        final Network n = new Network(NET_ID);
+        final boolean connectivity = true;
+
+        mBinder.onNetworkConnectivityReported(n, connectivity);
+
+        // The callback will be invoked synchronously by inline executor. Immediately check the
+        // latch without waiting.
+        verify(mCb).onNetworkConnectivityReported(eq(n), eq(connectivity));
     }
 }
