@@ -893,4 +893,11 @@ please see themes_device_defaults.xml.
         <item name="windowActivityTransitions">false</item>
     </style>
 
+    <!-- Theme for the Autofill inline suggestion on IME -->
+    <style name="Theme.AutofillInlineSuggestion" parent="Theme.DeviceDefault">
+        <item name="isAutofillInlineSuggestionTheme">true</item>
+        <item name="autofillInlineSuggestionChip">@style/AutofillInlineSuggestionChip</item>
+        <item name="autofillInlineSuggestionTitle">@style/AutofillInlineSuggestionTitle</item>
+        <item name="autofillInlineSuggestionSubtitle">@style/AutofillInlineSuggestionSubtitle</item>
+    </style>
 </resources>

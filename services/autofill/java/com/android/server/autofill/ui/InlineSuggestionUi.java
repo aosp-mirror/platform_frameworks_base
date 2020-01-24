@@ -25,10 +25,17 @@ import android.annotation.Nullable;
 import android.app.slice.Slice;
 import android.app.slice.SliceItem;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Icon;
+import android.graphics.fonts.SystemFonts;
 import android.os.IBinder;
+import android.service.autofill.InlinePresentation;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -41,6 +48,8 @@ import android.widget.TextView;
 import com.android.internal.R;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a temporary inline suggestion UI inflater which will be replaced by the ExtServices
@@ -54,6 +63,10 @@ public class InlineSuggestionUi {
 
     private static final String TAG = "InlineSuggestionUi";
 
+    // The pattern to match the value can be obtained by calling {@code Resources#getResourceName
+    // (int)}. This name is a single string of the form "package:type/entry".
+    private static final Pattern RESOURCE_NAME_PATTERN = Pattern.compile("([^:]+):([^/]+)/(\\S+)");
+
     private final Context mContext;
 
     public InlineSuggestionUi(Context context) {
@@ -65,28 +78,36 @@ public class InlineSuggestionUi {
      */
     @MainThread
     @Nullable
-    public SurfaceControl inflate(@NonNull Slice slice, int width, int height,
-            @Nullable View.OnClickListener onClickListener) {
+    public SurfaceControl inflate(@NonNull InlinePresentation inlinePresentation, int width,
+            int height, @Nullable View.OnClickListener onClickListener) {
         Log.d(TAG, "Inflating the inline suggestion UI");
 
         //TODO(b/137800469): Pass in inputToken from IME.
         final SurfaceControlViewHost wvr = new SurfaceControlViewHost(mContext,
                 mContext.getDisplay(), (IBinder) null);
         final SurfaceControl sc = wvr.getSurfacePackage().getSurfaceControl();
-        final ViewGroup suggestionView = (ViewGroup) renderSlice(slice);
+
+        Context contextThemeWrapper = getContextThemeWrapper(mContext,
+                inlinePresentation.getInlinePresentationSpec().getStyle());
+        if (contextThemeWrapper == null) {
+            contextThemeWrapper = getDefaultContextThemeWrapper(mContext);
+        }
+        final View suggestionView = renderSlice(inlinePresentation.getSlice(),
+                contextThemeWrapper);
         if (onClickListener != null) {
             suggestionView.setOnClickListener(onClickListener);
         }
 
         WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
-                        WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
+                        WindowManager.LayoutParams.TYPE_APPLICATION, 0,
+                        PixelFormat.TRANSPARENT);
         wvr.addView(suggestionView, lp);
         return sc;
     }
 
-    private View renderSlice(Slice slice) {
-        final LayoutInflater inflater = LayoutInflater.from(mContext);
+    private static View renderSlice(Slice slice, Context context) {
+        final LayoutInflater inflater = LayoutInflater.from(context);
         final ViewGroup suggestionView =
                 (ViewGroup) inflater.inflate(R.layout.autofill_inline_suggestion, null);
 
@@ -136,5 +157,97 @@ public class InlineSuggestionUi {
         }
 
         return suggestionView;
+    }
+
+    private Context getDefaultContextThemeWrapper(@NonNull Context context) {
+        Resources.Theme theme = context.getResources().newTheme();
+        theme.applyStyle(android.R.style.Theme_AutofillInlineSuggestion, true);
+        return new ContextThemeWrapper(context, theme);
+    }
+
+    /**
+     * Returns a context wrapping the theme in the provided {@code style}, or null if {@code
+     * style} doesn't pass validation.
+     */
+    @Nullable
+    private static Context getContextThemeWrapper(@NonNull Context context,
+            @Nullable String style) {
+        if (style == null) {
+            return null;
+        }
+        Matcher matcher = RESOURCE_NAME_PATTERN.matcher(style);
+        if (!matcher.matches()) {
+            Log.d(TAG, "Can not parse the style=" + style);
+            return null;
+        }
+        String packageName = matcher.group(1);
+        String type = matcher.group(2);
+        String entry = matcher.group(3);
+        if (TextUtils.isEmpty(packageName) || TextUtils.isEmpty(type) || TextUtils.isEmpty(entry)) {
+            Log.d(TAG, "Can not proceed with empty field values in the style=" + style);
+            return null;
+        }
+        Resources resources = null;
+        try {
+            resources = context.getPackageManager().getResourcesForApplication(
+                    packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+        int resId = resources.getIdentifier(entry, type, packageName);
+        if (resId == Resources.ID_NULL) {
+            return null;
+        }
+        Resources.Theme theme = resources.newTheme();
+        theme.applyStyle(resId, true);
+        if (!validateBaseTheme(theme, resId)) {
+            Log.d(TAG, "Provided theme is not a child of Theme.InlineSuggestion, ignoring it.");
+            return null;
+        }
+        if (!validateFontFamilyForTextViewStyles(theme)) {
+            Log.d(TAG,
+                    "Provided theme specifies a font family that is not system font, ignoring it.");
+            return null;
+        }
+        return new ContextThemeWrapper(context, theme);
+    }
+
+    private static boolean validateFontFamilyForTextViewStyles(Resources.Theme theme) {
+        return validateFontFamily(theme, android.R.attr.autofillInlineSuggestionTitle)
+                && validateFontFamily(theme, android.R.attr.autofillInlineSuggestionSubtitle);
+    }
+
+    private static boolean validateFontFamily(Resources.Theme theme, int styleAttr) {
+        TypedArray ta = null;
+        try {
+            ta = theme.obtainStyledAttributes(null, new int[]{android.R.attr.fontFamily},
+                    styleAttr,
+                    0);
+            if (ta.getIndexCount() == 0) {
+                return true;
+            }
+            String fontFamily = ta.getString(ta.getIndex(0));
+            return SystemFonts.getRawSystemFallbackMap().containsKey(fontFamily);
+        } finally {
+            if (ta != null) {
+                ta.recycle();
+            }
+        }
+    }
+
+    private static boolean validateBaseTheme(Resources.Theme theme, int styleAttr) {
+        TypedArray ta = null;
+        try {
+            ta = theme.obtainStyledAttributes(null,
+                    new int[]{android.R.attr.isAutofillInlineSuggestionTheme}, styleAttr, 0);
+            if (ta.getIndexCount() == 0) {
+                return false;
+            }
+            return ta.getBoolean(ta.getIndex(0), false);
+        } finally {
+            if (ta != null) {
+                ta.recycle();
+            }
+        }
     }
 }
