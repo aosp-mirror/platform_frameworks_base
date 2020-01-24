@@ -1689,6 +1689,9 @@ class UserController implements Handler.Callback {
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND);
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
+                    // Also, add the UserHandle for mainline modules which can't use the @hide
+                    // EXTRA_USER_HANDLE.
+                    intent.putExtra(Intent.EXTRA_USER, UserHandle.of(profileUserId));
                     mInjector.broadcastIntent(intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                             null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
@@ -1705,6 +1708,9 @@ class UserController implements Handler.Callback {
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND);
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
+                    // Also, add the UserHandle for mainline modules which can't use the @hide
+                    // EXTRA_USER_HANDLE.
+                    intent.putExtra(Intent.EXTRA_USER, UserHandle.of(profileUserId));
                     mInjector.broadcastIntent(intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                             null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
@@ -1714,6 +1720,9 @@ class UserController implements Handler.Callback {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, newUserId);
+                // Also, add the UserHandle for mainline modules which can't use the @hide
+                // EXTRA_USER_HANDLE.
+                intent.putExtra(Intent.EXTRA_USER, UserHandle.of(newUserId));
                 mInjector.broadcastIntent(intent,
                         null, null, 0, null, null,
                         new String[] {android.Manifest.permission.MANAGE_USERS},
