@@ -4555,7 +4555,10 @@ public class PackageManagerService extends IPackageManager.Stub
         flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getPackageUid");
+        return getPackageUidInternal(packageName, flags, userId, callingUid);
+    }
 
+    private int getPackageUidInternal(String packageName, int flags, int userId, int callingUid) {
         // reader
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
@@ -23097,6 +23100,12 @@ public class PackageManagerService extends IPackageManager.Stub
         public int getPackageUid(String packageName, int flags, int userId) {
             return PackageManagerService.this
                     .getPackageUid(packageName, flags, userId);
+        }
+
+        @Override
+        public int getPackageUidInternal(String packageName, int flags, int userId) {
+            return PackageManagerService.this
+                    .getPackageUidInternal(packageName, flags, userId, Process.SYSTEM_UID);
         }
 
         @Override

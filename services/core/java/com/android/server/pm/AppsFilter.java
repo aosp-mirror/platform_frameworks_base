@@ -662,7 +662,7 @@ public class AppsFilter {
             String description, Throwable throwable) {
         Slog.wtf(TAG,
                 "interaction: " + callingPkgSetting
-                        + " -> " + targetPkgSetting.name + " "
+                        + " -> " + targetPkgSetting + " "
                         + description, throwable);
     }
 
