@@ -261,11 +261,15 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                             + result.getEffect()
                             + " due to "
                             + result.getRule());
+
+            // TODO(b/147095027): Remove when the proto type is fixed.
+            int dummyBreakageFixerInt = 0;
+
             StatsLog.write(
                     StatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
                     packageName,
                     appCert,
-                    appInstallMetadata.getVersionCode(),
+                    dummyBreakageFixerInt,
                     installerPackageName,
                     getLoggingResponse(result),
                     isCausedByAppCertRule(result),
