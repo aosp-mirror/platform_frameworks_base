@@ -17,7 +17,6 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -725,16 +724,16 @@ import java.util.Objects;
  *         <td>NZ_TV_G</td>
  *         <td>Programmes which exclude material likely to be unsuitable for children. Programmes
  *         may not necessarily be designed for child viewers but should not contain material likely
- *         to alarm or distress them.</td>
+ *         to alarm or distress them</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_TV_PGR</td>
  *         <td>Programmes containing material more suited for mature audiences but not necessarily
- *         unsuitable for child viewers when subject to the guidance of a parent or an adult.</td>
+ *         unsuitable for child viewers when subject to the guidance of a parent or an adult</td>
  *     </tr>
  *     <tr>
  *         <td>NZ_TV_AO</td>
- *         <td>Programmes containing adult themes and directed primarily at mature audiences.</td>
+ *         <td>Programmes containing adult themes and directed primarily at mature audiences</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="6">SG_TV</td>
