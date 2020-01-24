@@ -41,7 +41,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubblesTestActivity;
@@ -112,7 +111,7 @@ public class NotificationTestHelper {
                 mock(NotifRemoteViewCache.class),
                 mock(NotificationRemoteInputManager.class));
         contentBinder.setInflateSynchronously(true);
-        mBindStage = new RowContentBindStage(contentBinder, mock(IStatusBarService.class));
+        mBindStage = new RowContentBindStage(contentBinder, mock(NotifInflationErrorManager.class));
 
         NotificationEntryManager entryManager = mock(NotificationEntryManager.class);
 
