@@ -3527,6 +3527,44 @@ public abstract class PackageManager {
     public static final long FILTER_APPLICATION_QUERY = 135549675L;
 
     /** {@hide} */
+    @IntDef(prefix = {"SYSTEM_APP_STATE_"}, value = {
+            SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN,
+            SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE,
+            SYSTEM_APP_STATE_INSTALLED,
+            SYSTEM_APP_STATE_UNINSTALLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemAppState {}
+
+    /**
+     * Constant for noting system app state as hidden before installation
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0;
+
+    /**
+     * Constant for noting system app state as visible before installation
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1;
+
+    /**
+     * Constant for noting system app state as installed
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_INSTALLED = 2;
+
+    /**
+     * Constant for noting system app state as not installed
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_UNINSTALLED = 3;
+
+    /** {@hide} */
     public int getUserId() {
         return UserHandle.myUserId();
     }
@@ -6628,6 +6666,17 @@ public abstract class PackageManager {
     @UnsupportedAppUsage
     public abstract boolean getApplicationHiddenSettingAsUser(@NonNull String packageName,
             @NonNull UserHandle userHandle);
+
+    /**
+     * Sets system app state
+     * @param packageName Package name of the app.
+     * @param state State of the app.
+     * @hide
+     */
+    @SystemApi
+    public void setSystemAppState(@NonNull String packageName, @SystemAppState int state) {
+        throw new RuntimeException("Not implemented. Must override in a subclass");
+    }
 
     /**
      * Return whether the device has been booted into safe mode.

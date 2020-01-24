@@ -266,6 +266,28 @@ public final class PermissionManager {
         }
     }
 
+    /**
+     * Grant default permissions to currently enabled carrier apps
+     * @param packageNames Package names of the apps to be granted permissions
+     * @param user The user handle
+     * @param executor The executor for the callback
+     * @param callback The callback provided by caller to be notified when grant completes
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
+    public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[] packageNames,
+            @NonNull UserHandle user, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        try {
+            mPermissionManager.grantDefaultPermissionsToEnabledCarrierApps(packageNames,
+                    user.getIdentifier());
+            executor.execute(() -> callback.accept(true));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     private List<SplitPermissionInfo> splitPermissionInfoListToNonParcelableList(
             List<SplitPermissionInfoParcelable> parcelableList) {
         final int size = parcelableList.size();

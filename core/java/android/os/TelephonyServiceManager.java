@@ -191,14 +191,6 @@ public class TelephonyServiceManager {
     }
 
     /**
-     * Returns {@link ServiceRegisterer} for the package manager service.
-     */
-    @NonNull
-    public ServiceRegisterer getPackageManagerServiceRegisterer() {
-        return new ServiceRegisterer("package");
-    }
-
-    /**
      * Returns {@link ServiceRegisterer} for the ICC phone book service.
      */
     @NonNull
