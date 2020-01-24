@@ -61,6 +61,7 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.IWindowContainer;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -75,6 +76,7 @@ import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -248,6 +250,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private MagnificationSpec mLastMagnificationSpec;
 
     private boolean mIsFocusable = true;
+
+    /**
+     * Used as a unique, cross-process identifier for this Container. It also serves a minimal
+     * interface to other processes.
+     */
+    RemoteToken mRemoteToken = null;
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
@@ -860,13 +868,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
-    @Override
+    /**
+     * Returns {@code true} if this container is focusable. Generally, if a parent is not focusable,
+     * this will not be focusable either.
+     */
     boolean isFocusable() {
-        return super.isFocusable() && mIsFocusable;
+        final WindowContainer parent = getParent();
+        return (parent == null || parent.isFocusable()) && mIsFocusable;
     }
 
     /** Set whether this container or its children can be focusable */
-    @Override
     boolean setFocusable(boolean focusable) {
         if (mIsFocusable == focusable) {
             return false;
@@ -2258,5 +2269,41 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /** Cheap way of doing cast and instanceof. */
     ActivityRecord asActivityRecord() {
         return null;
+    }
+
+    RemoteToken getRemoteToken() {
+        return mRemoteToken;
+    }
+
+    static class RemoteToken extends IWindowContainer.Stub {
+        final WeakReference<WindowContainer> mWeakRef;
+
+        RemoteToken(WindowContainer container) {
+            mWeakRef = new WeakReference<>(container);
+        }
+
+        WindowContainer getContainer() {
+            return mWeakRef.get();
+        }
+
+        static RemoteToken fromBinder(IBinder binder) {
+            return (RemoteToken) binder;
+        }
+
+        @Override
+        public SurfaceControl getLeash() {
+            throw new RuntimeException("Not implemented");
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("RemoteToken{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            sb.append(mWeakRef.get());
+            sb.append('}');
+            return sb.toString();
+        }
     }
 }

@@ -3303,7 +3303,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private int sanitizeAndApplyChange(ConfigurationContainer container,
+    private int sanitizeAndApplyChange(WindowContainer container,
             WindowContainerTransaction.Change change) {
         if (!(container instanceof Task || container instanceof ActivityStack)) {
             throw new RuntimeException("Invalid token in task transaction");
@@ -3347,13 +3347,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private int applyWindowContainerChange(ConfigurationContainer cc,
+    private int applyWindowContainerChange(WindowContainer wc,
             WindowContainerTransaction.Change c) {
-        int effects = sanitizeAndApplyChange(cc, c);
+        int effects = sanitizeAndApplyChange(wc, c);
 
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
-            Task tr = (Task) cc;
+            Task tr = (Task) wc;
             mStackSupervisor.updatePictureInPictureMode(tr,
                     enterPipBounds, true);
         }
@@ -3378,17 +3378,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     while (entries.hasNext()) {
                         final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
                                 entries.next();
-                        final ConfigurationContainer cc =
-                                ConfigurationContainer.RemoteToken.fromBinder(
-                                        entry.getKey()).getContainer();
-                        int containerEffect = applyWindowContainerChange(cc, entry.getValue());
+                        final WindowContainer wc = WindowContainer.RemoteToken.fromBinder(
+                                entry.getKey()).getContainer();
+                        int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                         effects |= containerEffect;
                         // Lifecycle changes will trigger ensureConfig for everything.
                         if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
                                 && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
-                            if (cc instanceof WindowContainer) {
-                                haveConfigChanges.add((WindowContainer) cc);
-                            }
+                            haveConfigChanges.add(wc);
                         }
                     }
                     if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {

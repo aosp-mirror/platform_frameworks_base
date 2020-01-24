@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
@@ -496,7 +495,7 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     class TaskToken extends RemoteToken {
-        TaskToken(ConfigurationContainer container) {
+        TaskToken(WindowContainer container) {
             super(container);
         }
 
