@@ -34,9 +34,12 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -49,15 +52,20 @@ import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
 import android.view.contentcapture.IContentCaptureDirectManager;
 import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A service used to capture the content of the screen to provide contextual data in other areas of
@@ -163,6 +171,12 @@ public abstract class ContentCaptureService extends Service {
         public void onDataRemovalRequest(DataRemovalRequest request) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnDataRemovalRequest,
                     ContentCaptureService.this, request));
+        }
+
+        @Override
+        public void onDataShared(DataShareRequest request, IDataShareCallback callback) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnDataShared,
+                    ContentCaptureService.this, request, callback));
         }
 
         @Override
@@ -315,6 +329,21 @@ public abstract class ContentCaptureService extends Service {
      */
     public void onDataRemovalRequest(@NonNull DataRemovalRequest request) {
         if (sVerbose) Log.v(TAG, "onDataRemovalRequest()");
+    }
+
+    /**
+     * Notifies the service that data has been shared via a readable file.
+     *
+     * @param request request object containing information about data being shared
+     * @param callback callback to be fired with response on whether the request is "needed" and can
+     *                 be handled by the Content Capture service.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void onDataShareRequest(@NonNull DataShareRequest request,
+            @NonNull DataShareCallback callback) {
+        if (sVerbose) Log.v(TAG, "onDataShareRequest()");
     }
 
     /**
@@ -505,6 +534,37 @@ public abstract class ContentCaptureService extends Service {
         onDataRemovalRequest(request);
     }
 
+    private void handleOnDataShared(@NonNull DataShareRequest request,
+            IDataShareCallback callback) {
+        onDataShareRequest(request, new DataShareCallback() {
+
+            @Override
+            public void onAccept(@NonNull Executor executor,
+                    @NonNull DataShareReadAdapter adapter) {
+                Preconditions.checkNotNull(adapter);
+                Preconditions.checkNotNull(executor);
+
+                DataShareReadAdapterDelegate delegate =
+                        new DataShareReadAdapterDelegate(executor, adapter);
+
+                try {
+                    callback.accept(delegate);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to accept data sharing", e);
+                }
+            }
+
+            @Override
+            public void onReject() {
+                try {
+                    callback.reject();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to reject data sharing", e);
+                }
+            }
+        });
+    }
+
     private void handleOnActivityEvent(@NonNull ActivityEvent event) {
         onActivityEvent(event);
     }
@@ -587,6 +647,59 @@ public abstract class ContentCaptureService extends Service {
             mCallback.writeSessionFlush(sessionId, app, flushMetrics, options, flushReason);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to write flush metrics: " + e);
+        }
+    }
+
+    private static class DataShareReadAdapterDelegate extends IDataShareReadAdapter.Stub {
+
+        private final Object mLock = new Object();
+        private final WeakReference<DataShareReadAdapter> mAdapterReference;
+        private final WeakReference<Executor> mExecutorReference;
+
+        DataShareReadAdapterDelegate(Executor executor, DataShareReadAdapter adapter) {
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(adapter);
+
+            mExecutorReference = new WeakReference<>(executor);
+            mAdapterReference = new WeakReference<>(adapter);
+        }
+
+        @Override
+        public void start(ParcelFileDescriptor fd, ICancellationSignal remoteCancellationSignal)
+                throws RemoteException {
+            synchronized (mLock) {
+                CancellationSignal cancellationSignal = new CancellationSignal();
+                cancellationSignal.setRemote(remoteCancellationSignal);
+
+                executeAdapterMethodLocked(
+                        adapter -> adapter.onStart(fd, cancellationSignal), "onStart");
+            }
+        }
+
+        @Override
+        public void error(int errorCode) throws RemoteException {
+            synchronized (mLock) {
+                executeAdapterMethodLocked(
+                        adapter -> adapter.onError(errorCode), "onError");
+            }
+        }
+
+        private void executeAdapterMethodLocked(Consumer<DataShareReadAdapter> adapterFn,
+                String methodName) {
+            DataShareReadAdapter adapter = mAdapterReference.get();
+            Executor executor = mExecutorReference.get();
+
+            if (adapter == null || executor == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), references have been GC'ed");
+                return;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> adapterFn.accept(adapter));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 }
