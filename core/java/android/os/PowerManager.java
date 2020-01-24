@@ -1409,6 +1409,7 @@ public final class PowerManager {
      * @throws UnsupportedOperationException if userspace reboot was requested on a device that
      *                                       doesn't support it.
      */
+    @RequiresPermission(permission.REBOOT)
     public void reboot(@Nullable String reason) {
         if (REBOOT_USERSPACE.equals(reason) && !isRebootingUserspaceSupported()) {
             throw new UnsupportedOperationException(
@@ -1428,6 +1429,7 @@ public final class PowerManager {
      * </p>
      * @hide
      */
+    @RequiresPermission(permission.REBOOT)
     public void rebootSafeMode() {
         try {
             mService.rebootSafeMode(false, true);
