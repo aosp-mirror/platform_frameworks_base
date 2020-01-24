@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -63,20 +63,24 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskOrganizerTests extends WindowTestsBase {
-    private ITaskOrganizer makeAndRegisterMockOrganizer() {
+    private ITaskOrganizer registerMockOrganizer(int windowingMode) {
         final ITaskOrganizer organizer = mock(ITaskOrganizer.class);
         when(organizer.asBinder()).thenReturn(new Binder());
 
-        mWm.mAtmService.registerTaskOrganizer(organizer, WINDOWING_MODE_PINNED);
+        mWm.mAtmService.registerTaskOrganizer(organizer, windowingMode);
 
         return organizer;
+    }
+
+    private ITaskOrganizer registerMockOrganizer() {
+        return registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
     }
 
     @Test
     public void testAppearVanish() throws RemoteException {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
+        final ITaskOrganizer organizer = registerMockOrganizer();
 
         task.setTaskOrganizer(organizer);
         verify(organizer).taskAppeared(any(), any());
@@ -89,8 +93,8 @@ public class TaskOrganizerTests extends WindowTestsBase {
     public void testSwapOrganizer() throws RemoteException {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
-        final ITaskOrganizer organizer2 = makeAndRegisterMockOrganizer();
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_PINNED);
 
         task.setTaskOrganizer(organizer);
         verify(organizer).taskAppeared(any(), any());
@@ -100,10 +104,24 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSwapWindowingModes() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_PINNED);
+ 
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer).taskAppeared(any(), any());
+        stack.setWindowingMode(WINDOWING_MODE_PINNED);
+        verify(organizer).taskVanished(any());
+        verify(organizer2).taskAppeared(any(), any());
+    }
+
+    @Test
     public void testClearOrganizer() throws RemoteException {
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
+        final ITaskOrganizer organizer = registerMockOrganizer();
 
         stack.setTaskOrganizer(organizer);
         verify(organizer).taskAppeared(any(), any());
@@ -116,7 +134,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testRegisterTaskOrganizerStackWindowingModeChanges() throws RemoteException {
-        final ITaskOrganizer organizer = makeAndRegisterMockOrganizer();
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_PINNED);
 
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
