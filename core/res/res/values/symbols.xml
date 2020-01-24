@@ -3861,7 +3861,6 @@
   <java-symbol type="color" name="decor_view_status_guard_light" />
 
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
-  <java-symbol type="bool" name="config_inflateSignalStrength" />
   <java-symbol type="array" name="config_restrictedPreinstalledCarrierApps" />
 
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />

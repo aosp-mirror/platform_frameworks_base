@@ -4345,10 +4345,6 @@
     only. The component must be part of a system app. -->
     <string name="config_defaultSupervisionProfileOwnerComponent" translatable="false"></string>
 
-    <!-- Whether to artificially interpret all signal strengths as
-         one bar higher than they actually are -->
-    <bool name="config_inflateSignalStrength">false</bool>
-
     <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
          grants, even if the UICC claims that the app should be privileged. See b/138150105 -->
     <string-array name="config_restrictedPreinstalledCarrierApps" translatable="false"/>
