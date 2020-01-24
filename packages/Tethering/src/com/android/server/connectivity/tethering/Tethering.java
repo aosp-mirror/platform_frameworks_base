@@ -30,6 +30,7 @@ import static android.net.TetheringManager.EXTRA_ACTIVE_TETHER;
 import static android.net.TetheringManager.EXTRA_AVAILABLE_TETHER;
 import static android.net.TetheringManager.EXTRA_ERRORED_TETHER;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
+import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_INVALID;
 import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
@@ -68,6 +69,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
+import android.net.EthernetManager;
 import android.net.IIntResultListener;
 import android.net.INetd;
 import android.net.ITetheringEventCallback;
@@ -112,6 +114,7 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
@@ -213,6 +216,13 @@ public class Tethering {
     private TetherStatesParcel mTetherStatesParcel;
     private boolean mDataSaverEnabled = false;
     private String mWifiP2pTetherInterface = null;
+
+    @GuardedBy("mPublicSync")
+    private EthernetManager.TetheredInterfaceRequest mEthernetIfaceRequest;
+    @GuardedBy("mPublicSync")
+    private String mConfiguredEthernetIface;
+    @GuardedBy("mPublicSync")
+    private EthernetCallback mEthernetCallback;
 
     public Tethering(TetheringDependencies deps) {
         mLog.mark("Tethering.constructed");
@@ -464,6 +474,10 @@ public class Tethering {
                 result = setNcmTethering(enable);
                 sendTetherResult(listener, result);
                 break;
+            case TETHERING_ETHERNET:
+                result = setEthernetTethering(enable);
+                sendTetherResult(listener, result);
+                break;
             default:
                 Log.w(TAG, "Invalid tether type.");
                 sendTetherResult(listener, TETHER_ERROR_UNKNOWN_IFACE);
@@ -540,6 +554,57 @@ public class Tethering {
         }, BluetoothProfile.PAN);
     }
 
+    private int setEthernetTethering(final boolean enable) {
+        final EthernetManager em = (EthernetManager) mContext.getSystemService(
+                Context.ETHERNET_SERVICE);
+        synchronized (mPublicSync) {
+            if (enable) {
+                mEthernetCallback = new EthernetCallback();
+                mEthernetIfaceRequest = em.requestTetheredInterface(mEthernetCallback);
+            } else {
+                if (mConfiguredEthernetIface != null) {
+                    stopEthernetTetheringLocked();
+                    mEthernetIfaceRequest.release();
+                }
+                mEthernetCallback = null;
+            }
+        }
+        return TETHER_ERROR_NO_ERROR;
+    }
+
+    private void stopEthernetTetheringLocked() {
+        if (mConfiguredEthernetIface == null) return;
+        changeInterfaceState(mConfiguredEthernetIface, IpServer.STATE_AVAILABLE);
+        stopTrackingInterfaceLocked(mConfiguredEthernetIface);
+        mConfiguredEthernetIface = null;
+    }
+
+    private class EthernetCallback implements EthernetManager.TetheredInterfaceCallback {
+        @Override
+        public void onAvailable(String iface) {
+            synchronized (mPublicSync) {
+                if (this != mEthernetCallback) {
+                    // Ethernet callback arrived after Ethernet tethering stopped. Ignore.
+                    return;
+                }
+                maybeTrackNewInterfaceLocked(iface, TETHERING_ETHERNET);
+                changeInterfaceState(iface, IpServer.STATE_TETHERED);
+                mConfiguredEthernetIface = iface;
+            }
+        }
+
+        @Override
+        public void onUnavailable() {
+            synchronized (mPublicSync) {
+                if (this != mEthernetCallback) {
+                    // onAvailable called after stopping Ethernet tethering.
+                    return;
+                }
+                stopEthernetTetheringLocked();
+            }
+        }
+    }
+
     int tether(String iface) {
         return tether(iface, IpServer.STATE_TETHERED);
     }
@@ -590,6 +655,7 @@ public class Tethering {
         stopTethering(TETHERING_WIFI_P2P);
         stopTethering(TETHERING_USB);
         stopTethering(TETHERING_BLUETOOTH);
+        stopTethering(TETHERING_ETHERNET);
     }
 
     int getLastTetherError(String iface) {
