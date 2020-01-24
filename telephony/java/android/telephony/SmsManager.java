@@ -2529,7 +2529,7 @@ public final class SmsManager {
         MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
         if (m != null) {
             m.sendMultimediaMessage(getSubscriptionId(), contentUri, locationUrl, configOverrides,
-                    sentIntent);
+                    sentIntent, 0L /* messageId */);
         }
     }
 
@@ -2567,7 +2567,7 @@ public final class SmsManager {
         MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
         if (m != null) {
             m.downloadMultimediaMessage(getSubscriptionId(), locationUrl, contentUri,
-                    configOverrides, downloadedIntent);
+                    configOverrides, downloadedIntent, 0L /* messageId */);
         }
     }
 
