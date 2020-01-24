@@ -17,7 +17,6 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -179,6 +178,10 @@ import java.util.Objects;
  *         <td>TV content rating system for Canada (French)</td>
  *     </tr>
  *     <tr>
+ *         <td>DTMB</td>
+ *         <td>DTMB content rating system</td>
+ *     </tr>
+ *     <tr>
  *         <td>DVB</td>
  *         <td>DVB content rating system</td>
  *     </tr>
@@ -199,8 +202,16 @@ import java.util.Objects;
  *         <td>TV content rating system for South Korea</td>
  *     </tr>
  *     <tr>
+ *         <td>NZ_TV</td>
+ *         <td>TV content rating system for New Zealand</td>
+ *     </tr>
+ *     <tr>
  *         <td>SG_TV</td>
  *         <td>TV content rating system for Singapore</td>
+ *     </tr>
+ *     <tr>
+ *         <td>TH_TV</td>
+ *         <td>TV content rating system for Thailand</td>
  *     </tr>
  *     <tr>
  *         <td>US_MV</td>
@@ -354,6 +365,67 @@ import java.util.Objects;
  *     <tr>
  *         <td>CA_TV_FR_18</td>
  *         <td>Only to be viewed by adults</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="15">DTMB</td>
+ *         <td>DTMB_4</td>
+ *         <td>Recommended for ages 4 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_5</td>
+ *         <td>Recommended for ages 5 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_6</td>
+ *         <td>Recommended for ages 6 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_7</td>
+ *         <td>Recommended for ages 7 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_8</td>
+ *         <td>Recommended for ages 8 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_9</td>
+ *         <td>Recommended for ages 9 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_10</td>
+ *         <td>Recommended for ages 10 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_11</td>
+ *         <td>Recommended for ages 11 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_12</td>
+ *         <td>Recommended for ages 12 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_13</td>
+ *         <td>Recommended for ages 13 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_14</td>
+ *         <td>Recommended for ages 14 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_15</td>
+ *         <td>Recommended for ages 15 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_16</td>
+ *         <td>Recommended for ages 16 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_17</td>
+ *         <td>Recommended for ages 17 and over</td>
+ *     </tr>
+ *     <tr>
+ *         <td>DTMB_18</td>
+ *         <td>Recommended for ages 18 and over</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="15">DVB</td>
@@ -648,6 +720,22 @@ import java.util.Objects;
  *         <td>For adults only</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="3">NZ_TV</td>
+ *         <td>NZ_TV_G</td>
+ *         <td>Programmes which exclude material likely to be unsuitable for children. Programmes
+ *         may not necessarily be designed for child viewers but should not contain material likely
+ *         to alarm or distress them</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NZ_TV_PGR</td>
+ *         <td>Programmes containing material more suited for mature audiences but not necessarily
+ *         unsuitable for child viewers when subject to the guidance of a parent or an adult</td>
+ *     </tr>
+ *     <tr>
+ *         <td>NZ_TV_AO</td>
+ *         <td>Programmes containing adult themes and directed primarily at mature audiences</td>
+ *     </tr>
+ *     <tr>
  *         <td valign="top" rowspan="6">SG_TV</td>
  *         <td>SG_TV_G</td>
  *         <td>Suitable for all ages</td>
@@ -672,6 +760,31 @@ import java.util.Objects;
  *     <tr>
  *         <td>SG_TV_R21</td>
  *         <td>Suitable for adults aged 21 and above</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="6">TH_TV</td>
+ *         <td>TH_TV_4</td>
+ *         <td>Suitable for audiences 3 to 5 years of age</td>
+ *     </tr>
+ *     <tr>
+ *         <td>TH_TV_6</td>
+ *         <td>Suitable for audiences 6 to 12 years of age</td>
+ *     </tr>
+ *     <tr>
+ *         <td>TH_TV_10</td>
+ *         <td>Suitable for all audiences</td>
+ *     </tr>
+ *     <tr>
+ *         <td>TH_TV_13</td>
+ *         <td>Parental guidance suggested for viewers age below 13</td>
+ *     </tr>
+ *     <tr>
+ *         <td>TH_TV_18</td>
+ *         <td>Parental guidance suggested for viewers age below 18</td>
+ *     </tr>
+ *     <tr>
+ *         <td>TH_TV_19</td>
+ *         <td>Not suitable for children and teenagers</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="5">US_MV</td>
