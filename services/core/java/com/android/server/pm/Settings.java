@@ -3155,7 +3155,7 @@ public final class Settings {
                 LocalServices.getService(PackageManagerInternal.class);
         for (PackageSetting ps : mPackages.values()) {
             if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0 && ps.pkg != null
-                    && ps.pkg.getPreferredActivityFilters() != null) {
+                    && !ps.pkg.getPreferredActivityFilters().isEmpty()) {
                 List<ComponentParseUtils.ParsedActivityIntentInfo> intents
                         = ps.pkg.getPreferredActivityFilters();
                 for (int i=0; i<intents.size(); i++) {
@@ -4608,10 +4608,10 @@ public final class Settings {
                 pw.print(" (override=true)");
             }
             pw.println();
-            if (ps.pkg.getQueriesPackages() != null) {
+            if (ps.pkg.getQueriesPackages().isEmpty()) {
                 pw.append(prefix).append("  queriesPackages=").println(ps.pkg.getQueriesPackages());
             }
-            if (ps.pkg.getQueriesIntents() != null) {
+            if (!ps.pkg.getQueriesIntents().isEmpty()) {
                 pw.append(prefix).append("  queriesIntents=").println(ps.pkg.getQueriesIntents());
             }
             pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.getDataDir());
@@ -4707,11 +4707,10 @@ public final class Settings {
                     pw.print(prefix); pw.print("    "); pw.println(usesLibraryFiles[i]);
                 }
             }
-            final ArrayMap<String, ComponentParseUtils.ParsedProcess> procs = pkg.getProcesses();
-            if (procs != null) {
+            final Map<String, ComponentParseUtils.ParsedProcess> procs = pkg.getProcesses();
+            if (!procs.isEmpty()) {
                 pw.print(prefix); pw.println("  processes:");
-                for (int i = 0; i < procs.size(); i++) {
-                    final ComponentParseUtils.ParsedProcess proc = procs.valueAt(i);
+                for (ComponentParseUtils.ParsedProcess proc : procs.values()) {
                     pw.print(prefix); pw.print("    "); pw.println(proc.name);
                     if (proc.deniedPermissions != null) {
                         for (int j = 0; j < proc.deniedPermissions.size(); j++) {
@@ -4751,7 +4750,7 @@ public final class Settings {
             pw.print(prefix); pw.print("  overlayCategory="); pw.println(pkg.getOverlayCategory());
         }
 
-        if (pkg != null && pkg.getPermissions() != null && pkg.getPermissions().size() > 0) {
+        if (pkg != null && !pkg.getPermissions().isEmpty()) {
             final List<ParsedPermission> perms = pkg.getPermissions();
             pw.print(prefix); pw.println("  declared permissions:");
             for (int i=0; i<perms.size(); i++) {

@@ -29,8 +29,10 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
-import android.content.pm.parsing.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
+
 import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
@@ -763,8 +765,8 @@ public abstract class PackageManagerInternal {
             throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
-    public abstract boolean isEnabledAndMatches(
-            @NonNull ComponentParseUtils.ParsedComponent component, int flags, int userId);
+    public abstract boolean isEnabledAndMatches(@NonNull ParsedMainComponent component, int flags,
+            int userId);
 
     /** Returns {@code true} if the given user requires extra badging for icons. */
     public abstract boolean userNeedsBadging(int userId);

@@ -207,14 +207,14 @@ public class AppsFilter {
     /** Returns true if the querying package may query for the potential target package */
     private static boolean canQueryViaComponents(AndroidPackage querying,
             AndroidPackage potentialTarget) {
-        if (querying.getQueriesIntents() != null) {
+        if (!querying.getQueriesIntents().isEmpty()) {
             for (Intent intent : querying.getQueriesIntents()) {
                 if (matchesIntentFilters(intent, potentialTarget)) {
                     return true;
                 }
             }
         }
-        if (querying.getQueriesProviders() != null
+        if (!querying.getQueriesProviders().isEmpty()
                 && matchesProviders(querying.getQueriesProviders(), potentialTarget)) {
             return true;
         }
@@ -223,7 +223,7 @@ public class AppsFilter {
 
     private static boolean canQueryViaPackage(AndroidPackage querying,
             AndroidPackage potentialTarget) {
-        return querying.getQueriesPackages() != null
+        return !querying.getQueriesPackages().isEmpty()
                 && querying.getQueriesPackages().contains(potentialTarget.getPackageName());
     }
 

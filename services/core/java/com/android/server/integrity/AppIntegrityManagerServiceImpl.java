@@ -512,7 +512,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         try {
             ParsedPackage pkg = parser.parseParsedPackage(installationPath, 0, false);
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
-            ApkParseUtils.collectCertificates(pkg, false);
+            pkg.setSigningDetails(ApkParseUtils.collectCertificates(pkg, false));
             return PackageInfoUtils.generate(pkg, null, flags, 0, 0, null, new PackageUserState(),
                     UserHandle.getCallingUserId());
         } catch (Exception e) {

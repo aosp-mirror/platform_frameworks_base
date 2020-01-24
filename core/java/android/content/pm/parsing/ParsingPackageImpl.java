@@ -61,7 +61,7 @@ import com.android.internal.util.Parcelling.BuiltIn.ForBoolean;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringArray;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringList;
-import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringMap;
+import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringValueMap;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet;
 
 import java.security.PublicKey;
@@ -159,7 +159,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int overlayPriority;
     private boolean overlayIsStatic;
     @NonNull
-    @DataClass.ParcelWith(ForInternedStringMap.class)
+    @DataClass.ParcelWith(ForInternedStringValueMap.class)
     private Map<String, String> overlayables = emptyMap();
 
     @Nullable

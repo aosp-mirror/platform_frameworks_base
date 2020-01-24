@@ -50,7 +50,7 @@ import java.util.List;
 /** @hide */
 public class ApkLiteParseUtils {
 
-    private static final String TAG = ApkParseUtils.TAG;
+    private static final String TAG = ParsingPackageUtils.TAG;
 
     // TODO(b/135203078): Consolidate constants
     private static final int DEFAULT_MIN_SDK_VERSION = 1;
@@ -235,7 +235,7 @@ public class ApkLiteParseUtils {
                 final boolean skipVerify = (flags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0;
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
-                    signingDetails = ApkParseUtils.collectCertificates(apkFile.getAbsolutePath(),
+                    signingDetails = ParsingPackageUtils.collectCertificates(apkFile.getAbsolutePath(),
                             skipVerify, false, PackageParser.SigningDetails.UNKNOWN,
                             DEFAULT_TARGET_SDK_VERSION);
                 } finally {

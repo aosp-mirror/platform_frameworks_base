@@ -82,7 +82,7 @@ import java.util.Objects;
  */
 public class ComponentParseUtils {
 
-    private static final String TAG = ApkParseUtils.TAG;
+    private static final String TAG = ParsingUtils.TAG;
 
     // TODO(b/135203078): None of this class's subclasses do anything. Remove in favor of base?
     public static class ParsedIntentInfo extends IntentFilter {
@@ -315,7 +315,7 @@ public class ComponentParseUtils {
         // TODO(b/135203078): Make subclass that contains these fields only for the necessary
         //  subtypes
         protected boolean enabled = true;
-        protected boolean directBootAware;
+        public boolean directBootAware;
         public int flags;
 
         private String packageName;
@@ -1460,7 +1460,7 @@ public class ComponentParseUtils {
                 outError[0] = tag + " does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = tag + " invalid android:name";
                     return null;
@@ -1537,7 +1537,7 @@ public class ComponentParseUtils {
                     R.styleable.AndroidManifestActivity_parentActivityName,
                     Configuration.NATIVE_CONFIG_VERSION);
             if (parentName != null) {
-                String parentClassName = ApkParseUtils.buildClassName(packageName, parentName);
+                String parentClassName = ParsingUtils.buildClassName(packageName, parentName);
                 if (parentClassName == null) {
                     Log.e(TAG,
                             "Activity " + result.className
@@ -1856,9 +1856,8 @@ public class ComponentParseUtils {
                     parsingPackage.addPreferredActivityFilter(intentInfo);
                 }
             } else if (parser.getName().equals("meta-data")) {
-                if ((result.metaData = ApkParseUtils.parseMetaData(parsingPackage, res, parser,
-                        result.metaData,
-                        outError)) == null) {
+                if ((result.metaData = ParsingPackageUtils.parseMetaData(parsingPackage, res,
+                        parser, result.metaData, outError)) == null) {
                     return null;
                 }
             } else if (!receiver && parser.getName().equals("layout")) {
@@ -1969,7 +1968,7 @@ public class ComponentParseUtils {
                 outError[0] = "<service> does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = "<service> invalid android:name";
                     return null;
@@ -2099,7 +2098,7 @@ public class ComponentParseUtils {
             }
         }
 
-        if (parsingPackage.cantSaveState()) {
+        if (parsingPackage.isCantSaveState()) {
             // A heavy-weight application can not have services in its main process
             // We can do direct compare because we intern all strings.
             if (Objects.equals(result.getProcessName(), parsingPackage.getPackageName())) {
@@ -2132,9 +2131,8 @@ public class ComponentParseUtils {
                 result.order = Math.max(intent.getOrder(), result.order);
                 result.intents.add(intent);
             } else if (parser.getName().equals("meta-data")) {
-                if ((result.metaData = ApkParseUtils.parseMetaData(parsingPackage, res, parser,
-                        result.metaData,
-                        outError)) == null) {
+                if ((result.metaData = ParsingPackageUtils.parseMetaData(parsingPackage, res,
+                        parser, result.metaData, outError)) == null) {
                     return null;
                 }
             } else {
@@ -2182,7 +2180,7 @@ public class ComponentParseUtils {
                 outError[0] = "<provider> does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = "<provider> invalid android:name";
                     return null;
@@ -2413,7 +2411,7 @@ public class ComponentParseUtils {
                 outInfo.intents.add(intent);
 
             } else if (parser.getName().equals("meta-data")) {
-                Bundle metaData = ApkParseUtils.parseMetaData(parsingPackage, res, parser,
+                Bundle metaData = ParsingPackageUtils.parseMetaData(parsingPackage, res, parser,
                         outInfo.metaData, outError);
                 if (metaData == null) {
                     return false;
@@ -2607,7 +2605,7 @@ public class ComponentParseUtils {
         }
 
         String packageName = parsingPackage.getPackageName();
-        targetActivity = ApkParseUtils.buildClassName(packageName, targetActivity);
+        targetActivity = ParsingUtils.buildClassName(packageName, targetActivity);
         if (targetActivity == null) {
             outError[0] = "Empty class name in package " + packageName;
             sa.recycle();
@@ -2664,7 +2662,7 @@ public class ComponentParseUtils {
         result.requestedVrComponent = target.requestedVrComponent;
         result.directBootAware = target.directBootAware;
 
-        result.setProcessName(parsingPackage.getAppInfoProcessName(), target.getProcessName());
+        result.setProcessName(parsingPackage.getProcessName(), target.getProcessName());
 
         // Not all attributes from the target ParsedActivity are copied to the alias.
         // Careful when adding an attribute and determine whether or not it should be copied.
@@ -2686,7 +2684,7 @@ public class ComponentParseUtils {
             outError[0] = "<activity-alias> does not specify android:name";
             return null;
         } else {
-            String className = ApkParseUtils.buildClassName(packageName, name);
+            String className = ParsingUtils.buildClassName(packageName, name);
             if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                 outError[0] = "<activity-alias> invalid android:name";
                 return null;
@@ -2751,7 +2749,7 @@ public class ComponentParseUtils {
                 R.styleable.AndroidManifestActivityAlias_parentActivityName,
                 Configuration.NATIVE_CONFIG_VERSION);
         if (parentName != null) {
-            String parentClassName = ApkParseUtils.buildClassName(result.getPackageName(),
+            String parentClassName = ParsingUtils.buildClassName(result.getPackageName(),
                     parentName);
             if (parentClassName == null) {
                 Log.e(TAG, "Activity alias " + result.className +
@@ -2811,9 +2809,8 @@ public class ComponentParseUtils {
                     result.flags |= ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP;
                 }
             } else if (tagName.equals("meta-data")) {
-                if ((result.metaData = ApkParseUtils.parseMetaData(parsingPackage, res, parser,
-                        result.metaData,
-                        outError)) == null) {
+                if ((result.metaData = ParsingPackageUtils.parseMetaData(parsingPackage, res,
+                        parser, result.metaData, outError)) == null) {
                     return null;
                 }
             } else {
@@ -2935,7 +2932,7 @@ public class ComponentParseUtils {
                 outError[0] = "<permission> does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = "<permission> invalid android:name";
                     return null;
@@ -3073,7 +3070,7 @@ public class ComponentParseUtils {
                 outError[0] = "<permission-tree> does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = "<permission-tree> invalid android:name";
                     return null;
@@ -3163,7 +3160,7 @@ public class ComponentParseUtils {
                 outError[0] = "<permission> does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = "<permission> invalid android:name";
                     return null;
@@ -3262,7 +3259,7 @@ public class ComponentParseUtils {
                 outError[0] = "<instrumentation> does not specify android:name";
                 return null;
             } else {
-                String className = ApkParseUtils.buildClassName(packageName, name);
+                String className = ParsingUtils.buildClassName(packageName, name);
                 if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)) {
                     outError[0] = "<instrumentation> invalid android:name";
                     return null;
@@ -3764,8 +3761,8 @@ public class ComponentParseUtils {
             }
 
             if (parser.getName().equals("meta-data")) {
-                if ((outInfo.metaData = ApkParseUtils.parseMetaData(parsingPackage, res, parser,
-                        outInfo.metaData, outError)) == null) {
+                if ((outInfo.metaData = ParsingPackageUtils.parseMetaData(parsingPackage, res,
+                        parser, outInfo.metaData, outError)) == null) {
                     return false;
                 }
             } else {

@@ -40,8 +40,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ApkParseUtils;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
@@ -66,6 +65,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionsState;
 
 import dalvik.system.VMRuntime;
@@ -544,7 +544,8 @@ public class PackageManagerServiceUtils {
     private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting) {
         try {
-            ApkParseUtils.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */);
+            disabledPkgSetting.pkg.mutate().setSigningDetails(
+                    ParsingPackageUtils.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */));
             if (pkgSetting.signatures.mSigningDetails.checkCapability(
                     disabledPkgSetting.signatures.mSigningDetails,
                     PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)

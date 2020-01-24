@@ -20,13 +20,12 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
 import android.service.pm.PackageProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionsState;
 
 import java.io.File;
@@ -39,8 +38,7 @@ import java.util.Set;
 /**
  * Settings data for a particular package we know about.
  */
-public final class PackageSetting extends PackageSettingBase implements
-        ParsedPackage.PackageSettingCallback {
+public final class PackageSetting extends PackageSettingBase {
     int appId;
 
     public AndroidPackage pkg;
@@ -322,11 +320,5 @@ public final class PackageSetting extends PackageSettingBase implements
 
         Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
         updateMimeGroups(mimeGroupNames);
-    }
-
-    // TODO(b/135203078): Move to constructor
-    @Override
-    public void setAndroidPackage(AndroidPackage pkg) {
-        this.pkg = pkg;
     }
 }

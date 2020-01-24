@@ -3612,7 +3612,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             return EmptyArray.INT;
         }
         for (AndroidPackage pkg : pkgList) {
-            if (pkg.getRequestedPermissions() == null) {
+            if (pkg.getRequestedPermissions().isEmpty()) {
                 continue;
             }
             final int requestedPermCount = pkg.getRequestedPermissions().size();
@@ -4246,7 +4246,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private static boolean hasPermission(AndroidPackage pkg, String permName) {
-        if (pkg.getPermissions() == null) {
+        if (pkg.getPermissions().isEmpty()) {
             return false;
         }
 

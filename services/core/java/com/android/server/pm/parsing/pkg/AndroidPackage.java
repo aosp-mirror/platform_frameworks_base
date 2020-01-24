@@ -187,7 +187,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
     @NonNull
     List<ParsedPermissionGroup> getPermissionGroups();
 
-    @Nullable
+    @NonNull
     List<ParsedFeature> getFeatures();
 
     /**

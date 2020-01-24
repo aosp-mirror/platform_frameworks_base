@@ -26,6 +26,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTEN
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
+import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
@@ -99,10 +100,10 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 /** @hide */
-public class ApkParseUtils {
+public class ParsingPackageUtils {
 
     // TODO(b/135203078): Consolidate log tags
-    static final String TAG = "PackageParsing";
+    public static final String TAG = "PackageParsing";
 
     /**
      * Parse the package at the given location. Automatically detects if the
@@ -114,7 +115,7 @@ public class ApkParseUtils {
      * and unique split names.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #collectCertificates(ParsedPackage, boolean)}.
+     * must be done separately in {@link #collectCertificates(ParsingPackageRead, boolean)}.
      *
      * If {@code useCaches} is true, the package parser might return a cached
      * result from a previous parse of the same {@code packageFile} with the same
@@ -126,7 +127,7 @@ public class ApkParseUtils {
     public static ParsingPackage parsePackage(
             ParseInput parseInput,
             String[] separateProcesses,
-            PackageParser.Callback callback,
+            Callback callback,
             DisplayMetrics displayMetrics,
             boolean onlyCoreApps,
             File packageFile,
@@ -148,12 +149,12 @@ public class ApkParseUtils {
      * split names.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #collectCertificates(ParsedPackage, boolean)}.
+     * must be done separately in {@link #collectCertificates(ParsingPackageRead, boolean)}.
      */
     private static ParsingPackage parseClusterPackage(
             ParseInput parseInput,
             String[] separateProcesses,
-            PackageParser.Callback callback,
+            Callback callback,
             DisplayMetrics displayMetrics,
             boolean onlyCoreApps,
             File packageDir,
@@ -184,7 +185,7 @@ public class ApkParseUtils {
             final AssetManager assets = assetLoader.getBaseAssetManager();
             final File baseApk = new File(lite.baseCodePath);
             ParsingPackage parsingPackage = parseBaseApk(parseInput, separateProcesses, callback,
-                    displayMetrics, baseApk, assets, flags);
+                    displayMetrics, baseApk, lite.codePath, assets, flags);
             if (parsingPackage == null) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
                         "Failed to parse base APK: " + baseApk);
@@ -206,8 +207,7 @@ public class ApkParseUtils {
                 }
             }
 
-            return parsingPackage.setCodePath(lite.codePath)
-                    .setUse32BitAbi(lite.use32bitAbi);
+            return parsingPackage.setUse32BitAbi(lite.use32bitAbi);
         } finally {
             IoUtils.closeQuietly(assetLoader);
         }
@@ -217,12 +217,12 @@ public class ApkParseUtils {
      * Parse the given APK file, treating it as as a single monolithic package.
      * <p>
      * Note that this <em>does not</em> perform signature verification; that
-     * must be done separately in {@link #collectCertificates(AndroidPackage, boolean)}.
+     * must be done separately in {@link #collectCertificates(ParsingPackageRead, boolean)}.
      */
     public static ParsingPackage parseMonolithicPackage(
             ParseInput parseInput,
             String[] separateProcesses,
-            PackageParser.Callback callback,
+            Callback callback,
             DisplayMetrics displayMetrics,
             boolean onlyCoreApps,
             File apkFile,
@@ -240,8 +240,8 @@ public class ApkParseUtils {
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
         try {
             return parseBaseApk(parseInput, separateProcesses, callback,
-                    displayMetrics, apkFile, assetLoader.getBaseAssetManager(), flags)
-                    .setCodePath(apkFile.getCanonicalPath())
+                    displayMetrics, apkFile, apkFile.getCanonicalPath(),
+                    assetLoader.getBaseAssetManager(), flags)
                     .setUse32BitAbi(lite.use32bitAbi);
         } catch (IOException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
@@ -251,14 +251,9 @@ public class ApkParseUtils {
         }
     }
 
-    private static ParsingPackage parseBaseApk(
-            ParseInput parseInput,
-            String[] separateProcesses,
-            PackageParser.Callback callback,
-            DisplayMetrics displayMetrics,
-            File apkFile,
-            AssetManager assets,
-            int flags
+    private static ParsingPackage parseBaseApk(ParseInput parseInput, String[] separateProcesses,
+            Callback callback, DisplayMetrics displayMetrics, File apkFile,
+            String codePath, AssetManager assets, int flags
     ) throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
@@ -280,8 +275,8 @@ public class ApkParseUtils {
             parser = assets.openXmlResourceParser(cookie, PackageParser.ANDROID_MANIFEST_FILENAME);
             final Resources res = new Resources(assets, displayMetrics, null);
 
-            ParseResult result = parseBaseApk(parseInput, separateProcesses, callback, apkPath, res,
-                    parser, flags);
+            ParseResult result = parseBaseApk(parseInput, separateProcesses, callback, apkPath,
+                    codePath, res, parser, flags);
             if (!result.isSuccess()) {
                 throw new PackageParserException(result.getParseError(),
                         apkPath + " (at " + parser.getPositionDescription() + "): "
@@ -305,7 +300,6 @@ public class ApkParseUtils {
             }
 
             return pkg.setVolumeUuid(volumeUuid)
-                    .setApplicationVolumeUuid(volumeUuid)
                     .setSigningDetails(SigningDetails.UNKNOWN);
         } catch (PackageParserException e) {
             throw e;
@@ -372,14 +366,9 @@ public class ApkParseUtils {
      * @param flags    Flags how to parse
      * @return Parsed package or null on error.
      */
-    private static ParseResult parseBaseApk(
-            ParseInput parseInput,
-            String[] separateProcesses,
-            PackageParser.Callback callback,
-            String apkPath,
-            Resources res,
-            XmlResourceParser parser,
-            int flags
+    private static ParseResult parseBaseApk(ParseInput parseInput, String[] separateProcesses,
+            Callback callback, String apkPath, String codePath, Resources res,
+            XmlResourceParser parser, int flags
     ) throws XmlPullParserException, IOException {
         final String splitName;
         final String pkgName;
@@ -407,12 +396,8 @@ public class ApkParseUtils {
 
             boolean isCoreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
 
-            ParsingPackage parsingPackage = PackageImpl.forParsing(
-                    pkgName,
-                    apkPath,
-                    manifestArray,
-                    isCoreApp
-            );
+            ParsingPackage parsingPackage = callback.startParsingPackage(pkgName, apkPath, codePath,
+                    manifestArray, isCoreApp);
 
             ParseResult result = parseBaseApkTags(parseInput, separateProcesses, callback,
                     parsingPackage, manifestArray, res, parser, flags);
@@ -645,7 +630,7 @@ public class ApkParseUtils {
                     // remain null in the primary copy (we like to avoid extra copies because
                     // it can be large)
                     Bundle appMetaData = parseMetaData(parsingPackage, res, parser,
-                            parsingPackage.getAppMetaData(),
+                            parsingPackage.getMetaData(),
                             outError);
                     if (appMetaData == null) {
                         return parseInput.error(
@@ -654,7 +639,7 @@ public class ApkParseUtils {
                         );
                     }
 
-                    parsingPackage.setAppMetaData(appMetaData);
+                    parsingPackage.setMetaData(appMetaData);
                     break;
                 case "uses-static-library":
                     ParseResult parseResult = parseUsesStaticLibrary(parseInput, parsingPackage,
@@ -727,7 +712,7 @@ public class ApkParseUtils {
     private static ParseResult parseBaseApkTags(
             ParseInput parseInput,
             String[] separateProcesses,
-            PackageParser.Callback callback,
+            Callback callback,
             ParsingPackage parsingPackage,
             TypedArray manifestArray,
             Resources res,
@@ -897,11 +882,21 @@ public class ApkParseUtils {
         // At this point we can check if an application is not supporting densities and hence
         // cannot be windowed / resized. Note that an SDK version of 0 is common for
         // pre-Doughnut applications.
-        if (parsingPackage.usesCompatibilityMode()) {
+        if (usesCompatibilityMode(parsingPackage)) {
             adjustPackageToBeUnresizeableAndUnpipable(parsingPackage);
         }
 
         return parseInput.success(parsingPackage);
+    }
+
+    public static boolean usesCompatibilityMode(ParsingPackage pkg) {
+        return pkg.getTargetSdkVersion() < DONUT
+                || (!pkg.isSupportsSmallScreens()
+                && !pkg.isSupportsNormalScreens()
+                && !pkg.isSupportsLargeScreens()
+                && !pkg.isSupportsExtraLargeScreens()
+                && !pkg.isResizeable()
+                && !pkg.isAnyDensity());
     }
 
     private static ParseResult parseUnknownTag(
@@ -1234,20 +1229,11 @@ public class ApkParseUtils {
                 );
             }
 
-            parsingPackage.setName(outInfoName);
+            parsingPackage.setClassName(outInfoName);
         }
 
-        int roundIconVal = PackageParser.sUseRoundIcon ? sa.getResourceId(roundIconRes, 0) : 0;
-        if (roundIconVal != 0) {
-            parsingPackage.setIcon(roundIconVal)
-                    .setNonLocalizedLabel(null);
-        } else {
-            int iconVal = sa.getResourceId(iconRes, 0);
-            if (iconVal != 0) {
-                parsingPackage.setIcon(iconVal)
-                        .setNonLocalizedLabel(null);
-            }
-        }
+        parsingPackage.setRoundIconRes(sa.getResourceId(roundIconRes, 0))
+                .setIconRes(sa.getResourceId(iconRes, 0));
 
         int logoVal = sa.getResourceId(logoRes, 0);
         if (logoVal != 0) {
@@ -1375,7 +1361,7 @@ public class ApkParseUtils {
             ParsingPackage parsingPackage,
             Resources res,
             XmlResourceParser parser,
-            PackageParser.Callback callback
+            Callback callback
     )
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
@@ -1854,7 +1840,7 @@ public class ApkParseUtils {
     public static ParseResult parseBaseApplication(
             ParseInput parseInput,
             String[] separateProcesses,
-            PackageParser.Callback callback,
+            Callback callback,
             ParsingPackage parsingPackage,
             Resources res,
             XmlResourceParser parser,
@@ -1891,11 +1877,6 @@ public class ApkParseUtils {
             );
             if (!result.isSuccess()) {
                 return result;
-            }
-
-            String name = parsingPackage.getName();
-            if (name != null) {
-                parsingPackage.setClassName(name);
             }
 
             String manageSpaceActivity = sa.getNonConfigurationString(
@@ -2078,10 +2059,10 @@ public class ApkParseUtils {
                     R.styleable.AndroidManifestApplication_directBootAware, false));
 
             if (sa.hasValueOrEmpty(R.styleable.AndroidManifestApplication_resizeableActivity)) {
-                parsingPackage.setActivitiesResizeModeResizeable(sa.getBoolean(
+                parsingPackage.setResizeableActivity(sa.getBoolean(
                         R.styleable.AndroidManifestApplication_resizeableActivity, true));
             } else {
-                parsingPackage.setActivitiesResizeModeResizeableViaSdkVersion(
+                parsingPackage.setResizeableActivityViaSdkVersion(
                         parsingPackage.getTargetSdkVersion() >= Build.VERSION_CODES.N);
             }
 
@@ -2195,7 +2176,7 @@ public class ApkParseUtils {
             parsingPackage.setCrossProfile(
                     sa.getBoolean(R.styleable.AndroidManifestApplication_crossProfile, false));
 
-            parsingPackage.setIsGame(sa.getBoolean(
+            parsingPackage.setGame(sa.getBoolean(
                     R.styleable.AndroidManifestApplication_isGame, false));
 
             boolean cantSaveState = sa.getBoolean(
@@ -2334,7 +2315,7 @@ public class ApkParseUtils {
                     // remain null in the primary copy (we like to avoid extra copies because
                     // it can be large)
                     Bundle appMetaData = parseMetaData(parsingPackage, res, parser,
-                            parsingPackage.getAppMetaData(),
+                            parsingPackage.getMetaData(),
                             outError);
                     if (appMetaData == null) {
                         return parseInput.error(
@@ -2343,7 +2324,7 @@ public class ApkParseUtils {
                         );
                     }
 
-                    parsingPackage.setAppMetaData(appMetaData);
+                    parsingPackage.setMetaData(appMetaData);
                     break;
                 case "static-library":
                     sa = res.obtainAttributes(parser,
@@ -2728,7 +2709,7 @@ public class ApkParseUtils {
             // Use the application max aspect ration as default if set.
             maxAspectRatio = packageMaxAspectRatio;
         } else {
-            Bundle appMetaData = parsingPackage.getAppMetaData();
+            Bundle appMetaData = parsingPackage.getMetaData();
             if (appMetaData != null && appMetaData.containsKey(
                     PackageParser.METADATA_MAX_ASPECT_RATIO)) {
                 maxAspectRatio = appMetaData.getFloat(PackageParser.METADATA_MAX_ASPECT_RATIO,
@@ -2764,7 +2745,7 @@ public class ApkParseUtils {
      */
     private static void setMinAspectRatio(
             ParsingPackage parsingPackage,
-            PackageParser.Callback callback
+            Callback callback
     ) {
         final float minAspectRatio;
         float packageMinAspectRatio = parsingPackage.getMinAspectRatio();
@@ -2845,7 +2826,7 @@ public class ApkParseUtils {
         }
 
         parsingPackage
-                .setIsOverlay(true)
+                .setOverlay(true)
                 .setOverlayTarget(target)
                 .setOverlayTargetName(targetName)
                 .setOverlayCategory(category)
@@ -2907,7 +2888,7 @@ public class ApkParseUtils {
                         sa.getInteger(R.styleable.AndroidManifestSupportsScreens_normalScreens, 1))
                 .setSupportsLargeScreens(
                         sa.getInteger(R.styleable.AndroidManifestSupportsScreens_largeScreens, 1))
-                .setSupportsXLargeScreens(
+                .setSupportsExtraLargeScreens(
                         sa.getInteger(R.styleable.AndroidManifestSupportsScreens_xlargeScreens, 1))
                 .setResizeable(
                         sa.getInteger(R.styleable.AndroidManifestSupportsScreens_resizeable, 1))
@@ -2960,7 +2941,7 @@ public class ApkParseUtils {
                 R.styleable.AndroidManifestOriginalPackage_name,
                 0);
         if (!parsingPackage.getPackageName().equals(orig)) {
-            if (parsingPackage.getOriginalPackages() == null) {
+            if (parsingPackage.getOriginalPackages().isEmpty()) {
                 parsingPackage.setRealPackage(parsingPackage.getPackageName());
             }
             parsingPackage.addOriginalPackage(orig);
@@ -3186,36 +3167,36 @@ public class ApkParseUtils {
     }
 
     /**
-     * Collect certificates from all the APKs described in the given package,
-     * populating {@link AndroidPackageWrite#setSigningDetails(SigningDetails)}. Also asserts that
+     * Collect certificates from all the APKs described in the given package. Also asserts that
      * all APK contents are signed correctly and consistently.
      */
-    public static void collectCertificates(AndroidPackage pkg, boolean skipVerify)
+    public static SigningDetails collectCertificates(ParsingPackageRead pkg, boolean skipVerify)
             throws PackageParserException {
-        pkg.mutate().setSigningDetails(SigningDetails.UNKNOWN);
+        SigningDetails signingDetails = SigningDetails.UNKNOWN;
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
-            pkg.mutate().setSigningDetails(collectCertificates(
+            signingDetails = collectCertificates(
                     pkg.getBaseCodePath(),
                     skipVerify,
                     pkg.isStaticSharedLibrary(),
-                    pkg.getSigningDetails(),
+                    signingDetails,
                     pkg.getTargetSdkVersion()
-            ));
+            );
 
             String[] splitCodePaths = pkg.getSplitCodePaths();
             if (!ArrayUtils.isEmpty(splitCodePaths)) {
                 for (int i = 0; i < splitCodePaths.length; i++) {
-                    pkg.mutate().setSigningDetails(collectCertificates(
+                    signingDetails = collectCertificates(
                             splitCodePaths[i],
                             skipVerify,
                             pkg.isStaticSharedLibrary(),
-                            pkg.getSigningDetails(),
+                            signingDetails,
                             pkg.getTargetSdkVersion()
-                    ));
+                    );
                 }
             }
+            return signingDetails;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3345,5 +3326,16 @@ public class ApkParseUtils {
         public String getErrorMessage() {
             return errorMessage;
         }
+    }
+
+    /**
+     * Callback interface for retrieving information that may be needed while parsing
+     * a package.
+     */
+    public interface Callback {
+        boolean hasFeature(String feature);
+
+        ParsingPackage startParsingPackage(String packageName, String baseCodePath, String codePath,
+                TypedArray manifestArray, boolean isCoreApp);
     }
 }
