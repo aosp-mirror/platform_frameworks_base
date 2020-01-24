@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2019 The Android Open Source Project
+       ~ Copyright (C) 2020 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,9 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/bubble_overflow_recycler"
-    android:layout_gravity="center_horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bubble_overflow_button"
+    android:layout_width="@dimen/individual_bubble_size"
+    android:layout_height="@dimen/individual_bubble_size"
+    android:src="@drawable/ic_bubble_overflow_button"
+    android:scaleType="center"
+    android:layout_gravity="end"/>

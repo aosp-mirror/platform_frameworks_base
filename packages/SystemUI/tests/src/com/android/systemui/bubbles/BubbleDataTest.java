@@ -257,7 +257,7 @@ public class BubbleDataTest extends SysuiTestCase {
      * enforced by expiring the bubble which was least recently updated (lowest timestamp).
      */
     @Test
-    public void test_collapsed_addBubble_atMaxBubbles_expiresOldest() {
+    public void test_collapsed_addBubble_atMaxBubbles_overflowsOldest() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
         sendUpdatedEntryAtTime(mEntryA2, 2000);
@@ -269,7 +269,10 @@ public class BubbleDataTest extends SysuiTestCase {
         // Test
         sendUpdatedEntryAtTime(mEntryC1, 6000);
         verifyUpdateReceived();
+
+        // Verify
         assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_AGED);
+        assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(mBubbleA1));
     }
 
     /**
