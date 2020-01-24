@@ -29,6 +29,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.Notification;
@@ -38,6 +39,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
@@ -300,8 +302,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         int width = crop.width();
         int height = crop.height();
 
-        // Take the screenshot
-        mScreenBitmap = SurfaceControl.screenshot(crop, width, height, rot);
+        takeScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher, null);
+    }
+
+    private void takeScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect) {
+        mScreenBitmap = screenshot;
         if (mScreenBitmap == null) {
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_capture_text);
@@ -317,7 +322,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotLayout.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
 
         // Start the post-screenshot animation
-        startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels);
+        startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
+                screenRect);
     }
 
     void takeScreenshot(Consumer<Uri> finisher) {
@@ -327,9 +333,16 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
     }
 
+    void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
+            Insets visibleInsets, int taskId, Consumer<Uri> finisher) {
+        // TODO use taskId and visibleInsets
+        takeScreenshot(screenshot, finisher, screenshotScreenBounds);
+    }
+
     /**
      * Displays a screenshot selector
      */
+    @SuppressLint("ClickableViewAccessibility")
     void takeScreenshotPartial(final Consumer<Uri> finisher) {
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
@@ -402,7 +415,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(final Consumer<Uri> finisher, int w, int h) {
+    private void startAnimation(final Consumer<Uri> finisher, int w, int h,
+            @Nullable Rect screenRect) {
         // If power save is on, show a toast so there is some visual indication that a screenshot
         // has been taken.
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -422,7 +436,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             mScreenshotAnimation.removeAllListeners();
         }
 
-        ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
+        ValueAnimator screenshotDropInAnim = screenRect != null ? createRectAnimation(screenRect)
+                : createScreenshotDropInAnimation();
         ValueAnimator screenshotFadeOutAnim = createScreenshotToCornerAnimation(w, h);
         mScreenshotAnimation = new AnimatorSet();
         mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
@@ -458,6 +473,46 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             mScreenshotView.buildLayer();
             mScreenshotAnimation.start();
         });
+    }
+
+    private ValueAnimator createRectAnimation(Rect rect) {
+        mScreenshotView.setAdjustViewBounds(true);
+        mScreenshotView.setMaxHeight(rect.height());
+        mScreenshotView.setMaxWidth(rect.width());
+
+        final float flashPeakDurationPct = ((float) (SCREENSHOT_FLASH_TO_PEAK_DURATION)
+                / SCREENSHOT_DROP_IN_DURATION);
+        final float flashDurationPct = 2f * flashPeakDurationPct;
+        final Interpolator scaleInterpolator = x -> {
+            // We start scaling when the flash is at it's peak
+            if (x < flashPeakDurationPct) {
+                return 0;
+            }
+            return (x - flashDurationPct) / (1f - flashDurationPct);
+        };
+
+        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+        anim.setDuration(SCREENSHOT_DROP_IN_DURATION);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mBackgroundView.setAlpha(0f);
+                mBackgroundView.setVisibility(View.VISIBLE);
+                mScreenshotView.setAlpha(0f);
+                mScreenshotView.setElevation(0f);
+                mScreenshotView.setTranslationX(0f);
+                mScreenshotView.setTranslationY(0f);
+                mScreenshotView.setScaleX(1f);
+                mScreenshotView.setScaleY(1f);
+                mScreenshotView.setVisibility(View.VISIBLE);
+            }
+        });
+        anim.addUpdateListener(animation -> {
+            float t = (Float) animation.getAnimatedValue();
+            mBackgroundView.setAlpha(scaleInterpolator.getInterpolation(t) * BACKGROUND_ALPHA);
+            mScreenshotView.setAlpha(t);
+        });
+        return anim;
     }
 
     private ValueAnimator createScreenshotDropInAnimation() {
