@@ -16,7 +16,6 @@
 
 package android.location;
 
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1211,23 +1210,6 @@ public class Location implements Parcelable {
             }
         }
         return null;
-    }
-
-    /**
-     * Attaches an extra {@link Location} to this Location. This is useful for location providers
-     * to set the {@link #EXTRA_NO_GPS_LOCATION} extra to provide coarse locations for clients.
-     *
-     * @param key the key associated with the Location extra
-     * @param value the Location to attach
-     * @hide
-     */
-    @TestApi
-    @SystemApi
-    public void setExtraLocation(@Nullable String key, @Nullable Location value) {
-        if (mExtras == null) {
-            mExtras = new Bundle();
-        }
-        mExtras.putParcelable(key, value);
     }
 
     /**
