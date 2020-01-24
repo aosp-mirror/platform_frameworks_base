@@ -3451,6 +3451,7 @@ public class SyncManager {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
                 }
+                Slog.wtf(TAG, "SYNC_OP_STATE_INVALID: account doesn't exist.");
                 return SYNC_OP_STATE_INVALID;
             }
             // Drop this sync request if it isn't syncable.
@@ -3460,12 +3461,14 @@ public class SyncManager {
                     Slog.v(TAG, "    Dropping sync operation: "
                             + "isSyncable == SYNCABLE_NO_ACCOUNT_ACCESS");
                 }
+                Slog.wtf(TAG, "SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS");
                 return SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS;
             }
             if (state == AuthorityInfo.NOT_SYNCABLE) {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: isSyncable == NOT_SYNCABLE");
                 }
+                Slog.wtf(TAG, "SYNC_OP_STATE_INVALID: NOT_SYNCABLE");
                 return SYNC_OP_STATE_INVALID;
             }
 
@@ -3484,6 +3487,7 @@ public class SyncManager {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: disallowed by settings/network.");
                 }
+                Slog.wtf(TAG, "SYNC_OP_STATE_INVALID: disallowed by settings/network");
                 return SYNC_OP_STATE_INVALID;
             }
             return SYNC_OP_STATE_VALID;
