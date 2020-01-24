@@ -17,6 +17,7 @@
     <overlayable name="TetheringConfig">
         <policy type="product|system|vendor">
             <item type="array" name="config_tether_usb_regexs"/>
+            <item type="array" name="config_tether_ncm_regexs" />
             <item type="array" name="config_tether_wifi_regexs"/>
             <item type="array" name="config_tether_wifi_p2p_regexs"/>
             <item type="array" name="config_tether_bluetooth_regexs"/>
