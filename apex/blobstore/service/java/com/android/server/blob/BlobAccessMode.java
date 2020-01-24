@@ -15,12 +15,27 @@
  */
 package com.android.server.blob;
 
+import static android.app.blob.XmlTags.ATTR_CERTIFICATE;
+import static android.app.blob.XmlTags.ATTR_PACKAGE;
+import static android.app.blob.XmlTags.ATTR_TYPE;
+import static android.app.blob.XmlTags.TAG_WHITELISTED_PACKAGE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.ArraySet;
+import android.util.Base64;
+import android.util.DebugUtils;
 
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -40,10 +55,10 @@ class BlobAccessMode {
             ACCESS_TYPE_WHITELIST,
     })
     @interface AccessType {}
-    static final int ACCESS_TYPE_PRIVATE = 1 << 0;
-    static final int ACCESS_TYPE_PUBLIC = 1 << 1;
-    static final int ACCESS_TYPE_SAME_SIGNATURE = 1 << 2;
-    static final int ACCESS_TYPE_WHITELIST = 1 << 3;
+    public static final int ACCESS_TYPE_PRIVATE = 1 << 0;
+    public static final int ACCESS_TYPE_PUBLIC = 1 << 1;
+    public static final int ACCESS_TYPE_SAME_SIGNATURE = 1 << 2;
+    public static final int ACCESS_TYPE_WHITELIST = 1 << 3;
 
     private int mAccessType = ACCESS_TYPE_PRIVATE;
 
@@ -112,6 +127,51 @@ class BlobAccessMode {
         return false;
     }
 
+    void dump(IndentingPrintWriter fout) {
+        fout.println("accessType: " + DebugUtils.flagsToString(
+                BlobAccessMode.class, "ACCESS_TYPE_", mAccessType));
+        fout.print("Whitelisted pkgs:");
+        if (mWhitelistedPackages.isEmpty()) {
+            fout.println(" (Empty)");
+        } else {
+            fout.increaseIndent();
+            for (int i = 0, count = mWhitelistedPackages.size(); i < count; ++i) {
+                fout.println(mWhitelistedPackages.valueAt(i).toString());
+            }
+            fout.decreaseIndent();
+        }
+    }
+
+    void writeToXml(@NonNull XmlSerializer out) throws IOException {
+        XmlUtils.writeIntAttribute(out, ATTR_TYPE, mAccessType);
+        for (int i = 0, count = mWhitelistedPackages.size(); i < count; ++i) {
+            out.startTag(null, TAG_WHITELISTED_PACKAGE);
+            final PackageIdentifier packageIdentifier = mWhitelistedPackages.valueAt(i);
+            XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageIdentifier.packageName);
+            XmlUtils.writeByteArrayAttribute(out, ATTR_CERTIFICATE, packageIdentifier.certificate);
+            out.endTag(null, TAG_WHITELISTED_PACKAGE);
+        }
+    }
+
+    @NonNull
+    static BlobAccessMode createFromXml(@NonNull XmlPullParser in)
+            throws IOException, XmlPullParserException {
+        final BlobAccessMode blobAccessMode = new BlobAccessMode();
+
+        final int accessType = XmlUtils.readIntAttribute(in, ATTR_TYPE);
+        blobAccessMode.mAccessType = accessType;
+
+        final int depth = in.getDepth();
+        while (XmlUtils.nextElementWithin(in, depth)) {
+            if (TAG_WHITELISTED_PACKAGE.equals(in.getName())) {
+                final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
+                final byte[] certificate = XmlUtils.readByteArrayAttribute(in, ATTR_CERTIFICATE);
+                blobAccessMode.allowPackageAccess(packageName, certificate);
+            }
+        }
+        return blobAccessMode;
+    }
+
     private static final class PackageIdentifier {
         public final String packageName;
         public final byte[] certificate;
@@ -142,6 +202,12 @@ class BlobAccessMode {
         @Override
         public int hashCode() {
             return Objects.hash(packageName, Arrays.hashCode(certificate));
+        }
+
+        @Override
+        public String toString() {
+            return "[" + packageName + ", "
+                    + Base64.encodeToString(certificate, Base64.NO_WRAP) + "]";
         }
     }
 }

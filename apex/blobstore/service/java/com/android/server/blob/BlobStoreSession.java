@@ -16,6 +16,11 @@
 package com.android.server.blob;
 
 import static android.app.blob.BlobStoreManager.COMMIT_RESULT_ERROR;
+import static android.app.blob.XmlTags.ATTR_ID;
+import static android.app.blob.XmlTags.ATTR_PACKAGE;
+import static android.app.blob.XmlTags.ATTR_UID;
+import static android.app.blob.XmlTags.TAG_ACCESS_MODE;
+import static android.app.blob.XmlTags.TAG_BLOB_HANDLE;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
@@ -42,8 +47,14 @@ import android.util.ExceptionUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.SessionStateChangeListener;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -224,7 +235,7 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
     @Override
     @BytesLong
     public long getSize() {
-        return 0;
+        return getSessionFile().length();
     }
 
     @Override
@@ -366,8 +377,8 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
     private void revokeAllFdsLocked() {
         for (int i = mRevocableFds.size() - 1; i >= 0; --i) {
             mRevocableFds.get(i).revoke();
-            mRevocableFds.remove(i);
         }
+        mRevocableFds.clear();
     }
 
     @GuardedBy("mSessionLock")
@@ -417,5 +428,75 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
         if (callingUid != ownerUid) {
             throw new SecurityException(ownerUid + " is not the session owner");
         }
+    }
+
+    void dump(IndentingPrintWriter fout) {
+        synchronized (mSessionLock) {
+            fout.println("state: " + stateToString(mState));
+            fout.println("ownerUid: " + ownerUid);
+            fout.println("ownerPkg: " + ownerPackageName);
+
+            fout.println("blobHandle:");
+            fout.increaseIndent();
+            blobHandle.dump(fout);
+            fout.decreaseIndent();
+
+            fout.println("accessMode:");
+            fout.increaseIndent();
+            mBlobAccessMode.dump(fout);
+            fout.decreaseIndent();
+
+            fout.println("Open fds: #" + mRevocableFds.size());
+        }
+    }
+
+    void writeToXml(@NonNull XmlSerializer out) throws IOException {
+        synchronized (mSessionLock) {
+            XmlUtils.writeLongAttribute(out, ATTR_ID, sessionId);
+            XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, ownerPackageName);
+            XmlUtils.writeIntAttribute(out, ATTR_UID, ownerUid);
+
+            out.startTag(null, TAG_BLOB_HANDLE);
+            blobHandle.writeToXml(out);
+            out.endTag(null, TAG_BLOB_HANDLE);
+
+            out.startTag(null, TAG_ACCESS_MODE);
+            mBlobAccessMode.writeToXml(out);
+            out.endTag(null, TAG_ACCESS_MODE);
+        }
+    }
+
+    @Nullable
+    static BlobStoreSession createFromXml(@NonNull XmlPullParser in,
+            @NonNull Context context, @NonNull SessionStateChangeListener stateChangeListener)
+            throws IOException, XmlPullParserException {
+        final int sessionId = XmlUtils.readIntAttribute(in, ATTR_ID);
+        final String ownerPackageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
+        final int ownerUid = XmlUtils.readIntAttribute(in, ATTR_UID);
+
+        final int depth = in.getDepth();
+        BlobHandle blobHandle = null;
+        BlobAccessMode blobAccessMode = null;
+        while (XmlUtils.nextElementWithin(in, depth)) {
+            if (TAG_BLOB_HANDLE.equals(in.getName())) {
+                blobHandle = BlobHandle.createFromXml(in);
+            } else if (TAG_ACCESS_MODE.equals(in.getName())) {
+                blobAccessMode = BlobAccessMode.createFromXml(in);
+            }
+        }
+
+        if (blobHandle == null) {
+            Slog.wtf(TAG, "blobHandle should be available");
+            return null;
+        }
+        if (blobAccessMode == null) {
+            Slog.wtf(TAG, "blobAccessMode should be available");
+            return null;
+        }
+
+        final BlobStoreSession blobStoreSession = new BlobStoreSession(context, sessionId,
+                blobHandle, ownerUid, ownerPackageName, stateChangeListener);
+        blobStoreSession.mBlobAccessMode.allow(blobAccessMode);
+        return blobStoreSession;
     }
 }

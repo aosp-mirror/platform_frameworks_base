@@ -25,13 +25,17 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -346,6 +350,25 @@ public class BlobStoreManager {
             mService.releaseLease(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Wait until any pending tasks (like persisting data to disk) have finished.
+     *
+     * @hide
+     */
+    public void waitForIdle(long timeoutMillis) throws InterruptedException, TimeoutException {
+        try {
+            final CountDownLatch countDownLatch = new CountDownLatch(1);
+            mService.waitForIdle(new RemoteCallback((result) -> countDownLatch.countDown()));
+            if (!countDownLatch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException("Timed out waiting for service to become idle");
+            }
+        } catch (ParcelableException e) {
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
