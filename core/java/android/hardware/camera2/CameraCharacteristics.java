@@ -2860,6 +2860,23 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
+     * <p>List of rotate-and-crop modes for {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop} that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop} for this camera device.</p>
+     * <p>Starting with API level 30, all devices will list at least <code>ROTATE_AND_CROP_NONE</code>.
+     * Devices with support for rotate-and-crop will additionally list at least
+     * <code>ROTATE_AND_CROP_AUTO</code> and <code>ROTATE_AND_CROP_90</code>.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES =
+            new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
+
+    /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
      * distortion correction has been applied.</p>
      * <p>This is the rectangle representing the size of the active region of the sensor (i.e.

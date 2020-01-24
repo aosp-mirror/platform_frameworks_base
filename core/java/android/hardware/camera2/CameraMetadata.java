@@ -2749,6 +2749,56 @@ public abstract class CameraMetadata<TKey> {
     public static final int NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG = 4;
 
     //
+    // Enumeration values for CaptureRequest#SCALER_ROTATE_AND_CROP
+    //
+
+    /**
+     * <p>No rotate and crop is applied. Processed outputs are in the sensor orientation.</p>
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    public static final int SCALER_ROTATE_AND_CROP_NONE = 0;
+
+    /**
+     * <p>Processed images are rotated by 90 degrees clockwise, and then cropped
+     * to the original aspect ratio.</p>
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    public static final int SCALER_ROTATE_AND_CROP_90 = 1;
+
+    /**
+     * <p>Processed images are rotated by 180 degrees.  Since the aspect ratio does not
+     * change, no cropping is performed.</p>
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    public static final int SCALER_ROTATE_AND_CROP_180 = 2;
+
+    /**
+     * <p>Processed images are rotated by 270 degrees clockwise, and then cropped
+     * to the original aspect ratio.</p>
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    public static final int SCALER_ROTATE_AND_CROP_270 = 3;
+
+    /**
+     * <p>The camera API automatically selects the best concrete value for
+     * rotate-and-crop based on the application's support for resizability and the current
+     * multi-window mode.</p>
+     * <p>If the application does not support resizing but the display mode for its main
+     * Activity is not in a typical orientation, the camera API will set <code>ROTATE_AND_CROP_90</code>
+     * or some other supported rotation value, depending on device configuration,
+     * to ensure preview and captured images are correctly shown to the user. Otherwise,
+     * <code>ROTATE_AND_CROP_NONE</code> will be selected.</p>
+     * <p>When a value other than NONE is selected, several metadata fields will also be parsed
+     * differently to ensure that coordinates are correctly handled for features like drawing
+     * face detection boxes or passing in tap-to-focus coordinates.  The camera API will
+     * convert positions in the active array coordinate system to/from the cropped-and-rotated
+     * coordinate system to make the operation transparent for applications.</p>
+     * <p>No coordinate mapping will be done when the application selects a non-AUTO mode.</p>
+     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     */
+    public static final int SCALER_ROTATE_AND_CROP_AUTO = 4;
+
+    //
     // Enumeration values for CaptureRequest#SENSOR_TEST_PATTERN_MODE
     //
 
