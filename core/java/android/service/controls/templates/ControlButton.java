@@ -24,7 +24,6 @@ import com.android.internal.util.Preconditions;
 
 /**
  * Button element for {@link ControlTemplate}.
- * @hide
  */
 public final class ControlButton implements Parcelable {
 
@@ -64,7 +63,8 @@ public final class ControlButton implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    @NonNull
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeByte(mChecked ? (byte) 1 : (byte) 0);
         dest.writeCharSequence(mActionDescription);
     }
@@ -74,7 +74,7 @@ public final class ControlButton implements Parcelable {
         mActionDescription = in.readCharSequence();
     }
 
-    public static final Creator<ControlButton> CREATOR = new Creator<ControlButton>() {
+    public static final @NonNull Creator<ControlButton> CREATOR = new Creator<ControlButton>() {
         @Override
         public ControlButton createFromParcel(Parcel source) {
             return new ControlButton(source);

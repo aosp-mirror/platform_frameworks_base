@@ -20,7 +20,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.IBinder
 import android.service.controls.Control
-import android.service.controls.IControlsProviderCallback
+import android.service.controls.IControlsActionCallback
+import android.service.controls.IControlsLoadCallback
+import android.service.controls.IControlsSubscriber
+import android.service.controls.IControlsSubscription
 import android.service.controls.actions.ControlAction
 import android.util.ArrayMap
 import android.util.Log
@@ -54,25 +57,40 @@ open class ControlsBindingControllerImpl @Inject constructor(
     private val componentMap: MutableMap<ComponentName, ControlsProviderLifecycleManager> =
             ArrayMap<ComponentName, ControlsProviderLifecycleManager>()
 
-    private val serviceCallback = object : IControlsProviderCallback.Stub() {
-        override fun onLoad(token: IBinder, controls: MutableList<Control>) {
+    private val loadCallbackService = object : IControlsLoadCallback.Stub() {
+        override fun accept(token: IBinder, controls: MutableList<Control>) {
             backgroundExecutor.execute(OnLoadRunnable(token, controls))
         }
+    }
 
-        override fun onRefreshState(token: IBinder, controlStates: List<Control>) {
-            if (!refreshing.get()) {
-                Log.d(TAG, "Refresh outside of window for token:$token")
-            } else {
-                backgroundExecutor.execute(OnRefreshStateRunnable(token, controlStates))
-            }
-        }
-
-        override fun onControlActionResponse(
+    private val actionCallbackService = object : IControlsActionCallback.Stub() {
+        override fun accept(
             token: IBinder,
             controlId: String,
             @ControlAction.ResponseResult response: Int
         ) {
             backgroundExecutor.execute(OnActionResponseRunnable(token, controlId, response))
+        }
+    }
+
+    private val subscriberService = object : IControlsSubscriber.Stub() {
+        override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
+            backgroundExecutor.execute(OnSubscribeRunnable(token, subs))
+        }
+
+        override fun onNext(token: IBinder, c: Control) {
+            if (!refreshing.get()) {
+                Log.d(TAG, "Refresh outside of window for token:$token")
+            } else {
+                backgroundExecutor.execute(OnNextRunnable(token, c))
+            }
+        }
+        override fun onError(token: IBinder, s: String) {
+            backgroundExecutor.execute(OnErrorRunnable(token, s))
+        }
+
+        override fun onComplete(token: IBinder) {
+            backgroundExecutor.execute(OnCompleteRunnable(token))
         }
     }
 
@@ -82,7 +100,9 @@ open class ControlsBindingControllerImpl @Inject constructor(
         return ControlsProviderLifecycleManager(
                 context,
                 backgroundExecutor,
-                serviceCallback,
+                loadCallbackService,
+                actionCallbackService,
+                subscriberService,
                 component
         )
     }
@@ -176,16 +196,51 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
-    private inner class OnRefreshStateRunnable(
+    private inner class OnNextRunnable(
         token: IBinder,
-        val list: List<Control>
+        val control: Control
     ) : CallbackRunnable(token) {
         override fun run() {
             if (!refreshing.get()) {
                 Log.d(TAG, "onRefresh outside of window from:${provider?.componentName}")
             }
             provider?.let {
-                lazyController.get().refreshStatus(it.componentName, list)
+                lazyController.get().refreshStatus(it.componentName, control)
+            }
+        }
+    }
+
+    private inner class OnSubscribeRunnable(
+        token: IBinder,
+        val subscription: IControlsSubscription
+    ) : CallbackRunnable(token) {
+        override fun run() {
+            if (!refreshing.get()) {
+                Log.d(TAG, "onRefresh outside of window from '${provider?.componentName}'")
+            }
+            provider?.let {
+                it.startSubscription(subscription)
+            }
+        }
+    }
+
+    private inner class OnCompleteRunnable(
+        token: IBinder
+    ) : CallbackRunnable(token) {
+        override fun run() {
+            provider?.let {
+                Log.i(TAG, "onComplete receive from '${provider?.componentName}'")
+            }
+        }
+    }
+
+    private inner class OnErrorRunnable(
+        token: IBinder,
+        val error: String
+    ) : CallbackRunnable(token) {
+        override fun run() {
+            provider?.let {
+                Log.e(TAG, "onError receive from '${provider?.componentName}': $error")
             }
         }
     }

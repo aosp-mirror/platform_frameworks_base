@@ -19,11 +19,7 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 
-/**
- * @hide
- */
 public final class CommandAction extends ControlAction {
 
     private static final @ActionType int TYPE = TYPE_COMMAND;
@@ -36,7 +32,11 @@ public final class CommandAction extends ControlAction {
         this(templateId, null);
     }
 
-    public CommandAction(Bundle b) {
+    /**
+     * @param b
+     * @hide
+     */
+    CommandAction(Bundle b) {
         super(b);
     }
 
@@ -44,18 +44,4 @@ public final class CommandAction extends ControlAction {
     public int getActionType() {
         return TYPE;
     }
-
-    public static final Creator<CommandAction> CREATOR = new Creator<CommandAction>() {
-        @Override
-        public CommandAction createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new CommandAction(source.readBundle());
-        }
-
-        @Override
-        public CommandAction[] newArray(int size) {
-            return new CommandAction[size];
-        }
-    };
 }

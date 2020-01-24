@@ -19,12 +19,8 @@ package android.service.controls.templates;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.util.Log;
 
-/**
- * @hide
- */
 public final class CoordinatedRangeTemplate extends ControlTemplate {
 
     private static final String TAG = "CoordinatedRangeTemplate";
@@ -74,10 +70,14 @@ public final class CoordinatedRangeTemplate extends ControlTemplate {
                 minValueHigh, maxValueHigh, currentValueHigh, stepValue, formatString));
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     CoordinatedRangeTemplate(Bundle b) {
         super(b);
-        mRangeLow = b.getParcelable(KEY_RANGE_LOW);
-        mRangeHigh = b.getParcelable(KEY_RANGE_HIGH);
+        mRangeLow = new RangeTemplate(b.getBundle(KEY_RANGE_LOW));
+        mRangeHigh = new RangeTemplate(b.getBundle(KEY_RANGE_HIGH));
         mMinGap = b.getFloat(KEY_MIN_GAP);
         validateRanges();
     }
@@ -134,11 +134,16 @@ public final class CoordinatedRangeTemplate extends ControlTemplate {
         return TYPE;
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
-        b.putParcelable(KEY_RANGE_LOW, mRangeLow);
-        b.putParcelable(KEY_RANGE_HIGH, mRangeHigh);
+        b.putBundle(KEY_RANGE_LOW, mRangeLow.getDataBundle());
+        b.putBundle(KEY_RANGE_HIGH, mRangeHigh.getDataBundle());
         return b;
     }
 
@@ -160,18 +165,4 @@ public final class CoordinatedRangeTemplate extends ControlTemplate {
         }
     }
 
-    public static final Creator<CoordinatedRangeTemplate> CREATOR =
-            new Creator<CoordinatedRangeTemplate>() {
-        @Override
-        public CoordinatedRangeTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new CoordinatedRangeTemplate(source.readBundle());
-        }
-
-        @Override
-        public CoordinatedRangeTemplate[] newArray(int size) {
-            return new CoordinatedRangeTemplate[size];
-        }
-    };
 }

@@ -21,10 +21,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.service.controls.IControlsProviderCallback;
+import android.service.controls.IControlsActionCallback;
 import android.service.controls.templates.ControlTemplate;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -36,20 +35,21 @@ import java.lang.annotation.RetentionPolicy;
  *
  * The action may have a value to authenticate the input, when the provider has requested it to
  * complete the action.
- * @hide
  */
-public abstract class ControlAction implements Parcelable {
+public abstract class ControlAction {
 
+    private static final String TAG = "ControlAction";
+
+    private static final String KEY_ACTION_TYPE = "key_action_type";
     private static final String KEY_TEMPLATE_ID = "key_template_id";
     private static final String KEY_CHALLENGE_VALUE = "key_challenge_value";
-
 
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-            TYPE_UNKNOWN,
+            TYPE_ERROR,
             TYPE_BOOLEAN,
             TYPE_FLOAT,
             TYPE_MULTI_FLOAT,
@@ -57,15 +57,16 @@ public abstract class ControlAction implements Parcelable {
             TYPE_COMMAND
     })
     public @interface ActionType {};
-    public static final ControlAction UNKNOWN_ACTION = new ControlAction() {
 
+    public static final @NonNull ControlAction ERROR_ACTION = new ControlAction() {
         @Override
         public int getActionType() {
-            return TYPE_UNKNOWN;
+            return TYPE_ERROR;
         }
     };
 
-    public static final @ActionType int TYPE_UNKNOWN = 0;
+    public static final @ActionType int TYPE_ERROR = -1;
+
     /**
      * The identifier of {@link BooleanAction}.
      */
@@ -104,27 +105,27 @@ public abstract class ControlAction implements Parcelable {
     public static final @ResponseResult int RESPONSE_UNKNOWN = 0;
 
     /**
-     * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
+     * Response code for {@link IControlsActionCallback#accept} indicating that
      * the action has been performed. The action may still fail later and the state may not change.
      */
     public static final @ResponseResult int RESPONSE_OK = 1;
     /**
-     * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
+     * Response code for {@link IControlsActionCallback#accept} indicating that
      * the action has failed.
      */
     public static final @ResponseResult int RESPONSE_FAIL = 2;
     /**
-     * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
+     * Response code for {@link IControlsActionCallback#accept} indicating that
      * in order for the action to be performed, acknowledgment from the user is required.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_ACK = 3;
     /**
-     * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
+     * Response code for {@link IControlsActionCallback#accept} indicating that
      * in order for the action to be performed, a PIN is required.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_PIN = 4;
     /**
-     * Response code for {@link IControlsProviderCallback#onControlActionResponse} indicating that
+     * Response code for {@link IControlsActionCallback#accept} indicating that
      * in order for the action to be performed, an alphanumeric passphrase is required.
      */
     public static final @ResponseResult int RESPONSE_CHALLENGE_PASSPHRASE = 5;
@@ -175,68 +176,55 @@ public abstract class ControlAction implements Parcelable {
         return mChallengeValue;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public final void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(getActionType());
-        dest.writeBundle(getDataBundle());
-    }
-
     /**
      * Obtain a {@link Bundle} describing this object populated with data.
      *
      * Implementations in subclasses should populate the {@link Bundle} returned by
      * {@link ControlAction}.
      * @return a {@link Bundle} containing the data that represents this object.
+     * @hide
      */
     @CallSuper
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = new Bundle();
+        b.putInt(KEY_ACTION_TYPE, getActionType());
         b.putString(KEY_TEMPLATE_ID, mTemplateId);
         b.putString(KEY_CHALLENGE_VALUE, mChallengeValue);
         return b;
     }
 
-    public static final @NonNull Creator<ControlAction> CREATOR = new Creator<ControlAction>() {
-        @Override
-        public ControlAction createFromParcel(Parcel source) {
-            int type = source.readInt();
-            return createActionFromType(type, source);
+    /**
+     * @param bundle
+     * @return
+     * @hide
+     */
+    @NonNull
+    static ControlAction createActionFromBundle(@NonNull Bundle bundle) {
+        if (bundle == null) {
+            Log.e(TAG, "Null bundle");
+            return ERROR_ACTION;
         }
-
-        @Override
-        public ControlAction[] newArray(int size) {
-            return new ControlAction[size];
-        }
-    };
-
-
-    private static ControlAction createActionFromType(@ActionType int type, Parcel source) {
-        switch(type) {
-            case TYPE_BOOLEAN:
-                return new BooleanAction(source.readBundle());
-            case TYPE_FLOAT:
-                return new FloatAction(source.readBundle());
-            case TYPE_MULTI_FLOAT:
-                return new MultiFloatAction(source.readBundle());
-            case TYPE_MODE:
-                return new ModeAction(source.readBundle());
-            case TYPE_COMMAND:
-                return new CommandAction(source.readBundle());
-            default:
-                source.readBundle();
-                return UNKNOWN_ACTION;
-        }
-    }
-
-    protected static void verifyType(@ActionType int type, @ActionType int thisType) {
-        if (type != thisType) {
-            throw new IllegalStateException("The type " + type + "does not match " + thisType);
+        int type = bundle.getInt(KEY_ACTION_TYPE, TYPE_ERROR);
+        try {
+            switch (type) {
+                case TYPE_BOOLEAN:
+                    return new BooleanAction(bundle);
+                case TYPE_FLOAT:
+                    return new FloatAction(bundle);
+                case TYPE_MULTI_FLOAT:
+                    return new MultiFloatAction(bundle);
+                case TYPE_MODE:
+                    return new ModeAction(bundle);
+                case TYPE_COMMAND:
+                    return new CommandAction(bundle);
+                case TYPE_ERROR:
+                default:
+                    return ERROR_ACTION;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating action", e);
+            return ERROR_ACTION;
         }
     }
-
 }

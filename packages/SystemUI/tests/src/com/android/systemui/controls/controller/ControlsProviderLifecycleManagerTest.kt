@@ -18,9 +18,12 @@ package com.android.systemui.controls.controller
 
 import android.content.ComponentName
 import android.service.controls.Control
+import android.service.controls.IControlsActionCallback
+import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
-import android.service.controls.IControlsProviderCallback
+import android.service.controls.IControlsSubscriber
 import android.service.controls.actions.ControlAction
+import android.service.controls.actions.ControlActionWrapper
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -35,7 +38,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
@@ -46,13 +52,24 @@ import org.mockito.MockitoAnnotations
 class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var serviceCallback: IControlsProviderCallback.Stub
+    private lateinit var actionCallback: IControlsActionCallback.Stub
+    @Mock
+    private lateinit var loadCallback: IControlsLoadCallback.Stub
+    @Mock
+    private lateinit var subscriber: IControlsSubscriber.Stub
     @Mock
     private lateinit var service: IControlsProvider.Stub
+
+    @Captor
+    private lateinit var wrapperCaptor: ArgumentCaptor<ControlActionWrapper>
 
     private val componentName = ComponentName("test.pkg", "test.cls")
     private lateinit var manager: ControlsProviderLifecycleManager
     private lateinit var executor: DelayableExecutor
+
+    companion object {
+        fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+    }
 
     @Before
     fun setUp() {
@@ -66,7 +83,9 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         manager = ControlsProviderLifecycleManager(
                 context,
                 executor,
-                serviceCallback,
+                loadCallback,
+                actionCallback,
+                subscriber,
                 componentName
         )
     }
@@ -94,7 +113,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         val callback: (List<Control>) -> Unit = {}
         manager.maybeBindAndLoad(callback)
 
-        verify(service).load()
+        verify(service).load(loadCallback)
 
         assertTrue(mContext.isBound(componentName))
         assertEquals(callback, manager.lastLoadCallback)
@@ -110,29 +129,23 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUnsubscribe() {
-        manager.bindPermanently()
-        manager.unsubscribe()
-
-        verify(service).unsubscribe()
-    }
-
-    @Test
     fun testMaybeBindAndSubscribe() {
         val list = listOf("TEST_ID")
         manager.maybeBindAndSubscribe(list)
 
         assertTrue(mContext.isBound(componentName))
-        verify(service).subscribe(list)
+        verify(service).subscribe(list, subscriber)
     }
 
     @Test
     fun testMaybeBindAndAction() {
         val controlId = "TEST_ID"
-        val action = ControlAction.UNKNOWN_ACTION
+        val action = ControlAction.ERROR_ACTION
         manager.maybeBindAndSendAction(controlId, action)
 
         assertTrue(mContext.isBound(componentName))
-        verify(service).onAction(controlId, action)
+        verify(service).action(eq(controlId), capture(wrapperCaptor),
+                eq(actionCallback))
+        assertEquals(action, wrapperCaptor.getValue().getWrappedAction())
     }
 }

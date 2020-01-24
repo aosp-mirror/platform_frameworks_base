@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.service.controls.actions.ControlAction;
+import android.service.controls.actions.ControlActionWrapper;
 import android.service.controls.templates.ControlTemplate;
 import android.text.TextUtils;
 import android.util.Log;
@@ -35,150 +36,90 @@ import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
+import java.util.function.Consumer;
 
 /**
  * Service implementation allowing applications to contribute controls to the
  * System UI.
- * @hide
  */
 public abstract class ControlsProviderService extends Service {
 
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String CONTROLS_ACTION = "android.service.controls.ControlsProviderService";
+    public static final String SERVICE_CONTROLS =
+            "android.service.controls.ControlsProviderService";
+    /**
+     * @hide
+     */
     public static final String CALLBACK_BUNDLE = "CALLBACK_BUNDLE";
-    public static final String CALLBACK_BINDER = "CALLBACK_BINDER";
+
+    /**
+     * @hide
+     */
     public static final String CALLBACK_TOKEN = "CALLBACK_TOKEN";
 
-    public final String TAG = getClass().getSimpleName();
+    public static final @NonNull String TAG = "ControlsProviderService";
 
-    private IControlsProviderCallback mCallback;
     private IBinder mToken;
     private RequestHandler mHandler;
 
     /**
-     * Signal to retrieve all Controls. When complete, call
-     * {@link IControlsProviderCallback#onLoad} to inform the caller.
+     * Retrieve all available controls, using the stateless builder
+     * {@link Control.StatelessBuilder} to build each Control, then use the
+     * provided consumer to callback to the call originator.
      */
-    public abstract void load();
+    public abstract void loadAvailableControls(@NonNull Consumer<List<Control>> consumer);
 
     /**
-     * Informs the service that the caller is listening for updates to the given controlIds.
-     * {@link IControlsProviderCallback#onRefreshState} should be called any time
-     * there are Control updates to render.
+     * Return a valid Publisher for the given controlIds. This publisher will be asked
+     * to provide updates for the given list of controlIds as long as the Subscription
+     * is valid.
      */
-    public abstract void subscribe(@NonNull List<String> controlIds);
-
-    /**
-     * Informs the service that the caller is done listening for updates,
-     * and any calls to {@link IControlsProviderCallback#onRefreshState} will be ignored.
-     */
-    public abstract void unsubscribe();
+    @NonNull
+    public abstract Publisher<Control> publisherFor(@NonNull List<String> controlIds);
 
     /**
      * The user has interacted with a Control. The action is dictated by the type of
-     * {@link ControlAction} that was sent.
+     * {@link ControlAction} that was sent. A response can be sent via
+     * {@link Consumer#accept}, with the Integer argument being one of the provided
+     * {@link ControlAction.ResponseResult}. The Integer should indicate whether the action
+     * was received successfully, or if additional prompts should be presented to
+     * the user. Any visual control updates should be sent via the Publisher.
      */
-    public abstract void onAction(@NonNull String controlId, @NonNull ControlAction action);
-
-    /**
-     * Sends a list of the controls available from this service.
-     *
-     * The items in the list must not have state information (as created by
-     * {@link Control.StatelessBuilder}).
-     * @param controls
-     */
-    public final void onLoad(@NonNull List<Control> controls) {
-        Preconditions.checkNotNull(controls);
-        List<Control> list = new ArrayList<>();
-        for (Control control: controls) {
-            if (control == null) {
-                Log.e(TAG, "onLoad: null control.");
-            }
-            if (isStateless(control)) {
-                list.add(control);
-            } else {
-                Log.w(TAG, "onLoad: control is not stateless.");
-                list.add(new Control.StatelessBuilder(control).build());
-            }
-        }
-        try {
-            mCallback.onLoad(mToken, list);
-        } catch (RemoteException ex) {
-            ex.rethrowAsRuntimeException();
-        }
-    }
-
-    /**
-     * Sends a list of the controls requested by {@link ControlsProviderService#subscribe} with
-     * their state.
-     * @param statefulControls
-     */
-    public final void onRefreshState(@NonNull List<Control> statefulControls) {
-        Preconditions.checkNotNull(statefulControls);
-        try {
-            mCallback.onRefreshState(mToken, statefulControls);
-        } catch (RemoteException ex) {
-            ex.rethrowAsRuntimeException();
-        }
-    }
-
-    /**
-     * Sends the response of a command in the specified {@link Control}.
-     * @param controlId
-     * @param response
-     */
-    public final void onControlActionResponse(
-            @NonNull String controlId, @ControlAction.ResponseResult int response) {
-        Preconditions.checkNotNull(controlId);
-        if (!ControlAction.isValidResponse(response)) {
-            Log.e(TAG, "Not valid response result: " + response);
-            response = ControlAction.RESPONSE_UNKNOWN;
-        }
-        try {
-            mCallback.onControlActionResponse(mToken, controlId, response);
-        } catch (RemoteException ex) {
-            ex.rethrowAsRuntimeException();
-        }
-    }
-
-    private boolean isStateless(Control control) {
-        return (control.getStatus() == Control.STATUS_UNKNOWN
-                    && control.getControlTemplate().getTemplateType() == ControlTemplate.TYPE_NONE
-                    && TextUtils.isEmpty(control.getStatusText()));
-    }
+    public abstract void performControlAction(@NonNull String controlId,
+            @NonNull ControlAction action, @NonNull Consumer<Integer> consumer);
 
     @Override
-    public IBinder onBind(Intent intent) {
+    @NonNull
+    public final IBinder onBind(@NonNull Intent intent) {
         mHandler = new RequestHandler(Looper.getMainLooper());
 
         Bundle bundle = intent.getBundleExtra(CALLBACK_BUNDLE);
-        IBinder callbackBinder = bundle.getBinder(CALLBACK_BINDER);
         mToken = bundle.getBinder(CALLBACK_TOKEN);
-        mCallback = IControlsProviderCallback.Stub.asInterface(callbackBinder);
 
         return new IControlsProvider.Stub() {
-            public void load() {
-                mHandler.sendEmptyMessage(RequestHandler.MSG_LOAD);
+            public void load(IControlsLoadCallback cb) {
+                mHandler.obtainMessage(RequestHandler.MSG_LOAD, cb).sendToTarget();
             }
 
-            public void subscribe(List<String> ids) {
-                mHandler.obtainMessage(RequestHandler.MSG_SUBSCRIBE, ids).sendToTarget();
+            public void subscribe(List<String> controlIds,
+                    IControlsSubscriber subscriber) {
+                SubscribeMessage msg = new SubscribeMessage(controlIds, subscriber);
+                mHandler.obtainMessage(RequestHandler.MSG_SUBSCRIBE, msg).sendToTarget();
             }
 
-            public void unsubscribe() {
-                mHandler.sendEmptyMessage(RequestHandler.MSG_UNSUBSCRIBE);
-            }
-
-            public void onAction(String id, ControlAction action) {
-                ActionMessage msg = new ActionMessage(id, action);
-                mHandler.obtainMessage(RequestHandler.MSG_ON_ACTION, msg).sendToTarget();
+            public void action(String controlId, ControlActionWrapper action,
+                               IControlsActionCallback cb) {
+                ActionMessage msg = new ActionMessage(controlId, action.getWrappedAction(), cb);
+                mHandler.obtainMessage(RequestHandler.MSG_ACTION, msg).sendToTarget();
             }
         };
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        mCallback = null;
+    public boolean onUnbind(@NonNull Intent intent) {
         mHandler = null;
         return true;
     }
@@ -186,8 +127,7 @@ public abstract class ControlsProviderService extends Service {
     private class RequestHandler extends Handler {
         private static final int MSG_LOAD = 1;
         private static final int MSG_SUBSCRIBE = 2;
-        private static final int MSG_UNSUBSCRIBE = 3;
-        private static final int MSG_ON_ACTION = 4;
+        private static final int MSG_ACTION = 3;
 
         RequestHandler(Looper looper) {
             super(looper);
@@ -196,30 +136,136 @@ public abstract class ControlsProviderService extends Service {
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case MSG_LOAD:
-                    ControlsProviderService.this.load();
+                    final IControlsLoadCallback cb = (IControlsLoadCallback) msg.obj;
+                    ControlsProviderService.this.loadAvailableControls(consumerFor(cb));
                     break;
+
                 case MSG_SUBSCRIBE:
-                    List<String> ids = (List<String>) msg.obj;
-                    ControlsProviderService.this.subscribe(ids);
+                    final SubscribeMessage sMsg = (SubscribeMessage) msg.obj;
+                    final IControlsSubscriber cs = sMsg.mSubscriber;
+                    Subscriber<Control> s = new Subscriber<Control>() {
+                            public void onSubscribe(Subscription subscription) {
+                                try {
+                                    cs.onSubscribe(mToken, new SubscriptionAdapter(subscription));
+                                } catch (RemoteException ex) {
+                                    ex.rethrowAsRuntimeException();
+                                }
+                            }
+                            public void onNext(@NonNull Control statefulControl) {
+                                Preconditions.checkNotNull(statefulControl);
+                                try {
+                                    cs.onNext(mToken, statefulControl);
+                                } catch (RemoteException ex) {
+                                    ex.rethrowAsRuntimeException();
+                                }
+                            }
+                            public void onError(Throwable t) {
+                                try {
+                                    cs.onError(mToken, t.toString());
+                                } catch (RemoteException ex) {
+                                    ex.rethrowAsRuntimeException();
+                                }
+                            }
+                            public void onComplete() {
+                                try {
+                                    cs.onComplete(mToken);
+                                } catch (RemoteException ex) {
+                                    ex.rethrowAsRuntimeException();
+                                }
+                            }
+                        };
+                    ControlsProviderService.this.publisherFor(sMsg.mControlIds).subscribe(s);
                     break;
-                case MSG_UNSUBSCRIBE:
-                    ControlsProviderService.this.unsubscribe();
-                    break;
-                case MSG_ON_ACTION:
-                    ActionMessage aMsg = (ActionMessage) msg.obj;
-                    ControlsProviderService.this.onAction(aMsg.mId, aMsg.mAction);
+
+                case MSG_ACTION:
+                    final ActionMessage aMsg = (ActionMessage) msg.obj;
+                    ControlsProviderService.this.performControlAction(aMsg.mControlId,
+                            aMsg.mAction, consumerFor(aMsg.mControlId, aMsg.mCb));
                     break;
             }
         }
+
+        private Consumer<Integer> consumerFor(final String controlId,
+                final IControlsActionCallback cb) {
+            return (@NonNull Integer response) -> {
+                Preconditions.checkNotNull(response);
+                if (!ControlAction.isValidResponse(response)) {
+                    Log.e(TAG, "Not valid response result: " + response);
+                    response = ControlAction.RESPONSE_UNKNOWN;
+                }
+                try {
+                    cb.accept(mToken, controlId, response);
+                } catch (RemoteException ex) {
+                    ex.rethrowAsRuntimeException();
+                }
+            };
+        }
+
+        private Consumer<List<Control>> consumerFor(IControlsLoadCallback cb) {
+            return (@NonNull List<Control> controls) -> {
+                Preconditions.checkNotNull(controls);
+                List<Control> list = new ArrayList<>();
+                for (Control control: controls) {
+                    if (control == null) {
+                        Log.e(TAG, "onLoad: null control.");
+                    }
+                    if (isStatelessControl(control)) {
+                        list.add(control);
+                    } else {
+                        Log.w(TAG, "onLoad: control is not stateless.");
+                        list.add(new Control.StatelessBuilder(control).build());
+                    }
+                }
+                try {
+                    cb.accept(mToken, list);
+                } catch (RemoteException ex) {
+                    ex.rethrowAsRuntimeException();
+                }
+            };
+        }
+
+        private boolean isStatelessControl(Control control) {
+            return (control.getStatus() == Control.STATUS_UNKNOWN
+                    && control.getControlTemplate().getTemplateType() == ControlTemplate.TYPE_NONE
+                    && TextUtils.isEmpty(control.getStatusText()));
+        }
     }
 
-    private class ActionMessage {
-        final String mId;
-        final ControlAction mAction;
+    private static class SubscriptionAdapter extends IControlsSubscription.Stub {
+        final Subscription mSubscription;
 
-        ActionMessage(String id, ControlAction action) {
-            this.mId = id;
+        SubscriptionAdapter(Subscription s) {
+            this.mSubscription = s;
+        }
+
+        public void request(long n) {
+            mSubscription.request(n);
+        }
+
+        public void cancel() {
+            mSubscription.cancel();
+        }
+    }
+
+    private static class ActionMessage {
+        final String mControlId;
+        final ControlAction mAction;
+        final IControlsActionCallback mCb;
+
+        ActionMessage(String controlId, ControlAction action, IControlsActionCallback cb) {
+            this.mControlId = controlId;
             this.mAction = action;
+            this.mCb = cb;
+        }
+    }
+
+    private static class SubscribeMessage {
+        final List<String> mControlIds;
+        final IControlsSubscriber mSubscriber;
+
+        SubscribeMessage(List<String> controlIds, IControlsSubscriber subscriber) {
+            this.mControlIds = controlIds;
+            this.mSubscriber = subscriber;
         }
     }
 }

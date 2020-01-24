@@ -27,7 +27,6 @@ import android.service.controls.actions.FloatAction;
  * A template for a {@link Control} with inputs in a "continuous" range of values.
  *
  * @see FloatAction
- * @hide
  */
 public final class RangeTemplate extends ControlTemplate {
 
@@ -148,8 +147,13 @@ public final class RangeTemplate extends ControlTemplate {
         return TYPE;
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putFloat(KEY_MIN_VALUE, mMinValue);
         b.putFloat(KEY_MAX_VALUE, mMaxValue);
@@ -181,18 +185,4 @@ public final class RangeTemplate extends ControlTemplate {
             throw new IllegalArgumentException(String.format("stepValue=%f <= 0", mStepValue));
         }
     }
-
-    public static final Creator<RangeTemplate> CREATOR = new Creator<RangeTemplate>() {
-        @Override
-        public RangeTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new RangeTemplate(source.readBundle());
-        }
-
-        @Override
-        public RangeTemplate[] newArray(int size) {
-            return new RangeTemplate[size];
-        }
-    };
 }

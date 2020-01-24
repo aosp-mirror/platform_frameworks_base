@@ -18,13 +18,9 @@ package android.service.controls.templates;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
-import android.os.Parcel;
 
 import com.android.internal.util.Preconditions;
 
-/**
- * @hide
- */
 public final class ToggleRangeTemplate extends ControlTemplate {
 
     private static final @TemplateType int TYPE = TYPE_TOGGLE_RANGE;
@@ -34,11 +30,14 @@ public final class ToggleRangeTemplate extends ControlTemplate {
     private @NonNull final ControlButton mControlButton;
     private @NonNull final RangeTemplate mRangeTemplate;
 
-
+    /**
+     * @param b
+     * @hide
+     */
     ToggleRangeTemplate(@NonNull Bundle b) {
         super(b);
         mControlButton = b.getParcelable(KEY_BUTTON);
-        mRangeTemplate = b.getParcelable(KEY_RANGE);
+        mRangeTemplate = new RangeTemplate(b.getBundle(KEY_RANGE));
     }
 
     public ToggleRangeTemplate(@NonNull String templateId,
@@ -60,11 +59,16 @@ public final class ToggleRangeTemplate extends ControlTemplate {
                 range);
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putParcelable(KEY_BUTTON, mControlButton);
-        b.putParcelable(KEY_RANGE, mRangeTemplate);
+        b.putBundle(KEY_RANGE, mRangeTemplate.getDataBundle());
         return b;
     }
 
@@ -86,19 +90,4 @@ public final class ToggleRangeTemplate extends ControlTemplate {
     public int getTemplateType() {
         return TYPE;
     }
-
-    public static final Creator<ToggleRangeTemplate> CREATOR = new Creator<ToggleRangeTemplate>() {
-
-        @Override
-        public ToggleRangeTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new ToggleRangeTemplate(source.readBundle());
-        }
-
-        @Override
-        public ToggleRangeTemplate[] newArray(int size) {
-            return new ToggleRangeTemplate[size];
-        }
-    };
 }
