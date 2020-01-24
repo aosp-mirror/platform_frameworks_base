@@ -35,6 +35,7 @@ import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -103,6 +104,30 @@ public class AppSearchManagerService extends SystemService {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
         }
+
+        @Override
+        public void getDocuments(String[] uris, AndroidFuture callback) {
+            Preconditions.checkNotNull(uris);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                // Contains serialized DocumentProto. byte[][] is not transmissible via Binder.
+                List<byte[]> results = new ArrayList<>(uris.length);
+                for (String uri : uris) {
+                    DocumentProto result = impl.getDocument(callingUid, uri);
+                    results.add(result.toByteArray());
+                }
+                callback.complete(results);
+            } catch (Throwable t) {
+                callback.completeExceptionally(t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
         // TODO(sidchhabra):Init FakeIcing properly.
         // TODO(sidchhabra): Do this in a threadpool.
         @Override

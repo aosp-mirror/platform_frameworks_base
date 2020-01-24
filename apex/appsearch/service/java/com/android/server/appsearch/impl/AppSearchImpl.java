@@ -17,6 +17,7 @@
 package com.android.server.appsearch.impl;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 
@@ -106,30 +107,65 @@ public final class AppSearchImpl {
         // Rewrite the type names to include the app's prefix
         String typePrefix = getTypePrefix(callingUid);
         DocumentProto.Builder documentBuilder = origDocument.toBuilder();
-        rewriteDocumentTypes(typePrefix, documentBuilder);
+        rewriteDocumentTypes(typePrefix, documentBuilder, /*add=*/ true);
         mFakeIcing.put(documentBuilder.build());
     }
 
     /**
-     * Rewrites all types mentioned anywhere in {@code documentBuilder} to prepend
+     * Retrieves a document from the AppSearch index by URI.
+     *
+     * @param callingUid The uid of the app calling AppSearch.
+     * @param uri The URI of the document to get.
+     * @return The Document contents, or {@code null} if no such URI exists in the system.
+     */
+    @Nullable
+    public DocumentProto getDocument(int callingUid, @NonNull String uri) {
+        String typePrefix = getTypePrefix(callingUid);
+        DocumentProto document = mFakeIcing.get(uri);
+        // Rewrite the type names to remove the app's prefix
+        DocumentProto.Builder documentBuilder = document.toBuilder();
+        rewriteDocumentTypes(typePrefix, documentBuilder, /*add=*/ false);
+        return documentBuilder.build();
+    }
+
+    /**
+     * Rewrites all types mentioned anywhere in {@code documentBuilder} to prepend or remove
      * {@code typePrefix}.
      *
-     * @param typePrefix The prefix to add
+     * @param typePrefix The prefix to add or remove
      * @param documentBuilder The document to mutate
+     * @param add Whether to add typePrefix to the types. If {@code false}, typePrefix will be
+     *     removed from the types.
+     * @throws IllegalArgumentException If {@code add=false} and the document has a type that
+     *     doesn't start with {@code typePrefix}.
      */
     @VisibleForTesting
     void rewriteDocumentTypes(
             @NonNull String typePrefix,
-            @NonNull DocumentProto.Builder documentBuilder) {
-        // Rewrite the type name to include the app's prefix
-        String newSchema = typePrefix + documentBuilder.getSchema();
+            @NonNull DocumentProto.Builder documentBuilder,
+            boolean add) {
+        // Rewrite the type name to include/remove the app's prefix
+        String newSchema;
+        if (add) {
+            newSchema = typePrefix + documentBuilder.getSchema();
+        } else {
+            newSchema = removePrefix(typePrefix, documentBuilder.getSchema());
+        }
         documentBuilder.setSchema(newSchema);
 
-        // Add namespace. If we ever allow users to set their own namespaces, this will have
+        // Add/remove namespace. If we ever allow users to set their own namespaces, this will have
         // to change to prepend the prefix instead of setting the whole namespace. We will also have
         // to store the namespaces in a map similar to the type map so we can rewrite queries with
         // empty namespaces.
-        documentBuilder.setNamespace(typePrefix);
+        if (add) {
+            documentBuilder.setNamespace(typePrefix);
+        } else if (!documentBuilder.getNamespace().equals(typePrefix)) {
+            throw new IllegalStateException(
+                    "Unexpected namespace \"" + documentBuilder.getNamespace()
+                            + "\" (expected \"" + typePrefix + "\")");
+        } else {
+            documentBuilder.clearNamespace();
+        }
 
         // Recurse into derived documents
         for (int propertyIdx = 0;
@@ -142,7 +178,7 @@ public final class AppSearchImpl {
                 for (int documentIdx = 0; documentIdx < documentCount; documentIdx++) {
                     DocumentProto.Builder derivedDocumentBuilder =
                             propertyBuilder.getDocumentValues(documentIdx).toBuilder();
-                    rewriteDocumentTypes(typePrefix, derivedDocumentBuilder);
+                    rewriteDocumentTypes(typePrefix, derivedDocumentBuilder, add);
                     propertyBuilder.setDocumentValues(documentIdx, derivedDocumentBuilder);
                 }
                 documentBuilder.setProperties(propertyIdx, propertyBuilder);
@@ -164,5 +200,14 @@ public final class AppSearchImpl {
             throw new IllegalStateException("Failed to look up package name for uid " + callingUid);
         }
         return callingUidName + "@" + mUserId + "/";
+    }
+
+    @NonNull
+    private static String removePrefix(@NonNull String prefix, @NonNull String input) {
+        if (!input.startsWith(prefix)) {
+            throw new IllegalArgumentException(
+                    "Input \"" + input + "\" does not start with \"" + prefix + "\"");
+        }
+        return input.substring(prefix.length());
     }
 }
