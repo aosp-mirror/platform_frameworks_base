@@ -20,7 +20,6 @@ import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Debug.getIonHeapsSizeKb;
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
@@ -32,11 +31,8 @@ import static com.android.server.stats.pull.ProcfsMemoryUtil.forEachPid;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
-import android.app.AlarmManager;
-import android.app.AlarmManager.OnAlarmListener;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.HistoricalOpsRequest;
@@ -49,10 +45,7 @@ import android.app.StatsManager.PullAtomMetadata;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.UidTraffic;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -74,23 +67,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CoolingDevice;
 import android.os.Environment;
-import android.os.FileUtils;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.IPullAtomCallback;
-import android.os.IStatsCompanionService;
-import android.os.IStatsd;
 import android.os.IStoraged;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
-import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -134,7 +118,6 @@ import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
-import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -156,20 +139,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.MissingResourceException;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -228,6 +206,25 @@ public class StatsPullAtomService extends SystemService {
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
+
+        final ConnectivityManager connectivityManager =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Default NetworkRequest should cover all transport types.
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
+
+        // Enable push notifications of throttling from vendor thermal
+        // management subsystem via thermalservice.
+        IThermalService thermalService = getIThermalService();
+        if (thermalService != null) {
+            try {
+                thermalService.registerThermalEventListener(
+                        new ThermalEventListener());
+                Slog.i(TAG, "register thermal listener successfully");
+            } catch (RemoteException e) {
+                Slog.i(TAG, "failed to register thermal listener");
+            }
+        }
 
         // Initialize state for CPU_TIME_PER_FREQ atom
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -2895,5 +2892,30 @@ public class StatsPullAtomService extends SystemService {
                 (atomTag, data) -> pullDangerousPermissionState(atomTag, data),
                 BackgroundThread.getExecutor()
         );
+    }
+
+
+    // Thermal event received from vendor thermal management subsystem
+    private static final class ThermalEventListener extends IThermalEventListener.Stub {
+        @Override
+        public void notifyThrottling(Temperature temp) {
+            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
+                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
+        }
+    }
+
+    private static final class ConnectivityStatsCallback extends
+            ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
+        }
     }
 }

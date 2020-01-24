@@ -15,161 +15,51 @@
  */
 package com.android.server.stats;
 
-import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
-import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
-import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static android.os.Process.getUidForPid;
-import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
-import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
-import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.forEachPid;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
-import android.app.AppOpsManager;
-import android.app.AppOpsManager.HistoricalOps;
-import android.app.AppOpsManager.HistoricalOpsRequest;
-import android.app.AppOpsManager.HistoricalPackageOps;
-import android.app.AppOpsManager.HistoricalUidOps;
-import android.app.INotificationManager;
-import android.app.ProcessMemoryState;
 import android.app.StatsManager;
-import android.bluetooth.BluetoothActivityEnergyInfo;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.UidTraffic;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
-import android.content.pm.UserInfo;
-import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.face.FaceManager;
-import android.hardware.fingerprint.FingerprintManager;
-import android.net.ConnectivityManager;
-import android.net.INetworkStatsService;
-import android.net.Network;
-import android.net.NetworkRequest;
-import android.net.NetworkStats;
-import android.net.wifi.WifiManager;
-import android.os.BatteryStats;
-import android.os.BatteryStatsInternal;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.CoolingDevice;
-import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsd;
-import android.os.IStoraged;
-import android.os.IThermalEventListener;
-import android.os.IThermalService;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.StatsFrameworkInitializer;
-import android.os.StatFs;
-import android.os.StatsLogEventWrapper;
-import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.os.Temperature;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.connectivity.WifiActivityEnergyInfo;
-import android.os.storage.DiskInfo;
-import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
-import android.provider.Settings;
-import android.stats.storage.StorageEnums;
-import android.telephony.ModemActivityInfo;
-import android.telephony.TelephonyManager;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.procstats.IProcessStats;
-import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BatterySipper;
-import com.android.internal.os.BatteryStatsHelper;
-import com.android.internal.os.BinderCallsStats.ExportedCallStat;
-import com.android.internal.os.KernelCpuSpeedReader;
-import com.android.internal.os.KernelCpuThreadReader;
-import com.android.internal.os.KernelCpuThreadReaderDiff;
-import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
-import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
-import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
-import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
-import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
-import com.android.internal.os.KernelWakelockReader;
-import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
-import com.android.internal.os.PowerProfile;
-import com.android.internal.os.ProcessCpuTracker;
-import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
-import com.android.server.SystemServiceManager;
-import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.notification.NotificationManagerService;
-import com.android.server.role.RoleManagerInternal;
-import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
-import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
-import com.android.server.storage.DiskStatsFileLogger;
-import com.android.server.storage.DiskStatsLoggingService;
-
-import com.google.android.collect.Sets;
 
 import libcore.io.IoUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Helper service for statsd (the native stats management service in cmds/statsd/).
@@ -178,10 +68,7 @@ import java.util.concurrent.TimeoutException;
  * @hide
  */
 public class StatsCompanionService extends IStatsCompanionService.Stub {
-    /**
-     * How long to wait on an individual subsystem to return its stats.
-     */
-    private static final long EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS = 2000;
+
     private static final long MILLIS_IN_A_DAY = TimeUnit.DAYS.toMillis(1);
 
     public static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
@@ -201,45 +88,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final int INSTALLER_FIELD_ID = 5;
 
     public static final int DEATH_THRESHOLD = 10;
-    /**
-     * Which native processes to snapshot memory for.
-     *
-     * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
-     * /system/bin/statsd for the stats daemon.
-     */
-    private static final Set<String> MEMORY_INTERESTING_NATIVE_PROCESSES = Sets.newHashSet(
-            "/system/bin/statsd",  // Stats daemon.
-            "/system/bin/surfaceflinger",
-            "/system/bin/apexd",  // APEX daemon.
-            "/system/bin/audioserver",
-            "/system/bin/cameraserver",
-            "/system/bin/drmserver",
-            "/system/bin/healthd",
-            "/system/bin/incidentd",
-            "/system/bin/installd",
-            "/system/bin/lmkd",  // Low memory killer daemon.
-            "/system/bin/logd",
-            "media.codec",
-            "media.extractor",
-            "media.metrics",
-            "/system/bin/mediadrmserver",
-            "/system/bin/mediaserver",
-            "/system/bin/performanced",
-            "/system/bin/tombstoned",
-            "/system/bin/traced",  // Perfetto.
-            "/system/bin/traced_probes",  // Perfetto.
-            "webview_zygote",
-            "zygote",
-            "zygote64");
-    /**
-     * Lowest available uid for apps.
-     *
-     * <p>Used to quickly discard memory snapshots of the zygote forks from native process
-     * measurements.
-     */
-    private static final int MIN_APP_UID = 10_000;
-
-    private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
 
     static final class CompanionHandler extends Handler {
         CompanionHandler(Looper looper) {
@@ -249,7 +97,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
-    private final INetworkStatsService mNetworkStatsService;
     @GuardedBy("sStatsdLock")
     private static IStatsd sStatsd;
     private static final Object sStatsdLock = new Object();
@@ -263,52 +110,16 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private StatsManagerService mStatsManagerService;
 
-    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
-    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
-    private WifiManager mWifiManager = null;
-    private TelephonyManager mTelephony = null;
     @GuardedBy("sStatsdLock")
     private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
     @GuardedBy("sStatsdLock")
     private final HashMap<Long, String> mDeletedFiles = new HashMap<>();
     private final CompanionHandler mHandler;
 
-    // Disables throttler on CPU time readers.
-    private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
-            new KernelCpuUidUserSysTimeReader(false);
-    private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
-    private KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader =
-            new KernelCpuUidFreqTimeReader(false);
-    private KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader =
-            new KernelCpuUidActiveTimeReader(false);
-    private KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader =
-            new KernelCpuUidClusterTimeReader(false);
-    private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
-            new StoragedUidIoStatsReader();
-    @Nullable
-    private final KernelCpuThreadReaderDiff mKernelCpuThreadReader;
-
-    private long mDebugElapsedClockPreviousValue = 0;
-    private long mDebugElapsedClockPullCount = 0;
-    private long mDebugFailingElapsedClockPreviousValue = 0;
-    private long mDebugFailingElapsedClockPullCount = 0;
-    private BatteryStatsHelper mBatteryStatsHelper = null;
-    private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
-    private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
-
-    private static IThermalService sThermalService;
-    private File mBaseDir =
-            new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
-    @GuardedBy("this")
-    ProcessCpuTracker mProcessCpuTracker = null;
-
     public StatsCompanionService(Context context) {
         super();
         mContext = context;
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        mNetworkStatsService = INetworkStatsService.Stub.asInterface(
-              ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
-        mBaseDir.mkdirs();
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -331,47 +142,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         };
         mShutdownEventReceiver = new ShutdownEventReceiver();
         if (DEBUG) Slog.d(TAG, "Registered receiver for ACTION_PACKAGE_REPLACED and ADDED.");
-        PowerProfile powerProfile = new PowerProfile(context);
-        final int numClusters = powerProfile.getNumCpuClusters();
-        mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
-        int firstCpuOfCluster = 0;
-        for (int i = 0; i < numClusters; i++) {
-            final int numSpeedSteps = powerProfile.getNumSpeedStepsInCpuCluster(i);
-            mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
-                    numSpeedSteps);
-            firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
-        }
-
-        // Enable push notifications of throttling from vendor thermal
-        // management subsystem via thermalservice.
-        IBinder b = ServiceManager.getService("thermalservice");
-
-        if (b != null) {
-            sThermalService = IThermalService.Stub.asInterface(b);
-            try {
-                sThermalService.registerThermalEventListener(
-                        new ThermalEventListener());
-                Slog.i(TAG, "register thermal listener successfully");
-            } catch (RemoteException e) {
-                // Should never happen.
-                Slog.e(TAG, "register thermal listener error");
-            }
-        } else {
-            Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
-        }
-
-        // Default NetworkRequest should cover all transport types.
-        final NetworkRequest request = new NetworkRequest.Builder().build();
-        final ConnectivityManager connectivityManager =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
-
         HandlerThread handlerThread = new HandlerThread(TAG);
         handlerThread.start();
         mHandler = new CompanionHandler(handlerThread.getLooper());
 
-        mKernelCpuThreadReader =
-                KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
     }
 
     private final static int[] toIntArray(List<Integer> list) {
@@ -855,8 +629,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 mDeathTimeMillis.add(now);
                 if (mDeathTimeMillis.size() >= DEATH_THRESHOLD) {
                     mDeathTimeMillis.clear();
-                    File[] configs = FileUtils.listFilesOrEmpty(new File(CONFIG_DIR));
-                    if (configs.length > 0) {
+                    File[] configs = new File(CONFIG_DIR).listFiles();
+                    if (configs != null && configs.length > 0) {
                         String fileName = configs[0].getName();
                         if (configs[0].delete()) {
                             mDeletedFiles.put(now, fileName);
@@ -907,30 +681,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 writer.println(
                         "  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
             }
-        }
-    }
-
-    // Thermal event received from vendor thermal management subsystem
-    private static final class ThermalEventListener extends IThermalEventListener.Stub {
-        @Override
-        public void notifyThrottling(Temperature temp) {
-            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
-                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
-        }
-    }
-
-    private static final class ConnectivityStatsCallback extends
-            ConnectivityManager.NetworkCallback {
-        @Override
-        public void onAvailable(Network network) {
-            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
-                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
-        }
-
-        @Override
-        public void onLost(Network network) {
-            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
-                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
 }
