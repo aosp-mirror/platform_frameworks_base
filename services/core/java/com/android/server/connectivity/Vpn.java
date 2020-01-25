@@ -794,10 +794,10 @@ public class Vpn {
                     // ignore
                 }
                 mContext.unbindService(mConnection);
-                mConnection = null;
+                cleanupVpnStateLocked();
             } else if (mVpnRunner != null) {
+                // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                 mVpnRunner.exit();
-                mVpnRunner = null;
             }
 
             try {
@@ -1539,23 +1539,29 @@ public class Vpn {
         public void interfaceRemoved(String interfaze) {
             synchronized (Vpn.this) {
                 if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
-                    mStatusIntent = null;
-                    mNetworkCapabilities.setUids(null);
-                    mConfig = null;
-                    mInterface = null;
                     if (mConnection != null) {
                         mContext.unbindService(mConnection);
-                        mConnection = null;
-                        agentDisconnect();
+                        cleanupVpnStateLocked();
                     } else if (mVpnRunner != null) {
-                        // agentDisconnect must be called from mVpnRunner.exit()
+                        // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                         mVpnRunner.exit();
-                        mVpnRunner = null;
                     }
                 }
             }
         }
     };
+
+    private void cleanupVpnStateLocked() {
+        mStatusIntent = null;
+        mNetworkCapabilities.setUids(null);
+        mConfig = null;
+        mInterface = null;
+
+        // Unconditionally clear both VpnService and VpnRunner fields.
+        mVpnRunner = null;
+        mConnection = null;
+        agentDisconnect();
+    }
 
     private void enforceControlPermission() {
         mContext.enforceCallingPermission(Manifest.permission.CONTROL_VPN, "Unauthorized Caller");
@@ -2046,7 +2052,25 @@ public class Vpn {
 
         public abstract void run();
 
-        protected abstract void exit();
+        /**
+         * Disconnects the NetworkAgent and cleans up all state related to the VpnRunner.
+         *
+         * <p>All outer Vpn instance state is cleaned up in cleanupVpnStateLocked()
+         */
+        protected abstract void exitVpnRunner();
+
+        /**
+         * Triggers the cleanup of the VpnRunner, and additionally cleans up Vpn instance-wide state
+         *
+         * <p>This method ensures that simple calls to exit() will always clean up global state
+         * properly.
+         */
+        protected final void exit() {
+            synchronized (Vpn.this) {
+                exitVpnRunner();
+                cleanupVpnStateLocked();
+            }
+        }
     }
 
     interface IkeV2VpnRunnerCallback {
@@ -2376,17 +2400,6 @@ public class Vpn {
         }
 
         /**
-         * Triggers cleanup of outer class' state
-         *
-         * <p>Can be called from any thread, as it does not mutate state in the Ikev2VpnRunner.
-         */
-        private void cleanupVpnState() {
-            synchronized (Vpn.this) {
-                agentDisconnect();
-            }
-        }
-
-        /**
          * Cleans up all Ikev2VpnRunner internal state
          *
          * <p>This method MUST always be called on the mExecutor thread in order to ensure
@@ -2405,10 +2418,7 @@ public class Vpn {
         }
 
         @Override
-        public void exit() {
-            // Cleanup outer class' state immediately, otherwise race conditions may ensue.
-            cleanupVpnState();
-
+        public void exitVpnRunner() {
             mExecutor.execute(() -> {
                 shutdownVpnRunner();
             });
@@ -2507,10 +2517,9 @@ public class Vpn {
 
         /** Tears down this LegacyVpn connection */
         @Override
-        public void exit() {
+        public void exitVpnRunner() {
             // We assume that everything is reset after stopping the daemons.
             interrupt();
-            agentDisconnect();
             try {
                 mContext.unregisterReceiver(mBroadcastReceiver);
             } catch (IllegalArgumentException e) {}
