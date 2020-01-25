@@ -35,6 +35,8 @@ import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
 
+import static java.lang.Long.max;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -929,6 +931,19 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /**
+     * Update the pending state for the uid
+     *
+     * @param currentTime The current elapsed real time
+     * @param uid The uid that has a pending state
+     */
+    private void updatePendingState(long currentTime, int uid) {
+        synchronized (this) {
+            mLastRealtime = max(currentTime, mLastRealtime);
+            updatePendingStateIfNeededLocked(mUidStates.get(uid));
+        }
+    }
+
     public void updateUidProcState(int uid, int procState) {
         synchronized (this) {
             final UidState uidState = getUidStateLocked(uid, true);
@@ -954,7 +969,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                     } else {
                         settleTime = mConstants.BG_STATE_SETTLE_TIME;
                     }
-                    uidState.pendingStateCommitTime = SystemClock.elapsedRealtime() + settleTime;
+                    final long commitTime = SystemClock.elapsedRealtime() + settleTime;
+                    uidState.pendingStateCommitTime = commitTime;
+
+                    mHandler.sendMessageDelayed(
+                            PooledLambda.obtainMessage(AppOpsService::updatePendingState, this,
+                                    commitTime + 1, uid), settleTime + 1);
                 }
                 if (uidState.startNesting != 0) {
                     // There is some actively running operation...  need to find it
@@ -2442,6 +2462,18 @@ public class AppOpsService extends IAppOpsService.Stub {
             uidState = new UidState(uid);
             mUidStates.put(uid, uidState);
         } else {
+            updatePendingStateIfNeededLocked(uidState);
+        }
+        return uidState;
+    }
+
+    /**
+     * Check if the pending state should be updated and do so if needed
+     *
+     * @param uidState The uidState that might have a pending state
+     */
+    private void updatePendingStateIfNeededLocked(@NonNull UidState uidState) {
+        if (uidState != null) {
             if (uidState.pendingStateCommitTime != 0) {
                 if (uidState.pendingStateCommitTime < mLastRealtime) {
                     commitUidPendingStateLocked(uidState);
@@ -2453,7 +2485,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
-        return uidState;
     }
 
     private void commitUidPendingStateLocked(UidState uidState) {
