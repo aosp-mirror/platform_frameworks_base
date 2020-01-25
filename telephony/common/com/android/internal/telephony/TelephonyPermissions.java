@@ -31,7 +31,6 @@ import android.os.UserHandle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -393,8 +392,8 @@ public final class TelephonyPermissions {
                 invokedMethods = sReportedDeviceIDPackages.get(callingPackage);
             }
             invokedMethods.add(message);
-            StatsLog.write(StatsLog.DEVICE_IDENTIFIER_ACCESS_DENIED, callingPackage, message,
-                    isPreinstalled, false);
+            TelephonyCommonStatsLog.write(TelephonyCommonStatsLog.DEVICE_IDENTIFIER_ACCESS_DENIED,
+                    callingPackage, message, isPreinstalled, false);
         }
         Log.w(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message
                 + ":isPreinstalled=" + isPreinstalled);
