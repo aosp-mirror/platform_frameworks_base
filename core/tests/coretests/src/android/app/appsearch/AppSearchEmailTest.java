@@ -18,8 +18,6 @@ package android.app.appsearch;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.app.appsearch.AppSearch.Email;
-
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -29,7 +27,7 @@ public class AppSearchEmailTest {
 
     @Test
     public void testBuildEmailAndGetValue() {
-        Email email = Email.newBuilder("uri")
+        AppSearchEmail email = new AppSearchEmail.Builder("uri")
                 .setFrom("FakeFromAddress")
                 .setCc("CC1", "CC2")
                 // Score and Property are mixed into the middle to make sure DocumentBuilder's
