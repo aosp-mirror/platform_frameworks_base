@@ -94,7 +94,6 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.COLOR_MODE_DEFAULT;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -495,7 +494,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                                         // process that it is hidden.
     private boolean mLastDeferHidingClient; // If true we will defer setting mClientVisible to false
                                            // and reporting to the client that it is hidden.
-    boolean sleeping;       // have we told the activity to sleep?
+    private boolean mSetToSleep; // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
     boolean mDrawn;          // is this activity's window drawn?
     boolean mClientVisibilityDeferred;// was the visibility change message to client deferred?
@@ -613,6 +612,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private boolean mLastContainsShowWhenLockedWindow;
     private boolean mLastContainsDismissKeyguardWindow;
+    private boolean mLastContainsTurnScreenOnWindow;
 
     /**
      * A flag to determine if this AR is in the process of closing or entering PIP. This is needed
@@ -895,7 +895,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
-                pw.print(" sleeping="); pw.print(sleeping);
+        pw.print(" setToSleep="); pw.print(mSetToSleep);
                 pw.print(" idle="); pw.print(idle);
                 pw.print(" mStartingWindowState=");
                 pw.println(startingWindowStateToString(mStartingWindowState));
@@ -2654,7 +2654,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Make sure the record is cleaned out of other places.
         mStackSupervisor.mStoppingActivities.remove(this);
-        mStackSupervisor.mGoingToSleepActivities.remove(this);
 
         final ActivityStack stack = getRootTask();
         final DisplayContent display = getDisplay();
@@ -3357,6 +3356,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mLastContainsDismissKeyguardWindow = containsDismissKeyguard;
         mLastContainsShowWhenLockedWindow = containsShowWhenLocked;
+        mLastContainsTurnScreenOnWindow = containsTurnScreenOnWindow();
     }
 
     boolean containsDismissKeyguardWindow() {
@@ -4355,6 +4355,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || state5 == mState;
     }
 
+    /**
+     * Returns {@code true} if the Activity is in one of the specified states.
+     */
+    boolean isState(ActivityState state1, ActivityState state2, ActivityState state3,
+            ActivityState state4, ActivityState state5, ActivityState state6) {
+        return state1 == mState || state2 == mState || state3 == mState || state4 == mState
+                || state5 == mState || state6 == mState;
+    }
+
     void destroySurfaces() {
         destroySurfaces(false /*cleanupOnResume*/);
     }
@@ -4444,20 +4453,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Whether the activity is on the sleeping display.
-        // TODO(b/129750406): This should be applied for the default display, too.
-        final boolean isDisplaySleeping = getDisplay().isSleeping()
-                && getDisplayId() != DEFAULT_DISPLAY;
-        // Whether this activity is the top activity of this stack.
-        final boolean isTop = this == stack.getTopNonFinishingActivity();
-        // Exclude the case where this is the top activity in a pinned stack.
-        final boolean isTopNotPinnedStack = stack.isAttached()
-                && stack.getDisplay().isTopNotPinnedStack(stack);
+        // Check if the activity is on a sleeping display, and if it can turn it ON.
+        if (getDisplay().isSleeping()) {
+            final boolean canTurnScreenOn = !mSetToSleep || canTurnScreenOn()
+                    || canShowWhenLocked() || containsDismissKeyguardWindow();
+            if (!canTurnScreenOn) {
+                return false;
+            }
+        }
+
         // Now check whether it's really visible depending on Keyguard state, and update
         // {@link ActivityStack} internal states.
+        // Inform the method if this activity is the top activity of this stack, but exclude the
+        // case where this is the top activity in a pinned stack.
+        final boolean isTop = this == stack.getTopNonFinishingActivity();
+        final boolean isTopNotPinnedStack = stack.isAttached()
+                && stack.getDisplay().isTopNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
-        return visibleIgnoringDisplayStatus && !isDisplaySleeping;
+
+        return visibleIgnoringDisplayStatus;
     }
 
     boolean shouldBeVisible() {
@@ -4489,7 +4504,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 stack.mUndrawnActivitiesBelowTopTranslucent.add(this);
             }
             setVisibility(true);
-            sleeping = false;
+            mSetToSleep = false;
             app.postPendingUiCleanMsg(true);
             if (reportToClient) {
                 mClientVisibilityDeferred = false;
@@ -4499,7 +4514,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(this);
-            mStackSupervisor.mGoingToSleepActivities.remove(this);
         } catch (Exception e) {
             // Just skip on any failure; we'll make it visible when it next restarts.
             Slog.w(TAG, "Exception thrown making visible: " + intent.getComponent(), e);
@@ -5445,25 +5459,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mVisibleRequested || nowVisible || mState == PAUSING || mState == RESUMED;
     }
 
-    void setSleeping(boolean _sleeping) {
-        setSleeping(_sleeping, false);
-    }
-
-    void setSleeping(boolean _sleeping, boolean force) {
-        if (!force && sleeping == _sleeping) {
-            return;
-        }
-        if (attachedToProcess()) {
-            try {
-                app.getThread().scheduleSleeping(appToken, _sleeping);
-                if (_sleeping && !mStackSupervisor.mGoingToSleepActivities.contains(this)) {
-                    mStackSupervisor.mGoingToSleepActivities.add(this);
-                }
-                sleeping = _sleeping;
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Exception thrown when sleeping: " + intent.getComponent(), e);
-            }
-        }
+    void setSleeping(boolean sleeping) {
+        mSetToSleep = sleeping;
     }
 
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
@@ -7406,7 +7403,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean getTurnScreenOnFlag() {
-        return mTurnScreenOn;
+        return mTurnScreenOn || containsTurnScreenOnWindow();
+    }
+
+    private boolean containsTurnScreenOnWindow() {
+        // When we are relaunching, it is possible for us to be unfrozen before our previous
+        // windows have been added back. Using the cached value ensures that our previous
+        // showWhenLocked preference is honored until relaunching is complete.
+        if (isRelaunching()) {
+            return mLastContainsTurnScreenOnWindow;
+        }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if ((mChildren.get(i).mAttrs.flags & LayoutParams.FLAG_TURN_SCREEN_ON) != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -141,7 +141,6 @@ interface IActivityTaskManager {
             in PersistableBundle persistentState, in CharSequence description);
     oneway void activityDestroyed(in IBinder token);
     void activityRelaunched(in IBinder token);
-    oneway void activitySlept(in IBinder token);
     int getFrontActivityScreenCompatMode();
     void setFrontActivityScreenCompatMode(int mode);
     String getCallingPackage(in IBinder token);

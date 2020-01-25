@@ -1831,21 +1831,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         Binder.restoreCallingIdentity(origId);
     }
 
-    public final void activitySlept(IBinder token) {
-        if (DEBUG_ALL) Slog.v(TAG, "Activity slept: token=" + token);
-
-        final long origId = Binder.clearCallingIdentity();
-
-        synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r != null) {
-                mStackSupervisor.activitySleptLocked(r);
-            }
-        }
-
-        Binder.restoreCallingIdentity(origId);
-    }
-
     @Override
     public void setRequestedOrientation(IBinder token, int requestedOrientation) {
         synchronized (mGlobalLock) {

@@ -164,7 +164,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -2348,18 +2347,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     }
                 }
             }
-
-            if (displayShouldSleep || mStackSupervisor.mGoingToSleepActivities.isEmpty()) {
-                continue;
-            }
-            // The display is awake now, so clean up the going to sleep list.
-            for (Iterator<ActivityRecord> it =
-                    mStackSupervisor.mGoingToSleepActivities.iterator(); it.hasNext(); ) {
-                final ActivityRecord r = it.next();
-                if (r.getDisplayId() == display.mDisplayId) {
-                    it.remove();
-                }
-            }
         }
     }
 
@@ -3578,9 +3565,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         printed |= dumpHistoryList(fd, pw, mStackSupervisor.mStoppingActivities, "  ",
                 "Stop", false, !dumpAll,
                 false, dumpPackage, true, "  Activities waiting to stop:", null);
-        printed |= dumpHistoryList(fd, pw, mStackSupervisor.mGoingToSleepActivities,
-                "  ", "Sleep", false, !dumpAll,
-                false, dumpPackage, true, "  Activities waiting to sleep:", null);
 
         return printed;
     }
