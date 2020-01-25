@@ -79,6 +79,25 @@ public final class GnssMeasurementCorrections implements Parcelable {
     @NonNull
     private final List<GnssSingleSatCorrection> mSingleSatCorrectionList;
 
+    /**
+     * Indicates whether the environment bearing is available.
+     */
+    private final boolean mHasEnvironmentBearing;
+
+    /**
+     * Environment bearing in degrees clockwise from true north, in the direction of user motion.
+     * Environment bearing is provided when it is known with high probability that velocity is
+     * aligned with an environment feature (such as edge of a building, or road).
+     */
+    @FloatRange(from = 0.0f, to = 360.0f)
+    private final float mEnvironmentBearingDegrees;
+
+    /**
+     * Environment bearing uncertainty in degrees.
+     */
+    @FloatRange(from = 0.0f, to = 180.0f)
+    private final float mEnvironmentBearingUncertaintyDegrees;
+
     private GnssMeasurementCorrections(Builder builder) {
         mLatitudeDegrees = builder.mLatitudeDegrees;
         mLongitudeDegrees = builder.mLongitudeDegrees;
@@ -89,6 +108,10 @@ public final class GnssMeasurementCorrections implements Parcelable {
         final List<GnssSingleSatCorrection> singleSatCorrList =  builder.mSingleSatCorrectionList;
         Preconditions.checkArgument(singleSatCorrList != null && !singleSatCorrList.isEmpty());
         mSingleSatCorrectionList = Collections.unmodifiableList(new ArrayList<>(singleSatCorrList));
+        mHasEnvironmentBearing = builder.mEnvironmentBearingIsSet
+                && builder.mEnvironmentBearingUncertaintyIsSet;
+        mEnvironmentBearingDegrees = builder.mEnvironmentBearingDegrees;
+        mEnvironmentBearingUncertaintyDegrees = builder.mEnvironmentBearingUncertaintyDegrees;
     }
 
     /** Gets the latitude in degrees at which the corrections are computed. */
@@ -145,6 +168,31 @@ public final class GnssMeasurementCorrections implements Parcelable {
         return mSingleSatCorrectionList;
     }
 
+    /**
+     * If true, environment bearing will be available.
+     */
+    public boolean hasEnvironmentBearing() {
+        return mHasEnvironmentBearing;
+    }
+
+    /**
+     * Gets the environment bearing in degrees clockwise from true north, in the direction of user
+     * motion. Environment bearing is provided when it is known with high probability that
+     * velocity is aligned with an environment feature (such as edge of a building, or road).
+     */
+    @FloatRange(from = 0.0f, to = 360.0f)
+    public float getEnvironmentBearingDegrees() {
+        return mEnvironmentBearingDegrees;
+    }
+
+    /**
+     * Gets the environment bearing uncertainty in degrees.
+     */
+    @FloatRange(from = 0.0f, to = 180.0f)
+    public float getEnvironmentBearingUncertaintyDegrees() {
+        return mEnvironmentBearingUncertaintyDegrees;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -167,6 +215,12 @@ public final class GnssMeasurementCorrections implements Parcelable {
                     parcel.readTypedList(singleSatCorrectionList, GnssSingleSatCorrection.CREATOR);
                     gnssMeasurementCorrectons.setSingleSatelliteCorrectionList(
                             singleSatCorrectionList);
+                    boolean hasEnvironmentBearing = parcel.readBoolean();
+                    if (hasEnvironmentBearing) {
+                        gnssMeasurementCorrectons.setEnvironmentBearingDegrees(parcel.readFloat());
+                        gnssMeasurementCorrectons.setEnvironmentBearingUncertaintyDegrees(
+                                parcel.readFloat());
+                    }
                     return gnssMeasurementCorrectons.build();
                 }
 
@@ -192,6 +246,14 @@ public final class GnssMeasurementCorrections implements Parcelable {
                 String.format(format, "ToaGpsNanosecondsOfWeek = ", mToaGpsNanosecondsOfWeek));
         builder.append(
                 String.format(format, "mSingleSatCorrectionList = ", mSingleSatCorrectionList));
+        builder.append(
+                String.format(format, "HasEnvironmentBearing = ", mHasEnvironmentBearing));
+        builder.append(
+                String.format(format, "EnvironmentBearingDegrees = ",
+                        mEnvironmentBearingDegrees));
+        builder.append(
+                String.format(format, "EnvironmentBearingUncertaintyDegrees = ",
+                mEnvironmentBearingUncertaintyDegrees));
         return builder.toString();
     }
 
@@ -204,6 +266,11 @@ public final class GnssMeasurementCorrections implements Parcelable {
         parcel.writeDouble(mVerticalPositionUncertaintyMeters);
         parcel.writeLong(mToaGpsNanosecondsOfWeek);
         parcel.writeTypedList(mSingleSatCorrectionList);
+        parcel.writeBoolean(mHasEnvironmentBearing);
+        if (mHasEnvironmentBearing) {
+            parcel.writeFloat(mEnvironmentBearingDegrees);
+            parcel.writeFloat(mEnvironmentBearingUncertaintyDegrees);
+        }
     }
 
     /** Builder for {@link GnssMeasurementCorrections} */
@@ -219,6 +286,10 @@ public final class GnssMeasurementCorrections implements Parcelable {
         private double mVerticalPositionUncertaintyMeters;
         private long mToaGpsNanosecondsOfWeek;
         @Nullable private List<GnssSingleSatCorrection> mSingleSatCorrectionList;
+        private float mEnvironmentBearingDegrees;
+        private boolean mEnvironmentBearingIsSet = false;
+        private float mEnvironmentBearingUncertaintyDegrees;
+        private boolean mEnvironmentBearingUncertaintyIsSet = false;
 
         /** Sets the latitude in degrees at which the corrections are computed. */
         @NonNull public Builder setLatitudeDegrees(
@@ -282,8 +353,37 @@ public final class GnssMeasurementCorrections implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the environment bearing in degrees clockwise from true north, in the direction of
+         * user motion. Environment bearing is provided when it is known with high probability
+         * that velocity is aligned with an environment feature (such as edge of a building, or
+         * road).
+         */
+        @NonNull public Builder setEnvironmentBearingDegrees(
+                @FloatRange(from = 0.0f, to = 360.0f)
+                        float environmentBearingDegrees) {
+            mEnvironmentBearingDegrees = environmentBearingDegrees;
+            mEnvironmentBearingIsSet = true;
+            return this;
+        }
+
+        /**
+         * Sets the environment bearing uncertainty in degrees.
+         */
+        @NonNull public Builder setEnvironmentBearingUncertaintyDegrees(
+                @FloatRange(from = 0.0f, to = 180.0f)
+                        float environmentBearingUncertaintyDegrees) {
+            mEnvironmentBearingUncertaintyDegrees = environmentBearingUncertaintyDegrees;
+            mEnvironmentBearingUncertaintyIsSet = true;
+            return this;
+        }
+
         /** Builds a {@link GnssMeasurementCorrections} instance as specified by this builder. */
         @NonNull public GnssMeasurementCorrections build() {
+            if (mEnvironmentBearingIsSet ^ mEnvironmentBearingUncertaintyIsSet) {
+                throw new IllegalStateException("Both environment bearing and environment bearing "
+                        + "uncertainty must be set.");
+            }
             return new GnssMeasurementCorrections(this);
         }
     }
