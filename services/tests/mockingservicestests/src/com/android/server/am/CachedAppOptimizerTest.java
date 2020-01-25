@@ -120,7 +120,7 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_3);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleFullFull).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_4);
-        assertThat(mCachedAppOptimizerUnderTest.mStatsdSampleRate).isEqualTo(
+        assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE);
         assertThat(mCachedAppOptimizerUnderTest.mFullAnonRssThrottleKb).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB);
@@ -209,7 +209,7 @@ public final class CachedAppOptimizerTest {
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottlePersistent).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_6 + 1);
-        assertThat(mCachedAppOptimizerUnderTest.mStatsdSampleRate).isEqualTo(
+        assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleBFGS).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_5 + 1);
@@ -472,7 +472,7 @@ public final class CachedAppOptimizerTest {
     public void statsdSampleRate_listensToDeviceConfigChanges() throws InterruptedException {
         mCachedAppOptimizerUnderTest.init();
 
-        // When we override mStatsdSampleRate with a reasonable value ...
+        // When we override mCompactStatsdSampleRate with a reasonable value ...
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_STATSD_SAMPLE_RATE,
@@ -480,7 +480,7 @@ public final class CachedAppOptimizerTest {
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then that override is reflected in the compactor.
-        assertThat(mCachedAppOptimizerUnderTest.mStatsdSampleRate).isEqualTo(
+        assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE + 0.1f);
     }
 
@@ -489,14 +489,14 @@ public final class CachedAppOptimizerTest {
             throws InterruptedException {
         mCachedAppOptimizerUnderTest.init();
 
-        // When we override mStatsdSampleRate with an unreasonable value ...
+        // When we override mCompactStatsdSampleRate with an unreasonable value ...
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_STATSD_SAMPLE_RATE, "foo", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then that override is reflected in the compactor.
-        assertThat(mCachedAppOptimizerUnderTest.mStatsdSampleRate).isEqualTo(
+        assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(
                 CachedAppOptimizer.DEFAULT_STATSD_SAMPLE_RATE);
     }
 
@@ -505,7 +505,7 @@ public final class CachedAppOptimizerTest {
             throws InterruptedException {
         mCachedAppOptimizerUnderTest.init();
 
-        // When we override mStatsdSampleRate with an value outside of [0..1]...
+        // When we override mCompactStatsdSampleRate with an value outside of [0..1]...
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_STATSD_SAMPLE_RATE,
@@ -513,7 +513,7 @@ public final class CachedAppOptimizerTest {
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then the values is capped in the range.
-        assertThat(mCachedAppOptimizerUnderTest.mStatsdSampleRate).isEqualTo(0.0f);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(0.0f);
 
         mCountDown = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -522,7 +522,7 @@ public final class CachedAppOptimizerTest {
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then the values is capped in the range.
-        assertThat(mCachedAppOptimizerUnderTest.mStatsdSampleRate).isEqualTo(1.0f);
+        assertThat(mCachedAppOptimizerUnderTest.mCompactStatsdSampleRate).isEqualTo(1.0f);
     }
 
     @Test
