@@ -3990,6 +3990,10 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
      * Used to make room for shadows in the pinned windowing mode.
      */
     int getStackOutset() {
+        // If we are drawing shadows on the task then don't outset the stack.
+        if (mWmService.mRenderShadowsInCompositor) {
+            return 0;
+        }
         DisplayContent displayContent = getDisplayContent();
         if (inPinnedWindowingMode() && displayContent != null) {
             final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
