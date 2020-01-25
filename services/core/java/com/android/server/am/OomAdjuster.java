@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL_IMPLICIT;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
@@ -73,6 +74,7 @@ import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -129,11 +131,25 @@ public final class OomAdjuster {
      * to pass while-in-use capabilities from client process to bound service. In targetSdkVersion
      * R and above, if client is a TOP activity, when this flag is present, bound service gets all
      * while-in-use capabilities; when this flag is not present, bound service gets no while-in-use
-     * capabilitiy from client.
+     * capability from client.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
     static final long PROCESS_CAPABILITY_CHANGE_ID = 136274596L;
+
+    /**
+     * In targetSdkVersion R and above, foreground service has camera and microphone while-in-use
+     * capability only when the {@link android.R.attr#foregroundServiceType} is configured as
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_CAMERA} and
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} respectively in the
+     * manifest file.
+     * In targetSdkVersion below R, foreground service automatically have camera and microphone
+     * capabilities.
+     */
+    @ChangeId
+    //TODO: change to @EnabledAfter when enforcing the feature.
+    @Disabled
+    static final long CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID = 136219221L;
 
     /**
      * For some direct access we need to power manager.
@@ -1412,6 +1428,7 @@ public final class OomAdjuster {
         }
 
         int capabilityFromFGS = 0; // capability from foreground service.
+        boolean procStateFromFGSClient = false;
         for (int is = app.services.size() - 1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                         || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND
@@ -1460,22 +1477,13 @@ public final class OomAdjuster {
                 }
             }
 
-            if (s.isForeground) {
+            if (s.isForeground && s.mAllowWhileInUsePermissionInFgs) {
                 final int fgsType = s.foregroundServiceType;
                 capabilityFromFGS |=
                         (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
                                 != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
-                if (s.appInfo.targetSdkVersion < Build.VERSION_CODES.R) {
-                    capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-                } else {
-                    capabilityFromFGS |=
-                            (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
-                                    != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA : 0;
-                    capabilityFromFGS |=
-                            (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
-                                    != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE : 0;
-                }
+                capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                        | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
             }
 
             ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections = s.getConnections();
@@ -1513,12 +1521,16 @@ public final class OomAdjuster {
                             continue;
                         }
 
+                        int clientAdj = client.getCurRawAdj();
+                        int clientProcState = client.getCurRawProcState();
+
+                        if (clientProcState == PROCESS_STATE_FOREGROUND_SERVICE) {
+                            procStateFromFGSClient = true;
+                        }
+
                         if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                             capability |= client.curCapability;
                         }
-
-                        int clientAdj = client.getCurRawAdj();
-                        int clientProcState = client.getCurRawProcState();
 
                         if (clientProcState >= PROCESS_STATE_CACHED_ACTIVITY) {
                             // If the other app is cached for any reason, for purposes here
@@ -1941,7 +1953,17 @@ public final class OomAdjuster {
         // apply capability from FGS.
         if (app.hasForegroundServices()) {
             capability |= capabilityFromFGS;
+        } else if (!ActivityManager.isProcStateBackground(procState)) {
+            // procState higher than PROCESS_STATE_TRANSIENT_BACKGROUND implicitly has
+            // camera/microphone capability
+            if (procState == PROCESS_STATE_FOREGROUND_SERVICE && procStateFromFGSClient) {
+                // if the FGS state is passed down from client, do not grant implicit capabilities.
+            } else {
+                //TODO: remove this line when enforcing the feature.
+                capability |= PROCESS_CAPABILITY_ALL_IMPLICIT;
+            }
         }
+
         // TOP process has all capabilities.
         if (procState <= PROCESS_STATE_TOP) {
             capability = PROCESS_CAPABILITY_ALL;

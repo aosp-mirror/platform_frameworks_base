@@ -589,7 +589,8 @@ message ServiceRecordProto {
     repeated IntentBindRecordProto bindings = 25;
     repeated ConnectionRecordProto connections = 26;
 
-    // Next Tag: 27
+    optional bool allow_while_in_use_permission_in_fgs = 27;
+    // Next Tag: 28
 }
 
 message ConnectionRecordProto {
