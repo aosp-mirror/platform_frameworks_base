@@ -45,28 +45,28 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     // Lifted from Default carrier configs and max range of SSRSRP
     // Boundaries: [-140 dB, -44 dB]
     private int[] mSsRsrpThresholds = new int[] {
-            -125, /* SIGNAL_STRENGTH_POOR */
-            -115, /* SIGNAL_STRENGTH_MODERATE */
-            -105, /* SIGNAL_STRENGTH_GOOD */
-            -95,  /* SIGNAL_STRENGTH_GREAT */
+            -110, /* SIGNAL_STRENGTH_POOR */
+            -90, /* SIGNAL_STRENGTH_MODERATE */
+            -80, /* SIGNAL_STRENGTH_GOOD */
+            -65,  /* SIGNAL_STRENGTH_GREAT */
     };
 
     // Lifted from Default carrier configs and max range of SSRSRQ
     // Boundaries: [-20 dB, -3 dB]
     private int[] mSsRsrqThresholds = new int[] {
-            -14, /* SIGNAL_STRENGTH_POOR */
-            -12, /* SIGNAL_STRENGTH_MODERATE */
-            -10, /* SIGNAL_STRENGTH_GOOD */
-            -8  /* SIGNAL_STRENGTH_GREAT */
+            -16, /* SIGNAL_STRENGTH_POOR */
+            -11, /* SIGNAL_STRENGTH_MODERATE */
+            -9, /* SIGNAL_STRENGTH_GOOD */
+            -7  /* SIGNAL_STRENGTH_GREAT */
     };
 
     // Lifted from Default carrier configs and max range of SSSINR
     // Boundaries: [-23 dB, 40 dB]
     private int[] mSsSinrThresholds = new int[] {
-            -8, /* SIGNAL_STRENGTH_POOR */
-            0, /* SIGNAL_STRENGTH_MODERATE */
-            8, /* SIGNAL_STRENGTH_GOOD */
-            16  /* SIGNAL_STRENGTH_GREAT */
+            -5, /* SIGNAL_STRENGTH_POOR */
+            5, /* SIGNAL_STRENGTH_MODERATE */
+            15, /* SIGNAL_STRENGTH_GOOD */
+            30  /* SIGNAL_STRENGTH_GREAT */
     };
 
     /**
