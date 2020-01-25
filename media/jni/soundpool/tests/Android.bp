@@ -16,6 +16,10 @@ cc_binary {
         "libutils",
     ],
 
+    header_libs: [
+        "libmediametrics_headers",
+    ],
+
     srcs: [
         "soundpool_stress.cpp"
     ],
