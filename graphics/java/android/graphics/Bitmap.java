@@ -2132,7 +2132,7 @@ public final class Bitmap implements Parcelable {
     public void writeToParcel(Parcel p, int flags) {
         checkRecycled("Can't parcel a recycled bitmap");
         noteHardwareBitmapSlowCall();
-        if (!nativeWriteToParcel(mNativePtr, isMutable(), mDensity, p)) {
+        if (!nativeWriteToParcel(mNativePtr, mDensity, p)) {
             throw new RuntimeException("native writeToParcel failed");
         }
     }
@@ -2285,7 +2285,6 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCreateFromParcel(Parcel p);
     // returns true on success
     private static native boolean nativeWriteToParcel(long nativeBitmap,
-                                                      boolean isMutable,
                                                       int density,
                                                       Parcel p);
     // returns a new bitmap built from the native bitmap's alpha, and the paint
