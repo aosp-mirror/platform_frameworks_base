@@ -628,9 +628,12 @@ package android.app {
 
   public class KeyguardManager {
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(CharSequence, CharSequence, CharSequence);
+    method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public int getMinLockLength(boolean, int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public boolean getPrivateNotificationsAllowed();
     method @RequiresPermission(android.Manifest.permission.SHOW_KEYGUARD_MESSAGE) public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable CharSequence, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
+    method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean setLock(int, @NonNull byte[], int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public void setPrivateNotificationsAllowed(boolean);
+    method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean validateLockPasswordComplexity(boolean, @NonNull byte[], int);
   }
 
   public class Notification implements android.os.Parcelable {
