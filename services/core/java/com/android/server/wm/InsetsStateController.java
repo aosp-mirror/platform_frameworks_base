@@ -167,7 +167,7 @@ class InsetsStateController {
         return mTypeFakeControlTargetMap.get(type) == target;
     }
 
-    void onImeTargetChanged(@Nullable InsetsControlTarget imeTarget) {
+    void onImeControlTargetChanged(@Nullable InsetsControlTarget imeTarget) {
         onControlChanged(ITYPE_IME, imeTarget);
         notifyPendingInsetsControlChanged();
     }

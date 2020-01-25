@@ -122,7 +122,6 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
-import static com.android.server.wm.ProtoLogGroup.WM_ERROR;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
@@ -3468,8 +3467,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
         mInputMethodControlTarget = computeImeControlTarget();
-        mInsetsStateController.onImeTargetChanged(mInputMethodControlTarget);
+        mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
         updateImeParent();
+    }
+
+    /**
+     * IME control target is the window that controls the IME visibility and animation.
+     * This window is same as the window on which startInput is called.
+     * @param target the window that receives IME control.
+     *
+     * @see #getImeControlTarget()
+     */
+    void updateImeControlTarget(WindowState target) {
+        mInputMethodControlTarget = target;
+        mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 
     private void updateImeParent() {
