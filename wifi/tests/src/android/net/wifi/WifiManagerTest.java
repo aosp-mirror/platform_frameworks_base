@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_METERED;
 import static android.net.wifi.WifiManager.ActionListener;
 import static android.net.wifi.WifiManager.BUSY;
 import static android.net.wifi.WifiManager.ERROR;
@@ -881,17 +882,6 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify main looper is used when handler is not provided.
-     */
-    @Test
-    public void registerSoftApCallbackUsesMainExecutorOnNoExecutorProvided() {
-        when(mContext.getMainExecutor()).thenReturn(
-                new HandlerExecutor(new Handler(mLooper.getLooper())));
-        mWifiManager.registerSoftApCallback(mSoftApCallback);
-        verify(mContext).getMainExecutor();
-    }
-
-    /**
      * Verify the call to registerSoftApCallback goes to WifiServiceImpl.
      */
     @Test
@@ -1389,11 +1379,10 @@ public class WifiManagerTest {
     @Test
     public void registerTrafficStateCallbackUsesMainLooperOnNullArgumentForHandler()
             throws Exception {
-        when(mContext.getMainExecutor()).thenReturn(
-                new HandlerExecutor(new Handler(mLooper.getLooper())));
         ArgumentCaptor<ITrafficStateCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ITrafficStateCallback.Stub.class);
-        mWifiManager.registerTrafficStateCallback(mTrafficStateCallback);
+        mWifiManager.registerTrafficStateCallback(
+                new HandlerExecutor(new Handler(mLooper.getLooper())), mTrafficStateCallback);
         verify(mWifiService).registerTrafficStateCallback(
                 any(IBinder.class), callbackCaptor.capture(), anyInt());
 
@@ -1474,11 +1463,11 @@ public class WifiManagerTest {
     @Test
     public void registerNetworkRequestMatchCallbackCallGoesToWifiServiceImpl()
             throws Exception {
-        when(mContext.getMainExecutor()).thenReturn(
-                new HandlerExecutor(new Handler(mLooper.getLooper())));
         ArgumentCaptor<INetworkRequestMatchCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(INetworkRequestMatchCallback.Stub.class);
-        mWifiManager.registerNetworkRequestMatchCallback(mNetworkRequestMatchCallback);
+        mWifiManager.registerNetworkRequestMatchCallback(
+                new HandlerExecutor(new Handler(mLooper.getLooper())),
+                mNetworkRequestMatchCallback);
         verify(mWifiService).registerNetworkRequestMatchCallback(
                 any(IBinder.class), callbackCaptor.capture(), anyInt());
 
@@ -1530,11 +1519,11 @@ public class WifiManagerTest {
     @Test
     public void networkRequestUserSelectionCallbackCallGoesToWifiServiceImpl()
             throws Exception {
-        when(mContext.getMainExecutor()).thenReturn(
-                new HandlerExecutor(new Handler(mLooper.getLooper())));
         ArgumentCaptor<INetworkRequestMatchCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(INetworkRequestMatchCallback.Stub.class);
-        mWifiManager.registerNetworkRequestMatchCallback(mNetworkRequestMatchCallback);
+        mWifiManager.registerNetworkRequestMatchCallback(
+                new HandlerExecutor(new Handler(mLooper.getLooper())),
+                mNetworkRequestMatchCallback);
         verify(mWifiService).registerNetworkRequestMatchCallback(
                 any(IBinder.class), callbackCaptor.capture(), anyInt());
 
@@ -1808,6 +1797,16 @@ public class WifiManagerTest {
         verify(mWifiService).setMacRandomizationSettingPasspointEnabled(fqdn, true);
     }
 
+    /**
+     * Test behavior of
+     * {@link WifiManager#setMacRandomizationSettingPasspointEnabled(String, boolean)}
+     */
+    @Test
+    public void testSetMeteredOverridePasspoint() throws Exception {
+        final String fqdn = "FullyQualifiedDomainName";
+        mWifiManager.setMeteredOverridePasspoint(fqdn, METERED_OVERRIDE_METERED);
+        verify(mWifiService).setMeteredOverridePasspoint(fqdn, METERED_OVERRIDE_METERED);
+    }
 
     /**
      * Test behavior of {@link WifiManager#disconnect()}

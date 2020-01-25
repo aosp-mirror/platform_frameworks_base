@@ -87,6 +87,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable UserData mUserData;
     private final @Nullable int[] mCancelIds;
     private final boolean mSupportsInlineSuggestions;
+    private final @Nullable ParceledListSlice<InlinePresentation> mInlineActions;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -105,6 +106,8 @@ public final class FillResponse implements Parcelable {
         mUserData = builder.mUserData;
         mCancelIds = builder.mCancelIds;
         mSupportsInlineSuggestions = builder.mSupportsInlineSuggestions;
+        mInlineActions = (builder.mInlineActions != null) ? new ParceledListSlice<>(
+                builder.mInlineActions) : null;
     }
 
     /** @hide */
@@ -202,6 +205,11 @@ public final class FillResponse implements Parcelable {
         return mSupportsInlineSuggestions;
     }
 
+    /** @hide */
+    public @Nullable List<InlinePresentation> getInlineActions() {
+        return (mInlineActions != null) ? mInlineActions.getList() : null;
+    }
+
     /**
      * Builder for {@link FillResponse} objects. You must to provide at least
      * one dataset or set an authentication intent with a presentation view.
@@ -223,6 +231,7 @@ public final class FillResponse implements Parcelable {
         private UserData mUserData;
         private int[] mCancelIds;
         private boolean mSupportsInlineSuggestions;
+        private ArrayList<InlinePresentation> mInlineActions;
 
         /**
          * Triggers a custom UI before before autofilling the screen with any data set in this
@@ -578,6 +587,25 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * Adds a new {@link InlinePresentation} to this response representing an action UI.
+         *
+         * <p> For example, the UI can be associated with an intent which can open an activity for
+         * the user to manage the Autofill provider settings.
+         *
+         * @return This builder.
+         */
+        @NonNull
+        public Builder addInlineAction(@NonNull InlinePresentation inlineAction) {
+            throwIfDestroyed();
+            throwIfAuthenticationCalled();
+            if (mInlineActions == null) {
+                mInlineActions = new ArrayList<>();
+            }
+            mInlineActions.add(inlineAction);
+            return this;
+        }
+
+        /**
          * Builds a new {@link FillResponse} instance.
          *
          * @throws IllegalStateException if any of the following conditions occur:
@@ -688,6 +716,10 @@ public final class FillResponse implements Parcelable {
         if (mCancelIds != null) {
             builder.append(", mCancelIds=").append(mCancelIds.length);
         }
+        builder.append(", mSupportInlinePresentations=").append(mSupportsInlineSuggestions);
+        if (mInlineActions != null) {
+            builder.append(", mInlineActions=" + mInlineActions.getList());
+        }
         return builder.append("]").toString();
     }
 
@@ -717,6 +749,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeInt(mFlags);
         parcel.writeIntArray(mCancelIds);
         parcel.writeInt(mRequestId);
+        parcel.writeParcelable(mInlineActions, flags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<FillResponse> CREATOR =
@@ -770,6 +803,15 @@ public final class FillResponse implements Parcelable {
             builder.setFlags(parcel.readInt());
             final int[] cancelIds = parcel.createIntArray();
             builder.setPresentationCancelIds(cancelIds);
+
+            final ParceledListSlice<InlinePresentation> inlineActionsSlice = parcel.readParcelable(
+                    null);
+            final List<InlinePresentation> inlineActions =
+                    (inlineActionsSlice != null) ? inlineActionsSlice.getList() : null;
+            final int inlineActionsCount = (inlineActions != null) ? inlineActions.size() : 0;
+            for (int i = 0; i < inlineActionsCount; i++) {
+                builder.addInlineAction(inlineActions.get(i));
+            }
 
             final FillResponse response = builder.build();
             response.setRequestId(parcel.readInt());

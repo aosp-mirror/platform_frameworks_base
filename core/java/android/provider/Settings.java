@@ -8402,6 +8402,7 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
         public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
 
         /**
@@ -9361,6 +9362,16 @@ public final class Settings {
         public static final String DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM =
                 "enable_sizecompat_freeform";
 
+        /**
+         * If true, shadows drawn around the window will be rendered by the system compositor. If
+         * false, shadows will be drawn by the client by setting an elevation on the root view and
+         * the contents will be inset by the surface insets.
+         * (0 = false, 1 = true)
+         * @hide
+         */
+        public static final String DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR =
+                "render_shadows_in_compositor";
+
        /**
         * Whether user has enabled development settings.
         */
@@ -9735,6 +9746,15 @@ public final class Settings {
         * @hide
         */
        public static final String PACKAGE_VERIFIER_INCLUDE_ADB = "verifier_verify_adb_installs";
+
+        /**
+         * Run integrity checks for integrity rule providers.
+         * 0 = bypass integrity verification on installs from rule providers (default)
+         * 1 = perform integrity verification on installs from rule providers
+         * @hide
+         */
+        public static final String INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER =
+                "verify_integrity_for_rule_provider";
 
        /**
         * Time since last fstrim (milliseconds) after which we force one to happen

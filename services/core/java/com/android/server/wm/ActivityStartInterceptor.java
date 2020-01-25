@@ -52,7 +52,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.BlockedAppActivity;
 import com.android.internal.app.HarmfulAppWarningActivity;
 import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
@@ -167,15 +166,17 @@ class ActivityStartInterceptor {
             // no user action can undo this.
             return true;
         }
-        if (interceptLockTaskModeViolationPackageIfNeeded()) {
-            return true;
-        }
         if (interceptHarmfulAppIfNeeded()) {
             // If the app has a "harmful app" warning associated with it, we should ask to uninstall
             // before issuing the work challenge.
             return true;
         }
         return interceptWorkProfileChallengeIfNeeded();
+    }
+
+    private boolean hasCrossProfileAnimation() {
+        return mActivityOptions != null
+                && mActivityOptions.getAnimationType() == ANIM_OPEN_CROSS_PROFILE_APPS;
     }
 
     /**
@@ -185,8 +186,7 @@ class ActivityStartInterceptor {
      * @return the activity option used to start the original intent.
      */
     private Bundle deferCrossProfileAppsAnimationIfNecessary() {
-        if (mActivityOptions != null
-                && mActivityOptions.getAnimationType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
+        if (hasCrossProfileAnimation()) {
             mActivityOptions = null;
             return ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
         }
@@ -255,28 +255,13 @@ class ActivityStartInterceptor {
         }
         final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage,
                 suspendingPackage, mUserId);
+        final Bundle crossProfileOptions = hasCrossProfileAnimation()
+                ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
+                : null;
+        final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
+                FLAG_IMMUTABLE);
         mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
-                suspendingPackage, dialogInfo, deferCrossProfileAppsAnimationIfNecessary(),
-                mUserId);
-        mCallingPid = mRealCallingPid;
-        mCallingUid = mRealCallingUid;
-        mResolvedType = null;
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
-        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
-        return true;
-    }
-
-    private boolean interceptLockTaskModeViolationPackageIfNeeded() {
-        if (mAInfo == null || mAInfo.applicationInfo == null) {
-            return false;
-        }
-        LockTaskController controller = mService.getLockTaskController();
-        String packageName = mAInfo.applicationInfo.packageName;
-        int lockTaskLaunchMode = ActivityRecord.getLockTaskLaunchMode(mAInfo, mActivityOptions);
-        if (controller.isActivityAllowed(mUserId, packageName, lockTaskLaunchMode)) {
-            return false;
-        }
-        mIntent = BlockedAppActivity.createIntent(mUserId, mAInfo.applicationInfo.packageName);
+                suspendingPackage, dialogInfo, crossProfileOptions, target, mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;

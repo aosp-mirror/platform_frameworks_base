@@ -3394,6 +3394,7 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
+            VPN_MANAGEMENT_SERVICE,
             TEST_NETWORK_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
@@ -3982,6 +3983,14 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String IPSEC_SERVICE = "ipsec";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.VpnManager} to
+     * manage profiles for the platform built-in VPN.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

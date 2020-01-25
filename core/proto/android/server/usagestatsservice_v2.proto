@@ -99,6 +99,7 @@ message EventObfuscatedProto {
   optional int32 instance_id = 10;
   optional int32 task_root_package_token = 11;
   optional int32 task_root_class_token = 12;
+  optional int32 locus_id_token = 13;
 }
 
 /**
@@ -117,6 +118,7 @@ message PendingEventProto {
   optional int32 instance_id = 10;
   optional string task_root_package = 11;
   optional string task_root_class = 12;
+  optional string locus_id = 13;
 }
 
 /**

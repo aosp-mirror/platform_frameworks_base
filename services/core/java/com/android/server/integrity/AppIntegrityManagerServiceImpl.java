@@ -17,15 +17,14 @@
 package com.android.server.integrity;
 
 import static android.content.Intent.ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION;
+import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
 import static android.content.Intent.EXTRA_ORIGINATING_UID;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
-import static android.content.Intent.EXTRA_VERSION_CODE;
 import static android.content.integrity.AppIntegrityManager.EXTRA_STATUS;
 import static android.content.integrity.AppIntegrityManager.STATUS_FAILURE;
 import static android.content.integrity.AppIntegrityManager.STATUS_SUCCESS;
+import static android.content.integrity.IntegrityUtils.getHexDigest;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
-
-import static com.android.server.integrity.IntegrityUtils.getHexDigest;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -49,6 +48,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -74,18 +74,29 @@ import java.util.Map;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
+    /**
+     * This string will be used as the "installer" for formula evaluation when the app's installer
+     * cannot be determined.
+     *
+     * <p>This may happen for various reasons. e.g., the installing app's package name may not match
+     * its UID.
+     */
+    private static final String UNKNOWN_INSTALLER = "";
+    /**
+     * This string will be used as the "installer" for formula evaluation when the app is being
+     * installed via ADB.
+     */
+    private static final String ADB_INSTALLER = "adb";
+
     private static final String TAG = "AppIntegrityManagerServiceImpl";
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
-    private static final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
     private static final String PACKAGE_INSTALLER = "com.google.android.packageinstaller";
     private static final String BASE_APK_FILE = "base.apk";
     private static final String ALLOWED_INSTALLERS_METADATA_NAME = "allowed-installers";
     private static final String ALLOWED_INSTALLER_DELIMITER = ",";
     private static final String INSTALLER_PACKAGE_CERT_DELIMITER = "\\|";
 
-    private static final String ADB_INSTALLER = "adb";
-    private static final String UNKNOWN_INSTALLER = "";
     private static final String INSTALLER_CERT_NOT_APPLICABLE = "";
 
     // Access to files inside mRulesDir is protected by mRulesLock;
@@ -160,6 +171,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         Slog.e(TAG, "Error writing rules.", e);
                         success = false;
                     }
+
+                    StatsLog.write(StatsLog.INTEGRITY_RULES_PUSHED, success, ruleProvider, version);
 
                     Intent intent = new Intent();
                     intent.putExtra(EXTRA_STATUS, success ? STATUS_SUCCESS : STATUS_FAILURE);
@@ -238,7 +251,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
             builder.setPackageName(getPackageNameNormalized(packageName));
             builder.setAppCertificate(appCert == null ? "" : appCert);
-            builder.setVersionCode(intent.getIntExtra(EXTRA_VERSION_CODE, -1));
+            builder.setVersionCode(intent.getLongExtra(EXTRA_LONG_VERSION_CODE, -1));
             builder.setInstallerName(getPackageNameNormalized(installerPackageName));
             builder.setInstallerCertificate(
                     getInstallerCertificateFingerprint(installerPackageName));
@@ -258,6 +271,16 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                             + result.getEffect()
                             + " due to "
                             + result.getRule());
+
+            StatsLog.write(
+                    StatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
+                    packageName,
+                    appCert,
+                    appInstallMetadata.getVersionCode(),
+                    installerPackageName,
+                    getLoggingResponse(result),
+                    isCausedByAppCertRule(result),
+                    isCausedByInstallerRule(result));
             mPackageManagerInternal.setIntegrityVerificationResult(
                     verificationId,
                     result.getEffect() == IntegrityCheckResult.Effect.ALLOW
@@ -568,6 +591,26 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    private static int getLoggingResponse(IntegrityCheckResult result) {
+        if (result.getEffect() == IntegrityCheckResult.Effect.DENY) {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
+        } else if (result.getRule() != null) {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
+        } else {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
+        }
+    }
+
+    private static boolean isCausedByAppCertRule(IntegrityCheckResult result) {
+        // TODO(b/147095027): implement this.
+        return true;
+    }
+
+    private static boolean isCausedByInstallerRule(IntegrityCheckResult result) {
+        // TODO(b/147095027): implement this.
+        return true;
     }
 
     private List<String> getAllowedRuleProviders() {

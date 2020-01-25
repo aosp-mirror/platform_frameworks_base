@@ -122,6 +122,7 @@ import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
 import android.net.TestNetworkManager;
 import android.net.TetheringManager;
+import android.net.VpnManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
@@ -150,6 +151,7 @@ import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.StatsFrameworkInitializer;
 import android.os.SystemConfigManager;
 import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
@@ -378,6 +380,15 @@ public final class SystemServiceRegistry {
                 return new IpSecManager(ctx, service);
             }});
 
+        registerService(Context.VPN_MANAGEMENT_SERVICE, VpnManager.class,
+                new CachedServiceFetcher<VpnManager>() {
+            @Override
+            public VpnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                return new VpnManager(ctx, service);
+            }});
+
         registerService(Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
                 ConnectivityDiagnosticsManager.class,
                 new CachedServiceFetcher<ConnectivityDiagnosticsManager>() {
@@ -600,13 +611,6 @@ public final class SystemServiceRegistry {
                     public SensorPrivacyManager createService(ContextImpl ctx) {
                         return SensorPrivacyManager.getInstance(ctx);
                     }});
-
-        registerService(Context.STATS_MANAGER, StatsManager.class,
-                new CachedServiceFetcher<StatsManager>() {
-            @Override
-            public StatsManager createService(ContextImpl ctx) {
-                return new StatsManager(ctx.getOuterContext());
-            }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
                 new CachedServiceFetcher<StatusBarManager>() {
@@ -1327,6 +1331,7 @@ public final class SystemServiceRegistry {
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
             WifiFrameworkInitializer.registerServiceWrappers();
+            StatsFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

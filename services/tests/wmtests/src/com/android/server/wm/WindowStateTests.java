@@ -323,11 +323,18 @@ public class WindowStateTests extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState first = createWindow(null, TYPE_APPLICATION, activity, "first");
         final WindowState second = createWindow(null, TYPE_APPLICATION, activity, "second");
-        second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
         testPrepareWindowToDisplayDuringRelayout(first, false /* expectedWakeupCalled */,
                 true /* expectedCurrentLaunchCanTurnScreenOn */);
-        testPrepareWindowToDisplayDuringRelayout(second, true /* expectedWakeupCalled */,
+        testPrepareWindowToDisplayDuringRelayout(second, false /* expectedWakeupCalled */,
+                true /* expectedCurrentLaunchCanTurnScreenOn */);
+
+        // Call prepareWindowToDisplayDuringRelayout for two windows from the same activity, one of
+        // which has FLAG_TURN_SCREEN_ON. The first processed one should trigger the wakeup.
+        second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
+        testPrepareWindowToDisplayDuringRelayout(first, true /* expectedWakeupCalled */,
+                false /* expectedCurrentLaunchCanTurnScreenOn */);
+        testPrepareWindowToDisplayDuringRelayout(second, false /* expectedWakeupCalled */,
                 false /* expectedCurrentLaunchCanTurnScreenOn */);
 
         // Call prepareWindowToDisplayDuringRelayout for two window that have FLAG_TURN_SCREEN_ON

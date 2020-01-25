@@ -256,6 +256,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     UserManager mUm;
     @Mock
     NotificationHistoryManager mHistoryManager;
+    NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
+
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -265,8 +267,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         @Nullable
         NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
 
-        TestableNotificationManagerService(Context context) {
-            super(context);
+        TestableNotificationManagerService(Context context, NotificationRecordLogger logger) {
+            super(context, logger);
         }
 
         @Override
@@ -353,7 +355,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -1115,6 +1117,61 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
         assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testEnqueueNotificationWithTag_WritesExpectedLog() throws Exception {
+        final String tag = "testEnqueueNotificationWithTag_WritesExpectedLog";
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+        assertEquals(1, mNotificationRecordLogger.getCalls().size());
+        NotificationRecordLoggerFake.CallRecord call = mNotificationRecordLogger.get(0);
+        assertTrue(call.shouldLog());
+        assertNotNull(call.r);
+        assertNull(call.old);
+        assertEquals(0, call.position);
+        assertEquals(0, call.buzzBeepBlink);
+        assertEquals(PKG, call.r.sbn.getPackageName());
+        assertEquals(0, call.r.sbn.getId());
+        assertEquals(tag, call.r.sbn.getTag());
+    }
+
+    @Test
+    public void testEnqueueNotificationWithTag_LogsOnMajorUpdates() throws Exception {
+        final String tag = "testEnqueueNotificationWithTag_LogsOnMajorUpdates";
+        Notification original = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0, original, 0);
+        Notification update = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setCategory(Notification.CATEGORY_ALARM).build();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0, update, 0);
+        waitForIdle();
+        assertEquals(2, mNotificationRecordLogger.getCalls().size());
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog());
+        assertEquals(
+                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
+                mNotificationRecordLogger.get(0).getUiEvent());
+        assertEquals(
+                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_UPDATED,
+                mNotificationRecordLogger.get(1).getUiEvent());
+        assertTrue(mNotificationRecordLogger.get(1).shouldLog());
+    }
+
+    @Test
+    public void testEnqueueNotificationWithTag_DoesNotLogOnMinorUpdates() throws Exception {
+        final String tag = "testEnqueueNotificationWithTag_DoesNotLogOnMinorUpdates";
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+        assertEquals(2, mNotificationRecordLogger.getCalls().size());
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog());
+        assertFalse(mNotificationRecordLogger.get(1).shouldLog());
     }
 
     @Test
@@ -2252,7 +2309,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testHasCompanionDevice_noService() {
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext,  mNotificationRecordLogger);
 
         assertFalse(mService.hasCompanionDevice(mListener));
     }

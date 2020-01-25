@@ -475,8 +475,7 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
     }
 
     auto fm = static_cast<Bitmap::JavaCompressFormat>(format);
-    auto result = bitmap->bitmap().compress(fm, quality, strm.get());
-    return result == Bitmap::CompressResult::Success ? JNI_TRUE : JNI_FALSE;
+    return bitmap->bitmap().compress(fm, quality, strm.get()) ? JNI_TRUE : JNI_FALSE;
 }
 
 static inline void bitmapErase(SkBitmap bitmap, const SkColor4f& color,

@@ -1241,7 +1241,7 @@
   <java-symbol type="array" name="preloaded_color_state_lists" />
   <java-symbol type="array" name="preloaded_drawables" />
   <java-symbol type="array" name="preloaded_freeform_multi_window_drawables" />
-  <java-symbol type="array" name="sim_colors" />
+  <java-symbol type="array" name="simColors" />
   <java-symbol type="array" name="special_locale_codes" />
   <java-symbol type="array" name="special_locale_names" />
   <java-symbol type="array" name="supported_locales" />
@@ -3039,10 +3039,8 @@
 
   <java-symbol type="string" name="app_suspended_title" />
   <java-symbol type="string" name="app_suspended_more_details" />
+  <java-symbol type="string" name="app_suspended_unsuspend_message" />
   <java-symbol type="string" name="app_suspended_default_message" />
-
-  <java-symbol type="string" name="app_blocked_title" />
-  <java-symbol type="string" name="app_blocked_message" />
 
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
@@ -3804,6 +3802,7 @@
   <java-symbol type="string" name="accessibility_system_action_recents_label" />
   <java-symbol type="string" name="accessibility_system_action_screenshot_label" />
   <java-symbol type="string" name="accessibility_system_action_toggle_split_screen_label" />
+  <java-symbol type="string" name="accessibility_system_action_accessibility_menu_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
 

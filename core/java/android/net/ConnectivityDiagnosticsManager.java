@@ -19,7 +19,9 @@ package android.net;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -79,6 +81,128 @@ public class ConnectivityDiagnosticsManager {
 
     /** Class that includes connectivity information for a specific Network at a specific time. */
     public static final class ConnectivityReport implements Parcelable {
+        /**
+         * The overall status of the network is that it is invalid; it neither provides
+         * connectivity nor has been exempted from validation.
+         */
+        public static final int NETWORK_VALIDATION_RESULT_INVALID = 0;
+
+        /**
+         * The overall status of the network is that it is valid, this may be because it provides
+         * full Internet access (all probes succeeded), or because other properties of the network
+         * caused probes not to be run.
+         */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID
+        public static final int NETWORK_VALIDATION_RESULT_VALID = 1;
+
+        /**
+         * The overall status of the network is that it provides partial connectivity; some
+         * probed services succeeded but others failed.
+         */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
+        public static final int NETWORK_VALIDATION_RESULT_PARTIALLY_VALID = 2;
+
+        /**
+         * Due to the properties of the network, validation was not performed.
+         */
+        public static final int NETWORK_VALIDATION_RESULT_SKIPPED = 3;
+
+        /** @hide */
+        @IntDef(
+                prefix = {"NETWORK_VALIDATION_RESULT_"},
+                value = {
+                        NETWORK_VALIDATION_RESULT_INVALID,
+                        NETWORK_VALIDATION_RESULT_VALID,
+                        NETWORK_VALIDATION_RESULT_PARTIALLY_VALID,
+                        NETWORK_VALIDATION_RESULT_SKIPPED
+                })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface NetworkValidationResult {}
+
+        /**
+         * The overall validation result for the Network being reported on.
+         *
+         * <p>The possible values for this key are:
+         * {@link #NETWORK_VALIDATION_RESULT_INVALID},
+         * {@link #NETWORK_VALIDATION_RESULT_VALID},
+         * {@link #NETWORK_VALIDATION_RESULT_PARTIALLY_VALID},
+         * {@link #NETWORK_VALIDATION_RESULT_SKIPPED}.
+         *
+         * @see android.net.NetworkCapabilities#CAPABILITY_VALIDATED
+         */
+        @NetworkValidationResult
+        public static final String KEY_NETWORK_VALIDATION_RESULT = "networkValidationResult";
+
+        /** DNS probe. */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS
+        public static final int NETWORK_PROBE_DNS = 0x04;
+
+        /** HTTP probe. */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTP
+        public static final int NETWORK_PROBE_HTTP = 0x08;
+
+        /** HTTPS probe. */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTPS;
+        public static final int NETWORK_PROBE_HTTPS = 0x10;
+
+        /** Captive portal fallback probe. */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_FALLBACK
+        public static final int NETWORK_PROBE_FALLBACK = 0x20;
+
+        /** Private DNS (DNS over TLS) probd. */
+        // TODO: link to INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS
+        public static final int NETWORK_PROBE_PRIVATE_DNS = 0x40;
+
+        /** @hide */
+        @IntDef(
+                prefix = {"NETWORK_PROBE_"},
+                value = {
+                        NETWORK_PROBE_DNS,
+                        NETWORK_PROBE_HTTP,
+                        NETWORK_PROBE_HTTPS,
+                        NETWORK_PROBE_FALLBACK,
+                        NETWORK_PROBE_PRIVATE_DNS
+                })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface NetworkProbe {}
+
+        /**
+         * A bitmask of network validation probes that succeeded.
+         *
+         * <p>The possible bits values reported by this key are:
+         * {@link #NETWORK_PROBE_DNS},
+         * {@link #NETWORK_PROBE_HTTP},
+         * {@link #NETWORK_PROBE_HTTPS},
+         * {@link #NETWORK_PROBE_FALLBACK},
+         * {@link #NETWORK_PROBE_PRIVATE_DNS}.
+         */
+        @NetworkProbe
+        public static final String KEY_NETWORK_PROBES_SUCCEEDED_BITMASK =
+                "networkProbesSucceeded";
+
+        /**
+         * A bitmask of network validation probes that were attempted.
+         *
+         * <p>These probes may have failed or may be incomplete at the time of this report.
+         *
+         * <p>The possible bits values reported by this key are:
+         * {@link #NETWORK_PROBE_DNS},
+         * {@link #NETWORK_PROBE_HTTP},
+         * {@link #NETWORK_PROBE_HTTPS},
+         * {@link #NETWORK_PROBE_FALLBACK},
+         * {@link #NETWORK_PROBE_PRIVATE_DNS}.
+         */
+        @NetworkProbe
+        public static final String KEY_NETWORK_PROBES_ATTEMPTED_BITMASK =
+                "networkProbesAttemped";
+
+        /** @hide */
+        @StringDef(prefix = {"KEY_"}, value = {
+                KEY_NETWORK_VALIDATION_RESULT, KEY_NETWORK_PROBES_SUCCEEDED_BITMASK,
+                KEY_NETWORK_PROBES_ATTEMPTED_BITMASK})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ConnectivityReportBundleKeys {}
+
         /** The Network for which this ConnectivityReport applied */
         @NonNull private final Network mNetwork;
 
@@ -218,7 +342,7 @@ public class ConnectivityDiagnosticsManager {
 
         /** Implement the Parcelable interface */
         public static final @NonNull Creator<ConnectivityReport> CREATOR =
-                new Creator<>() {
+                new Creator<ConnectivityReport>() {
                     public ConnectivityReport createFromParcel(Parcel in) {
                         return new ConnectivityReport(
                                 in.readParcelable(null),
@@ -245,6 +369,49 @@ public class ConnectivityDiagnosticsManager {
                 prefix = {"DETECTION_METHOD_"},
                 value = {DETECTION_METHOD_DNS_EVENTS, DETECTION_METHOD_TCP_METRICS})
         public @interface DetectionMethod {}
+
+        /**
+         * This key represents the period in milliseconds over which other included TCP metrics
+         * were measured.
+         *
+         * <p>This key will be included if the data stall detection method is
+         * {@link #DETECTION_METHOD_TCP_METRICS}.
+         *
+         * <p>This value is an int.
+         */
+        public static final String KEY_TCP_METRICS_COLLECTION_PERIOD_MILLIS =
+                "tcpMetricsCollectionPeriodMillis";
+
+        /**
+         * This key represents the fail rate of TCP packets when the suspected data stall was
+         * detected.
+         *
+         * <p>This key will be included if the data stall detection method is
+         * {@link #DETECTION_METHOD_TCP_METRICS}.
+         *
+         * <p>This value is an int percentage between 0 and 100.
+         */
+        public static final String KEY_TCP_PACKET_FAIL_RATE = "tcpPacketFailRate";
+
+        /**
+         * This key represents the consecutive number of DNS timeouts that have occurred.
+         *
+         * <p>The consecutive count will be reset any time a DNS response is received.
+         *
+         * <p>This key will be included if the data stall detection method is
+         * {@link #DETECTION_METHOD_DNS_EVENTS}.
+         *
+         * <p>This value is an int.
+         */
+        public static final String KEY_DNS_CONSECUTIVE_TIMEOUTS = "dnsConsecutiveTimeouts";
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @StringDef(prefix = {"KEY_"}, value = {
+                KEY_TCP_PACKET_FAIL_RATE,
+                KEY_DNS_CONSECUTIVE_TIMEOUTS
+        })
+        public @interface DataStallReportBundleKeys {}
 
         /** The Network for which this DataStallReport applied */
         @NonNull private final Network mNetwork;
@@ -315,6 +482,9 @@ public class ConnectivityDiagnosticsManager {
         /**
          * Returns a PersistableBundle with additional info for this report.
          *
+         * <p>Gets a bundle with details about the suspected data stall including information
+         * specific to the monitoring method that detected the data stall.
+         *
          * @return PersistableBundle that may contain additional information on the suspected data
          *     stall
          */
@@ -373,6 +543,53 @@ public class ConnectivityDiagnosticsManager {
                         return new DataStallReport[size];
                     }
                 };
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public static class ConnectivityDiagnosticsBinder
+            extends IConnectivityDiagnosticsCallback.Stub {
+        @NonNull private final ConnectivityDiagnosticsCallback mCb;
+        @NonNull private final Executor mExecutor;
+
+        /** @hide */
+        @VisibleForTesting
+        public ConnectivityDiagnosticsBinder(
+                @NonNull ConnectivityDiagnosticsCallback cb, @NonNull Executor executor) {
+            this.mCb = cb;
+            this.mExecutor = executor;
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public void onConnectivityReport(@NonNull ConnectivityReport report) {
+            Binder.withCleanCallingIdentity(() -> {
+                mExecutor.execute(() -> {
+                    mCb.onConnectivityReport(report);
+                });
+            });
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public void onDataStallSuspected(@NonNull DataStallReport report) {
+            Binder.withCleanCallingIdentity(() -> {
+                mExecutor.execute(() -> {
+                    mCb.onDataStallSuspected(report);
+                });
+            });
+        }
+
+        /** @hide */
+        @VisibleForTesting
+        public void onNetworkConnectivityReported(
+                @NonNull Network network, boolean hasConnectivity) {
+            Binder.withCleanCallingIdentity(() -> {
+                mExecutor.execute(() -> {
+                    mCb.onNetworkConnectivityReported(network, hasConnectivity);
+                });
+            });
+        }
     }
 
     /**

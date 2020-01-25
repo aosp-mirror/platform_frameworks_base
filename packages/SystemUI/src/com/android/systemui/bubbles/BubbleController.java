@@ -103,6 +103,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -151,6 +152,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
+    private int mMaxBubbles;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
@@ -171,6 +173,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private StatusBarStateListener mStatusBarStateListener;
     private final ScreenshotHelper mScreenshotHelper;
 
+    // Callback that updates BubbleOverflowActivity on data change.
+    @Nullable private Runnable mOverflowCallback = null;
 
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private IStatusBarService mBarService;
@@ -301,6 +305,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
+        mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
 
         mNotificationEntryManager = entryManager;
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
@@ -369,6 +374,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     void setInflateSynchronously(boolean inflateSynchronously) {
         mInflateSynchronously = inflateSynchronously;
     }
+
+    void setOverflowCallback(Runnable updateOverflow) {
+        mOverflowCallback = updateOverflow;
+    }
+
+    /**
+     * @return Bubbles for updating overflow.
+     */
+    List<Bubble> getOverflowBubbles() {
+        return mBubbleData.getOverflowBubbles();
+    }
+
 
     /**
      * BubbleStackView is lazily created by this method the first time a Bubble is added. This
@@ -535,6 +552,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     void selectBubble(String key) {
         Bubble bubble = mBubbleData.getBubbleWithKey(key);
         mBubbleData.setSelectedBubble(bubble);
+    }
+
+    void promoteBubbleFromOverflow(Bubble bubble) {
+        mBubbleData.promoteBubbleFromOverflow(bubble);
     }
 
     /**
@@ -817,6 +838,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void applyUpdate(BubbleData.Update update) {
+            // Update bubbles in overflow.
+            if (mOverflowCallback != null) {
+                mOverflowCallback.run();
+            }
+
             if (update.addedBubble != null) {
                 mStackView.addBubble(update.addedBubble);
             }
@@ -890,6 +916,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mStackView.updateBubble(update.updatedBubble);
             }
 
+            // At this point, the correct bubbles are inflated in the stack.
+            // Make sure the order in bubble data is reflected in bubble row.
             if (update.orderChanged) {
                 mStackView.updateBubbleOrder(update.bubbles);
             }
@@ -912,15 +940,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             updateStack();
 
             if (DEBUG_BUBBLE_CONTROLLER) {
-                Log.d(TAG, "[BubbleData]");
+                Log.d(TAG, "\n[BubbleData] bubbles:");
                 Log.d(TAG, BubbleDebugConfig.formatBubblesString(mBubbleData.getBubbles(),
                         mBubbleData.getSelectedBubble()));
 
                 if (mStackView != null) {
-                    Log.d(TAG, "[BubbleStackView]");
+                    Log.d(TAG, "\n[BubbleStackView]");
                     Log.d(TAG, BubbleDebugConfig.formatBubblesString(mStackView.getBubblesOnScreen(),
                             mStackView.getExpandedBubble()));
                 }
+                Log.d(TAG, "\n[BubbleData] overflow:");
+                Log.d(TAG, BubbleDebugConfig.formatBubblesString(mBubbleData.getOverflowBubbles(),
+                        null));
             }
         }
     };

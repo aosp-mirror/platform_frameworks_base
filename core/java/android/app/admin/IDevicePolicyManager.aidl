@@ -270,6 +270,7 @@ interface IDevicePolicyManager {
     boolean isLockdownAdminConfiguredNetworks(in ComponentName who);
 
     void setLocationEnabled(in ComponentName who, boolean locationEnabled);
+    void requestSetLocationProviderAllowed(in ComponentName who, in String provider, boolean providerAllowed);
 
     boolean setTime(in ComponentName who, long millis);
     boolean setTimeZone(in ComponentName who, String timeZone);
@@ -473,4 +474,7 @@ interface IDevicePolicyManager {
 
     int getPersonalAppsSuspendedReasons(in ComponentName admin);
     void setPersonalAppsSuspended(in ComponentName admin, boolean suspended);
+
+    long getManagedProfileMaximumTimeOff(in ComponentName admin);
+    void setManagedProfileMaximumTimeOff(in ComponentName admin, long timeoutMs);
 }

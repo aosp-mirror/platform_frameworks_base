@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.recents.model;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_UNDEFINED;
@@ -31,6 +32,7 @@ public class ThumbnailData {
 
     public final Bitmap thumbnail;
     public int orientation;
+    public int rotation;
     public Rect insets;
     public boolean reducedResolution;
     public boolean isRealSnapshot;
@@ -43,6 +45,7 @@ public class ThumbnailData {
     public ThumbnailData() {
         thumbnail = null;
         orientation = ORIENTATION_UNDEFINED;
+        rotation = ROTATION_UNDEFINED;
         insets = new Rect();
         reducedResolution = false;
         scale = 1f;
@@ -57,6 +60,7 @@ public class ThumbnailData {
         thumbnail = Bitmap.wrapHardwareBuffer(snapshot.getSnapshot(), snapshot.getColorSpace());
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
+        rotation = snapshot.getRotation();
         reducedResolution = snapshot.isReducedResolution();
         scale = snapshot.getScale();
         isRealSnapshot = snapshot.isRealSnapshot();

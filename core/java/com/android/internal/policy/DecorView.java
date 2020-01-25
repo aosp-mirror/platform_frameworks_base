@@ -95,8 +95,6 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowCallbacks;
 import android.view.WindowInsets;
-import android.view.WindowInsets.Side;
-import android.view.WindowInsets.Type;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -131,9 +129,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private static final boolean SWEEP_OPEN_MENU = false;
 
     // The height of a window which has focus in DIP.
-    private final static int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
+    public static final int DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP = 20;
     // The height of a window which has not in DIP.
-    private final static int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
+    public static final int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
 
     private static final int SCRIM_LIGHT = 0xe6ffffff; // 90% white
 
@@ -1629,7 +1627,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         int opacity = PixelFormat.OPAQUE;
         final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
-        if (winConfig.hasWindowShadow()) {
+        // If we draw shadows in the compositor we don't need to force the surface to be
+        // translucent.
+        if (winConfig.hasWindowShadow() && !mWindow.mRenderShadowsInCompositor) {
             // If the window has a shadow, it must be translucent.
             opacity = PixelFormat.TRANSLUCENT;
         } else{
@@ -2414,6 +2414,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     private void updateElevation() {
+        // If rendering shadows in the compositor, don't set an elevation on the view
+        if (mWindow.mRenderShadowsInCompositor) {
+            return;
+        }
         float elevation = 0;
         final boolean wasAdjustedForStack = mElevationAdjustedForStack;
         // Do not use a shadow when we are in resizing mode (mBackdropFrameRenderer not null)

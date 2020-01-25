@@ -3659,8 +3659,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
      * {@link Type#navigationBars()}. For non-floating windows that fill the screen, call
-     * {@link Window#setOnContentApplyWindowInsets} with {@code null} or a listener that doesn't
-     * fit the navigation bar on the window content level.
+     * {@link Window#setOnContentApplyWindowInsetsListener} with {@code null} or a listener that
+     * doesn't fit the navigation bar on the window content level.
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
 
@@ -3688,8 +3688,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
      * {@link Type#statusBars()} ()}. For non-floating windows that fill the screen, call
-     * {@link Window#setOnContentApplyWindowInsets} with {@code null} or a listener that doesn't
-     * fit the status bar on the window content level.
+     * {@link Window#setOnContentApplyWindowInsetsListener} with {@code null} or a listener that
+     * doesn't fit the status bar on the window content level.
      */
     @Deprecated
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;

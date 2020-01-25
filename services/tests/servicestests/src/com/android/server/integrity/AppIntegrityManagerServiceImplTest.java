@@ -57,7 +57,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.server.LocalServices;
@@ -68,6 +67,7 @@ import com.android.server.testutils.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -81,7 +81,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Unit test for {@link com.android.server.integrity.AppIntegrityManagerServiceImpl} */
-@RunWith(AndroidJUnit4.class)
+@RunWith(JUnit4.class)
 public class AppIntegrityManagerServiceImplTest {
     private static final String TEST_APP_PATH =
             "/data/local/tmp/AppIntegrityManagerServiceTestApp.apk";
@@ -91,8 +91,10 @@ public class AppIntegrityManagerServiceImplTest {
     private static final String TEST_FRAMEWORK_PACKAGE = "com.android.frameworks.servicestests";
 
     private static final String PACKAGE_NAME = "com.test.app";
-    private static final int VERSION_CODE = 100;
+
+    private static final long VERSION_CODE = 100;
     private static final String INSTALLER = "com.long.random.test.installer.name";
+
     // These are obtained by running the test and checking logcat.
     private static final String APP_CERT =
             "301AA3CB081134501C45F1422ABC66C24224FD5DED5FDC8F17E697176FD866AA";
@@ -108,7 +110,8 @@ public class AppIntegrityManagerServiceImplTest {
             "play_store_cert";
     private static final String ADB_CERT = "";
 
-    @org.junit.Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @org.junit.Rule
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     @Mock PackageManagerInternal mPackageManagerInternal;
     @Mock Context mMockContext;
@@ -173,7 +176,8 @@ public class AppIntegrityManagerServiceImplTest {
         makeUsSystemApp();
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(
+                                AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
         TestUtils.assertExpectException(
                 SecurityException.class,
@@ -191,7 +195,8 @@ public class AppIntegrityManagerServiceImplTest {
         whitelistUsAsRuleProvider();
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(
+                                AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
         TestUtils.assertExpectException(
                 SecurityException.class,
@@ -210,7 +215,8 @@ public class AppIntegrityManagerServiceImplTest {
         makeUsSystemApp();
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(
+                                AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
 
         // no SecurityException
@@ -447,7 +453,7 @@ public class AppIntegrityManagerServiceImplTest {
         intent.putExtra(
                 EXTRA_VERIFICATION_INSTALLER_UID,
                 mMockContext.getPackageManager().getPackageUid(installer, /* flags= */ 0));
-        intent.putExtra(Intent.EXTRA_VERSION_CODE, VERSION_CODE);
+        intent.putExtra(Intent.EXTRA_LONG_VERSION_CODE, VERSION_CODE);
         return intent;
     }
 }

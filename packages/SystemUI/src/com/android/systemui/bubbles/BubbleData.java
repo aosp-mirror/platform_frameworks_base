@@ -78,9 +78,11 @@ public class BubbleData {
 
         // A read-only view of the bubbles list, changes there will be reflected here.
         final List<Bubble> bubbles;
+        final List<Bubble> overflowBubbles;
 
-        private Update(List<Bubble> bubbleOrder) {
-            bubbles = Collections.unmodifiableList(bubbleOrder);
+        private Update(List<Bubble> row, List<Bubble> overflow) {
+            bubbles = Collections.unmodifiableList(row);
+            overflowBubbles = Collections.unmodifiableList(overflow);
         }
 
         boolean anythingChanged() {
@@ -113,11 +115,14 @@ public class BubbleData {
     private final Context mContext;
     /** Bubbles that are actively in the stack. */
     private final List<Bubble> mBubbles;
+    /** Bubbles that aged out to overflow. */
+    private final List<Bubble> mOverflowBubbles;
     /** Bubbles that are being loaded but haven't been added to the stack just yet. */
     private final List<Bubble> mPendingBubbles;
     private Bubble mSelectedBubble;
     private boolean mExpanded;
     private final int mMaxBubbles;
+    private final int mMaxOverflowBubbles;
 
     // State tracked during an operation -- keeps track of what listener events to dispatch.
     private Update mStateChange;
@@ -146,9 +151,11 @@ public class BubbleData {
     public BubbleData(Context context) {
         mContext = context;
         mBubbles = new ArrayList<>();
+        mOverflowBubbles = new ArrayList<>();
         mPendingBubbles = new ArrayList<>();
-        mStateChange = new Update(mBubbles);
+        mStateChange = new Update(mBubbles, mOverflowBubbles);
         mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
+        mMaxOverflowBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_overflow);
     }
 
     public boolean hasBubbles() {
@@ -181,6 +188,19 @@ public class BubbleData {
             Log.d(TAG, "setSelectedBubble: " + bubble);
         }
         setSelectedBubbleInternal(bubble);
+        dispatchPendingChanges();
+    }
+
+    public void promoteBubbleFromOverflow(Bubble bubble) {
+        if (DEBUG_BUBBLE_DATA) {
+            Log.d(TAG, "promoteBubbleFromOverflow: " + bubble);
+        }
+        mOverflowBubbles.remove(bubble);
+        doAdd(bubble);
+        setSelectedBubbleInternal(bubble);
+        // Preserve new order for next repack, which sorts by last updated time.
+        bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
+        trim();
         dispatchPendingChanges();
     }
 
@@ -343,6 +363,7 @@ public class BubbleData {
             mStateChange.orderChanged = true;
         }
         mStateChange.addedBubble = bubble;
+
         if (!isExpanded()) {
             mStateChange.orderChanged |= packGroup(findFirstIndexForGroup(bubble.getGroupId()));
             // Top bubble becomes selected.
@@ -407,6 +428,17 @@ public class BubbleData {
             mStateChange.orderChanged |= repackAll();
         }
 
+        if (reason == BubbleController.DISMISS_AGED) {
+            if (DEBUG_BUBBLE_DATA) {
+                Log.d(TAG, "overflowing bubble: " + bubbleToRemove);
+            }
+            mOverflowBubbles.add(0, bubbleToRemove);
+            if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
+                // Remove oldest bubble.
+                mOverflowBubbles.remove(mOverflowBubbles.size() - 1);
+            }
+        }
+
         // Note: If mBubbles.isEmpty(), then mSelectedBubble is now null.
         if (Objects.equals(mSelectedBubble, bubbleToRemove)) {
             // Move selection to the new bubble at the same position.
@@ -454,7 +486,7 @@ public class BubbleData {
         if (mListener != null && mStateChange.anythingChanged()) {
             mListener.applyUpdate(mStateChange);
         }
-        mStateChange = new Update(mBubbles);
+        mStateChange = new Update(mBubbles, mOverflowBubbles);
     }
 
     /**
@@ -689,11 +721,18 @@ public class BubbleData {
     }
 
     /**
-     * The set of bubbles.
+     * The set of bubbles in row.
      */
     @VisibleForTesting(visibility = PRIVATE)
     public List<Bubble> getBubbles() {
         return Collections.unmodifiableList(mBubbles);
+    }
+    /**
+     * The set of bubbles in overflow.
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    public List<Bubble> getOverflowBubbles() {
+        return Collections.unmodifiableList(mOverflowBubbles);
     }
 
     @VisibleForTesting(visibility = PRIVATE)

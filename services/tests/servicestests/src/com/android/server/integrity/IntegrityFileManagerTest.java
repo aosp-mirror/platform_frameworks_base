@@ -22,7 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
-import android.content.integrity.AtomicFormula.IntAtomicFormula;
+import android.content.integrity.AtomicFormula.LongAtomicFormula;
 import android.content.integrity.AtomicFormula.StringAtomicFormula;
 import android.content.integrity.CompoundFormula;
 import android.content.integrity.Rule;
@@ -116,7 +116,8 @@ public class IntegrityFileManagerTest {
         Rule packageCertRule = getAppCertificateIndexedRule(packageCert);
         Rule versionCodeRule =
                 new Rule(
-                        new IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.LE, version),
+                        new LongAtomicFormula(
+                                AtomicFormula.VERSION_CODE, AtomicFormula.EQ, version),
                         Rule.DENY);
         Rule randomRule =
                 new Rule(
@@ -127,9 +128,9 @@ public class IntegrityFileManagerTest {
                                                 AtomicFormula.PACKAGE_NAME,
                                                 "abc",
                                                 /* isHashedValue= */ false),
-                                        new IntAtomicFormula(
+                                        new LongAtomicFormula(
                                                 AtomicFormula.VERSION_CODE,
-                                                AtomicFormula.LE,
+                                                AtomicFormula.EQ,
                                                 version))),
                         Rule.DENY);
 
@@ -201,21 +202,22 @@ public class IntegrityFileManagerTest {
     private Rule getPackageNameIndexedRule(String packageName) {
         return new Rule(
                 new StringAtomicFormula(
-                        AtomicFormula.PACKAGE_NAME, packageName, /* isHashedValue= */ false),
+                        AtomicFormula.PACKAGE_NAME, packageName, /* isHashedValue= */false),
                 Rule.DENY);
     }
 
     private Rule getAppCertificateIndexedRule(String appCertificate) {
         return new Rule(
                 new StringAtomicFormula(
-                        AtomicFormula.APP_CERTIFICATE, appCertificate, /* isHashedValue= */ false),
+                        AtomicFormula.APP_CERTIFICATE,
+                        appCertificate, /* isHashedValue= */ false),
                 Rule.DENY);
     }
 
     private Rule getInstallerCertificateRule(String installerCert) {
         return new Rule(
                 new StringAtomicFormula(
-                        AtomicFormula.INSTALLER_NAME, installerCert, /* isHashedValue= */ false),
+                        AtomicFormula.INSTALLER_NAME, installerCert, /* isHashedValue= */false),
                 Rule.DENY);
     }
 

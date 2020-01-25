@@ -16,12 +16,15 @@
 
 package com.android.systemui.shared.recents;
 
+import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
 /**
  * Temporary callbacks into SystemUI.
+ * Next id = 22
  */
 interface ISystemUiProxy {
 
@@ -114,4 +117,10 @@ interface ISystemUiProxy {
      * Sets the shelf height and visibility.
      */
     void setShelfHeight(boolean visible, int shelfHeight) = 20;
+
+    /**
+     * Handle the provided image as if it was a screenshot.
+     */
+     void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
+              in Insets visibleInsets, int taskId) = 21;
 }

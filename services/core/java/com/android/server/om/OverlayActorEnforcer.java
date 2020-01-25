@@ -43,6 +43,9 @@ import java.util.Map;
  */
 public class OverlayActorEnforcer {
 
+    // By default, the reason is not logged to prevent leaks of why it failed
+    private static final boolean DEBUG_REASON = false;
+
     private final VerifyCallback mVerifyCallback;
 
     /**
@@ -92,7 +95,7 @@ public class OverlayActorEnforcer {
         throw new SecurityException("UID" + callingUid + " is not allowed to call "
                 + methodName + " for "
                 + (TextUtils.isEmpty(targetOverlayableName) ? "" : (targetOverlayableName + " in "))
-                + overlayInfo.targetPackageName + " because " + actorState
+                + overlayInfo.targetPackageName + (DEBUG_REASON ? (" because " + actorState) : "")
         );
     }
 

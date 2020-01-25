@@ -31,6 +31,8 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -93,6 +95,9 @@ class Bubble {
     }
 
     private FlyoutMessage mFlyoutMessage;
+    private Bitmap mBadgedImage;
+    private int mDotColor;
+    private Path mDotPath;
 
     public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.getSbn().getUser();
@@ -122,6 +127,18 @@ class Bubble {
 
     public String getPackageName() {
         return mEntry.getSbn().getPackageName();
+    }
+
+    public Bitmap getBadgedImage() {
+        return mBadgedImage;
+    }
+
+    public int getDotColor() {
+        return mDotColor;
+    }
+
+    public Path getDotPath() {
+        return mDotPath;
     }
 
     @Nullable
@@ -205,8 +222,12 @@ class Bubble {
         mAppName = info.appName;
         mFlyoutMessage = info.flyoutMessage;
 
+        mBadgedImage = info.badgedBubbleImage;
+        mDotColor = info.dotColor;
+        mDotPath = info.dotPath;
+
         mExpandedView.update(this);
-        mIconView.update(this, info.badgedBubbleImage, info.dotColor, info.dotPath);
+        mIconView.update(this);
     }
 
     /**
@@ -259,6 +280,13 @@ class Bubble {
         mLastAccessed = lastAccessedMillis;
         setShowInShade(false);
         setShowDot(false /* show */, true /* animate */);
+    }
+
+    /**
+     * Should be invoked whenever a Bubble is promoted from overflow.
+     */
+    void markUpdatedAt(long lastAccessedMillis) {
+        mLastUpdated = lastAccessedMillis;
     }
 
     /**

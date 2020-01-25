@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.MediaCodec;
+import android.media.MediaParser;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
  * <table>
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
+ * <tr><td>{@link #KEY_CODECS_STRING}</td><td>String</td><td>optional, the RFC 6381 codecs string of the MediaFormat</td></tr>
  * <tr><td>{@link #KEY_MAX_INPUT_SIZE}</td><td>Integer</td><td>optional, maximum size of a buffer of input data</td></tr>
  * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_WIDTH}</td><td>Integer</td><td>optional, the pixel aspect ratio width</td></tr>
  * <tr><td>{@link #KEY_PIXEL_ASPECT_RATIO_HEIGHT}</td><td>Integer</td><td>optional, the pixel aspect ratio height</td></tr>
@@ -215,6 +218,15 @@ public final class MediaFormat {
      * The associated value is a string.
      */
     public static final String KEY_MIME = "mime";
+
+    /**
+     * A key describing the codecs string of the MediaFormat. See RFC 6381 section 3.2 for the
+     * syntax of the value. The value does not hold {@link MediaCodec}-exposed codec names.
+     * The associated value is a string.
+     *
+     * @see MediaParser.TrackData#mediaFormat
+     */
+    public static final String KEY_CODECS_STRING = "codecs-string";
 
     /**
      * An optional key describing the low latency decoding mode. This is an optional parameter

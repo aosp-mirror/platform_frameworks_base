@@ -54,6 +54,7 @@ import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.ContentCaptureServiceInfo;
 import android.service.contentcapture.FlushMetrics;
 import android.service.contentcapture.IContentCaptureServiceCallback;
+import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -63,6 +64,7 @@ import android.util.SparseBooleanArray;
 import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -372,6 +374,16 @@ final class ContentCapturePerUserService
         }
         assertCallerLocked(request.getPackageName());
         mRemoteService.onDataRemovalRequest(request);
+    }
+
+    @GuardedBy("mLock")
+    public void onDataSharedLocked(@NonNull DataShareRequest request,
+            IDataShareCallback.Stub dataShareCallback) {
+        if (!isEnabledLocked()) {
+            return;
+        }
+        assertCallerLocked(request.getPackageName());
+        mRemoteService.onDataShareRequest(request, dataShareCallback);
     }
 
     @GuardedBy("mLock")

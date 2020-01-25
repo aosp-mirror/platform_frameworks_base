@@ -15,20 +15,45 @@
  */
 package com.android.server.blob;
 
+import static android.app.blob.XmlTags.ATTR_DESCRIPTION_RES_ID;
+import static android.app.blob.XmlTags.ATTR_EXPIRY_TIME;
+import static android.app.blob.XmlTags.ATTR_ID;
+import static android.app.blob.XmlTags.ATTR_PACKAGE;
+import static android.app.blob.XmlTags.ATTR_UID;
+import static android.app.blob.XmlTags.ATTR_USER_ID;
+import static android.app.blob.XmlTags.TAG_ACCESS_MODE;
+import static android.app.blob.XmlTags.TAG_BLOB_HANDLE;
+import static android.app.blob.XmlTags.TAG_COMMITTER;
+import static android.app.blob.XmlTags.TAG_LEASEE;
 import static android.system.OsConstants.O_RDONLY;
 
+import static com.android.server.blob.BlobStoreConfig.TAG;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.blob.BlobHandle;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.ParcelFileDescriptor;
 import android.os.RevocableFileDescriptor;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.XmlUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Objects;
@@ -37,8 +62,10 @@ class BlobMetadata {
     private final Object mMetadataLock = new Object();
 
     private final Context mContext;
-    private final long mBlobId;
-    private final BlobHandle mBlobHandle;
+
+    public final long blobId;
+    public final BlobHandle blobHandle;
+    public final int userId;
 
     @GuardedBy("mMetadataLock")
     private final ArraySet<Committer> mCommitters = new ArraySet<>();
@@ -57,15 +84,47 @@ class BlobMetadata {
     private final ArrayMap<String, ArraySet<RevocableFileDescriptor>> mRevocableFds =
             new ArrayMap<>();
 
-    BlobMetadata(Context context, long blobId, BlobHandle blobHandle) {
+    // Do not access this directly, instead use getSessionFile().
+    private File mBlobFile;
+
+    BlobMetadata(Context context, long blobId, BlobHandle blobHandle, int userId) {
         mContext = context;
-        mBlobId = blobId;
-        mBlobHandle = blobHandle;
+        this.blobId = blobId;
+        this.blobHandle = blobHandle;
+        this.userId = userId;
     }
 
-    void addCommitter(String packageName, int uid, BlobAccessMode blobAccessMode) {
+    void addCommitter(@NonNull Committer committer) {
         synchronized (mMetadataLock) {
-            mCommitters.add(new Committer(packageName, uid, blobAccessMode));
+            mCommitters.add(committer);
+        }
+    }
+
+    void addCommitters(ArraySet<Committer> committers) {
+        synchronized (mMetadataLock) {
+            mCommitters.addAll(committers);
+        }
+    }
+
+    void removeCommitter(@NonNull String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            mCommitters.removeIf((committer) ->
+                    committer.uid == uid && committer.packageName.equals(packageName));
+        }
+    }
+
+    void removeInvalidCommitters(SparseArray<String> packages) {
+        synchronized (mMetadataLock) {
+            mCommitters.removeIf(committer ->
+                    !committer.packageName.equals(packages.get(committer.uid)));
+        }
+    }
+
+    @Nullable
+    Committer getExistingCommitter(@NonNull Committer newCommitter) {
+        synchronized (mCommitters) {
+            final int index = mCommitters.indexOf(newCommitter);
+            return index >= 0 ? mCommitters.valueAt(index) : null;
         }
     }
 
@@ -77,9 +136,23 @@ class BlobMetadata {
         }
     }
 
+    void addLeasees(ArraySet<Leasee> leasees) {
+        synchronized (mMetadataLock) {
+            mLeasees.addAll(leasees);
+        }
+    }
+
     void removeLeasee(String packageName, int uid) {
         synchronized (mMetadataLock) {
-            mLeasees.remove(new Accessor(packageName, uid));
+            mLeasees.removeIf((leasee) ->
+                    leasee.uid == uid && leasee.packageName.equals(packageName));
+        }
+    }
+
+    void removeInvalidLeasees(SparseArray<String> packages) {
+        synchronized (mMetadataLock) {
+            mLeasees.removeIf(leasee ->
+                    !leasee.packageName.equals(packages.get(leasee.uid)));
         }
     }
 
@@ -114,11 +187,18 @@ class BlobMetadata {
         return false;
     }
 
+    File getBlobFile() {
+        if (mBlobFile == null) {
+            mBlobFile = BlobStoreConfig.getBlobFile(blobId);
+        }
+        return mBlobFile;
+    }
+
     ParcelFileDescriptor openForRead(String callingPackage) throws IOException {
         // TODO: Add limit on opened fds
         FileDescriptor fd;
         try {
-            fd = Os.open(BlobStoreConfig.getBlobFile(mBlobId).getPath(), O_RDONLY, 0);
+            fd = Os.open(getBlobFile().getPath(), O_RDONLY, 0);
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
         }
@@ -154,12 +234,136 @@ class BlobMetadata {
         return revocableFd.getRevocableFileDescriptor();
     }
 
+    void dump(IndentingPrintWriter fout) {
+        fout.println("blobHandle:");
+        fout.increaseIndent();
+        blobHandle.dump(fout);
+        fout.decreaseIndent();
+
+        fout.println("Committers:");
+        fout.increaseIndent();
+        for (int i = 0, count = mCommitters.size(); i < count; ++i) {
+            final Committer committer = mCommitters.valueAt(i);
+            fout.println("committer " + committer.toString());
+            fout.increaseIndent();
+            committer.dump(fout);
+            fout.decreaseIndent();
+        }
+        fout.decreaseIndent();
+
+        fout.println("Leasees:");
+        fout.increaseIndent();
+        for (int i = 0, count = mLeasees.size(); i < count; ++i) {
+            final Leasee leasee = mLeasees.valueAt(i);
+            fout.println("leasee " + leasee.toString());
+            fout.increaseIndent();
+            leasee.dump(mContext, fout);
+            fout.decreaseIndent();
+        }
+        fout.decreaseIndent();
+
+        fout.println("Open fds: #" + mRevocableFds.size());
+    }
+
+    void writeToXml(XmlSerializer out) throws IOException {
+        synchronized (mMetadataLock) {
+            XmlUtils.writeLongAttribute(out, ATTR_ID, blobId);
+            XmlUtils.writeIntAttribute(out, ATTR_USER_ID, userId);
+
+            out.startTag(null, TAG_BLOB_HANDLE);
+            blobHandle.writeToXml(out);
+            out.endTag(null, TAG_BLOB_HANDLE);
+
+            for (int i = 0, count = mCommitters.size(); i < count; ++i) {
+                out.startTag(null, TAG_COMMITTER);
+                mCommitters.valueAt(i).writeToXml(out);
+                out.endTag(null, TAG_COMMITTER);
+            }
+
+            for (int i = 0, count = mLeasees.size(); i < count; ++i) {
+                out.startTag(null, TAG_LEASEE);
+                mLeasees.valueAt(i).writeToXml(out);
+                out.endTag(null, TAG_LEASEE);
+            }
+        }
+    }
+
+    @Nullable
+    static BlobMetadata createFromXml(Context context, XmlPullParser in)
+            throws XmlPullParserException, IOException {
+        final long blobId = XmlUtils.readLongAttribute(in, ATTR_ID);
+        final int userId = XmlUtils.readIntAttribute(in, ATTR_USER_ID);
+
+        BlobHandle blobHandle = null;
+        final ArraySet<Committer> committers = new ArraySet<>();
+        final ArraySet<Leasee> leasees = new ArraySet<>();
+        final int depth = in.getDepth();
+        while (XmlUtils.nextElementWithin(in, depth)) {
+            if (TAG_BLOB_HANDLE.equals(in.getName())) {
+                blobHandle = BlobHandle.createFromXml(in);
+            } else if (TAG_COMMITTER.equals(in.getName())) {
+                final Committer committer = Committer.createFromXml(in);
+                if (committer != null) {
+                    committers.add(committer);
+                }
+            } else if (TAG_LEASEE.equals(in.getName())) {
+                leasees.add(Leasee.createFromXml(in));
+            }
+        }
+
+        if (blobHandle == null) {
+            Slog.wtf(TAG, "blobHandle should be available");
+            return null;
+        }
+
+        final BlobMetadata blobMetadata = new BlobMetadata(context, blobId, blobHandle, userId);
+        blobMetadata.addCommitters(committers);
+        blobMetadata.addLeasees(leasees);
+        return blobMetadata;
+    }
+
     static final class Committer extends Accessor {
         public final BlobAccessMode blobAccessMode;
 
         Committer(String packageName, int uid, BlobAccessMode blobAccessMode) {
             super(packageName, uid);
             this.blobAccessMode = blobAccessMode;
+        }
+
+        void dump(IndentingPrintWriter fout) {
+            fout.println("accessMode:");
+            fout.increaseIndent();
+            blobAccessMode.dump(fout);
+            fout.decreaseIndent();
+        }
+
+        void writeToXml(@NonNull XmlSerializer out) throws IOException {
+            XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageName);
+            XmlUtils.writeIntAttribute(out, ATTR_UID, uid);
+
+            out.startTag(null, TAG_ACCESS_MODE);
+            blobAccessMode.writeToXml(out);
+            out.endTag(null, TAG_ACCESS_MODE);
+        }
+
+        @Nullable
+        static Committer createFromXml(@NonNull XmlPullParser in)
+                throws XmlPullParserException, IOException {
+            final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
+            final int uid = XmlUtils.readIntAttribute(in, ATTR_UID);
+
+            final int depth = in.getDepth();
+            BlobAccessMode blobAccessMode = null;
+            while (XmlUtils.nextElementWithin(in, depth)) {
+                if (TAG_ACCESS_MODE.equals(in.getName())) {
+                    blobAccessMode = BlobAccessMode.createFromXml(in);
+                }
+            }
+            if (blobAccessMode == null) {
+                Slog.wtf(TAG, "blobAccessMode should be available");
+                return null;
+            }
+            return new Committer(packageName, uid, blobAccessMode);
         }
     }
 
@@ -175,6 +379,38 @@ class BlobMetadata {
 
         boolean isStillValid() {
             return expiryTimeMillis == 0 || expiryTimeMillis <= System.currentTimeMillis();
+        }
+
+        void dump(Context context, IndentingPrintWriter fout) {
+            String desc = null;
+            try {
+                final Resources leaseeRes = context.getPackageManager()
+                        .getResourcesForApplicationAsUser(packageName, UserHandle.getUserId(uid));
+                desc = leaseeRes.getString(descriptionResId);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.d(TAG, "Unknown package in user " + UserHandle.getUserId(uid) + ": "
+                        + packageName, e);
+                desc = "<none>";
+            }
+            fout.println("desc: " + desc);
+            fout.println("expiryMs: " + expiryTimeMillis);
+        }
+
+        void writeToXml(@NonNull XmlSerializer out) throws IOException {
+            XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageName);
+            XmlUtils.writeIntAttribute(out, ATTR_UID, uid);
+            XmlUtils.writeIntAttribute(out, ATTR_DESCRIPTION_RES_ID, descriptionResId);
+            XmlUtils.writeLongAttribute(out, ATTR_EXPIRY_TIME, expiryTimeMillis);
+        }
+
+        @NonNull
+        static Leasee createFromXml(@NonNull XmlPullParser in) throws IOException {
+            final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
+            final int uid = XmlUtils.readIntAttribute(in, ATTR_UID);
+            final int descriptionResId = XmlUtils.readIntAttribute(in, ATTR_DESCRIPTION_RES_ID);
+            final long expiryTimeMillis = XmlUtils.readLongAttribute(in, ATTR_EXPIRY_TIME);
+
+            return new Leasee(packageName, uid, descriptionResId, expiryTimeMillis);
         }
     }
 
@@ -206,6 +442,11 @@ class BlobMetadata {
         @Override
         public int hashCode() {
             return Objects.hash(packageName, uid);
+        }
+
+        @Override
+        public String toString() {
+            return "[" + packageName + ", " + uid + "]";
         }
     }
 }

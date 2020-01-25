@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.text.TextUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -44,6 +45,162 @@ import java.util.Map;
  * frame and meta data from an input media file.
  */
 public class MediaMetadataRetriever implements AutoCloseable {
+
+    // borrowed from ExoPlayer
+    private static final String[] STANDARD_GENRES = new String[] {
+            // These are the official ID3v1 genres.
+            "Blues",
+            "Classic Rock",
+            "Country",
+            "Dance",
+            "Disco",
+            "Funk",
+            "Grunge",
+            "Hip-Hop",
+            "Jazz",
+            "Metal",
+            "New Age",
+            "Oldies",
+            "Other",
+            "Pop",
+            "R&B",
+            "Rap",
+            "Reggae",
+            "Rock",
+            "Techno",
+            "Industrial",
+            "Alternative",
+            "Ska",
+            "Death Metal",
+            "Pranks",
+            "Soundtrack",
+            "Euro-Techno",
+            "Ambient",
+            "Trip-Hop",
+            "Vocal",
+            "Jazz+Funk",
+            "Fusion",
+            "Trance",
+            "Classical",
+            "Instrumental",
+            "Acid",
+            "House",
+            "Game",
+            "Sound Clip",
+            "Gospel",
+            "Noise",
+            "AlternRock",
+            "Bass",
+            "Soul",
+            "Punk",
+            "Space",
+            "Meditative",
+            "Instrumental Pop",
+            "Instrumental Rock",
+            "Ethnic",
+            "Gothic",
+            "Darkwave",
+            "Techno-Industrial",
+            "Electronic",
+            "Pop-Folk",
+            "Eurodance",
+            "Dream",
+            "Southern Rock",
+            "Comedy",
+            "Cult",
+            "Gangsta",
+            "Top 40",
+            "Christian Rap",
+            "Pop/Funk",
+            "Jungle",
+            "Native American",
+            "Cabaret",
+            "New Wave",
+            "Psychadelic",
+            "Rave",
+            "Showtunes",
+            "Trailer",
+            "Lo-Fi",
+            "Tribal",
+            "Acid Punk",
+            "Acid Jazz",
+            "Polka",
+            "Retro",
+            "Musical",
+            "Rock & Roll",
+            "Hard Rock",
+            // These were made up by the authors of Winamp and later added to the ID3 spec.
+            "Folk",
+            "Folk-Rock",
+            "National Folk",
+            "Swing",
+            "Fast Fusion",
+            "Bebob",
+            "Latin",
+            "Revival",
+            "Celtic",
+            "Bluegrass",
+            "Avantgarde",
+            "Gothic Rock",
+            "Progressive Rock",
+            "Psychedelic Rock",
+            "Symphonic Rock",
+            "Slow Rock",
+            "Big Band",
+            "Chorus",
+            "Easy Listening",
+            "Acoustic",
+            "Humour",
+            "Speech",
+            "Chanson",
+            "Opera",
+            "Chamber Music",
+            "Sonata",
+            "Symphony",
+            "Booty Bass",
+            "Primus",
+            "Porn Groove",
+            "Satire",
+            "Slow Jam",
+            "Club",
+            "Tango",
+            "Samba",
+            "Folklore",
+            "Ballad",
+            "Power Ballad",
+            "Rhythmic Soul",
+            "Freestyle",
+            "Duet",
+            "Punk Rock",
+            "Drum Solo",
+            "A capella",
+            "Euro-House",
+            "Dance Hall",
+            // These were made up by the authors of Winamp but have not been added to the ID3 spec.
+            "Goa",
+            "Drum & Bass",
+            "Club-House",
+            "Hardcore",
+            "Terror",
+            "Indie",
+            "BritPop",
+            "Afro-Punk",
+            "Polsk Punk",
+            "Beat",
+            "Christian Gangsta Rap",
+            "Heavy Metal",
+            "Black Metal",
+            "Crossover",
+            "Contemporary Christian",
+            "Christian Rock",
+            "Merengue",
+            "Salsa",
+            "Thrash Metal",
+            "Anime",
+            "Jpop",
+            "Synthpop"
+    };
+
     static {
         System.loadLibrary("media_jni");
         native_init();
@@ -225,6 +382,8 @@ public class MediaMetadataRetriever implements AutoCloseable {
     private native void _setDataSource(MediaDataSource dataSource)
           throws IllegalArgumentException;
 
+    private native @Nullable String nativeExtractMetadata(int keyCode);
+
     /**
      * Call this method after setDataSource(). This method retrieves the
      * meta data value associated with the keyCode.
@@ -236,7 +395,118 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @return The meta data value associate with the given keyCode on success;
      * null on failure.
      */
-    public native @Nullable String extractMetadata(int keyCode);
+    public @Nullable String extractMetadata(int keyCode) {
+        String meta = nativeExtractMetadata(keyCode);
+        if (keyCode == METADATA_KEY_GENRE) {
+            // translate numeric genre code(s) to human readable
+            meta = convertGenreTag(meta);
+        }
+        return meta;
+    }
+
+    /*
+     * The id3v2 spec doesn't specify the syntax of the genre tag very precisely, so
+     * some assumptions are made. Using one possible interpretation of the id3v2
+     * spec, this method converts an id3 genre tag string to a human readable string,
+     * as follows:
+     * - if the first character of the tag is a digit, the entire tag is assumed to
+     *   be an id3v1 numeric genre code. If the tag does not parse to a number, or
+     *   the number is outside the range of defined standard genres, it is ignored.
+     * - if the tag does not start with a digit, it is assumed to be an id3v2 style
+     *   tag consisting of one or more genres, with each genre being either a parenthesized
+     *   integer referring to an id3v1 numeric genre code, the special indicators "(CR)" or
+     *   "(RX)" (for "Cover" or "Remix", respectively), or a custom genre string. When
+     *   a custom genre string is encountered, it is assumed to continue until the end
+     *   of the tag, unless it starts with "((" in which case it is assumed to continue
+     *   until the next close-parenthesis or the end of the tag. Any parse error in the tag
+     *   causes it to be ignored.
+     * The human-readable genre string is not localized, and uses the English genre names
+     * from the spec.
+     */
+    private String convertGenreTag(String meta) {
+        if (TextUtils.isEmpty(meta)) {
+            return null;
+        }
+
+        if (Character.isDigit(meta.charAt(0))) {
+            // assume a single id3v1-style bare number without any extra characters
+            try {
+                int genreIndex = Integer.parseInt(meta);
+                if (genreIndex >= 0 && genreIndex < STANDARD_GENRES.length) {
+                    return STANDARD_GENRES[genreIndex];
+                }
+            } catch (NumberFormatException e) {
+                // ignore and fall through
+            }
+            return null;
+        } else {
+            // assume id3v2-style genre tag, with parenthesized numeric genres
+            // and/or literal genre strings, possibly more than one per tag.
+            StringBuilder genres = null;
+            String nextGenre = null;
+            while (true) {
+                if (!TextUtils.isEmpty(nextGenre)) {
+                    if (genres == null) {
+                        genres = new StringBuilder();
+                    }
+                    if (genres.length() != 0) {
+                        genres.append(", ");
+                    }
+                    genres.append(nextGenre);
+                    nextGenre = null;
+                }
+                if (TextUtils.isEmpty(meta)) {
+                    // entire tag has been processed.
+                    break;
+                }
+                if (meta.startsWith("(RX)")) {
+                    nextGenre = "Remix";
+                    meta = meta.substring(4);
+                } else if (meta.startsWith("(CR)")) {
+                    nextGenre = "Cover";
+                    meta = meta.substring(4);
+                } else if (meta.startsWith("((")) {
+                    // the id3v2 spec says that custom genres that start with a parenthesis
+                    // should be "escaped" with another parenthesis, however the spec doesn't
+                    // specify escaping parentheses inside the custom string. We'll parse any
+                    // such strings until a closing parenthesis is found, or the end of
+                    // the tag is reached.
+                    int closeParenOffset = meta.indexOf(')');
+                    if (closeParenOffset == -1) {
+                        // string continues to end of tag
+                        nextGenre = meta.substring(1);
+                        meta = "";
+                    } else {
+                        nextGenre = meta.substring(1, closeParenOffset + 1);
+                        meta = meta.substring(closeParenOffset + 1);
+                    }
+                } else if (meta.startsWith("(")) {
+                    // should be a parenthesized numeric genre
+                    int closeParenOffset = meta.indexOf(')');
+                    if (closeParenOffset == -1) {
+                        return null;
+                    }
+                    String genreNumString = meta.substring(1, closeParenOffset);
+                    try {
+                        int genreIndex = Integer.parseInt(genreNumString.toString());
+                        if (genreIndex >= 0 && genreIndex < STANDARD_GENRES.length) {
+                            nextGenre = STANDARD_GENRES[genreIndex];
+                        } else {
+                            return null;
+                        }
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                    meta = meta.substring(closeParenOffset + 1);
+                } else {
+                    // custom genre
+                    nextGenre = meta;
+                    meta = "";
+                }
+            }
+            return genres == null || genres.length() == 0 ? null : genres.toString();
+        }
+    }
 
     /**
      * This method is similar to {@link #getFrameAtTime(long, int, BitmapParams)}

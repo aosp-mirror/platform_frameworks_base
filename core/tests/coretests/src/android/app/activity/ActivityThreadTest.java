@@ -96,16 +96,6 @@ public class ActivityThreadTest {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
-    @Test
-    public void testSleepAndStop() throws Exception {
-        final Activity activity = mActivityTestRule.launchActivity(new Intent());
-        final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();
-
-        appThread.scheduleSleeping(activity.getActivityToken(), true /* sleeping */);
-        appThread.scheduleTransaction(newStopTransaction(activity));
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
-
     /** Verify that repeated resume requests to activity will be ignored. */
     @Test
     public void testRepeatedResume() throws Exception {

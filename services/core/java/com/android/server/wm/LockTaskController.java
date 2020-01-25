@@ -23,8 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.content.Context.STATUS_BAR_SERVICE;
 import static android.content.Intent.ACTION_CALL_EMERGENCY;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_CURRENT;
 import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
@@ -339,20 +337,6 @@ public class LockTaskController {
     private boolean isKeyguardAllowed(int userId) {
         return (getLockTaskFeaturesForUser(userId)
                 & DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD) != 0;
-    }
-
-    boolean isActivityAllowed(int userId, String packageName, int lockTaskLaunchMode) {
-        if (mLockTaskModeState != LOCK_TASK_MODE_LOCKED) {
-            return true;
-        }
-        switch (lockTaskLaunchMode) {
-            case LOCK_TASK_LAUNCH_MODE_ALWAYS:
-                return true;
-            case LOCK_TASK_LAUNCH_MODE_NEVER:
-                return false;
-            default:
-        }
-        return isPackageWhitelisted(userId, packageName);
     }
 
     private boolean isEmergencyCallTask(Task task) {

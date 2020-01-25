@@ -19,7 +19,7 @@ package com.android.server.integrity.engine;
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 import android.util.Slog;
 
@@ -65,7 +65,7 @@ public class RuleEvaluationEngine {
      * Load, and match the list of rules against an app install metadata.
      *
      * @param appInstallMetadata Metadata of the app to be installed, and to evaluate the rules
-     *     against.
+     *                           against.
      * @return result of the integrity check
      */
     public IntegrityCheckResult evaluate(
@@ -89,14 +89,14 @@ public class RuleEvaluationEngine {
             return Optional.empty();
         }
 
-        List<Formula> formulas = new ArrayList<>(allowedInstallers.size());
+        List<IntegrityFormula> formulas = new ArrayList<>(allowedInstallers.size());
         allowedInstallers.forEach(
                 (installer, cert) -> {
                     formulas.add(allowedInstallerFormula(installer, cert));
                 });
 
         // We need this special case since OR-formulas require at least two operands.
-        Formula allInstallersFormula =
+        IntegrityFormula allInstallersFormula =
                 formulas.size() == 1
                         ? formulas.get(0)
                         : new CompoundFormula(CompoundFormula.OR, formulas);
@@ -108,7 +108,7 @@ public class RuleEvaluationEngine {
                         Rule.DENY));
     }
 
-    private static Formula allowedInstallerFormula(String installer, String cert) {
+    private static IntegrityFormula allowedInstallerFormula(String installer, String cert) {
         return new CompoundFormula(
                 CompoundFormula.AND,
                 Arrays.asList(
@@ -117,8 +117,7 @@ public class RuleEvaluationEngine {
                                 installer,
                                 /* isHashedValue= */ false),
                         new AtomicFormula.StringAtomicFormula(
-                                AtomicFormula.INSTALLER_CERTIFICATE,
-                                cert,
-                                /* isHashedValue= */ false)));
+                                AtomicFormula.INSTALLER_CERTIFICATE, cert, /* isHashedValue= */
+                                false)));
     }
 }

@@ -29,11 +29,13 @@ import android.os.IBinder;
 import android.service.contentcapture.ActivityEvent;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
+import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.Slog;
 import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.DataRemovalRequest;
+import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.os.IResultReceiver;
@@ -143,6 +145,11 @@ final class RemoteContentCaptureService
         scheduleAsyncRequest((s) -> s.onDataRemovalRequest(request));
         writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_USER_DATA_REMOVED,
                 mComponentName);
+    }
+
+    public void onDataShareRequest(@NonNull DataShareRequest request,
+            @NonNull IDataShareCallback.Stub dataShareCallback) {
+        scheduleAsyncRequest((s) -> s.onDataShared(request, dataShareCallback));
     }
 
     /**

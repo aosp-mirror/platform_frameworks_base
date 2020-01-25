@@ -19,13 +19,11 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.service.controls.templates.RangeTemplate;
 import android.service.controls.templates.ToggleRangeTemplate;
 
 /**
  * Action sent by a {@link RangeTemplate}, {@link ToggleRangeTemplate}.
- * @hide
  */
 public final class FloatAction extends ControlAction {
 
@@ -56,7 +54,11 @@ public final class FloatAction extends ControlAction {
         mNewValue = newValue;
     }
 
-    public FloatAction(Bundle b) {
+    /**
+     * @param b
+     * @hide
+     */
+    FloatAction(Bundle b) {
         super(b);
         mNewValue = b.getFloat(KEY_NEW_VALUE);
     }
@@ -76,24 +78,15 @@ public final class FloatAction extends ControlAction {
         return TYPE;
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = super.getDataBundle();
         b.putFloat(KEY_NEW_VALUE, mNewValue);
         return b;
     }
-
-    public static final @NonNull Creator<FloatAction> CREATOR = new Creator<FloatAction>() {
-        @Override
-        public FloatAction createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new FloatAction(source.readBundle());
-        }
-
-        @Override
-        public FloatAction[] newArray(int size) {
-            return new FloatAction[size];
-        }
-    };
 }

@@ -19,7 +19,8 @@ package com.android.server.integrity.parser;
 import static com.android.server.integrity.model.ComponentBitSize.IS_HASHED_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.VALUE_SIZE_BITS;
 
-import com.android.server.integrity.IntegrityUtils;
+import android.content.integrity.IntegrityUtils;
+
 import com.android.server.integrity.model.BitInputStream;
 
 import java.io.IOException;

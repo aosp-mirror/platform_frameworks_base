@@ -2403,11 +2403,19 @@ public class DevicePolicyManager {
     public static final int PERSONAL_APPS_SUSPENDED_EXPLICITLY = 1 << 0;
 
     /**
+     * Flag for {@link #getPersonalAppsSuspendedReasons} return value. Set when personal apps are
+     * suspended by framework because managed profile was off for longer than allowed by policy.
+     * @see #setManagedProfileMaximumTimeOff
+     */
+    public static final int PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT = 1 << 1;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "PERSONAL_APPS_" }, value = {
             PERSONAL_APPS_NOT_SUSPENDED,
-            PERSONAL_APPS_SUSPENDED_EXPLICITLY
+            PERSONAL_APPS_SUSPENDED_EXPLICITLY,
+            PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PersonalAppSuspensionReason {}
@@ -8847,6 +8855,49 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device owners to request a location provider to change its allowed state. For a
+     * provider to be enabled requires both that the master location setting is enabled, and that
+     * the provider itself is allowed. Most location providers are always allowed. Some location
+     * providers may have user consents or terms and conditions that must be accepted, or some other
+     * type of blocker before they are allowed however. Every location provider is responsible for
+     * its own allowed state.
+     *
+     * <p>This method requests that a location provider change its allowed state. For providers that
+     * are always allowed and have no state to change, this will have no effect. If the provider
+     * does require some consent, terms and conditions, or other blocking state, using this API
+     * implies that the device owner is agreeing/disagreeing to any consents, terms and conditions,
+     * etc, and the provider should make a best effort to adjust it's allowed state accordingly.
+     *
+     * <p>Location providers are generally only responsible for the current user, and callers must
+     * assume that this method will only affect provider state for the current user. Callers are
+     * responsible for tracking current user changes and re-updating provider state as necessary.
+     *
+     * <p>While providers are expected to make a best effort to honor this request, it is not a
+     * given that all providers will support such a request. If a provider does change its state as
+     * a result of this request, that may happen asynchronously after some delay. Test location
+     * providers set through {@link android.location.LocationManager#addTestProvider} will respond
+     * to this request to aide in testing.
+     *
+     * @param admin          Which {@link DeviceAdminReceiver} this request is associated with
+     * @param provider       A location provider as listed by
+     *                       {@link android.location.LocationManager#getAllProviders()}
+     * @param providerAllowed Whether the location provider is being requested to enable or disable
+     *                       itself
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void requestSetLocationProviderAllowed(@NonNull ComponentName admin,
+            @NonNull String provider, boolean providerAllowed) {
+        throwIfParentInstance("requestSetLocationProviderAllowed");
+        if (mService != null) {
+            try {
+                mService.requestSetLocationProviderAllowed(admin, provider, providerAllowed);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by profile or device owners to update {@link android.provider.Settings.Secure}
      * settings. Validation that the value of the setting is in the correct form for the setting
      * type should be performed by the caller.
@@ -11763,6 +11814,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param suspended Whether personal apps should be suspended.
+     * @throws IllegalStateException if the profile owner doesn't have an activity that handles
+     *        {@link #ACTION_CHECK_POLICY_COMPLIANCE}
      */
     public void setPersonalAppsSuspended(@NonNull ComponentName admin, boolean suspended) {
         throwIfParentInstance("setPersonalAppsSuspended");
@@ -11773,5 +11826,53 @@ public class DevicePolicyManager {
                 throw re.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Called by a profile owner of an organization-owned managed profile to set maximum time
+     * the profile is allowed to be turned off. If the profile is turned off for longer, personal
+     * apps are suspended on the device.
+     *
+     * <p>When personal apps are suspended, an ongoing notification about that is shown to the user.
+     * When the user taps the notification, system invokes {@link #ACTION_CHECK_POLICY_COMPLIANCE}
+     * in the profile owner package. Profile owner implementation that uses personal apps suspension
+     * must handle this intent.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param timeoutMs Maximum time the profile is allowed to be off in milliseconds or 0 if
+     *        not limited.
+     * @throws IllegalStateException if the profile owner doesn't have an activity that handles
+     *        {@link #ACTION_CHECK_POLICY_COMPLIANCE}
+     * @see #setPersonalAppsSuspended
+     */
+    public void setManagedProfileMaximumTimeOff(@NonNull ComponentName admin, long timeoutMs) {
+        throwIfParentInstance("setManagedProfileMaximumTimeOff");
+        if (mService != null) {
+            try {
+                mService.setManagedProfileMaximumTimeOff(admin, timeoutMs);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+     /**
+     * Called by a profile owner of an organization-owned managed profile to get maximum time
+     * the profile is allowed to be turned off.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @return Maximum time the profile is allowed to be off in milliseconds or 0 if not limited.
+     * @see #setPersonalAppsSuspended
+     */
+    public long getManagedProfileMaximumTimeOff(@NonNull ComponentName admin) {
+        throwIfParentInstance("getManagedProfileMaximumTimeOff");
+        if (mService != null) {
+            try {
+                return mService.getManagedProfileMaximumTimeOff(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return 0;
     }
 }

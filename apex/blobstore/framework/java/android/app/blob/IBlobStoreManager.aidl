@@ -17,6 +17,7 @@ package android.app.blob;
 
 import android.app.blob.BlobHandle;
 import android.app.blob.IBlobStoreSession;
+import android.os.RemoteCallback;
 
 /** {@hide} */
 interface IBlobStoreManager {
@@ -28,4 +29,6 @@ interface IBlobStoreManager {
     void acquireLease(in BlobHandle handle, int descriptionResId, long leaseTimeout,
             in String packageName);
     void releaseLease(in BlobHandle handle, in String packageName);
+
+    void waitForIdle(in RemoteCallback callback);
 }

@@ -37,4 +37,6 @@ interface ILocationProvider {
 
     @UnsupportedAppUsage
     oneway void sendExtraCommand(String command, in Bundle extras);
+
+    oneway void requestSetAllowed(boolean allowed);
 }

@@ -25,23 +25,115 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
  * This class provides access to the blob store managed by the system.
  *
- * Apps can publish data blobs which might be useful for other apps on the device to be
- * managed by the system and apps that would like to access these data blobs can do so
- * by addressing them via their cryptographically secure hashes.
+ * <p> Apps can publish and access a data blob using a {@link BlobHandle} object which can
+ * be created with {@link BlobHandle#createWithSha256(byte[], CharSequence, long, String)}.
+ * This {@link BlobHandle} object encapsulates the following pieces of information used for
+ * identifying the blobs:
+ * <ul>
+ *     <li> {@link BlobHandle#getSha256Digest()}
+ *     <li> {@link BlobHandle#getLabel()}
+ *     <li> {@link BlobHandle#getExpiryTimeMillis()}
+ *     <li> {@link BlobHandle#getTag()}
+ * </ul>
+ * For two {@link BlobHandle} objects to be considered identical, all these pieces of information
+ * must be equal.
  *
- * TODO: More documentation.
+ * <p> For contributing a new data blob, an app needs to create a session using
+ * {@link BlobStoreManager#createSession(BlobHandle)} and then open this session for writing using
+ * {@link BlobStoreManager#openSession(long)}.
+ *
+ * <p> The following code snippet shows how to create and open a session for writing:
+ * <pre class="prettyprint">
+ *     final long sessionId = blobStoreManager.createSession(blobHandle);
+ *     try (BlobStoreManager.Session session = blobStoreManager.openSession(sessionId)) {
+ *         try (ParcelFileDescriptor pfd = new ParcelFileDescriptor.AutoCloseOutputStream(
+ *                 session.openWrite(offsetBytes, lengthBytes))) {
+ *             writeData(pfd);
+ *         }
+ *     }
+ * </pre>
+ *
+ * <p> If all the data could not be written in a single attempt, apps can close this session
+ * and re-open it again using the session id obtained via
+ * {@link BlobStoreManager#createSession(BlobHandle)}. Note that the session data is persisted
+ * and can be re-opened for completing the data contribution, even across device reboots.
+ *
+ * <p> After the data is written to the session, it can be committed using
+ * {@link Session#commit(Executor, Consumer)}. Until the session is committed, data written
+ * to the session will not be shared with any app.
+ *
+ * <p class="note"> Once a session is committed using {@link Session#commit(Executor, Consumer)},
+ * any data written as part of this session is sealed and cannot be modified anymore.
+ *
+ * <p> Before committing the session, apps can indicate which apps are allowed to access the
+ * contributed data using one or more of the following access modes:
+ * <ul>
+ *     <li> {@link Session#allowPackageAccess(String, byte[])} which will allow whitelisting
+ *          specific packages to access the blobs.
+ *     <li> {@link Session#allowSameSignatureAccess()} which will allow only apps which are signed
+ *          with the same certificate as the app which contributed the blob to access it.
+ *     <li> {@link Session#allowPublicAccess()} which will allow any app on the device to access
+ *          the blob.
+ * </ul>
+ *
+ * <p> The following code snippet shows how to specify the access mode and commit the session:
+ * <pre class="prettyprint">
+ *     try (BlobStoreManager.Session session = blobStoreManager.openSession(sessionId)) {
+ *         try (ParcelFileDescriptor pfd = new ParcelFileDescriptor.AutoCloseOutputStream(
+ *                 session.openWrite(offsetBytes, lengthBytes))) {
+ *             writeData(pfd);
+ *         }
+ *         session.allowSameSignatureAccess();
+ *         session.allowPackageAccess(packageName, certificate);
+ *         session.commit(executor, callback);
+ *     }
+ * </pre>
+ *
+ * <p> Apps that satisfy at least one of the access mode constraints specified by the publisher
+ * of the data blob will be able to access it.
+ *
+ * <p> A data blob published without specifying any of
+ * these access modes will be considered private and only the app that contributed the data
+ * blob will be allowed to access it. This is still useful for overall device system health as
+ * the System can try to keep one copy of data blob on disk when multiple apps contribute the
+ * same data.
+ *
+ * <p class="note"> It is strongly recommended that apps use one of
+ * {@link Session#allowPackageAccess(String, byte[])} or {@link Session#allowSameSignatureAccess()}
+ * when they know, ahead of time, the set of apps they would like to share the blobs with.
+ * {@link Session#allowPublicAccess()} is meant for publicly available data committed from
+ * libraries and SDKs.
+ *
+ * <p> Once a data blob is committed with {@link Session#commit(Executor, Consumer)}, it
+ * can be accessed using {@link BlobStoreManager#openBlob(BlobHandle)}, assuming the caller
+ * satisfies constraints of any of the access modes associated with that data blob. An app may
+ * acquire a lease on a blob with {@link BlobStoreManager#acquireLease(BlobHandle, int)} and
+ * release the lease with {@link BlobStoreManager#releaseLease(BlobHandle)}. A blob will not be
+ * deleted from the system while there is at least one app leasing it.
+ *
+ * <p> The following code snippet shows how to access the data blob:
+ * <pre class="prettyprint">
+ *     try (ParcelFileDescriptor pfd = new ParcelFileDescriptor.AutoCloseInputStream(
+ *             blobStoreManager.openBlob(blobHandle)) {
+ *         useData(pfd);
+ *     }
+ * </pre>
  */
 @SystemService(Context.BLOB_STORE_SERVICE)
 public class BlobStoreManager {
@@ -258,6 +350,25 @@ public class BlobStoreManager {
             mService.releaseLease(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Wait until any pending tasks (like persisting data to disk) have finished.
+     *
+     * @hide
+     */
+    public void waitForIdle(long timeoutMillis) throws InterruptedException, TimeoutException {
+        try {
+            final CountDownLatch countDownLatch = new CountDownLatch(1);
+            mService.waitForIdle(new RemoteCallback((result) -> countDownLatch.countDown()));
+            if (!countDownLatch.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException("Timed out waiting for service to become idle");
+            }
+        } catch (ParcelableException e) {
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

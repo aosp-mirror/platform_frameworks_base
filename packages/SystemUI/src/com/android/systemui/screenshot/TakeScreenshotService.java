@@ -22,6 +22,9 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREEN
 
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -83,6 +86,22 @@ public class TakeScreenshotService extends Service {
                     } else {
                         mScreenshotLegacy.takeScreenshotPartial(
                                 finisher, msg.arg1 > 0, msg.arg2 > 0);
+                    }
+                    break;
+                case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
+                    Bitmap screenshot = msg.getData().getParcelable(
+                            WindowManager.PARCEL_KEY_SCREENSHOT_BITMAP);
+                    Rect screenBounds = msg.getData().getParcelable(
+                            WindowManager.PARCEL_KEY_SCREENSHOT_BOUNDS);
+                    Insets insets = msg.getData().getParcelable(
+                            WindowManager.PARCEL_KEY_SCREENSHOT_INSETS);
+                    int taskId = msg.getData().getInt(WindowManager.PARCEL_KEY_SCREENSHOT_TASK_ID);
+                    if (useCornerFlow) {
+                        mScreenshot.handleImageAsScreenshot(
+                                screenshot, screenBounds, insets, taskId, finisher);
+                    } else {
+                        mScreenshotLegacy.handleImageAsScreenshot(
+                                screenshot, screenBounds, insets, taskId, finisher);
                     }
                     break;
                 default:

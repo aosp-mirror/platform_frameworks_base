@@ -2551,6 +2551,7 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
+        @Deprecated
         @UnsupportedAppUsage
         public Transaction deferTransactionUntilSurface(SurfaceControl sc, Surface barrierSurface,
                 long frameNumber) {

@@ -6313,12 +6313,24 @@ public class ConnectivityServiceTest {
         assertEquals(wifiLp, mService.getActiveLinkProperties());
     }
 
+    @Test
+    public void testNetworkCapabilitiesRestrictedForCallerPermissions() {
+        int callerUid = Process.myUid();
+        final NetworkCapabilities originalNc = new NetworkCapabilities();
+        originalNc.setOwnerUid(callerUid);
 
-    private TestNetworkAgentWrapper establishVpn(LinkProperties lp, int establishingUid,
-            Set<UidRange> vpnRange) throws Exception {
+        final NetworkCapabilities newNc =
+                mService.networkCapabilitiesRestrictedForCallerPermissions(
+                        originalNc, Process.myPid(), callerUid);
+
+        assertEquals(Process.INVALID_UID, newNc.getOwnerUid());
+    }
+
+    private TestNetworkAgentWrapper establishVpn(
+            LinkProperties lp, int ownerUid, Set<UidRange> vpnRange) throws Exception {
         final TestNetworkAgentWrapper
                 vpnNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN, lp);
-        vpnNetworkAgent.getNetworkCapabilities().setEstablishingVpnAppUid(establishingUid);
+        vpnNetworkAgent.getNetworkCapabilities().setOwnerUid(ownerUid);
         mMockVpn.setNetworkAgent(vpnNetworkAgent);
         mMockVpn.connect();
         mMockVpn.setUids(vpnRange);

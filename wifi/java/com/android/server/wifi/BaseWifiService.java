@@ -198,6 +198,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void setMeteredOverridePasspoint(String fqdn, int meteredOverride) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean startScan(String packageName, String featureId) {
         throw new UnsupportedOperationException();
     }

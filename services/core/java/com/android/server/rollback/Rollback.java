@@ -179,6 +179,13 @@ class Rollback {
     private final IntArray mTokens = new IntArray();
 
     /**
+     * Session ids for all packages in the install. For multi-package sessions, this is the list
+     * of child session ids. For normal sessions, this list is a single element with the normal
+     * session id.
+     */
+    private final int[] mPackageSessionIds;
+
+    /**
      * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
@@ -186,9 +193,10 @@ class Rollback {
      * @param stagedSessionId the session id if this is a staged rollback, -1 otherwise.
      * @param userId the user that performed the install with rollback enabled.
      * @param installerPackageName the installer package name from the original install session.
+     * @param packageSessionIds the session ids for all packages in the install.
      */
     Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
-            String installerPackageName) {
+            String installerPackageName, int[] packageSessionIds) {
         this.info = new RollbackInfo(rollbackId,
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ stagedSessionId != -1,
@@ -200,6 +208,12 @@ class Rollback {
         mStagedSessionId = stagedSessionId;
         mState = ROLLBACK_STATE_ENABLING;
         mTimestamp = Instant.now();
+        mPackageSessionIds = packageSessionIds != null ? packageSessionIds : new int[0];
+    }
+
+    Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
+             String installerPackageName) {
+        this(rollbackId, backupDir, stagedSessionId, userId, installerPackageName, null);
     }
 
     /**
@@ -217,6 +231,11 @@ class Rollback {
         mState = state;
         mApkSessionId = apkSessionId;
         mRestoreUserDataInProgress = restoreUserDataInProgress;
+        // TODO(b/120200473): Include this field during persistence. This field will be used to
+        // decide which rollback to expire when ACTION_PACKAGE_REPLACED is received. Note persisting
+        // this field is not backward compatible. We won't fix b/120200473 until S to minimize the
+        // impact.
+        mPackageSessionIds = new int[0];
     }
 
     /**
@@ -791,6 +810,25 @@ class Rollback {
         synchronized (mLock) {
             return mTokens.indexOf(token) != -1;
         }
+    }
+
+    /**
+     * Returns true if this rollback contains the provided {@code packageSessionId}.
+     */
+    boolean containsSessionId(int packageSessionId) {
+        for (int id : mPackageSessionIds) {
+            if (id == packageSessionId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the number of package session ids in this rollback.
+     */
+    int getPackageSessionIdCount() {
+        return mPackageSessionIds.length;
     }
 
     static String rollbackStateToString(@RollbackState int state) {

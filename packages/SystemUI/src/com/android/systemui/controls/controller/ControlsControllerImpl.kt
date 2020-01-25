@@ -210,20 +210,20 @@ class ControlsControllerImpl @Inject constructor (
         }
     }
 
-    override fun refreshStatus(componentName: ComponentName, controls: List<Control>) {
+    override fun refreshStatus(componentName: ComponentName, control: Control) {
         if (!available) {
             Log.d(TAG, "Controls not available")
             return
         }
         executor.execute {
             synchronized(currentFavorites) {
-                val changed = updateFavoritesLocked(componentName, controls)
+                val changed = updateFavoritesLocked(componentName, listOf(control))
                 if (changed) {
                     persistenceWrapper.storeFavorites(favoritesAsListLocked())
                 }
             }
         }
-        uiController.onRefreshState(componentName, controls)
+        uiController.onRefreshState(componentName, listOf(control))
     }
 
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {

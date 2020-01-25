@@ -22,7 +22,7 @@ import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAG
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 
 import java.util.ArrayList;
@@ -76,15 +76,15 @@ class RuleIndexingDetailsIdentifier {
         return typeOrganizedRuleMap;
     }
 
-    private static RuleIndexingDetails getIndexingDetails(Formula formula) {
+    private static RuleIndexingDetails getIndexingDetails(IntegrityFormula formula) {
         switch (formula.getTag()) {
-            case Formula.COMPOUND_FORMULA_TAG:
+            case IntegrityFormula.COMPOUND_FORMULA_TAG:
                 return getIndexingDetailsForCompoundFormula((CompoundFormula) formula);
-            case Formula.STRING_ATOMIC_FORMULA_TAG:
+            case IntegrityFormula.STRING_ATOMIC_FORMULA_TAG:
                 return getIndexingDetailsForStringAtomicFormula(
                         (AtomicFormula.StringAtomicFormula) formula);
-            case Formula.INT_ATOMIC_FORMULA_TAG:
-            case Formula.BOOLEAN_ATOMIC_FORMULA_TAG:
+            case IntegrityFormula.LONG_ATOMIC_FORMULA_TAG:
+            case IntegrityFormula.BOOLEAN_ATOMIC_FORMULA_TAG:
                 // Package name and app certificate related formulas are string atomic formulas.
                 return new RuleIndexingDetails(NOT_INDEXED);
             default:
@@ -96,7 +96,7 @@ class RuleIndexingDetailsIdentifier {
     private static RuleIndexingDetails getIndexingDetailsForCompoundFormula(
             CompoundFormula compoundFormula) {
         int connector = compoundFormula.getConnector();
-        List<Formula> formulas = compoundFormula.getFormulas();
+        List<IntegrityFormula> formulas = compoundFormula.getFormulas();
 
         switch (connector) {
             case CompoundFormula.AND:

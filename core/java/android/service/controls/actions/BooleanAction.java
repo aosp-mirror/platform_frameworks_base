@@ -19,12 +19,10 @@ package android.service.controls.actions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.service.controls.templates.ToggleTemplate;
 
 /**
  * Action sent by a {@link ToggleTemplate}
- * @hide
  */
 public final class BooleanAction extends ControlAction {
 
@@ -54,6 +52,10 @@ public final class BooleanAction extends ControlAction {
         mNewState = newState;
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     BooleanAction(Bundle b) {
         super(b);
         mNewState = b.getBoolean(KEY_NEW_STATE);
@@ -77,24 +79,15 @@ public final class BooleanAction extends ControlAction {
         return TYPE;
     }
 
+    /**
+     * @return
+     * @hide
+     */
     @Override
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b =  super.getDataBundle();
         b.putBoolean(KEY_NEW_STATE, mNewState);
         return b;
     }
-
-    public static final @NonNull Creator<BooleanAction> CREATOR = new Creator<BooleanAction>() {
-        @Override
-        public BooleanAction createFromParcel(Parcel source) {
-            int type = source.readInt();
-            verifyType(type, TYPE);
-            return new BooleanAction(source.readBundle());
-        }
-
-        @Override
-        public BooleanAction[] newArray(int size) {
-            return new BooleanAction[size];
-        }
-    };
 }

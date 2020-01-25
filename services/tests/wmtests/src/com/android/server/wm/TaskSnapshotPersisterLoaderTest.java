@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.view.Surface;
 import android.view.View;
 
 import androidx.test.filters.MediumTest;
@@ -47,7 +48,7 @@ import java.util.function.Predicate;
  * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
  *
  * Build/Install/Run:
- *  atest WmTests:TaskSnapshotPersisterLoaderTest
+ *  atest TaskSnapshotPersisterLoaderTest
  */
 @MediumTest
 @Presubmit
@@ -315,5 +316,19 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 new File(FILES_DIR.getPath() + "/snapshots/2.jpg"),
                 new File(FILES_DIR.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
+    }
+
+    @Test
+    public void testRotationPersistAndLoadSnapshot() {
+        TaskSnapshot a = new TaskSnapshotBuilder()
+                .setRotation(Surface.ROTATION_270)
+                .build();
+        mPersister.persistSnapshot(1 , mTestUserId, createSnapshot());
+        mPersister.persistSnapshot(2 , mTestUserId, a);
+        mPersister.waitForQueueEmpty();
+        final TaskSnapshot snapshotA = mLoader.loadTask(1, mTestUserId, false /* reduced */);
+        final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId, false /* reduced */);
+        assertEquals(Surface.ROTATION_0, snapshotA.getRotation());
+        assertEquals(Surface.ROTATION_270, snapshotB.getRotation());
     }
 }

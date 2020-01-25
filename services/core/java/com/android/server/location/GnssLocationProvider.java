@@ -729,7 +729,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 }, UserHandle.USER_ALL);
 
         setProperties(PROPERTIES);
-        setEnabled(true);
+        setAllowed(true);
     }
 
     /**

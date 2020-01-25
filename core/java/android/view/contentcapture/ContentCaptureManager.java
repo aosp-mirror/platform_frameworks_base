@@ -19,6 +19,7 @@ import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toSet;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,12 +31,16 @@ import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Binder;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Slog;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.WindowManager;
@@ -48,8 +53,11 @@ import com.android.internal.util.SyncResultReceiver;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * <p>The {@link ContentCaptureManager} provides additional ways for for apps to
@@ -629,6 +637,33 @@ public final class ContentCaptureManager {
     }
 
     /**
+     * Called by the app to request data sharing via writing to a file.
+     *
+     * <p>The ContentCaptureService app will receive a read-only file descriptor pointing to the
+     * same file and will be able to read data being shared from it.
+     *
+     * <p>Note: using this API doesn't guarantee the app staying alive and is "best-effort".
+     * Starting a foreground service would minimize the chances of the app getting killed during the
+     * file sharing session.
+     *
+     * @param request object specifying details of the data being shared.
+     */
+    public void shareData(@NonNull DataShareRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull DataShareWriteAdapter dataShareWriteAdapter) {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(dataShareWriteAdapter);
+        Preconditions.checkNotNull(executor);
+
+        try {
+            mService.shareData(request,
+                    new DataShareAdapterDelegate(executor, dataShareWriteAdapter));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Runs a sync method in the service, properly handling exceptions.
      *
      * @throws SecurityException if caller is not allowed to execute the method.
@@ -674,5 +709,56 @@ public final class ContentCaptureManager {
 
     private interface MyRunnable {
         void run(@NonNull SyncResultReceiver receiver) throws RemoteException;
+    }
+
+    private static class DataShareAdapterDelegate extends IDataShareWriteAdapter.Stub {
+
+        private final WeakReference<DataShareWriteAdapter> mAdapterReference;
+        private final WeakReference<Executor> mExecutorReference;
+
+        private DataShareAdapterDelegate(Executor executor, DataShareWriteAdapter adapter) {
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(adapter);
+
+            mExecutorReference = new WeakReference<>(executor);
+            mAdapterReference = new WeakReference<>(adapter);
+        }
+
+        @Override
+        public void write(ParcelFileDescriptor destination)
+                throws RemoteException {
+            // TODO(b/148264965): implement this.
+            CancellationSignal cancellationSignal = new CancellationSignal();
+            executeAdapterMethodLocked(adapter -> adapter.onWrite(destination, cancellationSignal),
+                    "onWrite");
+        }
+
+        @Override
+        public void error(int errorCode) throws RemoteException {
+            executeAdapterMethodLocked(adapter -> adapter.onError(errorCode), "onError");
+        }
+
+        @Override
+        public void rejected() throws RemoteException {
+            executeAdapterMethodLocked(DataShareWriteAdapter::onRejected, "onRejected");
+        }
+
+        private void executeAdapterMethodLocked(Consumer<DataShareWriteAdapter> adapterFn,
+                String methodName) {
+            DataShareWriteAdapter adapter = mAdapterReference.get();
+            Executor executor = mExecutorReference.get();
+
+            if (adapter == null || executor == null) {
+                Slog.w(TAG, "Can't execute " + methodName + "(), references have been GC'ed");
+                return;
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> adapterFn.accept(adapter));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
     }
 }

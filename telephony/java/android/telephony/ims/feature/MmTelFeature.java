@@ -325,7 +325,6 @@ public class MmTelFeature extends ImsFeature {
         */
         @NonNull
         @Override
-        @SystemApi @TestApi
         public String toString() {
             StringBuilder builder = new StringBuilder("MmTel Capabilities - [");
             builder.append("Voice: ");

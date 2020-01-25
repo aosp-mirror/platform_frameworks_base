@@ -35,7 +35,7 @@ import static com.android.server.integrity.parser.BinaryFileOperations.getString
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 
 import com.android.server.integrity.model.BitInputStream;
@@ -121,7 +121,7 @@ public class RuleBinaryParser implements RuleParser {
     }
 
     private Rule parseRule(BitInputStream bitInputStream) throws IOException {
-        Formula formula = parseFormula(bitInputStream);
+        IntegrityFormula formula = parseFormula(bitInputStream);
         int effect = bitInputStream.getNext(EFFECT_BITS);
 
         if (bitInputStream.getNext(SIGNAL_BIT) != 1) {
@@ -131,7 +131,7 @@ public class RuleBinaryParser implements RuleParser {
         return new Rule(formula, effect);
     }
 
-    private Formula parseFormula(BitInputStream bitInputStream) throws IOException {
+    private IntegrityFormula parseFormula(BitInputStream bitInputStream) throws IOException {
         int separator = bitInputStream.getNext(SEPARATOR_BITS);
         switch (separator) {
             case ATOMIC_FORMULA_START:
@@ -148,9 +148,9 @@ public class RuleBinaryParser implements RuleParser {
 
     private CompoundFormula parseCompoundFormula(BitInputStream bitInputStream) throws IOException {
         int connector = bitInputStream.getNext(CONNECTOR_BITS);
-        List<Formula> formulas = new ArrayList<>();
+        List<IntegrityFormula> formulas = new ArrayList<>();
 
-        Formula parsedFormula = parseFormula(bitInputStream);
+        IntegrityFormula parsedFormula = parseFormula(bitInputStream);
         while (parsedFormula != null) {
             formulas.add(parsedFormula);
             parsedFormula = parseFormula(bitInputStream);
@@ -173,8 +173,11 @@ public class RuleBinaryParser implements RuleParser {
                 String stringValue = getStringValue(bitInputStream, valueSize, isHashedValue);
                 return new AtomicFormula.StringAtomicFormula(key, stringValue, isHashedValue);
             case AtomicFormula.VERSION_CODE:
-                int intValue = getIntValue(bitInputStream);
-                return new AtomicFormula.IntAtomicFormula(key, operator, intValue);
+                // TODO(b/147880712): temporary hack until our input handles long
+                long upper = getIntValue(bitInputStream);
+                long lower = getIntValue(bitInputStream);
+                long longValue = (upper << 32) | lower;
+                return new AtomicFormula.LongAtomicFormula(key, operator, longValue);
             case AtomicFormula.PRE_INSTALLED:
                 boolean booleanValue = getBooleanValue(bitInputStream);
                 return new AtomicFormula.BooleanAtomicFormula(key, booleanValue);

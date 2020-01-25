@@ -748,4 +748,9 @@ interface IWindowManager
     void getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out Rect outContentInsets, out Rect outStableInsets,
             out DisplayCutout.ParcelableWrapper displayCutout);
+
+    /**
+     * Called to show global actions.
+     */
+    void showGlobalActions();
 }

@@ -1263,6 +1263,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     void awakeFromSleepingLocked() {
         // Ensure activities are no longer sleeping.
         forAllActivities((Consumer<ActivityRecord>) (r) -> r.setSleeping(false));
+        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */);
         if (mPausingActivity != null) {
             Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             mPausingActivity.activityPaused(true);
@@ -1312,13 +1314,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 mStackSupervisor.scheduleIdle();
                 shouldSleep = false;
             }
-
-            if (containsActivityFromStack(mStackSupervisor.mGoingToSleepActivities)) {
-                // Still need to tell some activities to sleep; can't sleep yet.
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still need to sleep "
-                        + mStackSupervisor.mGoingToSleepActivities.size() + " activities");
-                shouldSleep = false;
-            }
         }
 
         if (shouldSleep) {
@@ -1329,16 +1324,18 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     void goToSleep() {
-        // Ensure visibility without updating configuration, as activities are about to sleep.
-        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */, !PRESERVE_WINDOWS);
-
-        // Make sure any paused or stopped but visible activities are now sleeping.
-        // This ensures that the activity's onStop() is called.
+        // Make sure all visible activities are now sleeping. This will update the activity's
+        // visibility and onStop() will be called.
         forAllActivities((r) -> {
-            if (r.isState(STARTED, STOPPING, STOPPED, PAUSED, PAUSING)) {
+            if (r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING, STOPPED)) {
                 r.setSleeping(true);
             }
         });
+
+        // Ensure visibility after updating sleep states without updating configuration,
+        // as activities are about to be sent to sleep.
+        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                !PRESERVE_WINDOWS);
     }
 
     private boolean containsActivityFromStack(List<ActivityRecord> rs) {
@@ -2040,8 +2037,17 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             return false;
         }
 
-        // If we are sleeping, and there is no resumed activity, and the top
-        // activity is paused, well that is the state we want.
+        // If we are currently pausing an activity, then don't do anything until that is done.
+        final boolean allPausedComplete = mRootWindowContainer.allPausedActivitiesComplete();
+        if (!allPausedComplete) {
+            if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) {
+                Slog.v(TAG_PAUSE, "resumeTopActivityLocked: Skip resume: some activity pausing.");
+            }
+            return false;
+        }
+
+        // If we are sleeping, and there is no resumed activity, and the top activity is paused,
+        // well that is the state we want.
         if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
                 && mRootWindowContainer.allPausedActivitiesComplete()) {
@@ -2082,8 +2088,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStackSupervisor.mStoppingActivities.remove(next);
-        mStackSupervisor.mGoingToSleepActivities.remove(next);
-        next.sleeping = false;
+        next.setSleeping(false);
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
@@ -2352,7 +2357,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 EventLogTags.writeWmResumeActivity(next.mUserId, System.identityHashCode(next),
                         next.getTask().mTaskId, next.shortComponentName);
 
-                next.sleeping = false;
+                next.setSleeping(false);
                 mAtmService.getAppWarningsLocked().onResumeActivity(next);
                 next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
                 next.clearOptionsLocked();
@@ -3985,6 +3990,10 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
      * Used to make room for shadows in the pinned windowing mode.
      */
     int getStackOutset() {
+        // If we are drawing shadows on the task then don't outset the stack.
+        if (mWmService.mRenderShadowsInCompositor) {
+            return 0;
+        }
         DisplayContent displayContent = getDisplayContent();
         if (inPinnedWindowingMode() && displayContent != null) {
             final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
@@ -4034,7 +4043,9 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     @Override
     void onDisplayChanged(DisplayContent dc) {
         super.onDisplayChanged(dc);
-        updateSurfaceBounds();
+        if (isRootTask()) {
+            updateSurfaceBounds();
+        }
     }
 
     /**

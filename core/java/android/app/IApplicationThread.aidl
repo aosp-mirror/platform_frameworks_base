@@ -91,7 +91,6 @@ oneway interface IApplicationThread {
             int resultCode, in String data, in Bundle extras, boolean ordered,
             boolean sticky, int sendingUser, int processState);
     void scheduleLowMemory();
-    void scheduleSleeping(IBinder token, boolean sleeping);
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);
     void scheduleCreateBackupAgent(in ApplicationInfo app, in CompatibilityInfo compatInfo,

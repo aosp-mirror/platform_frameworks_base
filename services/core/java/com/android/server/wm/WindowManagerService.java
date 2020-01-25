@@ -39,6 +39,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -122,6 +123,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
@@ -419,6 +421,11 @@ public class WindowManagerService extends IWindowManager.Stub
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
     boolean mVrModeEnabled = false;
+
+    /* If true, shadows drawn around the window will be rendered by the system compositor. If
+     * false, shadows will be drawn by the client by setting an elevation on the root view and
+     * the contents will be inset by the shadow radius. */
+    boolean mRenderShadowsInCompositor = false;
 
     /**
      * Tracks a map of input tokens to info that is used to decide whether to intercept
@@ -721,6 +728,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
         private final Uri mSizeCompatFreeformUri = Settings.Global.getUriFor(
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
+        private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
 
         public SettingsObserver() {
             super(new Handler());
@@ -742,6 +751,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mFreeformWindowUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -778,6 +789,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mSizeCompatFreeformUri.equals(uri)) {
                 updateSizeCompatFreeform();
+                return;
+            }
+
+            if (mRenderShadowsInCompositorUri.equals(uri)) {
+                setShadowRenderer();
                 return;
             }
 
@@ -860,6 +876,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
         }
+    }
+
+    private void setShadowRenderer() {
+        mRenderShadowsInCompositor = Settings.Global.getInt(mContext.getContentResolver(),
+                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 0) != 0;
     }
 
     PowerManager mPowerManager;
@@ -1248,6 +1269,7 @@ public class WindowManagerService extends IWindowManager.Stub
         float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
         SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
                 lightRadius);
+        setShadowRenderer();
     }
 
     /**
@@ -2996,7 +3018,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void showGlobalActions() {
+    @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+    @Override
+    public void showGlobalActions() {
+        if (!checkCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW,
+                "showGlobalActions()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
         mPolicy.showGlobalActions();
     }
 

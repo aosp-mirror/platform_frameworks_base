@@ -19,12 +19,16 @@ package android.service.controls;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.controls.actions.ControlAction;
 import android.service.controls.templates.ControlTemplate;
+import android.service.controls.templates.ControlTemplateWrapper;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -51,9 +55,8 @@ import java.lang.annotation.RetentionPolicy;
  * <p>
  * An {@link Intent} linking to the provider Activity that expands on this {@link Control} and
  * allows for further actions should be provided.
- * @hide
  */
-public class Control implements Parcelable {
+public final class Control implements Parcelable {
     private static final String TAG = "Control";
 
     private static final int NUM_STATUS = 5;
@@ -99,6 +102,10 @@ public class Control implements Parcelable {
     private final @Nullable CharSequence mStructure;
     private final @Nullable CharSequence mZone;
     private final @NonNull PendingIntent mAppIntent;
+
+    private final @Nullable Icon mCustomIcon;
+    private final @Nullable ColorStateList mCustomColor;
+
     private final @Status int mStatus;
     private final @NonNull ControlTemplate mControlTemplate;
     private final @NonNull CharSequence mStatusText;
@@ -113,14 +120,21 @@ public class Control implements Parcelable {
      * @param zone
      * @param appIntent a {@link PendingIntent} linking to a page to interact with the
      *                  corresponding device.
+     * @param customIcon
+     * @param customColor
+     * @param status
+     * @param controlTemplate
+     * @param statusText
      */
-    public Control(@NonNull String controlId,
+    Control(@NonNull String controlId,
             @DeviceTypes.DeviceType int deviceType,
             @NonNull CharSequence title,
             @NonNull CharSequence subtitle,
             @Nullable CharSequence structure,
             @Nullable CharSequence zone,
             @NonNull PendingIntent appIntent,
+            @Nullable Icon customIcon,
+            @Nullable ColorStateList customColor,
             @Status int status,
             @NonNull ControlTemplate controlTemplate,
             @NonNull CharSequence statusText) {
@@ -142,6 +156,10 @@ public class Control implements Parcelable {
         mStructure = structure;
         mZone = zone;
         mAppIntent = appIntent;
+
+        mCustomColor = customColor;
+        mCustomIcon = customIcon;
+
         if (status < 0 || status >= NUM_STATUS) {
             mStatus = STATUS_UNKNOWN;
             Log.e(TAG, "Status unknown:" + status);
@@ -152,7 +170,11 @@ public class Control implements Parcelable {
         mStatusText = statusText;
     }
 
-    public Control(Parcel in) {
+    /**
+     * @param in
+     * @hide
+     */
+    Control(Parcel in) {
         mControlId = in.readString();
         mDeviceType = in.readInt();
         mTitle = in.readCharSequence();
@@ -168,8 +190,22 @@ public class Control implements Parcelable {
             mZone = null;
         }
         mAppIntent = PendingIntent.CREATOR.createFromParcel(in);
+
+        if (in.readByte() == (byte) 1) {
+            mCustomIcon = Icon.CREATOR.createFromParcel(in);
+        } else {
+            mCustomIcon = null;
+        }
+
+        if (in.readByte() == (byte) 1) {
+            mCustomColor = ColorStateList.CREATOR.createFromParcel(in);
+        } else {
+            mCustomColor = null;
+        }
+
         mStatus = in.readInt();
-        mControlTemplate = ControlTemplate.CREATOR.createFromParcel(in);
+        ControlTemplateWrapper wrapper = ControlTemplateWrapper.CREATOR.createFromParcel(in);
+        mControlTemplate = wrapper.getWrappedTemplate();
         mStatusText = in.readCharSequence();
     }
 
@@ -208,6 +244,16 @@ public class Control implements Parcelable {
         return mAppIntent;
     }
 
+    @Nullable
+    public Icon getCustomIcon() {
+        return mCustomIcon;
+    }
+
+    @Nullable
+    public ColorStateList getCustomColor() {
+        return mCustomColor;
+    }
+
     @Status
     public int getStatus() {
         return mStatus;
@@ -229,7 +275,7 @@ public class Control implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mControlId);
         dest.writeInt(mDeviceType);
         dest.writeCharSequence(mTitle);
@@ -247,14 +293,27 @@ public class Control implements Parcelable {
             dest.writeByte((byte) 0);
         }
         mAppIntent.writeToParcel(dest, flags);
+        if (mCustomIcon != null) {
+            dest.writeByte((byte) 1);
+            mCustomIcon.writeToParcel(dest, flags);
+        } else {
+            dest.writeByte((byte) 0);
+        }
+        if (mCustomColor != null) {
+            dest.writeByte((byte) 1);
+            mCustomColor.writeToParcel(dest, flags);
+        } else {
+            dest.writeByte((byte) 0);
+        }
+
         dest.writeInt(mStatus);
-        mControlTemplate.writeToParcel(dest, flags);
+        new ControlTemplateWrapper(mControlTemplate).writeToParcel(dest, flags);
         dest.writeCharSequence(mStatusText);
     }
 
-    public static final Creator<Control> CREATOR = new Creator<Control>() {
+    public static final @NonNull Creator<Control> CREATOR = new Creator<Control>() {
         @Override
-        public Control createFromParcel(Parcel source) {
+        public Control createFromParcel(@NonNull Parcel source) {
             return new Control(source);
         }
 
@@ -275,25 +334,25 @@ public class Control implements Parcelable {
      *     <li> Subtitle: {@code ""}
      * </ul>
      * This fixes the values relating to state of the {@link Control} as required by
-     * {@link ControlsProviderService#onLoad}:
+     * {@link ControlsProviderService#loadAvailableControls}:
      * <ul>
      *     <li> Status: {@link Status#STATUS_UNKNOWN}
      *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}
      *     <li> Status text: {@code ""}
      * </ul>
      */
-    public static class StatelessBuilder {
+    @SuppressLint("MutableBareField")
+    public static final class StatelessBuilder {
         private static final String TAG = "StatelessBuilder";
-        protected @NonNull String mControlId;
-        protected @DeviceTypes.DeviceType int mDeviceType = DeviceTypes.TYPE_UNKNOWN;
-        protected @NonNull CharSequence mTitle = "";
-        protected @NonNull CharSequence mSubtitle = "";
-        protected @Nullable CharSequence mStructure;
-        protected @Nullable CharSequence mZone;
-        protected @NonNull PendingIntent mAppIntent;
-        protected @Status int mStatus = STATUS_UNKNOWN;
-        protected @NonNull ControlTemplate mControlTemplate = ControlTemplate.NO_TEMPLATE;
-        protected @NonNull CharSequence mStatusText = "";
+        private @NonNull String mControlId;
+        private @DeviceTypes.DeviceType int mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+        private @NonNull CharSequence mTitle = "";
+        private @NonNull CharSequence mSubtitle = "";
+        private @Nullable CharSequence mStructure;
+        private @Nullable CharSequence mZone;
+        private @NonNull PendingIntent mAppIntent;
+        private @Nullable Icon mCustomIcon;
+        private @Nullable ColorStateList mCustomColor;
 
         /**
          * @param controlId the identifier for the {@link Control}.
@@ -320,6 +379,8 @@ public class Control implements Parcelable {
             mStructure = control.mStructure;
             mZone = control.mZone;
             mAppIntent = control.mAppIntent;
+            mCustomIcon = control.mCustomIcon;
+            mCustomColor = control.mCustomColor;
         }
 
         /**
@@ -385,6 +446,18 @@ public class Control implements Parcelable {
             return this;
         }
 
+        @NonNull
+        public StatelessBuilder setCustomIcon(@Nullable Icon customIcon) {
+            mCustomIcon = customIcon;
+            return this;
+        }
+
+        @NonNull
+        public StatelessBuilder setCustomColor(@Nullable ColorStateList customColor) {
+            mCustomColor = customColor;
+            return this;
+        }
+
         /**
          * Build a {@link Control}
          * @return a valid {@link Control}
@@ -398,14 +471,42 @@ public class Control implements Parcelable {
                     mStructure,
                     mZone,
                     mAppIntent,
-                    mStatus,
-                    mControlTemplate,
-                    mStatusText);
+                    mCustomIcon,
+                    mCustomColor,
+                    STATUS_UNKNOWN,
+                    ControlTemplate.NO_TEMPLATE,
+                    "");
         }
     }
 
-    public static class StatefulBuilder extends StatelessBuilder {
+    /**
+     * Builder class for {@link Control}.
+     *
+     * This class facilitates the creation of {@link Control}.
+     * It provides the following defaults for non-optional parameters:
+     * <ul>
+     *     <li> Device type: {@link DeviceTypes#TYPE_UNKNOWN}
+     *     <li> Title: {@code ""}
+     *     <li> Subtitle: {@code ""}
+     *     <li> Status: {@link Status#STATUS_UNKNOWN}
+     *     <li> Control template: {@link ControlTemplate#NO_TEMPLATE}
+     *     <li> Status text: {@code ""}
+     * </ul>
+     */
+    public static final class StatefulBuilder {
         private static final String TAG = "StatefulBuilder";
+        private @NonNull String mControlId;
+        private @DeviceTypes.DeviceType int mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+        private @NonNull CharSequence mTitle = "";
+        private @NonNull CharSequence mSubtitle = "";
+        private @Nullable CharSequence mStructure;
+        private @Nullable CharSequence mZone;
+        private @NonNull PendingIntent mAppIntent;
+        private @Nullable Icon mCustomIcon;
+        private @Nullable ColorStateList mCustomColor;
+        private @Status int mStatus = STATUS_UNKNOWN;
+        private @NonNull ControlTemplate mControlTemplate = ControlTemplate.NO_TEMPLATE;
+        private @NonNull CharSequence mStatusText = "";
 
         /**
          * @param controlId the identifier for the {@link Control}.
@@ -413,11 +514,27 @@ public class Control implements Parcelable {
          */
         public StatefulBuilder(@NonNull String controlId,
                 @NonNull PendingIntent appIntent) {
-            super(controlId, appIntent);
+            Preconditions.checkNotNull(controlId);
+            Preconditions.checkNotNull(appIntent);
+            mControlId = controlId;
+            mAppIntent = appIntent;
         }
 
+        /**
+         * Creates a {@link StatelessBuilder} using an existing {@link Control} as a base.
+         * @param control base for the builder.
+         */
         public StatefulBuilder(@NonNull Control control) {
-            super(control);
+            Preconditions.checkNotNull(control);
+            mControlId = control.mControlId;
+            mDeviceType = control.mDeviceType;
+            mTitle = control.mTitle;
+            mSubtitle = control.mSubtitle;
+            mStructure = control.mStructure;
+            mZone = control.mZone;
+            mAppIntent = control.mAppIntent;
+            mCustomIcon = control.mCustomIcon;
+            mCustomColor = control.mCustomColor;
             mStatus = control.mStatus;
             mControlTemplate = control.mControlTemplate;
             mStatusText = control.mStatusText;
@@ -429,13 +546,19 @@ public class Control implements Parcelable {
          */
         @NonNull
         public StatefulBuilder setControlId(@NonNull String controlId) {
-            super.setControlId(controlId);
+            Preconditions.checkNotNull(controlId);
+            mControlId = controlId;
             return this;
         }
 
         @NonNull
         public StatefulBuilder setDeviceType(@DeviceTypes.DeviceType int deviceType) {
-            super.setDeviceType(deviceType);
+            if (!DeviceTypes.validDeviceType(deviceType)) {
+                Log.e(TAG, "Invalid device type:" + deviceType);
+                mDeviceType = DeviceTypes.TYPE_UNKNOWN;
+            } else {
+                mDeviceType = deviceType;
+            }
             return this;
         }
 
@@ -445,25 +568,27 @@ public class Control implements Parcelable {
          */
         @NonNull
         public StatefulBuilder setTitle(@NonNull CharSequence title) {
-            super.setTitle(title);
+            Preconditions.checkNotNull(title);
+            mTitle = title;
             return this;
         }
 
         @NonNull
         public StatefulBuilder setSubtitle(@NonNull CharSequence subtitle) {
-            super.setSubtitle(subtitle);
+            Preconditions.checkNotNull(subtitle);
+            mSubtitle = subtitle;
             return this;
         }
 
         @NonNull
         public StatefulBuilder setStructure(@Nullable CharSequence structure) {
-            super.setStructure(structure);
+            mStructure = structure;
             return this;
         }
 
         @NonNull
         public StatefulBuilder setZone(@Nullable CharSequence zone) {
-            super.setZone(zone);
+            mZone = zone;
             return this;
         }
 
@@ -473,7 +598,20 @@ public class Control implements Parcelable {
          */
         @NonNull
         public StatefulBuilder setAppIntent(@NonNull PendingIntent appIntent) {
-            super.setAppIntent(appIntent);
+            Preconditions.checkNotNull(appIntent);
+            mAppIntent = appIntent;
+            return this;
+        }
+
+        @NonNull
+        public StatefulBuilder setCustomIcon(@Nullable Icon customIcon) {
+            mCustomIcon = customIcon;
+            return this;
+        }
+
+        @NonNull
+        public StatefulBuilder setCustomColor(@Nullable ColorStateList customColor) {
+            mCustomColor = customColor;
             return this;
         }
 
@@ -500,6 +638,22 @@ public class Control implements Parcelable {
             Preconditions.checkNotNull(statusText);
             mStatusText = statusText;
             return this;
+        }
+
+        @NonNull
+        public Control build() {
+            return new Control(mControlId,
+                    mDeviceType,
+                    mTitle,
+                    mSubtitle,
+                    mStructure,
+                    mZone,
+                    mAppIntent,
+                    mCustomIcon,
+                    mCustomColor,
+                    mStatus,
+                    mControlTemplate,
+                    mStatusText);
         }
     }
 }

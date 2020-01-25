@@ -728,7 +728,7 @@ static const JNINativeMethod nativeMethods[] = {
             (void *)android_media_MediaMetadataRetriever_getFrameAtIndex
         },
 
-        {"extractMetadata", "(I)Ljava/lang/String;",
+        {"nativeExtractMetadata", "(I)Ljava/lang/String;",
                 (void *)android_media_MediaMetadataRetriever_extractMetadata},
         {"getEmbeddedPicture", "(I)[B",
                 (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},

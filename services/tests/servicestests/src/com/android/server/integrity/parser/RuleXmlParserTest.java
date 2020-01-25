@@ -46,15 +46,15 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
+                        /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -83,15 +83,15 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -123,17 +123,17 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.AND)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.AND)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", appCertificateAttrs, /* closed= */ true)
+                        /* tag= */ "AF", appCertificateAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -168,17 +168,17 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.OR)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.OR)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", appCertificateAttrs, /* closed= */ true)
+                        /* tag= */ "AF", appCertificateAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -211,15 +211,15 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -252,17 +252,17 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", versionCodeAttrs, /* closed= */ true)
+                        /* tag= */ "AF", versionCodeAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -283,15 +283,15 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -311,15 +311,15 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", "INVALID_EFFECT"),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", "INVALID_EFFECT"),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -339,17 +339,17 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "InvalidAtomicFormula",
-                                packageNameAttrs,
-                                /* closed= */ true)
+                        /* tag= */ "InvalidAtomicFormula",
+                        packageNameAttrs,
+                        /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -369,11 +369,11 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
@@ -399,17 +399,17 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", versionCodeAttrs, /* closed= */ true)
+                        /* tag= */ "AF", versionCodeAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule =
                 new Rule(
-                        new AtomicFormula.IntAtomicFormula(
+                        new AtomicFormula.LongAtomicFormula(
                                 AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1),
                         Rule.DENY);
 
@@ -426,17 +426,18 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", preInstalledAttrs, /* closed= */ true)
+                        /* tag= */ "AF", preInstalledAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(
+                                AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula.getBytes(StandardCharsets.UTF_8));
@@ -452,11 +453,11 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
@@ -481,11 +482,11 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
@@ -504,11 +505,11 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("BadEffect", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("BadEffect", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
@@ -526,16 +527,16 @@ public class RuleXmlParserTest {
         String ruleXmlCompoundFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap(
-                                        "BadConnector", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap(
+                                "BadConnector", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>"
                         + "</RL>";
@@ -555,11 +556,11 @@ public class RuleXmlParserTest {
         String ruleXmlAtomicFormula =
                 "<RL>"
                         + generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                        /* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                         + "</R>"
                         + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
@@ -577,15 +578,15 @@ public class RuleXmlParserTest {
         atomicFormulaAttrs.put("V", "com.app.test");
         String ruleXmlWithNoRuleList =
                 generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
+                        /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>";
         RuleParser xmlParser = new RuleXmlParser();
@@ -603,15 +604,15 @@ public class RuleXmlParserTest {
         atomicFormulaAttrs.put("V", "com.app.test");
         String ruleXmlWithNoRuleList =
                 generateTagWithAttribute(
-                                /* tag= */ "R",
-                                Collections.singletonMap("E", String.valueOf(Rule.DENY)),
-                                /* closed= */ false)
+                        /* tag= */ "R",
+                        Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "OF",
-                                Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
-                                /* closed= */ false)
+                        /* tag= */ "OF",
+                        Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
+                        /* closed= */ false)
                         + generateTagWithAttribute(
-                                /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
+                        /* tag= */ "AF", atomicFormulaAttrs, /* closed= */ true)
                         + "</OF>"
                         + "</R>";
         RuleParser xmlParser = new RuleXmlParser();

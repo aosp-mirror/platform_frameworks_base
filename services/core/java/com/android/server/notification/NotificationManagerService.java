@@ -513,6 +513,7 @@ public class NotificationManagerService extends SystemService {
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
 
     private final SavePolicyFileRunnable mSavePolicyFile = new SavePolicyFileRunnable();
+    private NotificationRecordLogger mNotificationRecordLogger;
 
     private static class Archive {
         final int mBufferSize;
@@ -1727,7 +1728,14 @@ public class NotificationManagerService extends SystemService {
     }
 
     public NotificationManagerService(Context context) {
+        this(context, new NotificationRecordLoggerImpl());
+    }
+
+    @VisibleForTesting
+    public NotificationManagerService(Context context,
+            NotificationRecordLogger notificationRecordLogger) {
         super(context);
+        mNotificationRecordLogger = notificationRecordLogger;
         Notification.processWhitelistToken = WHITELIST_TOKEN;
     }
 
@@ -6304,9 +6312,11 @@ public class NotificationManagerService extends SystemService {
 
                     mRankingHelper.extractSignals(r);
                     mRankingHelper.sort(mNotificationList);
+                    final int position = mRankingHelper.indexOf(mNotificationList, r);
 
+                    int buzzBeepBlinkLoggingCode = 0;
                     if (!r.isHidden()) {
-                        buzzBeepBlinkLocked(r);
+                        buzzBeepBlinkLoggingCode = buzzBeepBlinkLocked(r);
                     }
 
                     if (notification.getSmallIcon() != null) {
@@ -6346,6 +6356,10 @@ public class NotificationManagerService extends SystemService {
                     }
 
                     maybeRecordInterruptionLocked(r);
+
+                    // Log event to statsd
+                    mNotificationRecordLogger.logNotificationReported(r, old, position,
+                            buzzBeepBlinkLoggingCode);
                 } finally {
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
@@ -6574,9 +6588,13 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     @GuardedBy("mNotificationLock")
-    void buzzBeepBlinkLocked(NotificationRecord record) {
+    /**
+     * Determine whether this notification should attempt to make noise, vibrate, or flash the LED
+     * @return buzzBeepBlink - bitfield (buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)
+     */
+    int buzzBeepBlinkLocked(NotificationRecord record) {
         if (mIsAutomotive && !mNotificationEffectsEnabledForAutomotive) {
-            return;
+            return 0;
         }
         boolean buzz = false;
         boolean beep = false;
@@ -6674,7 +6692,8 @@ public class NotificationManagerService extends SystemService {
         } else if (wasShowLights) {
             updateLightsLocked();
         }
-        if (buzz || beep || blink) {
+        final int buzzBeepBlink = (buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0);
+        if (buzzBeepBlink > 0) {
             // Ignore summary updates because we don't display most of the information.
             if (record.sbn.isGroup() && record.sbn.getNotification().isGroupSummary()) {
                 if (DEBUG_INTERRUPTIVENESS) {
@@ -6696,10 +6715,11 @@ public class NotificationManagerService extends SystemService {
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_ALERT)
                     .setType(MetricsEvent.TYPE_OPEN)
-                    .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
+                    .setSubtype(buzzBeepBlink));
             EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
         }
         record.setAudiblyAlerted(buzz || beep);
+        return buzzBeepBlink;
     }
 
     @GuardedBy("mNotificationLock")

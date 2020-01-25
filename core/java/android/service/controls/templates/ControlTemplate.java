@@ -19,11 +19,11 @@ package android.service.controls.templates;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.service.controls.Control;
 import android.service.controls.actions.ControlAction;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -39,19 +39,28 @@ import java.lang.annotation.RetentionPolicy;
  * associated state. The actions available to a given {@link Control} are determined by its
  * {@link ControlTemplate}.
  * @see ControlAction
- * @hide
  */
-public abstract class ControlTemplate implements Parcelable {
+public abstract class ControlTemplate {
+
+    private static final String TAG = "ControlTemplate";
 
     private static final String KEY_TEMPLATE_ID = "key_template_id";
+    private static final String KEY_TEMPLATE_TYPE = "key_template_type";
 
     /**
      * Singleton representing a {@link Control} with no input.
      */
-    public static final ControlTemplate NO_TEMPLATE = new ControlTemplate("") {
+    public static final @NonNull ControlTemplate NO_TEMPLATE = new ControlTemplate("") {
         @Override
         public int getTemplateType() {
             return TYPE_NONE;
+        }
+    };
+
+    public static final @NonNull ControlTemplate ERROR_TEMPLATE = new ControlTemplate("") {
+        @Override
+        public int getTemplateType() {
+            return TYPE_ERROR;
         }
     };
 
@@ -60,6 +69,7 @@ public abstract class ControlTemplate implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+            TYPE_ERROR,
             TYPE_NONE,
             TYPE_TOGGLE,
             TYPE_RANGE,
@@ -72,47 +82,50 @@ public abstract class ControlTemplate implements Parcelable {
     })
     public @interface TemplateType {}
 
+    public static final @TemplateType int TYPE_ERROR = -1;
+
     /**
      * Type identifier of {@link ControlTemplate#NO_TEMPLATE}.
      */
-    public static final int TYPE_NONE = 0;
+    public static final @TemplateType int TYPE_NONE = 0;
 
     /**
      * Type identifier of {@link ToggleTemplate}.
      */
-    public static final int TYPE_TOGGLE = 1;
+    public static final @TemplateType int TYPE_TOGGLE = 1;
 
     /**
      * Type identifier of {@link RangeTemplate}.
      */
-    public static final int TYPE_RANGE = 2;
+    public static final @TemplateType int TYPE_RANGE = 2;
 
     /**
      * Type identifier of {@link ThumbnailTemplate}.
      */
-    public static final int TYPE_THUMBNAIL = 3;
+    public static final @TemplateType int TYPE_THUMBNAIL = 3;
 
     /**
      * Type identifier of {@link DiscreteToggleTemplate}.
      */
-    public static final int TYPE_DISCRETE_TOGGLE = 4;
+    public static final @TemplateType int TYPE_DISCRETE_TOGGLE = 4;
 
     /**
      * @hide
      */
-    public static final int TYPE_COORD_RANGE = 5;
+    public static final @TemplateType int TYPE_COORD_RANGE = 5;
 
-    public static final int TYPE_TOGGLE_RANGE = 6;
+    public static final @TemplateType int TYPE_TOGGLE_RANGE = 6;
 
-    public static final int TYPE_TEMPERATURE = 7;
+    public static final @TemplateType int TYPE_TEMPERATURE = 7;
 
-    public static final int TYPE_STATELESS = 8;
+    public static final @TemplateType int TYPE_STATELESS = 8;
 
     private @NonNull final String mTemplateId;
 
     /**
      * @return the identifier for this object.
      */
+    @NonNull
     public String getTemplateId() {
         return mTemplateId;
     }
@@ -122,24 +135,16 @@ public abstract class ControlTemplate implements Parcelable {
      */
     public abstract @TemplateType int getTemplateType();
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public final void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(getTemplateType());
-        dest.writeBundle(getDataBundle());
-    }
-
     /**
      * Obtain a {@link Bundle} describing this object populated with data.
      * @return a {@link Bundle} containing the data that represents this object.
+     * @hide
      */
     @CallSuper
-    protected Bundle getDataBundle() {
+    @NonNull
+    Bundle getDataBundle() {
         Bundle b = new Bundle();
+        b.putInt(KEY_TEMPLATE_TYPE, getTemplateType());
         b.putString(KEY_TEMPLATE_ID, mTemplateId);
         return b;
     }
@@ -148,6 +153,10 @@ public abstract class ControlTemplate implements Parcelable {
         mTemplateId = "";
     }
 
+    /**
+     * @param b
+     * @hide
+     */
     ControlTemplate(@NonNull Bundle b) {
         mTemplateId = b.getString(KEY_TEMPLATE_ID);
     }
@@ -160,48 +169,46 @@ public abstract class ControlTemplate implements Parcelable {
         mTemplateId = templateId;
     }
 
-    public static final Creator<ControlTemplate> CREATOR = new Creator<ControlTemplate>() {
-        @Override
-        public ControlTemplate createFromParcel(Parcel source) {
-            int type = source.readInt();
-            return createTemplateFromType(type, source);
+    /**
+     *
+     * @param bundle
+     * @return
+     * @hide
+     */
+    @NonNull
+    static ControlTemplate createTemplateFromBundle(@Nullable Bundle bundle) {
+        if (bundle == null) {
+            Log.e(TAG, "Null bundle");
+            return ERROR_TEMPLATE;
         }
-
-        @Override
-        public ControlTemplate[] newArray(int size) {
-            return new ControlTemplate[size];
-        }
-    };
-
-
-    private static ControlTemplate createTemplateFromType(@TemplateType int type, Parcel source) {
-        switch(type) {
-            case TYPE_TOGGLE:
-                return new ToggleTemplate(source.readBundle());
-            case TYPE_RANGE:
-                return new RangeTemplate(source.readBundle());
-            case TYPE_THUMBNAIL:
-                return new ThumbnailTemplate(source.readBundle());
-            case TYPE_DISCRETE_TOGGLE:
-                return new DiscreteToggleTemplate(source.readBundle());
-            case TYPE_COORD_RANGE:
-                return new CoordinatedRangeTemplate(source.readBundle());
-            case TYPE_TOGGLE_RANGE:
-                return new ToggleRangeTemplate(source.readBundle());
-            case TYPE_TEMPERATURE:
-                return new TemperatureControlTemplate(source.readBundle());
-            case TYPE_STATELESS:
-                return new StatelessTemplate(source.readBundle());
-            case TYPE_NONE:
-            default:
-                source.readBundle();
-                return NO_TEMPLATE;
-        }
-    }
-
-    protected static void verifyType(@TemplateType int type, @TemplateType int thisType) {
-        if (type != thisType) {
-            throw new IllegalStateException("The type " + type + "does not match " + thisType);
+        int type = bundle.getInt(KEY_TEMPLATE_TYPE, TYPE_ERROR);
+        try {
+            switch (type) {
+                case TYPE_TOGGLE:
+                    return new ToggleTemplate(bundle);
+                case TYPE_RANGE:
+                    return new RangeTemplate(bundle);
+                case TYPE_THUMBNAIL:
+                    return new ThumbnailTemplate(bundle);
+                case TYPE_DISCRETE_TOGGLE:
+                    return new DiscreteToggleTemplate(bundle);
+                case TYPE_COORD_RANGE:
+                    return new CoordinatedRangeTemplate(bundle);
+                case TYPE_TOGGLE_RANGE:
+                    return new ToggleRangeTemplate(bundle);
+                case TYPE_TEMPERATURE:
+                    return new TemperatureControlTemplate(bundle);
+                case TYPE_STATELESS:
+                    return new StatelessTemplate(bundle);
+                case TYPE_NONE:
+                    return NO_TEMPLATE;
+                case TYPE_ERROR:
+                default:
+                    return ERROR_TEMPLATE;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating template", e);
+            return ERROR_TEMPLATE;
         }
     }
 }

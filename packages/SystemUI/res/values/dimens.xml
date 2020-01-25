@@ -96,6 +96,9 @@
     <!-- Spacing before the airplane mode icon if there are any icons preceding it. -->
     <dimen name="status_bar_airplane_spacer_width">4dp</dimen>
 
+    <!-- Spacing between system icons. -->
+    <dimen name="status_bar_system_icon_spacing">0dp</dimen>
+
     <!-- The amount to scale each of the status bar icons by. A value of 1 means no scaling. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 

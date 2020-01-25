@@ -64,6 +64,7 @@ import android.net.CaptivePortal;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityManager;
 import android.net.ICaptivePortal;
+import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
@@ -210,6 +211,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -1622,7 +1624,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return getNetworkCapabilitiesInternal(getNetworkAgentInfoForNetwork(network));
     }
 
-    private NetworkCapabilities networkCapabilitiesRestrictedForCallerPermissions(
+    @VisibleForTesting
+    NetworkCapabilities networkCapabilitiesRestrictedForCallerPermissions(
             NetworkCapabilities nc, int callerPid, int callerUid) {
         final NetworkCapabilities newNc = new NetworkCapabilities(nc);
         if (!checkSettingsPermission(callerPid, callerUid)) {
@@ -1632,7 +1635,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (newNc.getNetworkSpecifier() != null) {
             newNc.setNetworkSpecifier(newNc.getNetworkSpecifier().redact());
         }
+        newNc.setAdministratorUids(Collections.EMPTY_LIST);
+
+        maybeSanitizeLocationInfoForCaller(newNc, callerUid);
+
         return newNc;
+    }
+
+    private void maybeSanitizeLocationInfoForCaller(
+            NetworkCapabilities nc, int callerUid) {
+        // TODO(b/142072839): Conditionally reset the owner UID if the following
+        // conditions are not met:
+        // 1. The destination app is the network owner
+        // 2. The destination app has the ACCESS_COARSE_LOCATION permission granted
+        // if target SDK<29 or otherwise has the ACCESS_FINE_LOCATION permission granted
+        // 3. The user's location toggle is on
+        nc.setOwnerUid(INVALID_UID);
     }
 
     private LinkProperties linkPropertiesRestrictedForCallerPermissions(
@@ -1662,6 +1680,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!checkSettingsPermission()) {
             nc.setSingleUid(Binder.getCallingUid());
         }
+        nc.setAdministratorUids(Collections.EMPTY_LIST);
+
+        // Clear owner UID; this can never come from an app.
+        nc.setOwnerUid(INVALID_UID);
     }
 
     private void restrictBackgroundRequestForCaller(NetworkCapabilities nc) {
@@ -5798,7 +5820,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         final Set<UidRange> ranges = nai.networkCapabilities.getUids();
-        final int vpnAppUid = nai.networkCapabilities.getEstablishingVpnAppUid();
+        final int vpnAppUid = nai.networkCapabilities.getOwnerUid();
         // TODO: this create a window of opportunity for apps to receive traffic between the time
         // when the old rules are removed and the time when new rules are added. To fix this,
         // make eBPF support two whitelisted interfaces so here new rules can be added before the
@@ -5997,7 +6019,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (nc == null || lp == null) return false;
         return nai.isVPN()
                 && !nai.networkAgentConfig.allowBypass
-                && nc.getEstablishingVpnAppUid() != Process.SYSTEM_UID
+                && nc.getOwnerUid() != Process.SYSTEM_UID
                 && lp.getInterfaceName() != null
                 && (lp.hasIPv4DefaultRoute() || lp.hasIPv6DefaultRoute());
     }
@@ -6045,12 +6067,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // TODO Fix this window by computing an accurate diff on Set<UidRange>, so the old range
             // to be removed will never overlap with the new range to be added.
             if (wasFiltering && !prevRanges.isEmpty()) {
-                mPermissionMonitor.onVpnUidRangesRemoved(iface, prevRanges,
-                        prevNc.getEstablishingVpnAppUid());
+                mPermissionMonitor.onVpnUidRangesRemoved(iface, prevRanges, prevNc.getOwnerUid());
             }
             if (shouldFilter && !newRanges.isEmpty()) {
-                mPermissionMonitor.onVpnUidRangesAdded(iface, newRanges,
-                        newNc.getEstablishingVpnAppUid());
+                mPermissionMonitor.onVpnUidRangesAdded(iface, newRanges, newNc.getOwnerUid());
             }
         } catch (Exception e) {
             // Never crash!
@@ -7310,5 +7330,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             return mTNS;
         }
+    }
+
+    @Override
+    public void registerConnectivityDiagnosticsCallback(
+            @NonNull IConnectivityDiagnosticsCallback callback, @NonNull NetworkRequest request) {
+        // TODO(b/146444622): implement register IConnectivityDiagnosticsCallback functionality
+        throw new UnsupportedOperationException(
+                "registerConnectivityDiagnosticsCallback not yet implemented");
+    }
+
+    @Override
+    public void unregisterConnectivityDiagnosticsCallback(
+            @NonNull IConnectivityDiagnosticsCallback callback) {
+        // TODO(b/146444622): implement register IConnectivityDiagnosticsCallback functionality
+        throw new UnsupportedOperationException(
+                "unregisterConnectivityDiagnosticsCallback not yet implemented");
     }
 }

@@ -18,9 +18,9 @@ package android.content.integrity;
 
 import static android.content.integrity.TestUtils.assertExpectException;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 
@@ -38,7 +38,7 @@ public class CompoundFormulaTest {
             new AtomicFormula.StringAtomicFormula(
                     AtomicFormula.PACKAGE_NAME, "test1", /* isHashedValue= */ false);
     private static final AtomicFormula ATOMIC_FORMULA_2 =
-            new AtomicFormula.IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1);
+            new AtomicFormula.LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1);
 
     @Test
     public void testValidCompoundFormula() {
@@ -75,142 +75,6 @@ public class CompoundFormulaTest {
     }
 
     @Test
-    public void testIsSatisfiable_notFalse_true() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(CompoundFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test2").build();
-        // validate assumptions about the metadata
-        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-
-        assertTrue(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_notTrue_false() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(CompoundFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test1").build();
-        // validate assumptions about the metadata
-        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-
-        assertFalse(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_trueAndTrue_true() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(1).build();
-        // validate assumptions about the metadata
-        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertTrue(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_trueAndFalse_false() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(2).build();
-        // validate assumptions about the metadata
-        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertFalse(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_falseAndTrue_false() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(1).build();
-        // validate assumptions about the metadata
-        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertFalse(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_falseAndFalse_false() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(2).build();
-        // validate assumptions about the metadata
-        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertFalse(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_trueOrTrue_true() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(1).build();
-        // validate assumptions about the metadata
-        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertTrue(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_trueOrFalse_true() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(2).build();
-        // validate assumptions about the metadata
-        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertTrue(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_falseOrTrue_true() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(1).build();
-        // validate assumptions about the metadata
-        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertTrue(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
-    public void testIsSatisfiable_falseOrFalse_false() {
-        CompoundFormula compoundFormula =
-                new CompoundFormula(
-                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
-        AppInstallMetadata appInstallMetadata =
-                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(2).build();
-        // validate assumptions about the metadata
-        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
-        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
-
-        assertFalse(compoundFormula.isSatisfied(appInstallMetadata));
-    }
-
-    @Test
     public void testParcelUnparcel() {
         CompoundFormula formula =
                 new CompoundFormula(
@@ -232,6 +96,135 @@ public class CompoundFormulaTest {
                         new CompoundFormula(
                                 /* connector= */ -1,
                                 Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+    }
+
+    @Test
+    public void testFormulaMatches_notFalse_true() {
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isFalse();
+
+        CompoundFormula compoundFormula =
+                new CompoundFormula(CompoundFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
+        assertThat(compoundFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_notTrue_false() {
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isTrue();
+
+        CompoundFormula compoundFormula =
+                new CompoundFormula(CompoundFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
+        assertThat(compoundFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testFormulaMatches_trueAndTrue_true() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(1).build();
+        // validate assumptions about the metadata
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isTrue();
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isTrue();
+
+        assertThat(compoundFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_trueAndFalse_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(2).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isTrue();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isFalse();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testFormulaMatches_falseAndTrue_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(1).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isFalse();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isTrue();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testFormulaMatches_falseAndFalse_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(2).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isFalse();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isFalse();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testFormulaMatches_trueOrTrue_true() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(1).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isTrue();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isTrue();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_trueOrFalse_true() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(2).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isTrue();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isFalse();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_falseOrTrue_true() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(1).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isFalse();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isTrue();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_falseOrFalse_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(2).build();
+
+        assertThat(ATOMIC_FORMULA_1.matches(appInstallMetadata)).isFalse();
+        assertThat(ATOMIC_FORMULA_2.matches(appInstallMetadata)).isFalse();
+        assertThat(compoundFormula.matches(appInstallMetadata)).isFalse();
     }
 
     /** Returns a builder with all fields filled with some dummy data. */

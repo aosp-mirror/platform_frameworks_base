@@ -224,6 +224,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
+                    Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.BATTERY_SAVER_ADAPTIVE_CONSTANTS,
@@ -574,7 +575,8 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLED_SUBSCRIPTION_FOR_SLOT,
                     Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT,
                     Settings.Global.POWER_BUTTON_LONG_PRESS,
-                    Settings.Global.POWER_BUTTON_VERY_LONG_PRESS);
+                    Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
+                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(

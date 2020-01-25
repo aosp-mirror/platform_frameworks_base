@@ -54,7 +54,8 @@ public class WifiSignalController extends
         mWifiTracker.setListening(true);
         mHasMobileData = hasMobileData;
         if (wifiManager != null) {
-            wifiManager.registerTrafficStateCallback(new WifiTrafficStateCallback());
+            wifiManager.registerTrafficStateCallback(context.getMainExecutor(),
+                    new WifiTrafficStateCallback());
         }
         // WiFi only has one state.
         mCurrentState.iconGroup = mLastState.iconGroup = new IconGroup(

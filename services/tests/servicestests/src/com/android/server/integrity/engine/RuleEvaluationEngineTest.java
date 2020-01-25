@@ -50,7 +50,8 @@ public class RuleEvaluationEngineTest {
     private static final String RANDOM_INSTALLER = "random";
     private static final String RANDOM_INSTALLER_CERT = "random_cert";
 
-    @Mock private IntegrityFileManager mIntegrityFileManager;
+    @Mock
+    private IntegrityFileManager mIntegrityFileManager;
 
     private RuleEvaluationEngine mEngine;
 
@@ -70,29 +71,29 @@ public class RuleEvaluationEngineTest {
         assertEquals(
                 IntegrityCheckResult.Effect.ALLOW,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_1)
-                                        .setInstallerCertificate(INSTALLER_1_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_1)
+                                .setInstallerCertificate(INSTALLER_1_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.ALLOW,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_2)
-                                        .setInstallerCertificate(INSTALLER_2_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_2)
+                                .setInstallerCertificate(INSTALLER_2_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.ALLOW,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(RANDOM_INSTALLER)
-                                        .setInstallerCertificate(RANDOM_INSTALLER_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(RANDOM_INSTALLER)
+                                .setInstallerCertificate(RANDOM_INSTALLER_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
     }
 
@@ -104,38 +105,38 @@ public class RuleEvaluationEngineTest {
         assertEquals(
                 IntegrityCheckResult.Effect.ALLOW,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_1)
-                                        .setInstallerCertificate(INSTALLER_1_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_1)
+                                .setInstallerCertificate(INSTALLER_1_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.DENY,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(RANDOM_INSTALLER)
-                                        .setInstallerCertificate(INSTALLER_1_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(RANDOM_INSTALLER)
+                                .setInstallerCertificate(INSTALLER_1_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.DENY,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_1)
-                                        .setInstallerCertificate(RANDOM_INSTALLER_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_1)
+                                .setInstallerCertificate(RANDOM_INSTALLER_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.DENY,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(RANDOM_INSTALLER)
-                                        .setInstallerCertificate(RANDOM_INSTALLER_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(RANDOM_INSTALLER)
+                                .setInstallerCertificate(RANDOM_INSTALLER_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
     }
 
@@ -149,38 +150,38 @@ public class RuleEvaluationEngineTest {
         assertEquals(
                 IntegrityCheckResult.Effect.ALLOW,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_1)
-                                        .setInstallerCertificate(INSTALLER_1_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_1)
+                                .setInstallerCertificate(INSTALLER_1_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.ALLOW,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_2)
-                                        .setInstallerCertificate(INSTALLER_2_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_2)
+                                .setInstallerCertificate(INSTALLER_2_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.DENY,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_1)
-                                        .setInstallerCertificate(INSTALLER_2_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_1)
+                                .setInstallerCertificate(INSTALLER_2_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
         assertEquals(
                 IntegrityCheckResult.Effect.DENY,
                 mEngine.evaluate(
-                                getAppInstallMetadataBuilder()
-                                        .setInstallerName(INSTALLER_2)
-                                        .setInstallerCertificate(INSTALLER_1_CERT)
-                                        .build(),
-                                allowedInstallers)
+                        getAppInstallMetadataBuilder()
+                                .setInstallerName(INSTALLER_2)
+                                .setInstallerCertificate(INSTALLER_1_CERT)
+                                .build(),
+                        allowedInstallers)
                         .getEffect());
     }
 

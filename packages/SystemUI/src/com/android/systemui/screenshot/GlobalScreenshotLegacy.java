@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -205,8 +206,13 @@ public class GlobalScreenshotLegacy {
         int width = crop.width();
         int height = crop.height();
 
-        // Take the screenshot
-        mScreenBitmap = SurfaceControl.screenshot(crop, width, height, rot);
+        takeScreenshot(SurfaceControl.screenshot(crop, width, height, rot), finisher,
+                statusBarVisible, navBarVisible, null);
+    }
+
+    private void takeScreenshot(Bitmap screenshot, Consumer<Uri> finisher, boolean statusBarVisible,
+            boolean navBarVisible, Rect screenboundsOfBitmap) {
+        mScreenBitmap = screenshot;
         if (mScreenBitmap == null) {
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_capture_text);
@@ -220,13 +226,19 @@ public class GlobalScreenshotLegacy {
 
         // Start the post-screenshot animation
         startAnimation(finisher, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
-                statusBarVisible, navBarVisible);
+                statusBarVisible, navBarVisible, screenboundsOfBitmap);
     }
 
     void takeScreenshot(Consumer<Uri> finisher, boolean statusBarVisible, boolean navBarVisible) {
         mDisplay.getRealMetrics(mDisplayMetrics);
         takeScreenshot(finisher, statusBarVisible, navBarVisible,
                 new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+    }
+
+    void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
+            Insets visibleInsets, int taskId, Consumer<Uri> finisher) {
+        // TODO use taskId and visibleInsets
+        takeScreenshot(screenshot, finisher, false, false, screenshotScreenBounds);
     }
 
     /**
@@ -302,7 +314,7 @@ public class GlobalScreenshotLegacy {
      * Starts the animation after taking the screenshot
      */
     private void startAnimation(final Consumer<Uri> finisher, int w, int h,
-            boolean statusBarVisible, boolean navBarVisible) {
+            boolean statusBarVisible, boolean navBarVisible, @Nullable Rect screenBoundsOfBitmap) {
         // If power save is on, show a toast so there is some visual indication that a screenshot
         // has been taken.
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -323,7 +335,8 @@ public class GlobalScreenshotLegacy {
         }
 
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
-        ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
+        ValueAnimator screenshotDropInAnim = screenBoundsOfBitmap != null
+                ? createRectAnimation(screenBoundsOfBitmap) : createScreenshotDropInAnimation();
         ValueAnimator screenshotFadeOutAnim =
                 createScreenshotDropOutAnimation(w, h, statusBarVisible, navBarVisible);
         mScreenshotAnimation = new AnimatorSet();
@@ -426,6 +439,53 @@ public class GlobalScreenshotLegacy {
                 mScreenshotView.setScaleY(scaleT);
                 mScreenshotFlash.setAlpha(flashAlphaInterpolator.getInterpolation(t));
             }
+        });
+        return anim;
+    }
+
+    /**
+     * If a bitmap was supplied to be used as the screenshot, animated from where that bitmap was
+     * on screen, rather than using the whole screen.
+     */
+    private ValueAnimator createRectAnimation(Rect rect) {
+        mScreenshotView.setAdjustViewBounds(true);
+        mScreenshotView.setMaxHeight(rect.height());
+        mScreenshotView.setMaxWidth(rect.width());
+
+        final float flashPeakDurationPct = ((float) (SCREENSHOT_FLASH_TO_PEAK_DURATION)
+                / SCREENSHOT_DROP_IN_DURATION);
+        final float flashDurationPct = 2f * flashPeakDurationPct;
+        final Interpolator scaleInterpolator = x -> {
+            // We start scaling when the flash is at it's peak
+            if (x < flashPeakDurationPct) {
+                return 0;
+            }
+            return (x - flashDurationPct) / (1f - flashDurationPct);
+        };
+
+        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+        anim.setDuration(SCREENSHOT_DROP_IN_DURATION);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mBackgroundView.setAlpha(0f);
+                mBackgroundView.setVisibility(View.VISIBLE);
+                mScreenshotView.setAlpha(0f);
+                mScreenshotView.setElevation(0f);
+                mScreenshotView.setTranslationX(0f);
+                mScreenshotView.setTranslationY(0f);
+                mScreenshotView.setScaleX(SCREENSHOT_SCALE + mBgPaddingScale);
+                mScreenshotView.setScaleY(SCREENSHOT_SCALE + mBgPaddingScale);
+                mScreenshotView.setVisibility(View.VISIBLE);
+            }
+        });
+        anim.addUpdateListener(animation -> {
+            float t = (Float) animation.getAnimatedValue();
+            float scaleT = (SCREENSHOT_SCALE + mBgPaddingScale)
+                    - scaleInterpolator.getInterpolation(t)
+                    * (SCREENSHOT_SCALE - SCREENSHOT_DROP_IN_MIN_SCALE);
+            mBackgroundView.setAlpha(scaleInterpolator.getInterpolation(t) * BACKGROUND_ALPHA);
+            mScreenshotView.setAlpha(t);
         });
         return anim;
     }

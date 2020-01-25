@@ -954,7 +954,7 @@ public class Vpn {
         NetworkAgentConfig networkAgentConfig = new NetworkAgentConfig();
         networkAgentConfig.allowBypass = mConfig.allowBypass && !mLockdown;
 
-        mNetworkCapabilities.setEstablishingVpnAppUid(Binder.getCallingUid());
+        mNetworkCapabilities.setOwnerUid(Binder.getCallingUid());
         mNetworkCapabilities.setUids(createUserAndRestrictedProfilesRanges(mUserHandle,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
         long token = Binder.clearCallingIdentity();

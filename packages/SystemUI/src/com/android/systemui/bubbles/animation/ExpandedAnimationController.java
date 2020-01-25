@@ -67,6 +67,8 @@ public class ExpandedAnimationController
     private float mBubblePaddingTop;
     /** Size of each bubble. */
     private float mBubbleSizePx;
+    /** Width of the overflow button. */
+    private float mOverflowBtnWidth;
     /** Height of the status bar. */
     private float mStatusBarHeight;
     /** Size of display. */
@@ -81,7 +83,7 @@ public class ExpandedAnimationController
 
     private boolean mAnimatingExpand = false;
     private boolean mAnimatingCollapse = false;
-    private Runnable mAfterExpand;
+    private @Nullable Runnable mAfterExpand;
     private Runnable mAfterCollapse;
     private PointF mCollapsePoint;
 
@@ -97,6 +99,7 @@ public class ExpandedAnimationController
     private boolean mSpringingBubbleToTouch = false;
 
     private int mExpandedViewPadding;
+    private boolean mShowOverflowBtn;
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
             int orientation) {
@@ -116,7 +119,7 @@ public class ExpandedAnimationController
     /**
      * Animates expanding the bubbles into a row along the top of the screen.
      */
-    public void expandFromStack(Runnable after) {
+    public void expandFromStack(@Nullable Runnable after) {
         mAnimatingCollapse = false;
         mAnimatingExpand = true;
         mAfterExpand = after;
@@ -148,6 +151,14 @@ public class ExpandedAnimationController
             mStatusBarHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_height);
         }
+    }
+
+    public void setShowOverflowBtn(boolean showBtn) {
+        mShowOverflowBtn = showBtn;
+    }
+
+    public boolean getShowOverflowBtn() {
+        return mShowOverflowBtn;
     }
 
     /**
@@ -380,6 +391,7 @@ public class ExpandedAnimationController
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mOverflowBtnWidth = mBubbleSizePx;
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
@@ -498,6 +510,14 @@ public class ExpandedAnimationController
         return getRowLeft() + bubbleFromRowLeft;
     }
 
+    public float getOverflowBtnLeft() {
+        if (mLayout == null || mLayout.getChildCount() == 0) {
+            return 0;
+        }
+        return getBubbleLeft(mLayout.getChildCount() - 1) + mBubbleSizePx
+                + getSpaceBetweenBubbles();
+    }
+
     /**
      * When expanded, the bubbles are centered in the screen. In portrait, all available space is
      * used. In landscape we have too much space so the value is restricted. This method accounts
@@ -505,7 +525,7 @@ public class ExpandedAnimationController
      *
      * @return the desired width to display the expanded bubbles in.
      */
-    private float getWidthForDisplayingBubbles() {
+    public float getWidthForDisplayingBubbles() {
         final float availableWidth = getAvailableScreenWidth(true /* includeStableInsets */);
         if (mScreenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
             // display size y in landscape will be the smaller dimension of the screen
@@ -551,7 +571,11 @@ public class ExpandedAnimationController
 
         final float totalBubbleWidth = bubbleCount * mBubbleSizePx;
         final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
-        final float rowWidth = totalGapWidth + totalBubbleWidth;
+        float rowWidth = totalGapWidth + totalBubbleWidth;
+        if (mShowOverflowBtn) {
+            rowWidth += getSpaceBetweenBubbles();
+            rowWidth += mOverflowBtnWidth;
+        }
 
         // This display size we're using includes the size of the insets, we want the true
         // center of the display minus the notch here, which means we should include the
@@ -559,7 +583,6 @@ public class ExpandedAnimationController
         final float trueCenter = getAvailableScreenWidth(false /* subtractStableInsets */) / 2f;
         final float halfRow = rowWidth / 2f;
         final float rowLeft = trueCenter - halfRow;
-
         return rowLeft;
     }
 
@@ -567,12 +590,12 @@ public class ExpandedAnimationController
      * @return Space between bubbles in row above expanded view.
      */
     private float getSpaceBetweenBubbles() {
-        final float rowMargins = mExpandedViewPadding * 2;
-        final float maxRowWidth = getWidthForDisplayingBubbles() - rowMargins;
-
         final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;
-        final float totalGapWidth = maxRowWidth - totalBubbleWidth;
-
+        final float rowMargins = mExpandedViewPadding * 2;
+        float totalGapWidth = getWidthForDisplayingBubbles() - rowMargins - totalBubbleWidth;
+        if (mShowOverflowBtn) {
+            totalGapWidth -= mBubbleSizePx;
+        }
         final int gapCount = mBubblesMaxRendered - 1;
         final float gapWidth = totalGapWidth / gapCount;
         return gapWidth;

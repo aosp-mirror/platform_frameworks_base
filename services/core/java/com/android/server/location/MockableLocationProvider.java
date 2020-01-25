@@ -170,13 +170,13 @@ public class MockableLocationProvider extends AbstractLocationProvider {
     }
 
     /**
-     * Sets the mock provider implementation's enabled state. Will throw an exception if the mock
+     * Sets the mock provider implementation's allowed state. Will throw an exception if the mock
      * provider is not currently the active implementation.
      */
-    public void setMockProviderEnabled(boolean enabled) {
+    public void setMockProviderAllowed(boolean allowed) {
         synchronized (mOwnerLock) {
             Preconditions.checkState(isMock());
-            mMockProvider.setProviderEnabled(enabled);
+            mMockProvider.setProviderAllowed(allowed);
         }
     }
     /**

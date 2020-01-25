@@ -92,7 +92,7 @@ public abstract class LocationProviderBase {
     // write locked on mBinder, read lock is optional depending on atomicity requirements
     @Nullable private volatile ILocationProviderManager mManager;
     private volatile ProviderProperties mProperties;
-    private volatile boolean mEnabled;
+    private volatile boolean mAllowed;
     private final ArrayList<String> mAdditionalProviderPackages;
 
     public LocationProviderBase(String tag, ProviderPropertiesUnbundled properties) {
@@ -104,7 +104,7 @@ public abstract class LocationProviderBase {
 
         mManager = null;
         mProperties = properties.getProviderProperties();
-        mEnabled = true;
+        mAllowed = true;
         mAdditionalProviderPackages = new ArrayList<>(0);
     }
 
@@ -113,35 +113,44 @@ public abstract class LocationProviderBase {
     }
 
     /**
-     * Sets whether this provider is currently enabled or not. Note that this is specific to the
-     * provider only, and is not related to global location settings. This is a hint to the Location
-     * Manager that this provider will generally be unable to fulfill incoming requests. This
-     * provider may still receive callbacks to onSetRequest while not enabled, and must decide
-     * whether to attempt to satisfy those requests or not.
-     *
-     * Some guidelines: providers should set their own enabled/disabled status based only on state
-     * "owned" by that provider. For instance, providers should not take into account the state of
-     * the location master setting when setting themselves enabled or disabled, as this state is not
-     * owned by a particular provider. If a provider requires some additional user consent that is
-     * particular to the provider, this should be use to set the enabled/disabled state. If the
-     * provider proxies to another provider, the child provider's enabled/disabled state should be
-     * taken into account in the parent's enabled/disabled state. For most providers, it is expected
-     * that they will be always enabled.
+     * @deprecated Use {@link #setAllowed(boolean)} instead.
      */
+    @Deprecated
     @RequiresApi(VERSION_CODES.Q)
     public void setEnabled(boolean enabled) {
+        setAllowed(enabled);
+    }
+
+    /**
+     * Sets whether this provider is currently allowed or not. Note that this is specific to the
+     * provider only, and is not related to global location settings. This is a hint to the Location
+     * Manager that this provider will generally be unable to fulfill incoming requests. This
+     * provider may still receive callbacks to onSetRequest while not allowed, and must decide
+     * whether to attempt to satisfy those requests or not.
+     *
+     * <p>Some guidelines: providers should set their own allowed/disallowed status based only on
+     * state "owned" by that provider. For instance, providers should not take into account the
+     * state of the location master setting when setting themselves allowed or disallowed, as this
+     * state is not owned by a particular provider. If a provider requires some additional user
+     * consent that is particular to the provider, this should be use to set the allowed/disallowed
+     * state. If the provider proxies to another provider, the child provider's allowed/disallowed
+     * state should be taken into account in the parent's allowed state. For most providers, it is
+     * expected that they will be always allowed.
+     */
+    @RequiresApi(VERSION_CODES.R)
+    public void setAllowed(boolean allowed) {
         synchronized (mBinder) {
-            if (mEnabled == enabled) {
+            if (mAllowed == allowed) {
                 return;
             }
 
-            mEnabled = enabled;
+            mAllowed = allowed;
         }
 
         ILocationProviderManager manager = mManager;
         if (manager != null) {
             try {
-                manager.onSetEnabled(mEnabled);
+                manager.onSetAllowed(mAllowed);
             } catch (RemoteException | RuntimeException e) {
                 Log.w(mTag, e);
             }
@@ -193,12 +202,20 @@ public abstract class LocationProviderBase {
     }
 
     /**
-     * Returns true if this provider has been set as enabled. This will be true unless explicitly
-     * set otherwise.
+     * @deprecated Use {@link #isAllowed()} instead.
      */
+    @Deprecated
     @RequiresApi(VERSION_CODES.Q)
     public boolean isEnabled() {
-        return mEnabled;
+        return isAllowed();
+    }
+
+    /**
+     * Returns true if this provider is allowed. Providers start as allowed on construction.
+     */
+    @RequiresApi(VERSION_CODES.R)
+    public boolean isAllowed() {
+        return mAllowed;
     }
 
     /**
@@ -285,6 +302,17 @@ public abstract class LocationProviderBase {
         return false;
     }
 
+    /**
+     * Invoked when the system wishes to request that the provider sets its allowed state as
+     * desired. This implies that the caller is providing/retracting consent for any terms and
+     * conditions or consents associated with the provider.
+     *
+     * <p>It is generally only necessary to override this function if the provider has some barriers
+     * or gates for enabling/disabling itself, in which case this function should handle those
+     * appropriately. A provider that is always allowed has no need to override this function.
+     */
+    protected void onRequestSetAllowed(boolean allowed) {}
+
     private final class Service extends ILocationProvider.Stub {
 
         @Override
@@ -295,7 +323,7 @@ public abstract class LocationProviderBase {
                         manager.onSetAdditionalProviderPackages(mAdditionalProviderPackages);
                     }
                     manager.onSetProperties(mProperties);
-                    manager.onSetEnabled(mEnabled);
+                    manager.onSetAllowed(mAllowed);
                 } catch (RemoteException e) {
                     Log.w(mTag, e);
                 }
@@ -314,6 +342,11 @@ public abstract class LocationProviderBase {
         @Override
         public void sendExtraCommand(String command, Bundle extras) {
             onSendExtraCommand(command, extras);
+        }
+
+        @Override
+        public void requestSetAllowed(boolean allowed) {
+            onRequestSetAllowed(allowed);
         }
     }
 }

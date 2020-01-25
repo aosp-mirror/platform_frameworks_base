@@ -32,7 +32,6 @@
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
 #include "../statscompanion_util.h"
-#include "CarStatsPuller.h"
 #include "GpuStatsPuller.h"
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
@@ -95,11 +94,6 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // GpuStatsAppInfo
         {{.atomTag = android::util::GPU_STATS_APP_INFO},
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
-
-        // VmsClientStats
-        {{.atomTag = android::util::VMS_CLIENT_STATS},
-         {.additiveFields = {5, 6, 7, 8, 9, 10},
-          .puller = new CarStatsPuller(android::util::VMS_CLIENT_STATS)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
-import android.content.integrity.Formula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 
 import androidx.annotation.NonNull;
@@ -328,7 +328,7 @@ public class RuleXmlSerializerTest {
     public void testXmlString_serializeValidAtomicFormula_integerValue() throws Exception {
         Rule rule =
                 new Rule(
-                        new AtomicFormula.IntAtomicFormula(
+                        new AtomicFormula.LongAtomicFormula(
                                 AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1),
                         Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
@@ -384,7 +384,7 @@ public class RuleXmlSerializerTest {
 
     @Test
     public void testXmlString_serializeInvalidFormulaType() throws Exception {
-        Formula invalidFormula = getInvalidFormula();
+        IntegrityFormula invalidFormula = getInvalidFormula();
         Rule rule = new Rule(invalidFormula, Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
 
@@ -530,16 +530,16 @@ public class RuleXmlSerializerTest {
                 + "</R>";
     }
 
-    private Formula getInvalidFormula() {
-        return new Formula() {
-            @Override
-            public boolean isSatisfied(AppInstallMetadata appInstallMetadata) {
-                return false;
-            }
-
+    private IntegrityFormula getInvalidFormula() {
+        return new AtomicFormula(0) {
             @Override
             public int getTag() {
                 return 0;
+            }
+
+            @Override
+            public boolean matches(AppInstallMetadata appInstallMetadata) {
+                return false;
             }
 
             @Override

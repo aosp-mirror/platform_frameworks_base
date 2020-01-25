@@ -38,7 +38,7 @@ public class SyncRtSurfaceTransactionApplier {
     public static final int FLAG_CORNER_RADIUS = 1 << 4;
     public static final int FLAG_VISIBILITY = 1 << 5;
 
-    private final Surface mTargetSurface;
+    private SurfaceControl mTargetSc;
     private final ViewRootImpl mTargetViewRootImpl;
     private final float[] mTmpFloat9 = new float[9];
 
@@ -47,7 +47,6 @@ public class SyncRtSurfaceTransactionApplier {
      */
     public SyncRtSurfaceTransactionApplier(View targetView) {
         mTargetViewRootImpl = targetView != null ? targetView.getViewRootImpl() : null;
-        mTargetSurface = mTargetViewRootImpl != null ? mTargetViewRootImpl.mSurface : null;
     }
 
     /**
@@ -60,15 +59,16 @@ public class SyncRtSurfaceTransactionApplier {
         if (mTargetViewRootImpl == null) {
             return;
         }
+        mTargetSc = mTargetViewRootImpl.getRenderSurfaceControl();
         mTargetViewRootImpl.registerRtFrameCallback(frame -> {
-            if (mTargetSurface == null || !mTargetSurface.isValid()) {
+            if (mTargetSc == null || !mTargetSc.isValid()) {
                 return;
             }
             Transaction t = new Transaction();
             for (int i = params.length - 1; i >= 0; i--) {
                 SurfaceParams surfaceParams = params[i];
                 SurfaceControl surface = surfaceParams.surface;
-                t.deferTransactionUntilSurface(surface, mTargetSurface, frame);
+                t.deferTransactionUntil(surface, mTargetSc, frame);
                 applyParams(t, surfaceParams, mTmpFloat9);
             }
             t.setEarlyWakeup();

@@ -20,10 +20,8 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -42,16 +40,11 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi
 @VisibleForTesting
-public final class CompoundFormula implements Formula, Parcelable {
-    private static final String TAG = "OpenFormula";
+public final class CompoundFormula extends IntegrityFormula implements Parcelable {
 
     /** @hide */
-    @IntDef(
-            value = {
-                AND, OR, NOT,
-            })
+    @IntDef(value = {AND, OR, NOT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Connector {}
 
@@ -65,7 +58,7 @@ public final class CompoundFormula implements Formula, Parcelable {
     public static final int NOT = 2;
 
     private final @Connector int mConnector;
-    private final @NonNull List<Formula> mFormulas;
+    private final @NonNull List<IntegrityFormula> mFormulas;
 
     @NonNull
     public static final Creator<CompoundFormula> CREATOR =
@@ -85,9 +78,10 @@ public final class CompoundFormula implements Formula, Parcelable {
      * Create a new formula from operator and operands.
      *
      * @throws IllegalArgumentException if the number of operands is not matching the requirements
-     *     for that operator (at least 2 for {@link #AND} and {@link #OR}, 1 for {@link #NOT}).
+     *                                  for that operator (at least 2 for {@link #AND} and {@link
+     *                                  #OR}, 1 for {@link #NOT}).
      */
-    public CompoundFormula(@Connector int connector, @NonNull List<Formula> formulas) {
+    public CompoundFormula(@Connector int connector, List<IntegrityFormula> formulas) {
         checkArgument(
                 isValidConnector(connector), String.format("Unknown connector: %d", connector));
         validateFormulas(connector, formulas);
@@ -101,7 +95,7 @@ public final class CompoundFormula implements Formula, Parcelable {
         checkArgument(length >= 0, "Must have non-negative length. Got " + length);
         mFormulas = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
-            mFormulas.add(Formula.readFromParcel(in));
+            mFormulas.add(IntegrityFormula.readFromParcel(in));
         }
         validateFormulas(mConnector, mFormulas);
     }
@@ -111,30 +105,29 @@ public final class CompoundFormula implements Formula, Parcelable {
     }
 
     @NonNull
-    public List<Formula> getFormulas() {
+    public List<IntegrityFormula> getFormulas() {
         return mFormulas;
     }
 
     @Override
-    public boolean isSatisfied(@NonNull AppInstallMetadata appInstallMetadata) {
-        switch (mConnector) {
-            case NOT:
-                return !mFormulas.get(0).isSatisfied(appInstallMetadata);
-            case AND:
-                return mFormulas.stream()
-                        .allMatch(formula -> formula.isSatisfied(appInstallMetadata));
-            case OR:
-                return mFormulas.stream()
-                        .anyMatch(formula -> formula.isSatisfied(appInstallMetadata));
-            default:
-                Slog.i(TAG, "Unknown connector " + mConnector);
-                return false;
-        }
+    public int getTag() {
+        return IntegrityFormula.COMPOUND_FORMULA_TAG;
     }
 
     @Override
-    public int getTag() {
-        return Formula.COMPOUND_FORMULA_TAG;
+    public boolean matches(AppInstallMetadata appInstallMetadata) {
+        switch (getConnector()) {
+            case NOT:
+                return !getFormulas().get(0).matches(appInstallMetadata);
+            case AND:
+                return getFormulas().stream()
+                        .allMatch(formula -> formula.matches(appInstallMetadata));
+            case OR:
+                return getFormulas().stream()
+                        .anyMatch(formula -> formula.matches(appInstallMetadata));
+            default:
+                throw new IllegalArgumentException("Unknown connector " + getConnector());
+        }
     }
 
     @Override
@@ -180,12 +173,13 @@ public final class CompoundFormula implements Formula, Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mConnector);
         dest.writeInt(mFormulas.size());
-        for (Formula formula : mFormulas) {
-            Formula.writeToParcel(formula, dest, flags);
+        for (IntegrityFormula formula : mFormulas) {
+            IntegrityFormula.writeToParcel(formula, dest, flags);
         }
     }
 
-    private static void validateFormulas(@Connector int connector, List<Formula> formulas) {
+    private static void validateFormulas(
+            @Connector int connector, List<IntegrityFormula> formulas) {
         switch (connector) {
             case AND:
             case OR:

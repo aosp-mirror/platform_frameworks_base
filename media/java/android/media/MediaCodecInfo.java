@@ -763,7 +763,13 @@ public final class MediaCodecInfo {
                 int maxLevel = 0;
                 for (CodecProfileLevel pl : profileLevels) {
                     if (pl.profile == profile && pl.level > maxLevel) {
-                        maxLevel = pl.level;
+                        // H.263 levels are not completely ordered:
+                        // Level45 support only implies Level10 support
+                        if (!mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_H263)
+                                || pl.level != CodecProfileLevel.H263Level45
+                                || maxLevel == CodecProfileLevel.H263Level10) {
+                            maxLevel = pl.level;
+                        }
                     }
                 }
                 levelCaps = createFromProfileLevel(mMime, profile, maxLevel);

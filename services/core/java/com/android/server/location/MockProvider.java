@@ -42,9 +42,9 @@ public class MockProvider extends AbstractLocationProvider {
         setProperties(properties);
     }
 
-    /** Sets the enabled state of this mock provider. */
-    public void setProviderEnabled(boolean enabled) {
-        setEnabled(enabled);
+    /** Sets the allowed state of this mock provider. */
+    public void setProviderAllowed(boolean allowed) {
+        setAllowed(allowed);
     }
 
     /** Sets the location to report for this mock provider. */
@@ -56,10 +56,15 @@ public class MockProvider extends AbstractLocationProvider {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("last mock location=" + mLocation);
+    public void onSetRequest(ProviderRequest request) {}
+
+    @Override
+    protected void onRequestSetAllowed(boolean allowed) {
+        setAllowed(allowed);
     }
 
     @Override
-    public void onSetRequest(ProviderRequest request) {}
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("last mock location=" + mLocation);
+    }
 }

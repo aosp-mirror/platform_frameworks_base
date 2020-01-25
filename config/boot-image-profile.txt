@@ -1515,7 +1515,6 @@ HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activityDestroyed(Landroid/os/
 HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activityIdle(Landroid/os/IBinder;Landroid/content/res/Configuration;Z)V
 HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activityPaused(Landroid/os/IBinder;)V
 HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activityResumed(Landroid/os/IBinder;)V
-HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activitySlept(Landroid/os/IBinder;)V
 HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activityStopped(Landroid/os/IBinder;Landroid/os/Bundle;Landroid/os/PersistableBundle;Ljava/lang/CharSequence;)V
 HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->activityTopResumedStateLost()V
 HSPLandroid/app/IActivityTaskManager$Stub$Proxy;->finishActivity(Landroid/os/IBinder;ILandroid/content/Intent;I)Z

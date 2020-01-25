@@ -4923,6 +4923,8 @@
     </string>
     <!-- Title of the button to show users more details about why the app has been suspended [CHAR LIMIT=50]-->
     <string name="app_suspended_more_details">Learn more</string>
+    <!-- Title of the button to unsuspend a suspended app immediately [CHAR LIMIT=50]-->
+    <string name="app_suspended_unsuspend_message">Unpause app</string>
 
     <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
     <string name="work_mode_off_title">Turn on work profile?</string>
@@ -4930,13 +4932,6 @@
     <string name="work_mode_off_message">Your work apps, notifications, data, and other work profile features will be turned on</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
-
-    <!-- Title of the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=50] -->
-    <string name="app_blocked_title">App is not available</string>
-    <!-- Default message shown in the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=NONE] -->
-    <string name="app_blocked_message">
-        <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> is not available right now.
-    </string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
@@ -5318,7 +5313,8 @@
     <string name="accessibility_system_action_lock_screen_label">Lock Screen</string>
     <!-- Label for taking screenshot action [CHAR LIMIT=NONE] -->
     <string name="accessibility_system_action_screenshot_label">Screenshot</string>
-
+    <!-- Label for showing accessibility menu action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_accessibility_menu_label">Accessibility Menu</string>
     <!-- Accessibility description of caption view -->
     <string name="accessibility_freeform_caption">Caption bar of <xliff:g id="app_name">%1$s</xliff:g>.</string>
 

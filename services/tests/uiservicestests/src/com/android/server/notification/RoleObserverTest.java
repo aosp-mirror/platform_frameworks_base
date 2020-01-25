@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import static android.app.role.RoleManager.ROLE_DIALER;
 import static android.app.role.RoleManager.ROLE_EMERGENCY;
-import static android.app.role.RoleManager.ROLE_SMS;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
 import static junit.framework.Assert.assertFalse;
@@ -92,24 +91,20 @@ public class RoleObserverTest extends UiServiceTestCase {
     private Executor mExecutor;
     @Mock
     private RoleManager mRoleManager;
+    NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
 
     private List<UserInfo> mUsers;
 
     private static class TestableNotificationManagerService extends NotificationManagerService {
-
-        TestableNotificationManagerService(Context context) {
-            super(context);
+        TestableNotificationManagerService(Context context, NotificationRecordLogger logger) {
+            super(context, logger);
         }
 
         @Override
-        protected void handleSavePolicyFile() {
-            return;
-        }
+        protected void handleSavePolicyFile() { }
 
         @Override
-        protected void loadPolicyFile() {
-            return;
-        }
+        protected void loadPolicyFile() { }
     }
 
     @Before
@@ -125,7 +120,7 @@ public class RoleObserverTest extends UiServiceTestCase {
         mUsers.add(new UserInfo(10, "second", 0));
         when(mUm.getUsers()).thenReturn(mUsers);
 
-        mService = new TestableNotificationManagerService(mContext);
+        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger);
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {

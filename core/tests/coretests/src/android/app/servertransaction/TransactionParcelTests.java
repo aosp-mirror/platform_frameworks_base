@@ -448,10 +448,6 @@ public class TransactionParcelTests {
         }
 
         @Override
-        public void scheduleSleeping(IBinder iBinder, boolean b) throws RemoteException {
-        }
-
-        @Override
         public void profilerControl(boolean b, ProfilerInfo profilerInfo, int i)
                 throws RemoteException {
         }

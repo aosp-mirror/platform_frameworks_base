@@ -549,9 +549,10 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Internal flag used to indicate that a package is a hidden system app.
+     * Internal {@link PackageInfo} flag used to indicate that a package is a hidden system app.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS =  0x20000000;
 
     /**
@@ -3328,6 +3329,15 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
 
     /**
+     * Permission flags: Reserved for use by the permission controller.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = 1 << 28 | 1 << 29
+            | 1 << 30 | 1 << 31;
+
+    /**
      * Permission flags: Bitwise or of all permission flags allowing an
      * exemption for a restricted permission.
      * @hide
@@ -3515,6 +3525,44 @@ public abstract class PackageManager {
     @ChangeId
     @Disabled
     public static final long FILTER_APPLICATION_QUERY = 135549675L;
+
+    /** {@hide} */
+    @IntDef(prefix = {"SYSTEM_APP_STATE_"}, value = {
+            SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN,
+            SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE,
+            SYSTEM_APP_STATE_INSTALLED,
+            SYSTEM_APP_STATE_UNINSTALLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemAppState {}
+
+    /**
+     * Constant for noting system app state as hidden before installation
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0;
+
+    /**
+     * Constant for noting system app state as visible before installation
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1;
+
+    /**
+     * Constant for noting system app state as installed
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_INSTALLED = 2;
+
+    /**
+     * Constant for noting system app state as not installed
+     * @hide
+     */
+    @SystemApi
+    public static final int SYSTEM_APP_STATE_UNINSTALLED = 3;
 
     /** {@hide} */
     public int getUserId() {
@@ -6618,6 +6666,17 @@ public abstract class PackageManager {
     @UnsupportedAppUsage
     public abstract boolean getApplicationHiddenSettingAsUser(@NonNull String packageName,
             @NonNull UserHandle userHandle);
+
+    /**
+     * Sets system app state
+     * @param packageName Package name of the app.
+     * @param state State of the app.
+     * @hide
+     */
+    @SystemApi
+    public void setSystemAppState(@NonNull String packageName, @SystemAppState int state) {
+        throw new RuntimeException("Not implemented. Must override in a subclass");
+    }
 
     /**
      * Return whether the device has been booted into safe mode.
