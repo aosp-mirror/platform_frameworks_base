@@ -2094,10 +2094,10 @@ public final class ProcessList {
                     }
                 }
             }
-            if (lrui <= mLruProcessActivityStart) {
+            if (lrui < mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
             }
-            if (lrui <= mLruProcessServiceStart) {
+            if (lrui < mLruProcessServiceStart) {
                 mLruProcessServiceStart--;
             }
             mLruProcesses.remove(lrui);
@@ -2629,7 +2629,7 @@ public final class ProcessList {
                         if (!moved) {
                             // Goes to the end of the group.
                             mLruProcesses.remove(i);
-                            mLruProcesses.add(endIndex - 1, subProc);
+                            mLruProcesses.add(endIndex, subProc);
                             if (DEBUG_LRU) Slog.d(TAG_LRU,
                                     "Moving " + subProc
                                             + " from position " + i + " to end of group @ "
@@ -2874,15 +2874,6 @@ public final class ProcessList {
                     pos--;
                 }
                 mLruProcesses.add(pos, app);
-                if (pos == mLruProcessActivityStart) {
-                    mLruProcessActivityStart++;
-                }
-                if (pos == mLruProcessServiceStart) {
-                    // Unless {@code #hasService} is implemented, currently the starting position
-                    // for activity and service are the same, so the incoming position may equal to
-                    // the starting position of service.
-                    mLruProcessServiceStart++;
-                }
                 // If this process is part of a group, need to pull up any other processes
                 // in that group to be with it.
                 int endIndex = pos - 1;

@@ -15,10 +15,10 @@
  */
 package com.android.systemui.screenshot;
 
-import com.android.systemui.R;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import com.android.systemui.tests.R;
 
 /**
  * A stub activity used in {@link ScreenshotTest}.

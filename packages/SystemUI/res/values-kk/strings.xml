@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Шұғылдығы азырақ хабарландырулар төменде"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ашу үшін қайта түртіңіз"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Ашу үшін жоғары қарай сырғытыңыз."</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Әрекетті қайталау үшін жоғары сырғытыңыз."</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Бұл құрылғыны ұйым басқарады"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Бұл құрылғыны <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> басқарады"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Телефонды ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Экран босатылғанға дейін көрсетіліп тұрады. Оны босату үшін \"Негізгі бет\" түймесін түртіп, ұстап тұрыңыз."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Бұл экранды босату үшін \"Артқа\" және \"Шолу\" түймелерін түртіп, ұстап тұрыңыз"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Бұл экранды босату үшін \"Артқа\" және \"Негізгі бет\" түймелерін түртіп, ұстап тұрыңыз"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Бұл экранды босату үшін жоғары сырғытып, ұстап тұрыңыз."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Түсінікті"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Жоқ, рақмет"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Экран бекітілді"</string>

@@ -1277,10 +1277,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Pieskarieties, lai skatītu visus tīklus"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Izveidot savienojumu"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Visi tīkli"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Vai veidot savienojumus ar Wi-Fi tīkliem?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Iesaka <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Jā"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nē"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vai atļaut ieteiktos Wi‑Fi tīklus?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Lietotnes <xliff:g id="NAME">%s</xliff:g> ieteiktie tīkli. Ierīcē var tikt automātiski izveidots savienojums."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Atļaut"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nē, paldies"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi tiks automātiski ieslēgts"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kad atrodaties saglabāta augstas kvalitātes tīkla tuvumā"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Neieslēgt atkārtoti"</string>
@@ -1922,8 +1922,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nav kategorijas"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Jūs iestatījāt šo paziņojumu svarīguma līmeni."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tas ir svarīgi iesaistīto personu dēļ."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g> (lietotājs ar šādu kontu jau pastāv)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g> (lietotājs ar šādu kontu jau pastāv)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Pievienot valodu"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Reģiona preference"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Ierakstiet valodas nosaukumu"</string>

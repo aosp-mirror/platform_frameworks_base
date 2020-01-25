@@ -138,8 +138,8 @@
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"கடவுச்சொல் தேவைப்படாத திறந்த நெட்வொர்க்"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"கடவுச்சொல் தேவைப்படும் பாதுகாப்பான நெட்வொர்க்"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
-    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"அகற்றப்பட்ட பயன்பாடுகள்"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"அகற்றப்பட்ட பயன்பாடுகள் மற்றும் பயனர்கள்"</string>
+    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"அகற்றப்பட்ட ஆப்ஸ்"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"அகற்றப்பட்ட ஆப்ஸ் மற்றும் பயனர்கள்"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"சிஸ்டம் புதுப்பிப்புகள்"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB டெதெரிங்"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"போர்ட்டபிள் ஹாட்ஸ்பாட்"</string>
@@ -264,7 +264,7 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"வைஃபை இயங்கும் போதும் (வேகமான நெட்வொர்க் மாற்றத்திற்கு), மொபைல் டேட்டாவை எப்போதும் இயக்கத்தில் வைக்கும்."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை கிடைக்கும் போது, அதைப் பயன்படுத்தும்"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB பிழைதிருத்தத்தை அனுமதிக்கவா?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைதிருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் பயன்பாடுகளை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைதிருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் ஆப்ஸை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"நீங்கள் ஏற்கனவே அனுமதித்த எல்லா கணினிகளிலிருந்தும் USB பிழைத்திருத்தத்திற்கான அணுகலைத் திரும்பப்பெற வேண்டுமா?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"மேம்பட்ட அமைப்புகளை அனுமதிக்கவா?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"இந்த அமைப்பு மேம்பட்டப் பயன்பாட்டிற்காக மட்டுமே. உங்கள் சாதனம் மற்றும் அதில் உள்ள பயன்பாடுகளைச் சிதைக்கும் அல்லது தவறாகச் செயல்படும் வகையில் பாதிப்பை ஏற்படுத்தும்."</string>
@@ -402,7 +402,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g>ம் ஆகும்"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஆகிறது"</string>
@@ -437,7 +437,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"சாதன மொழிகளைப் பயன்படுத்து"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> க்கான அமைப்புகளைத் திறப்பதில் தோல்வி"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"இந்த உள்ளீட்டு முறையானது, கடவுச்சொற்கள் மற்றும் கிரெடிட் கார்டு எண்கள் போன்ற தனிப்பட்ட தகவல் உள்பட நீங்கள் உள்ளிடும் எல்லா உரையையும் சேகரிக்கக்கூடும். இது <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> பயன்பாட்டிலிருந்து வந்துள்ளது. இந்த உள்ளீட்டு முறையைப் பயன்படுத்தவா?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்தப் பயன்பாட்டால் தொடங்க முடியாது"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS பதிவின் நிலை"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"பதிவு செய்யப்பட்டது"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"பதிவு செய்யப்படவில்லை"</string>

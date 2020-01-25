@@ -1299,10 +1299,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Palieskite, jei norite matyti visus tinklus"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Prisijungti"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Visi tinklai"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Prisijungti prie „Wi-Fi“ tinklų?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Pasiūlė „<xliff:g id="NAME">%s</xliff:g>“"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Taip"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Ne"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Leisti siūlomus „Wi‑Fi“ tinklus?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"„<xliff:g id="NAME">%s</xliff:g>“ siūlomi tinklai. Įrenginys gali prisijungti automatiškai."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Leisti"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Ne, ačiū"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"„Wi‑Fi“ bus įjungtas automatiškai"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kai būsite netoli išsaugoto aukštos kokybės tinklo"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Neįjunkite vėl"</string>
@@ -1956,8 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Be kategorijos"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Galite nustatyti šių pranešimų svarbą."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją (šią paskyrą naudojantis naudotojas jau yra)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją (šią paskyrą naudojantis naudotojas jau yra)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Pridėkite kalbą"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiono nuostata"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Įveskite kalbos pav."</string>

@@ -51,6 +51,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
@@ -219,6 +220,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             @Override
             public void onMobileDataEnabled(boolean enabled) {
                 mCallbackHandler.setMobileDataEnabled(enabled);
+                notifyControllersMobileDataChanged();
             }
         });
         mWifiSignalController = new WifiSignalController(mContext, mHasMobileDataFeature,
@@ -382,6 +384,22 @@ public class NetworkControllerImpl extends BroadcastReceiver
     @Override
     public int getNumberSubscriptions() {
         return mMobileSignalControllers.size();
+    }
+
+    boolean isDataControllerDisabled() {
+        MobileSignalController dataController = getDataController();
+        if (dataController == null) {
+            return false;
+        }
+
+        return dataController.isDataDisabled();
+    }
+
+    private void notifyControllersMobileDataChanged() {
+        for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+            MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
+            mobileSignalController.onMobileDataChanged();
+        }
     }
 
     public boolean isEmergencyOnly() {
@@ -829,6 +847,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.print("  mEmergencySource=");
         pw.println(emergencyToString(mEmergencySource));
 
+        pw.println("  - config ------");
+        pw.print("  patternOfCarrierSpecificDataIcon=");
+        pw.println(mConfig.patternOfCarrierSpecificDataIcon);
+        pw.print("  nr5GIconMap=");
+        pw.println(mConfig.nr5GIconMap.toString());
+        pw.print("  nrIconDisplayGracePeriodMs=");
+        pw.println(mConfig.nrIconDisplayGracePeriodMs);
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
             mobileSignalController.dump(pw);
@@ -1111,8 +1136,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     static class Config {
         static final int NR_CONNECTED_MMWAVE = 1;
         static final int NR_CONNECTED = 2;
-        static final int NR_NOT_RESTRICTED = 3;
-        static final int NR_RESTRICTED = 4;
+        static final int NR_NOT_RESTRICTED_RRC_IDLE = 3;
+        static final int NR_NOT_RESTRICTED_RRC_CON = 4;
+        static final int NR_RESTRICTED = 5;
 
         Map<Integer, MobileIconGroup> nr5GIconMap = new HashMap<>();
 
@@ -1125,6 +1151,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
         public String patternOfCarrierSpecificDataIcon = "";
+        public long nrIconDisplayGracePeriodMs;
 
         /**
          * Mapping from NR 5G status string to an integer. The NR 5G status string should match
@@ -1132,10 +1159,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
          */
         private static final Map<String, Integer> NR_STATUS_STRING_TO_INDEX;
         static {
-            NR_STATUS_STRING_TO_INDEX = new HashMap<>(4);
+            NR_STATUS_STRING_TO_INDEX = new HashMap<>(5);
             NR_STATUS_STRING_TO_INDEX.put("connected_mmwave", NR_CONNECTED_MMWAVE);
             NR_STATUS_STRING_TO_INDEX.put("connected", NR_CONNECTED);
-            NR_STATUS_STRING_TO_INDEX.put("not_restricted", NR_NOT_RESTRICTED);
+            NR_STATUS_STRING_TO_INDEX.put("not_restricted_rrc_idle", NR_NOT_RESTRICTED_RRC_IDLE);
+            NR_STATUS_STRING_TO_INDEX.put("not_restricted_rrc_con", NR_NOT_RESTRICTED_RRC_CON);
             NR_STATUS_STRING_TO_INDEX.put("restricted", NR_RESTRICTED);
         }
 
@@ -1176,6 +1204,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         add5GIconMapping(pair, config);
                     }
                 }
+                setDisplayGraceTime(
+                        b.getInt(CarrierConfigManager.KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT),
+                        config);
             }
 
             return config;
@@ -1208,6 +1239,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         NR_STATUS_STRING_TO_INDEX.get(key),
                         TelephonyIcons.ICON_NAME_TO_ICON.get(value));
             }
+        }
+
+        /**
+         * Set display gracefully period time(MS) depend on carrierConfig KEY
+         * KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, and this function will convert to ms.
+         * {@link CarrierConfigManager}.
+         *
+         * @param time   showing 5G icon gracefully in the period of the time(SECOND)
+         * @param config container that used to store the parsed configs.
+         */
+        @VisibleForTesting
+        static void setDisplayGraceTime(int time, Config config) {
+            config.nrIconDisplayGracePeriodMs = time * DateUtils.SECOND_IN_MILLIS;
         }
     }
 }

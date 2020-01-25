@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Koppintással megjelenítheti az összes hálózatot"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kapcsolódás"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Összes hálózat"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Kapcsolódik a Wi-Fi-hálózathoz?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> javasolta"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Igen"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nem"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Engedélyezi a javasolt Wi-Fi-hálózatokat?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"A(z) <xliff:g id="NAME">%s</xliff:g> hálózatokat javasolt. Az eszköz automatikusan csatlakozhat hozzájuk."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Engedélyezés"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nem, köszönöm"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"A Wi-Fi automatikusan bekapcsol"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Amikor jó minőségű mentett hálózat közelében tartózkodik"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne kapcsolódjon vissza"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nincs kategóriába sorolva"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ön állította be ezen értesítések fontossági szintjét."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ez az üzenet a résztvevők miatt fontos."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Nyelv hozzáadása"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Régió beállítása"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adja meg a nyelvet"</string>

@@ -407,6 +407,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Poniżej widać mniej pilne powiadomienia"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Kliknij ponownie, by otworzyć"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Przesuń w górę, by otworzyć"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Przesuń w górę, by spróbować ponownie"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Tym urządzeniem zarządza Twoja organizacja"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Tym urządzeniem zarządza <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Aby włączyć telefon, przesuń palcem od ikony"</string>
@@ -464,10 +465,10 @@
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Podczas nagrywania lub przesyłania usługa udostępniająca tę funkcję może rejestrować wszelkie informacje poufne wyświetlane na ekranie lub odtwarzane na urządzeniu takie jak dźwięki czy podawane hasła, informacje o płatnościach, zdjęcia i wiadomości."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Ujawnianie poufnych informacji podczas przesyłania/nagrywania"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nie pokazuj ponownie"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"Ukryj wszystkie"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Usuń wszystkie"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Zarządzaj"</string>
-    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Powiadomienia ciche"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Wyczyść wszystkie ciche powiadomienia"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Ciche powiadomienia"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Usuń wszystkie ciche powiadomienia"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Powiadomienia wstrzymane przez tryb Nie przeszkadzać"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Rozpocznij teraz"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Brak powiadomień"</string>
@@ -552,6 +553,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Aby odpiąć ten ekran, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Aby odpiąć ten ekran, naciśnij i przytrzymaj przyciski Wstecz oraz Ekran główny"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Aby odpiąć ten ekran, przesuń w górę i przytrzymaj"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nie, dziękuję"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran przypięty"</string>

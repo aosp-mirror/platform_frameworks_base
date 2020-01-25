@@ -5924,7 +5924,8 @@ message BubbleUIChanged {
     optional bool is_ongoing = 10;
 
     // Whether the bubble is produced by an app running in foreground.
-    optional bool is_foreground = 11;
+    // This is deprecated and the value should be ignored.
+    optional bool is_foreground = 11 [deprecated = true];
 }
 
 /**

@@ -323,14 +323,16 @@
         <font weight="700" style="normal">NotoSansLaoUI-Bold.ttf</font>
     </family>
     <family lang="und-Mymr" variant="elegant">
-        <font weight="400" style="normal">NotoSansMyanmar-Regular-ZawDecode.ttf</font>
-        <font weight="700" style="normal">NotoSansMyanmar-Bold-ZawDecode.ttf</font>
+        <font weight="400" style="normal">NotoSansMyanmar-Regular.otf</font>
+        <font weight="500" style="normal">NotoSansMyanmar-Medium.otf</font>
+        <font weight="700" style="normal">NotoSansMyanmar-Bold.otf</font>
         <font weight="400" style="normal" fallbackFor="serif">NotoSerifMyanmar-Regular.otf</font>
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifMyanmar-Bold.otf</font>
     </family>
     <family lang="und-Mymr" variant="compact">
-        <font weight="400" style="normal">NotoSansMyanmarUI-Regular-ZawDecode.ttf</font>
-        <font weight="700" style="normal">NotoSansMyanmarUI-Bold-ZawDecode.ttf</font>
+        <font weight="400" style="normal">NotoSansMyanmarUI-Regular.otf</font>
+        <font weight="500" style="normal">NotoSansMyanmarUI-Medium.otf</font>
+        <font weight="700" style="normal">NotoSansMyanmarUI-Bold.otf</font>
     </family>
     <family lang="und-Thaa">
         <font weight="400" style="normal">NotoSansThaana-Regular.ttf</font>

@@ -110,7 +110,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         return mKeyguardUpdateMonitor.isDeviceInteractive();
     }
 
-    private synchronized void notifyKeyguardChanged() {
+    private void notifyKeyguardChanged() {
         // Copy the list to allow removal during callback.
         new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
     }

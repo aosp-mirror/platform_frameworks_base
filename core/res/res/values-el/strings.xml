@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Πατήστε για να δείτε όλα τα δίκτυα"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Σύνδεση"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Όλα τα δίκτυα"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Σύνδεση σε δίκτυα Wi-Fi;"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Προτείνεται από <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ναι"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Όχι"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Να επιτρέπονται προτεινόμενα δίκτυα Wi‑Fi;"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Προτεινόμενα δίκτυα <xliff:g id="NAME">%s</xliff:g>. Η συσκευή μπορεί να συνδεθεί αυτόματα."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Αποδοχή"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Όχι, ευχαριστώ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Το Wi‑Fi θα ενεργοποιηθεί αυτόματα"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Όταν βρίσκεστε κοντά σε αποθηκευμένο δίκτυο υψηλής ποιότητας"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Να μην ενεργοποιηθεί ξανά"</string>
@@ -1673,7 +1673,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με τρία δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Για εναλλαγή μεταξύ υπηρεσιών, αγγίξτε παρατεταμένα το κουμπί προσβασιμότητας."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω και μην τα απομακρύνετε από την οθόνη."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με τρία δάχτυλα προς τα επάνω."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Μεγιστοποίηση"</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Μη κατηγοριοποιημένο"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν το λογαριασμό);"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Προσθήκη γλώσσας"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Προτίμηση περιοχής"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Εισαγ. όνομα γλώσσας"</string>

@@ -405,6 +405,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manj nujna obvestila spodaj"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Znova se dotaknite, da odprete"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Povlecite navzgor, da odprete"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Povlecite navzgor za vnovičen poskus"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"To napravo upravlja vaša organizacija"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"To napravo upravlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Povlecite z ikone za telefon"</string>
@@ -550,6 +551,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za začetni zaslon."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Če želite odpeti ta zaslon, hkrati pridržite gumba za nazaj in za pregled."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Če želite odpeti ta zaslon, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Če želite odpeti ta zaslon, povlecite navzgor in pridržite"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Razumem"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Zaslon je pripet"</string>

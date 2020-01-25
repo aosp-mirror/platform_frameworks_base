@@ -20,8 +20,16 @@ import android.content.Context;
 
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** Assistant handle behavior that hides the Assistant handles. */
+@Singleton
 final class AssistHandleOffBehavior implements BehaviorController {
+
+    @Inject
+    AssistHandleOffBehavior() {
+    }
 
     @Override
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {

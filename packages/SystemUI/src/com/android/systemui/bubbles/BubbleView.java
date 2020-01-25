@@ -19,16 +19,23 @@ package com.android.systemui.bubbles;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Path;
 import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
+import android.util.PathParser;
 import android.widget.FrameLayout;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.launcher3.icons.ShadowGenerator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -38,23 +45,25 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * A floating object on the screen that can post message updates.
  */
 public class BubbleView extends FrameLayout {
-    private static final String TAG = "BubbleView";
 
     private static final int DARK_ICON_ALPHA = 180;
     private static final double ICON_MIN_CONTRAST = 4.1;
-    private static final int DEFAULT_BACKGROUND_COLOR =  Color.LTGRAY;
+    private static final int DEFAULT_BACKGROUND_COLOR = Color.LTGRAY;
     // Same value as Launcher3 badge code
     private static final float WHITE_SCRIM_ALPHA = 0.54f;
     private Context mContext;
 
     private BadgedImageView mBadgedImageView;
     private int mBadgeColor;
-    private int mPadding;
     private int mIconInset;
+    private Drawable mUserBadgedAppIcon;
+
+    // mBubbleIconFactory cannot be static because it depends on Context.
+    private BubbleIconFactory mBubbleIconFactory;
 
     private boolean mSuppressDot = false;
 
-    private NotificationEntry mEntry;
+    private Bubble mBubble;
 
     public BubbleView(Context context) {
         this(context, null);
@@ -71,8 +80,6 @@ public class BubbleView extends FrameLayout {
     public BubbleView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mContext = context;
-        // XXX: can this padding just be on the view and we look it up?
-        mPadding = getResources().getDimensionPixelSize(R.dimen.bubble_view_padding);
         mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
     }
 
@@ -88,16 +95,15 @@ public class BubbleView extends FrameLayout {
     }
 
     /**
-     * Populates this view with a notification.
+     * Populates this view with a bubble.
      * <p>
-     * This should only be called when a new notification is being set on the view, updates to the
-     * current notification should use {@link #update(NotificationEntry)}.
+     * This should only be called when a new bubble is being set on the view, updates to the
+     * current bubble should use {@link #update(Bubble)}.
      *
-     * @param entry the notification to display as a bubble.
+     * @param bubble the bubble to display in this view.
      */
-    public void setNotif(NotificationEntry entry) {
-        mEntry = entry;
-        updateViews();
+    public void setBubble(Bubble bubble) {
+        mBubble = bubble;
     }
 
     /**
@@ -105,7 +111,7 @@ public class BubbleView extends FrameLayout {
      */
     @Nullable
     public NotificationEntry getEntry() {
-        return mEntry;
+        return mBubble != null ? mBubble.getEntry() : null;
     }
 
     /**
@@ -113,24 +119,34 @@ public class BubbleView extends FrameLayout {
      */
     @Nullable
     public String getKey() {
-        return (mEntry != null) ? mEntry.key : null;
+        return (mBubble != null) ? mBubble.getKey() : null;
     }
 
     /**
-     * Updates the UI based on the entry, updates badge and animates messages as needed.
+     * Updates the UI based on the bubble, updates badge and animates messages as needed.
      */
-    public void update(NotificationEntry entry) {
-        mEntry = entry;
+    public void update(Bubble bubble) {
+        mBubble = bubble;
         updateViews();
     }
 
+    /**
+     * @param factory Factory for creating normalized bubble icons.
+     */
+    public void setBubbleIconFactory(BubbleIconFactory factory) {
+        mBubbleIconFactory = factory;
+    }
+
+    public void setAppIcon(Drawable appIcon) {
+        mUserBadgedAppIcon = appIcon;
+    }
     /**
      * @return the {@link ExpandableNotificationRow} view to display notification content when the
      * bubble is expanded.
      */
     @Nullable
     public ExpandableNotificationRow getRowView() {
-        return (mEntry != null) ? mEntry.getRow() : null;
+        return (mBubble != null) ? mBubble.getEntry().getRow() : null;
     }
 
     /** Changes the dot's visibility to match the bubble view's state. */
@@ -150,18 +166,23 @@ public class BubbleView extends FrameLayout {
 
     /** Sets the position of the 'new' dot, animating it out and back in if requested. */
     void setDotPosition(boolean onLeft, boolean animate) {
-        if (animate && onLeft != mBadgedImageView.getDotPosition() && !mSuppressDot) {
+        if (animate && onLeft != mBadgedImageView.getDotOnLeft() && !mSuppressDot) {
             animateDot(false /* showDot */, () -> {
-                mBadgedImageView.setDotPosition(onLeft);
+                mBadgedImageView.setDotOnLeft(onLeft);
                 animateDot(true /* showDot */, null);
             });
         } else {
-            mBadgedImageView.setDotPosition(onLeft);
+            mBadgedImageView.setDotOnLeft(onLeft);
         }
     }
 
+    float[] getDotCenter() {
+        float[] unscaled = mBadgedImageView.getDotCenter();
+        return new float[]{unscaled[0], unscaled[1]};
+    }
+
     boolean getDotPositionOnLeft() {
-        return mBadgedImageView.getDotPosition();
+        return mBadgedImageView.getDotOnLeft();
     }
 
     /**
@@ -169,7 +190,7 @@ public class BubbleView extends FrameLayout {
      * after animation if requested.
      */
     private void updateDotVisibility(boolean animate, Runnable after) {
-        boolean showDot = getEntry().showInShadeWhenBubble() && !mSuppressDot;
+        boolean showDot = mBubble.showBubbleDot() && !mSuppressDot;
 
         if (animate) {
             animateDot(showDot, after);
@@ -186,7 +207,6 @@ public class BubbleView extends FrameLayout {
             if (showDot) {
                 mBadgedImageView.setShowDot(true);
             }
-
             mBadgedImageView.clearAnimation();
             mBadgedImageView.animate().setDuration(200)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
@@ -207,37 +227,60 @@ public class BubbleView extends FrameLayout {
     }
 
     void updateViews() {
-        if (mEntry == null) {
+        if (mBubble == null || mBubbleIconFactory == null) {
             return;
         }
-        Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
-        Notification n = mEntry.notification.getNotification();
-        Icon ic;
-        boolean needsTint;
-        if (metadata != null) {
-            ic = metadata.getIcon();
-            needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
-        } else {
-            needsTint = n.getLargeIcon() == null;
-            ic = needsTint ? n.getSmallIcon() : n.getLargeIcon();
-        }
+        // Update icon.
+        Notification.BubbleMetadata metadata = mBubble.getEntry().getBubbleMetadata();
+        Notification n = mBubble.getEntry().notification.getNotification();
+        Icon ic = metadata.getIcon();
+        boolean needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
+
         Drawable iconDrawable = ic.loadDrawable(mContext);
         if (needsTint) {
-            mBadgedImageView.setImageDrawable(buildIconWithTint(iconDrawable, n.color));
-        } else {
-            mBadgedImageView.setImageDrawable(iconDrawable);
+            iconDrawable = buildIconWithTint(iconDrawable, n.color);
         }
+        Bitmap bubbleIcon = mBubbleIconFactory.createBadgedIconBitmap(iconDrawable,
+                null /* user */,
+                true /* shrinkNonAdaptiveIcons */).icon;
+
+        // Give it a shadow
+        Bitmap userBadgedBitmap = mBubbleIconFactory.createIconBitmap(mUserBadgedAppIcon,
+                1f, mBubbleIconFactory.getBadgeSize());
+        Canvas c = new Canvas();
+        ShadowGenerator shadowGenerator = new ShadowGenerator(mBubbleIconFactory.getBadgeSize());
+        c.setBitmap(userBadgedBitmap);
+        shadowGenerator.recreateIcon(Bitmap.createBitmap(userBadgedBitmap), c);
+
+        mBubbleIconFactory.badgeWithDrawable(bubbleIcon,
+                new BitmapDrawable(mContext.getResources(), userBadgedBitmap));
+        mBadgedImageView.setImageBitmap(bubbleIcon);
+
+        // Update badge.
         int badgeColor = determineDominateColor(iconDrawable, n.color);
         mBadgeColor = badgeColor;
         mBadgedImageView.setDotColor(badgeColor);
-        animateDot(mEntry.showInShadeWhenBubble() /* showDot */, null /* after */);
+
+        // Update dot.
+        Path iconPath = PathParser.createPathFromPathData(
+                getResources().getString(com.android.internal.R.string.config_icon_mask));
+        Matrix matrix = new Matrix();
+        float scale = mBubbleIconFactory.getNormalizer().getScale(iconDrawable,
+                null /* outBounds */, null /* path */, null /* outMaskShape */);
+        float radius = BadgedImageView.DEFAULT_PATH_SIZE / 2f;
+        matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
+                radius /* pivot y */);
+        iconPath.transform(matrix);
+        mBadgedImageView.drawDot(iconPath);
+
+        animateDot(mBubble.showBubbleDot() /* showDot */, null /* after */);
     }
 
     int getBadgeColor() {
         return mBadgeColor;
     }
 
-    private Drawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
+    private AdaptiveIconDrawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {
         iconDrawable = checkTint(iconDrawable, backgroundColor);
         InsetDrawable foreground = new InsetDrawable(iconDrawable, mIconInset);
         ColorDrawable background = new ColorDrawable(backgroundColor);

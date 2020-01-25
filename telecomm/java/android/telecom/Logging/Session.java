@@ -33,6 +33,8 @@ import java.util.ArrayList;
  */
 public class Session {
 
+    public static final String LOG_TAG = "Session";
+
     public static final String START_SESSION = "START_SESSION";
     public static final String START_EXTERNAL_SESSION = "START_EXTERNAL_SESSION";
     public static final String CREATE_SUBSESSION = "CREATE_SUBSESSION";
@@ -44,6 +46,9 @@ public class Session {
     public static final String SESSION_SEPARATION_CHAR_CHILD = "_";
     public static final String EXTERNAL_INDICATOR = "E-";
     public static final String TRUNCATE_STRING = "...";
+
+    // Prevent infinite recursion by setting a reasonable limit.
+    private static final int SESSION_RECURSION_LIMIT = 25;
 
     /**
      * Initial value of mExecutionEndTimeMs and the final value of {@link #getLocalExecutionTime()}
@@ -226,6 +231,15 @@ public class Session {
 
     // Builds full session id recursively
     private String getFullSessionId() {
+        return getFullSessionId(0);
+    }
+
+    // keep track of calls and bail if we hit the recursion limit
+    private String getFullSessionId(int parentCount) {
+        if (parentCount >= SESSION_RECURSION_LIMIT) {
+            Log.w(LOG_TAG, "getFullSessionId: Hit recursion limit!");
+            return TRUNCATE_STRING + mSessionId;
+        }
         // Cache mParentSession locally to prevent a concurrency problem where
         // Log.endParentSessions() is called while a logging statement is running (Log.i, for
         // example) and setting mParentSession to null in a different thread after the null check
@@ -235,42 +249,57 @@ public class Session {
             return mSessionId;
         } else {
             if (Log.VERBOSE) {
-                return parentSession.getFullSessionId() +
+                return parentSession.getFullSessionId(parentCount + 1)
                         // Append "_X" to subsession to show subsession designation.
-                        SESSION_SEPARATION_CHAR_CHILD + mSessionId;
+                        + SESSION_SEPARATION_CHAR_CHILD + mSessionId;
             } else {
                 // Only worry about the base ID at the top of the tree.
-                return parentSession.getFullSessionId();
+                return parentSession.getFullSessionId(parentCount + 1);
             }
 
         }
     }
 
-    // Print out the full Session tree from any subsession node
-    public String printFullSessionTree() {
-        // Get to the top of the tree
+    private Session getRootSession(String callingMethod) {
+        int currParentCount = 0;
         Session topNode = this;
         while (topNode.getParentSession() != null) {
+            if (currParentCount >= SESSION_RECURSION_LIMIT) {
+                Log.w(LOG_TAG, "getRootSession: Hit recursion limit from " + callingMethod);
+                break;
+            }
             topNode = topNode.getParentSession();
+            currParentCount++;
         }
-        return topNode.printSessionTree();
+        return topNode;
+    }
+
+    // Print out the full Session tree from any subsession node
+    public String printFullSessionTree() {
+        return getRootSession("printFullSessionTree").printSessionTree();
     }
 
     // Recursively move down session tree using DFS, but print out each node when it is reached.
-    public String printSessionTree() {
+    private String printSessionTree() {
         StringBuilder sb = new StringBuilder();
-        printSessionTree(0, sb);
+        printSessionTree(0, sb, 0);
         return sb.toString();
     }
 
-    private void printSessionTree(int tabI, StringBuilder sb) {
+    private void printSessionTree(int tabI, StringBuilder sb, int currChildCount) {
+        // Prevent infinite recursion.
+        if (currChildCount >= SESSION_RECURSION_LIMIT) {
+            Log.w(LOG_TAG, "printSessionTree: Hit recursion limit!");
+            sb.append(TRUNCATE_STRING);
+            return;
+        }
         sb.append(toString());
         for (Session child : mChildSessions) {
             sb.append("\n");
             for (int i = 0; i <= tabI; i++) {
                 sb.append("\t");
             }
-            child.printSessionTree(tabI + 1, sb);
+            child.printSessionTree(tabI + 1, sb, currChildCount + 1);
         }
     }
 
@@ -279,11 +308,17 @@ public class Session {
     // recent) will be truncated to "..."
     public String getFullMethodPath(boolean truncatePath) {
         StringBuilder sb = new StringBuilder();
-        getFullMethodPath(sb, truncatePath);
+        getFullMethodPath(sb, truncatePath, 0);
         return sb.toString();
     }
 
-    private synchronized void getFullMethodPath(StringBuilder sb, boolean truncatePath) {
+    private synchronized void getFullMethodPath(StringBuilder sb, boolean truncatePath,
+            int parentCount) {
+        if (parentCount >= SESSION_RECURSION_LIMIT) {
+            Log.w(LOG_TAG, "getFullMethodPath: Hit recursion limit!");
+            sb.append(TRUNCATE_STRING);
+            return;
+        }
         // Return cached value for method path. When returning the truncated path, recalculate the
         // full path without using the cached value.
         if (!TextUtils.isEmpty(mFullMethodPathCache) && !truncatePath) {
@@ -296,7 +331,7 @@ public class Session {
             // Check to see if the session has been renamed yet. If it has not, then the session
             // has not been continued.
             isSessionStarted = !mShortMethodName.equals(parentSession.mShortMethodName);
-            parentSession.getFullMethodPath(sb, truncatePath);
+            parentSession.getFullMethodPath(sb, truncatePath, parentCount + 1);
             sb.append(SUBSESSION_SEPARATION_CHAR);
         }
         // Encapsulate the external session's method name so it is obvious what part of the session
@@ -319,13 +354,10 @@ public class Session {
             mFullMethodPathCache = sb.toString();
         }
     }
+
     // Recursively move to the top of the tree to see if the parent session is external.
     private boolean isSessionExternal() {
-        if (getParentSession() == null) {
-            return isExternal();
-        } else {
-            return getParentSession().isSessionExternal();
-        }
+        return getRootSession("isSessionExternal").isExternal();
     }
 
     @Override

@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Toca de nuevo para abrir"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Desliza el dedo hacia arriba para abrir"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Desliza el dedo hacia arriba para volverlo a intentar"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Este dispositivo está administrado por tu organización"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Este dispositivo está administrado por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Desliza desde el icono para abrir el teléfono"</string>
@@ -543,7 +544,8 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Aplicaciones recientes."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Inicio."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Mantén pulsado el botón Atrás y el de aplicaciones recientes para dejar de fijar esta pantalla"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Mantén pulsado el botón Atrás y el de Inicio para dejar de fijar esta pantalla"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Mantén pulsados los botones Atrás e Inicio para dejar de fijar esta pantalla"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Para dejar de fijar esta pantalla, desliza el dedo hacia arriba y mantenla pulsada"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendido"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, gracias"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Pantalla fijada"</string>

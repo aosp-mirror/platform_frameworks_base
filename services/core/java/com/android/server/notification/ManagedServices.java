@@ -196,18 +196,20 @@ abstract public class ManagedServices {
 
     public void dump(PrintWriter pw, DumpFilter filter) {
         pw.println("    Allowed " + getCaption() + "s:");
-        final int N = mApproved.size();
-        for (int i = 0 ; i < N; i++) {
-            final int userId = mApproved.keyAt(i);
-            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
-            if (approvedByType != null) {
-                final int M = approvedByType.size();
-                for (int j = 0; j < M; j++) {
-                    final boolean isPrimary = approvedByType.keyAt(j);
-                    final ArraySet<String> approved = approvedByType.valueAt(j);
-                    if (approvedByType != null && approvedByType.size() > 0) {
-                        pw.println("      " + String.join(ENABLED_SERVICES_SEPARATOR, approved)
-                                + " (user: " + userId + " isPrimary: " + isPrimary + ")");
+        synchronized (mApproved) {
+            final int N = mApproved.size();
+            for (int i = 0; i < N; i++) {
+                final int userId = mApproved.keyAt(i);
+                final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
+                if (approvedByType != null) {
+                    final int M = approvedByType.size();
+                    for (int j = 0; j < M; j++) {
+                        final boolean isPrimary = approvedByType.keyAt(j);
+                        final ArraySet<String> approved = approvedByType.valueAt(j);
+                        if (approvedByType != null && approvedByType.size() > 0) {
+                            pw.println("      " + String.join(ENABLED_SERVICES_SEPARATOR, approved)
+                                    + " (user: " + userId + " isPrimary: " + isPrimary + ")");
+                        }
                     }
                 }
             }
@@ -240,23 +242,25 @@ abstract public class ManagedServices {
 
     public void dump(ProtoOutputStream proto, DumpFilter filter) {
         proto.write(ManagedServicesProto.CAPTION, getCaption());
-        final int N = mApproved.size();
-        for (int i = 0 ; i < N; i++) {
-            final int userId = mApproved.keyAt(i);
-            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
-            if (approvedByType != null) {
-                final int M = approvedByType.size();
-                for (int j = 0; j < M; j++) {
-                    final boolean isPrimary = approvedByType.keyAt(j);
-                    final ArraySet<String> approved = approvedByType.valueAt(j);
-                    if (approvedByType != null && approvedByType.size() > 0) {
-                        final long sToken = proto.start(ManagedServicesProto.APPROVED);
-                        for (String s : approved) {
-                            proto.write(ServiceProto.NAME, s);
+        synchronized (mApproved) {
+            final int N = mApproved.size();
+            for (int i = 0; i < N; i++) {
+                final int userId = mApproved.keyAt(i);
+                final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
+                if (approvedByType != null) {
+                    final int M = approvedByType.size();
+                    for (int j = 0; j < M; j++) {
+                        final boolean isPrimary = approvedByType.keyAt(j);
+                        final ArraySet<String> approved = approvedByType.valueAt(j);
+                        if (approvedByType != null && approvedByType.size() > 0) {
+                            final long sToken = proto.start(ManagedServicesProto.APPROVED);
+                            for (String s : approved) {
+                                proto.write(ServiceProto.NAME, s);
+                            }
+                            proto.write(ServiceProto.USER_ID, userId);
+                            proto.write(ServiceProto.IS_PRIMARY, isPrimary);
+                            proto.end(sToken);
                         }
-                        proto.write(ServiceProto.USER_ID, userId);
-                        proto.write(ServiceProto.IS_PRIMARY, isPrimary);
-                        proto.end(sToken);
                     }
                 }
             }
@@ -315,33 +319,36 @@ abstract public class ManagedServices {
             trimApprovedListsAccordingToInstalledServices(userId);
         }
 
-        final int N = mApproved.size();
-        for (int i = 0 ; i < N; i++) {
-            final int approvedUserId = mApproved.keyAt(i);
-            if (forBackup && approvedUserId != userId) {
-                continue;
-            }
-            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
-            if (approvedByType != null) {
-                final int M = approvedByType.size();
-                for (int j = 0; j < M; j++) {
-                    final boolean isPrimary = approvedByType.keyAt(j);
-                    final Set<String> approved = approvedByType.valueAt(j);
-                    if (approved != null) {
-                        String allowedItems = String.join(ENABLED_SERVICES_SEPARATOR, approved);
-                        out.startTag(null, TAG_MANAGED_SERVICES);
-                        out.attribute(null, ATT_APPROVED_LIST, allowedItems);
-                        out.attribute(null, ATT_USER_ID, Integer.toString(approvedUserId));
-                        out.attribute(null, ATT_IS_PRIMARY, Boolean.toString(isPrimary));
-                        writeExtraAttributes(out, approvedUserId);
-                        out.endTag(null, TAG_MANAGED_SERVICES);
+        synchronized (mApproved) {
+            final int N = mApproved.size();
+            for (int i = 0; i < N; i++) {
+                final int approvedUserId = mApproved.keyAt(i);
+                if (forBackup && approvedUserId != userId) {
+                    continue;
+                }
+                final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.valueAt(i);
+                if (approvedByType != null) {
+                    final int M = approvedByType.size();
+                    for (int j = 0; j < M; j++) {
+                        final boolean isPrimary = approvedByType.keyAt(j);
+                        final Set<String> approved = approvedByType.valueAt(j);
+                        if (approved != null) {
+                            String allowedItems = String.join(ENABLED_SERVICES_SEPARATOR, approved);
+                            out.startTag(null, TAG_MANAGED_SERVICES);
+                            out.attribute(null, ATT_APPROVED_LIST, allowedItems);
+                            out.attribute(null, ATT_USER_ID, Integer.toString(approvedUserId));
+                            out.attribute(null, ATT_IS_PRIMARY, Boolean.toString(isPrimary));
+                            writeExtraAttributes(out, approvedUserId);
+                            out.endTag(null, TAG_MANAGED_SERVICES);
 
-                        if (!forBackup && isPrimary) {
-                            // Also write values to settings, for observers who haven't migrated yet
-                            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                    getConfig().secureSettingName, allowedItems, approvedUserId);
+                            if (!forBackup && isPrimary) {
+                                // Also write values to settings, for observers who haven't migrated yet
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        getConfig().secureSettingName, allowedItems,
+                                        approvedUserId);
+                            }
+
                         }
-
                     }
                 }
             }
@@ -440,23 +447,25 @@ abstract public class ManagedServices {
         if (TextUtils.isEmpty(approved)) {
             approved = "";
         }
-        ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
-        if (approvedByType == null) {
-            approvedByType = new ArrayMap<>();
-            mApproved.put(userId, approvedByType);
-        }
+        synchronized (mApproved) {
+            ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+            if (approvedByType == null) {
+                approvedByType = new ArrayMap<>();
+                mApproved.put(userId, approvedByType);
+            }
 
-        ArraySet<String> approvedList = approvedByType.get(isPrimary);
-        if (approvedList == null) {
-            approvedList = new ArraySet<>();
-            approvedByType.put(isPrimary, approvedList);
-        }
+            ArraySet<String> approvedList = approvedByType.get(isPrimary);
+            if (approvedList == null) {
+                approvedList = new ArraySet<>();
+                approvedByType.put(isPrimary, approvedList);
+            }
 
-        String[] approvedArray = approved.split(ENABLED_SERVICES_SEPARATOR);
-        for (String pkgOrComponent : approvedArray) {
-            String approvedItem = getApprovedValue(pkgOrComponent);
-            if (approvedItem != null) {
-                approvedList.add(approvedItem);
+            String[] approvedArray = approved.split(ENABLED_SERVICES_SEPARATOR);
+            for (String pkgOrComponent : approvedArray) {
+                String approvedItem = getApprovedValue(pkgOrComponent);
+                if (approvedItem != null) {
+                    approvedList.add(approvedItem);
+                }
             }
         }
     }
@@ -469,23 +478,25 @@ abstract public class ManagedServices {
             boolean isPrimary, boolean enabled) {
         Slog.i(TAG,
                 (enabled ? " Allowing " : "Disallowing ") + mConfig.caption + " " + pkgOrComponent);
-        ArrayMap<Boolean, ArraySet<String>> allowedByType = mApproved.get(userId);
-        if (allowedByType == null) {
-            allowedByType = new ArrayMap<>();
-            mApproved.put(userId, allowedByType);
-        }
-        ArraySet<String> approved = allowedByType.get(isPrimary);
-        if (approved == null) {
-            approved = new ArraySet<>();
-            allowedByType.put(isPrimary, approved);
-        }
-        String approvedItem = getApprovedValue(pkgOrComponent);
+        synchronized (mApproved) {
+            ArrayMap<Boolean, ArraySet<String>> allowedByType = mApproved.get(userId);
+            if (allowedByType == null) {
+                allowedByType = new ArrayMap<>();
+                mApproved.put(userId, allowedByType);
+            }
+            ArraySet<String> approved = allowedByType.get(isPrimary);
+            if (approved == null) {
+                approved = new ArraySet<>();
+                allowedByType.put(isPrimary, approved);
+            }
+            String approvedItem = getApprovedValue(pkgOrComponent);
 
-        if (approvedItem != null) {
-            if (enabled) {
-                approved.add(approvedItem);
-            } else {
-                approved.remove(approvedItem);
+            if (approvedItem != null) {
+                if (enabled) {
+                    approved.add(approvedItem);
+                } else {
+                    approved.remove(approvedItem);
+                }
             }
         }
 
@@ -504,22 +515,26 @@ abstract public class ManagedServices {
     }
 
     protected String getApproved(int userId, boolean primary) {
-        final ArrayMap<Boolean, ArraySet<String>> allowedByType =
-                mApproved.getOrDefault(userId, new ArrayMap<>());
-        ArraySet<String> approved = allowedByType.getOrDefault(primary, new ArraySet<>());
-        return String.join(ENABLED_SERVICES_SEPARATOR, approved);
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> allowedByType =
+                    mApproved.getOrDefault(userId, new ArrayMap<>());
+            ArraySet<String> approved = allowedByType.getOrDefault(primary, new ArraySet<>());
+            return String.join(ENABLED_SERVICES_SEPARATOR, approved);
+        }
     }
 
     protected List<ComponentName> getAllowedComponents(int userId) {
         final List<ComponentName> allowedComponents = new ArrayList<>();
-        final ArrayMap<Boolean, ArraySet<String>> allowedByType =
-                mApproved.getOrDefault(userId, new ArrayMap<>());
-        for (int i = 0; i < allowedByType.size(); i++) {
-            final ArraySet<String> allowed = allowedByType.valueAt(i);
-            for (int j = 0; j < allowed.size(); j++) {
-                ComponentName cn = ComponentName.unflattenFromString(allowed.valueAt(j));
-                if (cn != null) {
-                    allowedComponents.add(cn);
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> allowedByType =
+                    mApproved.getOrDefault(userId, new ArrayMap<>());
+            for (int i = 0; i < allowedByType.size(); i++) {
+                final ArraySet<String> allowed = allowedByType.valueAt(i);
+                for (int j = 0; j < allowed.size(); j++) {
+                    ComponentName cn = ComponentName.unflattenFromString(allowed.valueAt(j));
+                    if (cn != null) {
+                        allowedComponents.add(cn);
+                    }
                 }
             }
         }
@@ -528,14 +543,16 @@ abstract public class ManagedServices {
 
     protected List<String> getAllowedPackages(int userId) {
         final List<String> allowedPackages = new ArrayList<>();
-        final ArrayMap<Boolean, ArraySet<String>> allowedByType =
-                mApproved.getOrDefault(userId, new ArrayMap<>());
-        for (int i = 0; i < allowedByType.size(); i++) {
-            final ArraySet<String> allowed = allowedByType.valueAt(i);
-            for (int j = 0; j < allowed.size(); j++) {
-                String pkgName = getPackageName(allowed.valueAt(j));
-                if (!TextUtils.isEmpty(pkgName)) {
-                    allowedPackages.add(pkgName);
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> allowedByType =
+                    mApproved.getOrDefault(userId, new ArrayMap<>());
+            for (int i = 0; i < allowedByType.size(); i++) {
+                final ArraySet<String> allowed = allowedByType.valueAt(i);
+                for (int j = 0; j < allowed.size(); j++) {
+                    String pkgName = getPackageName(allowed.valueAt(j));
+                    if (!TextUtils.isEmpty(pkgName)) {
+                        allowedPackages.add(pkgName);
+                    }
                 }
             }
         }
@@ -543,12 +560,14 @@ abstract public class ManagedServices {
     }
 
     protected boolean isPackageOrComponentAllowed(String pkgOrComponent, int userId) {
-        ArrayMap<Boolean, ArraySet<String>> allowedByType =
-                mApproved.getOrDefault(userId, new ArrayMap<>());
-        for (int i = 0; i < allowedByType.size(); i++) {
-            ArraySet<String> allowed = allowedByType.valueAt(i);
-            if (allowed.contains(pkgOrComponent)) {
-                return true;
+        synchronized (mApproved) {
+            ArrayMap<Boolean, ArraySet<String>> allowedByType =
+                    mApproved.getOrDefault(userId, new ArrayMap<>());
+            for (int i = 0; i < allowedByType.size(); i++) {
+                ArraySet<String> allowed = allowedByType.valueAt(i);
+                if (allowed.contains(pkgOrComponent)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -558,19 +577,21 @@ abstract public class ManagedServices {
         if (pkg == null) {
             return false;
         }
-        ArrayMap<Boolean, ArraySet<String>> allowedByType =
-                mApproved.getOrDefault(userId, new ArrayMap<>());
-        for (int i = 0; i < allowedByType.size(); i++) {
-            ArraySet<String> allowed = allowedByType.valueAt(i);
-            for (String allowedEntry : allowed) {
-                ComponentName component = ComponentName.unflattenFromString(allowedEntry);
-                if (component != null) {
-                    if (pkg.equals(component.getPackageName())) {
-                        return true;
-                    }
-                } else {
-                    if (pkg.equals(allowedEntry)) {
-                        return true;
+        synchronized (mApproved) {
+            ArrayMap<Boolean, ArraySet<String>> allowedByType =
+                    mApproved.getOrDefault(userId, new ArrayMap<>());
+            for (int i = 0; i < allowedByType.size(); i++) {
+                ArraySet<String> allowed = allowedByType.valueAt(i);
+                for (String allowedEntry : allowed) {
+                    ComponentName component = ComponentName.unflattenFromString(allowedEntry);
+                    if (component != null) {
+                        if (pkg.equals(component.getPackageName())) {
+                            return true;
+                        }
+                    } else {
+                        if (pkg.equals(allowedEntry)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -616,7 +637,9 @@ abstract public class ManagedServices {
 
     public void onUserRemoved(int user) {
         Slog.i(TAG, "Removing approved services for removed user " + user);
-        mApproved.remove(user);
+        synchronized (mApproved) {
+            mApproved.remove(user);
+        }
         rebindServices(true, user);
     }
 
@@ -797,14 +820,16 @@ abstract public class ManagedServices {
 
     protected Set<String> getAllowedPackages() {
         final Set<String> allowedPackages = new ArraySet<>();
-        for (int k = 0; k < mApproved.size(); k++) {
-            ArrayMap<Boolean, ArraySet<String>> allowedByType = mApproved.valueAt(k);
-            for (int i = 0; i < allowedByType.size(); i++) {
-                final ArraySet<String> allowed = allowedByType.valueAt(i);
-                for (int j = 0; j < allowed.size(); j++) {
-                    String pkgName = getPackageName(allowed.valueAt(j));
-                    if (!TextUtils.isEmpty(pkgName)) {
-                        allowedPackages.add(pkgName);
+        synchronized (mApproved) {
+            for (int k = 0; k < mApproved.size(); k++) {
+                ArrayMap<Boolean, ArraySet<String>> allowedByType = mApproved.valueAt(k);
+                for (int i = 0; i < allowedByType.size(); i++) {
+                    final ArraySet<String> allowed = allowedByType.valueAt(i);
+                    for (int j = 0; j < allowed.size(); j++) {
+                        String pkgName = getPackageName(allowed.valueAt(j));
+                        if (!TextUtils.isEmpty(pkgName)) {
+                            allowedPackages.add(pkgName);
+                        }
                     }
                 }
             }
@@ -813,22 +838,24 @@ abstract public class ManagedServices {
     }
 
     private void trimApprovedListsAccordingToInstalledServices(int userId) {
-        final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
-        if (approvedByType == null) {
-            return;
-        }
-        for (int i = 0; i < approvedByType.size(); i++) {
-            final ArraySet<String> approved = approvedByType.valueAt(i);
-            for (int j = approved.size() - 1; j >= 0; j--) {
-                final String approvedPackageOrComponent = approved.valueAt(j);
-                if (!isValidEntry(approvedPackageOrComponent, userId)){
-                    approved.removeAt(j);
-                    Slog.v(TAG, "Removing " + approvedPackageOrComponent
-                            + " from approved list; no matching services found");
-                } else {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Keeping " + approvedPackageOrComponent
-                                + " on approved list; matching services found");
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+            if (approvedByType == null) {
+                return;
+            }
+            for (int i = 0; i < approvedByType.size(); i++) {
+                final ArraySet<String> approved = approvedByType.valueAt(i);
+                for (int j = approved.size() - 1; j >= 0; j--) {
+                    final String approvedPackageOrComponent = approved.valueAt(j);
+                    if (!isValidEntry(approvedPackageOrComponent, userId)) {
+                        approved.removeAt(j);
+                        Slog.v(TAG, "Removing " + approvedPackageOrComponent
+                                + " from approved list; no matching services found");
+                    } else {
+                        if (DEBUG) {
+                            Slog.v(TAG, "Keeping " + approvedPackageOrComponent
+                                    + " on approved list; matching services found");
+                        }
                     }
                 }
             }
@@ -837,20 +864,23 @@ abstract public class ManagedServices {
 
     private boolean removeUninstalledItemsFromApprovedLists(int uninstalledUserId, String pkg) {
         boolean removed = false;
-        final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(uninstalledUserId);
-        if (approvedByType != null) {
-            int M = approvedByType.size();
-            for (int j = 0; j < M; j++) {
-                final ArraySet<String> approved = approvedByType.valueAt(j);
-                int O = approved.size();
-                for (int k = O - 1; k >= 0; k--) {
-                    final String packageOrComponent = approved.valueAt(k);
-                    final String packageName = getPackageName(packageOrComponent);
-                    if (TextUtils.equals(pkg, packageName)) {
-                        approved.removeAt(k);
-                        if (DEBUG) {
-                            Slog.v(TAG, "Removing " + packageOrComponent
-                                    + " from approved list; uninstalled");
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(
+                    uninstalledUserId);
+            if (approvedByType != null) {
+                int M = approvedByType.size();
+                for (int j = 0; j < M; j++) {
+                    final ArraySet<String> approved = approvedByType.valueAt(j);
+                    int O = approved.size();
+                    for (int k = O - 1; k >= 0; k--) {
+                        final String packageOrComponent = approved.valueAt(k);
+                        final String packageName = getPackageName(packageOrComponent);
+                        if (TextUtils.equals(pkg, packageName)) {
+                            approved.removeAt(k);
+                            if (DEBUG) {
+                                Slog.v(TAG, "Removing " + packageOrComponent
+                                        + " from approved list; uninstalled");
+                            }
                         }
                     }
                 }
@@ -887,17 +917,19 @@ abstract public class ManagedServices {
 
         for (int i = 0; i < nUserIds; ++i) {
             final int userId = userIds.get(i);
-            final ArrayMap<Boolean, ArraySet<String>> approvedLists = mApproved.get(userId);
-            if (approvedLists != null) {
-                final int N = approvedLists.size();
-                for (int j = 0; j < N; j++) {
-                    ArraySet<ComponentName> approvedByUser = componentsByUser.get(userId);
-                    if (approvedByUser == null) {
-                        approvedByUser = new ArraySet<>();
-                        componentsByUser.put(userId, approvedByUser);
+            synchronized (mApproved) {
+                final ArrayMap<Boolean, ArraySet<String>> approvedLists = mApproved.get(userId);
+                if (approvedLists != null) {
+                    final int N = approvedLists.size();
+                    for (int j = 0; j < N; j++) {
+                        ArraySet<ComponentName> approvedByUser = componentsByUser.get(userId);
+                        if (approvedByUser == null) {
+                            approvedByUser = new ArraySet<>();
+                            componentsByUser.put(userId, approvedByUser);
+                        }
+                        approvedByUser.addAll(
+                                loadComponentNamesFromValues(approvedLists.valueAt(j), userId));
                     }
-                    approvedByUser.addAll(
-                            loadComponentNamesFromValues(approvedLists.valueAt(j), userId));
                 }
             }
         }

@@ -33,8 +33,9 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.SystemUIRootComponent;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -114,13 +115,21 @@ public class SystemUIFactory {
 
     public SystemUIFactory() {}
 
-    protected void init(Context context) {
-        mRootComponent = DaggerSystemUIFactory_SystemUIRootComponent.builder()
-                .systemUIFactory(this)
+    private void init(Context context) {
+        mRootComponent = buildSystemUIRootComponent(context);
+
+        // Every other part of our codebase currently relies on Dependency, so we
+        // really need to ensure the Dependency gets initialized early on.
+        Dependency.initDependencies(mRootComponent);
+    }
+	
+    protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
+        return DaggerSystemUIRootComponent.builder()
                 .dependencyProvider(new com.android.systemui.DependencyProvider())
                 .contextHolder(new ContextHolder(context))
                 .build();
     }
+
 
     public SystemUIRootComponent getRootComponent() {
         return mRootComponent;
@@ -132,23 +141,24 @@ public class SystemUIFactory {
     }
 
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils,  ViewGroup container,
+            LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardBouncer.BouncerExpansionCallback expansionCallback,
-            KeyguardBypassController bypassController) {
+            FalsingManager falsingManager, KeyguardBypassController bypassController) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
+                dismissCallbackRegistry, falsingManager,
                 expansionCallback, UnlockMethodCache.getInstance(context),
                 KeyguardUpdateMonitor.getInstance(context), bypassController,
                 new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+            ScrimView scrimForBubble,
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
-        return new ScrimController(scrimBehind, scrimInFront, scrimStateListener,
+        return new ScrimController(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
                 scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 
@@ -182,13 +192,6 @@ public class SystemUIFactory {
     public NotificationLockscreenUserManager provideNotificationLockscreenUserManager(
             Context context) {
         return new NotificationLockscreenUserManagerImpl(context);
-    }
-
-    @Singleton
-    @Provides
-    public AssistManager provideAssistManager(DeviceProvisionedController controller,
-            Context context) {
-        return new AssistManager(controller, context);
     }
 
     @Singleton
@@ -238,13 +241,6 @@ public class SystemUIFactory {
 
     @Singleton
     @Provides
-    public NotificationInterruptionStateProvider provideNotificationInterruptionStateProvider(
-            Context context) {
-        return new NotificationInterruptionStateProvider(context);
-    }
-
-    @Singleton
-    @Provides
     @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
     public boolean provideAllowNotificationLongPress() {
         return true;
@@ -268,30 +264,5 @@ public class SystemUIFactory {
         public Context provideContext() {
             return mContext;
         }
-    }
-
-    @Singleton
-    @Component(modules = {SystemUIFactory.class, DependencyProvider.class, DependencyBinder.class,
-            ContextHolder.class})
-    public interface SystemUIRootComponent {
-        @Singleton
-        Dependency.DependencyInjector createDependency();
-
-        @Singleton
-        StatusBar.StatusBarInjector getStatusBarInjector();
-
-        /**
-         * FragmentCreator generates all Fragments that need injection.
-         */
-        @Singleton
-        FragmentService.FragmentCreator createFragmentCreator();
-
-        /**
-         * ViewCreator generates all Views that need injection.
-         */
-        InjectionInflationController.ViewCreator createViewCreator();
-
-        @Singleton
-        GarbageMonitor createGarbageMonitor();
     }
 }

@@ -69,13 +69,13 @@
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"擷取螢幕畫面"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面…"</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面…"</string>
-    <string name="screenshot_saved_title" msgid="5637073968117370753">"螢幕擷取畫面已儲存"</string>
-    <string name="screenshot_saved_text" msgid="7574667448002050363">"輕觸即可查看螢幕擷取畫面"</string>
-    <string name="screenshot_failed_title" msgid="7612509838919089748">"無法儲存螢幕擷取畫面"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"請再次嘗試拍攝螢幕擷取畫面"</string>
-    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"由於儲存空間有限，因此無法儲存螢幕擷取畫面"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕截圖…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕截圖…"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"螢幕截圖已儲存"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"輕觸即可查看螢幕截圖"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"無法儲存螢幕截圖"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"請再次嘗試拍攝螢幕截圖"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"由於儲存空間有限，因此無法儲存螢幕截圖"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"這個應用程式或貴機構不允許擷取螢幕畫面"</string>
     <string name="screenrecord_name" msgid="4196719243134204796">"錄製螢幕畫面"</string>
     <string name="screenrecord_channel_description" msgid="4630777331970993858">"持續顯示螢幕畫面錄製工作階段通知"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次輕觸即可開啟"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"向上滑動即可開啟"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"向上滑動即可重試"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"這個裝置是由貴機構所管理"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"這個裝置是由 <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> 所管理"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑動手機圖示即可啟用"</string>
@@ -458,8 +459,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不要再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
-    <string name="notification_section_header_gentle" msgid="4372438504154095677">"無聲通知"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"清除所有無聲通知"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"靜音通知"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"清除所有靜音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「零打擾」模式已將通知設為暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定這個螢幕畫面，請按住「返回」按鈕和「總覽」按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"如要取消固定這個螢幕畫面，請按住「返回」按鈕和主螢幕按鈕"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"如要取消固定畫面，請向上滑動並按住"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"已固定螢幕畫面"</string>
@@ -643,7 +645,7 @@
     <string name="inline_block_button" msgid="8735843688021655065">"封鎖"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
-    <string name="inline_silent_button_silent" msgid="5315879183296940969">"無聲"</string>
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"靜音"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"繼續顯示通知但不發出音效"</string>
     <string name="inline_silent_button_alert" msgid="6008435419895088034">"快訊"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"繼續顯示通知"</string>
@@ -866,7 +868,7 @@
     <string name="tuner_app" msgid="3507057938640108777">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"快訊"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"電池"</string>
-    <string name="notification_channel_screenshot" msgid="6314080179230000938">"螢幕擷取畫面"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"螢幕截圖"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"儲存空間"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"提示"</string>

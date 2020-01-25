@@ -405,6 +405,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"התראות בדחיפות נמוכה יותר בהמשך"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"הקש שוב כדי לפתוח"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"צריך להחליק כדי לפתוח"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"יש להחליק למעלה כדי לנסות שוב"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"מכשיר זה מנוהל על ידי הארגון שלך"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"המכשיר הזה מנוהל על ידי <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"החלק מהסמל כדי להפעיל את הטלפון"</string>
@@ -462,7 +463,7 @@
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"בזמן הקלטה או העברה, השירות שמספק את הפונקציה הזו יכול לקלוט מידע רגיש שמוצג במסך או מופעל מהמכשיר שלך, כולל מידע רגיש כמו אודיו, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"חשיפת מידע רגיש בזמן העברה/הקלטה"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"אל תציג שוב"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"נקה הכל"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"ניקוי הכל"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ניהול"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"התראות שקטות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"ניקוי כל ההתראות השקטות"</string>
@@ -550,6 +551,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"נשאר בתצוגה עד לביטול ההצמדה. יש ללחוץ לחיצה ארוכה על הלחצן \'דף הבית\' כדי לבטל את ההצמדה."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"כדי לבטל את ההצמדה של מסך זה, יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'סקירה\'"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"כדי לבטל את ההצמדה של מסך זה, יש ללחוץ לחיצה ארוכה על הלחצנים \'הקודם\' ו\'דף הבית\'"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"לביטול ההצמדה של המסך הזה יש להחליק מעלה ולהחזיק"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"הבנתי"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"לא, תודה"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"המסך מוצמד"</string>
@@ -623,7 +625,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"הצג שניות בשעון בשורת הסטטוס. פעולה זו עשויה להשפיע על אורך חיי הסוללה."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"סידור מחדש של הגדרות מהירות"</string>
     <string name="show_brightness" msgid="6613930842805942519">"הצג בהירות בהגדרות מהירות"</string>
-    <string name="experimental" msgid="6198182315536726162">"ניסיוניות"</string>
+    <string name="experimental" msgid="6198182315536726162">"ניסיוני"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"‏האם להפעיל את ה-Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"‏כדי לחבר את המקלדת לטאבלט, תחילה עליך להפעיל את ה-Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"הפעל"</string>

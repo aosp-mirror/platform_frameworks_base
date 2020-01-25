@@ -29,7 +29,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.android.keyguard.R;
+import com.android.systemui.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

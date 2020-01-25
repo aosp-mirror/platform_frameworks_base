@@ -571,6 +571,16 @@ public class SubscriptionManager {
     public static final String ACCESS_RULES = "access_rules";
 
     /**
+     * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
+     * {@link UiccAccessRule#encodeRules} but for the rules that come from CarrierConfigs.
+     * Only present if there are access rules in CarrierConfigs
+     * <p>TYPE: BLOB
+     * @hide
+     */
+    public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS =
+            "access_rules_from_carrier_configs";
+
+    /**
      * TelephonyProvider column name identifying whether an embedded subscription is on a removable
      * card. Such subscriptions are marked inaccessible as soon as the current card is removed.
      * Otherwise, they will remain accessible unless explicitly deleted. Only present if
@@ -2578,7 +2588,6 @@ public class SubscriptionManager {
      *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws IllegalArgumentException if this subscription is not embedded.
      */
     public boolean canManageSubscription(SubscriptionInfo info) {
         return canManageSubscription(info, mContext.getPackageName());
@@ -2594,24 +2603,22 @@ public class SubscriptionManager {
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
      * @return whether the app is authorized to manage this subscription per its access rules.
-     * @throws IllegalArgumentException if this subscription is not embedded.
      * @hide
      */
     public boolean canManageSubscription(SubscriptionInfo info, String packageName) {
-        if (!info.isEmbedded()) {
-            throw new IllegalArgumentException("Not an embedded subscription");
-        }
-        if (info.getAccessRules() == null) {
+        if (info == null || info.getAllAccessRules() == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
         PackageInfo packageInfo;
         try {
-            packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = packageManager.getPackageInfo(packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package: " + packageName, e);
+            logd("Unknown package: " + packageName);
+            return false;
         }
-        for (UiccAccessRule rule : info.getAccessRules()) {
+        for (UiccAccessRule rule : info.getAllAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 return true;
@@ -3002,7 +3009,7 @@ public class SubscriptionManager {
         // to the caller.
         boolean hasCarrierPrivilegePermission = TelephonyManager.from(mContext)
                 .hasCarrierPrivileges(info.getSubscriptionId())
-                || (info.isEmbedded() && canManageSubscription(info));
+                || canManageSubscription(info);
         return hasCarrierPrivilegePermission;
     }
 

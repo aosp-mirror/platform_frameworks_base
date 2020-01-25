@@ -18,9 +18,11 @@ package com.android.server.appop;
 
 import static android.app.AppOpsManager.MAX_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
+import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -171,6 +173,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_RECENT
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_EMPTY
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_NONEXISTENT
+    };
+
+    private static final int[] OPS_RESTRICTED_ON_SUSPEND = {
+            OP_PLAY_AUDIO,
+            OP_RECORD_AUDIO,
+            OP_CAMERA,
     };
 
     Context mContext;
@@ -510,6 +518,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         private void updateProxyState(long key, int proxyUid,
             @Nullable String proxyPackageName) {
+            if (proxyUid == Process.INVALID_UID) {
+                return;
+            }
+
             if (mProxyUids == null) {
                 mProxyUids = new LongSparseLongArray();
             }
@@ -791,20 +803,22 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 final String[] changedPkgs = intent.getStringArrayExtra(
                         Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                ArraySet<ModeCallback> callbacks;
-                synchronized (AppOpsService.this) {
-                    callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
-                    if (callbacks == null) {
-                        return;
+                for (int code : OPS_RESTRICTED_ON_SUSPEND) {
+                    ArraySet<ModeCallback> callbacks;
+                    synchronized (AppOpsService.this) {
+                        callbacks = mOpModeWatchers.get(code);
+                        if (callbacks == null) {
+                            continue;
+                        }
+                        callbacks = new ArraySet<>(callbacks);
                     }
-                    callbacks = new ArraySet<>(callbacks);
-                }
-                for (int i = 0; i < changedUids.length; i++) {
-                    final int changedUid = changedUids[i];
-                    final String changedPkg = changedPkgs[i];
-                    // We trust packagemanager to insert matching uid and packageNames in the
-                    // extras
-                    notifyOpChanged(callbacks, OP_PLAY_AUDIO, changedUid, changedPkg);
+                    for (int i = 0; i < changedUids.length; i++) {
+                        final int changedUid = changedUids[i];
+                        final String changedPkg = changedPkgs[i];
+                        // We trust packagemanager to insert matching uid and packageNames in the
+                        // extras
+                        notifyOpChanged(callbacks, code, changedUid, changedPkg);
+                    }
                 }
             }
         }, packageSuspendFilter);
@@ -1807,6 +1821,9 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
                 boolean raw, boolean verify) {
+        if (isOpRestrictedDueToSuspend(code, packageName, uid)) {
+            return AppOpsManager.MODE_IGNORED;
+        }
         synchronized (this) {
             if (verify) {
                 checkPackage(uid, packageName);
@@ -2661,6 +2678,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         return op;
     }
 
+    private boolean isOpRestrictedDueToSuspend(int code, String packageName, int uid) {
+        if (!ArrayUtils.contains(OPS_RESTRICTED_ON_SUSPEND, code)) {
+            return false;
+        }
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        return pmi.isPackageSuspended(packageName, UserHandle.getUserId(uid));
+    }
+
     private boolean isOpRestrictedLocked(int uid, int code, String packageName) {
         int userHandle = UserHandle.getUserId(uid);
         final int restrictionSetCount = mOpUserRestrictions.size();
@@ -2986,17 +3011,40 @@ public class AppOpsService extends IAppOpsService.Stub {
                 out.startTag(null, "app-ops");
                 out.attribute(null, "v", String.valueOf(CURRENT_VERSION));
 
-                final int uidStateCount = mUidStates.size();
-                for (int i = 0; i < uidStateCount; i++) {
-                    UidState uidState = mUidStates.valueAt(i);
-                    if (uidState.opModes != null && uidState.opModes.size() > 0) {
+                SparseArray<SparseIntArray> uidStatesClone;
+                synchronized (this) {
+                    uidStatesClone = new SparseArray<>(mUidStates.size());
+
+                    final int uidStateCount = mUidStates.size();
+                    for (int uidStateNum = 0; uidStateNum < uidStateCount; uidStateNum++) {
+                        UidState uidState = mUidStates.valueAt(uidStateNum);
+                        int uid = mUidStates.keyAt(uidStateNum);
+
+                        SparseIntArray opModes = uidState.opModes;
+                        if (opModes != null && opModes.size() > 0) {
+                            uidStatesClone.put(uid, new SparseIntArray(opModes.size()));
+
+                            final int opCount = opModes.size();
+                            for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
+                                uidStatesClone.get(uid).put(
+                                        opModes.keyAt(opCountNum),
+                                        opModes.valueAt(opCountNum));
+                            }
+                        }
+                    }
+                }
+
+                final int uidStateCount = uidStatesClone.size();
+                for (int uidStateNum = 0; uidStateNum < uidStateCount; uidStateNum++) {
+                    SparseIntArray opModes = uidStatesClone.valueAt(uidStateNum);
+                    if (opModes != null && opModes.size() > 0) {
                         out.startTag(null, "uid");
-                        out.attribute(null, "n", Integer.toString(uidState.uid));
-                        SparseIntArray uidOpModes = uidState.opModes;
-                        final int opCount = uidOpModes.size();
-                        for (int j = 0; j < opCount; j++) {
-                            final int op = uidOpModes.keyAt(j);
-                            final int mode = uidOpModes.valueAt(j);
+                        out.attribute(null, "n",
+                                Integer.toString(uidStatesClone.keyAt(uidStateNum)));
+                        final int opCount = opModes.size();
+                        for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
+                            final int op = opModes.keyAt(opCountNum);
+                            final int mode = opModes.valueAt(opCountNum);
                             out.startTag(null, "op");
                             out.attribute(null, "n", Integer.toString(op));
                             out.attribute(null, "m", Integer.toString(mode));

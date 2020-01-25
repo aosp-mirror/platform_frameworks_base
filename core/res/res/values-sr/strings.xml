@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="4638956954852782576">"&lt;Без наслова&gt;"</string>
+    <string name="untitled" msgid="4638956954852782576">"&lt;Без имена&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нема броја телефона)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Непознато"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Гласовна пошта"</string>
@@ -1277,10 +1277,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Додирните да бисте видели све мреже"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Повежи"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Све мреже"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Желите ли да се повежете са Wi-Fi мрежама?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> предлаже"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Да"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Желите да дозволите предложене Wi‑Fi мреже?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Мреже које предлаже <xliff:g id="NAME">%s</xliff:g>. Уређај ће се можда повезати аутоматски."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Дозволи"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Не, хвала"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ће се аутоматски укључити"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Када сте у близини сачуване мреже високог квалитета"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не укључуј поново"</string>
@@ -1922,8 +1922,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Некатегоризовано"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ви подешавате важност ових обавештења."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ово је важно због људи који учествују."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g> (корисник са овим налогом већ постоји)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Желите ли да дозволите да <xliff:g id="APP">%1$s</xliff:g> направи новог корисника са налогом <xliff:g id="ACCOUNT">%2$s</xliff:g> (корисник са тим налогом већ постоји)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Желите ли да дозволите да <xliff:g id="APP">%1$s</xliff:g> направи новог корисника са налогом <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Додајте језик"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Подешавање региона"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Унесите назив језика"</string>

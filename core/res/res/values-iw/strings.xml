@@ -102,7 +102,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏העמית ביקש TTY במצב HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏העמית ביקש TTY במצב VCO"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"‏העמית ביקש TTY במצב OFF"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Google Voice"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"קול"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Google Data"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"פקס"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -1299,10 +1299,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"יש להקיש כדי לראות את כל הרשתות"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"התחבר"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"כל הרשתות"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‏להתחבר לרשתות Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"הוצע על-ידי <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"כן"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"לא"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏לאפשר הצעות לרשתות Wi-Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"הצעות לרשתות <xliff:g id="NAME">%s</xliff:g>. ייתכן שחיבור המכשיר ייעשה באופן אוטומטי."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"אישור"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"לא תודה"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏ה-Wi-Fi יופעל אוטומטית"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"כשתימצאו בקרבת רשת באיכות גבוהה ששמרתם"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"אל תפעיל שוב"</string>
@@ -1956,8 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ללא שיוך לקטגוריה"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"עליך להגדיר את החשיבות של ההתראות האלה."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"האם לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"האם לאפשר לאפליקציה <xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש באמצעות <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"הוספת שפה"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"העדפת אזור"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"הקלד שם שפה"</string>

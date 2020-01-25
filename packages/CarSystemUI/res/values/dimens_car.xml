@@ -43,4 +43,10 @@
     <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
     <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
 
+    <!-- dimensions for the unlock dialog -->
+    <dimen name="unlock_dialog_width">500dp</dimen>
+    <dimen name="unlock_dialog_radius">16dp</dimen>
+    <dimen name="unlock_dialog_avatar_size">100dp</dimen>
+    <dimen name="unlock_dialog_progress_bar_size">140dp</dimen>
+
 </resources>

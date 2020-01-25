@@ -1299,10 +1299,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Kliknij, by zobaczyć wszystkie sieci"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Połącz"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Wszystkie sieci"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Nawiązywać połączenia z sieciami Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Sugestia: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Tak"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nie"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Zezwalać na sugerowane sieci Wi‑Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Sugerowane sieci: <xliff:g id="NAME">%s</xliff:g>. Urządzenie może łączyć się automatycznie."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Zezwól"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nie, dziękuję"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi włączy się automatycznie"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gdy znajdziesz się w pobliżu zapisanej sieci o mocnym sygnale"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nie włączaj ponownie"</string>
@@ -1956,8 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Bez kategorii"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ustawiłeś ważność tych powiadomień."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ta wiadomość jest ważna ze względu na osoby uczestniczące w wątku."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>)? Użytkownik z tym kontem już istnieje."</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Zezwolić aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g> (użytkownik dla tego konta już istnieje)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Zezwolić aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodaj język"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Ustawienie regionu"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Wpisz nazwę języka"</string>

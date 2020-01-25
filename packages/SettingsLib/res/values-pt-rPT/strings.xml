@@ -387,8 +387,8 @@
     <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Deve durar até cerca da(s) <xliff:g id="TIME">%1$s</xliff:g> com base na sua utilização (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Deve durar até cerca da(s) <xliff:g id="TIME">%1$s</xliff:g> com base na sua utilização."</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Deve durar até cerca da(s) <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Deve durar até cerca da(s) <xliff:g id="TIME">%1$s</xliff:g>."</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Deve durar até cerca da(s) <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Deve durar até cerca da(s) <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Até à(s) <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Prolongar a autonomia da bateria após <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Resta(m) menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>."</string>

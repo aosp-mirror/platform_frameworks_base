@@ -471,7 +471,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"للسماح للتطبيق باستخدام مرسل الأشعة تحت الحمراء الخاص بالجهاز اللوحي."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"يتيح للتطبيق استخدام مرسل الأشعة تحت الحمراء في جهاز التلفزيون."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"للسماح للتطبيق باستخدام مرسل الأشعة تحت الحمراء الخاص بالهاتف."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"تعيين الخلفية"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"ضبط الخلفية"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"للسماح للتطبيق بتعيين خلفية النظام."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"تعديل حجم الخلفية"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"للسماح للتطبيق بتعيين تلميحات حجم خلفية النظام."</string>
@@ -533,7 +533,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"للسماح للتطبيق بتعديل مجموعة صورك."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"قراءة المواقع من مجموعة الوسائط التابعة لك"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"للسماح للتطبيق بقراءة المواقع من مجموعة الوسائط التابعة لك."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"التحقق من هويتك"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"إثبات هويتك"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"معدّات المقاييس الحيوية غير متاحة."</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"تم إلغاء المصادقة."</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"لم يتم التعرف عليها."</string>
@@ -1343,10 +1343,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"انقر للاطلاع على جميع الشبكات"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"جميع الشبكات"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"‏هل تريد الاتصال بشبكات Wi-Fi؟"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"اقتراح من <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"نعم"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"لا"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏هل تريد السماح لشبكات Wi‑Fi المقترحة؟"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"شبكات <xliff:g id="NAME">%s</xliff:g> المقترحة - قد يتم توصيل الجهاز تلقائيًا."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"سماح"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"لا، شكرًا"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏سيتم تشغيل شبكة Wi-Fi تلقائيًا."</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"عندما تكون بالقرب من شبكة محفوظة عالية الجودة"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"عدم إعادة التشغيل"</string>
@@ -1677,7 +1677,7 @@
     <string name="sending" msgid="3245653681008218030">"جارٍ الإرسال..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
-    <string name="activity_resolver_use_always" msgid="8017770747801494933">"دومًا"</string>
+    <string name="activity_resolver_use_always" msgid="8017770747801494933">"دائمًا"</string>
     <string name="activity_resolver_set_always" msgid="1422574191056490585">"ضبط على الفتح دائمًا"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"مرة واحدة فقط"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"الإعدادات"</string>
@@ -2024,8 +2024,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"لقد عيَّنت أهمية هذه الإشعارات."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g>؟"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"هل تسمح لتطبيق <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> ؟"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>

@@ -261,7 +261,7 @@ public class Letterbox {
 
         public void remove() {
             if (mSurface != null) {
-                mSurface.remove();
+                new SurfaceControl.Transaction().remove(mSurface).apply();
                 mSurface = null;
             }
             if (mInputInterceptor != null) {

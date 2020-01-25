@@ -1257,10 +1257,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"සියලු ජාල බැලීමට තට්ටු කරන්න"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"සම්බන්ධ කරන්න"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"සියලු ජාල"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi ජාල වෙත සම්බන්ධ කරන්නේද?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> විසින් යෝජනා කරන ලදි"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ඔව්"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"නැත"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"යෝජිත Wi-Fi ජාල ඉඩ දෙන්නද?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> යෝජිත ජාල. උපාංගය ස්වයංක්‍රියව සම්බන්ධ වනු ඇත."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ඉඩ දෙන්න"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"එපා, ස්තූතියි"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ස්වයංක්‍රියව ක්‍රියාත්මක වනු ඇත"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ඔබ උසස් තත්ත්වයේ සුරැකි ජාලයක් අවට සිටින විට"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"නැවත ක්‍රියාත්මක නොකරන්න"</string>
@@ -1890,8 +1890,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"වර්ගීකරණය නොකළ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ඔබ මෙම දැනුම්දීම්වල වැදගත්කම සකසා ඇත."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"සම්බන්ධ වූ පුද්ගලයන් නිසා මෙය වැදගත් වේ."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"භාෂාවක් එක් කරන්න"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ප්‍රදේශ මනාපය"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"භාෂා නම ටයිප් කරන්න"</string>

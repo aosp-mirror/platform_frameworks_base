@@ -117,7 +117,7 @@
     <string name="kg_pin_accepted" msgid="7637293533973802143">"Kood on õige."</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Teenus puudub."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Vaheta sisestusmeetodit"</string>
-    <string name="airplane_mode" msgid="3807209033737676010">"Lennurežiim"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"Lennukirežiim"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Pärast seadme taaskäivitamist tuleb sisestada muster"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Pärast seadme taaskäivitamist tuleb sisestada PIN-kood"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Pärast seadme taaskäivitamist tuleb sisestada parool"</string>

@@ -226,7 +226,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoninnstillinger"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Lås skjermen"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Slå av"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Nødsituasjon"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Nødssituasjon"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Feilrapport"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Avslutt økten"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Skjermdump"</string>
@@ -291,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til kalenderen din?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sende og se SMS-meldinger?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sende og se tekstmeldinger?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medieinnhold og filer på enheten din"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til bilder, medier og filer på enheten din?"</string>
@@ -812,7 +812,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Trykk på menyknappen for å låse opp eller ringe et nødnummer."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Trykk på menyknappen for å låse opp."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Tegn mønster for å låse opp"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Nødsituasjon"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Nødssituasjon"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Tilbake til samtale"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Riktig!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Prøv på nytt"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trykk for å se alle nettverkene"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Koble til"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle nettverk"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Vil du koble til Wi-Fi-nettverk?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Foreslått av <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nei"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vil du tillate foreslåtte Wi-Fi nettverk?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g>-foreslåtte nettverk. Enheten kan koble til automatisk."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Tillat"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nei takk"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi slås på automatisk"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Når du er i nærheten av et lagret nettverk av høy kvalitet"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ikke slå på igjen"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Uten kategori"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Du angir viktigheten for disse varslene."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dette er viktig på grunn av folkene som er involvert."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Det finnes allerede en bruker med denne kontoen.)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g> (en bruker med denne kontoen eksisterer allerede)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Legg til et språk"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regionsinnstilling"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Skriv inn språknavn"</string>

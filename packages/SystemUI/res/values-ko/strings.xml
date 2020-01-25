@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="8187820911065797519">"절전 모드 사용 설정"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"설정"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"자동 화면 회전"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"화면 자동 회전"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"무시"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"자동"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"알림"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"다시 탭하여 열기"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"위로 스와이프하여 열기"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"조직에서 관리하는 기기입니다."</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>에서 관리하는 기기입니다."</string>
     <string name="phone_hint" msgid="4872890986869209950">"전화 기능을 사용하려면 아이콘에서 스와이프하세요."</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 홈을 길게 터치하세요."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"이 화면을 고정 해제하려면 뒤로 및 최근 사용 버튼을 길게 터치하세요."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"이 화면을 고정 해제하려면 뒤로 및 홈 버튼을 길게 터치하세요."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"이 화면을 고정 해제하려면 위로 스와이프하고 유지하세요."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"확인"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"거부"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"화면 고정됨"</string>

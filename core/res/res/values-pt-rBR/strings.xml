@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toque para ver todas as redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectar"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas as redes"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Conectar a redes Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Sugerido por <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sim"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Não"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Permitir redes Wi-Fi sugeridas?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Redes sugeridas pelo app <xliff:g id="NAME">%s</xliff:g>. O dispositivo pode se conectar automaticamente."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Permitir"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Não"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"O Wi‑Fi será ativado automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quando você estiver perto de uma rede salva de alta qualidade"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Não ativar novamente"</string>
@@ -1476,7 +1476,7 @@
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"O app para carro está sendo usado"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toque para sair do app para carro."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Vínculo ou ponto de acesso ativo"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Ponto de acesso ou tethering ativo"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toque para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering desativado"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Fale com seu administrador para saber detalhes"</string>
@@ -1670,8 +1670,8 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"O atalho de acessibilidade desativou o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Toque nos dois botões de volume e os mantenha pressionados por três segundo para usar o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Escolha um serviço a ser usado quando você toca no botão Acessibilidade:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Escolha um serviço a ser usado com o gesto de acessibilidade (deslizar de baixo para cima na tela com dois dedos):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Escolha um serviço a ser usado com o gesto de acessibilidade (deslizar de baixo para cima na tela com três dedos):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Escolha um serviço para usar com o gesto de acessibilidade (deslizar de baixo para cima na tela com dois dedos):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Escolha um serviço para usar com o gesto de acessibilidade (deslizar de baixo para cima na tela com três dedos):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Para alternar entre serviços, toque no botão de acessibilidade e mantenha-o pressionado."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Para alternar entre serviços, deslize de baixo para cima na tela com dois dedos sem soltar."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Para alternar entre serviços, deslize de baixo para cima na tela com três dedos sem soltar."</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sem classificação"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Você definiu a importância dessas notificações."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Isso é importante por causa das pessoas envolvidas."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Permitir que <xliff:g id="APP">%1$s</xliff:g> crie um novo usuário com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Permitir que <xliff:g id="APP">%1$s</xliff:g> crie um novo usuário com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um usuário com essa conta)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Permitir que o app <xliff:g id="APP">%1$s</xliff:g> crie um novo usuário com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um usuário com essa conta)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Permitir que o app <xliff:g id="APP">%1$s</xliff:g> crie um novo usuário com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Digitar nome do idioma"</string>

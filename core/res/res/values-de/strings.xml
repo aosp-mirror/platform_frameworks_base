@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; auf deine Kontakte zugreift?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zugreifen"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; den Gerätestandort abruft?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Zulassen, dass die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; den Gerätestandort abruft?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Die App hat nur Zugriff auf den Gerätestandort, solange du sie verwendest"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;ständig&lt;/b&gt; auf deinen Standort zugreift?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Die App hat gegenwärtig nur dann Zugriff auf den Gerätestandort, wenn du sie verwendest"</string>
@@ -291,7 +291,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; auf deinen Kalender zugreift?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS senden und abrufen"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS sendet und aufruft?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Zulassen, dass die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS sendet und aufruft?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"auf Fotos, Medien und Dateien auf deinem Gerät zugreifen"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Zulassen, dass &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; auf Fotos, Medien und Dateien auf deinem Gerät zugreift?"</string>
@@ -996,7 +996,7 @@
     <string name="weeks" msgid="6509623834583944518">"Wochen"</string>
     <string name="year" msgid="4001118221013892076">"Jahr"</string>
     <string name="years" msgid="6881577717993213522">"Jahre"</string>
-    <string name="now_string_shortest" msgid="8912796667087856402">"jetzt"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"Jetzt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tippen, um alle Netzwerke zu sehen"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinden"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle Netzwerke"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Verbindung mit WLANs herstellen?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Vorschlag von <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ja"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nein"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vorgeschlagene WLANs zulassen?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Von <xliff:g id="NAME">%s</xliff:g> vorgeschlagene Netzwerke. Gerät verbindet sich möglicherweise automatisch."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Zulassen"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nein danke"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN wird automatisch aktiviert"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wenn du in der Nähe eines sicheren gespeicherten Netzwerks bist"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nicht wieder aktivieren"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Unkategorisiert"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Du hast die Wichtigkeit dieser Benachrichtigungen festgelegt."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Diese Benachrichtigung ist aufgrund der beteiligten Personen wichtig."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Möchtest du zulassen, dass <xliff:g id="APP">%1$s</xliff:g> einen neuen Nutzer mit <xliff:g id="ACCOUNT">%2$s</xliff:g> erstellt?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Möchtest du zulassen, dass <xliff:g id="APP">%1$s</xliff:g> einen neuen Nutzer mit <xliff:g id="ACCOUNT">%2$s</xliff:g> erstellt? Dieses Konto wird jedoch bereits von einem anderen Nutzer verwendet."</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Es gibt bereits einen Nutzer mit <xliff:g id="ACCOUNT">%2$s</xliff:g>. Möchtest du zulassen, dass <xliff:g id="APP">%1$s</xliff:g> einen neuen Nutzer mit diesem Konto erstellt?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Möchtest du zulassen, dass <xliff:g id="APP">%1$s</xliff:g> einen neuen Nutzer mit <xliff:g id="ACCOUNT">%2$s</xliff:g> erstellt?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Sprache hinzufügen"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Region auswählen"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Sprache eingeben"</string>

@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifikasi kurang darurat di bawah"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ketuk lagi untuk membuka"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Geser ke atas untuk membuka"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Geser ke atas untuk mencoba lagi"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Perangkat ini dikelola oleh organisasi"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Perangkat ini dikelola oleh <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Geser dari ikon untuk telepon"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Beranda untuk melepas pin."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Ringkasan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Untuk melepas pin layar ini, sentuh lama tombol Kembali dan Beranda"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Untuk melepas pin layar ini, geser ke atas &amp; tahan"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Mengerti"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Lain kali"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Layar dipasangi pin"</string>

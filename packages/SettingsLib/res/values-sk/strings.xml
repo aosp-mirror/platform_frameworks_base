@@ -385,10 +385,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Zostáva približne <xliff:g id="TIME_REMAINING">%1$s</xliff:g> – závisí to od intenzity využitia (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Mal by vydržať približne do <xliff:g id="TIME">%1$s</xliff:g> v závislosti od využitia (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Mal by vydržať približne do <xliff:g id="TIME">%1$s</xliff:g> v závislosti od využitia"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Mal by vydržať približne <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Mal by vydržať približne do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Podľa vášho využitia (<xliff:g id="LEVEL">%2$s</xliff:g>) vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Podľa vášho využitia vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Predĺžiť výdrž batérie minimálne do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Zostáva menej ako <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
@@ -402,8 +402,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Tablet sa môže čoskoro vypnúť (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Zariadenie sa môže čoskoro vypnúť (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Zostávajúci čas do úplného nabitia: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabitia"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> do úplného nabitia"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g> do úplného nabitia"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Neznáme"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Nabíja sa"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"nabíja sa"</string>

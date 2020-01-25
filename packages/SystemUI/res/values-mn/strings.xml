@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нээхийн тулд дахин товшино уу"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Нээхийн тулд дээш шударна уу"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Дахин оролдохын тулд дээш шударна уу"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Энэ төхөөрөмжийг таны байгууллага удирдаж байна"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Энэ төхөөрөмжийг <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> удирддаг"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Утсыг гаргахын тулд дүрс тэмдгээс шудрах"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Таныг тогтоосныг болиулах хүртэл үүнийг харуулсан хэвээр байна. Тогтоосныг болиулахын тулд Нүүр хуудас товчлуурыг дараад хүлээнэ үү."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Энэ дэлгэцийг тогтоосныг болиулахын тулд Буцах, Тойм товчлуурыг дараад хүлээнэ үү"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Энэ дэлгэцийг тогтоосныг болиулахын тулд Буцах, Нүүр хуудас товчлуурыг дараад хүлээнэ үү"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Энэ дэлгэцийг тогтоосныг болиулахын тулд дээш шудраад хүлээнэ үү"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Ойлголоо"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Үгүй"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Дэлгэцийг тогтоосон"</string>

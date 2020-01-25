@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ಕೆಳಗೆ ಕಡಿಮೆ ಅವಸರದ ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಸಂಸ್ಥೆ ನಿರ್ವಹಿಸುತ್ತಿದೆ"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ಈ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ರಿಂದ ನಿರ್ವಹಿಸಲಾಗಿದೆ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ಫೋನ್‌ಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
@@ -449,7 +450,7 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುವುದು."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟಿಂಗ್ ಮಾಡುವಾಗ, ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯಂತಹ ಆಡಿಯೋ, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಮಾಡಿದ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಿಂದ ಪ್ಲೇ ಮಾಡಿದ ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು."</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಮುಖಪುಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"ಈ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ &amp; ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ತಿಳಿಯಿತು"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ಧನ್ಯವಾದಗಳು"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"ಪರದೆಯನ್ನು ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>

@@ -198,6 +198,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.res.Resources;
 import android.content.rollback.IRollbackManager;
 import android.database.ContentObserver;
@@ -238,6 +239,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
@@ -2027,6 +2029,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     pkgList.add(packageName);
                     sendResourcesChangedBroadcast(true, true, pkgList, uidArray, null);
                 }
+            } else if (!ArrayUtils.isEmpty(res.libraryConsumers)) { // if static shared lib
+                for (int i = 0; i < res.libraryConsumers.size(); i++) {
+                    PackageParser.Package pkg = res.libraryConsumers.get(i);
+                    // send broadcast that all consumers of the static shared library have changed
+                    sendPackageChangedBroadcast(pkg.packageName, false /*killFlag*/,
+                            new ArrayList<>(Collections.singletonList(pkg.packageName)),
+                            pkg.applicationInfo.uid);
+                }
             }
 
             // Work that needs to happen on first install within each user
@@ -2123,6 +2133,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 notifyInstallObserver(packageName);
             }
         }
+    }
+
+    @Override
+    public List<SplitPermissionInfoParcelable> getSplitPermissions() {
+        return PermissionManager.splitPermissionInfoListToParcelableList(
+                SystemConfig.getInstance().getSplitPermissions());
     }
 
     private void notifyInstallObserver(String packageName) {
@@ -12277,6 +12293,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
         }
+        if (reconciledPkg.installResult != null) {
+            reconciledPkg.installResult.libraryConsumers = clientLibPkgs;
+        }
 
         if ((scanFlags & SCAN_BOOTING) != 0) {
             // No apps can run during boot scan, so they don't need to be frozen
@@ -16130,6 +16149,8 @@ public class PackageManagerService extends IPackageManager.Stub
         String installerPackageName;
         PackageRemovedInfo removedInfo;
         ArrayMap<String, PackageInstalledInfo> addedChildPackages;
+        // The set of packages consuming this shared library or null if no consumers exist.
+        ArrayList<PackageParser.Package> libraryConsumers;
 
         public void setError(int code, String msg) {
             setReturnCode(code);
@@ -18884,8 +18905,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
             if (removedAppId >= 0) {
+                // If a system app's updates are uninstalled the UID is not actually removed. Some
+                // services need to know the package name affected.
+                if (extras.getBoolean(Intent.EXTRA_REPLACING, false)) {
+                    extras.putString(Intent.EXTRA_PACKAGE_NAME, removedPackage);
+                }
+
                 packageSender.sendPackageBroadcast(Intent.ACTION_UID_REMOVED,
-                    null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
+                        null, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
                     null, null, broadcastUsers, instantUserIds);
             }
         }
@@ -18974,19 +19001,20 @@ public class PackageManagerService extends IPackageManager.Stub
                         // or packages running under the shared user of the removed
                         // package if revoking the permissions requested only by the removed
                         // package is successful and this causes a change in gids.
+                        boolean shouldKill = false;
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             final int userIdToKill = mSettings.updateSharedUserPermsLPw(deletedPs,
                                     userId);
-                            if (userIdToKill == UserHandle.USER_ALL
-                                    || userIdToKill >= UserHandle.USER_SYSTEM) {
-                                // If gids changed for this user, kill all affected packages.
-                                mHandler.post(() -> {
-                                    // This has to happen with no lock held.
-                                    killApplication(deletedPs.name, deletedPs.appId,
-                                            KILL_APP_REASON_GIDS_CHANGED);
-                                });
-                                break;
-                            }
+                            shouldKill |= userIdToKill == UserHandle.USER_ALL
+                                    || userIdToKill >= UserHandle.USER_SYSTEM;
+                        }
+                        // If gids changed, kill all affected packages.
+                        if (shouldKill) {
+                            mHandler.post(() -> {
+                                // This has to happen with no lock held.
+                                killApplication(deletedPs.name, deletedPs.appId,
+                                        KILL_APP_REASON_GIDS_CHANGED);
+                            });
                         }
                     }
                     clearPackagePreferredActivitiesLPw(
@@ -20943,7 +20971,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
         UserManagerService ums = UserManagerService.getInstance();
-        if (ums != null) {
+        if (ums != null && !sessionInfo.isStaged()) {
             final UserInfo parent = ums.getProfileParent(userId);
             final int launcherUid = (parent != null) ? parent.id : userId;
             final ComponentName launcherComponent = getDefaultHomeActivity(launcherUid);

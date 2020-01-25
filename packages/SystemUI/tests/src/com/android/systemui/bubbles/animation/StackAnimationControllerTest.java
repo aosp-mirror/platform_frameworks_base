@@ -339,10 +339,10 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
 
         @Override
         protected void springFirstBubbleWithStackFollowing(DynamicAnimation.ViewProperty property,
-                SpringForce spring, float vel, float finalPosition) {
+                SpringForce spring, float vel, float finalPosition, Runnable... after) {
             mMainThreadHandler.post(() ->
                     super.springFirstBubbleWithStackFollowing(
-                            property, spring, vel, finalPosition));
+                            property, spring, vel, finalPosition, after));
         }
     }
 }

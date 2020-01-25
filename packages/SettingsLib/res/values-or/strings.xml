@@ -402,7 +402,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"ଖୁବ୍ ଶୀଘ୍ର ଟାବଲେଟ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ଖୁବ୍ ଶୀଘ୍ର ଡିଭାଇସ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"ସମ୍ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାପାଇଁ <xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ ଅଛି"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"ସମ୍ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାପାଇଁ <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବା ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ଅଜ୍ଞାତ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ଚାର୍ଜ ହେଉଛି"</string>

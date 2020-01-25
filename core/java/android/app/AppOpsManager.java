@@ -834,9 +834,12 @@ public class AppOpsManager {
     public static final int OP_ACCESS_ACCESSIBILITY = 88;
     /** @hide Read the device identifiers (IMEI / MEID, IMSI, SIM / Build serial) */
     public static final int OP_READ_DEVICE_IDENTIFIERS = 89;
+    /** @hide Read location metadata from media */
+    public static final int OP_ACCESS_MEDIA_LOCATION = 90;
+
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 90;
+    public static final int _NUM_OP = 91;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1107,6 +1110,9 @@ public class AppOpsManager {
     @TestApi
     @SystemApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    /** @hide Read location metadata from media */
+    public static final String OPSTR_ACCESS_MEDIA_LOCATION = "android:access_media_location";
+
     /** @hide Interact with accessibility. */
     @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
@@ -1134,6 +1140,7 @@ public class AppOpsManager {
             // Storage
             OP_READ_EXTERNAL_STORAGE,
             OP_WRITE_EXTERNAL_STORAGE,
+            OP_ACCESS_MEDIA_LOCATION,
             // Location
             OP_COARSE_LOCATION,
             OP_FINE_LOCATION,
@@ -1273,6 +1280,7 @@ public class AppOpsManager {
             OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
             OP_ACCESS_ACCESSIBILITY,            // ACCESS_ACCESSIBILITY
             OP_READ_DEVICE_IDENTIFIERS,         // READ_DEVICE_IDENTIFIERS
+            OP_ACCESS_MEDIA_LOCATION,           // ACCESS_MEDIA_LOCATION
     };
 
     /**
@@ -1369,6 +1377,7 @@ public class AppOpsManager {
             OPSTR_LEGACY_STORAGE,
             OPSTR_ACCESS_ACCESSIBILITY,
             OPSTR_READ_DEVICE_IDENTIFIERS,
+            OPSTR_ACCESS_MEDIA_LOCATION,
     };
 
     /**
@@ -1466,6 +1475,7 @@ public class AppOpsManager {
             "LEGACY_STORAGE",
             "ACCESS_ACCESSIBILITY",
             "READ_DEVICE_IDENTIFIERS",
+            "ACCESS_MEDIA_LOCATION",
     };
 
     /**
@@ -1564,6 +1574,7 @@ public class AppOpsManager {
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
             null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
     };
 
     /**
@@ -1662,6 +1673,7 @@ public class AppOpsManager {
             null, // LEGACY_STORAGE
             null, // ACCESS_ACCESSIBILITY
             null, // READ_DEVICE_IDENTIFIERS
+            null, // ACCESS_MEDIA_LOCATION
     };
 
     /**
@@ -1759,6 +1771,7 @@ public class AppOpsManager {
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
     };
 
     /**
@@ -1855,6 +1868,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
             AppOpsManager.MODE_ALLOWED, // ACCESS_ACCESSIBILITY
             AppOpsManager.MODE_ERRORED, // READ_DEVICE_IDENTIFIERS
+            AppOpsManager.MODE_ALLOWED, // ALLOW_MEDIA_LOCATION
     };
 
     /**
@@ -1955,6 +1969,7 @@ public class AppOpsManager {
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
     };
 
     /**
@@ -2587,7 +2602,7 @@ public class AppOpsManager {
          * @return The proxy UID.
          */
         public int getProxyUid() {
-            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+            return (int) findFirstNonNegativeForFlagsInStates(mProxyUids,
                     MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
         }
 
@@ -2609,7 +2624,7 @@ public class AppOpsManager {
          * @return The proxy UID.
          */
         public int getProxyUid(@UidState int uidState, @OpFlags int flags) {
-            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+            return (int) findFirstNonNegativeForFlagsInStates(mProxyUids,
                     uidState, uidState, flags);
         }
 
@@ -4169,8 +4184,8 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
      * @return The sum.
      */
@@ -4199,13 +4214,13 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
      * @return The non-negative value or -1.
      */
     private static long findFirstNonNegativeForFlagsInStates(@Nullable LongSparseLongArray counts,
-            @OpFlags int flags, @UidState int beginUidState, @UidState int endUidState) {
+            @UidState int beginUidState, @UidState int endUidState, @OpFlags int flags) {
         if (counts == null) {
             return -1;
         }
@@ -4231,14 +4246,14 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
      * @return The non-negative value or -1.
      */
     private static @Nullable String findFirstNonNullForFlagsInStates(
-            @Nullable LongSparseArray<String> counts, @OpFlags int flags,
-            @UidState int beginUidState, @UidState int endUidState) {
+            @Nullable LongSparseArray<String> counts, @UidState int beginUidState,
+            @UidState int endUidState, @OpFlags int flags) {
         if (counts == null) {
             return null;
         }

@@ -22,7 +22,7 @@ import android.view.View;
 
 import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SystemUIFactory;
+import com.android.systemui.SystemUIRootComponent;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 
@@ -51,7 +51,7 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
     private final FragmentCreator mFragmentCreator;
 
     @Inject
-    public FragmentService(SystemUIFactory.SystemUIRootComponent rootComponent) {
+    public FragmentService(SystemUIRootComponent rootComponent) {
         mFragmentCreator = rootComponent.createFragmentCreator();
         initInjectionMap();
     }

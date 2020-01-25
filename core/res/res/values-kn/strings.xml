@@ -1152,7 +1152,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"ಈ ಕ್ರಿಯೆಗೆ ಡಿಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ."</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೆಯ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೊಂದು ಆ್ಯಪ್ ಬಳಸಿ"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾದ ಡಿಫಾಲ್ಟ್‌‌ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ಸಾಧನಕ್ಕೆ ಅಪ್ಲಿಕೇಶನ್‌‌ವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳು"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳಿಗೆ ಸಂಪರ್ಕಿಸುವುದೇ?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"ಸೂಚಿಸಿದವರು: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"ಹೌದು"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"ಇಲ್ಲ"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"ಸೂಚಿಸಿರುವ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> ಸೂಚಿಸಿರುವ ನೆಟ್‌ವರ್ಕ್‌ಗಳು. ಸಾಧನಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಗೊಳ್ಳಬಹುದು."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ಅನುಮತಿಸಿ"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"ಬೇಡ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ವೈ‑ಫೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಆಗುತ್ತದೆ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ನೀವು ಉಳಿಸಿದ ಅಧಿಕ ಗುಣಮಟ್ಟದ ನೆಟ್‌ವರ್ಕ್‌ ಸಮೀಪದಲ್ಲಿದ್ದಾಗ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ಮತ್ತೆ ಆನ್ ಮಾಡಲು ಹಿಂತಿರುಗಬೇಡಿ"</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ವರ್ಗೀಕರಿಸದಿರುವುದು"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ನೀವು ಈ ಅಧಿಸೂಚನೆಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಿರುವಿರಿ."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ಜನರು ತೊಡಗಿಕೊಂಡಿರುವ ಕಾರಣ ಇದು ಅತ್ಯಂತ ಪ್ರಮುಖವಾಗಿದೆ."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (ಈ ಖಾತೆಯ ಬಳಕೆದಾರರು ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದಾರೆ) ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (ಈ ಖಾತೆಯ ಬಳಕೆದಾರರು ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದಾರೆ) ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ಭಾಷೆ ಸೇರಿಸಿ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ಪ್ರದೇಶ ಪ್ರಾಶಸ್ತ್ಯ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ಭಾಷೆ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ"</string>

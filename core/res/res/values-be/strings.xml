@@ -989,7 +989,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Апошні месяц"</string>
     <string name="older" msgid="5211975022815554840">"Раней"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"дата: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"у <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"у <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"дзень"</string>
@@ -1299,10 +1299,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Усе сеткі"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Падключыцца да сетак Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Прапанавана ўладальнікам <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Так"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Не"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Дазволіць падключэнне да прапанаваных сетак Wi‑Fi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Праграма \"<xliff:g id="NAME">%s</xliff:g>\" прапанавала сеткі. Прылада можа падключыцца да ніх аўтаматычна."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Дазволіць"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Не, дзякуй"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi уключыцца аўтаматычна"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Побач з захаванай сеткай з высакаякасным сігналам"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не ўключаць зноў"</string>
@@ -1387,7 +1387,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Дазволу не патрабуецца"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"за гэта можа спаганяцца плата"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Зарадка гэтай прылады праз USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Прылада зараджаецца праз USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Зарадка падключанай прылады праз USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Перадача файлаў праз USB"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Перадача фота (PTP) праз USB"</string>
@@ -1718,8 +1718,8 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> быў адключаны з дапамогай камбінацыі хуткага доступу для спецыяльных магчымасцей"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Выберыце службу для выкарыстання пры націску кнопкі \"Спецыяльныя магчымасці\":"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"З дапамогай жэста спецыяльных магчымасцей (правесці двума пальцамі па экране знізу ўверх) выберыце службу для выкарыстання:"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"З дапамогай жэста спецыяльных магчымасцей (правесці трыма пальцамі па экране знізу ўверх) выберыце службу для выкарыстання:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Выберыце службу, дзе будзе выкарыстоўвацца жэст спецыяльных магчымасцей (правесці двума пальцамі па экране знізу ўверх):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Выберыце службу, дзе будзе выкарыстоўвацца жэст спецыяльных магчымасцей (правесці двума пальцамі па экране знізу ўверх):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Каб пераключыцца на другую службу, націсніце і ўтрымлівайце кнопку спецыяльных магчымасцей."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Каб пераключыцца на другую службу, правядзіце ўверх двума пальцамі, утрымліваючы іх на экране."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Каб пераключыцца на іншую службу, правядзіце ўверх трыма пальцамі, утрымліваючы іх на экране."</string>
@@ -1956,8 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Некатэгарызаванае"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Вы задалі важнасць гэтых апавяшчэнняў."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Гэта важна, бо з гэтым звязаны пэўныя людзі."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Дазволіць <xliff:g id="APP">%1$s</xliff:g> стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Дазволіць <xliff:g id="APP">%1$s</xliff:g> стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g> (Карыстальнік з гэтым уліковым запісам ужо існуе)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g> (Карыстальнік з гэтым уліковым запісам ужо існуе)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Дадаць мову"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Параметры рэгіёна"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Увядзіце назву мовы"</string>

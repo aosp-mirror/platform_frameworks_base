@@ -229,7 +229,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Emergência"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Relatório de erros"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Terminar sessão"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de ecrã"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. ecrã"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Relatório de erro"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Será recolhida informação sobre o estado atual do seu dispositivo a enviar através de uma mensagem de email. Demorará algum tempo até que o relatório de erro esteja pronto para ser enviado. Aguarde um pouco."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Relatório interativo"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toque para ver todas as redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Ligar"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas as redes"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Pretende estabelecer ligação a redes Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Sugerida por <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Sim"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Não"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Pretende permitir redes Wi-Fi sugeridas?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Redes sugeridas por <xliff:g id="NAME">%s</xliff:g>. O dispositivo pode estabelecer ligação automaticamente."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Permitir"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Não, obrigado"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"O Wi‑Fi será ativado automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quando estiver próximo de uma rede de alta qualidade guardada."</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Não reativar"</string>
@@ -1355,7 +1355,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Acessório de áudio analógico detetado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"O dispositivo ligado não é compatível com este telemóvel. Toque para saber mais."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB ligada"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toque para desativar a depuração USB."</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toque para desativar a depuração USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecione para desativar a depuração por USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Modo de estrutura de teste ativado"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Efetue uma reposição de dados de fábrica para desativar o Modo de estrutura de teste."</string>
@@ -1506,7 +1506,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Eliminar os itens"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Anular as eliminações"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Não fazer nada por agora"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Selecionar uma conta"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Selecione uma conta"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Adicionar uma conta"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Aumentar"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sem categoria"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Definiu a importância destas notificações."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"É importante devido às pessoas envolvidas."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Pretende permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Pretende permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Pretende permitir que a aplicação <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Pretende permitir que a aplicação <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com a conta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Intr. nome do idioma"</string>

@@ -403,6 +403,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manje hitna obaveštenja su u nastavku"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Dodirnite ponovo da biste otvorili"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Prevucite nagore da biste otvorili"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Prevucite nagore da biste probali ponovo"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Ovim uređajem upravlja organizacija"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Ovim uređajem upravlja <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Prevucite od ikone za telefon"</string>
@@ -547,6 +548,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Početna da biste ga otkačili."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Da biste otkačili ovaj ekran, dodirnite i zadržite dugmad Nazad i Pregled"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Da biste otkačili ovaj ekran, dodirnite i zadržite dugmad Nazad i Početna"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Da biste otkačili ovaj ekran, prevucite nagore i zadržite"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Važi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekran je zakačen"</string>

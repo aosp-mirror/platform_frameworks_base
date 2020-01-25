@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"নিচে অপেক্ষাকৃত কম জরুরী বিজ্ঞপ্তিগুলি"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"খোলার জন্য আবার আলতো চাপুন"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"খোলার জন্য উপরে সোয়াইপ করুন"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"আবার চেষ্টা করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"আপনার সংস্থা এই ডিভাইসটি পরিচালনা করছে"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"এই ডিভাইসটি <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> এর দ্বারা পরিচালিত"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ফোনের জন্য আইকন থেকে সোয়াইপ করুন"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"হোম\" বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"এই স্ক্রিনটি আনপিন করতে \"ফিরে যান\" এবং \"এক নজরে\" বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"এই স্ক্রিনটি আনপিন করতে \"ফিরে যান\" এবং \"হোম\" বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"আনপিন করতে এই স্ক্রিনটি উপরের দিকে সোয়াইপ করে ধরে রাখুন"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"বুঝেছি"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"না থাক"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"স্ক্রিন পিন করা হয়েছে"</string>

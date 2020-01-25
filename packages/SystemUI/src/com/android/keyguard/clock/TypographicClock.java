@@ -27,7 +27,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.keyguard.R;
+import com.android.systemui.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

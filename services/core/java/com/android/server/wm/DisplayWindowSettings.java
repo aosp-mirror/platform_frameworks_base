@@ -30,6 +30,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -63,6 +64,11 @@ import java.util.HashMap;
  */
 class DisplayWindowSettings {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayWindowSettings" : TAG_WM;
+
+    private static final String SYSTEM_DIRECTORY = "system";
+    private static final String DISPLAY_SETTINGS_FILE_NAME = "display_settings.xml";
+    private static final String VENDOR_DISPLAY_SETTINGS_PATH = "etc/" + DISPLAY_SETTINGS_FILE_NAME;
+    private static final String WM_DISPLAY_COMMIT_TAG = "wm-displays";
 
     private static final int IDENTIFIER_UNIQUE_ID = 0;
     private static final int IDENTIFIER_PORT = 1;
@@ -688,8 +694,26 @@ class DisplayWindowSettings {
         private final AtomicFile mAtomicFile;
 
         AtomicFileStorage() {
-            final File folder = new File(Environment.getDataDirectory(), "system");
-            mAtomicFile = new AtomicFile(new File(folder, "display_settings.xml"), "wm-displays");
+            final File folder = new File(Environment.getDataDirectory(), SYSTEM_DIRECTORY);
+            final File settingsFile = new File(folder, DISPLAY_SETTINGS_FILE_NAME);
+            // If display_settings.xml doesn't exist, try to copy the vendor's one instead
+            // in order to provide the vendor specific initialization.
+            if (!settingsFile.exists()) {
+                copyVendorSettings(settingsFile);
+            }
+            mAtomicFile = new AtomicFile(settingsFile, WM_DISPLAY_COMMIT_TAG);
+        }
+
+        private static void copyVendorSettings(File target) {
+            final File vendorFile = new File(Environment.getVendorDirectory(),
+                    VENDOR_DISPLAY_SETTINGS_PATH);
+            if (vendorFile.canRead()) {
+                try {
+                    FileUtils.copy(vendorFile, target);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to copy vendor display_settings.xml");
+                }
+            }
         }
 
         @Override

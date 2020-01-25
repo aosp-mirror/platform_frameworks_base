@@ -385,10 +385,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Should last until about <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"ຈົນກວ່າຈະຮອດ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"ຂະຫຍາຍອາຍຸແບັດເຕີຣີກາຍ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"ຍັງເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>

@@ -57,6 +57,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageParserCacheHelper.ReadHelper;
 import android.content.pm.PackageParserCacheHelper.WriteHelper;
+import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
@@ -104,6 +105,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.SystemConfig;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -2482,11 +2484,10 @@ public class PackageParser {
             Slog.i(TAG, newPermsMsg.toString());
         }
 
-
-        final int NS = PermissionManager.SPLIT_PERMISSIONS.size();
-        for (int is=0; is<NS; is++) {
-            final PermissionManager.SplitPermissionInfo spi =
-                    PermissionManager.SPLIT_PERMISSIONS.get(is);
+        List<SplitPermissionInfoParcelable> splitPermissions = getSplitPermissions();
+        final int listSize = splitPermissions.size();
+        for (int is = 0; is < listSize; is++) {
+            final SplitPermissionInfoParcelable spi = splitPermissions.get(is);
             if (pkg.applicationInfo.targetSdkVersion >= spi.getTargetSdk()
                     || !pkg.requestedPermissions.contains(spi.getSplitPermission())) {
                 continue;
@@ -2538,6 +2539,23 @@ public class PackageParser {
         }
 
         return pkg;
+    }
+
+    private List<SplitPermissionInfoParcelable> getSplitPermissions() {
+        // PackageManager runs this code during initialization prior to registering with
+        // ServiceManager, so we can't use the PackageManager API.  Instead, just read from
+        // SystemConfig directly when in any SystemProcess and only use PackageManager when not in
+        // one.
+        if (ActivityThread.isSystem()) {
+            return PermissionManager.splitPermissionInfoListToParcelableList(
+                    SystemConfig.getInstance().getSplitPermissions());
+        } else {
+            try {
+                return ActivityThread.getPackageManager().getSplitPermissions();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     private boolean checkOverlayRequiredSystemProperty(String propName, String propValue) {

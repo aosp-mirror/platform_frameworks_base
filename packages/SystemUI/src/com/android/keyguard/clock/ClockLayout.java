@@ -24,7 +24,7 @@ import android.util.MathUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.keyguard.R;
+import com.android.systemui.R;
 
 /**
  * Positions clock faces (analog, digital, typographic) and handles pixel shifting

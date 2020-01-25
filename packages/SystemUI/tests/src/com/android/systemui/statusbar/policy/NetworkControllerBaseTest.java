@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.Instrumentation;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -47,6 +48,8 @@ import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.graph.SignalDrawable;
@@ -95,6 +98,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected SubscriptionDefaults mMockSubDefaults;
     protected DeviceProvisionedController mMockProvisionController;
     protected DeviceProvisionedListener mUserCallback;
+    protected Instrumentation mInstrumentation;
 
     protected int mSubId;
 
@@ -116,6 +120,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(R.string.cell_data_off_content_description, NO_DATA_STRING);
@@ -226,6 +231,28 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     public void setupDefaultNr5GIconConfiguration() {
         NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
         NetworkControllerImpl.Config.add5GIconMapping("connected:5g", mConfig);
+    }
+
+    public void setupNr5GIconConfigurationForNotRestrictedRrcCon() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_con:5g", mConfig);
+    }
+
+    public void setupNr5GIconConfigurationForNotRestrictedRrcIdle() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_idle:5g", mConfig);
+    }
+
+    public void setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds() {
+        final int enableDisplayGraceTimeSec = 30;
+        NetworkControllerImpl.Config.setDisplayGraceTime(enableDisplayGraceTimeSec, mConfig);
+    }
+
+    public void setupDefaultNr5GIconDisplayGracePeriodTime_disabled() {
+        final int disableDisplayGraceTimeSec = 0;
+        NetworkControllerImpl.Config.setDisplayGraceTime(disableDisplayGraceTimeSec, mConfig);
     }
 
     public void setConnectivityViaBroadcast(

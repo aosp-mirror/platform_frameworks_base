@@ -240,7 +240,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privato"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Seleziona modalità DNS privato"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"Non attivo"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Off"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatico"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nome host del provider DNS privato"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Inserisci il nome host del provider DNS"</string>

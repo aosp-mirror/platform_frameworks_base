@@ -1886,8 +1886,8 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Injects the supplied Java object into this WebView. The object is
-     * injected into the JavaScript context of the main frame, using the
-     * supplied name. This allows the Java object's methods to be
+     * injected into all frames of the web page, including all the iframes,
+     * using the supplied name. This allows the Java object's methods to be
      * accessed from JavaScript. For applications targeted to API
      * level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      * and above, only public methods that are annotated with
@@ -1926,6 +1926,11 @@ public class WebView extends AbsoluteLayout
      * thread of this WebView. Care is therefore required to maintain thread
      * safety.
      * </li>
+     * <li> Because the object is exposed to all the frames, any frame could
+     * obtain the object name and call methods on it. There is no way to tell the
+     * calling frame's origin from the app side, so the app must not assume that
+     * the caller is trustworthy unless the app can guarantee that no third party
+     * content is ever loaded into the WebView even inside an iframe.</li>
      * <li> The Java object's fields are not accessible.</li>
      * <li> For applications targeted to API level {@link android.os.Build.VERSION_CODES#LOLLIPOP}
      * and above, methods of injected Java objects are enumerable from

@@ -84,7 +84,6 @@ public final class SurfaceControl implements Parcelable {
     private static native long nativeCopyFromSurfaceControl(long nativeObject);
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native void nativeRelease(long nativeObject);
-    private static native void nativeDestroy(long nativeObject);
     private static native void nativeDisconnect(long nativeObject);
 
     private static native ScreenshotGraphicBuffer nativeScreenshot(IBinder displayToken,
@@ -924,19 +923,6 @@ public final class SurfaceControl implements Parcelable {
     public void release() {
         if (mNativeObject != 0) {
             nativeRelease(mNativeObject);
-            mNativeObject = 0;
-        }
-        mCloseGuard.close();
-    }
-
-    /**
-     * Release the local resources like {@link #release} but also
-     * remove the Surface from the screen.
-     * @hide
-     */
-    public void remove() {
-        if (mNativeObject != 0) {
-            nativeDestroy(mNativeObject);
             mNativeObject = 0;
         }
         mCloseGuard.close();

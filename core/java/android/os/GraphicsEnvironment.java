@@ -67,6 +67,8 @@ public class GraphicsEnvironment {
     private static final String PROPERTY_GFX_DRIVER_PRERELEASE = "ro.gfx.driver.1";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
     private static final String METADATA_DRIVER_BUILD_TIME = "com.android.gamedriver.build_time";
+    private static final String METADATA_DEVELOPER_DRIVER_ENABLE =
+            "com.android.graphics.developerdriver.enable";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -691,7 +693,8 @@ public class GraphicsEnvironment {
     /**
      * Return the driver package name to use. Return null for system driver.
      */
-    private static String chooseDriverInternal(Context context, Bundle coreSettings) {
+    private static String chooseDriverInternal(
+            Context context, Bundle coreSettings, PackageManager pm, String packageName) {
         final String gameDriver = SystemProperties.get(PROPERTY_GFX_DRIVER);
         final boolean hasGameDriver = gameDriver != null && !gameDriver.isEmpty();
 
@@ -706,11 +709,23 @@ public class GraphicsEnvironment {
         // To minimize risk of driver updates crippling the device beyond user repair, never use an
         // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
         // were tested thoroughly with the pre-installed driver.
-        final ApplicationInfo ai = context.getApplicationInfo();
+        ApplicationInfo ai;
+        try {
+            // Get the ApplicationInfo from PackageManager so that metadata fields present.
+            ai = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Unlikely to fail for applications, but in case of failure, fall back to use the
+            // ApplicationInfo from context directly.
+            ai = context.getApplicationInfo();
+        }
         if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
             if (DEBUG) Log.v(TAG, "Ignoring driver package for privileged/non-updated system app.");
             return null;
         }
+
+        final boolean enablePrereleaseDriver =
+                (ai.metaData != null && ai.metaData.getBoolean(METADATA_DEVELOPER_DRIVER_ENABLE))
+                || getCanLoadSystemLibraries() == 1;
 
         // Priority for Game Driver settings global on confliction (Higher priority comes first):
         // 1. GAME_DRIVER_ALL_APPS
@@ -728,7 +743,7 @@ public class GraphicsEnvironment {
                 return hasGameDriver ? gameDriver : null;
             case GAME_DRIVER_GLOBAL_OPT_IN_PRERELEASE_DRIVER:
                 if (DEBUG) Log.v(TAG, "All apps opt in to use prerelease driver.");
-                return hasPrereleaseDriver ? prereleaseDriver : null;
+                return hasPrereleaseDriver && enablePrereleaseDriver ? prereleaseDriver : null;
             case GAME_DRIVER_GLOBAL_OPT_IN_DEFAULT:
             default:
                 break;
@@ -745,7 +760,7 @@ public class GraphicsEnvironment {
                     null, coreSettings, Settings.Global.GAME_DRIVER_PRERELEASE_OPT_IN_APPS)
                         .contains(appPackageName)) {
             if (DEBUG) Log.v(TAG, "App opts in for prerelease Game Driver.");
-            return hasPrereleaseDriver ? prereleaseDriver : null;
+            return hasPrereleaseDriver && enablePrereleaseDriver ? prereleaseDriver : null;
         }
 
         // Early return here since the rest logic is only for Game Driver.
@@ -783,7 +798,8 @@ public class GraphicsEnvironment {
      */
     private static boolean chooseDriver(
             Context context, Bundle coreSettings, PackageManager pm, String packageName) {
-        final String driverPackageName = chooseDriverInternal(context, coreSettings);
+        final String driverPackageName = chooseDriverInternal(context, coreSettings, pm,
+                packageName);
         if (driverPackageName == null) {
             return false;
         }

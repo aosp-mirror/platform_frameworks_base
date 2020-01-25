@@ -1277,10 +1277,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Atingeți pentru a vedea toate rețelele"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectați-vă"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Toate rețelele"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Vă conectați la rețele Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Sugerat de <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Da"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Nu"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Permiteți rețelele Wi-Fi sugerate?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> a sugerat rețele. Dispozitivul se poate conecta automat."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Permiteți"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nu, mulțumesc"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi se va activa automat"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Când vă aflați lângă o rețea salvată, de înaltă calitate"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nu reactivați"</string>
@@ -1922,8 +1922,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Neclasificate"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Dvs. setați importanța acestor notificări."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Notificarea este importantă având în vedere persoanele implicate."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>? (există deja un utilizator cu acest cont)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>? (există deja un utilizator cu acest cont)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Adăugați o limbă"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiunea preferată"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Numele limbii"</string>

@@ -41,8 +41,10 @@ import android.widget.ScrollView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.recents.LegacyRecentsImpl;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -86,15 +88,15 @@ import com.android.systemui.recents.events.ui.focus.NavigateTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.utilities.AnimationProps;
 import com.android.systemui.recents.utilities.Utilities;
-import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.grid.GridTaskView;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskViewFocusFrame;
-
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -256,7 +258,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, this);
         mStableLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, null);
         mStackScroller = new TaskStackViewScroller(context, this, mLayoutAlgorithm);
-        mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
+        mTouchHandler = new TaskStackViewTouchHandler(
+                context, this, mStackScroller, Dependency.get(FalsingManager.class));
         mAnimationHelper = new TaskStackAnimationHelper(context, this);
         mTaskCornerRadiusPx = LegacyRecentsImpl.getConfiguration().isGridEnabled ?
                 res.getDimensionPixelSize(R.dimen.recents_grid_task_view_rounded_corners_radius) :

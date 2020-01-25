@@ -388,7 +388,7 @@
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ਤੁਹਾਡੀ ਵਰਤੋਂ ਦੇ ਆਧਾਰ \'ਤੇ ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਚੱਲੇਗਾ"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਚੱਲੇਗੀ"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"ਬੈਟਰੀ ਲਾਈਫ਼ <xliff:g id="TIME">%1$s</xliff:g> ਤੋਂ ਬਾਅਦ ਤੱਕ ਵਧਾਓ"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਸਮਾਂ ਬਾਕੀ"</string>

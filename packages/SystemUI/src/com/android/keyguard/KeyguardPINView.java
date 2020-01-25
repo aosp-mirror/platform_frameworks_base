@@ -34,6 +34,7 @@ import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
 import com.android.keyguard.PasswordTextView.QuickUnlockListener;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
+import com.android.systemui.R;
 
 /**
  * Displays a PIN pad for unlocking.

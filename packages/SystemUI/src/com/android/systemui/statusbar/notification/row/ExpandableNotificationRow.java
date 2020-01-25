@@ -74,7 +74,6 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -1209,12 +1208,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.notification);
         }
         if (mGuts != null) {
-            View oldGuts = mGuts;
+            NotificationGuts oldGuts = mGuts;
             int index = indexOfChild(oldGuts);
             removeView(oldGuts);
             mGuts = (NotificationGuts) LayoutInflater.from(mContext).inflate(
                     R.layout.notification_guts, this, false);
-            mGuts.setVisibility(oldGuts.getVisibility());
+            mGuts.setVisibility(oldGuts.isExposed() ? VISIBLE : GONE);
             addView(mGuts, index);
         }
         View oldMenu = mMenuRow == null ? null : mMenuRow.getMenuView();
@@ -1637,7 +1636,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
+        mFalsingManager = Dependency.get(FalsingManager.class);  // TODO: inject into a controller.
         mNotificationInflater = new NotificationContentInflater(this);
         mMenuRow = new NotificationMenuRow(mContext);
         mImageResolver = new NotificationInlineImageResolver(context,
@@ -2312,9 +2311,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public int getIntrinsicHeight() {
-        if (isShownAsBubble()) {
-            return getMaxExpandHeight();
-        }
         if (isUserLocked()) {
             return getActualHeight();
         }
@@ -2358,10 +2354,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private boolean isDozing() {
         return mStatusbarStateController != null && mStatusbarStateController.isDozing();
-    }
-
-    private boolean isShownAsBubble() {
-        return mEntry.isBubble() && !mEntry.showInShadeWhenBubble() && !mEntry.isBubbleDismissed();
     }
 
     @Override

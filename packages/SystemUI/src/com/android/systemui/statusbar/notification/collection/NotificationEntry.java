@@ -23,6 +23,7 @@ import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
@@ -41,7 +42,6 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
@@ -52,7 +52,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.systemui.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.InflationException;
@@ -156,19 +155,6 @@ public final class NotificationEntry {
     public boolean canBubble;
 
     /**
-     * Whether this notification should be shown in the shade when it is also displayed as a bubble.
-     *
-     * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
-     * expanded</p>
-     */
-    private boolean mShowInShadeWhenBubble;
-
-    /**
-     * Whether the user has dismissed this notification when it was in bubble form.
-     */
-    private boolean mUserDismissedBubble;
-
-    /**
      * Whether this notification is shown to the user as a high priority notification: visible on
      * the lock screen/status bar and in the top section in the shade.
      */
@@ -242,31 +228,6 @@ public final class NotificationEntry {
 
     public boolean isBubble() {
         return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
-    }
-
-    public void setBubbleDismissed(boolean userDismissed) {
-        mUserDismissedBubble = userDismissed;
-    }
-
-    public boolean isBubbleDismissed() {
-        return mUserDismissedBubble;
-    }
-
-    /**
-     * Sets whether this notification should be shown in the shade when it is also displayed as a
-     * bubble.
-     */
-    public void setShowInShadeWhenBubble(boolean showInShade) {
-        mShowInShadeWhenBubble = showInShade;
-    }
-
-    /**
-     * Whether this notification should be shown in the shade when it is also displayed as a
-     * bubble.
-     */
-    public boolean showInShadeWhenBubble() {
-        // We always show it in the shade if non-clearable
-        return !isRowDismissed() && (!isClearable() || mShowInShadeWhenBubble);
     }
 
     /**
@@ -460,72 +421,6 @@ public final class NotificationEntry {
         mCachedContrastColorIsFor = rawColor;
         mCachedContrastColor = contrasted;
         return mCachedContrastColor;
-    }
-
-    /**
-     * Returns our best guess for the most relevant text summary of the latest update to this
-     * notification, based on its type. Returns null if there should not be an update message.
-     */
-    public CharSequence getUpdateMessage(Context context) {
-        final Notification underlyingNotif = notification.getNotification();
-        final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
-
-        try {
-            if (Notification.BigTextStyle.class.equals(style)) {
-                // Return the big text, it is big so probably important. If it's not there use the
-                // normal text.
-                CharSequence bigText =
-                        underlyingNotif.extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
-                return !TextUtils.isEmpty(bigText)
-                        ? bigText
-                        : underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
-            } else if (Notification.MessagingStyle.class.equals(style)) {
-                final List<Notification.MessagingStyle.Message> messages =
-                        Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                                (Parcelable[]) underlyingNotif.extras.get(
-                                        Notification.EXTRA_MESSAGES));
-
-                final Notification.MessagingStyle.Message latestMessage =
-                        Notification.MessagingStyle.findLatestIncomingMessage(messages);
-
-                if (latestMessage != null) {
-                    final CharSequence personName = latestMessage.getSenderPerson() != null
-                            ? latestMessage.getSenderPerson().getName()
-                            : null;
-
-                    // Prepend the sender name if available since group chats also use messaging
-                    // style.
-                    if (!TextUtils.isEmpty(personName)) {
-                        return context.getResources().getString(
-                                R.string.notification_summary_message_format,
-                                personName,
-                                latestMessage.getText());
-                    } else {
-                        return latestMessage.getText();
-                    }
-                }
-            } else if (Notification.InboxStyle.class.equals(style)) {
-                CharSequence[] lines =
-                        underlyingNotif.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
-
-                // Return the last line since it should be the most recent.
-                if (lines != null && lines.length > 0) {
-                    return lines[lines.length - 1];
-                }
-            } else if (Notification.MediaStyle.class.equals(style)) {
-                // Return nothing, media updates aren't typically useful as a text update.
-                return null;
-            } else {
-                // Default to text extra.
-                return underlyingNotif.extras.getCharSequence(Notification.EXTRA_TEXT);
-            }
-        } catch (ClassCastException | NullPointerException | ArrayIndexOutOfBoundsException e) {
-            // No use crashing, we'll just return null and the caller will assume there's no update
-            // message.
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     /**
@@ -875,6 +770,16 @@ public final class NotificationEntry {
         return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_NOTIFICATION_LIST);
     }
 
+
+    /**
+     * Returns whether {@link Policy#SUPPRESSED_EFFECT_BADGE}
+     * is set for this entry. This badge is not an app badge, but rather an indicator of "unseen"
+     * content. Typically this is referred to as a "dot" internally in Launcher & SysUI code.
+     */
+    public boolean shouldSuppressNotificationDot() {
+        return shouldSuppressVisualEffect(SUPPRESSED_EFFECT_BADGE);
+    }
+
     /**
      * Categories that are explicitly called out on DND settings screens are always blocked, if
      * DND has flagged them, even if they are foreground or system notifications that might
@@ -941,13 +846,5 @@ public final class NotificationEntry {
             this.originalText = originalText;
             this.index = index;
         }
-    }
-
-    /**
-     * Returns whether the notification is a foreground service. It shows that this is an ongoing
-     * bubble.
-     */
-    public boolean isForegroundService() {
-        return (notification.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 }

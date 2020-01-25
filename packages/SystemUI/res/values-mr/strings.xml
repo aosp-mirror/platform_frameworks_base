@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"खाली कमी तातडीच्या सूचना"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"उघडण्यासाठी पुन्हा टॅप करा"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"उघडण्यासाठी वर स्वाइप करा"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"पुन्हा प्रयत्न करण्यासाठी वर स्‍वाइप करा"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"हे डिव्हाइस तुमची संस्था व्यवस्थापित करते"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने व्यवस्थापित केले आहे"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फोनसाठी चिन्हावरून स्वाइप करा"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"तुम्ही अनपिन करेपर्यंत हे त्यास दृश्यामध्ये ठेवते. अनपिन करण्यासाठी होमला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"हा स्क्रीन अनपिन करण्यासाठी, मागे आणि अवलोकन बटणांना स्पर्श करून धरून ठेवा"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"हा स्क्रीन अनपिन करण्यासाठी, मागे आणि होम बटणांना स्पर्श करून धरून ठेवा"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"हा स्क्रीन अनपिन करण्यासाठी, वर स्‍वाइप करा आणि धरून ठेवा"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"समजले"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"नाही, नको"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"स्क्रीन पिन केला"</string>

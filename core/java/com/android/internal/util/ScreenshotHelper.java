@@ -1,6 +1,7 @@
 package com.android.internal.util;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+
+import java.util.function.Consumer;
 
 public class ScreenshotHelper {
     private static final String TAG = "ScreenshotHelper";
@@ -34,17 +37,58 @@ public class ScreenshotHelper {
     }
 
     /**
-     * Request a screenshot be taken.
+     * Request a screenshot be taken with a specific timeout.
      *
-     * @param screenshotType The type of screenshot, for example either
-     *                       {@link android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN}
-     *                       or {@link android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION}
-     * @param hasStatus {@code true} if the status bar is currently showing. {@code false} if not.
-     * @param hasNav {@code true} if the navigation bar is currently showing. {@code false} if not.
-     * @param handler A handler used in case the screenshot times out
+     * Added to support reducing unit test duration; the method variant without a timeout argument
+     * is recommended for general use.
+     *
+     * @param screenshotType     The type of screenshot, for example either
+     *                           {@link android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN}
+     *                           or
+     *                           {@link android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION}
+     * @param hasStatus          {@code true} if the status bar is currently showing. {@code false}
+     *                           if
+     *                           not.
+     * @param hasNav             {@code true} if the navigation bar is currently showing. {@code
+     *                           false}
+     *                           if not.
+     * @param handler            A handler used in case the screenshot times out
+     * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
+     *                           screenshot was taken.
      */
     public void takeScreenshot(final int screenshotType, final boolean hasStatus,
-            final boolean hasNav, @NonNull Handler handler) {
+            final boolean hasNav, @NonNull Handler handler,
+            @Nullable Consumer<Boolean> completionConsumer) {
+        takeScreenshot(screenshotType, hasStatus, hasNav, SCREENSHOT_TIMEOUT_MS, handler,
+                completionConsumer);
+    }
+
+    /**
+     * Request a screenshot be taken.
+     *
+     * Added to support reducing unit test duration; the method variant without a timeout argument
+     * is recommended for general use.
+     *
+     * @param screenshotType     The type of screenshot, for example either
+     *                           {@link android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN}
+     *                           or
+     *                           {@link android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION}
+     * @param hasStatus          {@code true} if the status bar is currently showing. {@code false}
+     *                           if
+     *                           not.
+     * @param hasNav             {@code true} if the navigation bar is currently showing. {@code
+     *                           false}
+     *                           if not.
+     * @param timeoutMs          If the screenshot hasn't been completed within this time period,
+     *                           the screenshot attempt will be cancelled and `completionConsumer`
+     *                           will be run.
+     * @param handler            A handler used in case the screenshot times out
+     * @param completionConsumer Consumes `false` if a screenshot was not taken, and `true` if the
+     *                           screenshot was taken.
+     */
+    public void takeScreenshot(final int screenshotType, final boolean hasStatus,
+            final boolean hasNav, long timeoutMs, @NonNull Handler handler,
+            @Nullable Consumer<Boolean> completionConsumer) {
         synchronized (mScreenshotLock) {
             if (mScreenshotConnection != null) {
                 return;
@@ -54,13 +98,17 @@ public class ScreenshotHelper {
             final Intent serviceIntent = new Intent();
 
             final Runnable mScreenshotTimeout = new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     synchronized (mScreenshotLock) {
                         if (mScreenshotConnection != null) {
                             mContext.unbindService(mScreenshotConnection);
                             mScreenshotConnection = null;
                             notifyScreenshotError();
                         }
+                    }
+                    if (completionConsumer != null) {
+                        completionConsumer.accept(false);
                     }
                 }
             };
@@ -86,15 +134,22 @@ public class ScreenshotHelper {
                                         handler.removeCallbacks(mScreenshotTimeout);
                                     }
                                 }
+                                if (completionConsumer != null) {
+                                    completionConsumer.accept(true);
+                                }
                             }
                         };
                         msg.replyTo = new Messenger(h);
-                        msg.arg1 = hasStatus ? 1: 0;
-                        msg.arg2 = hasNav ? 1: 0;
+                        msg.arg1 = hasStatus ? 1 : 0;
+                        msg.arg2 = hasNav ? 1 : 0;
+
                         try {
                             messenger.send(msg);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Couldn't take screenshot: " + e);
+                            if (completionConsumer != null) {
+                                completionConsumer.accept(false);
+                            }
                         }
                     }
                 }
@@ -115,7 +170,7 @@ public class ScreenshotHelper {
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     UserHandle.CURRENT)) {
                 mScreenshotConnection = conn;
-                handler.postDelayed(mScreenshotTimeout, SCREENSHOT_TIMEOUT_MS);
+                handler.postDelayed(mScreenshotTimeout, timeoutMs);
             }
         }
     }

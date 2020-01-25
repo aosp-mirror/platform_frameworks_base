@@ -45,6 +45,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.util.InjectionInflationController;
@@ -596,6 +597,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             }
         }
 
+        @Override
+        public void onUserInput() {
+            mUpdateMonitor.cancelFaceAuth();
+        }
+
         public void dismiss(boolean authenticated, int targetId) {
             mSecurityCallback.dismiss(authenticated, targetId);
         }
@@ -639,6 +645,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         public boolean isVerifyUnlockOnly() { return false; }
         @Override
         public void dismiss(boolean securityVerified, int targetUserId) { }
+        @Override
+        public void onUserInput() { }
         @Override
         public void reset() {}
     };

@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
@@ -213,6 +215,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -2522,15 +2525,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode) {
         final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final boolean crossUser = isCrossUserAllowed(callingPid, callingUid);
+        final int[] profileIds = getUserManager().getProfileIds(
+                UserHandle.getUserId(callingUid), true);
+        ArraySet<Integer> callingProfileIds = new ArraySet<>();
+        for (int i = 0; i < profileIds.length; i++) {
+            callingProfileIds.add(profileIds[i]);
+        }
         ArrayList<ActivityManager.RunningTaskInfo> list = new ArrayList<>();
 
         synchronized (mGlobalLock) {
             if (DEBUG_ALL) Slog.v(TAG, "getTasks: max=" + maxNum);
 
-            final boolean allowed = isGetTasksAllowed("getTasks", Binder.getCallingPid(),
-                    callingUid);
+            final boolean allowed = isGetTasksAllowed("getTasks", callingPid, callingUid);
             mRootActivityContainer.getRunningTasks(maxNum, list, ignoreActivityType,
-                    ignoreWindowingMode, callingUid, allowed);
+                    ignoreWindowingMode, callingUid, allowed, crossUser, callingProfileIds);
         }
 
         return list;
@@ -3585,6 +3595,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     + " does not hold REAL_GET_TASKS; limiting output");
         }
         return allowed;
+    }
+
+    boolean isCrossUserAllowed(int pid, int uid) {
+        return checkPermission(INTERACT_ACROSS_USERS, pid, uid) == PERMISSION_GRANTED
+                || checkPermission(INTERACT_ACROSS_USERS_FULL, pid, uid) == PERMISSION_GRANTED;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
@@ -6046,6 +6061,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
         return allUids.contains(uid);
+    }
+
+    void notifySingleTaskDisplayEmpty(int displayId) {
+        mTaskChangeNotificationController.notifySingleTaskDisplayEmpty(displayId);
     }
 
     final class H extends Handler {

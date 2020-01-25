@@ -407,6 +407,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Менш тэрміновыя апавяшчэнні ніжэй"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Дакраніцеся яшчэ раз, каб адкрыць"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Каб адкрыць, прагарніце ўверх"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Прагартайце ўверх, каб паўтарыць спробу"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Гэта прылада знаходзіцца пад кіраваннем вашай арганізацыі"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Гэта прылада знаходзіцца пад кіраваннем <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Тэлефон: правядзіце пальцам ад значка"</string>
@@ -552,6 +553,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопку \"Галоўны экран\"."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Каб адмацаваць гэты экран, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\""</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Каб адмацаваць гэты экран, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Галоўны экран\""</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Каб адмацаваць экран, правядзіце пальцам, утрымліваючы яго на экране"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Зразумела"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Не, дзякуй"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Экран замацаваны"</string>

@@ -1473,6 +1473,9 @@ public interface WindowManager extends ViewManager {
          * <p>When this flag is enabled for a window, it automatically sets
          * the system UI visibility flags {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
          * {@link View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.</p>
+         *
+         * <p>Note: For devices that support
+         * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE} this flag may be ignored.
          */
         public static final int FLAG_TRANSLUCENT_STATUS = 0x04000000;
 
@@ -1492,6 +1495,10 @@ public interface WindowManager extends ViewManager {
          * <p>When this flag is enabled for a window, it automatically sets
          * the system UI visibility flags {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
          * {@link View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.</p>
+         *
+         * <p>Note: For devices that support
+         * {@link android.content.pm.PackageManager#FEATURE_AUTOMOTIVE} this flag can be disabled
+         * by the car manufacturers.
          */
         public static final int FLAG_TRANSLUCENT_NAVIGATION = 0x08000000;
 

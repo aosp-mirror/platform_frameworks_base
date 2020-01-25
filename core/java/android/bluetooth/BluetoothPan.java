@@ -118,6 +118,8 @@ public final class BluetoothPan implements BluetoothProfile {
      */
     public static final int PAN_OPERATION_SUCCESS = 1004;
 
+    private final Context mContext;
+
     private BluetoothAdapter mAdapter;
     private final BluetoothProfileConnector<IBluetoothPan> mProfileConnector =
             new BluetoothProfileConnector(this, BluetoothProfile.PAN,
@@ -136,6 +138,7 @@ public final class BluetoothPan implements BluetoothProfile {
     @UnsupportedAppUsage
     /*package*/ BluetoothPan(Context context, ServiceListener listener) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mContext = context;
         mProfileConnector.connect(context, listener);
     }
 
@@ -287,11 +290,12 @@ public final class BluetoothPan implements BluetoothProfile {
 
     @UnsupportedAppUsage
     public void setBluetoothTethering(boolean value) {
-        if (DBG) log("setBluetoothTethering(" + value + ")");
+        String pkgName = mContext.getOpPackageName();
+        if (DBG) log("setBluetoothTethering(" + value + "), calling package:" + pkgName);
         final IBluetoothPan service = getService();
         if (service != null && isEnabled()) {
             try {
-                service.setBluetoothTethering(value);
+                service.setBluetoothTethering(value, pkgName);
             } catch (RemoteException e) {
                 Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             }

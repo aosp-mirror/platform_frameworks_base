@@ -35,6 +35,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Consumer;
+
 /**
  * Tests for GlobalActionPerformer
  */
@@ -84,6 +86,6 @@ public class GlobalActionPerformerTest {
                 AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT);
         verify(mMockScreenshotHelper).takeScreenshot(
                 eq(android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN), anyBoolean(),
-                anyBoolean(), any(Handler.class));
+                anyBoolean(), any(Handler.class), any());
     }
 }

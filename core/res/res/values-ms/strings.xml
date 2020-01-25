@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketik untuk melihat semua rangkaian"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Sambung"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua rangkaian"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Sambung ke rangkaian Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Dicadangkan oleh <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ya"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Tidak"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Benarkan rangkaian Wi-Fi yang dicadangkan?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Rangkaian yang dicadangkan oleh <xliff:g id="NAME">%s</xliff:g>. Peranti mungkin disambungkan secara automatik."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Benarkan"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Tidak perlu"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan dihidupkan secara automatik"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Apabila anda berada berdekatan dengan rangkaian disimpan yang berkualiti tinggi"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan hidupkan kembali"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Tidak dikategorikan"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Anda menetapkan kepentingan pemberitahuan ini."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Mesej ini penting disebabkan orang yang terlibat."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Benarkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baharu dengan <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Benarkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baharu dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akaun ini sudah wujud)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Benarkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baharu dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akaun ini sudah wujud) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Benarkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baharu dengan <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Tambahkan bahasa"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Pilihan wilayah"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Taipkan nama bahasa"</string>

@@ -201,7 +201,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"開啟無線網絡"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線網絡"</string>
     <string name="screen_lock" msgid="799094655496098153">"螢幕鎖定"</string>
-    <string name="power_off" msgid="4266614107412865048">"關閉"</string>
+    <string name="power_off" msgid="4266614107412865048">"關機"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"鈴聲震動"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"鈴聲開啟"</string>
@@ -225,7 +225,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"電視選項"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"手機選項"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"螢幕鎖定"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"關閉"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"關機"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"緊急"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"錯誤報告"</string>
     <string name="global_action_logout" msgid="935179188218826050">"結束工作階段"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"輕按即可查看所有網絡"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"連線"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"所有網絡"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"要連線至 Wi-Fi 網絡嗎？"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"由 <xliff:g id="NAME">%s</xliff:g> 推薦"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"是"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"否"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"要允許連線至建議的 Wi-Fi 網絡嗎？"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"「<xliff:g id="NAME">%s</xliff:g>」已建議網絡連線，裝置可能會自動連接網絡。"</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"允許"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"不用了，謝謝"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi 將會自動開啟"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"當您位於已儲存的高品質網絡信號範圍內時"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"不要重新開啟"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"未分類"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"您可以設定這些通知的重要性。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及的人。"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者 (此帳戶目前已有此使用者) 嗎？"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者 (此帳戶目前已有此使用者) 嗎？"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"新增語言"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"輸入語言名稱"</string>

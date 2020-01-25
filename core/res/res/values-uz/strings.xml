@@ -1224,12 +1224,12 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Ovozsiz rejim tanlandi"</string>
     <string name="volume_call" msgid="3941680041282788711">"Suhbat vaqtidagi tovush balandligi"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Kiruvchi bluetooth tovushi"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Signal tovushi balandligi"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Signal tovushi"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Eslatma tovushi"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Tovush balandligi"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth tovushi"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Rington balandligi"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Qo‘ng‘iroq tovushi balandligi"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Suhbat tovushi"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Multimedia tovushi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Eslatma tovushi"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standart rington"</string>
@@ -1255,10 +1255,10 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Barcha tarmoqlarni ko‘rish uchun bosing"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Ulanish"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Barcha tarmoqlar"</string>
-    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi tarmoqlarga ulanilsinmi?"</string>
-    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> tomonidan taklif etilgan"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Ha"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Yoʻq"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Tavsiya qilingan Wi‑Fi tarmoqlarga ruxsat berilsinmi?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> tavsiya qilgan tarmoqlar. Qurilma avtomatik ulanishi mumkin."</string>
+    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Ruxsat"</string>
+    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Kerak emas"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi avtomatik ravishda yoqiladi"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Saqlangan tarmoqlar ichidan signali yaxshisi hududida ekaningizda"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Qayta yoqilmasin"</string>
@@ -1355,7 +1355,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Ulangan qurilma quvvatlanmoqda. Boshqa parametrlar uchun bosing."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analogli audio uskuna aniqlandi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Biriktirilgan qurilma mazkur telefon bilan mos emas. Batafsil axborot olish uchun bu yerga bosing."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni aniqlash"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB orqali nosozliklarni aniqlashni faolsizlantirish uchun bosing"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB orqali nosozliklarni tuzatishni o‘chirib qo‘yish uchun bosing."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Xavfsizlik sinovi rejimi yoqildi"</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Turkumlanmagan"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Siz ushbu bildirishnomalarning muhimligini belgilagansiz."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Bu odamlar siz uchun muhim."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Til qoʻshish"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Hudud sozlamalari"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Til nomini kiriting"</string>
@@ -1929,7 +1929,7 @@
     <string name="app_category_maps" msgid="5878491404538024367">"Xaritalar va navigatsiya"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"Ish va unumdorlik"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Qurilma xotirasi"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB orqali nosozliklarni tuzatish"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB orqali nosozliklarni aniqlash"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"soat"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"daqiqa"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Vaqtni sozlash"</string>

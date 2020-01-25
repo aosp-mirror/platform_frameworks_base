@@ -110,6 +110,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -156,6 +157,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
+    @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBarNotificationPresenter mNotificationPresenter;
     @Mock
@@ -208,7 +210,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         mNotificationInterruptionStateProvider =
                 new TestableNotificationInterruptionStateProvider(mContext, mPowerManager,
-                        mDreamManager, mAmbientDisplayConfiguration);
+                        mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
+                        mStatusBarStateController, mBatteryController);
         mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider);
         mDependency.injectMockDependency(NavigationBarController.class);
@@ -870,8 +873,12 @@ public class StatusBarTest extends SysuiTestCase {
                 Context context,
                 PowerManager powerManager,
                 IDreamManager dreamManager,
-                AmbientDisplayConfiguration ambientDisplayConfiguration) {
-            super(context, powerManager, dreamManager, ambientDisplayConfiguration);
+                AmbientDisplayConfiguration ambientDisplayConfiguration,
+                NotificationFilter filter,
+                StatusBarStateController controller,
+                BatteryController batteryController) {
+            super(context, powerManager, dreamManager, ambientDisplayConfiguration, filter,
+                    batteryController, controller);
             mUseHeadsUp = true;
         }
     }

@@ -33,10 +33,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 
+import com.android.settingslib.widget.R;
+
 import java.net.URISyntaxException;
 import java.util.Locale;
-
-import com.android.settingslib.helputils.R;
 
 /**
  * Functions to easily prepare contextual help menu option items with an intent that opens up the

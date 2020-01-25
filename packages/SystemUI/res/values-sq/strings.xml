@@ -96,7 +96,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsionet e transferimit të dosjeve të USB-së"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lidh si një lexues \"media\" (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montoje si kamerë (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instalo apl. \"Transferimi i skedarëve\" për \"Mac\""</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instalo \"Transferimi i skedarëve të Android\" për Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Prapa"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Faqja bazë"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyja"</string>
@@ -298,7 +298,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"\"Kutia e ëmbëlsirës\""</string>
     <string name="start_dreams" msgid="5640361424498338327">"Mbrojtësi i ekranit"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Eternet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Trokit dhe mbaj prekur ikonat për më shumë opsione"</string>
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Trokit dhe mbaj të shtypur ikonat për më shumë opsione"</string>
     <string name="quick_settings_dnd_label" msgid="7112342227663678739">"Mos shqetëso"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Vetëm me prioritet"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Vetëm alarmet"</string>
@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Njoftimet më pak urgjente, më poshtë!"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Trokit përsëri për ta hapur"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Rrëshqit lart për ta hapur"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Rrëshqit lart për të provuar përsëri"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Kjo pajisje menaxhohet nga organizata jote"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Kjo pajisje menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Rrëshqit për të hapur telefonin"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Përmbledhja\"."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Kreu\"."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Për të hequr gozhdimin e këtij ekrani, rrëshqit shpejt lart dhe mbaje të shtypur"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Jo, faleminderit!"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekrani u gozhdua"</string>

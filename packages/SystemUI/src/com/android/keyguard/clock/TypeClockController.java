@@ -25,7 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.keyguard.R;
+import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
 

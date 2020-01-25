@@ -401,6 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes affichées ci-dessous"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Touchez à nouveau pour ouvrir"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Balayez l\'écran vers le haut pour ouvrir"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Balayez l\'écran vers le haut pour réessayer"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Cet appareil est géré par votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Cet appareil est géré par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Balayez à partir de l\'icône pour accéder au téléphone"</string>
@@ -544,6 +545,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur la touche Accueil."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Aperçu."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Accueil."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Pour annuler l\'épinglage de cet écran, balayez-le vers le haut et gardez le doigt dessus"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Non, merci"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Écran épinglé"</string>
