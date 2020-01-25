@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-// TODO(b/145815909): move StatsDimensionsValue.aidl and StatsLogEventWrapper.aidl here
+// TODO(b/145815909): move StatsDimensionsValue.aidl here
 filegroup {
     name: "statsd_aidl",
     srcs: [

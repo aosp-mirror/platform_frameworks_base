@@ -19,7 +19,6 @@
 #include "FieldValue.h"
 
 #include <android/frameworks/stats/1.0/types.h>
-#include <android/os/StatsLogEventWrapper.h>
 #include <android/util/ProtoOutputStream.h>
 #include <log/log_read.h>
 #include <private/android_logger.h>
@@ -78,17 +77,6 @@ public:
      * Temp constructor to use for pulled atoms until we flip the socket schema.
      */
     explicit LogEvent(uint8_t* msg, uint32_t len, uint32_t uid, bool useNewSchema);
-
-    /**
-     * Creates LogEvent from StatsLogEventWrapper.
-     */
-    static void createLogEvents(const StatsLogEventWrapper& statsLogEventWrapper,
-                                std::vector<std::shared_ptr<LogEvent>>& logEvents);
-
-    /**
-     * Construct one LogEvent from a StatsLogEventWrapper with the i-th work chain. -1 if no chain.
-     */
-    explicit LogEvent(const StatsLogEventWrapper& statsLogEventWrapper, int workChainIndex);
 
     /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
