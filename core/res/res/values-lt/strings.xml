@@ -198,6 +198,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Įrenginys bus ištrintas"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratoriaus programos negalima naudoti. Dabar įrenginio duomenys bus ištrinti.\n\nJei turite klausimų, susisiekite su organizacijos administratoriumi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Neleidžiama spausdinti (<xliff:g id="OWNER_APP">%s</xliff:g>)."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Aš"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetinio kompiuterio parinktys"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"„Android TV“ parinktys"</string>
@@ -1656,7 +1660,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Padidinti garsą daugiau nei rekomenduojamas lygis?\n\nIlgai klausydami dideliu garsu galite pažeisti klausą."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Naudoti spartųjį pritaikymo neįgaliesiems klavišą?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kai spartusis klavišas įjungtas, spaudžiant abu garsumo mygtukus 3 sekundes bus paleista pritaikymo neįgaliesiems funkcija.\n\n Dabartinė pritaikymo neįgaliesiems funkcija:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>„\n“\n Funkciją galite pakeisti skiltyje „Nustatymai“ &gt; „Pritaikymas neįgaliesiems“."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Išvalyti"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redaguoti sparčiuosius klavišus"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Atšaukti"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Išjungti spartųjį klavišą"</string>
@@ -1911,11 +1914,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Programa nepasiekiama"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Programa „<xliff:g id="APP_NAME_0">%1$s</xliff:g>“ šiuo metu nepasiekiama. Tai tvarkoma naudojant programą „<xliff:g id="APP_NAME_1">%2$s</xliff:g>“."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Sužinoti daugiau"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Įjungti darbo profilį?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Darbo programos, pranešimai, duomenys ir kitos darbo profilio funkcijos bus išjungtos"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Įjungti"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ši programa sukurta naudoti senesnės versijos sistemoje „Android“ ir gali tinkamai neveikti. Pabandykite patikrinti, ar yra naujinių, arba susisiekite su kūrėju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tikrinti, ar yra naujinių"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Turite naujų pranešimų"</string>
@@ -2050,6 +2053,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> skaičiuoklė"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Pristatymas"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> pristatymas"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"„Bluetooth“ liks įjungtas veikiant lėktuvo režimui"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Įkeliama"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one">„<xliff:g id="FILE_NAME_2">%s</xliff:g>“ ir <xliff:g id="COUNT_3">%d</xliff:g> failas</item>
@@ -2069,5 +2073,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Perjungti išskaidyto ekrano režimą"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Užrakinimo ekranas"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekrano kopija"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Programos „<xliff:g id="APP_NAME">%1$s</xliff:g>“ antraštės juosta."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"„<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>“ įkeltas į grupę APRIBOTA"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

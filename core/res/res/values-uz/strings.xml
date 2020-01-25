@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planshet sozlamalari"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV parametrlari"</string>
@@ -1612,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Tovush balandligi tavsiya etilgan darajadan ham yuqori qilinsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala ovoz balandligini boshqarish tugmasini 3 soniya bosib turing.\n\n Joriy maxsus imkoniyatlar funksiyasi:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Bu funksiyani Sozlamalar &gt; Maxsus imkoniyatlar orqali o‘zgartirish mumkin."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Boʻshatish"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Bekor qilish"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
@@ -1847,11 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Ilova ishlamayapti"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ishlamayapti. Uning ishlashini <xliff:g id="APP_NAME_1">%2$s</xliff:g> cheklamoqda."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Batafsil"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ishchi profil yoqilsinmi?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Ishchi ilovalar, bildirishnomalar, ma’lumotlar va boshqa ishchi profil imkoniyatlari yoqiladi"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Yoqish"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"Ilova ishlamayapti"</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"Ayni vaqtda <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi ishlamayapti."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu ilova eskiroq Android versiyalariga chiqarilgan va xato ishlashi mumkin. Yangilanishlarini tekshiring yoki dasturchi bilan bog‘laning."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Yangilanish borligini tekshirish"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Sizga yangi SMS keldi"</string>
@@ -1984,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> jadval"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Taqdimot"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> taqdimot"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth parvoz rejimida yoniq qoladi"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Yuklanmoqda"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ta fayl</item>
@@ -2001,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Ekranni ikkiga ajratish tugmasi"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekran qulfi"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skrinshot"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> cheklangan turkumga joylandi"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

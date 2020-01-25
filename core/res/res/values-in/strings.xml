@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Perangkat akan dihapus"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplikasi admin tidak dapat digunakan. Perangkat Anda kini akan dihapus.\n\nJika ada pertanyaan, hubungi admin organisasi."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Fitur pencetakan dinonaktifkan oleh <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsi tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opsi Android TV"</string>
@@ -1612,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas.\n\n Fitur aksesibilitas saat ini:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Anda dapat mengubah fitur di Setelan &gt; Aksesibilitas."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Kosong"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Batal"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Nonaktifkan Pintasan"</string>
@@ -1847,11 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikasi tidak tersedia"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> saat ini tidak tersedia. Aplikasi ini dikelola oleh <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Pelajari lebih lanjut"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Aktifkan profil kerja?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikasi kerja, notifikasi, data, dan fitur profil kerja lainnya akan diaktifkan"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktifkan"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikasi tidak tersedia"</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia saat ini."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aplikasi ini dibuat untuk Android versi lama dan mungkin tidak berfungsi sebagaimana mestinya. Coba periksa apakah ada update, atau hubungi developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Periksa apakah ada update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ada pesan baru"</string>
@@ -1984,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Spreadsheet <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Presentasi"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Presentasi <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth akan tetap aktif selama mode pesawat"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Memuat"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
@@ -2001,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Aktifkan/Nonaktifkan Layar Terpisah"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Layar Kunci"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Kolom teks <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> telah dimasukkan ke dalam bucket DIBATASI"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

@@ -196,6 +196,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jūsu ierīces dati tiks dzēsti"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratora lietotni nevar izmantot. Ierīcē saglabātie dati tiks dzēsti.\n\nJa jums ir kādi jautājumi, sazinieties ar savas organizācijas administratoru."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV opcijas"</string>
@@ -290,8 +294,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"piekļūt jūsu kalendāram"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Īsziņas"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sūtīt un skatīt īsziņas"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Faili un multivides saturs"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"piekļūt fotoattēliem, multividei un failiem jūsu ierīcē"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofons"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ierakstīt audio"</string>
@@ -317,10 +320,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Atbalsta pieskaršanos, vilkšanu, savilkšanu un citus žestus."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Pirksta nospieduma žesti"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Var uztvert žestus ierīces pirksta nospieduma sensorā."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ekrānuzņēmuma izveide"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Var izveidot displeja ekrānuzņēmumu."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"atspējot vai pārveidot statusa joslu"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ļauj lietotnei atspējot statusa joslu vai pievienot un noņemt sistēmas ikonas."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Būt par statusa joslu"</string>
@@ -1637,7 +1638,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vai palielināt skaļumu virs ieteicamā līmeņa?\n\nIlgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Ja saīsne ir iespējota, vienlaikus nospiežot abas skaļuma regulēšanas pogas un trīs sekundes turot tās, tiks palaista pieejamības funkcija.\n\n Pašreiz iestatītā pieejamības funkcija:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Šo funkciju var mainīt sadaļā Iestatījumi &gt; Pieejamība."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Notīrīt"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Atcelt"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Izslēgt saīsni"</string>
@@ -1882,13 +1882,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Lietotne nav pieejama"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> pašlaik nav pieejama. Šo darbību pārvalda <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Uzzināt vairāk"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vai ieslēgt darba profilu?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Tiks ieslēgtas jūsu darba lietotnes, paziņojumi, dati un citas darba profila funkcijas."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ieslēgt"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Šī lietotne tika izstrādāta vecākai Android versijai un var nedarboties pareizi. Meklējiet atjauninājumus vai sazinieties ar izstrādātāju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Meklēt atjauninājumu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jums ir jaunas īsziņas."</string>
@@ -2000,14 +1998,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Aktivizēts akumulatora jaudas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akumulatora jaudas taupīšanas režīms"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akumulatora jaudas taupīšanas režīms ir izslēgts"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Tālruņa uzlādes līmenis ir pietiekams. Funkcijas vairs netiek ierobežotas."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Planšetdatora uzlādes līmenis ir pietiekams. Funkcijas vairs netiek ierobežotas."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Ierīces uzlādes līmenis ir pietiekams. Funkcijas vairs netiek ierobežotas."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Mape"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android lietojumprogramma"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Fails"</string>
@@ -2026,6 +2020,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> izklājlapa"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Prezentācija"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> prezentācija"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth joprojām būs ieslēgts lidojuma režīmā."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Ielāde"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="zero"><xliff:g id="FILE_NAME_2">%s</xliff:g> un <xliff:g id="COUNT_3">%d</xliff:g> failu</item>
@@ -2044,5 +2039,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Pārslēgt ekrāna sadalīšanu"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Bloķēt ekrānu"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekrānuzņēmums"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> subtitru josla."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Pakotne “<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>” ir ievietota ierobežotā kopā."</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

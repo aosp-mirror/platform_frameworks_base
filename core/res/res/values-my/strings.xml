@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"စီမံခန့်ခွဲမှု အက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်\n\nမေးစရာများရှိပါက သင့်အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> က ပုံနှိပ်ထုတ်ယူခြင်းကို ပိတ်ထားသည်။"</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"ကျွန်ုပ်"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ရွေးချယ်စရာများ"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Files နှင့် မီဒီယာ"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"မိုက်ခရိုဖုန်း"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"အသံဖမ်းခြင်း"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"လက်ဗွေဟန်များ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"စက်ပစ္စည်း၏ လက်ဗွေအာရုံခံကိရိယာတွင် လုပ်ဆောင်ထားသည့် လက်ဟန်များကို မှတ်သားထားနိုင်သည်။"</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ဖန်သားပြင်ဓာတ်ပုံ ရိုက်ရန်"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ဖန်သားပြင်ပြသမှုကို ဓာတ်ပုံရိုက်နိုင်ပါသည်။"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"အခြေအနေပြဘားအား အလုပ်မလုပ်ခိုင်းရန်သို့မဟုတ် မွမ်းမံရန်"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"အက်ပ်အား အခြေအနေပြ ဘားကို ပိတ်ခွင့် သို့မဟတ် စနစ် အိုင်ကွန်များကို ထည့်ခြင်း ဖယ်ရှားခြင်း ပြုလုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"အခြေအနေပြ ဘားဖြစ်ပါစေ"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံအတိုးအလျှော့ခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။\n\n လက်ရှိ အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှု−\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ဝန်ဆောင်မှုကို ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှုတွင် ပြောင်းလဲနိုင်ပါသည်။"</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"အလွတ်"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"မလုပ်တော့"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"အက်ပ်ကို မရရှိနိုင်ပါ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ကို လောလောဆယ် မရနိုင်ပါ။ ၎င်းကို <xliff:g id="APP_NAME_1">%2$s</xliff:g> က စီမံထားပါသည်။"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ပိုမိုလေ့လာရန်"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"အလုပ်ပရိုဖိုင် ဖွင့်လိုသလား။"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"သင်၏ အလုပ်အက်ပ်၊ အကြောင်းကြားချက်၊ ဒေတာနှင့် အခြားအလုပ်ပရိုဖိုင် ဝန်ဆောင်မှုများကို ဖွင့်လိုက်ပါမည်"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ဖွင့်ပါ"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ဤအက်ပ်ကို Android ဗားရှင်းဟောင်းအတွက် ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ အပ်ဒိတ်များအတွက် ရှာကြည့်ပါ သို့မဟုတ် ဆော့ဖ်ဝဲအင်ဂျင်နီယာကို ဆက်သွယ်ပါ။"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"အပ်ဒိတ်စစ်ရန်"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ဘက်ထရီ အားထိန်း"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ဘက်ထရီ အားထိန်းကို ပိတ်ထားသည်"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ဖုန်းတွင် ဘက်ထရီအား အလုံအလောက် ရှိသည်။ လုပ်ဆောင်ချက်များကို ကန့်သတ်မထားတော့ပါ။"</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"တက်ဘလက်တွင် ဘက်ထရီအား အလုံအလောက် ရှိသည်။ လုပ်ဆောင်ချက်များကို ကန့်သတ်မထားတော့ပါ။"</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"စက်တွင် ဘက်ထရီအား အလုံအလောက် ရှိသည်။ လုပ်ဆောင်ချက်များကို ကန့်သတ်မထားတော့ပါ။"</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"ဖိုင်တွဲ"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android အပလီကေးရှင်း"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ဖိုင်"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> spreadsheet"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"တင်ပြမှု"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> တင်ပြမှု"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"လေယာဉ်ပျံမုဒ်ကို ဖွင့်ထားစဉ် ဘလူးတုသ် ပွင့်နေပါမည်"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"တင်နေသည်"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ဖိုင်</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းကို နှိပ်ပါ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>၏ ခေါင်းစီး ဘား။"</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ကို တားမြစ်ထားသော သိမ်းဆည်းမှုအတွင်းသို့ ထည့်ပြီးပါပြီ"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

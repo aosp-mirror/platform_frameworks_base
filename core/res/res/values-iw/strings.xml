@@ -198,6 +198,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"תתבצע מחיקה של המכשיר"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"לא ניתן להשתמש באפליקציה של מנהל המערכת.\n\nאם יש לך שאלות, יש ליצור קשר עם מנהל המערכת של הארגון."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ההדפסה הושבתה על ידי <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"אני"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"אפשרויות טאבלט"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏אפשרויות Android TV"</string>
@@ -293,8 +297,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"גישה אל היומן"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏שליחה והצגה של הודעות SMS"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"קבצים ומדיה"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"גישה לתמונות, למדיה ולקבצים במכשיר שלך"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"מיקרופון"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"הקלטת אודיו"</string>
@@ -320,10 +323,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"יכול להקיש, להחליק, לעשות תנועת צביטה ולבצע תנועות אחרות."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"תנועות של טביעות אצבעות"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"אפשרות לזהות תנועות בזמן נגיעה בחיישן טביעות האצבע של המכשיר."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"שמירת צילום המסך"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ניתן לצלם צילום מסך של התצוגה."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"להיות שורת הסטטוס"</string>
@@ -1659,7 +1660,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\n\nהאזנה בעוצמת קול גבוהה למשכי זמן ממושכים עלולה לפגוע בשמיעה."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"להשתמש בקיצור הדרך לתכונת הנגישות?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"כשקיצור הדרך מופעל, לחיצה על שני לחצני עוצמת השמע למשך שלוש שניות מפעילה את תכונת הנגישות.\n\n תכונת הנגישות המוגדרת כרגע:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n אפשר לשנות את התכונה בקטע \'הגדרות ונגישות\'."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ריק"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"עריכת קיצורי הדרך"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ביטול"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"כבה את קיצור הדרך"</string>
@@ -1914,13 +1914,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"האפליקציה אינה זמינה"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"האפליקציה <xliff:g id="APP_NAME_0">%1$s</xliff:g> לא זמינה כרגע. את הזמינות שלה אפשר לנהל באפליקציה <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"מידע נוסף"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"להפעיל את פרופיל העבודה?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"אפליקציות העבודה, התראות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעל"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏האפליקציה הזו עוצבה לגרסה ישנה יותר של Android וייתכן שלא תפעל כראוי. ניתן לבדוק אם יש עדכונים או ליצור קשר עם המפתח."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"האם יש עדכון חדש?"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"יש לך הודעות חדשות"</string>
@@ -2033,14 +2031,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"חיסכון בסוללה"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"\'חיסכון בסוללה\' כבוי"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"הטלפון טעון מספיק. התכונות כבר לא מוגבלות."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"הטאבלט טעון מספיק. התכונות כבר לא מוגבלות."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"המכשיר טעון מספיק. התכונות כבר לא מוגבלות."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"תיקייה"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"‏אפליקציית Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"קובץ"</string>
@@ -2059,6 +2053,8 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"גיליון אלקטרוני <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"מצגת"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"מצגת <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
+    <skip />
     <string name="car_loading_profile" msgid="8219978381196748070">"בטעינה"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="two"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> קבצים</item>
@@ -2078,5 +2074,13 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"החלפת מצב של מסך מפוצל"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"מסך הנעילה"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"צילום מסך"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"סרגל כיתוב של <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
+    <skip />
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Your device will be erased"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"The admin app can\'t be used. Your device will now be erased.\n\nIf you have questions, contact your organisation\'s admin."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printing disabled by <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Me"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet options"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV options"</string>
@@ -1612,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Use Accessibility Shortcut?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"When the shortcut is on, pressing both volume buttons for 3 seconds will start an accessibility feature.\n\n Current accessibility feature:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n You can change the feature in Settings &gt; Accessibility."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Empty"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit shortcuts"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancel"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Turn off Shortcut"</string>
@@ -1847,11 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"App isn’t available"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> isn’t available at the moment. This is managed by <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Learn more"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Turn on work profile?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Your work apps, notifications, data and other work profile features will be turned on"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Turn on"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"App is not available"</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is not available right now."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"This app was built for an older version of Android and may not work properly. Try checking for updates or contact the developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Check for update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"You have new messages"</string>
@@ -1984,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> spreadsheet"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Presentation"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> presentation"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth will stay on during aeroplane mode"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Loading"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> files</item>
@@ -2001,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Toggle Split Screen"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lock Screen"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Caption bar of <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> has been put into the RESTRICTED bucket"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

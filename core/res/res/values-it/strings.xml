@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossibile usare l\'app di amministrazione. Il dispositivo verrà resettato.\n\nPer eventuali domande, contatta l\'amministratore della tua organizzazione."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Stampa disattivata da <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Io"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opzioni tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opzioni Android TV"</string>
@@ -1612,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità.\n\n Funzione di accessibilità corrente:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puoi cambiare la funzione in Impostazioni &gt; Accessibilità."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Svuota"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifica scorciatoie"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Annulla"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Disattiva scorciatoia"</string>
@@ -1847,11 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"App non disponibile"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ulteriori informazioni"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Attiva"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Questa app è stata realizzata per una versione precedente di Android e potrebbe non funzionare correttamente. Prova a verificare la disponibilità di aggiornamenti o contatta lo sviluppatore."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verifica la presenza di aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
@@ -1984,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Foglio di lavoro <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Presentazione"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Presentazione <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Il Bluetooth rimane attivo durante l\'uso della modalità aereo"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Caricamento"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
@@ -2001,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Attiva/disattiva schermo diviso"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Schermata di blocco"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra del titolo di <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> è stato inserito nel bucket RESTRICTED"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>
