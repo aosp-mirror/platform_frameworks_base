@@ -3236,18 +3236,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, listenUsingL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingL2capCoc(int transport)
-            throws IOException {
-        Log.e(TAG, "listenUsingL2capCoc: PLEASE USE THE OFFICIAL API, listenUsingL2capChannel");
-        return listenUsingL2capChannel();
-    }
-
-    /**
      * Create an insecure L2CAP Connection-oriented Channel (CoC) {@link BluetoothServerSocket} and
      * assign a dynamic PSM value. This socket can be used to listen for incoming connections. The
      * supported Bluetooth transport is LE only.
@@ -3291,19 +3279,6 @@ public final class BluetoothAdapter {
         socket.setChannel(assignedPsm);
 
         return socket;
-    }
-
-    /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, listenUsingInsecureL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingInsecureL2capCoc(int transport)
-            throws IOException {
-        Log.e(TAG, "listenUsingInsecureL2capCoc: PLEASE USE THE OFFICIAL API, "
-                    + "listenUsingInsecureL2capChannel");
-        return listenUsingInsecureL2capChannel();
     }
 
     /**
