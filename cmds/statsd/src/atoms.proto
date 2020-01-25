@@ -232,8 +232,8 @@ message Atom {
         NfcCardemulationOccurred nfc_cardemulation_occurred = 137 [(module) = "nfc"];
         NfcTagOccurred nfc_tag_occurred = 138 [(module) = "nfc"];
         NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139 [(module) = "nfc"];
-        SeStateChanged se_state_changed = 140;
-        SeOmapiReported se_omapi_reported = 141;
+        SeStateChanged se_state_changed = 140 [(module) = "secure_element"];
+        SeOmapiReported se_omapi_reported = 141 [(module) = "secure_element"];
         BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported =
                 142 [(module) = "framework"];
         AttentionManagerServiceResultReported attention_manager_service_result_reported =
