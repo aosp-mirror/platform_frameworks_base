@@ -30,6 +30,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -158,6 +159,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
@@ -1075,6 +1077,15 @@ public class AudioService extends IAudioService.Stub
                             + AudioSystem.audioSystemErrorToString(status)
                             + " when connecting mixes for policy " + policy.toLogFriendlyString());
                     policy.release();
+                } else {
+                    final int deviceAffinitiesStatus = policy.setupDeviceAffinities();
+                    if (deviceAffinitiesStatus != AudioSystem.SUCCESS) {
+                        Log.e(TAG, "onAudioServerDied: error "
+                                + AudioSystem.audioSystemErrorToString(deviceAffinitiesStatus)
+                                + " when connecting device affinities for policy "
+                                + policy.toLogFriendlyString());
+                        policy.release();
+                    }
                 }
             }
         }
@@ -7898,22 +7909,16 @@ public class AudioService extends IAudioService.Stub
 
         int setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
             final Integer Uid = new Integer(uid);
-            int res;
             if (mUidDeviceAffinities.remove(Uid) != null) {
-                final long identity = Binder.clearCallingIdentity();
-                res = AudioSystem.removeUidDeviceAffinities(uid);
-                Binder.restoreCallingIdentity(identity);
-                if (res != AudioSystem.SUCCESS) {
+                if (removeUidDeviceAffinitiesFromSystem(uid) != AudioSystem.SUCCESS) {
                     Log.e(TAG, "AudioSystem. removeUidDeviceAffinities(" + uid + ") failed, "
                             + " cannot call AudioSystem.setUidDeviceAffinities");
                     return AudioManager.ERROR;
                 }
             }
-            final long identity = Binder.clearCallingIdentity();
-            res = AudioSystem.setUidDeviceAffinities(uid, types, addresses);
-            Binder.restoreCallingIdentity(identity);
-            if (res == AudioSystem.SUCCESS) {
-                mUidDeviceAffinities.put(Uid, new AudioDeviceArray(types, addresses));
+            AudioDeviceArray deviceArray = new AudioDeviceArray(types, addresses);
+            if (setUidDeviceAffinitiesOnSystem(uid, deviceArray) == AudioSystem.SUCCESS) {
+                mUidDeviceAffinities.put(Uid, deviceArray);
                 return AudioManager.SUCCESS;
             }
             Log.e(TAG, "AudioSystem. setUidDeviceAffinities(" + uid + ") failed");
@@ -7922,10 +7927,7 @@ public class AudioService extends IAudioService.Stub
 
         int removeUidDeviceAffinities(int uid) {
             if (mUidDeviceAffinities.remove(new Integer(uid)) != null) {
-                final long identity = Binder.clearCallingIdentity();
-                final int res = AudioSystem.removeUidDeviceAffinities(uid);
-                Binder.restoreCallingIdentity(identity);
-                if (res == AudioSystem.SUCCESS) {
+                if (removeUidDeviceAffinitiesFromSystem(uid) == AudioSystem.SUCCESS) {
                     return AudioManager.SUCCESS;
                 }
             }
@@ -7933,26 +7935,41 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.ERROR;
         }
 
+        @AudioSystem.AudioSystemError private int removeUidDeviceAffinitiesFromSystem(int uid) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return AudioSystem.removeUidDeviceAffinities(uid);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @AudioSystem.AudioSystemError private int setUidDeviceAffinitiesOnSystem(int uid,
+                AudioDeviceArray deviceArray) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return AudioSystem.setUidDeviceAffinities(uid, deviceArray.mDeviceTypes,
+                        deviceArray.mDeviceAddresses);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
         int setUserIdDeviceAffinities(int userId,
                 @NonNull int[] types, @NonNull String[] addresses) {
             final Integer UserId = new Integer(userId);
-            int res;
             if (mUserIdDeviceAffinities.remove(UserId) != null) {
-                final long identity = Binder.clearCallingIdentity();
-                res = AudioSystem.removeUserIdDeviceAffinities(UserId);
-                Binder.restoreCallingIdentity(identity);
-                if (res != AudioSystem.SUCCESS) {
+                if (removeUserIdDeviceAffinitiesFromSystem(userId) != AudioSystem.SUCCESS) {
                     Log.e(TAG, "AudioSystem. removeUserIdDeviceAffinities("
                             + UserId + ") failed, "
                             + " cannot call AudioSystem.setUserIdDeviceAffinities");
                     return AudioManager.ERROR;
                 }
             }
-            final long identity = Binder.clearCallingIdentity();
-            res = AudioSystem.setUserIdDeviceAffinities(userId, types, addresses);
-            Binder.restoreCallingIdentity(identity);
-            if (res == AudioSystem.SUCCESS) {
-                mUserIdDeviceAffinities.put(UserId, new AudioDeviceArray(types, addresses));
+            AudioDeviceArray audioDeviceArray = new AudioDeviceArray(types, addresses);
+            if (setUserIdDeviceAffinitiesOnSystem(userId, audioDeviceArray)
+                    == AudioSystem.SUCCESS) {
+                mUserIdDeviceAffinities.put(UserId, audioDeviceArray);
                 return AudioManager.SUCCESS;
             }
             Log.e(TAG, "AudioSystem.setUserIdDeviceAffinities(" + userId + ") failed");
@@ -7961,10 +7978,7 @@ public class AudioService extends IAudioService.Stub
 
         int removeUserIdDeviceAffinities(int userId) {
             if (mUserIdDeviceAffinities.remove(new Integer(userId)) != null) {
-                final long identity = Binder.clearCallingIdentity();
-                final int res = AudioSystem.removeUserIdDeviceAffinities(userId);
-                Binder.restoreCallingIdentity(identity);
-                if (res == AudioSystem.SUCCESS) {
+                if (removeUserIdDeviceAffinitiesFromSystem(userId) == AudioSystem.SUCCESS) {
                     return AudioManager.SUCCESS;
                 }
             }
@@ -7972,9 +7986,76 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.ERROR;
         }
 
+        @AudioSystem.AudioSystemError private int removeUserIdDeviceAffinitiesFromSystem(
+                @UserIdInt int userId) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return AudioSystem.removeUserIdDeviceAffinities(userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @AudioSystem.AudioSystemError private int setUserIdDeviceAffinitiesOnSystem(
+                @UserIdInt int userId, AudioDeviceArray deviceArray) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return AudioSystem.setUserIdDeviceAffinities(userId, deviceArray.mDeviceTypes,
+                        deviceArray.mDeviceAddresses);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @AudioSystem.AudioSystemError int setupDeviceAffinities() {
+            for (Map.Entry<Integer, AudioDeviceArray> uidEntry : mUidDeviceAffinities.entrySet()) {
+                int uidStatus = removeUidDeviceAffinitiesFromSystem(uidEntry.getKey());
+                if (uidStatus != AudioSystem.SUCCESS) {
+                    Log.e(TAG,
+                            "setupDeviceAffinities failed to remove device affinity for uid "
+                                    + uidEntry.getKey());
+                    return uidStatus;
+                }
+                uidStatus = setUidDeviceAffinitiesOnSystem(uidEntry.getKey(), uidEntry.getValue());
+                if (uidStatus != AudioSystem.SUCCESS) {
+                    Log.e(TAG,
+                            "setupDeviceAffinities failed to set device affinity for uid "
+                                    + uidEntry.getKey());
+                    return uidStatus;
+                }
+            }
+
+            for (Map.Entry<Integer, AudioDeviceArray> userIdEntry :
+                    mUserIdDeviceAffinities.entrySet()) {
+                int userIdStatus = removeUserIdDeviceAffinitiesFromSystem(userIdEntry.getKey());
+                if (userIdStatus != AudioSystem.SUCCESS) {
+                    Log.e(TAG,
+                            "setupDeviceAffinities failed to remove device affinity for userId "
+                                    + userIdEntry.getKey());
+                    return userIdStatus;
+                }
+                userIdStatus = setUserIdDeviceAffinitiesOnSystem(userIdEntry.getKey(),
+                                userIdEntry.getValue());
+                if (userIdStatus != AudioSystem.SUCCESS) {
+                    Log.e(TAG,
+                            "setupDeviceAffinities failed to set device affinity for userId "
+                                    + userIdEntry.getKey());
+                    return userIdStatus;
+                }
+            }
+            return AudioSystem.SUCCESS;
+        }
+
         /** @return human readable debug informations summarizing the state of the object. */
         public String toLogFriendlyString() {
             String textDump = super.toLogFriendlyString();
+            textDump += " Uid Device Affinities:\n";
+            String spacer = "     ";
+            textDump += logFriendlyAttributeDeviceArrayMap("Uid",
+                    mUidDeviceAffinities, spacer);
+            textDump += " UserId Device Affinities:\n";
+            textDump += logFriendlyAttributeDeviceArrayMap("UserId",
+                    mUserIdDeviceAffinities, spacer);
             textDump += " Proxy:\n";
             textDump += "   is focus policy= " + mIsFocusPolicy + "\n";
             if (mIsFocusPolicy) {
@@ -7984,6 +8065,24 @@ public class AudioService extends IAudioService.Stub
             }
             textDump += "   media projection= " + mProjection + "\n";
             return textDump;
+        }
+
+        private String logFriendlyAttributeDeviceArrayMap(String attribute,
+                Map<Integer, AudioDeviceArray> map, String spacer) {
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (Map.Entry<Integer, AudioDeviceArray> mapEntry : map.entrySet()) {
+                stringBuilder.append(spacer).append(attribute).append(": ")
+                        .append(mapEntry.getKey()).append("\n");
+                AudioDeviceArray deviceArray = mapEntry.getValue();
+                String deviceSpacer = spacer + "   ";
+                for (int i = 0; i < deviceArray.mDeviceTypes.length; i++) {
+                    stringBuilder.append(deviceSpacer).append("Type: 0x")
+                            .append(Integer.toHexString(deviceArray.mDeviceTypes[i]))
+                            .append(" Address: ").append(deviceArray.mDeviceAddresses[i])
+                                    .append("\n");
+                }
+            }
+            return stringBuilder.toString();
         }
     };
 
