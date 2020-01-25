@@ -60,6 +60,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIB
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
@@ -124,8 +125,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ApplicationPackageManager;
 import android.app.AppOpsManager;
+import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -289,6 +290,7 @@ import android.util.SparseIntArray;
 import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.Xml;
+import android.util.apk.ApkSignatureVerifier;
 import android.util.jar.StrictJarFile;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -11560,6 +11562,17 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 }
+            }
+
+            // Ensure the package is signed with at least the minimum signature scheme version
+            // required for its target SDK.
+            int minSignatureSchemeVersion =
+                    ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                            pkg.getTargetSdkVersion());
+            if (pkg.getSigningDetails().signatureSchemeVersion < minSignatureSchemeVersion) {
+                throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                        "No signature found in package of version " + minSignatureSchemeVersion
+                                + " or newer for package " + pkg.getPackageName());
             }
         }
     }

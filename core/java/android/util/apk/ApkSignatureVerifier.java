@@ -27,6 +27,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
+import android.os.Build;
 import android.os.Trace;
 import android.util.jar.StrictJarFile;
 
@@ -444,6 +445,17 @@ public class ApkSignatureVerifier {
         } catch (SignatureNotFoundException e) {
             return null;
         }
+    }
+
+    /**
+     * Returns the minimum signature scheme version required for an app targeting the specified
+     * {@code targetSdk}.
+     */
+    public static int getMinimumSignatureSchemeVersionForTargetSdk(int targetSdk) {
+        if (targetSdk >= Build.VERSION_CODES.R) {
+            return SignatureSchemeVersion.SIGNING_BLOCK_V2;
+        }
+        return SignatureSchemeVersion.JAR;
     }
 
     /**

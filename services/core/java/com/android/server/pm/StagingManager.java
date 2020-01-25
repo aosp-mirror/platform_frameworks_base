@@ -141,10 +141,12 @@ public class StagingManager {
         // Get signing details of the new package
         final String apexPath = newApexPkg.applicationInfo.sourceDir;
         final String packageName = newApexPkg.packageName;
+        int minSignatureScheme = ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                newApexPkg.applicationInfo.targetSdkVersion);
 
         final SigningDetails newSigningDetails;
         try {
-            newSigningDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
+            newSigningDetails = ApkSignatureVerifier.verify(apexPath, minSignatureScheme);
         } catch (PackageParserException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Failed to parse APEX package " + apexPath, e);
