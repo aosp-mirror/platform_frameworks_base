@@ -102,9 +102,9 @@ public class LinkAddress implements Parcelable {
 
     /**
      * The time, as reported by {@link SystemClock#elapsedRealtime}, when this LinkAddress will be
-     * or was deprecated. {@link #LIFETIME_UNKNOWN} indicates this information is not available. At
-     * the time existing connections can still use this address until it expires, but new
-     * connections should use the new address. {@link #LIFETIME_PERMANENT} indicates this
+     * or was deprecated. At the time existing connections can still use this address until it
+     * expires, but new connections should use the new address. {@link #LIFETIME_UNKNOWN} indicates
+     * this information is not available. {@link #LIFETIME_PERMANENT} indicates this
      * {@link LinkAddress} will never be deprecated.
      */
     private long deprecationTime;
@@ -261,10 +261,10 @@ public class LinkAddress implements Parcelable {
      * @param scope An integer defining the scope in which the address is unique (e.g.,
      *              {@link OsConstants#RT_SCOPE_LINK} or {@link OsConstants#RT_SCOPE_SITE}).
      * @param deprecationTime The time, as reported by {@link SystemClock#elapsedRealtime}, when
-     *                        this {@link LinkAddress} will be or was deprecated.
-     *                        {@link #LIFETIME_UNKNOWN} indicates this information is not available.
-     *                        At the time existing connections can still use this address until it
-     *                        expires, but new connections should use the new address.
+     *                        this {@link LinkAddress} will be or was deprecated. At the time
+     *                        existing connections can still use this address until it expires, but
+     *                        new connections should use the new address. {@link #LIFETIME_UNKNOWN}
+     *                        indicates this information is not available.
      *                        {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress} will
      *                        never be deprecated.
      * @param expirationTime The time, as reported by {@link SystemClock#elapsedRealtime}, when this
@@ -441,7 +441,7 @@ public class LinkAddress implements Parcelable {
         if (expirationTime == LIFETIME_PERMANENT) {
             flags |= IFA_F_PERMANENT;
         } else if (expirationTime != LIFETIME_UNKNOWN) {
-            // If we know this address expired or will expire in the future or, then this address
+            // If we know this address expired or will expire in the future, then this address
             // should not be permanent.
             flags &= ~IFA_F_PERMANENT;
         }
@@ -458,10 +458,13 @@ public class LinkAddress implements Parcelable {
     }
 
     /**
-     * @return The time that this address will be deprecated. At the time the existing connection
-     * can still use this address until it expires, but the new connection should use the new
-     * address. This is the EPOCH time in milliseconds. 0 indicates this information is not
-     * available.
+     * Get the deprecation time, as reported by {@link SystemClock#elapsedRealtime}, when this
+     * {@link LinkAddress} will be or was deprecated. At the time existing connections can still use
+     * this address until it expires, but new connections should use the new address.
+     *
+     * @return The deprecation time in milliseconds. {@link #LIFETIME_UNKNOWN} indicates this
+     * information is not available. {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress}
+     * will never be deprecated.
      *
      * @hide
      */
@@ -472,8 +475,12 @@ public class LinkAddress implements Parcelable {
     }
 
     /**
-     * @return The time that this address will expire and will be no longer valid. This is the EPOCH
-     * time in milliseconds. 0 indicates this information is not available.
+     * Get the expiration time, as reported by {@link SystemClock#elapsedRealtime}, when this
+     * {@link LinkAddress} will expire and be removed from the interface.
+     *
+     * @return The expiration time in milliseconds. {@link #LIFETIME_UNKNOWN} indicates this
+     * information is not available. {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress}
+     * will never expire.
      *
      * @hide
      */
