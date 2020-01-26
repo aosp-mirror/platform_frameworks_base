@@ -257,9 +257,9 @@ message Atom {
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
         DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
         BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
-        AssistGestureStageReported assist_gesture_stage_reported = 174;
-        AssistGestureFeedbackReported assist_gesture_feedback_reported = 175;
-        AssistGestureProgressReported assist_gesture_progress_reported = 176;
+        AssistGestureStageReported assist_gesture_stage_reported = 174 [(module) = "sysui"];
+        AssistGestureFeedbackReported assist_gesture_feedback_reported = 175 [(module) = "sysui"];
+        AssistGestureProgressReported assist_gesture_progress_reported = 176 [(module) = "sysui"];
         TouchGestureClassified touch_gesture_classified = 177;
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
         StyleUIChanged style_ui_changed = 179 [(module) = "sysui"];
