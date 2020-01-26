@@ -36,7 +36,7 @@ public class EnhancedEstimatesGoogleImpl implements EnhancedEstimates {
             }
             updateFlags();
             return mParser.getBoolean("hybrid_enabled", true);
-        } catch (Exception unused) {
+        } catch (PackageManager.NameNotFoundException unused) {
             return false;
         }
     }
