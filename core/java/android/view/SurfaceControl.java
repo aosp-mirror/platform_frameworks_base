@@ -2801,12 +2801,12 @@ public final class SurfaceControl implements Parcelable {
          * the system releases buffers back to the application.
          *
          * @param sc The SurfaceControl to specify the frame rate of.
-         * @param frameRate The intended frame rate for this surface. 0 is a special value that
-         *                  indicates the app will accept the system's choice for the display frame
-         *                  rate, which is the default behavior if this function isn't called. The
-         *                  frameRate param does *not* need to be a valid refresh rate for this
-         *                  device's display - e.g., it's fine to pass 30fps to a device that can
-         *                  only run the display at 60fps.
+         * @param frameRate The intended frame rate for this surface, in frames per second. 0 is a
+         *                  special value that indicates the app will accept the system's choice for
+         *                  the display frame rate, which is the default behavior if this function
+         *                  isn't called. The frameRate param does *not* need to be a valid refresh
+         *                  rate for this device's display - e.g., it's fine to pass 30fps to a
+         *                  device that can only run the display at 60fps.
          * @return This transaction object.
          */
         @NonNull

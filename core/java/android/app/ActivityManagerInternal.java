@@ -367,4 +367,14 @@ public abstract class ActivityManagerInternal {
      * Unregisters the specified {@code processObserver}.
      */
     public abstract void unregisterProcessObserver(IProcessObserver processObserver);
+
+    /**
+     * Checks if there is an unfinished instrumentation that targets the given uid.
+     *
+     * @param uid The uid to be checked for
+     *
+     * @return True, if there is an instrumentation whose target application uid matches the given
+     * uid, false otherwise
+     */
+    public abstract boolean isUidCurrentlyInstrumented(int uid);
 }

@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.app.ActivityManager;
@@ -42,6 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.ServiceThread;
 
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +57,7 @@ public final class CachedAppOptimizer {
 
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
+    @VisibleForTesting static final String KEY_USE_FREEZER = "use_freezer";
     @VisibleForTesting static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
     @VisibleForTesting static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
@@ -65,6 +68,8 @@ public final class CachedAppOptimizer {
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_6 = "compact_throttle_6";
     @VisibleForTesting static final String KEY_COMPACT_STATSD_SAMPLE_RATE =
             "compact_statsd_sample_rate";
+    @VisibleForTesting static final String KEY_FREEZER_STATSD_SAMPLE_RATE =
+            "freeze_statsd_sample_rate";
     @VisibleForTesting static final String KEY_COMPACT_FULL_RSS_THROTTLE_KB =
             "compact_full_rss_throttle_kb";
     @VisibleForTesting static final String KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB =
@@ -85,6 +90,7 @@ public final class CachedAppOptimizer {
 
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
+    @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = false;
     @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE_FLAG;
     @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL_FLAG;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
@@ -114,6 +120,13 @@ public final class CachedAppOptimizer {
     static final int COMPACT_PROCESS_BFGS = 4;
     static final int COMPACT_PROCESS_MSG = 1;
     static final int COMPACT_SYSTEM_MSG = 2;
+    static final int SET_FROZEN_PROCESS_MSG = 3;
+
+    //TODO:change this static definition into a configurable flag.
+    static final int FREEZE_TIMEOUT_MS = 500;
+
+    static final int DO_FREEZE = 1;
+    static final int DO_UNFREEZE = 2;
 
     /**
      * This thread must be moved to the system background cpuset.
@@ -144,7 +157,9 @@ public final class CachedAppOptimizer {
                                     || KEY_COMPACT_THROTTLE_4.equals(name)) {
                                 updateCompactionThrottles();
                             } else if (KEY_COMPACT_STATSD_SAMPLE_RATE.equals(name)) {
-                                updateStatsdSampleRate();
+                                updateCompactStatsdSampleRate();
+                            } else if (KEY_FREEZER_STATSD_SAMPLE_RATE.equals(name)) {
+                                updateFreezerStatsdSampleRate();
                             } else if (KEY_COMPACT_FULL_RSS_THROTTLE_KB.equals(name)) {
                                 updateFullRssThrottle();
                             } else if (KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB.equals(name)) {
@@ -183,9 +198,11 @@ public final class CachedAppOptimizer {
     @VisibleForTesting volatile long mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
     @GuardedBy("mPhenotypeFlagLock")
     private volatile boolean mUseCompaction = DEFAULT_USE_COMPACTION;
+    private volatile boolean mUseFreezer = DEFAULT_USE_FREEZER;
     private final Random mRandom = new Random();
     @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting volatile float mStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
+    @VisibleForTesting volatile float mCompactStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
+    @VisibleForTesting volatile float mFreezerStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mFullAnonRssThrottleKb =
             DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB;
@@ -197,6 +214,7 @@ public final class CachedAppOptimizer {
 
     // Handler on which compaction runs.
     private Handler mCompactionHandler;
+    private Handler mFreezeHandler;
 
     // Maps process ID to last compaction statistics for processes that we've fully compacted. Used
     // when evaluating throttles that we only consider for "full" compaction, so we don't store
@@ -238,10 +256,12 @@ public final class CachedAppOptimizer {
             updateUseCompaction();
             updateCompactionActions();
             updateCompactionThrottles();
-            updateStatsdSampleRate();
+            updateCompactStatsdSampleRate();
+            updateFreezerStatsdSampleRate();
             updateFullRssThrottle();
             updateFullDeltaRssThrottle();
             updateProcStateThrottle();
+            updateUseFreezer();
         }
         Process.setThreadGroupAndCpuset(mCachedAppOptimizerThread.getThreadId(),
                 Process.THREAD_GROUP_SYSTEM);
@@ -253,6 +273,15 @@ public final class CachedAppOptimizer {
     public boolean useCompaction() {
         synchronized (mPhenotypeFlagLock) {
             return mUseCompaction;
+        }
+    }
+
+    /**
+     * Returns whether freezer is enabled.
+     */
+    public boolean useFreezer() {
+        synchronized (mPhenotypeFlagLock) {
+            return mUseFreezer;
         }
     }
 
@@ -269,7 +298,7 @@ public final class CachedAppOptimizer {
             pw.println("  " + KEY_COMPACT_THROTTLE_4 + "=" + mCompactThrottleFullFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_5 + "=" + mCompactThrottleBFGS);
             pw.println("  " + KEY_COMPACT_THROTTLE_6 + "=" + mCompactThrottlePersistent);
-            pw.println("  " + KEY_COMPACT_STATSD_SAMPLE_RATE + "=" + mStatsdSampleRate);
+            pw.println("  " + KEY_COMPACT_STATSD_SAMPLE_RATE + "=" + mCompactStatsdSampleRate);
             pw.println("  " + KEY_COMPACT_FULL_RSS_THROTTLE_KB + "="
                     + mFullAnonRssThrottleKb);
             pw.println("  " + KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB + "="
@@ -283,6 +312,8 @@ public final class CachedAppOptimizer {
 
             pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
                     + " processes.");
+            pw.println(" " + KEY_USE_FREEZER + "=" + mUseFreezer);
+            pw.println("  " + KEY_FREEZER_STATSD_SAMPLE_RATE + "=" + mFreezerStatsdSampleRate);
             if (DEBUG_COMPACTION) {
                 for (Map.Entry<Integer, LastCompactionStats> entry
                         : mLastCompactionStats.entrySet()) {
@@ -356,15 +387,73 @@ public final class CachedAppOptimizer {
 
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
-     * should be enabled, and starts the compaction thread if needed.
+     * should be enabled, and starts the freeze/compaction thread if needed.
      */
     @GuardedBy("mPhenotypeFlagLock")
     private void updateUseCompaction() {
         mUseCompaction = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_USE_COMPACTION, DEFAULT_USE_COMPACTION);
-        if (mUseCompaction && !mCachedAppOptimizerThread.isAlive()) {
-            mCachedAppOptimizerThread.start();
+
+        if (mUseCompaction) {
+            if (!mCachedAppOptimizerThread.isAlive()) {
+                mCachedAppOptimizerThread.start();
+            }
+
             mCompactionHandler = new MemCompactionHandler();
+        }
+    }
+
+    /**
+     * Determines whether the freezer is correctly supported by this system
+     */
+    public boolean isFreezerSupported() {
+        boolean supported = false;
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader("/dev/freezer/frozen/freezer.killable");
+            int i = fr.read();
+
+            if ((char) i == '1') {
+                supported = true;
+            } else {
+                Slog.w(TAG_AM, "Freezer killability is turned off, disabling freezer");
+            }
+        } catch (java.io.FileNotFoundException e) {
+            Slog.d(TAG_AM, "Freezer.killable not present, disabling freezer");
+        } catch (Exception e) {
+            Slog.d(TAG_AM, "Unable to read freezer.killable, disabling freezer: " + e.toString());
+        }
+
+        if (fr != null) {
+            try {
+                fr.close();
+            } catch (java.io.IOException e) {
+                Slog.e(TAG_AM, "Exception closing freezer.killable: " + e.toString());
+            }
+        }
+
+        return supported;
+    }
+
+    /**
+     * Reads the flag value from DeviceConfig to determine whether app freezer
+     * should be enabled, and starts the freeze/compaction thread if needed.
+     */
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateUseFreezer() {
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
+            mUseFreezer = isFreezerSupported();
+        }
+
+        if (mUseFreezer) {
+            Slog.d(TAG_AM, "Freezer enabled");
+            if (!mCachedAppOptimizerThread.isAlive()) {
+                mCachedAppOptimizerThread.start();
+            }
+
+            mFreezeHandler = new FreezeHandler();
         }
     }
 
@@ -433,10 +522,17 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy("mPhenotypeFlagLock")
-    private void updateStatsdSampleRate() {
-        mStatsdSampleRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+    private void updateCompactStatsdSampleRate() {
+        mCompactStatsdSampleRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_COMPACT_STATSD_SAMPLE_RATE, DEFAULT_STATSD_SAMPLE_RATE);
-        mStatsdSampleRate = Math.min(1.0f, Math.max(0.0f, mStatsdSampleRate));
+        mCompactStatsdSampleRate = Math.min(1.0f, Math.max(0.0f, mCompactStatsdSampleRate));
+    }
+
+    @GuardedBy("mPhenotypeFlagLock")
+    private void updateFreezerStatsdSampleRate() {
+        mFreezerStatsdSampleRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FREEZER_STATSD_SAMPLE_RATE, DEFAULT_STATSD_SAMPLE_RATE);
+        mFreezerStatsdSampleRate = Math.min(1.0f, Math.max(0.0f, mFreezerStatsdSampleRate));
     }
 
     @GuardedBy("mPhenotypeFlagLock")
@@ -505,6 +601,24 @@ public final class CachedAppOptimizer {
             default:
                 return COMPACT_ACTION_NONE;
         }
+    }
+
+    @GuardedBy("mAm")
+    void freezeAppAsync(ProcessRecord app) {
+        mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+
+        mFreezeHandler.sendMessageDelayed(
+                mFreezeHandler.obtainMessage(
+                    SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app),
+                FREEZE_TIMEOUT_MS);
+    }
+
+    @GuardedBy("mAm")
+    void unfreezeAppAsync(ProcessRecord app) {
+        mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+
+        mFreezeHandler.sendMessage(
+                mFreezeHandler.obtainMessage(SET_FROZEN_PROCESS_MSG, DO_UNFREEZE, 0, app));
     }
 
     private static final class LastCompactionStats {
@@ -734,7 +848,7 @@ public final class CachedAppOptimizer {
                         // Note that as above not taking mPhenoTypeFlagLock here to avoid locking
                         // on every single compaction for a flag that will seldom change and the
                         // impact of reading the wrong value here is low.
-                        if (mRandom.nextFloat() < mStatsdSampleRate) {
+                        if (mRandom.nextFloat() < mCompactStatsdSampleRate) {
                             StatsLog.write(StatsLog.APP_COMPACTED, pid, name, pendingAction,
                                     rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
                                     rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
@@ -765,6 +879,121 @@ public final class CachedAppOptimizer {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 }
+            }
+        }
+    }
+
+    private final class FreezeHandler extends Handler {
+        private FreezeHandler() {
+            super(mCachedAppOptimizerThread.getLooper());
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what != SET_FROZEN_PROCESS_MSG) {
+                return;
+            }
+
+            if (msg.arg1 == DO_FREEZE) {
+                freezeProcess((ProcessRecord) msg.obj);
+            } else if (msg.arg1 == DO_UNFREEZE) {
+                unfreezeProcess((ProcessRecord) msg.obj);
+            }
+        }
+
+        private void freezeProcess(ProcessRecord proc) {
+            final int pid;
+            final String name;
+            final long unfrozenDuration;
+            final boolean frozen;
+
+            synchronized (mAm) {
+                pid = proc.pid;
+                name = proc.processName;
+
+                if (proc.curAdj <= ProcessList.CACHED_APP_MIN_ADJ) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, "Skipping freeze for process " + pid
+                                + " " + name + " (not cached)");
+                    }
+                    return;
+                }
+
+                if (pid == 0 || proc.frozen) {
+                    // Already frozen or not a real process, either one being
+                    // launched or one being killed
+                    return;
+                }
+
+                long unfreezeTime = proc.freezeUnfreezeTime;
+
+                try {
+                    Process.setProcessFrozen(pid, proc.uid, true);
+
+                    proc.freezeUnfreezeTime = SystemClock.uptimeMillis();
+                    proc.frozen = true;
+                } catch (Exception e) {
+                    Slog.w(TAG_AM, "Unable to freeze " + pid + " " + name);
+                }
+
+                unfrozenDuration = proc.freezeUnfreezeTime - unfreezeTime;
+                frozen = proc.frozen;
+            }
+
+            if (frozen) {
+                if (DEBUG_FREEZER) {
+                    Slog.d(TAG_AM, "froze " + pid + " " + name);
+                }
+
+                EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
+            }
+        }
+
+        private void unfreezeProcess(ProcessRecord proc) {
+            final int pid;
+            final String name;
+            final long frozenDuration;
+            final boolean frozen;
+
+            synchronized (mAm) {
+                pid = proc.pid;
+                name = proc.processName;
+
+                if (!proc.frozen) {
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM,
+                                "Skipping unfreeze for process " + pid + " "
+                                + name + " (not frozen)");
+                    }
+                    return;
+                }
+
+                if (pid == 0) {
+                    // Not a real process, either being launched or killed
+                    return;
+                }
+
+                long freezeTime = proc.freezeUnfreezeTime;
+
+                try {
+                    Process.setProcessFrozen(proc.pid, proc.uid, false);
+
+                    proc.freezeUnfreezeTime = SystemClock.uptimeMillis();
+                    proc.frozen = false;
+                } catch (Exception e) {
+                    Slog.w(TAG_AM, "Unable to unfreeze " + pid + " " + name);
+                }
+
+                frozenDuration = proc.freezeUnfreezeTime - freezeTime;
+                frozen = proc.frozen;
+            }
+
+            if (!frozen) {
+                if (DEBUG_FREEZER) {
+                    Slog.d(TAG_AM, "unfroze " + pid + " " + name);
+                }
+
+                EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, name);
             }
         }
     }

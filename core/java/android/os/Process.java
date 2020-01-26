@@ -179,6 +179,12 @@ public class Process {
     public static final int OTA_UPDATE_UID = 1061;
 
     /**
+     * Defines the UID used for statsd
+     * @hide
+     */
+    public static final int STATSD_UID = 1066;
+
+    /**
      * Defines the UID used for incidentd.
      * @hide
      */
@@ -854,6 +860,17 @@ public class Process {
     @UnsupportedAppUsage
     public static final native void setProcessGroup(int pid, int group)
             throws IllegalArgumentException, SecurityException;
+
+    /**
+     * Freeze or unfreeze the specified process.
+     *
+     * @param pid Identifier of the process to freeze or unfreeze.
+     * @param uid Identifier of the user the process is running under.
+     * @param frozen Specify whether to free (true) or unfreeze (false).
+     *
+     * @hide
+     */
+    public static final native void setProcessFrozen(int pid, int uid, boolean frozen);
 
     /**
      * Return the scheduling group of requested process.

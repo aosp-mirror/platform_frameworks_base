@@ -109,16 +109,16 @@ class UsbUserPermissionManager {
     @GuardedBy("mLock")
     private boolean mIsCopyPermissionsScheduled;
 
-    UsbUserPermissionManager(@NonNull Context context, @NonNull UserHandle user,
+    UsbUserPermissionManager(@NonNull Context context,
             @NonNull UsbUserSettingsManager usbUserSettingsManager) {
         mContext = context;
-        mUser = user;
+        mUser = context.getUser();
         mUsbUserSettingsManager = usbUserSettingsManager;
         mDisablePermissionDialogs = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_disableUsbPermissionDialogs);
 
         mPermissionsFile = new AtomicFile(new File(
-                Environment.getUserSystemDirectory(user.getIdentifier()),
+                Environment.getUserSystemDirectory(mUser.getIdentifier()),
                 "usb_permissions.xml"), "usb-permissions");
 
         synchronized (mLock) {

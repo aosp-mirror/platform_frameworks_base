@@ -19089,6 +19089,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void unregisterProcessObserver(IProcessObserver processObserver) {
             ActivityManagerService.this.unregisterProcessObserver(processObserver);
         }
+
+        @Override
+        public boolean isUidCurrentlyInstrumented(int uid) {
+            synchronized (ActivityManagerService.this) {
+                for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
+                    ActiveInstrumentation activeInst = mActiveInstrumentation.get(i);
+                    if (!activeInst.mFinished && activeInst.mTargetInfo != null
+                            && activeInst.mTargetInfo.uid == uid) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {

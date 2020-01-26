@@ -2173,6 +2173,9 @@ public final class OomAdjuster {
             app.repForegroundActivities = app.hasForegroundActivities();
             changes |= ActivityManagerService.ProcessChangeItem.CHANGE_ACTIVITIES;
         }
+
+        updateAppFreezeStateLocked(app);
+
         if (app.getReportedProcState() != app.getCurProcState()) {
             app.setReportedProcState(app.getCurProcState());
             if (app.thread != null) {
@@ -2488,5 +2491,19 @@ public final class OomAdjuster {
     @GuardedBy("mService")
     void dumpCachedAppOptimizerSettings(PrintWriter pw) {
         mCachedAppOptimizer.dump(pw);
+    }
+
+    @GuardedBy("mService")
+    void updateAppFreezeStateLocked(ProcessRecord app) {
+        if (!mCachedAppOptimizer.useFreezer()) {
+            return;
+        }
+
+        // Use current adjustment when freezing, set adjustment when unfreezing.
+        if (app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ && !app.frozen) {
+            mCachedAppOptimizer.freezeAppAsync(app);
+        } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ && app.frozen) {
+            mCachedAppOptimizer.unfreezeAppAsync(app);
+        }
     }
 }
