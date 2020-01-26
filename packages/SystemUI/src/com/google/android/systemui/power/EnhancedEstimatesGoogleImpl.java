@@ -43,9 +43,8 @@ public class EnhancedEstimatesGoogleImpl implements EnhancedEstimates {
 
     @Override
     public Estimate getEstimate() {
-        Builder appendPath = new Builder().scheme("content").authority("com.google.android.apps.turbo.estimated_time_remaining").appendPath("time_remaining").appendPath("id");
         try {
-           Cursor query = mContext.getContentResolver().query(appendPath.build(), null, null, null, null);
+            Cursor query = mContext.getContentResolver().query(new Builder().scheme("content").authority("com.google.android.apps.turbo.estimated_time_remaining").appendPath("time_remaining").build(), null, null, null, null);
             if (query != null) {
                 if (query.moveToFirst()) {
                     boolean z = true;
