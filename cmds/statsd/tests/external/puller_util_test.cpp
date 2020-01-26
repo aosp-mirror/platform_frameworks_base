@@ -34,8 +34,9 @@ using testing::Contains;
 /*
  * Test merge isolated and host uid
  */
-
+namespace {
 int uidAtomTagId = android::util::CPU_CLUSTER_TIME;
+const vector<int> uidAdditiveFields = {3};
 int nonUidAtomTagId = android::util::SYSTEM_UPTIME;
 int timestamp = 1234;
 int isolatedUid = 30;
@@ -57,6 +58,7 @@ void extractIntoVector(vector<shared_ptr<LogEvent>> events,
     ret.push_back(vec);
   }
 }
+}  // anonymous namespace
 
 TEST(puller_util, MergeNoDimension) {
   vector<shared_ptr<LogEvent>> inputData;
@@ -81,7 +83,7 @@ TEST(puller_util, MergeNoDimension) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
 
   vector<vector<int>> actual;
   extractIntoVector(inputData, actual);
@@ -121,7 +123,7 @@ TEST(puller_util, MergeWithDimension) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
 
   vector<vector<int>> actual;
   extractIntoVector(inputData, actual);
@@ -155,7 +157,7 @@ TEST(puller_util, NoMergeHostUidOnly) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
 
   // 20->32->31
   // 20->22->21
@@ -191,7 +193,7 @@ TEST(puller_util, IsolatedUidOnly) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
 
   // 20->32->31
   // 20->22->21
@@ -232,7 +234,7 @@ TEST(puller_util, MultipleIsolatedUidToOneHostUid) {
 
   sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
   EXPECT_CALL(*uidMap, getHostUidOrSelf(_)).WillRepeatedly(Return(hostUid));
-  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
 
   vector<vector<int>> actual;
   extractIntoVector(inputData, actual);
@@ -257,7 +259,7 @@ TEST(puller_util, NoNeedToMerge) {
   inputData.push_back(event);
 
   sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId, {} /*no additive fields*/);
 
   EXPECT_EQ(2, (int)inputData.size());
 }

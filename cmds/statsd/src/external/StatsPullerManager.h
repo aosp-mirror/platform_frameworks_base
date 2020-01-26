@@ -36,24 +36,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-typedef struct {
-    // The field numbers of the fields that need to be summed when merging
-    // isolated uid with host uid.
-    std::vector<int> additiveFields;
-    // Minimum time before this puller does actual pull again.
-    // Pullers can cause significant impact to system health and battery.
-    // So that we don't pull too frequently.
-    // If a pull request comes before cooldown, a cached version from previous pull
-    // will be returned.
-    int64_t coolDownNs = 1 * NS_PER_SEC;
-    // The actual puller
-    sp<StatsPuller> puller;
-    // Max time allowed to pull this atom.
-    // We cannot reliably kill a pull thread. So we don't terminate the puller.
-    // The data is discarded if the pull takes longer than this and mHasGoodData
-    // marked as false.
-    int64_t pullTimeoutNs = StatsdStats::kPullMaxDelayNs;
-} PullAtomInfo;
 
 typedef struct PullerKey {
     // The uid of the process that registers this puller.
@@ -121,7 +103,7 @@ public:
 
     void UnregisterPullAtomCallback(const int uid, const int32_t atomTag);
 
-    static std::map<PullerKey, PullAtomInfo> kAllPullAtomInfo;
+    std::map<const PullerKey, sp<StatsPuller>> kAllPullAtomInfo;
 
 private:
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;

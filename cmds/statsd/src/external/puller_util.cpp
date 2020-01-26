@@ -17,7 +17,6 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include "StatsPullerManager.h"
 #include "atoms_info.h"
 #include "puller_util.h"
 
@@ -25,12 +24,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::list;
-using std::map;
-using std::set;
-using std::shared_ptr;
-using std::sort;
-using std::vector;
+using namespace std;
 
 /**
  * Process all data and merge isolated with host if necessary.
@@ -54,12 +48,7 @@ using std::vector;
  * All atoms should be of the same tagId. All fields should be present.
  */
 void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<UidMap>& uidMap,
-                                      int tagId) {
-    if (StatsPullerManager::kAllPullAtomInfo.find({.atomTag = tagId}) ==
-        StatsPullerManager::kAllPullAtomInfo.end()) {
-        VLOG("Unknown pull atom id %d", tagId);
-        return;
-    }
+                                      int tagId, const vector<int>& additiveFieldsVec) {
     if ((android::util::AtomsInfo::kAtomsWithAttributionChain.find(tagId) ==
          android::util::AtomsInfo::kAtomsWithAttributionChain.end()) &&
         (android::util::AtomsInfo::kAtomsWithUidField.find(tagId) ==
@@ -120,8 +109,6 @@ void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const 
          });
 
     vector<shared_ptr<LogEvent>> mergedData;
-    const vector<int>& additiveFieldsVec =
-            StatsPullerManager::kAllPullAtomInfo.find({.atomTag = tagId})->second.additiveFields;
     const set<int> additiveFields(additiveFieldsVec.begin(), additiveFieldsVec.end());
     bool needMerge = true;
 

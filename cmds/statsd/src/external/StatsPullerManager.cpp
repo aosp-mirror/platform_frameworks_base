@@ -54,49 +54,47 @@ namespace statsd {
 // Values smaller than this may require to update the alarm.
 const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
-std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
+StatsPullerManager::StatsPullerManager()
+    : kAllPullAtomInfo({
+              // subsystem_sleep_state
+              {{.atomTag = android::util::SUBSYSTEM_SLEEP_STATE}, new SubsystemSleepStatePuller()},
 
-        // subsystem_sleep_state
-        {{.atomTag = android::util::SUBSYSTEM_SLEEP_STATE},
-         {.puller = new SubsystemSleepStatePuller()}},
+              // on_device_power_measurement
+              {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT}, new PowerStatsPuller()},
 
-        // on_device_power_measurement
-        {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT},
-         {.puller = new PowerStatsPuller()}},
+              // remaining_battery_capacity
+              {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
+               new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)},
 
-        // remaining_battery_capacity
-        {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
-         {.puller = new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
+              // full_battery_capacity
+              {{.atomTag = android::util::FULL_BATTERY_CAPACITY},
+               new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)},
 
-        // full_battery_capacity
-        {{.atomTag = android::util::FULL_BATTERY_CAPACITY},
-         {.puller = new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
+              // battery_voltage
+              {{.atomTag = android::util::BATTERY_VOLTAGE},
+               new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)},
 
-        // battery_voltage
-        {{.atomTag = android::util::BATTERY_VOLTAGE},
-         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
+              // battery_level
+              {{.atomTag = android::util::BATTERY_LEVEL},
+               new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)},
 
-        // battery_level
-        {{.atomTag = android::util::BATTERY_LEVEL},
-         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
+              // battery_cycle_count
+              {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
+               new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)},
 
-        // battery_cycle_count
-        {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
-         {.puller = new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)}},
+              // TrainInfo.
+              {{.atomTag = android::util::TRAIN_INFO}, new TrainInfoPuller()},
 
-        // TrainInfo.
-        {{.atomTag = android::util::TRAIN_INFO}, {.puller = new TrainInfoPuller()}},
+              // GpuStatsGlobalInfo
+              {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
+               new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)},
 
-        // GpuStatsGlobalInfo
-        {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
-         {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},
+              // GpuStatsAppInfo
+              {{.atomTag = android::util::GPU_STATS_APP_INFO},
+               new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)},
 
-        // GpuStatsAppInfo
-        {{.atomTag = android::util::GPU_STATS_APP_INFO},
-         {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
-};
-
-StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
+      }),
+      mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
 
 bool StatsPullerManager::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
@@ -108,7 +106,7 @@ bool StatsPullerManager::PullLocked(int tagId, vector<shared_ptr<LogEvent>>* dat
     VLOG("Initiating pulling %d", tagId);
 
     if (kAllPullAtomInfo.find({.atomTag = tagId}) != kAllPullAtomInfo.end()) {
-        bool ret = kAllPullAtomInfo.find({.atomTag = tagId})->second.puller->Pull(data);
+        bool ret = kAllPullAtomInfo.find({.atomTag = tagId})->second->Pull(data);
         VLOG("pulled %d items", (int)data->size());
         if (!ret) {
             StatsdStats::getInstance().notePullFailed(tagId);
@@ -147,7 +145,7 @@ void StatsPullerManager::SetStatsCompanionService(
     sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
-        pulledAtom.second.puller->SetStatsCompanionService(statsCompanionService);
+        pulledAtom.second->SetStatsCompanionService(statsCompanionService);
     }
     if (mStatsCompanionService != nullptr) {
         updateAlarmLocked();
@@ -279,7 +277,7 @@ void StatsPullerManager::OnAlarmFired(int64_t elapsedTimeNs) {
 int StatsPullerManager::ForceClearPullerCache() {
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
-        totalCleared += pulledAtom.second.puller->ForceClearCache();
+        totalCleared += pulledAtom.second->ForceClearCache();
     }
     return totalCleared;
 }
@@ -287,7 +285,7 @@ int StatsPullerManager::ForceClearPullerCache() {
 int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
-        totalCleared += pulledAtom.second.puller->ClearCacheIfNecessary(timestampNs);
+        totalCleared += pulledAtom.second->ClearCacheIfNecessary(timestampNs);
     }
     return totalCleared;
 }
@@ -300,12 +298,8 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
     VLOG("RegisterPullerCallback: adding puller for tag %d", atomTag);
     // TODO: linkToDeath with the callback so that we can remove it and delete the puller.
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
-    kAllPullAtomInfo[{.atomTag = atomTag}] = {
-            .additiveFields = additiveFields,
-            .coolDownNs = coolDownNs,
-            .puller = new StatsCallbackPuller(atomTag, callback, timeoutNs),
-            .pullTimeoutNs = timeoutNs,
-    };
+    kAllPullAtomInfo[{.atomTag = atomTag}] =
+            new StatsCallbackPuller(atomTag, callback, coolDownNs, timeoutNs, additiveFields);
 }
 
 void StatsPullerManager::UnregisterPullAtomCallback(const int uid, const int32_t atomTag) {

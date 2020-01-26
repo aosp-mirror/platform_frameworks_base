@@ -45,7 +45,7 @@ long pullDelayNs;
 
 class FakePuller : public StatsPuller {
 public:
-    FakePuller() : StatsPuller(pullTagId){};
+    FakePuller() : StatsPuller(pullTagId, /*coolDown=*/NS_PER_SEC, /*timeout=*/NS_PER_SEC / 2){};
 
 private:
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override {
