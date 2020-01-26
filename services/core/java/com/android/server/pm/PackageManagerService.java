@@ -2723,7 +2723,7 @@ public class PackageManagerService extends IPackageManager.Stub
         t.traceBegin("get system config");
         SystemConfig systemConfig = SystemConfig.getInstance();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
-        ApplicationPackageManager.invalidateHasSystemFeatureCache();
+        ApplicationPackageManager.invalidateSysFeatureCache();
         t.traceEnd();
 
         mProtectedPackages = new ProtectedPackages(mContext);

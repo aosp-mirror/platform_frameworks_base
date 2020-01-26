@@ -632,22 +632,22 @@ public class ApplicationPackageManager extends PackageManager {
     private static final int SYS_FEATURE_CACHE_SIZE = 256;
     private static final String CACHE_KEY_SYS_FEATURE_PROPERTY = "cache_key.has_system_feature";
 
-    private class HasSystemFeatureQuery {
+    private class SystemFeatureQuery {
         public final String name;
         public final int version;
-        public HasSystemFeatureQuery(String n, int v) {
+        public SystemFeatureQuery(String n, int v) {
             name = n;
             version = v;
         }
         @Override
         public String toString() {
-            return String.format("HasSystemFeatureQuery(name=\"%s\", version=%d)",
+            return String.format("SystemFeatureQuery(name=\"%s\", version=%d)",
                     name, version);
         }
         @Override
         public boolean equals(Object o) {
-            if (o instanceof HasSystemFeatureQuery) {
-                HasSystemFeatureQuery r = (HasSystemFeatureQuery) o;
+            if (o instanceof SystemFeatureQuery) {
+                SystemFeatureQuery r = (SystemFeatureQuery) o;
                 return Objects.equals(name, r.name) &&  version == r.version;
             } else {
                 return false;
@@ -655,32 +655,32 @@ public class ApplicationPackageManager extends PackageManager {
         }
         @Override
         public int hashCode() {
-            return Objects.hashCode(name) * 13 + version;
+            return Objects.hashCode(name) + version;
         }
     }
 
-    private final PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean> mHasSystemFeatureCache =
-            new PropertyInvalidatedCache<>(
+    private final PropertyInvalidatedCache<SystemFeatureQuery, Boolean> mSysFeatureCache =
+            new PropertyInvalidatedCache<SystemFeatureQuery, Boolean>(
                 SYS_FEATURE_CACHE_SIZE,
                 CACHE_KEY_SYS_FEATURE_PROPERTY) {
                 @Override
-                protected Boolean recompute(HasSystemFeatureQuery query) {
+                protected Boolean recompute(SystemFeatureQuery query) {
                     return hasSystemFeatureUncached(query.name, query.version);
                 }
             };
 
     @Override
     public boolean hasSystemFeature(String name, int version) {
-        return mHasSystemFeatureCache.query(new HasSystemFeatureQuery(name, version));
+        return mSysFeatureCache.query(new SystemFeatureQuery(name, version)).booleanValue();
     }
 
     /** @hide */
-    public void disableHasSystemFeatureCache() {
-        mHasSystemFeatureCache.disableLocal();
+    public void disableSysFeatureCache() {
+        mSysFeatureCache.disableLocal();
     }
 
     /** @hide */
-    public static void invalidateHasSystemFeatureCache() {
+    public static void invalidateSysFeatureCache() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SYS_FEATURE_PROPERTY);
     }
 
