@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ടിവി ഓപ്‌ഷനുകൾ"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ഫയലുകളും മീഡിയയും"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഫോട്ടോകളും മീഡിയയും ഫയലുകളും ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"മൈക്രോഫോണ്‍"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ടാപ്പുചെയ്യാനോ സ്വൈപ്പുചെയ്യാനോ പിഞ്ചുചെയ്യാനോ മറ്റ് ജെസ്‌റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ഫിംഗർപ്രിന്റ് ജെസ്‌റ്ററുകൾ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"കുറുക്കുവഴി ഓണാണെങ്കിൽ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും.\n\n നിലവിലെ  ഉപയോഗസഹായി ഫീച്ചർ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിൽ ഏത് സമയത്തും നിങ്ങൾക്ക് ഫീച്ചർ മാറ്റാവുന്നതാണ്."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"ശൂന്യം"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"കുറുക്കുവഴികൾ തിരുത്തുക"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"റദ്ദാക്കുക"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണ് ഇത് മാനേജ് ചെയ്യുന്നത്."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"കൂടുതലറിയുക"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ഓണാക്കുക"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ഈ ആപ്പ് Android-ന്റെ പഴയ പതിപ്പിനായി നിർമ്മിച്ചിരിക്കുന്നതിനാൽ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല. അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക, അല്ലെങ്കിൽ ഡെവലപ്പറുമായി ബന്ധപ്പെടുക."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി ലാഭിക്കൽ"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കിയിരിക്കുന്നു"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ഫോണിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ടാബ്‌ലെറ്റിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ഉപകരണത്തിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"ഫോള്‍ഡര്‍"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ആപ്പ്"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ഫയൽ"</string>
@@ -1993,6 +1987,8 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> സ്പ്രെഡ്ഷീറ്റ്"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"അവതരണം"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> അവതരണം"</string>
+    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
+    <skip />
     <string name="car_loading_profile" msgid="8219978381196748070">"ലോഡ് ചെയ്യുന്നു"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ഫയലുകൾ</item>
@@ -2010,5 +2006,13 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"സ്‌ക്രീൻ വിഭജന മോഡ് മാറ്റുക"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"സ്ക്രീൻഷോട്ട്"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
+    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
+    <skip />
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

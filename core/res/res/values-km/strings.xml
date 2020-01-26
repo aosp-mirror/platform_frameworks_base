@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរផ្សេងៗ​ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ជម្រើស Android TV"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ឯកសារ និង​មេឌៀ"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"ចូលដំណើការរូបភាព មេឌៀ និងឯកសារនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ថតសំឡេង"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"អាចប៉ះ អូស ច្បិច និងធ្វើកាយវិការផ្សេងទៀត"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"ចលនា​ស្នាមម្រាមដៃ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"អាចចាប់យក​ចលនា​ដែលធ្វើនៅលើ​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍បាន។"</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ថត​អេក្រង់"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"អាច​ថត​អេក្រង់​នៃ​ផ្ទាំង​អេក្រង់​បាន។"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ធ្វើជារបារស្ថានភាព"</string>
@@ -1617,7 +1618,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"នៅពេល​ផ្លូវកាត់​នេះបើក ការ​ចុច​ប៊ូតុង​កម្រិត​សំឡេង​ទាំង​ពីរ​ឲ្យ​ជាប់​រយៈពេល​ 3 វិនាទីនឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយស្រួល។\n\n មុខងារ​ភាពងាយស្រួល​បច្ចុប្បន្ន៖\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n អ្នក​អាច​ផ្លាស់​ប្តូរ​មុខងារ​នេះ​បាន​នៅក្នុង​ការ កំណត់ &gt; ភាព​ងាយស្រួល។"</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"លុបទាំងអស់"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"កែ​ផ្លូវកាត់"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"បោះបង់"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
@@ -1852,13 +1852,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"​កម្មវិធី​មិន​អាច​ប្រើ​បានទេ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> មិន​អាច​ប្រើ​បាន​ទេនៅពេលនេះ។ វា​ស្ថិត​ក្រោម​ការគ្រប់គ្រងរបស់ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ។"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ស្វែងយល់បន្ថែម"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"បើក​កម្រង​ព័ត៌មាន​ការ​ងារ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"បើក"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"កម្មវិធី​នេះ​ត្រូវបាន​បង្កើត​ឡើង​សម្រាប់​កំណែ​ប្រព័ន្ធ​ប្រតិបត្តិការ Android ចាស់ ហើយ​វាអាច​ដំណើរការ​ខុសប្រក្រតី។ សូម​សាកល្បង​ពិនិត្យមើល​កំណែ​ថ្មី ឬ​ទាក់ទង​ទៅអ្នក​អភិវឌ្ឍន៍។"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"រក​មើល​កំណែ​ថ្មី"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"អ្នកមានសារថ្មី"</string>
@@ -1969,14 +1967,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"កម្មវិធីសន្សំថ្ម"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"កម្មវិធី​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ទូរសព្ទ​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ថេប្លេត​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ឧបករណ៍​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"ថត"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"​កម្មវិធី Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ឯកសារ"</string>
@@ -1995,6 +1989,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"បញ្ជី​ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"បទ​បង្ហាញ"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"បទបង្ហាញ​ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ប៊្លូធូស​នឹងនៅបន្តបើក អំឡុងពេល​ប្រើមុខងារ​ពេលជិះយន្តហោះ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"កំពុងផ្ទុក"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other">ឯកសារ <xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
@@ -2012,5 +2007,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"បិទ/បើក​មុខងារ​បំបែកអេក្រង់"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"អេក្រង់ចាក់សោ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"រូបថតអេក្រង់"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

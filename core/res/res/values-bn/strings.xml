@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"অ্যাডমিন অ্যাপটি ব্যবহার করা যাবে না। আপনার ডিভাইসে থাকা সবকিছু এখন মুছে ফেলা হবে।\n\nকোনও প্রশ্ন থাকলে আপনার প্রতিষ্ঠানের অ্যাডমিনের সাথে যোগাযোগ করুন।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> প্রিন্টিং বন্ধ রেখেছে।"</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"আমাকে"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ট্যাবলেট বিকল্পগুলি"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-র বিকল্প"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ফাইল এবং মিডিয়া"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"আপনার ডিভাইসে ফটো, মিডিয়া এবং ফাইলগুলিতে অ্যাক্সেস"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"মাইক্রোফোন"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"অডিও রেকর্ড"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"আঙ্গুলের ছাপ সেন্সরের উপর করা জেসচার"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"স্ক্রিনশট নিন"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ডিসপ্লের একটি স্ক্রিনশট নিতে পারেন।"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দন্ডে থাকুন"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"প্রস্তাবিত স্তরের চেয়ে বেশি উঁচুতে ভলিউম বাড়াবেন?\n\nউঁচু ভলিউমে বেশি সময় ধরে কিছু শুনলে আপনার শ্রবনশক্তির ক্ষতি হতে পারে।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"অ্যাক্সেসযোগ্যতা শর্টকাট ব্যবহার করবেন?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"শর্টকাটটি চালু থাকলে দুটি ভলিউম বোতাম একসাথে ৩ সেকেন্ড টিপে ধরে রাখলে একটি অ্যাকসেসিবিলিটি বৈশিষ্ট্য চালু হবে।\n\n বর্তমান অ্যাকসেসিবিলিটি বৈশিষ্ট্য:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n আপনি এই বৈশিষ্ট্যটি সেটিংস &gt; অ্যাকসেসিবিলিটিতে গিয়ে পরিবর্তন করতে পারবেন।"</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"খালি"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শর্টকাট এডিট করুন"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"বাতিল করুন"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শর্টকাট বন্ধ করুন"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"অ্যাপটি উপলভ্য নয়"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> এখন উপলভ্য নয়। এই অ্যাপটিকে <xliff:g id="APP_NAME_1">%2$s</xliff:g> অ্যাপ ম্যানেজ করে।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"আরও জানুন"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"কাজের প্রোফাইল চালু করবেন?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"আপনার কাজের অ্যাপ, বিজ্ঞপ্তি, ডেটা এবং কাজের প্রোফাইলের অন্যান্য বৈশিষ্ট্য চালু করা হবে"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"চালু করুন"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"এই অ্যাপটি Android এর একটি পুরনো ভার্সনের জন্য তৈরি করা হয়েছিল, তাই এখানে সেটি ঠিকমতো কাজ নাও করতে পারে। আপডেট পাওয়া যাচ্ছে কিনা দেখুন বা ডেভেলপারের সাথে যোগাযোগ করুন।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডেট পাওয়া যাচ্ছে কিনা দেখুন"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপনার নতুন মেসেজ আছে"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ব্যাটারি সেভার"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ব্যাটারি সেভার বন্ধ করা আছে"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ফোনের ব্যাটারিতে যথেষ্ট চার্জ আছে। ফিচারগুলির উপর আর বিধিনিষেধ নেই।"</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"ট্যাবলেটের ব্যাটারিতে যথেষ্ট চার্জ আছে। ফিচারগুলির উপর আর বিধিনিষেধ নেই।"</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"ডিভাইসের ব্যাটারিতে যথেষ্ট পরিমাণে চার্জ আছে। ফিচারগুলির উপর আর বিধিনিষেধ নেই।"</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"ফোল্ডার"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android অ্যাপ্লিকেশন"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ফাইল"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> স্প্রেডশীট"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"উপস্থাপনা"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> উপস্থাপনা"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ব্লুটুথ বিমান মোডে চালু থাকবে"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"লোড হচ্ছে"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> এবং আরও <xliff:g id="COUNT_3">%d</xliff:g>টি ফাইল</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"স্প্লিট স্ক্রিন টগল করুন"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"লক স্ক্রিন"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"স্ক্রিনশট"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর ক্যাপশন বার।"</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> সীমাবদ্ধ গ্রুপে অন্তর্ভুক্ত করা হয়েছে"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

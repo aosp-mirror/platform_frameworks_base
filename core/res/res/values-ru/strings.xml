@@ -198,6 +198,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Все данные с устройства будут удалены"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Невозможно использовать приложение для администрирования. С устройства будут удалены все данные.\n\nЕсли у вас возникли вопросы, обратитесь к администратору."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Функция печати отключена приложением \"<xliff:g id="OWNER_APP">%s</xliff:g>\""</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Настройки планшетного ПК"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Настройки Android TV"</string>
@@ -293,8 +297,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"доступ к календарю"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"отправлять и просматривать SMS-сообщения"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файлы и медиафайлы"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записывать аудио"</string>
@@ -320,10 +323,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Может выполнять жесты нажатия, пролистывания, масштабирования и т. д."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Регистрировать жесты на сканере отпечатков пальцев"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Использовать сканер отпечатков пальцев для дополнительных жестов."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Создавать скриншоты"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Создавать скриншоты экрана."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Отключение/изменение строки состояния"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Замена строки состояния"</string>
@@ -1659,7 +1660,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Установить громкость выше рекомендуемого уровня?\n\nВоздействие громкого звука в течение долгого времени может привести к повреждению слуха."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Использовать быстрое включение?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Чтобы использовать функцию специальных возможностей, когда она включена, нажмите и удерживайте три секунды обе кнопки регулировки громкости.\n\nТекущая функция специальных возможностей:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nВы можете изменить ее в разделе \"Настройки &gt; Специальные возможности\"."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Очистить"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить быстрые клавиши"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Отмена"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Деактивировать быстрое включение"</string>
@@ -1914,13 +1914,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Приложение недоступно"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Приложение \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" недоступно. Его работу ограничивает приложение \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Подробнее"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Включить рабочий профиль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Будут включены корпоративные приложения, уведомления, данные и другие функции рабочего профиля."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Включить"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Это приложение было создано для более ранней версии Android и может работать со сбоями. Проверьте наличие обновлений или свяжитесь с разработчиком."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверить обновления"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Новые сообщения"</string>
@@ -2033,14 +2031,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим энергосбережения"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режим энергосбережения отключен"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефон заряжен достаточно. Функции больше не ограничены."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Планшет заряжен достаточно. Функции больше не ограничены."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Устройство заряжено достаточно. Функции больше не ограничены."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Приложение Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>
@@ -2059,6 +2053,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Таблица <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Презентация"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Презентация <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth будет работать в режиме полета."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Загрузка"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one">\"<xliff:g id="FILE_NAME_2">%s</xliff:g>\" и ещё <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
@@ -2078,5 +2073,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Включить или выключить разделение экрана"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Заблокированный экран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Строка субтитров в приложении \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Приложение \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" помещено в категорию с ограниченным доступом."</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

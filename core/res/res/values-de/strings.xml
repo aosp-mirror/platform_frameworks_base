@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Die Daten auf deinem Gerät werden gelöscht."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Die Admin-App kann nicht verwendet werden. Die Daten auf deinem Gerät werden nun gelöscht.\n\nBitte wende dich bei Fragen an den Administrator deiner Organisation."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drucken wurde von <xliff:g id="OWNER_APP">%s</xliff:g> deaktiviert."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-Optionen"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-Optionen"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS senden und abrufen"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Dateien und Medien"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"auf Fotos, Medien und Dateien auf deinem Gerät zugreifen"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Audio aufnehmen"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Tippen, Wischen, Zusammenziehen und andere Touch-Gesten möglich."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingerabdrucksensor-Gesten"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Statusleiste darstellen"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lautstärke über den Schwellenwert anheben?\n\nWenn du über einen längeren Zeitraum Musik in hoher Lautstärke hörst, kann dies dein Gehör schädigen."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Verknüpfung für Bedienungshilfen verwenden?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Wenn die Verknüpfung aktiviert ist, kannst du die beiden Lautstärketasten drei Sekunden lang gedrückt halten, um eine Bedienungshilfe zu starten.\n\n Aktuelle Bedienungshilfe:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Du kannst die Bedienungshilfe unter \"Einstellungen\" &gt; \"Bedienungshilfen\" ändern."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Leeren"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Verknüpfungen bearbeiten"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Abbrechen"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Verknüpfung deaktivieren"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"App nicht verfügbar"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ist momentan nicht verfügbar. Dies wird über die App \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\" verwaltet."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Weitere Informationen"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Arbeitsprofil aktivieren?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Deine geschäftlichen Apps, Benachrichtigungen, Daten und andere Funktionen des Arbeitsprofils werden aktiviert"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivieren"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Diese App wurde für eine ältere Android-Version entwickelt und funktioniert möglicherweise nicht mehr richtig. Prüfe, ob Updates verfügbar sind oder kontaktiere den Entwickler."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Auf Updates prüfen"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du hast neue Nachrichten"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Dein Akku könnte vor der gewöhnlichen Ladezeit leer sein"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Energiesparmodus aktiviert, um die Akkulaufzeit zu verlängern"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Energiesparmodus"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Energiesparmodus deaktiviert"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Das Smartphone ist ausreichend geladen. Es sind keine Funktionen mehr beschränkt."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Das Tablet ist ausreichend geladen. Es sind keine Funktionen mehr beschränkt."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Das Gerät ist ausreichend geladen. Es sind keine Funktionen mehr beschränkt."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Ordner"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android-App"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Datei"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Tabelle (<xliff:g id="EXTENSION">%1$s</xliff:g>)"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Präsentation"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Präsentation (<xliff:g id="EXTENSION">%1$s</xliff:g>)"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth bleibt im Flugmodus aktiviert"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Wird geladen"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> und <xliff:g id="COUNT_3">%d</xliff:g> Dateien</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"\"Bildschirm teilen\" ein-/ausschalten"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sperrbildschirm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Untertitelleiste von <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> wurde in den BESCHRÄNKT-Bucket gelegt"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>
