@@ -326,26 +326,23 @@ public class LinkAddressTest {
         assertParcelSane(l, 6);
     }
 
-    /*
     @Test
     public void testDeprecationTime() {
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
-                    LinkAddress.LIFETIME_UNKNOWN,
-                    SystemClock.elapsedRealtime() + 200000);
+                    LinkAddress.LIFETIME_UNKNOWN, 100000L);
             fail("Only one time provided should cause exception");
         } catch (IllegalArgumentException expected) { }
 
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
-                    SystemClock.elapsedRealtime() - 100000,
-                    SystemClock.elapsedRealtime() - 200000);
+                    200000L, 100000L);
             fail("deprecation time later than expiration time should cause exception");
         } catch (IllegalArgumentException expected) { }
 
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
-                    -2, SystemClock.elapsedRealtime());
+                    -2, 100000L);
             fail("negative deprecation time should cause exception");
         } catch (IllegalArgumentException expected) { }
     }
@@ -354,14 +351,13 @@ public class LinkAddressTest {
     public void testExpirationTime() {
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
-                    SystemClock.elapsedRealtime() + 200000,
-                    LinkAddress.LIFETIME_UNKNOWN);
+                    200000L, LinkAddress.LIFETIME_UNKNOWN);
             fail("Only one time provided should cause exception");
         } catch (IllegalArgumentException expected) { }
 
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
-                    SystemClock.elapsedRealtime() - 10000, -2);
+                    100000L, -2);
             fail("negative expiration time should cause exception");
         } catch (IllegalArgumentException expected) { }
     }
@@ -374,12 +370,12 @@ public class LinkAddressTest {
         // Test if deprecated bit was added/remove automatically based on the provided deprecation
         // time
         l = new LinkAddress(V6_ADDRESS, 64, 0, RT_SCOPE_HOST,
-                SystemClock.elapsedRealtime() - 100000, LinkAddress.LIFETIME_PERMANENT);
+                1L, LinkAddress.LIFETIME_PERMANENT);
         // Check if the flag is added automatically.
         assertTrue((l.getFlags() & IFA_F_DEPRECATED) != 0);
 
         l = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED, RT_SCOPE_HOST,
-                SystemClock.elapsedRealtime() + 100000, LinkAddress.LIFETIME_PERMANENT);
+                SystemClock.elapsedRealtime() + 100000L, LinkAddress.LIFETIME_PERMANENT);
         // Check if the flag is removed automatically.
         assertTrue((l.getFlags() & IFA_F_DEPRECATED) == 0);
 
@@ -389,12 +385,10 @@ public class LinkAddressTest {
         assertTrue((l.getFlags() & IFA_F_PERMANENT) != 0);
 
         l = new LinkAddress(V6_ADDRESS, 64, IFA_F_PERMANENT, RT_SCOPE_HOST,
-                SystemClock.elapsedRealtime() - 100000,
-                SystemClock.elapsedRealtime() + 100000);
+                1000L, SystemClock.elapsedRealtime() + 100000L);
         // Check if the permanent flag is removed
         assertTrue((l.getFlags() & IFA_F_PERMANENT) == 0);
-    }*/
-
+    }
 
     private void assertGlobalPreferred(LinkAddress l, String msg) {
         assertTrue(msg, l.isGlobalPreferred());
