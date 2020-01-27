@@ -343,6 +343,7 @@ public final class SystemServer {
 
     private static final String START_SENSOR_SERVICE = "StartSensorService";
     private static final String START_HIDL_SERVICES = "StartHidlServices";
+    private static final String START_BLOB_STORE_SERVICE = "startBlobStoreManagerService";
 
     private static final String SYSPROP_START_COUNT = "sys.system_server.start_count";
     private static final String SYSPROP_START_ELAPSED = "sys.system_server.start_elapsed";
@@ -350,6 +351,7 @@ public final class SystemServer {
 
     private Future<?> mSensorServiceStart;
     private Future<?> mZygotePreload;
+    private Future<?> mBlobStoreServiceStart;
 
     /**
      * Start the sensor service. This is a blocking call and can take time.
@@ -1783,6 +1785,13 @@ public final class SystemServer {
                 t.traceEnd();
             }
 
+            mBlobStoreServiceStart = SystemServerInitThreadPool.submit(() -> {
+                final TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
+                traceLog.traceBegin(START_BLOB_STORE_SERVICE);
+                mSystemServiceManager.startService(BLOB_STORE_MANAGER_SERVICE_CLASS);
+                traceLog.traceEnd();
+            }, START_BLOB_STORE_SERVICE);
+
             // Dreams (interactive idle-time views, a/k/a screen savers, and doze mode)
             t.traceBegin("StartDreamManager");
             mSystemServiceManager.startService(DreamManagerService.class);
@@ -2027,10 +2036,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(ClipboardService.class);
         t.traceEnd();
 
-        t.traceBegin("StartBlobStoreManagerService");
-        mSystemServiceManager.startService(BLOB_STORE_MANAGER_SERVICE_CLASS);
-        t.traceEnd();
-
         t.traceBegin("AppServiceManager");
         mSystemServiceManager.startService(AppBindingService.Lifecycle.class);
         t.traceEnd();
@@ -2148,6 +2153,9 @@ public final class SystemServer {
         t.traceBegin("AppSearchManagerService");
         mSystemServiceManager.startService(APP_SEARCH_MANAGER_SERVICE_CLASS);
         t.traceEnd();
+
+        ConcurrentUtils.waitForFutureNoInterrupt(mBlobStoreServiceStart,
+                START_BLOB_STORE_SERVICE);
 
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
