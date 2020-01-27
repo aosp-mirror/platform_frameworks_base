@@ -709,14 +709,14 @@ public class KeyguardViewMediator extends SystemUI {
         mShowHomeOverLockscreen = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
-                /* defaultValue = */ false);
+                /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post,
                 new DeviceConfig.OnPropertiesChangedListener() {
                     @Override
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         if (properties.getKeyset().contains(NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN)) {
                             mShowHomeOverLockscreen = properties.getBoolean(
-                                    NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN, false /* defaultValue */);
+                                    NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN, true /* defaultValue */);
                         }
                     }
                 });
