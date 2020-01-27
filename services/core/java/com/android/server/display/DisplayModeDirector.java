@@ -1050,6 +1050,7 @@ public class DisplayModeDirector {
 
         public void dumpLocked(PrintWriter pw) {
             pw.println("  BrightnessObserver");
+            pw.println("    mAmbientLux: " + mAmbientLux);
             pw.println("    mRefreshRateInZone: " + mRefreshRateInZone);
 
             for (int d: mDisplayBrightnessThresholds) {
@@ -1059,6 +1060,8 @@ public class DisplayModeDirector {
             for (int d: mAmbientBrightnessThresholds) {
                 pw.println("    mAmbientBrightnessThreshold: " + d);
             }
+
+            mLightSensorListener.dumpLocked(pw);
         }
 
         public void onDisplayChanged(int displayId) {
@@ -1221,6 +1224,10 @@ public class DisplayModeDirector {
         private final class LightSensorEventListener implements SensorEventListener {
             final private static int INJECT_EVENTS_INTERVAL_MS = LIGHT_SENSOR_RATE_MS;
             private float mLastSensorData;
+
+            public void dumpLocked(PrintWriter pw) {
+                pw.println("    mLastSensorData: " + mLastSensorData);
+            }
 
             @Override
             public void onSensorChanged(SensorEvent event) {
