@@ -3683,30 +3683,27 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
         boolean usingAsyncReport = false;
+        boolean reportNextDraw = mReportNextDraw; // Capture the original value
         if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
             ArrayList<Runnable> commitCallbacks = mAttachInfo.mTreeObserver
                     .captureFrameCommitCallbacks();
-            if (mReportNextDraw) {
-                usingAsyncReport = true;
+            final boolean needFrameCompleteCallback = mNextDrawUseBLASTSyncTransaction ||
+                (commitCallbacks != null && commitCallbacks.size() > 0) ||
+                mReportNextDraw;
+            usingAsyncReport = mReportNextDraw;
+            if (needFrameCompleteCallback) {
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
                         handler.postAtFrontOfQueue(() -> {
                             finishBLASTSync();
-                            // TODO: Use the frame number
-                            pendingDrawFinished();
+                            if (reportNextDraw) {
+                                // TODO: Use the frame number
+                                pendingDrawFinished();
+                            }
                             if (commitCallbacks != null) {
                                 for (int i = 0; i < commitCallbacks.size(); i++) {
                                     commitCallbacks.get(i).run();
                                 }
-                            }
-                        }));
-            } else if (commitCallbacks != null && commitCallbacks.size() > 0) {
-                final Handler handler = mAttachInfo.mHandler;
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
-                        handler.postAtFrontOfQueue(() -> {
-                            finishBLASTSync();
-                            for (int i = 0; i < commitCallbacks.size(); i++) {
-                                commitCallbacks.get(i).run();
                             }
                         }));
             }
