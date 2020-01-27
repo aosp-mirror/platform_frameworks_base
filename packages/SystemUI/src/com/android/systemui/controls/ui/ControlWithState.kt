@@ -16,18 +16,16 @@
 
 package com.android.systemui.controls.ui
 
-import android.content.ComponentName
 import android.service.controls.Control
-import android.service.controls.actions.ControlAction
-import android.view.ViewGroup
 
-interface ControlsUiController {
-    fun show(parent: ViewGroup)
-    fun hide()
-    fun onRefreshState(componentName: ComponentName, controls: List<Control>)
-    fun onActionResponse(
-        componentName: ComponentName,
-        controlId: String,
-        @ControlAction.ResponseResult response: Int
-    )
-}
+import com.android.systemui.controls.controller.ControlInfo
+
+/**
+ * A container for:
+ * <ul>
+ *  <li>ControlInfo - Basic cached info about a Control
+ *  <li>Control - Actual Control parcelable received directly from
+ *  the participating application
+ * </ul>
+ */
+data class ControlWithState(val ci: ControlInfo, val control: Control?)
