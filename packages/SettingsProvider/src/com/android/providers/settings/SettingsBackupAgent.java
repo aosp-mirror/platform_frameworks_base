@@ -45,6 +45,7 @@ import android.provider.settings.validators.Validator;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.BackupUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
@@ -625,6 +626,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      * Get names of the settings for which the current value should be preserved during restore.
      */
     private Set<String> getSettingsToPreserveInRestore(Uri settingsUri) {
+        if (!FeatureFlagUtils.isEnabled(getApplicationContext(),
+                FeatureFlagUtils.SETTINGS_DO_NOT_RESTORE_PRESERVED)) {
+            return Collections.emptySet();
+        }
+
         Cursor cursor = getContentResolver().query(settingsUri, new String[] {
                 Settings.NameValueTable.NAME, Settings.NameValueTable.IS_PRESERVED_IN_RESTORE },
                 /* selection */ null, /* selectionArgs */ null, /* sortOrder */ null);
