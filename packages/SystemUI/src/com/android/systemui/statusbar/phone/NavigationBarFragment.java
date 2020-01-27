@@ -302,14 +302,14 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mForceNavBarHandleOpaque = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_FORCE_OPAQUE,
-                /* defaultValue = */ false);
+                /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post,
                 new DeviceConfig.OnPropertiesChangedListener() {
                     @Override
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
                             mForceNavBarHandleOpaque = properties.getBoolean(
-                                    NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ false);
+                                    NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
                         }
                     }
                 });
