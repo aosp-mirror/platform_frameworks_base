@@ -21,6 +21,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
@@ -29,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
+import android.telephony.ims.feature.RcsFeature;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -42,6 +45,8 @@ import java.util.concurrent.Executor;
  * @see ImsRcsManager#getUceAdapter() for information on creating an instance of this class.
  * @hide
  */
+@SystemApi
+@TestApi
 public class RcsUceAdapter {
     private static final String TAG = "RcsUceAdapter";
 
@@ -197,6 +202,7 @@ public class RcsUceAdapter {
     /**
      * Not to be instantiated directly, use
      * {@link ImsRcsManager#getUceAdapter()} to instantiate this manager class.
+     * @hide
      */
     RcsUceAdapter(int subId) {
         mSubId = subId;
@@ -222,7 +228,7 @@ public class RcsUceAdapter {
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void requestCapabilities(@CallbackExecutor Executor executor,
+    public void requestCapabilities(@NonNull @CallbackExecutor Executor executor,
             @NonNull List<Uri> contactNumbers,
             @NonNull CapabilitiesCallback c) throws ImsException {
         if (c == null) {
@@ -299,7 +305,7 @@ public class RcsUceAdapter {
      * for the associated subscription.
      *
      * @return true if the user’s setting for UCE is enabled, false otherwise. If false,
-     * {@link ImsRcsManager#isCapable(int)} will return false for
+     * {@link ImsRcsManager#isCapable(int, int)} will return false for
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} and
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE}
      * @see #setUceSettingEnabled(boolean)

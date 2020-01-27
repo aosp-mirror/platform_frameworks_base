@@ -61,7 +61,6 @@ public final class ImsException extends Exception {
      * This is a configuration error and there should be no retry. The subscription used for this
      * operation is either invalid or has become inactive. The active subscriptions can be queried
      * with {@link SubscriptionManager#getActiveSubscriptionInfoList()}.
-     * @hide
      */
     public static final int CODE_ERROR_INVALID_SUBSCRIPTION = 3;
 

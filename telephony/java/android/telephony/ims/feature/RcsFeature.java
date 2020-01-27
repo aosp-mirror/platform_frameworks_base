@@ -349,9 +349,8 @@ public class RcsFeature extends ImsFeature {
      *
      * @return An instance of {@link RcsSipOptionsImplBase} that implements SIP options exchange if
      * it is supported by the device.
-     * @hide
      */
-    public RcsSipOptionsImplBase getOptionsExchangeImpl() {
+    public @NonNull RcsSipOptionsImplBase getOptionsExchangeImpl() {
         // Base Implementation, override to implement functionality
         return new RcsSipOptionsImplBase();
     }
@@ -365,9 +364,8 @@ public class RcsFeature extends ImsFeature {
      *
      * @return An instance of {@link RcsPresenceExchangeImplBase} that implements presence
      * exchange if it is supported by the device.
-     * @hide
      */
-    public RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
+    public @NonNull RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
         // Base Implementation, override to implement functionality.
         return new RcsPresenceExchangeImplBase();
     }
