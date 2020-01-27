@@ -5628,6 +5628,7 @@ package android.net.wifi {
   public class WifiInfo implements android.os.Parcelable {
     method public boolean isOsuAp();
     method public boolean isPasspointAp();
+    method @Nullable public static String sanitizeSsid(@Nullable String);
   }
 
   public class WifiManager {
