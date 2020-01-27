@@ -175,7 +175,6 @@ public class RcsUceAdapter {
      * Provides a one-time callback for the response to a UCE request. After this callback is called
      * by the framework, the reference to this callback will be discarded on the service side.
      * @see #requestCapabilities(Executor, List, CapabilitiesCallback)
-     * @hide
      */
     public static class CapabilitiesCallback {
 
@@ -227,10 +226,9 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
-     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void requestCapabilities(@CallbackExecutor Executor executor,
+    public void requestCapabilities(@NonNull @CallbackExecutor Executor executor,
             @NonNull List<Uri> contactNumbers,
             @NonNull CapabilitiesCallback c) throws ImsException {
         if (c == null) {
@@ -283,7 +281,6 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
-     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @PublishState int getUcePublishState() throws ImsException {
