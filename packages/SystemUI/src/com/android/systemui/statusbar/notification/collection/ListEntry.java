@@ -44,10 +44,11 @@ public abstract class ListEntry {
 
     /**
      * Should return the "representative entry" for this ListEntry. For NotificationEntries, its
-     * the entry itself. For groups, it should be the summary. This method exists to interface with
+     * the entry itself. For groups, it should be the summary (but if a summary doesn't exist,
+     * this can return null). This method exists to interface with
      * legacy code that expects groups to also be NotificationEntries.
      */
-    public abstract NotificationEntry getRepresentativeEntry();
+    public abstract @Nullable NotificationEntry getRepresentativeEntry();
 
     @Nullable public GroupEntry getParent() {
         return mParent;
