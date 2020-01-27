@@ -423,6 +423,11 @@ public class RecentsAnimationController implements DeathRecipient {
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
 
+        // If the target activity has a fixed orientation which is different from the current top
+        // activity, it will be rotated before being shown so we avoid a screen rotation
+        // animation when showing the Recents view.
+        mDisplayContent.rotateInDifferentOrientationIfNeeded(mTargetActivityRecord);
+
         // Notify that the animation has started
         if (mStatusBar != null) {
             mStatusBar.onRecentsAnimationStateChanged(true /* running */);
@@ -694,6 +699,9 @@ public class RecentsAnimationController implements DeathRecipient {
             if (reorderMode == REORDER_MOVE_TO_TOP || reorderMode == REORDER_KEEP_IN_PLACE) {
                 mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(
                         mTargetActivityRecord.token);
+            }
+            if (mTargetActivityRecord.hasFixedRotationTransform()) {
+                mTargetActivityRecord.clearFixedRotationTransform();
             }
         }
 

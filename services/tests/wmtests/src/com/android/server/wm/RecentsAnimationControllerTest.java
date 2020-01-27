@@ -53,6 +53,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -328,6 +330,44 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // IRecentsAnimationController#setCancelWithDeferredScreenshot called.
         assertFalse(mController.shouldDeferCancelWithScreenshot());
         assertTrue(activity.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
+    }
+
+    @Test
+    public void testRecentViewInFixedPortraitWhenTopAppInLandscape() {
+        mWm.mIsFixedRotationTransformEnabled = true;
+        mWm.setRecentsAnimationController(mController);
+
+        final ActivityStack homeStack = mDisplayContent.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final ActivityRecord homeAppWindow =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homeStack)
+                        .setCreateTask(true)
+                        .build();
+        final ActivityRecord appWindow = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win0 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win0);
+
+        final ActivityRecord landActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        landActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, landActivity, "win1");
+        landActivity.addWindow(win1);
+
+        assertEquals(landActivity.getTask().getTopVisibleActivity(), landActivity);
+        assertEquals(landActivity.findMainWindow(), win1);
+
+        // Ensure that the display is in Landscape
+        landActivity.onDescendantOrientationChanged(landActivity.token, landActivity);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE,
+                mDisplayContent.getConfiguration().orientation);
+
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeAppWindow);
+
+        // Check that the home app is in portrait
+        assertEquals(Configuration.ORIENTATION_PORTRAIT,
+                homeAppWindow.getConfiguration().orientation);
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {
