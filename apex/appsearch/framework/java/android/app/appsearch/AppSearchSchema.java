@@ -46,18 +46,6 @@ public final class AppSearchSchema {
         mProto = proto;
     }
 
-    /** Creates a new {@link AppSearchSchema.Builder}. */
-    @NonNull
-    public static AppSearchSchema.Builder newBuilder(@NonNull String typeName) {
-        return new AppSearchSchema.Builder(typeName);
-    }
-
-    /** Creates a new {@link PropertyConfig.Builder}. */
-    @NonNull
-    public static PropertyConfig.Builder newPropertyBuilder(@NonNull String propertyName) {
-        return new PropertyConfig.Builder(propertyName);
-    }
-
     /**
      * Returns the {@link SchemaTypeConfigProto} populated by this builder.
      * @hide
@@ -78,7 +66,8 @@ public final class AppSearchSchema {
         private final SchemaTypeConfigProto.Builder mProtoBuilder =
                 SchemaTypeConfigProto.newBuilder();
 
-        private Builder(@NonNull String typeName) {
+        /** Creates a new {@link AppSearchSchema.Builder}. */
+        public Builder(@NonNull String typeName) {
             mProtoBuilder.setSchemaType(typeName);
         }
 
@@ -115,7 +104,10 @@ public final class AppSearchSchema {
      * a property.
      */
     public static final class PropertyConfig {
-        /** Physical data-types of the contents of the property. */
+        /**
+         * Physical data-types of the contents of the property.
+         * @hide
+         */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.PropertyConfigProto.DataType.Code.
         @IntDef(prefix = {"DATA_TYPE_"}, value = {
@@ -144,7 +136,10 @@ public final class AppSearchSchema {
          */
         public static final int DATA_TYPE_DOCUMENT = 6;
 
-        /** The cardinality of the property (whether it is required, optional or repeated). */
+        /**
+         * The cardinality of the property (whether it is required, optional or repeated).
+         * @hide
+         */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.PropertyConfigProto.Cardinality.Code.
         @IntDef(prefix = {"CARDINALITY_"}, value = {
@@ -164,7 +159,10 @@ public final class AppSearchSchema {
         /** Exactly one value [1]. */
         public static final int CARDINALITY_REQUIRED = 3;
 
-        /** Encapsulates the configurations on how AppSearch should query/index these terms. */
+        /**
+         * Encapsulates the configurations on how AppSearch should query/index these terms.
+         * @hide
+         */
         @IntDef(prefix = {"INDEXING_TYPE_"}, value = {
                 INDEXING_TYPE_NONE,
                 INDEXING_TYPE_EXACT_TERMS,
@@ -199,7 +197,10 @@ public final class AppSearchSchema {
          */
         public static final int INDEXING_TYPE_PREFIXES = 2;
 
-        /** Configures how tokens should be extracted from this property. */
+        /**
+         * Configures how tokens should be extracted from this property.
+         * @hide
+         */
         // NOTE: The integer values of these constants must match the proto enum constants in
         // com.google.android.icing.proto.IndexingConfig.TokenizerType.Code.
         @IntDef(prefix = {"TOKENIZER_TYPE_"}, value = {
@@ -249,7 +250,8 @@ public final class AppSearchSchema {
                     mIndexingConfigProto =
                         com.google.android.icing.proto.IndexingConfig.newBuilder();
 
-            private Builder(String propertyName) {
+            /** Creates a new {@link PropertyConfig.Builder}. */
+            public Builder(@NonNull String propertyName) {
                 mPropertyConfigProto.setPropertyName(propertyName);
             }
 
