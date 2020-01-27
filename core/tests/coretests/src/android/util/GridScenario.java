@@ -233,7 +233,7 @@ public abstract class GridScenario extends Activity {
         // turn off title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        mScreenHeight = getWindowManager().getDefaultDisplay().getHeight();
+        mScreenHeight = getWindowManager().getCurrentWindowMetrics().getSize().getHeight();
 
         final Params params = new Params();
         init(params);

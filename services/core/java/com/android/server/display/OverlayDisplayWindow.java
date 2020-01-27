@@ -109,7 +109,8 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
         mWindowManager = (WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE);
 
-        mDefaultDisplay = mWindowManager.getDefaultDisplay();
+        // TODO(b/148458868): Support multi-display
+        mDefaultDisplay = mContext.getDisplay();
         updateDefaultDisplayInfo();
 
         resize(width, height, densityDpi, false /* doLayout */);

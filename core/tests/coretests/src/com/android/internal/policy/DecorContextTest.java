@@ -26,7 +26,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
-import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -71,8 +70,7 @@ public final class DecorContextTest {
 
     private static void assertDecorContextDisplay(int expectedDisplayId,
             DecorContext decorContext) {
-        WindowManager wm = (WindowManager) decorContext.getSystemService(Context.WINDOW_SERVICE);
-        Display associatedDisplay = wm.getDefaultDisplay();
+        Display associatedDisplay = decorContext.getDisplay();
         assertEquals(expectedDisplayId, associatedDisplay.getDisplayId());
     }
 }

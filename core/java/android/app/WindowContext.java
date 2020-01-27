@@ -32,7 +32,7 @@ import android.view.WindowManagerImpl;
  * windows. Its resources and configuration are adjusted to the area of the display that will be
  * used when a new window is added via {@link android.view.WindowManager.addView}.
  *
- * @see Context#createWindowContext(int)
+ * @see Context#createWindowContext(int, Bundle)
  * @hide
  */
 // TODO(b/128338354): Handle config/display changes from server side.

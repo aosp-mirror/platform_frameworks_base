@@ -5732,14 +5732,13 @@ public abstract class Context {
      * shared, however common state (ClassLoader, other Resources for the
      * same configuration) may be so the Context itself can be fairly lightweight.
      *
-     * The returned display Context provides a {@link WindowManager}
-     * (see {@link #getSystemService(String)}) that is configured to show windows
-     * on the given display.  The WindowManager's {@link WindowManager#getDefaultDisplay}
-     * method can be used to retrieve the Display from the returned Context.
+     * To obtain an instance of a {@link WindowManager} (see {@link #getSystemService(String)}) that
+     * is configured to show windows on the given display call
+     * {@link #createWindowContext(int, Bundle)} on the returned display Context or use an
+     * {@link android.app.Activity}.
      *
-     * @param display A {@link Display} object specifying the display
-     * for whose metrics the Context's resources should be tailored and upon which
-     * new windows should be shown.
+     * @param display A {@link Display} object specifying the display for whose metrics the
+     * Context's resources should be tailored.
      *
      * @return A {@link Context} for the display.
      */

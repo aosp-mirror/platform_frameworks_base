@@ -275,7 +275,7 @@ public class ImmersiveModeConfirmation {
             super.onAttachedToWindow();
 
             DisplayMetrics metrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            mContext.getDisplay().getMetrics(metrics);
             float density = metrics.density;
 
             getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);

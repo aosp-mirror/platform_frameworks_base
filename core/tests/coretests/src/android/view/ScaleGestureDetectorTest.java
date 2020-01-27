@@ -22,8 +22,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
-import android.util.DisplayMetrics;
+import android.util.Size;
 import android.widget.TextView;
 
 import androidx.test.filters.LargeTest;
@@ -54,25 +53,23 @@ public class ScaleGestureDetectorTest {
         final float initialScaleFactor = 1.0f;
         assertEquals(initialScaleFactor, mScaleGestureActivity.getScaleFactor(), 0f);
 
-        // Specify start and end coordinates, irrespective of device display size.
-        final DisplayMetrics dm = new DisplayMetrics();
-        final WindowManager wm = (WindowManager) (mScaleGestureActivity.getApplicationContext())
-                .getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getMetrics(dm);
-        final int displayWidth = dm.widthPixels;
-        final int displayHeight = dm.heightPixels;
+        // Specify start and end coordinates with respect to the window size.
+        final WindowManager wm = mScaleGestureActivity.getSystemService(WindowManager.class);
+        final Size windowSize = wm.getCurrentWindowMetrics().getSize();
+        final int windowWidth = windowSize.getWidth();
+        final int windowHeight = windowSize.getHeight();
 
         // Obtain coordinates to perform pinch and zoom from the center, to 75% of the display.
-        final int centerX = displayWidth / 2;
-        final int centerY = displayHeight / 2;
+        final int centerX = windowWidth / 2;
+        final int centerY = windowHeight / 2;
 
         // Offset center coordinates by one, so that the two starting points are different.
         final float[] firstFingerStartCoords = new float[] {centerX + 1.0f, centerY - 1.0f};
         final float[] firstFingerEndCoords =
-        new float[] {0.75f * displayWidth, 0.25f * displayHeight};
+        new float[] {0.75f * windowWidth, 0.25f * windowHeight};
         final float[] secondFingerStartCoords = new float[] {centerX - 1.0f, centerY + 1.0f};
         final float[] secondFingerEndCoords =
-        new float[] {0.25f * displayWidth, 0.75f * displayHeight};
+        new float[] {0.25f * windowWidth, 0.75f * windowHeight};
 
         onView(withId(R.id.article)).perform(new PinchZoomAction(firstFingerStartCoords,
                 firstFingerEndCoords, secondFingerStartCoords, secondFingerEndCoords,

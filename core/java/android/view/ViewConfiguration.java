@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Size;
 import android.util.SparseArray;
 
 /**
@@ -398,11 +399,9 @@ public class ViewConfiguration {
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         // Size of the screen in bytes, in ARGB_8888 format
-        final WindowManager win = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        final Display display = win.getDefaultDisplay();
-        final Point size = new Point();
-        display.getRealSize(size);
-        mMaximumDrawingCacheSize = 4 * size.x * size.y;
+        final WindowManager windowManager = context.getSystemService(WindowManager.class);
+        final Size maxWindowSize = windowManager.getMaximumWindowMetrics().getSize();
+        mMaximumDrawingCacheSize = 4 * maxWindowSize.getWidth() * maxWindowSize.getHeight();
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
