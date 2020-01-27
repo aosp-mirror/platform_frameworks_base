@@ -288,8 +288,8 @@ message Atom {
         MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
         MediametricsRecorderReported mediametrics_recorder_reported = 200;
         MediametricsDrmManagerReported mediametrics_drmmanager_reported = 201;
-        CarPowerStateChanged car_power_state_changed = 203;
-        GarageModeInfo garage_mode_info = 204;
+        CarPowerStateChanged car_power_state_changed = 203 [(module) = "car"];
+        GarageModeInfo garage_mode_info = 204 [(module) = "car"];
         TestAtomReported test_atom_reported = 205 [(module) = "cts"];
         ContentCaptureCallerMismatchReported content_capture_caller_mismatch_reported = 206;
         ContentCaptureServiceEvents content_capture_service_events = 207;
@@ -324,7 +324,8 @@ message Atom {
         AppCompatibilityChangeReported app_compatibility_change_reported =
             228 [(allow_from_any_uid) = true];
         PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
-        VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
+        VmsClientConnectionStateChanged vms_client_connection_state_changed =
+                230 [(module) = "car"];
         MediaProviderScanEvent media_provider_scan_event = 233 [(module) = "mediaprovider"];
         MediaProviderDeletionEvent media_provider_deletion_event = 234 [(module) = "mediaprovider"];
         MediaProviderPermissionEvent media_provider_permission_event =
@@ -416,7 +417,7 @@ message Atom {
         SurfaceflingerStatsGlobalInfo surfaceflinger_stats_global_info = 10062;
         SurfaceflingerStatsLayerInfo surfaceflinger_stats_layer_info = 10063;
         ProcessMemorySnapshot process_memory_snapshot = 10064;
-        VmsClientStats vms_client_stats = 10065;
+        VmsClientStats vms_client_stats = 10065 [(module) = "car"];
         NotificationRemoteViews notification_remote_views = 10066;
         DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
         GraphicsStats graphics_stats = 10068;
