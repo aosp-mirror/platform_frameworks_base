@@ -2451,8 +2451,6 @@ ProtectedMember: android.view.ViewGroup#resetResolvedDrawables():
     
 
 
-PublicTypedef: android.os.HwParcel.Status:
-    
 PublicTypedef: android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability:
     
 PublicTypedef: android.telephony.ims.feature.MmTelFeature.ProcessCallResult:
