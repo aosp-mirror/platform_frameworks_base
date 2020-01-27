@@ -19,8 +19,7 @@ import static android.os.Process.PROC_OUT_STRING;
 
 import android.annotation.Nullable;
 import android.os.Process;
-
-import java.util.function.BiConsumer;
+import android.util.SparseArray;
 
 public final class ProcfsMemoryUtil {
     private static final int[] CMDLINE_OUT = new int[] { PROC_OUT_STRING };
@@ -71,19 +70,25 @@ public final class ProcfsMemoryUtil {
         return cmdline[0];
     }
 
-    public static void forEachPid(BiConsumer<Integer, String> func) {
+    /**
+     * Scans all /proc/pid/cmdline entries and returns a mapping between pid and cmdline.
+     */
+    public static SparseArray<String> getProcessCmdlines() {
         int[] pids = new int[1024];
         pids = Process.getPids("/proc", pids);
+
+        SparseArray<String> cmdlines = new SparseArray<>(pids.length);
         for (int pid : pids) {
             if (pid < 0) {
-                return;
+                break;
             }
             String cmdline = readCmdlineFromProcfs(pid);
             if (cmdline.isEmpty()) {
                 continue;
             }
-            func.accept(pid, cmdline);
+            cmdlines.append(pid, cmdline);
         }
+        return cmdlines;
     }
 
     public static final class MemorySnapshot {

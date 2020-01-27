@@ -27,7 +27,7 @@ import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
-import static com.android.server.stats.pull.ProcfsMemoryUtil.forEachPid;
+import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
@@ -93,6 +93,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.StatsEvent;
 import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
@@ -129,8 +130,6 @@ import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
-
-import com.google.android.collect.Sets;
 
 import libcore.io.IoUtils;
 
@@ -1148,37 +1147,6 @@ public class StatsPullAtomService extends SystemService {
     }
 
     /**
-     * Which native processes to snapshot memory for.
-     *
-     * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
-     * /system/bin/statsd for the stats daemon.
-     */
-    private static final Set<String> MEMORY_INTERESTING_NATIVE_PROCESSES = Sets.newHashSet(
-            "/system/bin/statsd",  // Stats daemon.
-            "/system/bin/surfaceflinger",
-            "/system/bin/apexd",  // APEX daemon.
-            "/system/bin/audioserver",
-            "/system/bin/cameraserver",
-            "/system/bin/drmserver",
-            "/system/bin/healthd",
-            "/system/bin/incidentd",
-            "/system/bin/installd",
-            "/system/bin/lmkd",  // Low memory killer daemon.
-            "/system/bin/logd",
-            "media.codec",
-            "media.extractor",
-            "media.metrics",
-            "/system/bin/mediadrmserver",
-            "/system/bin/mediaserver",
-            "/system/bin/performanced",
-            "/system/bin/tombstoned",
-            "/system/bin/traced",  // Perfetto.
-            "/system/bin/traced_probes",  // Perfetto.
-            "webview_zygote",
-            "zygote",
-            "zygote64");
-
-    /**
      * Lowest available uid for apps.
      *
      * <p>Used to quickly discard memory snapshots of the zygote forks from native process
@@ -1219,30 +1187,25 @@ public class StatsPullAtomService extends SystemService {
                     .build();
             pulledData.add(e);
         }
-        forEachPid((pid, cmdLine) -> {
-            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
-                return;
-            }
-            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
-            if (snapshot == null) {
-                return;
-            }
-            // Sometimes we get here a process that is not included in the whitelist. It comes
-            // from forking the zygote for an app. We can ignore that sample because this process
-            // is collected by ProcessMemoryState.
-            if (isAppUid(snapshot.uid)) {
-                return;
+        // Complement the data with native system processes
+        SparseArray<String> processCmdlines = getProcessCmdlines();
+        managedProcessList.forEach(managedProcess -> processCmdlines.delete(managedProcess.pid));
+        int size = processCmdlines.size();
+        for (int i = 0; i < size; ++i) {
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(processCmdlines.keyAt(i));
+            if (snapshot == null || isAppUid(snapshot.uid)) {
+                continue;
             }
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(snapshot.uid)
-                    .writeString(cmdLine)
+                    .writeString(processCmdlines.valueAt(i))
                     // RSS high-water mark in bytes.
                     .writeLong(snapshot.rssHighWaterMarkInKilobytes * 1024L)
                     .writeInt(snapshot.rssHighWaterMarkInKilobytes)
                     .build();
             pulledData.add(e);
-        });
+        }
         // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
         SystemProperties.set("sys.rss_hwm_reset.on", "1");
         return StatsManager.PULL_SUCCESS;
@@ -1280,24 +1243,22 @@ public class StatsPullAtomService extends SystemService {
                     .build();
             pulledData.add(e);
         }
-        forEachPid((pid, cmdLine) -> {
-            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
-                return;
-            }
+        // Complement the data with native system processes. Given these measurements can be taken
+        // in response to LMKs happening, we want to first collect the managed app stats (to
+        // maximize the probability that a heavyweight process will be sampled before it dies).
+        SparseArray<String> processCmdlines = getProcessCmdlines();
+        managedProcessList.forEach(managedProcess -> processCmdlines.delete(managedProcess.pid));
+        int size = processCmdlines.size();
+        for (int i = 0; i < size; ++i) {
+            int pid = processCmdlines.keyAt(i);
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
-            if (snapshot == null) {
-                return;
-            }
-            // Sometimes we get here a process that is not included in the whitelist. It comes
-            // from forking the zygote for an app. We can ignore that sample because this process
-            // is collected by ProcessMemoryState.
-            if (isAppUid(snapshot.uid)) {
-                return;
+            if (snapshot == null || isAppUid(snapshot.uid)) {
+                continue;
             }
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
                     .writeInt(snapshot.uid)
-                    .writeString(cmdLine)
+                    .writeString(processCmdlines.valueAt(i))
                     .writeInt(pid)
                     .writeInt(-1001)  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
                     .writeInt(snapshot.rssInKilobytes)
@@ -1306,7 +1267,7 @@ public class StatsPullAtomService extends SystemService {
                     .writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes)
                     .build();
             pulledData.add(e);
-        });
+        }
         return StatsManager.PULL_SUCCESS;
     }
 
