@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"حذف"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"از میان‌بر دسترس‌پذیری استفاده شود؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"وقتی میان‌بر روشن است،‌ اگر هر دو دکمه صدا را ۳ ثانیه فشار دهید یکی از قابلیت‌های دسترس‌پذیری شروع می‌شود.\n\n قابلیت دسترس‌پذیری کنونی:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n می‌توانید در «تنظیمات &gt; دسترس‌پذیری»، قابلیت را تغییر دهید."</string>

@@ -1657,6 +1657,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%1$d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%2$d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odstrani"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ali želite povečati glasnost nad priporočeno raven?\n\nDolgotrajno poslušanje pri veliki glasnosti lahko poškoduje sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite uporabljati bližnjico funkcij za ljudi s posebnimi potrebami?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo za ljudi s posebnimi potrebami.\n\n Trenutna funkcija za ljudi s posebnimi potrebami:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkcijo lahko spremenite v »Nastavitve &gt; Funkcije za ljudi s posebnimi potrebami«."</string>

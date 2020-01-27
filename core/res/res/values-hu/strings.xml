@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%3$d</xliff:g> másodperc múlva."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eltávolítás"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Szeretné használni a Kisegítő lehetőségek billentyűparancsot?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Ha be van kapcsolva a billentyűparancs, a két hangerőgomb 3 másodpercig tartó lenyomásával elindíthatja a kisegítő lehetőségek egyik funkcióját.\n\n A kisegítő lehetőségek jelenleg beállított funkciója:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n A funkciót a Beállítások &gt; Kisegítő lehetőségek menüpontban módosíthatja."</string>

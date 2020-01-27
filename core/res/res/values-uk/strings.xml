@@ -1657,6 +1657,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Вилучити"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Коли ярлик увімкнено, після натискання обох клавіш гучності й утримування їх протягом 3 секунд увімкнеться функція спеціальних можливостей.\n\n Поточна функція спеціальних можливостей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Цю функцію можна змінити в меню \"Налаштування\" &gt; \"Спеціальні можливості\"."</string>

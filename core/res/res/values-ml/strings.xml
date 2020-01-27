@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"നീക്കംചെയ്യുക"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"കുറുക്കുവഴി ഓണാണെങ്കിൽ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും.\n\n നിലവിലെ  ഉപയോഗസഹായി ഫീച്ചർ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിൽ ഏത് സമയത്തും നിങ്ങൾക്ക് ഫീച്ചർ മാറ്റാവുന്നതാണ്."</string>
@@ -1987,8 +1989,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> സ്പ്രെഡ്ഷീറ്റ്"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"അവതരണം"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> അവതരണം"</string>
-    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
-    <skip />
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ഫ്ലൈറ്റ് മോഡ് ഓണാക്കിയിരിക്കുമ്പോഴും Bluetooth ലഭ്യമാകും"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ലോഡ് ചെയ്യുന്നു"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ഫയലുകൾ</item>
@@ -2009,8 +2010,7 @@
     <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
     <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
-    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
-    <skip />
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
     <skip />
     <!-- no translation found for resolver_work_tab (2690019516263167035) -->

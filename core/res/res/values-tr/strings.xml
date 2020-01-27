@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Kilit açma deseninizi <xliff:g id="NUMBER_0">%1$d</xliff:g> kez yanlış çizdiniz. <xliff:g id="NUMBER_1">%2$d</xliff:g> başarısız denemeden sonra telefonunuzu bir e-posta hesabı kullanarak açmanız istenir.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kaldır"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ses seviyesi önerilen düzeyin üzerine yükseltilsin mi?\n\nUzun süre yüksek ses seviyesinde dinlemek işitme duyunuza zarar verebilir."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erişilebilirlik Kısayolu Kullanılsın mı?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kısayol açık olduğunda, ses düğmelerinin ikisini birden 3 saniyeliğine basılı tutmanız bir erişilebilirlik özelliğini başlatır.\n\n Geçerli erişilebilirlik özelliği:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Özelliği, Ayarlar &gt; Erişilebilirlik seçeneğinden değiştirebilirsiniz."</string>

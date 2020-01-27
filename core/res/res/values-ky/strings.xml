@@ -540,7 +540,7 @@
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Манжа изи иш-аракети жокко чыгарылды."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Манжа изи операциясын колдонуучу жокко чыгарды."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Аракеттер өтө көп болду. Кийинчерээк кайра аракет кылыңыз."</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Аракеттер өтө көп болду. Бир аздан кийин кайталап көрүңүз."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Өтө көп жолу аракет жасадыңыз. Манжа изинин сенсору өчүрүлдү."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Кайра бир аракеттениңиз."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Бир да манжа изи катталган эмес."</string>
@@ -583,7 +583,7 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"Жаңы жүздү сактоо мүмкүн эмес. Адегенде эскисин өчүрүңүз."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Жүздүн аныктыгын текшерүү жокко чыгарылды."</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Жүзүнөн таануу функциясын колдонуучу өчүрүп салды."</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"Өтө көп жолу аракет жасадыңыз. Кийинчерээк кайра аракет кылыңыз."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"Өтө көп жолу аракет жасадыңыз. Бир аздан кийин кайталап көрүңүз."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Өтө көп жолу аракет кылдыңыз. Жүзүнөн таануу функциясы өчүрүлдү."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Жүз ырасталбай жатат. Кайра аракет кылыңыз."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Жүзүнөн таануу функциясын жөндөй элексиз."</string>
@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Графикалык ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес көрсөтүлгөндөн кийин, телефондун кулпусун ачуу үчүн Google аккаунтуңузга кирүүгө туура келет.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин кайталап көрсөңүз болот."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Алып салуу"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн, ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең үч секунддай кое бербей басып туруңуз.\n\n Учурдагы атайын мүмкүнчүлүктөрдүн жөндөөлөрү:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nЖөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>

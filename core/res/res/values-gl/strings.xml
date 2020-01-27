@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono a través dunha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eliminar"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade.\n\n Función de accesibilidade actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Podes cambiar a función en Configuración &gt; Accesibilidade."</string>

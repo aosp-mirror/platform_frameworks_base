@@ -1613,6 +1613,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయి"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
@@ -1987,8 +1989,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> స్ప్రెడ్‌షీట్"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"ప్రదర్శన"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ప్రదర్శన"</string>
-    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
-    <skip />
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"విమానం మోడ్‌లో బ్లూటూత్ ఆన్‌లో ఉంటుంది"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"లోడవుతోంది"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైల్‌లు</item>
@@ -2009,8 +2010,7 @@
     <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
     <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> క్యాప్షన్ బార్."</string>
-    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
-    <skip />
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> పరిమితం చేయబడిన బకెట్‌లో ఉంచబడింది"</string>
     <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
     <skip />
     <!-- no translation found for resolver_work_tab (2690019516263167035) -->
