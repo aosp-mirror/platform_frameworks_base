@@ -64,7 +64,7 @@ public class WifiInfoTest {
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
-        writeWifiInfo.setAppPackageName(TEST_PACKAGE_NAME);
+        writeWifiInfo.setRequestingPackageName(TEST_PACKAGE_NAME);
         writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
         writeWifiInfo.setMaxSupportedTxLinkSpeedMbps(TEST_MAX_SUPPORTED_TX_LINK_SPEED_MBPS);
         writeWifiInfo.setMaxSupportedRxLinkSpeedMbps(TEST_MAX_SUPPORTED_RX_LINK_SPEED_MBPS);
@@ -83,7 +83,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
-        assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getAppPackageName());
+        assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getRequestingPackageName());
         assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
         assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
         assertEquals(TEST_WIFI_STANDARD, readWifiInfo.getWifiStandard());

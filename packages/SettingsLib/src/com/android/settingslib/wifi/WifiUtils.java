@@ -102,10 +102,10 @@ public class WifiUtils {
             if (accessPoint.getSpeed() != AccessPoint.Speed.NONE) {
                 visibility.append(" speed=").append(accessPoint.getSpeedLabel());
             }
-            visibility.append(String.format(" tx=%.1f,", info.getTxSuccessRate()));
-            visibility.append(String.format("%.1f,", info.getTxRetriesRate()));
-            visibility.append(String.format("%.1f ", info.getTxBadRate()));
-            visibility.append(String.format("rx=%.1f", info.getRxSuccessRate()));
+            visibility.append(String.format(" tx=%.1f,", info.getSuccessfulTxPacketsPerSecond()));
+            visibility.append(String.format("%.1f,", info.getRetriedTxPacketsPerSecond()));
+            visibility.append(String.format("%.1f ", info.getLostTxPacketsPerSecond()));
+            visibility.append(String.format("rx=%.1f", info.getSuccessfulRxPacketsPerSecond()));
         }
 
         int maxRssi5 = INVALID_RSSI;

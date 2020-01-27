@@ -1141,7 +1141,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         } else if (isActive()) {
             summary.append(getSummary(mContext, /* ssid */ null, getDetailedState(),
                     mInfo != null && mInfo.isEphemeral(),
-                    mInfo != null ? mInfo.getAppPackageName() : null));
+                    mInfo != null ? mInfo.getRequestingPackageName() : null));
         } else { // not active
             if (mConfig != null && mConfig.hasNoInternetAccess()) {
                 int messageID = mConfig.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()

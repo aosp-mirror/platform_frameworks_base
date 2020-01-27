@@ -7571,12 +7571,12 @@ package android.net.wifi {
   }
 
   public class WifiInfo implements android.os.Parcelable {
-    method @Nullable public String getAppPackageName();
-    method public double getRxSuccessRate();
+    method public double getLostTxPacketsPerSecond();
+    method @Nullable public String getRequestingPackageName();
+    method public double getRetriedTxPacketsPerSecond();
     method public int getScore();
-    method public double getTxBadRate();
-    method public double getTxRetriesRate();
-    method public double getTxSuccessRate();
+    method public double getSuccessfulRxPacketsPerSecond();
+    method public double getSuccessfulTxPacketsPerSecond();
     method public boolean isEphemeral();
     method public boolean isOsuAp();
     method public boolean isPasspointAp();
