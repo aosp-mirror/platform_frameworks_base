@@ -1268,6 +1268,7 @@ public class StatsPullAtomService extends SystemService {
                 continue;
             }
             StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
                     .writeInt(managedProcess.uid)
                     .writeString(managedProcess.processName)
                     .writeInt(managedProcess.pid)
