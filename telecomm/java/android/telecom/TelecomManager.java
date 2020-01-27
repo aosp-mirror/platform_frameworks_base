@@ -819,8 +819,8 @@ public class TelecomManager {
      * automatically add dialing prefixes when placing international calls.
      * <p>
      * Setting this extra on the outgoing call extras will cause the
-     * {@link Connection#PROPERTY_ASSISTED_DIALING_USED} property and
-     * {@link Call.Details#PROPERTY_ASSISTED_DIALING_USED} property to be set on the
+     * {@link Connection#PROPERTY_ASSISTED_DIALING} property and
+     * {@link Call.Details#PROPERTY_ASSISTED_DIALING} property to be set on the
      * {@link Connection}/{@link Call} in question.  When the call is logged to the call log, the
      * {@link android.provider.CallLog.Calls#FEATURES_ASSISTED_DIALING_USED} call feature is set to
      * indicate that assisted dialing was used for the call.
@@ -1412,7 +1412,7 @@ public class TelecomManager {
     /**
      * Used to determine the currently selected default dialer package for a specific user.
      *
-     * @param userId the user id to query the default dialer package for.
+     * @param userHandle the user id to query the default dialer package for.
      * @return package name for the default dialer package or null if no package has been
      *         selected as the default dialer.
      * @hide
@@ -1420,10 +1420,11 @@ public class TelecomManager {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
-    public @Nullable String getDefaultDialerPackage(int userId) {
+    public @Nullable String getDefaultDialerPackage(@NonNull UserHandle userHandle) {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getDefaultDialerPackageForUser(userId);
+                return getTelecomService().getDefaultDialerPackageForUser(
+                        userHandle.getIdentifier());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);

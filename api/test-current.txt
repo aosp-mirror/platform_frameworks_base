@@ -3412,23 +3412,22 @@ package android.telecom {
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
-    method public final long getConnectionStartElapsedRealTime();
     method public android.telecom.Connection getPrimaryConnection();
     method @NonNull public final String getTelecomCallId();
-    method public final void setAddress(@NonNull android.net.Uri, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setAddress(@NonNull android.net.Uri, int);
     method public final void setCallerDisplayName(@NonNull String, int);
-    method public void setConferenceState(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setConferenceState(boolean);
   }
 
   public abstract class Connection extends android.telecom.Conferenceable {
-    method public final long getConnectElapsedTimeMillis();
-    method public final long getConnectTimeMillis();
+    method @IntRange(from=0) public final long getConnectTimeMillis();
+    method public final long getConnectionStartElapsedRealtimeMillis();
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
-    method public final void setConnectTimeMillis(long);
-    method public final void setConnectionStartElapsedRealTime(long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectionStartElapsedRealtimeMillis(long);
     method public void setPhoneAccountHandle(@NonNull android.telecom.PhoneAccountHandle);
     method public void setTelecomCallId(@NonNull String);
     field public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 2097152; // 0x200000
@@ -3460,7 +3459,7 @@ package android.telecom {
   }
 
   public static class PhoneAccount.Builder {
-    method @NonNull public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
   }
 
   public class PhoneAccountSuggestionService extends android.app.Service {
@@ -3474,7 +3473,7 @@ package android.telecom {
   public class TelecomManager {
     method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
-    method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDefaultDialerPackage(int);
+    method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDefaultDialerPackage(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
     field public static final int TTY_MODE_FULL = 1; // 0x1
