@@ -2145,8 +2145,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     String getInstallerPackageName() {
+        return getInstallSource().installerPackageName;
+    }
+
+    InstallSource getInstallSource() {
         synchronized (mLock) {
-            return mInstallSource.installerPackageName;
+            return mInstallSource;
         }
     }
 
