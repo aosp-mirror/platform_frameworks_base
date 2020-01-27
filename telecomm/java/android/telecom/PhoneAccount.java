@@ -16,7 +16,10 @@
 
 package android.telecom;
 
+import static android.Manifest.permission.MODIFY_PHONE_STATE;
+
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Intent;
@@ -605,7 +608,8 @@ public final class PhoneAccount implements Parcelable {
          * time. By default, there is no group Id for a {@link PhoneAccount} (an empty String). Only
          * grouped {@link PhoneAccount}s with the same {@link ConnectionService} can be replaced.
          * <p>
-         * Note: This is an API specific to the Telephony stack.
+         * Note: This is an API specific to the Telephony stack; the group Id will be ignored for
+         * callers not holding the correct permission.
          *
          * @param groupId The group Id of the {@link PhoneAccount} that will replace any other
          * registered {@link PhoneAccount} in Telecom with the same Group Id.
@@ -614,6 +618,7 @@ public final class PhoneAccount implements Parcelable {
          */
         @SystemApi
         @TestApi
+        @RequiresPermission(MODIFY_PHONE_STATE)
         public @NonNull Builder setGroupId(@NonNull String groupId) {
             if (groupId != null) {
                 mGroupId = groupId;
