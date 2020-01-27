@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.InstantAppNotifier;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
+import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
 
@@ -163,4 +164,10 @@ public abstract class CarSystemUIBinder {
     @IntoMap
     @ClassKey(VolumeUI.class)
     public abstract SystemUI bindVolumeUI(VolumeUI sysui);
+
+    /** Inject into ToastUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(ToastUI.class)
+    public abstract SystemUI bindToastUI(ToastUI service);
 }
