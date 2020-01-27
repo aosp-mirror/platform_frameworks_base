@@ -3037,6 +3037,17 @@ public abstract class Connection extends Conferenceable {
     public void onReject() {}
 
     /**
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of a request to reject.
+     * <p>
+     * For managed {@link ConnectionService}s, this will be called when the user rejects a call via
+     * the default dialer's {@link InCallService} using {@link Call#reject(int)}.
+     * @param rejectReason the reason the user provided for rejecting the call.
+     */
+    public void onReject(@android.telecom.Call.RejectReason int rejectReason) {
+        // to be implemented by ConnectionService.
+    }
+
+    /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to reject with a message.
      */
