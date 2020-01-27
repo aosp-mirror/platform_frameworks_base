@@ -87,7 +87,7 @@ public abstract class BrightnessMappingStrategy {
             }
             BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
                     luxLevels, brightnessLevelsNits);
-            builder.setShortTermModelTimeout(shortTermModelTimeout);
+            builder.setShortTermModelTimeoutMillis(shortTermModelTimeout);
             builder.setShortTermModelLowerLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange,
@@ -739,10 +739,10 @@ public abstract class BrightnessMappingStrategy {
 
         @Override
         public long getShortTermModelTimeout() {
-            if (mConfig.getShortTermModelTimeout() >= 0) {
-                return mConfig.getShortTermModelTimeout();
+            if (mConfig.getShortTermModelTimeoutMillis() >= 0) {
+                return mConfig.getShortTermModelTimeoutMillis();
             } else {
-                return mDefaultConfig.getShortTermModelTimeout();
+                return mDefaultConfig.getShortTermModelTimeoutMillis();
             }
         }
 

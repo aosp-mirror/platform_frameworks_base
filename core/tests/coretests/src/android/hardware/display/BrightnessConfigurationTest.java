@@ -132,7 +132,7 @@ public class BrightnessConfigurationTest {
         BrightnessConfiguration.Builder builder =
                 new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
         builder.setShouldCollectColorSamples(true);
-        builder.setShortTermModelTimeout(1234L);
+        builder.setShortTermModelTimeoutMillis(1234L);
         builder.setShortTermModelLowerLuxMultiplier(0.9f);
         builder.setShortTermModelUpperLuxMultiplier(0.2f);
         builder.addCorrectionByCategory(3,
@@ -153,7 +153,7 @@ public class BrightnessConfigurationTest {
         BrightnessConfiguration.Builder builder =
                 new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
         builder.setShouldCollectColorSamples(true);
-        builder.setShortTermModelTimeout(123L);
+        builder.setShortTermModelTimeoutMillis(123L);
         builder.setShortTermModelLowerLuxMultiplier(0.4f);
         builder.setShortTermModelUpperLuxMultiplier(0.8f);
         builder.addCorrectionByCategory(3,
@@ -236,7 +236,7 @@ public class BrightnessConfigurationTest {
         assertNotEquals(baseConfig, colorCollectionDiffers);
 
         builder = new BrightnessConfiguration.Builder(LUX_LEVELS, NITS_LEVELS);
-        builder.setShortTermModelTimeout(300L);
+        builder.setShortTermModelTimeoutMillis(300L);
         BrightnessConfiguration timeoutDiffers = builder.build();
         assertNotEquals(baseConfig, timeoutDiffers);
 
