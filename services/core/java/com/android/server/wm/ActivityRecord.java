@@ -3088,7 +3088,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         waitingToShow = false;
 
-        boolean delayed = isAnimating(TRANSITION | CHILDREN);
+        // Defer removal of this activity when either a child is animating, or app transition is on
+        // going. App transition animation might be applied on the parent stack not on the activity,
+        // but the actual frame buffer is associated with the activity, so we have to keep the
+        // activity while a parent is animating.
+        boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN);
         if (getDisplayContent().mClosingApps.contains(this)) {
             delayed = true;
         } else if (getDisplayContent().mAppTransition.isTransitionSet()) {
