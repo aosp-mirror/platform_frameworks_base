@@ -164,7 +164,7 @@ public class StatsPullAtomService extends SystemService {
     private static final String TAG = "StatsPullAtomService";
     private static final boolean DEBUG = true;
 
-    /*
+    /**
      * Lowest available uid for apps.
      *
      * <p>Used to quickly discard memory snapshots of the zygote forks from native process
@@ -225,26 +225,19 @@ public class StatsPullAtomService extends SystemService {
     private WifiManager mWifiManager;
     private TelephonyManager mTelephony;
 
-    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
-    private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
+    private KernelWakelockReader mKernelWakelockReader;
+    private KernelWakelockStats mTmpWakelockStats;
 
-    private final StoragedUidIoStatsReader mStoragedUidIoStatsReader =
-            new StoragedUidIoStatsReader();
+    private StoragedUidIoStatsReader mStoragedUidIoStatsReader;
 
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
     // Disables throttler on CPU time readers.
-    private final KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader =
-            new KernelCpuUidUserSysTimeReader(false);
-    private final KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader =
-            new KernelCpuUidFreqTimeReader(false);
-    private final KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader =
-            new KernelCpuUidActiveTimeReader(false);
-    private final KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader =
-            new KernelCpuUidClusterTimeReader(false);
+    private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader;
+    private KernelCpuUidFreqTimeReader mCpuUidFreqTimeReader;
+    private KernelCpuUidActiveTimeReader mCpuUidActiveTimeReader;
+    private KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader;
 
-    // TODO: Change this directory to stats_pull.
-    private final File mBaseDir = new File(
-            SystemServiceManager.ensureSystemDir(), "stats_companion");
+    private File mBaseDir;
 
     @Nullable
     private KernelCpuThreadReaderDiff mKernelCpuThreadReader;
@@ -388,29 +381,44 @@ public class StatsPullAtomService extends SystemService {
 
     @Override
     public void onStart() {
+        // no op
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        super.onBootPhase(phase);
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            BackgroundThread.getHandler().post(() -> {
+                initializePullersState();
+                registerAllPullers();
+                registerEventListeners();
+            });
+        }
+    }
+
+    void initializePullersState() {
+        // Get Context Managers
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
 
-        final ConnectivityManager connectivityManager =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        // Default NetworkRequest should cover all transport types.
-        final NetworkRequest request = new NetworkRequest.Builder().build();
-        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
+        // Initialize DiskIO
+        mStoragedUidIoStatsReader = new StoragedUidIoStatsReader();
 
-        // Enable push notifications of throttling from vendor thermal
-        // management subsystem via thermalservice.
-        IThermalService thermalService = getIThermalService();
-        if (thermalService != null) {
-            try {
-                thermalService.registerThermalEventListener(
-                        new ThermalEventListener());
-                Slog.i(TAG, "register thermal listener successfully");
-            } catch (RemoteException e) {
-                Slog.i(TAG, "failed to register thermal listener");
-            }
-        }
+        // Initialize PROC_STATS
+        // TODO (b/148402814): Change this directory to stats_pull.
+        mBaseDir = new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
+
+        // Disables throttler on CPU time readers.
+        mCpuUidUserSysTimeReader = new KernelCpuUidUserSysTimeReader(false);
+        mCpuUidFreqTimeReader = new KernelCpuUidFreqTimeReader(false);
+        mCpuUidActiveTimeReader = new KernelCpuUidActiveTimeReader(false);
+        mCpuUidClusterTimeReader = new KernelCpuUidClusterTimeReader(false);
+
+        // Initialize state for KERNEL_WAKELOCK
+        mKernelWakelockReader = new KernelWakelockReader();
+        mTmpWakelockStats = new KernelWakelockStats();
 
         // Initialize state for CPU_TIME_PER_FREQ atom
         PowerProfile powerProfile = new PowerProfile(mContext);
@@ -432,13 +440,23 @@ public class StatsPullAtomService extends SystemService {
         mBaseDir.mkdirs();
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        super.onBootPhase(phase);
-        if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            BackgroundThread.getHandler().post(() -> {
-                registerAllPullers();
-            });
+    void registerEventListeners() {
+        final ConnectivityManager connectivityManager =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        // Default NetworkRequest should cover all transport types.
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
+
+        // Enable push notifications of throttling from vendor thermal
+        // management subsystem via thermalservice.
+        IThermalService thermalService = getIThermalService();
+        if (thermalService != null) {
+            try {
+                thermalService.registerThermalEventListener(new ThermalEventListener());
+                Slog.i(TAG, "register thermal listener successfully");
+            } catch (RemoteException e) {
+                Slog.i(TAG, "failed to register thermal listener");
+            }
         }
     }
 
