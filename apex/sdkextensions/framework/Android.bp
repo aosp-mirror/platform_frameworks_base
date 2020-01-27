@@ -32,6 +32,7 @@ java_library {
     libs: [ "framework-annotations-lib" ],
     permitted_packages: [ "android.os.ext" ],
     installable: true,
+    plugins: ["java_api_finder"],
     visibility: [
         "//frameworks/base/apex/sdkextensions",
         "//frameworks/base/apex/sdkextensions/testing",
