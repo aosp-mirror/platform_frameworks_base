@@ -53,9 +53,4 @@ interface IPinnedStackController {
      * {@param bounds} here is the final destination bounds.
      */
     void resetBoundsAnimation(in Rect bounds);
-
-    /**
-     * Reports the current default and movement bounds to controller.
-     */
-    void reportBounds(in Rect defaultBounds, in Rect movementBounds);
 }
