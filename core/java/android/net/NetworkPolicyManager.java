@@ -539,13 +539,13 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static String resolveNetworkId(WifiConfiguration config) {
-        return WifiInfo.removeDoubleQuotes(config.isPasspoint()
+        return WifiInfo.sanitizeSsid(config.isPasspoint()
                 ? config.providerFriendlyName : config.SSID);
     }
 
     /** @hide */
     public static String resolveNetworkId(String ssid) {
-        return WifiInfo.removeDoubleQuotes(ssid);
+        return WifiInfo.sanitizeSsid(ssid);
     }
 
     /** @hide */
