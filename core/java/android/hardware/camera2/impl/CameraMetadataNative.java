@@ -621,6 +621,16 @@ public class CameraMetadataNative implements Parcelable {
                     }
                 });
         sGetCommandMap.put(
+                CameraCharacteristics.SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMandatoryConcurrentStreamCombinations();
+                    }
+                });
+
+        sGetCommandMap.put(
                 CameraCharacteristics.CONTROL_MAX_REGIONS_AE.getNativeKey(), new GetCommand() {
                     @Override
                     @SuppressWarnings("unchecked")
@@ -1247,7 +1257,8 @@ public class CameraMetadataNative implements Parcelable {
         return ret;
     }
 
-    private MandatoryStreamCombination[] getMandatoryStreamCombinations() {
+    private MandatoryStreamCombination[] getMandatoryStreamCombinationsHelper(
+            boolean getConcurrent) {
         int[] capabilities = getBase(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
         ArrayList<Integer> caps = new ArrayList<Integer>();
         caps.ensureCapacity(capabilities.length);
@@ -1257,7 +1268,13 @@ public class CameraMetadataNative implements Parcelable {
         int hwLevel = getBase(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
         MandatoryStreamCombination.Builder build = new MandatoryStreamCombination.Builder(
                 mCameraId, hwLevel, mDisplaySize, caps, getStreamConfigurationMap());
-        List<MandatoryStreamCombination> combs = build.getAvailableMandatoryStreamCombinations();
+
+        List<MandatoryStreamCombination> combs = null;
+        if (getConcurrent) {
+            combs = build.getAvailableMandatoryConcurrentStreamCombinations();
+        } else {
+            combs = build.getAvailableMandatoryStreamCombinations();
+        }
         if ((combs != null) && (!combs.isEmpty())) {
             MandatoryStreamCombination[] combArray = new MandatoryStreamCombination[combs.size()];
             combArray = combs.toArray(combArray);
@@ -1265,6 +1282,17 @@ public class CameraMetadataNative implements Parcelable {
         }
 
         return null;
+    }
+
+    private MandatoryStreamCombination[] getMandatoryConcurrentStreamCombinations() {
+        if (!mHasMandatoryConcurrentStreams) {
+            return null;
+        }
+        return getMandatoryStreamCombinationsHelper(true);
+    }
+
+    private MandatoryStreamCombination[] getMandatoryStreamCombinations() {
+        return getMandatoryStreamCombinationsHelper(false);
     }
 
     private StreamConfigurationMap getStreamConfigurationMap() {
@@ -1614,6 +1642,7 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     private int mCameraId = -1;
+    private boolean mHasMandatoryConcurrentStreams = false;
     private Size mDisplaySize = new Size(0, 0);
 
     /**
@@ -1625,6 +1654,18 @@ public class CameraMetadataNative implements Parcelable {
      */
     public void setCameraId(int cameraId) {
         mCameraId = cameraId;
+    }
+
+    /**
+     * Set the current camera Id.
+     *
+     * @param hasMandatoryConcurrentStreams whether the metadata advertises mandatory concurrent
+     *        streams.
+     *
+     * @hide
+     */
+    public void setHasMandatoryConcurrentStreams(boolean hasMandatoryConcurrentStreams) {
+        mHasMandatoryConcurrentStreams = hasMandatoryConcurrentStreams;
     }
 
     /**
@@ -1682,6 +1723,7 @@ public class CameraMetadataNative implements Parcelable {
     public void swap(CameraMetadataNative other) {
         nativeSwap(other);
         mCameraId = other.mCameraId;
+        mHasMandatoryConcurrentStreams = other.mHasMandatoryConcurrentStreams;
         mDisplaySize = other.mDisplaySize;
     }
 
