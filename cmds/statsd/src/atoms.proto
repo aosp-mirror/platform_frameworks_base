@@ -255,7 +255,8 @@ message Atom {
         PermissionGrantRequestResultReported permission_grant_request_result_reported =
             170 [(module) = "permissioncontroller"];
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
-        DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
+        DeviceIdentifierAccessDenied device_identifier_access_denied =
+                172 [(module) = "telephony_common"];
         BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
         AssistGestureStageReported assist_gesture_stage_reported = 174;
         AssistGestureFeedbackReported assist_gesture_feedback_reported = 175;
