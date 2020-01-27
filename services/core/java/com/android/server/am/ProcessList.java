@@ -1551,6 +1551,43 @@ public final class ProcessList {
         }
     }
 
+    private int[] computeGidsForProcess(int mountExternal, int uid, int[] permGids,
+            String packageName) {
+        ArrayList<Integer> gidList = new ArrayList<>(permGids.length + 5);
+
+        final int sharedAppGid = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
+        final int cacheAppGid = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
+        final int userGid = UserHandle.getUserGid(UserHandle.getUserId(uid));
+
+        // Add shared application and profile GIDs so applications can share some
+        // resources like shared libraries and access user-wide resources
+        for (int permGid : permGids) {
+            gidList.add(permGid);
+        }
+        if (sharedAppGid != UserHandle.ERR_GID) {
+            gidList.add(sharedAppGid);
+        }
+        if (cacheAppGid != UserHandle.ERR_GID) {
+            gidList.add(cacheAppGid);
+        }
+        if (userGid != UserHandle.ERR_GID) {
+            gidList.add(userGid);
+        }
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+            gidList.add(Process.SDCARD_RW_GID);
+        }
+        if (packageName.equals("com.android.externalstorage")) {
+            // Allows access to 'unreliable' (USB OTG) volumes via SAF
+            gidList.add(Process.MEDIA_RW_GID);
+        }
+
+        int[] gidArray = new int[gidList.size()];
+        for (int i = 0; i < gidArray.length; i++) {
+            gidArray[i] = gidList.get(i);
+        }
+        return gidArray;
+    }
+
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
@@ -1625,38 +1662,7 @@ public final class ProcessList {
                     }
                 }
 
-                int numGids = 3;
-                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
-                        || app.info.packageName.equals("com.android.externalstorage")) {
-                    numGids++;
-                }
-
-                /*
-                 * Add shared application and profile GIDs so applications can share some
-                 * resources like shared libraries and access user-wide resources
-                 */
-                if (ArrayUtils.isEmpty(permGids)) {
-                    gids = new int[numGids];
-                } else {
-                    gids = new int[permGids.length + numGids];
-                    System.arraycopy(permGids, 0, gids, numGids, permGids.length);
-                }
-                gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
-                gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
-                gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
-
-                if (numGids > 3) {
-                    if (app.info.packageName.equals("com.android.externalstorage")) {
-                        // Allows access to 'unreliable' (USB OTG) volumes via SAF
-                        gids[3] = Process.MEDIA_RW_GID;
-                    } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
-                        gids[3] = Process.SDCARD_RW_GID;
-                    }
-                }
-
-                // Replace any invalid GIDs
-                if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
-                if (gids[1] == UserHandle.ERR_GID) gids[1] = gids[2];
+                gids = computeGidsForProcess(mountExternal, uid, permGids, app.info.packageName);
             }
             app.mountMode = mountExternal;
             checkSlow(startTime, "startProcess: building args");
