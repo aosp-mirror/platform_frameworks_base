@@ -2568,4 +2568,9 @@ enum PageId {
 
     // OPEN: Settings > Display > Dark theme > Set end time dialog
     DIALOG_DARK_THEME_SET_END_TIME = 1826;
+
+    // OPEN: Settings -> Sound -> Vibrate for calls
+    // CATEGORY: SETTINGS
+    // OS: R
+    VIBRATE_FOR_CALLS = 1827;
 }
