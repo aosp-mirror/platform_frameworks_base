@@ -70,6 +70,13 @@ class MultiTap extends GestureMatcher {
         }
         mBaseX = event.getX();
         mBaseY = event.getY();
+        if (mCurrentTaps + 1 == mTargetTaps) {
+            // Start gesture detecting on down of final tap.
+            // Note that if this instance is matching double tap,
+            // and the service is not requesting to handle double tap, GestureManifold will
+            // ignore this.
+            startGesture(event, rawEvent, policyFlags);
+        }
     }
 
     @Override
