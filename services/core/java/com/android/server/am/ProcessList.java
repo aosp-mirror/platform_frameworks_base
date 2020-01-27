@@ -1574,7 +1574,14 @@ public final class ProcessList {
             gidList.add(userGid);
         }
         if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+            // For DownloadProviders and MTP: To grant access to /sdcard/Android/
             gidList.add(Process.SDCARD_RW_GID);
+        }
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
+            // For the FUSE daemon: To grant access to the lower filesystem.
+            // EmulatedVolumes: /data/media and /mnt/expand/<volume>/data/media
+            // PublicVolumes: /mnt/media_rw/<volume>
+            gidList.add(Process.MEDIA_RW_GID);
         }
         if (packageName.equals("com.android.externalstorage")) {
             // Allows access to 'unreliable' (USB OTG) volumes via SAF
