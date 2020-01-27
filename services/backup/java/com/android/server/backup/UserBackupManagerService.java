@@ -186,6 +186,7 @@ public class UserBackupManagerService {
                 return;
             }
             mPowerManagerWakeLock.acquire();
+            Slog.v(TAG, "Acquired wakelock:" + mPowerManagerWakeLock.getTag());
         }
 
         /** Releases the {@link PowerManager.WakeLock} if hasn't been quit. */
@@ -195,6 +196,7 @@ public class UserBackupManagerService {
                 return;
             }
             mPowerManagerWakeLock.release();
+            Slog.v(TAG, "Released wakelock:" + mPowerManagerWakeLock.getTag());
         }
 
         /**
