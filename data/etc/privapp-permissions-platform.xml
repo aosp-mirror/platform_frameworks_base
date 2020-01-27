@@ -59,6 +59,7 @@ applications that come with the platform
     <privapp-permissions package="com.android.externalstorage">
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.location.fused">
@@ -98,6 +99,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.musicfx">
@@ -201,6 +203,7 @@ applications that come with the platform
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
@@ -210,6 +213,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
         <permission name="android.permission.WATCH_APPOPS"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
@@ -266,6 +270,7 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.sharedstoragebackup">
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.shell">
@@ -341,6 +346,7 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.STATUS_BAR_SERVICE"/>
         <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
