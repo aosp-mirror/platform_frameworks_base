@@ -924,10 +924,12 @@ public class AppOpsManager {
      * @hide
      */
     public static final int OP_ACTIVATE_PLATFORM_VPN = 94;
+    /** @hide */
+    public static final int OP_LOADER_USAGE_STATS = 95;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 95;
+    public static final int _NUM_OP = 96;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1224,6 +1226,9 @@ public class AppOpsManager {
     public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
     /** @hide Start Platform VPN without user intervention */
     public static final String OPSTR_ACTIVATE_PLATFORM_VPN = "android:activate_platform_vpn";
+    /** @hide */
+    @SystemApi
+    public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
 
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
@@ -1302,7 +1307,8 @@ public class AppOpsManager {
             OP_MANAGE_IPSEC_TUNNELS,
             OP_INSTANT_APP_START_FOREGROUND,
             OP_MANAGE_EXTERNAL_STORAGE,
-            OP_INTERACT_ACROSS_PROFILES
+            OP_INTERACT_ACROSS_PROFILES,
+            OP_LOADER_USAGE_STATS,
     };
 
     /**
@@ -1409,6 +1415,7 @@ public class AppOpsManager {
             OP_MANAGE_EXTERNAL_STORAGE,         // MANAGE_EXTERNAL_STORAGE
             OP_INTERACT_ACROSS_PROFILES,        //INTERACT_ACROSS_PROFILES
             OP_ACTIVATE_PLATFORM_VPN,           // ACTIVATE_PLATFORM_VPN
+            OP_LOADER_USAGE_STATS,              // LOADER_USAGE_STATS
     };
 
     /**
@@ -1510,6 +1517,7 @@ public class AppOpsManager {
             OPSTR_MANAGE_EXTERNAL_STORAGE,
             OPSTR_INTERACT_ACROSS_PROFILES,
             OPSTR_ACTIVATE_PLATFORM_VPN,
+            OPSTR_LOADER_USAGE_STATS,
     };
 
     /**
@@ -1612,6 +1620,7 @@ public class AppOpsManager {
             "MANAGE_EXTERNAL_STORAGE",
             "INTERACT_ACROSS_PROFILES",
             "ACTIVATE_PLATFORM_VPN",
+            "LOADER_USAGE_STATS",
     };
 
     /**
@@ -1715,6 +1724,7 @@ public class AppOpsManager {
             Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             android.Manifest.permission.INTERACT_ACROSS_PROFILES,
             null, // no permission for OP_ACTIVATE_PLATFORM_VPN
+            android.Manifest.permission.LOADER_USAGE_STATS,
     };
 
     /**
@@ -1818,6 +1828,7 @@ public class AppOpsManager {
             null, // MANAGE_EXTERNAL_STORAGE
             null, // INTERACT_ACROSS_PROFILES
             null, // ACTIVATE_PLATFORM_VPN
+            null, // LOADER_USAGE_STATS
     };
 
     /**
@@ -1920,6 +1931,7 @@ public class AppOpsManager {
             false, // MANAGE_EXTERNAL_STORAGE
             false, // INTERACT_ACROSS_PROFILES
             false, // ACTIVATE_PLATFORM_VPN
+            false, // LOADER_USAGE_STATS
     };
 
     /**
@@ -2021,6 +2033,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // MANAGE_EXTERNAL_STORAGE
             AppOpsManager.MODE_DEFAULT, // INTERACT_ACROSS_PROFILES
             AppOpsManager.MODE_IGNORED, // ACTIVATE_PLATFORM_VPN
+            AppOpsManager.MODE_DEFAULT, // LOADER_USAGE_STATS
     };
 
     /**
@@ -2126,6 +2139,7 @@ public class AppOpsManager {
             false, // MANAGE_EXTERNAL_STORAGE
             false, // INTERACT_ACROSS_PROFILES
             false, // ACTIVATE_PLATFORM_VPN
+            false, // LOADER_USAGE_STATS
     };
 
     /**

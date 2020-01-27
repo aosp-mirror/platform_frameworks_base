@@ -256,10 +256,10 @@ public final class AsyncNotedAppOp implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1578516519372L,
+            time = 1580158740502L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/app/AsyncNotedAppOp.java",
-            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=94L) int mOpCode\nprivate final @android.annotation.IntRange(from=0L) int mNotingUid\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.annotation.IntRange(from=0L) long mTime\npublic @android.annotation.NonNull java.lang.String getOp()\nclass AsyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=95L) int mOpCode\nprivate final @android.annotation.IntRange(from=0L) int mNotingUid\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.annotation.IntRange(from=0L) long mTime\npublic @android.annotation.NonNull java.lang.String getOp()\nclass AsyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 
