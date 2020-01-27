@@ -259,10 +259,7 @@ public class MmTelFeature extends ImsFeature {
             super(capabilities);
         }
 
-        /**
-         * @hide
-         */
-        @SystemApi @TestApi
+        /** @hide */
         @IntDef(flag = true,
                 value = {
                         CAPABILITY_TYPE_VOICE,
@@ -396,10 +393,7 @@ public class MmTelFeature extends ImsFeature {
     @SystemApi @TestApi
     public static final int PROCESS_CALL_CSFB = 1;
 
-    /**
-    * @hide
-    */
-    @SystemApi @TestApi
+    /** @hide */
     @IntDef(flag = true,
             value = {
                     PROCESS_CALL_IMS,
