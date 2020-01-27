@@ -354,11 +354,9 @@ final class SystemServiceRegistry {
         registerService(Context.TETHERING_SERVICE, TetheringManager.class,
                 new CachedServiceFetcher<TetheringManager>() {
             @Override
-            public TetheringManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getService(Context.TETHERING_SERVICE);
-                if (b == null) return null;
-
-                return new TetheringManager(ctx, b);
+            public TetheringManager createService(ContextImpl ctx) {
+                return new TetheringManager(
+                        ctx, () -> ServiceManager.getService(Context.TETHERING_SERVICE));
             }});
 
 
