@@ -153,6 +153,25 @@ public class UserManagerServiceUserInfoTest {
         assertTrue(mUserManagerService.isUserOfType(testId, typeName));
     }
 
+    /** Test UserInfo.supportsSwitchTo() for precreated users. */
+    @Test
+    public void testSupportSwitchTo_preCreated() throws Exception {
+        UserInfo userInfo = createUser(100, FLAG_FULL, null);
+        userInfo.preCreated = true;
+        assertFalse("Switching to a precreated user should be disabled",
+                userInfo.supportsSwitchTo());
+
+        userInfo.preCreated = false;
+        assertTrue("Switching to a full, real user should be allowed", userInfo.supportsSwitchTo());
+    }
+
+    /** Test UserInfo.supportsSwitchTo() for profiles. */
+    @Test
+    public void testSupportSwitchTo_profile() throws Exception {
+        UserInfo userInfo = createUser(100, FLAG_PROFILE, null);
+        assertFalse("Switching to a profiles should be disabled", userInfo.supportsSwitchTo());
+    }
+
     /** Tests upgradeIfNecessaryLP (but without locking) for upgrading from version 8 to 9+. */
     @Test
     public void testUpgradeIfNecessaryLP_9() {
