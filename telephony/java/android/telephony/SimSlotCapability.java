@@ -105,14 +105,14 @@ public final class SimSlotCapability implements Parcelable {
     /**
      * {@link Parcelable#describeContents}
      */
-    public @ContentsFlags int describeContents() {
+    public int describeContents() {
         return 0;
     }
 
     /**
      * {@link Parcelable#writeToParcel}
      */
-    public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mPhysicalSlotIndex);
         dest.writeInt(mSlotType);
     }
