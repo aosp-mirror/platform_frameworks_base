@@ -76,6 +76,11 @@ public class RuleEvaluationEngine {
     }
 
     private List<Rule> loadRules(AppInstallMetadata appInstallMetadata) {
+        if (!mIntegrityFileManager.initialized()) {
+            Slog.w(TAG, "Integrity rule files are not available. Evaluating only manifest rules.");
+            return new ArrayList<>();
+        }
+
         try {
             return mIntegrityFileManager.readRules(appInstallMetadata);
         } catch (Exception e) {
