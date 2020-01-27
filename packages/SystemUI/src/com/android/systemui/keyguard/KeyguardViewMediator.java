@@ -18,6 +18,7 @@ package com.android.systemui.keyguard;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -53,6 +54,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -371,6 +373,7 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mPulsing;
 
     private boolean mLockLater;
+    private boolean mShowHomeOverLockscreen;
 
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
@@ -703,6 +706,20 @@ public class KeyguardViewMediator extends SystemUI {
         mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mUiBgExecutor = uiBgExecutor;
+        mShowHomeOverLockscreen = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
+                /* defaultValue = */ false);
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post,
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        if (properties.getKeyset().contains(NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN)) {
+                            mShowHomeOverLockscreen = properties.getBoolean(
+                                    NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN, false /* defaultValue */);
+                        }
+                    }
+                });
     }
 
     public void userActivity() {
@@ -1972,7 +1989,10 @@ public class KeyguardViewMediator extends SystemUI {
             // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
             if (forceHideHomeRecentsButtons || isShowingAndNotOccluded()) {
-                flags |= StatusBarManager.DISABLE_HOME | StatusBarManager.DISABLE_RECENT;
+                if (!mShowHomeOverLockscreen) {
+                    flags |= StatusBarManager.DISABLE_HOME;
+                }
+                flags |= StatusBarManager.DISABLE_RECENT;
             }
 
             if (DEBUG) {
