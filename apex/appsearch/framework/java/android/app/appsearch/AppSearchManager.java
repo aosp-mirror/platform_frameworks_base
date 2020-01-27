@@ -24,7 +24,6 @@ import android.os.RemoteException;
 
 import com.android.internal.infra.AndroidFuture;
 
-import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
@@ -182,53 +181,6 @@ public class AppSearchManager {
     }
 
     /**
-     * Retrieves {@link android.app.appsearch.AppSearch.Document}s by URI.
-     *
-     * <p>You should not call this method directly; instead, use the
-     * {@code AppSearch#getDocuments()} API provided by JetPack.
-     *
-     * @param uris URIs of the documents to look up.
-     * @param executor Executor on which to invoke the callback.
-     * @param callback Callback to receive the documents or error.
-     */
-    public void getDocuments(
-            @NonNull List<String> uris,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BiConsumer<List<AppSearch.Document>, ? super Throwable> callback) {
-        AndroidFuture<List<byte[]>> future = new AndroidFuture<>();
-        future.whenCompleteAsync((documentProtos, err) -> {
-            if (err != null) {
-                callback.accept(null, err);
-                return;
-            }
-            if (documentProtos != null) {
-                List<AppSearch.Document> results = new ArrayList<>(documentProtos.size());
-                for (int i = 0; i < documentProtos.size(); i++) {
-                    DocumentProto documentProto;
-                    try {
-                        documentProto = DocumentProto.parseFrom(documentProtos.get(i));
-                    } catch (InvalidProtocolBufferException e) {
-                        callback.accept(null, e);
-                        return;
-                    }
-                    results.add(new AppSearch.Document(documentProto));
-                }
-                callback.accept(results, null);
-                return;
-            }
-            // Nothing was supplied in the future at all
-            callback.accept(null, new IllegalStateException(
-                    "Unknown failure occurred while retrieving documents"));
-        }, executor);
-        // TODO(b/146386470) stream uris?
-        try {
-            mService.getDocuments(uris.toArray(new String[uris.size()]), future);
-        } catch (RemoteException e) {
-            future.completeExceptionally(e);
-        }
-    }
-
-    /**
      * This method searches for documents based on a given query string. It also accepts
      * specifications regarding how to search and format the results.
      *
@@ -285,6 +237,7 @@ public class AppSearchManager {
                 callback.accept(null, err);
                 return;
             }
+
             if (searchResultBytes != null) {
                 SearchResultProto searchResultProto;
                 try {
@@ -304,10 +257,12 @@ public class AppSearchManager {
                 callback.accept(searchResults, null);
                 return;
             }
+
             // Nothing was supplied in the future at all
             callback.accept(
                     null, new IllegalStateException("Unknown failure occurred while querying"));
         }, executor);
+
         try {
             SearchSpecProto searchSpecProto = searchSpec.getSearchSpecProto();
             searchSpecProto = searchSpecProto.toBuilder().setQuery(queryExpression).build();
