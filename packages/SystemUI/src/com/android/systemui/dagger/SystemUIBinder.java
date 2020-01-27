@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarModule;
 import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
+import com.android.systemui.toast.ToastUI;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
 
@@ -152,6 +153,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(ThemeOverlayController.class)
     public abstract SystemUI bindThemeOverlayController(ThemeOverlayController sysui);
+
+    /** Inject into ToastUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(ToastUI.class)
+    public abstract SystemUI bindToastUI(ToastUI service);
 
     /** Inject into TvStatusBar. */
     @Binds
