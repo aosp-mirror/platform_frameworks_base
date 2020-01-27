@@ -325,11 +325,9 @@ int AImageDecoder_decodeImage(AImageDecoder* decoder,
 
     ImageDecoder* imageDecoder = toDecoder(decoder);
 
-    const int height = imageDecoder->getOutputInfo().height();
-    const size_t minStride = AImageDecoder_getMinimumStride(decoder);
-    // If this calculation were to overflow, it would have been caught in
-    // setTargetSize.
-    if (stride < minStride || size < stride * (height - 1) + minStride) {
+    SkImageInfo info = imageDecoder->getOutputInfo();
+    size_t minSize = info.computeByteSize(stride);
+    if (SkImageInfo::ByteSizeOverflowed(minSize) || size < minSize || !info.validRowBytes(stride)) {
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
