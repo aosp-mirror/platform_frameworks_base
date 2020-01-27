@@ -77,6 +77,8 @@ oneway interface IConnectionService {
 
     void reject(String callId, in Session.Info sessionInfo);
 
+    void rejectWithReason(String callId, int rejectReason, in Session.Info sessionInfo);
+
     void rejectWithMessage(String callId, String message, in Session.Info sessionInfo);
 
     void disconnect(String callId, in Session.Info sessionInfo);

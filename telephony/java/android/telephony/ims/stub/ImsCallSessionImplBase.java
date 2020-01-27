@@ -410,6 +410,13 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * Rejects an incoming call or session update.
      *
      * @param reason reason code to reject an incoming call, defined in {@link ImsReasonInfo}.
+     *               The {@link android.telecom.InCallService} (dialer app) can use the
+     *               {@link android.telecom.Call#reject(int)} API to reject a call while specifying
+     *               a user-indicated reason for rejecting the call.
+     *               Normal call declines ({@link android.telecom.Call#REJECT_REASON_DECLINED}) will
+     *               map to {@link ImsReasonInfo#CODE_USER_DECLINE}.
+     *               Unwanted calls ({@link android.telecom.Call#REJECT_REASON_UNWANTED}) will map
+     *               to {@link ImsReasonInfo#CODE_SIP_USER_MARKED_UNWANTED}.
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
     public void reject(int reason) {

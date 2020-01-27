@@ -34,6 +34,8 @@ oneway interface IInCallAdapter {
 
     void rejectCall(String callId, boolean rejectWithMessage, String textMessage);
 
+    void rejectCallWithReason(String callId, int rejectReason);
+
     void disconnectCall(String callId);
 
     void holdCall(String callId);
