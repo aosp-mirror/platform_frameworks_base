@@ -2459,6 +2459,7 @@ public interface WindowManager extends ViewManager {
          * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED}
          * will be used.
          */
+        @ActivityInfo.ScreenOrientation
         public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
         /**

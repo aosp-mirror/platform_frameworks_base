@@ -697,12 +697,6 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "-650040763": {
-      "message": "rotationForOrientation(orient=%d, last=%d); user=%d %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotation.java"
-    },
     "-635082269": {
       "message": "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b wallEnabled=%b haveKeyguard=%b",
       "level": "INFO",
@@ -900,6 +894,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_MOVEMENT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-177040661": {
+      "message": "Start rotation animation. customAnim=%s, mCurRotation=%s, mOriginalRotation=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
     "-167822951": {
       "message": "Attempted to add starting window to token with already existing starting window",
@@ -1104,6 +1104,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
+    },
+    "202263690": {
+      "message": "rotationForOrientation(orient=%s (%d), last=%s (%d)); user=%s (%d) %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
     "221540118": {
       "message": "mUserActivityTimeout set to %d",

@@ -367,6 +367,7 @@ class Task extends WindowContainer<WindowContainer> {
      * Display rotation as of the last time {@link #setBounds(Rect)} was called or this task was
      * moved to a new display.
      */
+    @Surface.Rotation
     private int mRotation;
 
     // For comparison with DisplayContent bounds.
