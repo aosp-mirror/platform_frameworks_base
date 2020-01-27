@@ -213,6 +213,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     private static final int MAX_UNFORWARED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
 
+    //TODO: remove this when development is done.
+    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
+
     Context mContext;
     final AtomicFile mFile;
     final Handler mHandler;
@@ -480,8 +483,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                         case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
                                 return AppOpsManager.MODE_ALLOWED;
-                            } else {
+                            } else if ((capability
+                                    & TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
+                                // The FGS has the location capability, but due to FGS BG start
+                                // restriction it lost the capability, use temp location capability
+                                // to mark this case.
+                                // TODO change to MODE_IGNORED when enforcing the feature.
                                 maybeShowWhileInUseDebugToast(op, mode);
+                                return AppOpsManager.MODE_ALLOWED;
+                            } else {
                                 return AppOpsManager.MODE_IGNORED;
                             }
                         case OP_CAMERA:
@@ -586,7 +596,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
             final long now = System.currentTimeMillis();
-            if (lastTimeShowDebugToast == 0 ||  now - lastTimeShowDebugToast > 600000) {
+            if (lastTimeShowDebugToast == 0 ||  now - lastTimeShowDebugToast > 3600000) {
                 lastTimeShowDebugToast = now;
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         ActivityManagerInternal::showWhileInUseDebugToast,

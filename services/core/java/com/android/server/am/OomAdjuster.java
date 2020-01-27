@@ -17,8 +17,8 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL_IMPLICIT;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
@@ -36,9 +36,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -78,7 +76,6 @@ import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
-import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -150,6 +147,9 @@ public final class OomAdjuster {
     //TODO: change to @EnabledAfter when enforcing the feature.
     @Disabled
     static final long CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID = 136219221L;
+
+    //TODO: remove this when development is done.
+    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
 
     /**
      * For some direct access we need to power manager.
@@ -1477,13 +1477,24 @@ public final class OomAdjuster {
                 }
             }
 
-            if (s.isForeground && s.mAllowWhileInUsePermissionInFgs) {
+            if (s.isForeground) {
                 final int fgsType = s.foregroundServiceType;
-                capabilityFromFGS |=
-                        (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
-                                != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
-                capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                        | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                if (s.mAllowWhileInUsePermissionInFgs) {
+                    capabilityFromFGS |=
+                            (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
+                                    != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
+                } else {
+                    //The FGS has the location capability, but due to FGS BG start restriction it
+                    //lost the capability, use temp location capability to mark this case.
+                    //TODO: remove this block when development is done.
+                    capabilityFromFGS |=
+                            (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
+                                    != 0 ? TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
+                }
+                if (s.mAllowWhileInUsePermissionInFgs) {
+                    capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                }
             }
 
             ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections = s.getConnections();
