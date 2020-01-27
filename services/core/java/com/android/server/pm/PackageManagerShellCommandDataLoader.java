@@ -152,6 +152,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
                 }
                 return true;
             } catch (IOException e) {
+                Slog.e(TAG, "Exception while streaming files", e);
                 return false;
             }
         }
