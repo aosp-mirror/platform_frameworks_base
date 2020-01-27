@@ -95,15 +95,17 @@ public abstract class ApexManager {
      * Returns an instance of either {@link ApexManagerImpl} or {@link ApexManagerFlattenedApex}
      * depending on whether this device supports APEX, i.e. {@link ApexProperties#updatable()}
      * evaluates to {@code true}.
+     * @hide
      */
-    static ApexManager getInstance() {
+    public static ApexManager getInstance() {
         return sApexManagerSingleton.get();
     }
 
     /**
      * Minimal information about APEX mount points and the original APEX package they refer to.
+     * @hide
      */
-    static class ActiveApexInfo {
+    public static class ActiveApexInfo {
         @Nullable public final String apexModuleName;
         public final File apexDirectory;
         public final File preInstalledApexPath;
@@ -130,8 +132,10 @@ public abstract class ApexManager {
 
     /**
      * Returns {@link ActiveApexInfo} records relative to all active APEX packages.
+     *
+     * @hide
      */
-    abstract List<ActiveApexInfo> getActiveApexInfos();
+    public abstract List<ActiveApexInfo> getActiveApexInfos();
 
     abstract void systemReady(Context context);
 
@@ -347,7 +351,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        List<ActiveApexInfo> getActiveApexInfos() {
+        public List<ActiveApexInfo> getActiveApexInfos() {
             synchronized (mLock) {
                 if (mActiveApexInfosCache == null) {
                     try {
@@ -744,7 +748,7 @@ public abstract class ApexManager {
      */
     private static final class ApexManagerFlattenedApex extends ApexManager {
         @Override
-        List<ActiveApexInfo> getActiveApexInfos() {
+        public List<ActiveApexInfo> getActiveApexInfos() {
             // There is no apexd running in case of flattened apex
             // We look up the /apex directory and identify the active APEX modules from there.
             // As "preinstalled" path, we just report /system since in the case of flattened APEX

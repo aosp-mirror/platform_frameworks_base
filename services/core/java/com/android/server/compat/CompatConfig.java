@@ -35,6 +35,7 @@ import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.OverrideAllowedState;
 import com.android.server.compat.config.Change;
 import com.android.server.compat.config.XmlParser;
+import com.android.server.pm.ApexManager;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -369,12 +371,18 @@ final class CompatConfig {
                 Environment.getRootDirectory(), "etc", "compatconfig"));
         config.initConfigFromLib(Environment.buildPath(
                 Environment.getRootDirectory(), "system_ext", "etc", "compatconfig"));
+
+        List<ApexManager.ActiveApexInfo> apexes = ApexManager.getInstance().getActiveApexInfos();
+        for (ApexManager.ActiveApexInfo apex : apexes) {
+            config.initConfigFromLib(Environment.buildPath(
+                    apex.apexDirectory, "etc", "compatconfig"));
+        }
         return config;
     }
 
     void initConfigFromLib(File libraryDir) {
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
-            Slog.e(TAG, "No directory " + libraryDir + ", skipping");
+            Slog.d(TAG, "No directory " + libraryDir + ", skipping");
             return;
         }
         for (File f : libraryDir.listFiles()) {
