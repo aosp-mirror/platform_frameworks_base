@@ -1438,12 +1438,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     }
 
     /**
-     * Requests that the WindowManager sends
-     * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
-     */
-    public void requestUserActivityNotification();
-
-    /**
      * Registers an IDisplayFoldListener.
      */
     default void registerDisplayFoldListener(IDisplayFoldListener listener) {}

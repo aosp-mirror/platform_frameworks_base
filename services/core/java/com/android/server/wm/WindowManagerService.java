@@ -7032,15 +7032,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
     }
 
-    @Override
-    public void requestUserActivityNotification() {
-        if (!checkCallingPermission(android.Manifest.permission.USER_ACTIVITY,
-                "requestUserActivityNotification()")) {
-            throw new SecurityException("Requires USER_ACTIVITY permission");
-        }
-        mPolicy.requestUserActivityNotification();
-    }
-
     private final class LocalService extends WindowManagerInternal {
 
         @Override

@@ -406,10 +406,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void requestUserActivityNotification() {
-    }
-
-    @Override
     public boolean setAodShowing(boolean aodShowing) {
         return false;
     }

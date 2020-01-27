@@ -315,4 +315,10 @@ public class TelephonyIntents {
      */
     public static final String ACTION_LINE1_NUMBER_ERROR_DETECTED =
             "com.android.internal.telephony.ACTION_LINE1_NUMBER_ERROR_DETECTED";
+
+    /**
+     * Broadcast sent when a user activity is detected.
+     */
+    public static final String ACTION_USER_ACTIVITY_NOTIFICATION =
+            "android.intent.action.USER_ACTIVITY_NOTIFICATION";
 }

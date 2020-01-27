@@ -558,12 +558,6 @@ interface IWindowManager
     boolean isWindowTraceEnabled();
 
     /**
-     * Requests that the WindowManager sends
-     * WindowManagerPolicyConstants#ACTION_USER_ACTIVITY_NOTIFICATION on the next user activity.
-     */
-    void requestUserActivityNotification();
-
-    /**
      * Notify WindowManager that it should not override the info in DisplayManager for the specified
      * display. This can disable letter- or pillar-boxing applied in DisplayManager when the metrics
      * of the logical display reported from WindowManager do not correspond to the metrics of the
