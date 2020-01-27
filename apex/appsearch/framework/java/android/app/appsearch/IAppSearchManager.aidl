@@ -47,6 +47,16 @@ interface IAppSearchManager {
     void putDocuments(in List documentsBytes, in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
+     * Retrieves documents from the index.
+     *
+     * @param uris The URIs of the documents to retrieve
+     * @param callback {@link AndroidFuture}&lt;{@link List}&lt;byte[]&gt;&gt;. Will be completed
+     *     with a {@link List} containing serialized DocumentProtos, or completed exceptionally if
+     *     get fails.
+     */
+    void getDocuments(in String[] uris, in AndroidFuture callback);
+
+    /**
      * Searches a document based on a given specifications.
      *
      * @param searchSpecBytes Serialized SearchSpecProto.
