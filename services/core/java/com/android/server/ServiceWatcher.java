@@ -167,7 +167,7 @@ public class ServiceWatcher implements ServiceConnection {
 
         @Override
         public String toString() {
-            return component + "@" + version + "[u" + userId + "]";
+            return component.toShortString() + "@" + version + "[u" + userId + "]";
         }
     }
 
@@ -472,5 +472,10 @@ public class ServiceWatcher implements ServiceConnection {
 
     private String getLogPrefix() {
         return "[" + mIntent.getAction() + "]";
+    }
+
+    @Override
+    public String toString() {
+        return mServiceInfo.toString();
     }
 }
