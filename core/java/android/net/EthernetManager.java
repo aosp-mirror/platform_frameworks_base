@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.os.Message;
 import android.os.RemoteException;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * A class representing the IP configuration of the Ethernet network.
@@ -37,7 +39,7 @@ public class EthernetManager {
 
     private final Context mContext;
     private final IEthernetManager mService;
-    private final Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(ConnectivityThread.getInstanceLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_AVAILABILITY_CHANGED) {
@@ -179,5 +181,79 @@ public class EthernetManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * A request for a tethered interface.
+     */
+    public static class TetheredInterfaceRequest {
+        private final IEthernetManager mService;
+        private final ITetheredInterfaceCallback mCb;
+
+        private TetheredInterfaceRequest(@NonNull IEthernetManager service,
+                @NonNull ITetheredInterfaceCallback cb) {
+            this.mService = service;
+            this.mCb = cb;
+        }
+
+        /**
+         * Release the request, causing the interface to revert back from tethering mode if there
+         * is no other requestor.
+         */
+        public void release() {
+            try {
+                mService.releaseTetheredInterface(mCb);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Callback for {@link #requestTetheredInterface(TetheredInterfaceCallback)}.
+     */
+    public interface TetheredInterfaceCallback {
+        /**
+         * Called when the tethered interface is available.
+         * @param iface The name of the interface.
+         */
+        void onAvailable(@NonNull String iface);
+
+        /**
+         * Called when the tethered interface is now unavailable.
+         */
+        void onUnavailable();
+    }
+
+    /**
+     * Request a tethered interface in tethering mode.
+     *
+     * <p>When this method is called and there is at least one ethernet interface available, the
+     * system will designate one to act as a tethered interface. If there is already a tethered
+     * interface, the existing interface will be used.
+     * @param callback A callback to be called once the request has been fulfilled.
+     */
+    @NonNull
+    public TetheredInterfaceRequest requestTetheredInterface(
+            @NonNull TetheredInterfaceCallback callback) {
+        Objects.requireNonNull(callback, "Callback must be non-null");
+        final ITetheredInterfaceCallback cbInternal = new ITetheredInterfaceCallback.Stub() {
+            @Override
+            public void onAvailable(String iface) {
+                callback.onAvailable(iface);
+            }
+
+            @Override
+            public void onUnavailable() {
+                callback.onUnavailable();
+            }
+        };
+
+        try {
+            mService.requestTetheredInterface(cbInternal);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return new TetheredInterfaceRequest(mService, cbInternal);
     }
 }
