@@ -33,28 +33,59 @@ import com.android.internal.annotations.VisibleForTesting;
 
 
 /**
- * Utility methods for common functionality using by different networks.
+ * The methods used for location permission and location mode checking.
  *
  * @hide
  */
-public class ConnectivityUtil {
+public class LocationPermissionChecker {
 
-    private static final String TAG = "ConnectivityUtil";
+    private static final String TAG = "LocationPermissionChecker";
 
     private final Context mContext;
-    private final AppOpsManager mAppOps;
+    private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
+    private final LocationManager mLocationManager;
 
-    public ConnectivityUtil(Context context) {
+    public LocationPermissionChecker(Context context) {
         mContext = context;
-        mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mLocationManager =
+            (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
     /**
-     * API to determine if the caller has fine/coarse location permission (depending on
-     * config/targetSDK level) and the location mode is enabled for the user. SecurityException is
-     * thrown if the caller has no permission or the location mode is disabled.
+     * Check location permission granted by the caller.
+     *
+     * This API check if the location mode enabled for the caller and the caller has
+     * ACCESS_COARSE_LOCATION permission is targetSDK<29, otherwise, has ACCESS_FINE_LOCATION.
+     *
+     * @param pkgName package name of the application requesting access
+     * @param featureId The feature in the package
+     * @param uid The uid of the package
+     * @param message A message describing why the permission was checked. Only needed if this is
+     *                not inside of a two-way binder call from the data receiver
+     *
+     * @return {@code true} returns if the caller has location permission and the location mode is
+     *         enabled.
+     */
+    public boolean checkLocationPermission(String pkgName, @Nullable String featureId,
+            int uid, @Nullable String message) {
+        try {
+            enforceLocationPermission(pkgName, featureId, uid, message);
+            return true;
+        } catch (SecurityException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Enforce the caller has location permission.
+     *
+     * This API determines if the location mode enabled for the caller and the caller has
+     * ACCESS_COARSE_LOCATION permission is targetSDK<29, otherwise, has ACCESS_FINE_LOCATION.
+     * SecurityException is thrown if the caller has no permission or the location mode is disabled.
+     *
      * @param pkgName package name of the application requesting access
      * @param featureId The feature in the package
      * @param uid The uid of the package
@@ -62,30 +93,20 @@ public class ConnectivityUtil {
      *                not inside of a two-way binder call from the data receiver
      */
     public void enforceLocationPermission(String pkgName, @Nullable String featureId, int uid,
-            @Nullable String message)
-            throws SecurityException {
+            @Nullable String message) throws SecurityException {
+
         checkPackage(uid, pkgName);
 
         // Location mode must be enabled
         if (!isLocationModeEnabled()) {
-            // Location mode is disabled, scan results cannot be returned
             throw new SecurityException("Location mode is disabled for the device");
         }
 
         // LocationAccess by App: caller must have Coarse/Fine Location permission to have access to
         // location information.
-        boolean canAppPackageUseLocation = checkCallersLocationPermission(pkgName, featureId,
-                uid, /* coarseForTargetSdkLessThanQ */ true, message);
-
-        // If neither caller or app has location access, there is no need to check
-        // any other permissions. Deny access to scan results.
-        if (!canAppPackageUseLocation) {
+        if (!checkCallersLocationPermission(pkgName, featureId,
+                uid, /* coarseForTargetSdkLessThanQ */ true, message)) {
             throw new SecurityException("UID " + uid + " has no location permission");
-        }
-        // If the User or profile is current, permission is granted
-        // Otherwise, uid must have INTERACT_ACROSS_USERS_FULL permission.
-        if (!isCurrentProfile(uid) && !checkInteractAcrossUsersFull(uid)) {
-            throw new SecurityException("UID " + uid + " profile not permitted");
         }
     }
 
@@ -104,6 +125,7 @@ public class ConnectivityUtil {
      */
     public boolean checkCallersLocationPermission(String pkgName, @Nullable String featureId,
             int uid, boolean coarseForTargetSdkLessThanQ, @Nullable String message) {
+
         boolean isTargetSdkLessThanQ = isTargetSdkLessThan(pkgName, Build.VERSION_CODES.Q, uid);
 
         String permissionType = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -111,8 +133,7 @@ public class ConnectivityUtil {
             // Having FINE permission implies having COARSE permission (but not the reverse)
             permissionType = Manifest.permission.ACCESS_COARSE_LOCATION;
         }
-        if (getUidPermission(permissionType, uid)
-                == PackageManager.PERMISSION_DENIED) {
+        if (getUidPermission(permissionType, uid) == PackageManager.PERMISSION_DENIED) {
             return false;
         }
 
@@ -134,10 +155,8 @@ public class ConnectivityUtil {
      * Retrieves a handle to LocationManager (if not already done) and check if location is enabled.
      */
     public boolean isLocationModeEnabled() {
-        LocationManager locationManager =
-                (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         try {
-            return locationManager.isLocationEnabledForUser(UserHandle.of(
+            return mLocationManager.isLocationEnabledForUser(UserHandle.of(
                     getCurrentUser()));
         } catch (Exception e) {
             Log.e(TAG, "Failure to get location mode via API, falling back to settings", e);
@@ -166,28 +185,15 @@ public class ConnectivityUtil {
 
     private boolean noteAppOpAllowed(String op, String pkgName, @Nullable String featureId,
             int uid, @Nullable String message) {
-        return mAppOps.noteOp(op, uid, pkgName) == AppOpsManager.MODE_ALLOWED;
+        return mAppOpsManager.noteOp(op, uid, pkgName) == AppOpsManager.MODE_ALLOWED;
     }
 
-    private void checkPackage(int uid, String pkgName) throws SecurityException {
+    private void checkPackage(int uid, String pkgName)
+            throws SecurityException {
         if (pkgName == null) {
             throw new SecurityException("Checking UID " + uid + " but Package Name is Null");
         }
-        mAppOps.checkPackage(uid, pkgName);
-    }
-
-    private boolean isCurrentProfile(int uid) {
-        UserHandle currentUser = UserHandle.of(getCurrentUser());
-        UserHandle callingUser = UserHandle.getUserHandleForUid(uid);
-        return currentUser.equals(callingUser)
-                || mUserManager.isSameProfileGroup(
-                        currentUser.getIdentifier(), callingUser.getIdentifier());
-    }
-
-    private boolean checkInteractAcrossUsersFull(int uid) {
-        return getUidPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, uid)
-                == PackageManager.PERMISSION_GRANTED;
+        mAppOpsManager.checkPackage(uid, pkgName);
     }
 
     @VisibleForTesting

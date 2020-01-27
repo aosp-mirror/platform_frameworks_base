@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -47,8 +48,8 @@ import org.mockito.stubbing.Answer;
 
 import java.util.HashMap;
 
-/** Unit tests for {@link ConnectivityUtil}. */
-public class ConnectivityUtilTest {
+/** Unit tests for {@link LocationPermissionChecker}. */
+public class LocationPermissionCheckerTest {
 
     public static final String TAG = "ConnectivityUtilTest";
 
@@ -84,18 +85,7 @@ public class ConnectivityUtilTest {
     private boolean mThrowSecurityException;
     private Answer<Integer> mReturnPermission;
     private HashMap<String, Integer> mPermissionsList = new HashMap<String, Integer>();
-
-    private class TestConnectivityUtil extends ConnectivityUtil {
-
-        TestConnectivityUtil(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected int getCurrentUser() {
-            return mCurrentUser;
-        }
-    }
+    private LocationPermissionChecker mChecker;
 
     @Before
     public void setUp() {
@@ -140,11 +130,12 @@ public class ConnectivityUtilTest {
         mThrowSecurityException = true;
         mMockApplInfo.targetSdkVersion = Build.VERSION_CODES.M;
         mIsLocationEnabled = false;
-        mCurrentUser = UserHandle.USER_SYSTEM;
+        mCurrentUser = ActivityManager.getCurrentUser();
         mCoarseLocationPermission = PackageManager.PERMISSION_DENIED;
         mFineLocationPermission = PackageManager.PERMISSION_DENIED;
         mAllowCoarseLocationApps = AppOpsManager.MODE_ERRORED;
         mAllowFineLocationApps = AppOpsManager.MODE_ERRORED;
+        mChecker = new LocationPermissionChecker(mMockContext);
     }
 
     private void setupMockInterface() {
@@ -188,8 +179,7 @@ public class ConnectivityUtilTest {
         mWifiScanAllowApps = AppOpsManager.MODE_ALLOWED;
         mUid = mCurrentUser;
         setupTestCase();
-        new TestConnectivityUtil(mMockContext)
-                .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        mChecker.enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
     }
 
     @Test
@@ -202,8 +192,7 @@ public class ConnectivityUtilTest {
         mAllowFineLocationApps = AppOpsManager.MODE_ALLOWED;
         mWifiScanAllowApps = AppOpsManager.MODE_ALLOWED;
         setupTestCase();
-        new TestConnectivityUtil(mMockContext)
-                .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        mChecker.enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
     }
 
     @Test
@@ -216,22 +205,8 @@ public class ConnectivityUtilTest {
         setupTestCase();
 
         assertThrows(SecurityException.class,
-                () -> new TestConnectivityUtil(mMockContext)
-                        .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
-    }
-
-    @Test
-    public void testenforceCanAccessScanResults_UserOrProfileNotCurrent() throws Exception {
-        mIsLocationEnabled = true;
-        mThrowSecurityException = false;
-        mCoarseLocationPermission = PackageManager.PERMISSION_GRANTED;
-        mAllowCoarseLocationApps = AppOpsManager.MODE_ALLOWED;
-        mWifiScanAllowApps = AppOpsManager.MODE_ALLOWED;
-        setupTestCase();
-
-        assertThrows(SecurityException.class,
-                () -> new TestConnectivityUtil(mMockContext)
-                        .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+                () -> mChecker.enforceLocationPermission(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
     }
 
     @Test
@@ -240,8 +215,8 @@ public class ConnectivityUtilTest {
         mIsLocationEnabled = true;
         setupTestCase();
         assertThrows(SecurityException.class,
-                () -> new TestConnectivityUtil(mMockContext)
-                        .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+                () -> mChecker.enforceLocationPermission(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
     }
 
     @Test
@@ -255,8 +230,8 @@ public class ConnectivityUtilTest {
         setupTestCase();
 
         assertThrows(SecurityException.class,
-                () -> new TestConnectivityUtil(mMockContext)
-                        .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+                () -> mChecker.enforceLocationPermission(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
         verify(mMockAppOps, never()).noteOp(anyInt(), anyInt(), anyString());
     }
 
@@ -271,8 +246,8 @@ public class ConnectivityUtilTest {
         setupTestCase();
 
         assertThrows(SecurityException.class,
-                () -> new TestConnectivityUtil(mMockContext)
-                        .enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+                () -> mChecker.enforceLocationPermission(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
     }
 
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
