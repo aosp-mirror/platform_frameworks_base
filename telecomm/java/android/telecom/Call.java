@@ -265,6 +265,29 @@ public final class Call {
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
 
+
+    /**
+     * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
+     * call because they have declined to answer it.  This typically means that they are unable
+     * to answer the call at this time and would prefer it be sent to voicemail.
+     */
+    public static final int REJECT_REASON_DECLINED = 1;
+
+    /**
+     * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
+     * call because it is an unwanted call.  This allows the user to indicate that they are
+     * rejecting a call because it is likely a nuisance call.
+     */
+    public static final int REJECT_REASON_UNWANTED = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "REJECT_REASON_" },
+            value = {REJECT_REASON_DECLINED, REJECT_REASON_UNWANTED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RejectReason {};
+
     public static class Details {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
@@ -1517,6 +1540,16 @@ public final class Call {
      */
     public void reject(boolean rejectWithMessage, String textMessage) {
         mInCallAdapter.rejectCall(mTelecomCallId, rejectWithMessage, textMessage);
+    }
+
+    /**
+     * Instructs the {@link ConnectionService} providing this {@link #STATE_RINGING} call that the
+     * user has chosen to reject the call and has indicated a reason why the call is being rejected.
+     *
+     * @param rejectReason the reason the call is being rejected.
+     */
+    public void reject(@RejectReason int rejectReason) {
+        mInCallAdapter.rejectCall(mTelecomCallId, rejectReason);
     }
 
     /**

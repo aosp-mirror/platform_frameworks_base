@@ -89,6 +89,19 @@ public final class InCallAdapter {
     }
 
     /**
+     * Instructs Telecom to reject the specified call.
+     *
+     * @param callId The identifier of the call to reject.
+     * @param rejectReason The reason the call was rejected.
+     */
+    public void rejectCall(String callId, @Call.RejectReason int rejectReason) {
+        try {
+            mAdapter.rejectCallWithReason(callId, rejectReason);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Instructs Telecom to disconnect the specified call.
      *
      * @param callId The identifier of the call to disconnect.
