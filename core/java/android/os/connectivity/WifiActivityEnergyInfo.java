@@ -16,7 +16,9 @@
 
 package android.os.connectivity;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
@@ -37,14 +39,20 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public final class WifiActivityEnergyInfo implements Parcelable {
-    private long mTimeSinceBootMillis;
+    @ElapsedRealtimeLong
+    private final long mTimeSinceBootMillis;
     @StackState
-    private int mStackState;
-    private long mControllerTxDurationMillis;
-    private long mControllerRxDurationMillis;
-    private long mControllerScanDurationMillis;
-    private long mControllerIdleDurationMillis;
-    private long mControllerEnergyUsedMicroJoules;
+    private final int mStackState;
+    @IntRange(from = 0)
+    private final long mControllerTxDurationMillis;
+    @IntRange(from = 0)
+    private final long mControllerRxDurationMillis;
+    @IntRange(from = 0)
+    private final long mControllerScanDurationMillis;
+    @IntRange(from = 0)
+    private final long mControllerIdleDurationMillis;
+    @IntRange(from = 0)
+    private final long mControllerEnergyUsedMicroJoules;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -67,7 +75,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     /**
      * Constructor.
      *
-     * @param timeSinceBootMillis the time since boot, in milliseconds.
+     * @param timeSinceBootMillis the elapsed real time since boot, in milliseconds.
      * @param stackState The current state of the Wifi Stack. One of {@link #STACK_STATE_INVALID},
      *                   {@link #STACK_STATE_STATE_ACTIVE}, {@link #STACK_STATE_STATE_SCANNING},
      *                   or {@link #STACK_STATE_STATE_IDLE}.
@@ -78,23 +86,27 @@ public final class WifiActivityEnergyInfo implements Parcelable {
      *                       receiving.
      */
     public WifiActivityEnergyInfo(
-            long timeSinceBootMillis,
+            @ElapsedRealtimeLong long timeSinceBootMillis,
             @StackState int stackState,
-            long txDurationMillis,
-            long rxDurationMillis,
-            long scanDurationMillis,
-            long idleDurationMillis) {
-        mTimeSinceBootMillis = timeSinceBootMillis;
-        mStackState = stackState;
-        mControllerTxDurationMillis = txDurationMillis;
-        mControllerRxDurationMillis = rxDurationMillis;
-        mControllerScanDurationMillis = scanDurationMillis;
-        mControllerIdleDurationMillis = idleDurationMillis;
+            @IntRange(from = 0) long txDurationMillis,
+            @IntRange(from = 0) long rxDurationMillis,
+            @IntRange(from = 0) long scanDurationMillis,
+            @IntRange(from = 0) long idleDurationMillis) {
 
+        this(timeSinceBootMillis,
+                stackState,
+                txDurationMillis,
+                rxDurationMillis,
+                scanDurationMillis,
+                idleDurationMillis,
+                calculateEnergyMicroJoules(txDurationMillis, rxDurationMillis, idleDurationMillis));
+    }
+
+    private static long calculateEnergyMicroJoules(
+            long txDurationMillis, long rxDurationMillis, long idleDurationMillis) {
         final Context context = ActivityThread.currentActivityThread().getSystemContext();
         if (context == null) {
-            mControllerEnergyUsedMicroJoules = 0L;
-            return;
+            return 0L;
         }
         // Calculate energy used using PowerProfile.
         PowerProfile powerProfile = new PowerProfile(context);
@@ -106,10 +118,28 @@ public final class WifiActivityEnergyInfo implements Parcelable {
                 PowerProfile.POWER_WIFI_CONTROLLER_TX);
         final double voltage = powerProfile.getAveragePower(
                 PowerProfile.POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
-        final long energyUsedMicroJoules = (long) ((mControllerTxDurationMillis * txCurrent
-                + mControllerRxDurationMillis * rxCurrent
-                + mControllerIdleDurationMillis * rxIdleCurrent)
+
+        return (long) ((txDurationMillis * txCurrent
+                + rxDurationMillis * rxCurrent
+                + idleDurationMillis * rxIdleCurrent)
                 * voltage);
+    }
+
+    /** @hide */
+    public WifiActivityEnergyInfo(
+            @ElapsedRealtimeLong long timeSinceBootMillis,
+            @StackState int stackState,
+            @IntRange(from = 0) long txDurationMillis,
+            @IntRange(from = 0) long rxDurationMillis,
+            @IntRange(from = 0) long scanDurationMillis,
+            @IntRange(from = 0) long idleDurationMillis,
+            @IntRange(from = 0) long energyUsedMicroJoules) {
+        mTimeSinceBootMillis = timeSinceBootMillis;
+        mStackState = stackState;
+        mControllerTxDurationMillis = txDurationMillis;
+        mControllerRxDurationMillis = rxDurationMillis;
+        mControllerScanDurationMillis = scanDurationMillis;
+        mControllerIdleDurationMillis = idleDurationMillis;
         mControllerEnergyUsedMicroJoules = energyUsedMicroJoules;
     }
 
@@ -158,14 +188,10 @@ public final class WifiActivityEnergyInfo implements Parcelable {
         return 0;
     }
 
-    /** Get the timestamp (milliseconds since boot) of record creation. */
+    /** Get the timestamp (elapsed real time milliseconds since boot) of record creation. */
+    @ElapsedRealtimeLong
     public long getTimeSinceBootMillis() {
         return mTimeSinceBootMillis;
-    }
-
-    /** Set the timestamp (milliseconds since boot) of record creation. */
-    public void setTimeSinceBootMillis(long timeSinceBootMillis) {
-        mTimeSinceBootMillis = timeSinceBootMillis;
     }
 
     /**
@@ -178,66 +204,40 @@ public final class WifiActivityEnergyInfo implements Parcelable {
         return mStackState;
     }
 
-    /**
-     * Set the Wifi stack reported state. One of {@link #STACK_STATE_INVALID},
-     * {@link #STACK_STATE_STATE_ACTIVE}, {@link #STACK_STATE_STATE_SCANNING},
-     * {@link #STACK_STATE_STATE_IDLE}.
-     */
-    public void setStackState(@StackState int stackState) {
-        mStackState = stackState;
-    }
-
     /** Get the Wifi transmission duration, in milliseconds. */
+    @IntRange(from = 0)
     public long getControllerTxDurationMillis() {
         return mControllerTxDurationMillis;
     }
 
-    /** Set the Wifi transmission duration, in milliseconds. */
-    public void setControllerTxDurationMillis(long controllerTxDurationMillis) {
-        mControllerTxDurationMillis = controllerTxDurationMillis;
-    }
-
     /** Get the Wifi receive duration, in milliseconds. */
+    @IntRange(from = 0)
     public long getControllerRxDurationMillis() {
         return mControllerRxDurationMillis;
     }
 
-    /** Set the Wifi receive duration, in milliseconds. */
-    public void setControllerRxDurationMillis(long controllerRxDurationMillis) {
-        mControllerRxDurationMillis = controllerRxDurationMillis;
-    }
-
     /** Get the Wifi scan duration, in milliseconds. */
+    @IntRange(from = 0)
     public long getControllerScanDurationMillis() {
         return mControllerScanDurationMillis;
     }
 
-    /** Set the Wifi scan duration, in milliseconds. */
-    public void setControllerScanDurationMillis(long controllerScanDurationMillis) {
-        mControllerScanDurationMillis = controllerScanDurationMillis;
-    }
-
     /** Get the Wifi idle duration, in milliseconds. */
+    @IntRange(from = 0)
     public long getControllerIdleDurationMillis() {
         return mControllerIdleDurationMillis;
     }
 
-    /** Set the Wifi idle duration, in milliseconds. */
-    public void setControllerIdleDurationMillis(long controllerIdleDurationMillis) {
-        mControllerIdleDurationMillis = controllerIdleDurationMillis;
-    }
-
     /** Get the energy consumed by Wifi, in microjoules. */
+    @IntRange(from = 0)
     public long getControllerEnergyUsedMicroJoules() {
         return mControllerEnergyUsedMicroJoules;
     }
 
-    /** Set the energy consumed by Wifi, in microjoules. */
-    public void setControllerEnergyUsedMicroJoules(long controllerEnergyUsedMicroJoules) {
-        mControllerEnergyUsedMicroJoules = controllerEnergyUsedMicroJoules;
-    }
-
-    /** Returns true if the record is valid, false otherwise. */
+    /**
+     * Returns true if the record is valid, false otherwise.
+     * @hide
+     */
     public boolean isValid() {
         return mControllerTxDurationMillis >= 0
                 && mControllerRxDurationMillis >= 0
