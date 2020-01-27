@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.location.gnss;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -52,6 +52,7 @@ import android.os.IInterface;
 import android.os.Message;
 import android.os.RemoteException;
 
+import com.android.server.LocationManagerService;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssCapabilitiesProvider;
 import com.android.server.location.GnssLocationProvider;
@@ -71,11 +72,12 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Unit tests for {@link com.android.server.GnssManagerService}.
+ * Unit tests for {@link com.android.server.location.gnss.GnssManagerService}.
  */
 public class GnssManagerServiceTest {
 
@@ -111,7 +113,7 @@ public class GnssManagerServiceTest {
     private Context mMockContext;
 
     // Class under test
-    private GnssManagerService mGnssManagerService;
+    private com.android.server.location.gnss.GnssManagerService mGnssManagerService;
 
     @Before
     public void setUp() {
@@ -371,7 +373,7 @@ public class GnssManagerServiceTest {
     @Test
     public void addGnssBatchCallbackWithoutPermissionsTest() throws RemoteException {
         IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = (List<Location>) mock(List.class);
+        List<Location> mockLocationList = new ArrayList<>();
 
         disableLocationPermissions();
 
@@ -387,7 +389,7 @@ public class GnssManagerServiceTest {
     @Test
     public void addGnssBatchCallbackWithPermissionsTest() throws RemoteException {
         IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = (List<Location>) mock(List.class);
+        List<Location> mockLocationList = new ArrayList<>();
 
         enableLocationPermissions();
 
@@ -404,7 +406,7 @@ public class GnssManagerServiceTest {
     public void replaceGnssBatchCallbackTest() throws RemoteException {
         IBatchedLocationCallback mockBatchedLocationCallback1 = createMockBatchedLocationCallback();
         IBatchedLocationCallback mockBatchedLocationCallback2 = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = (List<Location>) mock(List.class);
+        List<Location> mockLocationList = new ArrayList<>();
 
         enableLocationPermissions();
 
@@ -441,7 +443,7 @@ public class GnssManagerServiceTest {
     @Test
     public void removeGnssBatchingCallbackWithoutPermissionsTest() throws RemoteException {
         IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = (List<Location>) mock(List.class);
+        List<Location> mockLocationList = new ArrayList<>();
 
         enableLocationPermissions();
 
@@ -461,7 +463,7 @@ public class GnssManagerServiceTest {
     @Test
     public void removeGnssBatchingCallbackWithPermissionsTest() throws RemoteException {
         IBatchedLocationCallback mockBatchedLocationCallback = createMockBatchedLocationCallback();
-        List<Location> mockLocationList = (List<Location>) mock(List.class);
+        List<Location> mockLocationList = new ArrayList<>();
 
         enableLocationPermissions();
 
