@@ -69,6 +69,7 @@ import static com.android.server.am.ActivityManagerService.ANR_TRACE_DIR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerService.dumpStackTraces;
+import static com.android.server.am.ActivityManagerServiceDumpActivitiesProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONTROLLER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CURRENT_TRACKER;
@@ -257,7 +258,6 @@ import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.BaseErrorDialog;
@@ -6963,10 +6963,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void writeActivitiesToProto(ProtoOutputStream proto) {
             synchronized (mGlobalLock) {
                 // The output proto of "activity --proto activities"
-                // is ActivityManagerServiceDumpActivitiesProto
-                mRootWindowContainer.dumpDebug(proto,
-                        ActivityManagerServiceDumpActivitiesProto.ACTIVITY_STACK_SUPERVISOR,
-                        WindowTraceLogLevel.ALL);
+                mRootWindowContainer.dumpDebug(
+                        proto, ROOT_WINDOW_CONTAINER, WindowTraceLogLevel.ALL);
             }
         }
 

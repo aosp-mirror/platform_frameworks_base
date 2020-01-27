@@ -5906,7 +5906,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void dumpDebugLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         mPolicy.dumpDebug(proto, POLICY);
-        mRoot.dumpDebugInner(proto, ROOT_WINDOW_CONTAINER, logLevel);
+        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);

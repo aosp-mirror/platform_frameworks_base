@@ -7502,17 +7502,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Write all fields to an {@code ActivityRecordProto}. This assumes the
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
-    void dumpDebug(ProtoOutputStream proto) {
+    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         writeNameToProto(proto, NAME);
-        super.dumpDebug(proto, WINDOW_TOKEN, WindowTraceLogLevel.ALL);
+        super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating());
-        if (mThumbnail != null) {
+        proto.write(IS_ANIMATING, isAnimating(PARENTS));
+        if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }
         proto.write(FILLS_PARENT, mOccludesParent);
         proto.write(APP_STOPPED, mAppStopped);
+        proto.write(TRANSLUCENT, !occludesParent());
+        proto.write(VISIBLE, mVisible);
         proto.write(VISIBLE_REQUESTED, mVisibleRequested);
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
@@ -7535,24 +7537,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
-        proto.write(VISIBLE_REQUESTED, mVisibleRequested);
         proto.write(FRONT_OF_TASK, isRootOfTask());
         if (hasProcess()) {
             proto.write(PROC_ID, app.getPid());
         }
-        proto.write(TRANSLUCENT, !occludesParent());
-        proto.write(VISIBLE, mVisible);
     }
 
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-        dumpDebug(proto);
-        proto.end(token);
-    }
-
-    /**
-     * Copied from old AppWindowToken.
-     */
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
@@ -7562,36 +7552,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final long token = proto.start(fieldId);
-        writeNameToProto(proto, NAME);
-        super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
-        proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
-        proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating(PARENTS));
-        if (mThumbnail != null){
-            mThumbnail.dumpDebug(proto, THUMBNAIL);
-        }
-        proto.write(FILLS_PARENT, mOccludesParent);
-        proto.write(APP_STOPPED, mAppStopped);
-        proto.write(VISIBLE_REQUESTED, mVisibleRequested);
-        proto.write(CLIENT_VISIBLE, mClientVisible);
-        proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
-        proto.write(REPORTED_DRAWN, reportedDrawn);
-        proto.write(REPORTED_VISIBLE, reportedVisible);
-        proto.write(NUM_INTERESTING_WINDOWS, mNumInterestingWindows);
-        proto.write(NUM_DRAWN_WINDOWS, mNumDrawnWindows);
-        proto.write(ALL_DRAWN, allDrawn);
-        proto.write(LAST_ALL_DRAWN, mLastAllDrawn);
-        if (startingWindow != null) {
-            startingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
-        }
-        proto.write(STARTING_DISPLAYED, startingDisplayed);
-        proto.write(STARTING_MOVED, startingMoved);
-        proto.write(VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW,
-                mVisibleSetFromTransferredStartingWindow);
-        for (Rect bounds : mFrozenBounds) {
-            bounds.dumpDebug(proto, FROZEN_BOUNDS);
-        }
-        proto.write(VISIBLE, mVisible);
+        dumpDebug(proto, logLevel);
         proto.end(token);
     }
 

@@ -61,17 +61,6 @@ import static android.view.SurfaceControl.METADATA_TASK_ID;
 
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
-import static com.android.server.am.TaskRecordProto.ACTIVITIES;
-import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
-import static com.android.server.am.TaskRecordProto.FULLSCREEN;
-import static com.android.server.am.TaskRecordProto.LAST_NON_FULLSCREEN_BOUNDS;
-import static com.android.server.am.TaskRecordProto.MIN_HEIGHT;
-import static com.android.server.am.TaskRecordProto.MIN_WIDTH;
-import static com.android.server.am.TaskRecordProto.ORIG_ACTIVITY;
-import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
-import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
-import static com.android.server.am.TaskRecordProto.STACK_ID;
-import static com.android.server.am.TaskRecordProto.TASK;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -90,7 +79,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.server.wm.TaskProto.ACTIVITY;
 import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
@@ -3160,29 +3148,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    // TODO(proto-merge): Remove once protos for TaskRecord and Task are merged.
-    void dumpDebugInnerTaskOnly(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
-            return;
-        }
-
-        final long token = proto.start(fieldId);
-        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
-        proto.write(TaskProto.ID, mTaskId);
-        forAllActivities((r) -> {
-            r.dumpDebug(proto, ACTIVITY);
-        });
-        proto.write(FILLS_PARENT, matchParentBounds());
-        getBounds().dumpDebug(proto, TaskProto.BOUNDS);
-        mOverrideDisplayedBounds.dumpDebug(proto, DISPLAYED_BOUNDS);
-        if (mSurfaceControl != null) {
-            proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
-            proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
-        }
-        proto.end(token);
-    }
-
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
@@ -3393,43 +3358,6 @@ class Task extends WindowContainer<WindowContainer> {
         }
         stringName = sb.toString();
         return toString();
-    }
-
-    void dumpDebugInner(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
-            return;
-        }
-
-        final long token = proto.start(fieldId);
-        dumpDebugInnerTaskOnly(proto, TASK, logLevel);
-        proto.write(com.android.server.am.TaskRecordProto.ID, mTaskId);
-
-        forAllActivities((r) -> {
-            r.dumpDebug(proto, ACTIVITIES);
-        });
-        proto.write(STACK_ID, getRootTaskId());
-        if (mLastNonFullscreenBounds != null) {
-            mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
-        }
-        if (realActivity != null) {
-            proto.write(REAL_ACTIVITY, realActivity.flattenToShortString());
-        }
-        if (origActivity != null) {
-            proto.write(ORIG_ACTIVITY, origActivity.flattenToShortString());
-        }
-        proto.write(ACTIVITY_TYPE, getActivityType());
-        proto.write(RESIZE_MODE, mResizeMode);
-        // TODO: Remove, no longer needed with windowingMode.
-        proto.write(FULLSCREEN, matchParentBounds());
-
-        if (!matchParentBounds()) {
-            final Rect bounds = getRequestedOverrideBounds();
-            bounds.dumpDebug(proto, com.android.server.am.TaskRecordProto.BOUNDS);
-        }
-        proto.write(MIN_WIDTH, mMinWidth);
-        proto.write(MIN_HEIGHT, mMinHeight);
-        proto.end(token);
     }
 
     /** @see #getNumRunningActivities(TaskActivitiesReport) */

@@ -54,8 +54,14 @@ message RootWindowContainerProto {
 
     optional WindowContainerProto window_container = 1;
     repeated DisplayContentProto displays = 2;
+    reserved 3; // IdentifierProto windows
     /* window references in top down z order */
-    repeated IdentifierProto windows = 3;
+    repeated WindowStateProto windows = 4;
+    optional KeyguardControllerProto keyguard_controller = 5;
+    // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
+    // know what activity types to check for when invoking splitscreen multi-window.
+    optional bool is_home_recents_component = 6;
+    repeated IdentifierProto pending_activities = 7;
 }
 
 message BarControllerProto {
@@ -92,6 +98,21 @@ message KeyguardServiceDelegateProto {
         INTERACTIVE_STATE_GOING_TO_SLEEP = 3;
     }
     optional InteractiveState interactive_state = 5;
+}
+
+message KeyguardControllerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional bool keyguard_showing = 1;
+    repeated KeyguardOccludedProto keyguard_occluded_states = 2;
+    optional bool aod_showing = 3;
+}
+
+message KeyguardOccludedProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 display_id = 1;
+    optional bool keyguard_occluded = 2;
 }
 
 /* represents PhoneWindowManager */
@@ -145,7 +166,7 @@ message DisplayContentProto {
 
     optional WindowContainerProto window_container = 1;
     optional int32 id = 2;
-    repeated StackProto stacks = 3;
+    reserved 3; // stacks
     optional DockedStackDividerControllerProto docked_stack_divider_controller = 4;
     // Will be removed soon.
     optional PinnedStackControllerProto pinned_stack_controller = 5 [deprecated=true];
@@ -166,6 +187,12 @@ message DisplayContentProto {
     repeated IdentifierProto changing_apps = 19;
     repeated WindowTokenProto overlay_windows = 20;
     optional DisplayAreaProto root_display_area = 21;
+
+
+    optional bool single_task_instance = 22;
+    optional int32 focused_root_task_id = 23;
+    optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
+    repeated TaskProto tasks = 25;
 }
 
 /* represents DisplayArea object */
@@ -191,7 +218,6 @@ message DisplayAreaChildProto {
     repeated string unknown = 3;
 }
 
-
 /* represents DisplayFrames */
 message DisplayFramesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -214,39 +240,41 @@ message PinnedStackControllerProto {
     optional .android.graphics.RectProto movement_bounds = 2 [deprecated=true];
 }
 
-/* represents TaskStack */
-message StackProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional WindowContainerProto window_container = 1;
-    optional int32 id = 2;
-    repeated TaskProto tasks = 3;
-    optional bool fills_parent = 4;
-    optional .android.graphics.RectProto bounds = 5;
-    optional bool animation_background_surface_is_dimming = 6 [deprecated=true];
-    optional bool defer_removal = 7;
-    optional float minimize_amount = 8;
-    optional bool adjusted_for_ime = 9;
-    optional float adjust_ime_amount = 10;
-    optional float adjust_divider_amount = 11;
-    optional .android.graphics.RectProto adjusted_bounds = 12;
-    optional bool animating_bounds = 13;
-}
-
 /* represents Task */
 message TaskProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
     optional int32 id = 2;
-    repeated ActivityRecordProto activity = 3;
+    reserved 3; // activity
     optional bool fills_parent = 4;
     optional .android.graphics.RectProto bounds = 5;
     optional .android.graphics.RectProto displayed_bounds = 6;
-    // Will be removed soon.
-    optional bool defer_removal = 7 [deprecated=true];
+    optional bool defer_removal = 7;
     optional int32 surface_width = 8;
     optional int32 surface_height = 9;
+
+    repeated TaskProto tasks = 10;
+    repeated ActivityRecordProto activities = 11;
+
+    optional .com.android.server.wm.IdentifierProto resumed_activity = 12;
+    optional string real_activity = 13;
+    optional string orig_activity = 14;
+
+    optional int32 display_id = 15;
+    optional int32 root_task_id = 16;
+    optional int32 activity_type = 17;
+    optional int32 resize_mode = 18;
+    optional int32 min_width = 19;
+    optional int32 min_height = 20;
+
+    optional .android.graphics.RectProto adjusted_bounds = 21;
+    optional .android.graphics.RectProto last_non_fullscreen_bounds = 22;
+    optional bool adjusted_for_ime = 23;
+    optional float adjust_ime_amount = 24;
+    optional float adjust_divider_amount = 25;
+    optional bool animating_bounds = 26;
+    optional float minimize_amount = 27;
 }
 
 /* represents ActivityRecordProto */
@@ -271,17 +299,15 @@ message ActivityRecordProto {
     optional int32 num_drawn_windows = 15;
     optional bool all_drawn = 16;
     optional bool last_all_drawn = 17;
-    // Will be removed soon
-    optional bool removed = 18 [deprecated=true];
+    reserved 18; // removed
     optional IdentifierProto starting_window = 19;
     optional bool starting_displayed = 20;
-    optional bool starting_moved = 21;
+    optional bool starting_moved = 201;
     optional bool visible_set_from_transferred_starting_window = 22;
     repeated .android.graphics.RectProto frozen_bounds = 23;
     optional bool visible = 24;
-    // To be removed soon.
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 25 [deprecated=true];
-    optional .com.android.server.wm.IdentifierProto identifier = 26;
+    reserved 25; // configuration_container
+    optional IdentifierProto identifier = 26;
     optional string state = 27;
     optional bool front_of_task = 28;
     optional int32 proc_id = 29;

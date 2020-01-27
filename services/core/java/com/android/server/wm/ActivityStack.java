@@ -60,10 +60,18 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.am.ActivityStackProto.DISPLAY_ID;
-import static com.android.server.am.ActivityStackProto.FULLSCREEN;
-import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
-import static com.android.server.am.ActivityStackProto.STACK;
+import static com.android.server.wm.TaskProto.ACTIVITIES;
+import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
+import static com.android.server.wm.TaskProto.BOUNDS;
+import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
+import static com.android.server.wm.TaskProto.DISPLAY_ID;
+import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
+import static com.android.server.wm.TaskProto.MIN_HEIGHT;
+import static com.android.server.wm.TaskProto.MIN_WIDTH;
+import static com.android.server.wm.TaskProto.ORIG_ACTIVITY;
+import static com.android.server.wm.TaskProto.REAL_ACTIVITY;
+import static com.android.server.wm.TaskProto.RESIZE_MODE;
+import static com.android.server.wm.TaskProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -107,15 +115,19 @@ import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGE
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.StackProto.ADJUSTED_BOUNDS;
-import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
-import static com.android.server.wm.StackProto.ADJUST_DIVIDER_AMOUNT;
-import static com.android.server.wm.StackProto.ADJUST_IME_AMOUNT;
-import static com.android.server.wm.StackProto.ANIMATING_BOUNDS;
-import static com.android.server.wm.StackProto.DEFER_REMOVAL;
-import static com.android.server.wm.StackProto.FILLS_PARENT;
-import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
-import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
+import static com.android.server.wm.TaskProto.ADJUSTED_BOUNDS;
+import static com.android.server.wm.TaskProto.ADJUSTED_FOR_IME;
+import static com.android.server.wm.TaskProto.ADJUST_DIVIDER_AMOUNT;
+import static com.android.server.wm.TaskProto.ADJUST_IME_AMOUNT;
+import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
+import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
+import static com.android.server.wm.TaskProto.FILLS_PARENT;
+import static com.android.server.wm.TaskProto.MINIMIZE_AMOUNT;
+import static com.android.server.wm.TaskProto.ROOT_TASK_ID;
+import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
+import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
+import static com.android.server.wm.TaskProto.TASKS;
+import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -4925,49 +4937,66 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
-        final long token = proto.start(fieldId);
-        dumpDebugInnerStackOnly(proto, STACK, logLevel);
-        proto.write(com.android.server.am.ActivityStackProto.ID, getRootTaskId());
-
-        forAllTasks((t) -> {
-            t.dumpDebugInner(proto, com.android.server.am.ActivityStackProto.TASKS, logLevel);
-        }, true /* traverseTopToBottom */, this);
-        if (mResumedActivity != null) {
-            mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
-        }
-        proto.write(DISPLAY_ID, getDisplayId());
-        if (!matchParentBounds()) {
-            final Rect bounds = getRequestedOverrideBounds();
-            bounds.dumpDebug(proto, com.android.server.am.ActivityStackProto.BOUNDS);
-        }
-
-        // TODO: Remove, no longer needed with windowingMode.
-        proto.write(FULLSCREEN, matchParentBounds());
-        proto.end(token);
-    }
-
-    // TODO(proto-merge): Remove once protos for ActivityStack and TaskStack are merged.
-    void dumpDebugInnerStackOnly(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
-        proto.write(StackProto.ID, getRootTaskId());
-        forAllTasks((t) -> {
-            t.dumpDebugInnerTaskOnly(proto, StackProto.TASKS, logLevel);
-        }, true /* traverseTopToBottom */, this);
+
+        proto.write(TaskProto.ID, mTaskId);
+        proto.write(DISPLAY_ID, getDisplayId());
+        proto.write(ROOT_TASK_ID, getRootTaskId());
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (child instanceof Task) {
+                child.dumpDebug(proto, TASKS, logLevel);
+            } else if (child instanceof ActivityRecord) {
+                child.dumpDebug(proto, ACTIVITIES, logLevel);
+            } else {
+                throw new IllegalStateException("Unknown child type: " + child);
+            }
+        }
+
+        if (mResumedActivity != null) {
+            mResumedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
+        }
+        if (realActivity != null) {
+            proto.write(REAL_ACTIVITY, realActivity.flattenToShortString());
+        }
+        if (origActivity != null) {
+            proto.write(ORIG_ACTIVITY, origActivity.flattenToShortString());
+        }
+        proto.write(ACTIVITY_TYPE, getActivityType());
+        proto.write(RESIZE_MODE, mResizeMode);
+        proto.write(MIN_WIDTH, mMinWidth);
+        proto.write(MIN_HEIGHT, mMinHeight);
+
         proto.write(FILLS_PARENT, matchParentBounds());
-        getRawBounds().dumpDebug(proto, StackProto.BOUNDS);
+
+        if (!matchParentBounds()) {
+            final Rect bounds = getRequestedOverrideBounds();
+            bounds.dumpDebug(proto, BOUNDS);
+        }
+        getOverrideDisplayedBounds().dumpDebug(proto, DISPLAYED_BOUNDS);
+        mAdjustedBounds.dumpDebug(proto, ADJUSTED_BOUNDS);
+        if (mLastNonFullscreenBounds != null) {
+            mLastNonFullscreenBounds.dumpDebug(proto, LAST_NON_FULLSCREEN_BOUNDS);
+        }
+
         proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(MINIMIZE_AMOUNT, mMinimizeAmount);
         proto.write(ADJUSTED_FOR_IME, mAdjustedForIme);
         proto.write(ADJUST_IME_AMOUNT, mAdjustImeAmount);
         proto.write(ADJUST_DIVIDER_AMOUNT, mAdjustDividerAmount);
-        mAdjustedBounds.dumpDebug(proto, ADJUSTED_BOUNDS);
         proto.write(ANIMATING_BOUNDS, mBoundsAnimating);
+
+        if (mSurfaceControl != null) {
+            proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
+            proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
+        }
+
         proto.end(token);
     }
 }
