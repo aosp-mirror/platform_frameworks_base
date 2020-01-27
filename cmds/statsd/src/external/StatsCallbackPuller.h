@@ -28,12 +28,12 @@ namespace statsd {
 class StatsCallbackPuller : public StatsPuller {
 public:
     explicit StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback,
-                                 int64_t timeoutNs);
+                                 const int64_t coolDownNs, const int64_t timeoutNs,
+                                 const std::vector<int> additiveFields);
 
 private:
     bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
     const sp<IPullAtomCallback> mCallback;
-    const int64_t mTimeoutNs;
 
     FRIEND_TEST(StatsCallbackPullerTest, PullFail);
     FRIEND_TEST(StatsCallbackPullerTest, PullSuccess);

@@ -198,6 +198,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Podatki v napravi bodo izbrisani"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Skrbniške aplikacije ni mogoče uporabljati. Podatki v napravi bodo izbrisani.\n\nČe imate vprašanja, se obrnite na skrbnika organizacije."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Tiskanje je onemogočil pravilnik <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Jaz"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabličnega računalnika"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Možnosti naprave Android TV"</string>
@@ -293,8 +297,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostop do koledarja"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"pošiljanje in ogled sporočil SMS"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Datoteke in predstavnost"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"dostop do fotografij, predstavnosti in datotek v napravi"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snemanje zvoka"</string>
@@ -320,10 +323,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Mogoče je izvajanje dotikov, vlečenja, primikanja in razmikanja prstov ter drugih potez."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Poteze po tipalu prstnih odtisov"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Prepoznava poteze, narejene po tipalu prstnih odtisov naprave."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ustvarjanje posnetka zaslona"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Lahko naredi posnetek zaslona."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"onemogočanje ali spreminjanje vrstice stanja"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Aplikacijam omogoča onemogočenje vrstice stanja ali dodajanje in odstranjevanje ikon sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"postane vrstica stanja"</string>
@@ -1659,7 +1660,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ali želite povečati glasnost nad priporočeno raven?\n\nDolgotrajno poslušanje pri veliki glasnosti lahko poškoduje sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite uporabljati bližnjico funkcij za ljudi s posebnimi potrebami?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo za ljudi s posebnimi potrebami.\n\n Trenutna funkcija za ljudi s posebnimi potrebami:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkcijo lahko spremenite v »Nastavitve &gt; Funkcije za ljudi s posebnimi potrebami«."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Prazno"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Uredi bližnjice"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Prekliči"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Izklopi bližnjico"</string>
@@ -1914,13 +1914,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikacija ni na voljo"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno ni na voljo. To upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Več o tem"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Želite vklopiti delovni profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Vklopili boste svoje delovne aplikacije, obvestila, podatke in druge funkcije delovnega profila"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Vklop"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacija je bila zasnovana za starejšo različico Androida in morda ne bo delovala pravilno. Preverite, ali so na voljo posodobitve, ali pa se obrnite na razvijalca."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Preveri, ali je na voljo posodobitev"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nova sporočila."</string>
@@ -2033,14 +2031,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akumulator se bo morda izpraznil, preden ga običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Vklopilo se je varčevanje z energijo akumulatorja za podaljšanje časa delovanja akumulatorja"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Varčevanje z energijo akumulatorja"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Varčevanje z energijo baterije je izklopljeno"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Baterija v telefonu je dovolj napolnjena. Funkcije niso več omejene."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Baterija v tabličnem računalniku je dovolj napolnjena. Funkcije niso več omejene."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Baterija v napravi je dovolj napolnjena. Funkcije niso več omejene."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Mapa"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplikacija za Android"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Datoteka"</string>
@@ -2059,6 +2053,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Preglednica <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Predstavitev"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Predstavitev <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth bo v načinu za letalo ostal vklopljen"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Nalaganje"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteka</item>
@@ -2078,5 +2073,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Preklop razdeljenega zaslona"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaklenjen zaslon"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Posnetek zaslona"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Vrstica s podnapisi aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je bil dodan v segment OMEJENO"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

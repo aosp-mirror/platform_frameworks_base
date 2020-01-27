@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Таны төхөөрөмж устах болно."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Админ аппыг ашиглах боломжгүй. Таны төхөөрөмжийг одоо устгана.\n\nХэрэв танд асуулт байгаа бол байгууллагынхаа админтай холбогдоно уу."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> хэвлэх үйлдлийг идэвхгүй болгосон."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ТВ-н сонголт"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Хуанли руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файл болон мeдиа"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"Tөхөөрөмж дээрх зураг, медиа болон файлд хандалт хийх"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Товших, шудрах, жижигрүүлэх болон бусад зангааг хийх боломжтой."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Хурууны хээний зангаа"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Төхөөрөмжийн хурууны хээ мэдрэгчид зангасан зангааг танина."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Дэлгэцийн зургийг дарах"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дэлгэцийн зургийг дарах боломжтой."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"статус самбарыг идэвхгүй болгох болон өөрчлөх"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Апп нь статус самбарыг идэвхгүй болгох эсвэл систем дүрсийг нэмэх, хасах боломжтой."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"статусын хэсэг болох"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дууг санал болгосноос чанга болгож өсгөх үү?\n\nУрт хугацаанд чанга хөгжим сонсох нь таны сонсголыг муутгаж болно."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Хүртээмжийн товчлолыг ашиглах уу?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Товчлолыг асаасан үед дуун товчлуурыг 3 секунд дарснаар хүртээмжийн онцлогийг эхлүүлнэ.\n\n Одоогийн хүртээмжийн онцлог:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Онцлогийг Тохиргоо &gt; Хүртээмж хэсэгт өөрчлөх боломжтой."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Хоосон"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Товчлолуудыг засах"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Болих"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Товчлолыг унтраах"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Апп боломжгүй байна"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> одоогоор боломжгүй байна. Үүнийг <xliff:g id="APP_NAME_1">%2$s</xliff:g>-р удирддаг."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дэлгэрэнгүй үзэх"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ажлын профайлыг асаах уу?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Таны ажлын апп, мэдэгдэл, өгөгдөл болон бусад ажлын профайлын онцлогийг асаана"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Асаах"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Энэ аппыг Андройдын хуучин хувилбарт зориулсан бөгөөд буруу ажиллаж болзошгүй. Шинэчлэлтийг шалгаж эсвэл хөгжүүлэгчтэй холбогдоно уу."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шинэчлэлтийг шалгах"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Танд шинэ зурвасууд байна"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батарей хэмнэгч"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батарей хэмнэгчийг унтраалаа"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Утас хангалттай цэнэгтэй боллоо. Онцлогуудыг цаашид хязгаарлахгүй."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Таблет хангалттай цэнэгтэй боллоо. Онцлогуудыг цаашид хязгаарлахгүй."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Төхөөрөмж хангалттай цэнэгтэй боллоо. Онцлогуудыг цаашид хязгаарлахгүй."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Фолдер"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Андройд апп"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>
@@ -1993,6 +1987,8 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g>-н хүснэгт"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Үзүүлэн"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-н үзүүлэн"</string>
+    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
+    <skip />
     <string name="car_loading_profile" msgid="8219978381196748070">"Ачаалж байна"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
@@ -2010,5 +2006,13 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Дэлгэц хуваахыг унтраах/асаах"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Дэлгэцийг түгжих"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Дэлгэцийн зураг дарах"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н гарчгийн талбар."</string>
+    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
+    <skip />
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

@@ -198,6 +198,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Zařízení bude vymazáno"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplikaci pro správu nelze použít. Zařízení teď bude vymazáno.\n\nV případě dotazů vám pomůže administrátor organizace."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabletu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Možnosti zařízení Android TV"</string>
@@ -1656,7 +1660,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšit hlasitost nad doporučenou úroveň?\n\nDlouhodobý poslech hlasitého zvuku může poškodit sluch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použít zkratku přístupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Když je tato zkratka zapnutá, můžete funkci přístupnosti spustit tím, že na tři sekundy podržíte obě tlačítka hlasitosti.\n\n Aktuální funkce přístupnosti:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkci můžete změnit v Nastavení &gt; Přístupnost."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Prázdné"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Upravit zkratky"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Zrušit"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Vypnout zkratku"</string>
@@ -1911,11 +1914,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikace není k dispozici"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikace <xliff:g id="APP_NAME_0">%1$s</xliff:g> momentálně není dostupná. Tato předvolba se spravuje v aplikaci <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Další informace"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Zapnout pracovní profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Vaše pracovní aplikace, oznámení, data a ostatní funkce pracovního účtu budou zapnuty"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnout"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Tato aplikace byla vytvořena pro starší verzi systému Android a nemusí fungovat správně. Zkuste vyhledat aktualizace, případně kontaktujte vývojáře."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Zkontrolovat aktualizace"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové zprávy"</string>
@@ -2050,6 +2053,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Tabulka <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Prezentace"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Prezentace <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth v režimu Letadlo zůstane zapnuté"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Načítání"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> soubory</item>
@@ -2069,5 +2073,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Přepnout rozdělenou obrazovku"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Obrazovka uzamčení"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímek obrazovky"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Popisek aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Balíček <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> byl vložen do sekce OMEZENO"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

@@ -17,7 +17,15 @@
 package com.android.server.am;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.os.Process.BLUETOOTH_UID;
+import static android.os.Process.NETWORK_STACK_UID;
+import static android.os.Process.NFC_UID;
+import static android.os.Process.PHONE_UID;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SE_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
@@ -45,6 +53,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.ServiceStartArgs;
+import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.ComponentName.WithComponentName;
 import android.content.Context;
@@ -56,6 +65,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -83,6 +93,7 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.app.procstats.ServiceState;
@@ -177,6 +188,8 @@ public final class ActiveServices {
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
 
     String mLastAnrDump;
+
+    AppWidgetManagerInternal mAppWidgetManagerInternal;
 
     final Runnable mLastAnrDumpClearer = new Runnable() {
         @Override public void run() {
@@ -371,6 +384,7 @@ public final class ActiveServices {
     void systemServicesReady() {
         AppStateTracker ast = LocalServices.getService(AppStateTracker.class);
         ast.addListener(new ForcedStandbyListener());
+        mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
     }
 
     ServiceRecord getServiceByNameLocked(ComponentName name, int callingUser) {
@@ -643,8 +657,14 @@ public final class ActiveServices {
         if (allowBackgroundActivityStarts) {
             r.whitelistBgActivityStartsOnServiceStart();
         }
-
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
+
+        if (!r.mAllowWhileInUsePermissionInFgs) {
+            r.mAllowWhileInUsePermissionInFgs =
+                    shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingUid,
+                            service, r, allowBackgroundActivityStarts);
+        }
+
         return cmp;
     }
 
@@ -1303,6 +1323,15 @@ public final class ActiveServices {
                         +  String.format("0x%08X", manifestType)
                         + " in service element of manifest file");
                 }
+                if ((foregroundServiceType & FOREGROUND_SERVICE_TYPE_LOCATION) != 0
+                        && !r.mAllowWhileInUsePermissionInFgs) {
+                    // If the foreground service is not started from TOP process, do not allow it to
+                    // have location capability, this prevents BG started FGS to have while-in-use
+                    // location permission.
+                    Slog.w(TAG,
+                            "BG started FGS can not have location capability: service "
+                                    + r.shortInstanceName);
+                }
             }
             boolean alreadyStartedOp = false;
             boolean stopProcStatsOp = false;
@@ -1661,7 +1690,6 @@ public final class ActiveServices {
             return -1;
         }
         ServiceRecord s = res.record;
-
         boolean permissionsReviewRequired = false;
 
         // If permissions need a review before any of the app components can run,
@@ -1808,6 +1836,13 @@ public final class ActiveServices {
                         permissionsReviewRequired) != null) {
                     return 0;
                 }
+            }
+
+            if (!s.mAllowWhileInUsePermissionInFgs) {
+                final int callingUid = Binder.getCallingUid();
+                s.mAllowWhileInUsePermissionInFgs =
+                        shouldAllowWhileInUsePermissionInFgsLocked(callingPackage, callingUid,
+                                service, s, false);
             }
 
             if (s.app != null) {
@@ -2199,6 +2234,7 @@ public final class ActiveServices {
                     }
                     r = new ServiceRecord(mAm, ss, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res);
+                    r.mRecentCallingPackage = callingPackage;
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -3065,6 +3101,7 @@ public final class ActiveServices {
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;
+        r.mAllowWhileInUsePermissionInFgs = false;
 
         // Clear start entries.
         r.clearDeliveredStartsLocked();
@@ -4531,6 +4568,111 @@ public final class ActiveServices {
             } catch (RemoteException e) {
                 pw.println(prefix + "    Got a RemoteException while dumping the service");
             }
+        }
+    }
+
+    /**
+     * Should allow while-in-use permissions in foreground service or not.
+     * while-in-use permissions in FGS started from background might be restricted.
+     * @param callingPackage caller app's package name.
+     * @param callingUid caller app's uid.
+     * @param intent intent to start/bind service.
+     * @param r the service to start.
+     * @return true if allow, false otherwise.
+     */
+    private boolean shouldAllowWhileInUsePermissionInFgsLocked(String callingPackage,
+            int callingUid, Intent intent, ServiceRecord r, boolean allowBackgroundActivityStarts) {
+        // Is the background FGS start restriction turned on?
+        if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
+            return true;
+        }
+        // Is the allow activity background start flag on?
+        if (allowBackgroundActivityStarts) {
+            return true;
+        }
+
+        // Is the service in a whitelist?
+        final boolean hasAllowBackgroundActivityStartsToken = r.app != null
+                ? r.app.mAllowBackgroundActivityStartsTokens.contains(r) : false;
+        if (hasAllowBackgroundActivityStartsToken) {
+            return true;
+        }
+
+        boolean isCallerSystem = false;
+        final int callingAppId = UserHandle.getAppId(callingUid);
+        switch (callingAppId) {
+            case ROOT_UID:
+            case SYSTEM_UID:
+            case NFC_UID:
+                isCallerSystem = true;
+                break;
+            default:
+                isCallerSystem = false;
+                break;
+        }
+
+        if (isCallerSystem) {
+            return true;
+        }
+
+        // Is the calling UID at PROCESS_STATE_TOP or above?
+        final boolean isCallingUidTopApp = appIsTopLocked(callingUid);
+        if (isCallingUidTopApp) {
+            return true;
+        }
+        // Does the calling UID have any visible activity?
+        final boolean isCallingUidVisible = mAm.mAtmInternal.isUidForeground(callingUid);
+        if (isCallingUidVisible) {
+            return true;
+        }
+
+        r.mInfoDenyWhileInUsePermissionInFgs =
+                "Background FGS start while-in-use permission restriction [callingPackage: "
+                + callingPackage
+                + "; callingUid: " + callingUid
+                + "; intent: " + intent
+                + "]";
+        return false;
+    }
+
+    // TODO: remove this toast after feature development is done
+    private void showWhileInUsePermissionInFgsBlockedToastLocked(String callingPackage) {
+        final Resources res = mAm.mContext.getResources();
+        final String toastMsg = res.getString(
+                        R.string.allow_while_in_use_permission_in_fgs, callingPackage);
+        mAm.mUiHandler.post(() -> {
+            Toast.makeText(mAm.mContext, toastMsg, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    // TODO: remove this toast after feature development is done
+    // show a toast message to ask user to file a bugreport so we know how many apps are impacted by
+    // the new background started foreground service while-in-use permission restriction.
+    void showWhileInUseDebugToastLocked(int uid, int op, int mode) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
+            ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
+            if (pr.uid != uid) {
+                continue;
+            }
+            for (int j = pr.services.size() - 1; j >= 0; j--) {
+                ServiceRecord r = pr.services.valueAt(j);
+                if (!r.isForeground) {
+                    continue;
+                }
+                if (!r.mAllowWhileInUsePermissionInFgs
+                        && r.mInfoDenyWhileInUsePermissionInFgs != null) {
+                    Slog.wtf(TAG, r.mInfoDenyWhileInUsePermissionInFgs
+                            + " affected while-use-permission:" + AppOpsManager.opToPublicName(op));
+                    sb.append(r.mRecentCallingPackage + " ");
+                }
+            }
+        }
+
+        final String callingPackageStr = sb.toString();
+        if (mAm.mConstants.mFlagForegroundServiceStartsLoggingEnabled
+                && !callingPackageStr.isEmpty()) {
+            showWhileInUsePermissionInFgsBlockedToastLocked(callingPackageStr);
         }
     }
 }

@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Түзмөгүңүз тазаланат"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Түзмөктү башкаруучу колдонмо жараксыз. Түзмөгүңүз азыр тазаланат.\n\nСуроолоруңуз болсо, ишканаңыздын администраторуна кайрылыңыз."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Басып чыгаруу <xliff:g id="OWNER_APP">%s</xliff:g> тарабынан өчүрүлдү."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Планшет мүмкүнчүлүктөрү"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV параметрлери"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файлдар жана медиа"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"түзмөгүңүздөгү сүрөттөрдү жана башка мультимедиа файлдарын пайдаланууга"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жаздыруу"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Таптап, серпип, чымчып жана башка жаңсоолорду аткара алат."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Манжа изинин жаңсоолору"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Түзмөктөгү манжа изинин сенсорунда жасалган жаңсоолорду жаздырып алат."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Скриншот тартып алуу"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дисплейдин скриншотун тартып алууга болот."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"абал тилкесин өчүрүү же өзгөртүү"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Колдонмого абал тилкесин өчүрүү же тутум сүрөтчөлөрүн кошуу же алып салуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"абал тилкесинин милдетин аткаруу"</string>
@@ -843,9 +844,9 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"Кулпуну ачуу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, планшетиңиздин кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"Графикалык ачкычыңызды <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес чийдиңиз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, Android TV түзмөгүңүздүн кулпусун Google аккаунтуңузга кирип ачышыңыз керек болот.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секунддан кийин кайра аракет кылыңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"Кулпуну ачуу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу туура эмес тартсаңыз, телефонуңуздун кулпусун Google\'га кирип ачууга туура келет.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундадан кийин дагы аракет кылып көрүңүз."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Сиз планшетиңизди бөгөттөн чыгарууга <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> аракеттен кийин, планшет баштапкы абалына келтирилет жана бардык маалыматтар жок кылынат."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"Сиз планшетиңизди бөгөттөн чыгарууга <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> аракеттен кийин, планшет баштапкы абалына келтирилет жана бардык маалыматтар өчүрүлөт."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"Android TV түзмөгүңүздүн кулпусун <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, Android TV түзмөгүңүз демейки жөндөөлөргө кайтарылып, бардык колдонуучу дайындары жоголот."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"Сиз телефонуңузду бөгөттөн чыгарууга <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> аракеттен кийин, телефон баштапкы абалына келтирилет жана бардык маалыматтар жок кылынат."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"Сиз телефонуңузду бөгөттөн чыгарууга <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> аракеттен кийин, телефон баштапкы абалына келтирилет жана бардык маалыматтар өчүрүлөт."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"Сиз планшетти бөгөттөн чыгарууга <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Планшет баштапкы абалына келтирилет."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Android TV түзмөгүңүздүн кулпусун <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Android TV түзмөгүңүз эми демейки жөндөөлөргө кайтарылат."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Сиз телефонду бөгөттөн чыгарууга <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Телефон баштапкы абалына келтирилет."</string>
@@ -1601,9 +1602,9 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Сиз PIN-кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Сиз сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес көрсөттүңүз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Сиз планшетиңизди <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, планшет баштапкы абалына кайтарылат жана бардык берилиштериңиз жок кылынат."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"Сиз планшетиңизди <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, планшет баштапкы абалына кайтарылат жана бардык берилиштериңиз өчүрүлөт."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"Android TV түзмөгүңүздүн кулпусун <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, Android TV түзмөгүңүз демейки жөндөөлөргө кайтарылып, бардык колдонуучу дайындары жоголот."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"Сиз телефонуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, телефон баштапкы абалына кайтарылат жана бардык берилиштериңиз жок кылынат."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"Сиз телефонуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> ийгиликсиз аракеттен кийин, телефон баштапкы абалына кайтарылат жана бардык берилиштериңиз өчүрүлөт."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"Сиз планшетиңизди <xliff:g id="NUMBER">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Планшет баштапкы абалына кайтарылат."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"Android TV түзмөгүңүздүн кулпусун <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Android TV түзмөгүңүз эми демейки жөндөөлөргө кайтарылат."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"Сиз телефонуңузду <xliff:g id="NUMBER">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Телефон баштапкы абалына кайтарылат."</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн, ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең үч секунддай кое бербей басып туруңуз.\n\n Учурдагы атайын мүмкүнчүлүктөрдүн жөндөөлөрү:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nЖөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Бошотуу"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Кыска жолдорду түзөтүү"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Жокко чыгаруу"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Кыска жолду өчүрүү"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Колдонмо жеткиликсиз"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Анын жеткиликтүүлүгү <xliff:g id="APP_NAME_1">%2$s</xliff:g> тарабынан башкарылат."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Кеңири маалымат"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Жумуш профили күйгүзүлсүнбү?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайын-даректериңиз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Күйгүзүү"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Бул колдонмо Android\'дин эски версиясы үчүн иштеп чыгарылган, андыктан туура эмес иштеши мүмкүн. Жаңыртууларды издеп көрүңүз же иштеп чыгуучуга кайрылыңыз."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңыртууну издөө"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сизге жаңы билдирүүлөр келди"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея кубаттоого чейин отуруп калышы мүмкүн"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батареянын отуруп калбашы үчүн Батареяны үнөмдөгүч режими иштетилди"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнөмдөгүч"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнөмдөгүч режими өчүрүлдү"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефон жеткиликтүү кубатталды. Функцияны колдоно берсеңиз болот."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Планшет жеткиликтүү кубатталды. Функцияны колдоно берсеңиз болот."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Түзмөк жеткиликтүү кубатталды. Функцияны колдоно берсеңиз болот."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Папка"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android колдонмосу"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Файл"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> форматындагы электр. жадыбал"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Презентация"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> форматындагы презентация"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth учак режиминде күйүп турат"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Жүктөлүүдө"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Экранды бөлүүнү күйгүзүү же өчүрүү"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Кулпуланган экран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун маалымат тилкеси."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ЧЕКТЕЛГЕН чакага коюлган"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

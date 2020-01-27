@@ -71,21 +71,21 @@ public final class SearchResults implements Iterator<SearchResults.Result> {
         private final SearchResultProto.ResultProto mResultProto;
 
         @Nullable
-        private AppSearch.Document mDocument;
+        private AppSearchDocument mDocument;
 
         private Result(SearchResultProto.ResultProto resultProto) {
             mResultProto = resultProto;
         }
 
         /**
-         * Contains the matching {@link AppSearch.Document}.
+         * Contains the matching {@link AppSearchDocument}.
          * @return Document object which matched the query.
          * @hide
          */
         @NonNull
-        public AppSearch.Document getDocument() {
+        public AppSearchDocument getDocument() {
             if (mDocument == null) {
-                mDocument = new AppSearch.Document(mResultProto.getDocument());
+                mDocument = new AppSearchDocument(mResultProto.getDocument());
             }
             return mDocument;
         }
@@ -106,7 +106,7 @@ public final class SearchResults implements Iterator<SearchResults.Result> {
             if (!mResultProto.hasSnippet()) {
                 return null;
             }
-            AppSearch.Document document = getDocument();
+            AppSearchDocument document = getDocument();
             List<MatchInfo> matchList = new ArrayList<>();
             for (Iterator entryProtoIterator = mResultProto.getSnippet()
                     .getEntriesList().iterator(); entryProtoIterator.hasNext(); ) {

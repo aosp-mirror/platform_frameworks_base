@@ -198,6 +198,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Twoje urządzenie zostanie wyczyszczone"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Nie można użyć aplikacji administratora. Dane z urządzenia zostaną wykasowane.\n\nJeśli masz pytania, skontaktuj się z administratorem organizacji."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukowanie wyłączone przez: <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcje tabletu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcje Androida TV"</string>
@@ -293,8 +297,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Pliki i multimedia"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nagrywanie dźwięku"</string>
@@ -320,10 +323,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Obsługuje kliknięcia, przesunięcia, ściągnięcia palców i inne gesty."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Gesty związane z odciskiem palca"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Może przechwytywać gesty wykonywane na czytniku linii papilarnych w urządzeniu."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Robienie zrzutu ekranu"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Może robić zrzuty ekranu wyświetlacza."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"działanie jako pasek stanu"</string>
@@ -1659,7 +1660,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu do ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Gdy skrót jest włączony, jednoczesne naciśnięcie przez trzy sekundy obu klawiszy sterowania głośnością uruchomi funkcję ułatwień dostępu.\n\nBieżąca funkcja ułatwień dostępu:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nFunkcję możesz zmienić, wybierając Ustawienia &gt; Ułatwienia dostępu."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Puste"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edytuj skróty"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Anuluj"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Wyłącz skrót"</string>
@@ -1914,13 +1914,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikacja niedostępna"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacja <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie jest teraz dostępna. Zarządza tym aplikacja <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Więcej informacji"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil służbowy?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacje do pracy, powiadomienia, dane i inne funkcje profilu do pracy zostaną włączone"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Włącz"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacja jest na starszą wersję Androida i może nie działać prawidłowo. Sprawdź dostępność aktualizacji lub skontaktuj się z programistą."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sprawdź dostępność aktualizacji"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Masz nowe wiadomości"</string>
@@ -2033,14 +2031,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Oszczędzanie baterii"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Oszczędzanie baterii zostało wyłączone"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon jest wystarczająco naładowany. Funkcje nie są już ograniczone."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Tablet jest wystarczająco naładowany. Funkcje nie są już ograniczone."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Urządzenie jest wystarczająco naładowane. Funkcje nie są już ograniczone."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Folder"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Aplikacja na Androida"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Plik"</string>
@@ -2059,6 +2053,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"Arkusz kalkulacyjny <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Prezentacja"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Prezentacja <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth pozostanie włączony w trybie samolotowym"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Ładuję"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> pliki</item>
@@ -2078,5 +2073,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Przełącz podzielony ekran"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekran blokady"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Zrzut ekranu"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Pasek napisów w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Umieszczono pakiet <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> w zasobniku danych RESTRICTED"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

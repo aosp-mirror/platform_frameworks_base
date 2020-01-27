@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV விருப்பத்தேர்வுகள்"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"ஃபைல்களும் மீடியாவும்"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ஒலிப் பதிவு செய்யலாம்"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"தட்டலாம், ஸ்வைப் செய்யலாம், பின்ச் செய்யலாம் மற்றும் பிற சைகைகளைச் செயல்படுத்தலாம்."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"கைரேகை சைகைகள்"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"சாதனத்தின் கைரேகை சென்சார்மேல் செய்யப்படும் சைகைகளைக் கேப்ட்சர் செய்ய முடியும்."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ஸ்கிரீன்ஷாட்டை எடுக்கும்"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"டிஸ்ப்ளேவை ஸ்கிரீன்ஷாட் எடுக்க முடியும்."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"நிலைப் பட்டியில் இருக்கும்"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"பரிந்துரைத்த அளவை விட ஒலியை அதிகரிக்கவா?\n\nநீண்ட நேரத்திற்கு அதிகளவில் ஒலி கேட்பது கேட்கும் திறனைப் பாதிக்கலாம்."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"அணுகல்தன்மை ஷார்ட்கட்டைப் பயன்படுத்தவா?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ஷார்ட்கட் இயக்கத்தில் இருந்தால், இரண்டு ஒலியளவு பொத்தான்களையும் 3 வினாடிகள் அழுத்தி, அணுகல்தன்மை அம்சத்தை இயக்கலாம்.\n\n தற்போதைய அணுகல்தன்மை அம்சம்:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n அமைப்புகள் &gt; அணுகல்தன்மை என்பதற்குச் சென்று, அம்சத்தை மாற்றலாம்."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"காலியானது"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ஷார்ட்கட்களை மாற்று"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ரத்துசெய்"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ஆப்ஸை உபயோகிக்க இயலாது"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"இப்போது <xliff:g id="APP_NAME_0">%1$s</xliff:g> ஆப்ஸை உபயோகிக்க இயலாது. இதை <xliff:g id="APP_NAME_1">%2$s</xliff:g> நிர்வகிக்கிறது."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"மேலும் அறிக"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"பணிச் சுயவிவரத்தை ஆன் செய்யவா?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"பணி ஆப்ஸ், அறிவிப்புகள், தரவு மற்றும் பிற பணிச் சுயவிவர அம்சங்கள் ஆன் செய்யப்படும்"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"இயக்கு"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"இந்த ஆப்ஸ் Android இன் பழைய பதிப்புக்காக உருவாக்கப்பட்டதால், சரியாக வேலை செய்யாமல் போகலாம். புதுப்பிப்புகள் ஏதேனும் உள்ளதா எனப் பார்க்கவும் அல்லது டெவெலப்பரைத் தொடர்புகொள்ளவும்."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"புதிய செய்திகள் வந்துள்ளன"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பான்"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"டேப்லெட்டில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"சாதனத்தில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"கோப்புறை"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android ஆப்ஸ்"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"ஃபைல்"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> விரிதாள்"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"விளக்கக்காட்சி"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> விளக்கக்காட்சி"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"விமானப் பயன்முறையில் இருக்கும்போதும் புளூடூத் ஆன் செய்யப்பட்டே இருக்கும்"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ஏற்றுகிறது"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ஃபைல்கள்</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"திரைப் பிரிப்பை நிலைமாற்று"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"பூட்டுத் திரை"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ஸ்கிரீன்ஷாட்"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸின் தலைப்புப் பட்டி."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> என்பதை வரம்பிடப்பட்ட பக்கெட்திற்குள் சேர்க்கப்பட்டது"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

@@ -31,6 +31,7 @@ import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -278,6 +279,7 @@ public class SettingsBackupTest {
                     Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,
                     Settings.Global.WIFI_ON_WHEN_PROXY_DISCONNECTED,
                     Settings.Global.FSTRIM_MANDATORY_INTERVAL,
+                    Settings.Global.FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED,
                     Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                     Settings.Global.GLOBAL_HTTP_PROXY_HOST,
                     Settings.Global.GLOBAL_HTTP_PROXY_PAC,
@@ -748,6 +750,7 @@ public class SettingsBackupTest {
     }
 
     @Test
+    @Suppress //("b/148236308")
     public void secureSettingsBackedUpOrBlacklisted() {
         HashSet<String> keys = new HashSet<String>();
         Collections.addAll(keys, SecureSettings.SETTINGS_TO_BACKUP);

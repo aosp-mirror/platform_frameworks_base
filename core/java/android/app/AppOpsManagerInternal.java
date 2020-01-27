@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.function.HexFunction;
@@ -82,4 +83,12 @@ public abstract class AppOpsManagerInternal {
      * access to app ops for their user.
      */
     public abstract void setDeviceAndProfileOwners(SparseIntArray owners);
+
+    /**
+     * Update if the list of AppWidget becomes visible/invisible.
+     * @param uidPackageNames uid to packageName map.
+     * @param visible true for visible, false for invisible.
+     */
+    public abstract void updateAppWidgetVisibility(SparseArray<String> uidPackageNames,
+            boolean visible);
 }

@@ -377,4 +377,10 @@ public abstract class ActivityManagerInternal {
      * uid, false otherwise
      */
     public abstract boolean isUidCurrentlyInstrumented(int uid);
+
+    /**
+     * Show a debug toast, asking user to file a bugreport.
+     */
+    // TODO: remove this toast after feature development is done
+    public abstract void showWhileInUseDebugToast(int uid, int op, int mode);
 }

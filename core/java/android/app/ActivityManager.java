@@ -602,6 +602,22 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
             | PROCESS_CAPABILITY_FOREGROUND_CAMERA
             | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+    /**
+     * All explicit capabilities. These are capabilities that need to be specified from manifest
+     * file.
+     * @hide
+     */
+    @TestApi
+    public static final int PROCESS_CAPABILITY_ALL_EXPLICIT =
+            PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+
+    /**
+     * All implicit capabilities. There are capabilities that process automatically have.
+     * @hide
+     */
+    @TestApi
+    public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = PROCESS_CAPABILITY_FOREGROUND_CAMERA
+            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 
     // NOTE: If PROCESS_STATEs are added, then new fields must be added
     // to frameworks/base/core/proto/android/app/enums.proto and the following method must

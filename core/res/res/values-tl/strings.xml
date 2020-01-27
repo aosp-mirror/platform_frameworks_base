@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Hindi magamit ang admin app. Mabubura na ang iyong device.\n\nKung mayroon kang mga tanong, makipag-ugnayan sa admin ng iyong organisasyon."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Na-disable ng <xliff:g id="OWNER_APP">%s</xliff:g> ang pag-print."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Ako"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Mga pagpipilian sa tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Mga opsyon sa Android TV"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"i-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"magpadala at tumingin ng mga mensaheng SMS"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Mga file at media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"i-access ang mga larawan, media at file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"mag-record ng audio"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"May kakayahang mag-tap, mag-swipe, mag-pinch at magsagawa ng iba pang mga galaw."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Mga galaw gamit ang fingerprint"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Makukunan ang mga galaw na ginawa sa sensor para sa fingerprint ng device."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Kumuha ng screenshot"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puwedeng kumuha ng screenshot ng display."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"i-disable o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pinapayagan ang app na i-disable ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"maging status bar"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Pagiging Accessible?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume sa loob ng 3 segundo.\n\n Kasalukuyang feature ng pagiging naa-access:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Maaari mong baguhin ang feature sa Mga Setting &gt; Pagiging Accessible."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Bakantehin"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"I-edit ang mga shortcut"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Kanselahin"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"I-off ang Shortcut"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Hindi available ang app"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Hindi available ang <xliff:g id="APP_NAME_0">%1$s</xliff:g> sa ngayon. Pinamamahalaan ito ng <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Matuto pa"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"I-on ang profile sa trabaho?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"I-on"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ang app na ito ay ginawa para sa mas lumang bersyon ng Android at maaaring hindi gumana nang maayos. Subukang tingnan kung may mga update, o makipag-ugnayan sa developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tingnan kung may update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mayroon kang mga bagong mensahe"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pangtipid sa Baterya para patagalin ang buhay ng baterya"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pangtipid sa Baterya"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Na-off ang Pangtipid sa Baterya"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"May sapat na charge ang telepono. Hindi na pinaghihigpitan ang mga feature."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"May sapat na charge ang tablet. Hindi na pinaghihigpitan ang mga feature."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"May sapat na charge ang device. Hindi na pinaghihigpitan ang mga feature."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Folder"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android application"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"File"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> na spreadsheet"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Presentation"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> na presentation"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Mananatiling naka-on ang bluetooth habang nasa airplane mode"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Naglo-load"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"I-toggle ang Split Screen"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lock Screen"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Caption bar ng <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Inilagay ang <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> sa PINAGHIHIGPITANG bucket"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

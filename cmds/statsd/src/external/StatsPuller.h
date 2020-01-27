@@ -32,7 +32,10 @@ namespace statsd {
 
 class StatsPuller : public virtual RefBase {
 public:
-    explicit StatsPuller(const int tagId);
+    explicit StatsPuller(const int tagId,
+                         const int64_t coolDownNs = NS_PER_SEC,
+                         const int64_t pullTimeoutNs = StatsdStats::kPullMaxDelayNs,
+                         const std::vector<int> additiveFields = std::vector<int>());
 
     virtual ~StatsPuller() {}
 
@@ -60,6 +63,12 @@ public:
 protected:
     const int mTagId;
 
+    // Max time allowed to pull this atom.
+    // We cannot reliably kill a pull thread. So we don't terminate the puller.
+    // The data is discarded if the pull takes longer than this and mHasGoodData
+    // marked as false.
+    const int64_t mPullTimeoutNs = StatsdStats::kPullMaxDelayNs;
+
 private:
     mutable std::mutex mLock;
 
@@ -67,6 +76,17 @@ private:
     virtual bool PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) = 0;
 
     bool mHasGoodData = false;
+
+    // Minimum time before this puller does actual pull again.
+    // Pullers can cause significant impact to system health and battery.
+    // So that we don't pull too frequently.
+    // If a pull request comes before cooldown, a cached version from previous pull
+    // will be returned.
+    const int64_t mCoolDownNs = 1 * NS_PER_SEC;
+
+    // The field numbers of the fields that need to be summed when merging
+    // isolated uid with host uid.
+    const std::vector<int> mAdditiveFields;
 
     int64_t mLastPullTimeNs;
 

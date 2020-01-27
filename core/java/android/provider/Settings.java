@@ -11101,6 +11101,15 @@ public final class Settings {
                 = "activity_starts_logging_enabled";
 
         /**
+         * Feature flag to enable or disable the foreground service starts logging feature.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final String FOREGROUND_SERVICE_STARTS_LOGGING_ENABLED =
+                "foreground_service_starts_logging_enabled";
+
+        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */

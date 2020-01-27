@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tækið verður hreinsað"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ekki er hægt að nota stjórnunarforritið. Tækinu verður eytt.\n\nEf spurningar vakna skaltu hafa samband við kerfisstjóra fyrirtækisins."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> lokaði á prentun."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Ég"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Valkostir spjaldtölvu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Valkostir Android TV"</string>
@@ -1612,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Hækka hljóðstyrk umfram ráðlagðan styrk?\n\nEf hlustað er á háum hljóðstyrk í langan tíma kann það að skaða heyrnina."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Viltu nota aðgengisflýtileið?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Þegar flýtileiðin er virk er kveikt á aðgengiseiginleikanum með því að halda báðum hljóðstyrkshnöppunum inni í þrjár sekúndur.\n\n Virkur aðgengiseiginleiki:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Hægt er að skipta um eiginleika í Stillingar &gt; Aðgengi."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Autt"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Breyta flýtileiðum"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Hætta við"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Slökkva á flýtileið"</string>
@@ -1847,11 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Forritið er ekki í boði"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> er ekki í boði eins og er. Þessu er stjórnað með <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Nánari upplýsingar"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Kveikja á vinnusniði?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Kveikt verður á vinnuforritum, tilkynningum, gögnum og öðrum eiginleikum vinnusniðsins"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Kveikja"</string>
-    <string name="app_blocked_title" msgid="7353262160455028160">"Forrit er ekki tiltækt"</string>
-    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Þetta forrit var hannað fyrir eldri útgáfu af Android og ekki er víst að það virki eðlilega. Athugaðu hvort uppfærslur séu í boði eða hafðu samband við þróunaraðilann."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Leita að uppfærslu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Þú ert með ný skilaboð"</string>
@@ -1984,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g>-töflureiknir"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Kynning"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-kynning"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Áfram verður kveikt á Bluetooth í flugstillingu"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Hleður"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
@@ -2001,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Breyta skjáskiptingu"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lásskjár"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skjámynd"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Skjátextastika <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> var sett í flokkinn TAKMARKAÐ"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>

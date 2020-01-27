@@ -5780,7 +5780,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uidRec == null || uidRec.idle) {
                 return false;
             }
-            return uidRec.getCurProcState() <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            return uidRec.getCurProcState()
+                    <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
         }
     }
 
@@ -19102,6 +19103,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             return false;
+        }
+
+        // TODO: remove this toast after feature development is done
+        @Override
+        public void showWhileInUseDebugToast(int uid, int op, int mode) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.mServices.showWhileInUseDebugToastLocked(uid, op, mode);
+            }
         }
     }
 

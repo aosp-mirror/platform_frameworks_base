@@ -194,6 +194,10 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jou toestel sal uitgevee word"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Die administrasieprogram kan nie gebruik word nie. Jou toestel sal nou uitgevee word.\n\nKontak jou organisasie se administrateur as jy vrae het."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Druk is gedeaktiveer deur <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
+    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Ek"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-opsies"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-opsies"</string>
@@ -287,8 +291,7 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"by jou kalender in te gaan"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS-boodskappe te stuur en te bekyk"</string>
-    <!-- no translation found for permgrouplab_storage (1938416135375282333) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1938416135375282333">"Lêers en media"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"toegang te verkry tot foto\'s, media en lêers op jou toestel"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"oudio op te neem"</string>
@@ -314,10 +317,8 @@
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"Kan tik, swiep, knyp en ander gebare uitvoer."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Vingerafdrukgebare"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebare vasvang wat op die toestel se vingerafdruksensor uitgevoer word."</string>
-    <!-- no translation found for capability_title_canTakeScreenshot (3895812893130071930) -->
-    <skip />
-    <!-- no translation found for capability_desc_canTakeScreenshot (7762297374317934052) -->
-    <skip />
+    <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Neem skermkiekie"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan \'n skermkiekie neem."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktiveer of verander statusbalk"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"wees die statusbalk"</string>
@@ -1615,7 +1616,6 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Verhoog volume bo aanbevole vlak?\n\nOm lang tydperke teen hoë volume te luister, kan jou gehoor beskadig."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gebruik toeganklikheidkortpad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Wanneer die kortpad aan is, sal \'n toeganklikheidkenmerk begin word as albei volumeknoppies 3 sekondes lank gedruk word.\n\n Bestaande toeganklikheidkenmerk:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Jy kan die kenmerk in Instellings &gt; Toeganklikheid verander."</string>
-    <string name="accessibility_shortcut_menu_button" msgid="3019329474891857428">"Maak leeg"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Wysig kortpaaie"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Kanselleer"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Skakel kortpad af"</string>
@@ -1850,13 +1850,11 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Program is nie beskikbaar nie"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> is nie nou onmiddellik beskikbaar nie. Dit word bestuur deur <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Kom meer te wete"</string>
+    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
+    <skip />
     <string name="work_mode_off_title" msgid="5503291976647976560">"Skakel werkprofiel aan?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Jou werkprogramme, kennisgewings, data en ander werkprofielkenmerke sal aangeskakel word"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Skakel aan"</string>
-    <!-- no translation found for app_blocked_title (7353262160455028160) -->
-    <skip />
-    <!-- no translation found for app_blocked_message (542972921087873023) -->
-    <skip />
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Hierdie program is vir \'n ouer weergawe van Android gebou en sal dalk nie behoorlik werk nie. Probeer kyk vir opdaterings, of kontak die ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kyk vir opdatering"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jy het nuwe boodskappe"</string>
@@ -1967,14 +1965,10 @@
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery kan afloop voordat dit normaalweg gelaai word"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterybespaarder is geaktiveer om batterylewe te verleng"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Batterybespaarder"</string>
-    <!-- no translation found for battery_saver_off_notification_title (7637255960468032515) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (5544457317418624367) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (4426317048139996888) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_summary (1031562417867646649) -->
-    <skip />
+    <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Batterybespaarder is afgeskakel"</string>
+    <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Foon se battery het genoeg krag. Kenmerke is nie meer beperk nie."</string>
+    <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Tablet se battery het genoeg krag. Kenmerke is nie meer beperk nie."</string>
+    <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Toestel se battery het genoeg krag. Kenmerke is nie meer beperk nie."</string>
     <string name="mime_type_folder" msgid="2203536499348787650">"Vouer"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android-program"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Lêer"</string>
@@ -1993,6 +1987,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g>-sigblad"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Aanbieding"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-aanbieding"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth sal tydens vliegtuigmodus aan bly"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Laai tans"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> lêers</item>
@@ -2010,5 +2005,12 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Wissel verdeelde skerm"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sluitskerm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skermkiekie"</string>
+    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> se onderskrifbalk."</string>
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> is in die BEPERK-groep geplaas"</string>
+    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
+    <skip />
 </resources>
