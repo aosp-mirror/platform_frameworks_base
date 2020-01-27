@@ -7604,7 +7604,6 @@ package android.net.wifi {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void connect(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK}) public void disableEphemeralNetwork(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void enableVerboseLogging(int);
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void factoryReset();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void forget(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.util.Pair<android.net.wifi.WifiConfiguration,java.util.Map<java.lang.Integer,java.util.List<android.net.wifi.ScanResult>>>> getAllMatchingWifiConfigs(@NonNull java.util.List<android.net.wifi.ScanResult>);
@@ -7616,7 +7615,6 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_WIFI_STATE}) public java.util.Map<android.net.wifi.WifiNetworkSuggestion,java.util.List<android.net.wifi.ScanResult>> getMatchingScanResults(@NonNull java.util.List<android.net.wifi.WifiNetworkSuggestion>, @Nullable java.util.List<android.net.wifi.ScanResult>);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_WIFI_STATE, android.Manifest.permission.READ_WIFI_CREDENTIAL}) public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.SoftApConfiguration getSoftApConfiguration();
-    method public int getVerboseLoggingLevel();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public void getWifiActivityEnergyInfoAsync(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiActivityEnergyInfoListener);
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.WifiConfiguration getWifiApConfiguration();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public int getWifiApState();
@@ -7626,6 +7624,7 @@ package android.net.wifi {
     method @Deprecated public boolean isDeviceToDeviceRttSupported();
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean isDualModeSupported();
     method public boolean isPortableHotspotSupported();
+    method public boolean isVerboseLoggingEnabled();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void registerNetworkRequestMatchCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.NetworkRequestMatchCallback);
@@ -7642,6 +7641,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean setSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setVerboseLoggingEnabled(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE) public boolean setWifiConnectedNetworkScorer(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.WifiConnectedNetworkScorer);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void startEasyConnectAsConfiguratorInitiator(@NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.EasyConnectStatusCallback);

@@ -58,7 +58,7 @@ public class DownloadManagerTestRunner extends InstrumentationTestRunner {
         }
         // enable verbose wifi logging
         ((WifiManager)getContext().getSystemService(Context.WIFI_SERVICE))
-            .enableVerboseLogging(1);
+                .setVerboseLoggingEnabled(true);
         super.onCreate(icicle);
     }
 
