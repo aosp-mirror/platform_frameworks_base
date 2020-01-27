@@ -44,35 +44,43 @@ public @interface SystemApi {
     enum Client {
         /**
          * Specifies that the intended clients of a SystemApi are privileged apps.
-         * This is the default value for {@link #client}. This implies
-         * MODULE_APPS and MODULE_LIBRARIES as well, which means that APIs will also
-         * be available to module apps and jars.
+         * This is the default value for {@link #client}.
+         * TODO Update the javadoc according to the final spec
          */
         PRIVILEGED_APPS,
 
         /**
-         * Specifies that the intended clients of a SystemApi are modules implemented
-         * as apps, like the NetworkStack app. This implies MODULE_LIBRARIES as well,
-         * which means that APIs will also be available to module jars.
+         * DO NOT USE. Use PRIVILEGED_APPS instead.
+         * (This would provide no further protection over PRIVILEGED_APPS; do not rely on it)
+         * @deprecated Use #PRIVILEGED_APPS instead
          */
+        @Deprecated
         MODULE_APPS,
 
         /**
          * Specifies that the intended clients of a SystemApi are modules implemented
          * as libraries, like the conscrypt.jar in the conscrypt APEX.
+         * TODO Update the javadoc according to the final spec
          */
-        MODULE_LIBRARIES
+        MODULE_LIBRARIES,
+
+        /**
+         * Specifies that the system API is available only in the system server process.
+         * Use this to expose APIs from code loaded by the system server process <em>but</em>
+         * not in <pre>BOOTCLASSPATH</pre>.
+         * TODO(b/148177503) Update "services-stubs" and actually use it.
+         */
+        SYSTEM_SERVER
     }
 
+    /** @deprecated do not use */
+    @Deprecated
     enum Process {
-        /**
-         * Specifies that the SystemAPI is available in every Java processes.
-         * This is the default value for {@link #process}.
-         */
+        /** @deprecated do not use */
         ALL,
 
         /**
-         * Specifies that the SystemAPI is available only in the system server process.
+         * @deprecated use Client#SYSTEM_SERVER instead
          */
         SYSTEM_SERVER
     }
@@ -83,7 +91,8 @@ public @interface SystemApi {
     Client client() default android.annotation.SystemApi.Client.PRIVILEGED_APPS;
 
     /**
-     * The process(es) that this SystemAPI is available
+     * @deprecated use Client#SYSTEM_SERVER instead for system_server APIs
      */
+    @Deprecated
     Process process() default android.annotation.SystemApi.Process.ALL;
 }
