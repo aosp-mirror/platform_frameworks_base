@@ -1551,8 +1551,7 @@ public final class ProcessList {
         }
     }
 
-    private int[] computeGidsForProcess(int mountExternal, int uid, int[] permGids,
-            String packageName) {
+    private int[] computeGidsForProcess(int mountExternal, int uid, int[] permGids) {
         ArrayList<Integer> gidList = new ArrayList<>(permGids.length + 5);
 
         final int sharedAppGid = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
@@ -1581,10 +1580,6 @@ public final class ProcessList {
             // For the FUSE daemon: To grant access to the lower filesystem.
             // EmulatedVolumes: /data/media and /mnt/expand/<volume>/data/media
             // PublicVolumes: /mnt/media_rw/<volume>
-            gidList.add(Process.MEDIA_RW_GID);
-        }
-        if (packageName.equals("com.android.externalstorage")) {
-            // Allows access to 'unreliable' (USB OTG) volumes via SAF
             gidList.add(Process.MEDIA_RW_GID);
         }
 
@@ -1669,7 +1664,7 @@ public final class ProcessList {
                     }
                 }
 
-                gids = computeGidsForProcess(mountExternal, uid, permGids, app.info.packageName);
+                gids = computeGidsForProcess(mountExternal, uid, permGids);
             }
             app.mountMode = mountExternal;
             checkSlow(startTime, "startProcess: building args");
