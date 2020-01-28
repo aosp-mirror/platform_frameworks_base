@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.parsing.AndroidPackage;
 import android.util.SparseArray;
@@ -42,6 +43,7 @@ public class PackageSettingBuilder {
     private AndroidPackage mPkg;
     private int mAppId;
     private InstallSource mInstallSource;
+    private PackageParser.SigningDetails mSigningDetails;
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
         this.mPkg = pkg;
@@ -143,12 +145,21 @@ public class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setSigningDetails(
+            PackageParser.SigningDetails signingDetails) {
+        mSigningDetails = signingDetails;
+        return this;
+    }
+
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
                 new File(mCodePath), new File(mResourcePath),
                 mLegacyNativeLibraryPathString, mPrimaryCpuAbiString, mSecondaryCpuAbiString,
                 mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mSharedUserId,
                 mUsesStaticLibraries, mUsesStaticLibrariesVersions);
+        packageSetting.signatures = mSigningDetails != null
+                ? new PackageSignatures(mSigningDetails)
+                : new PackageSignatures();
         packageSetting.pkg = mPkg;
         packageSetting.appId = mAppId;
         packageSetting.volumeUuid = this.mVolumeUuid;
