@@ -154,10 +154,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final boolean LOGD = true;
     private static final String REMOVE_MARKER_EXTENSION = ".removed";
 
-    private static final int MSG_COMMIT = 1;
-    private static final int MSG_ON_PACKAGE_INSTALLED = 2;
-    private static final int MSG_SEAL = 3;
-    private static final int MSG_STREAM_AND_VALIDATE = 4;
+    private static final int MSG_STREAM_VALIDATE_AND_COMMIT = 1;
+    private static final int MSG_INSTALL = 2;
+    private static final int MSG_ON_PACKAGE_INSTALLED = 3;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -415,14 +414,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SEAL:
-                    handleSeal((IntentSender) msg.obj);
+                case MSG_STREAM_VALIDATE_AND_COMMIT:
+                    handleStreamValidateAndCommit();
                     break;
-                case MSG_STREAM_AND_VALIDATE:
-                    handleStreamAndValidate();
-                    break;
-                case MSG_COMMIT:
-                    handleCommit();
+                case MSG_INSTALL:
+                    handleInstall();
                     break;
                 case MSG_ON_PACKAGE_INSTALLED:
                     final SomeArgs args = (SomeArgs) msg.obj;
@@ -1011,24 +1007,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             + mParentSessionId +  " and may not be committed directly.");
         }
 
-        assertCanBeCommitted(forTransfer);
-
-        if (isMultiPackage()) {
-            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
-                final int childSessionId = mChildSessionIds.keyAt(i);
-                mSessionProvider.getSession(childSessionId).assertCanBeCommitted(forTransfer);
-            }
-        }
-
-        if (mIncrementalFileStorages != null) {
-            mIncrementalFileStorages.finishSetUp();
-        }
-
-        mHandler.obtainMessage(MSG_SEAL, statusReceiver).sendToTarget();
-    }
-
-    private void handleSeal(@NonNull IntentSender statusReceiver) {
-        if (!markAsSealed(statusReceiver)) {
+        if (!markAsSealed(statusReceiver, forTransfer)) {
             return;
         }
         if (isMultiPackage()) {
@@ -1042,7 +1021,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // seal all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
                 if (!mSessionProvider.getSession(childSessionId)
-                        .markAsSealed(childIntentSender)) {
+                        .markAsSealed(childIntentSender, forTransfer)) {
                     sealFailed = true;
                 }
             }
@@ -1051,20 +1030,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        dispatchStreamAndValidate();
+        if (mIncrementalFileStorages != null) {
+            mIncrementalFileStorages.finishSetUp();
+        }
+
+        dispatchStreamValidateAndCommit();
     }
 
-    private void dispatchStreamAndValidate() {
-        mHandler.obtainMessage(MSG_STREAM_AND_VALIDATE).sendToTarget();
+    private void dispatchStreamValidateAndCommit() {
+        mHandler.obtainMessage(MSG_STREAM_VALIDATE_AND_COMMIT).sendToTarget();
     }
 
-    private void handleStreamAndValidate() {
+    private void handleStreamValidateAndCommit() {
         // TODO(b/136132412): update with new APIs
         if (mIncrementalFileStorages != null) {
             mIncrementalFileStorages.startLoading();
         }
 
-        boolean commitFailed = !markAsCommitted();
+        boolean success = streamValidateAndCommit();
 
         if (isMultiPackage()) {
             for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
@@ -1072,17 +1055,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // commit all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
                 if (!mSessionProvider.getSession(childSessionId)
-                        .markAsCommitted()) {
-                    commitFailed = true;
+                        .streamValidateAndCommit()) {
+                    success = false;
                 }
             }
         }
 
-        if (commitFailed) {
+        if (!success) {
             return;
         }
 
-        mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+        mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
     }
 
     private final class FileSystemConnector extends
@@ -1201,9 +1184,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * Sanity checks to make sure it's ok to commit the session.
+     * If this was not already called, the session will be sealed.
+     *
+     * This method may be called multiple times to update the status receiver validate caller
+     * permissions.
      */
-    private void assertCanBeCommitted(boolean forTransfer) {
+    private boolean markAsSealed(@NonNull IntentSender statusReceiver, boolean forTransfer) {
+        Objects.requireNonNull(statusReceiver);
+
+        List<PackageInstallerSession> childSessions = getChildSessions();
+
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotDestroyedLocked("commit");
@@ -1226,21 +1216,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new IllegalArgumentException("Session has been transferred");
                 }
             }
-        }
-    }
 
-    /**
-     * If this was not already called, the session will be sealed.
-     *
-     * This method may be called multiple times to update the status receiver validate caller
-     * permissions.
-     */
-    private boolean markAsSealed(@NonNull IntentSender statusReceiver) {
-        Objects.requireNonNull(statusReceiver);
-
-        List<PackageInstallerSession> childSessions = getChildSessions();
-
-        synchronized (mLock) {
             mRemoteStatusReceiver = statusReceiver;
 
             // After updating the observer, we can skip re-sealing.
@@ -1263,10 +1239,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return true;
     }
 
-    private boolean markAsCommitted() {
+    private boolean streamValidateAndCommit() {
         synchronized (mLock) {
-            Objects.requireNonNull(mRemoteStatusReceiver);
-
             if (mCommitted) {
                 return true;
             }
@@ -1519,7 +1493,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionSealedBlocking(this);
     }
 
-    private void handleCommit() {
+    private void handleInstall() {
         if (isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked()) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
@@ -1548,7 +1522,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         try {
             synchronized (mLock) {
-                commitNonStagedLocked(childSessions);
+                installNonStagedLocked(childSessions);
             }
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
@@ -1559,25 +1533,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void commitNonStagedLocked(List<PackageInstallerSession> childSessions)
+    private void installNonStagedLocked(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
-        final PackageManagerService.ActiveInstallSession committingSession =
+        final PackageManagerService.ActiveInstallSession installingSession =
                 makeSessionActiveLocked();
-        if (committingSession == null) {
+        if (installingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            List<PackageManagerService.ActiveInstallSession> activeChildSessions =
+            List<PackageManagerService.ActiveInstallSession> installingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.ActiveInstallSession activeSession =
+                    final PackageManagerService.ActiveInstallSession installingChildSession =
                             session.makeSessionActiveLocked();
-                    if (activeSession != null) {
-                        activeChildSessions.add(activeSession);
+                    if (installingChildSession != null) {
+                        installingChildSessions.add(installingChildSession);
                     }
                 } catch (PackageManagerException e) {
                     failure = e;
@@ -1591,9 +1565,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
-            mPm.installStage(activeChildSessions);
+            mPm.installStage(installingChildSessions);
         } else {
-            mPm.installStage(committingSession);
+            mPm.installStage(installingSession);
         }
     }
 
@@ -2306,7 +2280,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Mark and kick off another install pass
             synchronized (mLock) {
                 mPermissionsManuallyAccepted = true;
-                mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+                mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
             }
         } else {
             destroyInternal();
@@ -2536,9 +2510,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             mDataLoaderFinished = true;
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
-                                        mParentSessionId).dispatchStreamAndValidate();
+                                        mParentSessionId).dispatchStreamValidateAndCommit();
                             } else {
-                                dispatchStreamAndValidate();
+                                dispatchStreamValidateAndCommit();
                             }
                             dataLoader.destroy();
                             break;
