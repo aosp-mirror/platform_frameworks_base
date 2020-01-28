@@ -666,9 +666,21 @@ public final class SmsApplication {
     }
 
     /**
+     * Broadcast action:
+     * Same as {@link Intent#ACTION_DEFAULT_SMS_PACKAGE_CHANGED} but it's implicit (e.g. sent to
+     * all apps) and requires
+     * {@link #PERMISSION_MONITOR_DEFAULT_SMS_PACKAGE} to receive.
+     */
+    public static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
+            "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
+
+    public static final String PERMISSION_MONITOR_DEFAULT_SMS_PACKAGE =
+            "android.permission.MONITOR_DEFAULT_SMS_PACKAGE";
+
+    /**
      * Sends broadcasts on sms app change:
      * {@link Intent#ACTION_DEFAULT_SMS_PACKAGE_CHANGED}
-     * {@link Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL}
+     * {@link #ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL}
      */
     public static void broadcastSmsAppChange(Context context,
             UserHandle userHandle, @Nullable String oldPackage, @Nullable String newPackage) {
@@ -718,11 +730,11 @@ public final class SmsApplication {
         }
 
         // Send an implicit broadcast for the system server.
-        // (or anyone with MONITOR_DEFAULT_SMS_PACKAGE, really.)
+        // (or anyone with PERMISSION_MONITOR_DEFAULT_SMS_PACKAGE, really.)
         final Intent intent =
-                new Intent(Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
+                new Intent(ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
         context.sendBroadcastAsUser(intent, userHandle,
-                permission.MONITOR_DEFAULT_SMS_PACKAGE);
+                PERMISSION_MONITOR_DEFAULT_SMS_PACKAGE);
     }
 
     /**
