@@ -4730,7 +4730,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // exists so it get's layered above the starting window.
             if (imeTarget != null && !(imeTarget.mActivityRecord != null
                     && imeTarget.mActivityRecord.hasStartingWindow()) && (
-                    !(imeTarget.inSplitScreenWindowingMode()
+                    !(imeTarget.inMultiWindowMode()
                             || imeTarget.mToken.isAppTransitioning()) && (
                             imeTarget.getSurfaceControl() != null))) {
                 mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
