@@ -21,7 +21,8 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
 import android.util.Slog;
-import android.util.StatsLog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Abstract class that adds logging functionality to the ClientMonitor classes.
@@ -86,7 +87,7 @@ public abstract class LoggableMonitor {
                     + ", AcquiredInfo: " + acquiredInfo
                     + ", VendorCode: " + vendorCode);
         }
-        StatsLog.write(StatsLog.BIOMETRIC_ACQUIRED,
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ACQUIRED,
                 statsModality(),
                 targetUserId,
                 isCryptoOperation(),
@@ -114,7 +115,7 @@ public abstract class LoggableMonitor {
         } else {
             Slog.v(TAG, "Error latency: " + latency);
         }
-        StatsLog.write(StatsLog.BIOMETRIC_ERROR_OCCURRED,
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                 statsModality(),
                 targetUserId,
                 isCryptoOperation(),
@@ -128,15 +129,15 @@ public abstract class LoggableMonitor {
 
     protected final void logOnAuthenticated(Context context, boolean authenticated,
             boolean requireConfirmation, int targetUserId, boolean isBiometricPrompt) {
-        int authState = StatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
+        int authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__UNKNOWN;
         if (!authenticated) {
-            authState = StatsLog.BIOMETRIC_AUTHENTICATED__STATE__REJECTED;
+            authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__REJECTED;
         } else {
             // Authenticated
             if (isBiometricPrompt && requireConfirmation) {
-                authState = StatsLog.BIOMETRIC_AUTHENTICATED__STATE__PENDING_CONFIRMATION;
+                authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__PENDING_CONFIRMATION;
             } else {
-                authState = StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED;
+                authState = FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED;
             }
         }
 
@@ -157,7 +158,7 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Authentication latency: " + latency);
         }
 
-        StatsLog.write(StatsLog.BIOMETRIC_AUTHENTICATED,
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                 statsModality(),
                 targetUserId,
                 isCryptoOperation(),
@@ -179,7 +180,7 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Enroll latency: " + latency);
         }
 
-        StatsLog.write(StatsLog.BIOMETRIC_ENROLLED,
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
                 statsModality(),
                 targetUserId,
                 latency,
