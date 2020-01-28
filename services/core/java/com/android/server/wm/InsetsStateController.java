@@ -88,6 +88,20 @@ class InsetsStateController {
             state.removeSource(ITYPE_IME);
             state.removeSource(ITYPE_STATUS_BAR);
         }
+
+        // IME needs different frames for certain cases (e.g. navigation bar in gesture nav).
+        if (type == ITYPE_IME) {
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                InsetsSourceProvider otherProvider = mProviders.valueAt(i);
+                if (otherProvider.overridesImeFrame()) {
+                    InsetsSource override =
+                            new InsetsSource(state.getSource(otherProvider.getSource().getType()));
+                    override.setFrame(otherProvider.getImeOverrideFrame());
+                    state.addSource(override);
+                }
+            }
+        }
+
         return state;
     }
 

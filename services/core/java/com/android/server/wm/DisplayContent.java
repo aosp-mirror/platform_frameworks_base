@@ -1245,6 +1245,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayRotation;
     }
 
+    void setInsetProvider(@InternalInsetsType int type, WindowState win,
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider){
+        setInsetProvider(type, win, frameProvider, null /* imeFrameProvider */);
+    }
+
     /**
      * Marks a window as providing insets for the rest of the windows in the system.
      *
@@ -1252,10 +1257,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param win The window.
      * @param frameProvider Function to compute the frame, or {@code null} if the just the frame of
      *                      the window should be taken.
+     * @param imeFrameProvider Function to compute the frame when dispatching insets to the IME, or
+     *                         {@code null} if the normal frame should be taken.
      */
     void setInsetProvider(@InternalInsetsType int type, WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
-        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider);
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider,
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> imeFrameProvider) {
+        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider,
+                imeFrameProvider);
     }
 
     InsetsStateController getInsetsStateController() {
@@ -3268,7 +3277,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         computeImeTarget(true /* updateImeTarget */);
         mInsetsStateController.getSourceProvider(ITYPE_IME).setWindow(win,
-                null /* frameProvider */);
+                null /* frameProvider */, null /* imeFrameProvider */);
     }
 
     /**
