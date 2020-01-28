@@ -1724,9 +1724,11 @@ public final class SystemServer {
             mSystemServiceManager.startService(SensorNotificationService.class);
             t.traceEnd();
 
-            t.traceBegin("StartContextHubSystemService");
-            mSystemServiceManager.startService(ContextHubSystemService.class);
-            t.traceEnd();
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CONTEXTHUB)) {
+                t.traceBegin("StartContextHubSystemService");
+                mSystemServiceManager.startService(ContextHubSystemService.class);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartDiskStatsService");
             try {
