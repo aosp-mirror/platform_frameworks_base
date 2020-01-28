@@ -112,7 +112,6 @@ import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.OVERLAY_WINDOWS;
-import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
@@ -2779,7 +2778,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             stack.dumpDebugInnerStackOnly(proto, STACKS, logLevel);
         }
         mDividerControllerLocked.dumpDebug(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
-        mPinnedStackControllerLocked.dumpDebug(proto, PINNED_STACK_CONTROLLER);
         for (int i = mAboveAppWindowsContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mAboveAppWindowsContainers.getChildAt(i);
             windowToken.dumpDebug(proto, ABOVE_APP_WINDOWS, logLevel);
