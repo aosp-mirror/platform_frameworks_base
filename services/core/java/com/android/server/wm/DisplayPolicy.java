@@ -1014,8 +1014,19 @@ public class DisplayPolicy {
                 mNavigationBarController.setWindow(win);
                 mNavigationBarController.setOnBarVisibilityChangedListener(
                         mNavBarVisibilityListener, true);
-                mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR,
-                        win, null /* frameProvider */);
+                mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, win,
+                        (displayFrames, windowState, inOutFrame) -> {
+
+                            // In Gesture Nav, navigation bar frame is larger than frame to
+                            // calculate inset.
+                            if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                                sTmpRect.set(displayFrames.mUnrestricted);
+                                sTmpRect.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
+                                inOutFrame.top = sTmpRect.bottom
+                                        - getNavigationBarHeight(displayFrames.mRotation,
+                                                mDisplayContent.getConfiguration().uiMode);
+                            }
+                        });
                 mDisplayContent.setInsetProvider(ITYPE_BOTTOM_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
                             inOutFrame.top -= mBottomGestureAdditionalInset;
