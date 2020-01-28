@@ -3415,7 +3415,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 186;
+            private static final int SETTINGS_VERSION = 187;
 
             private final int mUserId;
 
@@ -4692,6 +4692,33 @@ public class SettingsProvider extends ContentProvider {
                     secureSettings.deleteSettingLocked(
                             Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
                     currentVersion = 186;
+                }
+
+                if (currentVersion == 186) {
+                    // Remove unused wifi settings
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_rtt_background_exec_gap_ms");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "network_recommendation_request_timeout_ms");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_suspend_optimizations_enabled");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_is_unusable_event_metrics_enabled");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_data_stall_min_tx_bad");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_data_stall_min_tx_success_without_rx");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_link_speed_metrics_enabled");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_pno_frequency_culling_enabled");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_pno_recency_sorting_enabled");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_link_probing_enabled");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                            "wifi_saved_state");
+                    currentVersion = 187;
                 }
 
                 // vXXX: Add new settings above this point.

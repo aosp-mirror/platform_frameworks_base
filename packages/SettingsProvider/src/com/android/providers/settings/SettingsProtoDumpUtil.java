@@ -1563,9 +1563,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_WAKEUP_ENABLED,
                 GlobalSettingsProto.Wifi.WAKEUP_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.WIFI_SAVED_STATE,
-                GlobalSettingsProto.Wifi.SAVED_STATE);
-        dumpSetting(s, p,
                 Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                 GlobalSettingsProto.Wifi.SUPPLICANT_SCAN_INTERVAL_MS);
         dumpSetting(s, p,
