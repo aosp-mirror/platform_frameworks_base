@@ -260,7 +260,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     "Integrity check result: "
                             + result.getEffect()
                             + " due to "
-                            + result.getRule());
+                            + result.getMatchedRules());
 
             StatsLog.write(
                     StatsLog.INTEGRITY_CHECK_RESULT_REPORTED,

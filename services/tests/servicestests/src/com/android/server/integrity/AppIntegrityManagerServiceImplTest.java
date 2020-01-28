@@ -328,10 +328,11 @@ public class AppIntegrityManagerServiceImplTest {
         when(mRuleEvaluationEngine.evaluate(any(), any()))
                 .thenReturn(
                         IntegrityCheckResult.deny(
-                                new Rule(
-                                        new AtomicFormula.BooleanAtomicFormula(
-                                                AtomicFormula.PRE_INSTALLED, false),
-                                        Rule.DENY)));
+                                Arrays.asList(
+                                        new Rule(
+                                                new AtomicFormula.BooleanAtomicFormula(
+                                                        AtomicFormula.PRE_INSTALLED, false),
+                                                Rule.DENY))));
         Intent intent = makeVerificationIntent();
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
