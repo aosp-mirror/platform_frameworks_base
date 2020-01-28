@@ -35,7 +35,6 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
 import android.content.pm.parsing.PackageImpl;
 import android.content.pm.parsing.ParsingPackage;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.util.ArrayMap;
@@ -82,6 +81,17 @@ public class AppsFilterTest {
         if (queries != null) {
             for (Intent intent : queries) {
                 pkg.addQueriesIntent(intent);
+            }
+        }
+        return pkg;
+    }
+
+    private static ParsingPackage pkgQueriesProvider(String packageName,
+            String... queriesAuthorities) {
+        ParsingPackage pkg = pkg(packageName);
+        if (queriesAuthorities != null) {
+            for (String authority : queriesAuthorities) {
+                pkg.addQueriesProvider(authority);
             }
         }
         return pkg;
@@ -172,8 +182,7 @@ public class AppsFilterTest {
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent().setData(Uri.parse("content://com.some.authority"))),
+                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
                 DUMMY_CALLING_UID);
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -188,8 +197,7 @@ public class AppsFilterTest {
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent().setData(Uri.parse("content://com.some.other.authority"))),
+                pkgQueriesProvider("com.some.other.package", "com.some.other.authority"),
                 DUMMY_CALLING_UID);
 
         assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -205,8 +213,7 @@ public class AppsFilterTest {
                 pkgWithProvider("com.some.package", "com.some.authority;com.some.other.authority"),
                 DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent().setData(Uri.parse("content://com.some.authority"))),
+                pkgQueriesProvider("com.some.other.package", "com.some.authority"),
                 DUMMY_CALLING_UID);
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -266,7 +273,7 @@ public class AppsFilterTest {
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                        pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_UID);
+                pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_UID);
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package"), DUMMY_CALLING_UID);
 
