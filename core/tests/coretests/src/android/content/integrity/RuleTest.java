@@ -16,10 +16,9 @@
 
 package android.content.integrity;
 
-import static android.content.integrity.TestUtils.assertExpectException;
+import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.testng.Assert.expectThrows;
 
 import android.os.Parcel;
 
@@ -50,16 +49,16 @@ public class RuleTest {
     public void testValidRule() {
         Rule validRule = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
 
-        assertEquals(PACKAGE_NAME_ATOMIC_FORMULA, validRule.getFormula());
-        assertEquals(DENY_EFFECT, validRule.getEffect());
+        assertThat(validRule.getFormula()).isEqualTo(PACKAGE_NAME_ATOMIC_FORMULA);
+        assertThat(validRule.getEffect()).isEqualTo(DENY_EFFECT);
     }
 
     @Test
     public void testInvalidRule_invalidFormula() {
-        assertExpectException(
-                NullPointerException.class,
-                /* expectedExceptionMessageRegex */ null,
-                () -> new Rule(null, DENY_EFFECT));
+        Exception e =
+                expectThrows(
+                        NullPointerException.class,
+                        () -> new Rule(null, DENY_EFFECT));
     }
 
     @Test
@@ -70,27 +69,23 @@ public class RuleTest {
                         Arrays.asList(PACKAGE_NAME_ATOMIC_FORMULA, APP_CERTIFICATE_ATOMIC_FORMULA));
         Rule rule = new Rule(compoundFormula, Rule.DENY);
 
-        assertEquals(
-                String.format(
-                        "Rule: (PACKAGE_NAME EQ %s) AND (APP_CERTIFICATE EQ %s), DENY",
-                        PACKAGE_NAME, APP_CERTIFICATE),
-                rule.toString());
+        assertThat(rule.toString())
+                .isEqualTo(
+                        String.format(
+                                "Rule: (PACKAGE_NAME EQ %s) AND (APP_CERTIFICATE EQ %s), DENY",
+                                PACKAGE_NAME, APP_CERTIFICATE));
     }
 
     @Test
     public void testEquals_trueCase() {
-        Rule rule1 = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
-        Rule rule2 = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
-
-        assertEquals(rule1, rule2);
+        assertThat(new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT))
+                .isEqualTo(new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT));
     }
 
     @Test
     public void testEquals_falseCase() {
-        Rule rule1 = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
-        Rule rule2 = new Rule(APP_CERTIFICATE_ATOMIC_FORMULA, DENY_EFFECT);
-
-        assertNotEquals(rule1, rule2);
+        assertThat(new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT))
+                .isNotEqualTo(new Rule(APP_CERTIFICATE_ATOMIC_FORMULA, DENY_EFFECT));
     }
 
     @Test
@@ -108,16 +103,16 @@ public class RuleTest {
         Parcel p = Parcel.obtain();
         rule.writeToParcel(p, 0);
         p.setDataPosition(0);
-        Rule newRule = Rule.CREATOR.createFromParcel(p);
 
-        assertEquals(newRule, rule);
+        assertThat(Rule.CREATOR.createFromParcel(p)).isEqualTo(rule);
     }
 
     @Test
     public void testInvalidRule_invalidEffect() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */ "Unknown effect: -1",
-                () -> new Rule(PACKAGE_NAME_ATOMIC_FORMULA, /* effect= */ -1));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () -> new Rule(PACKAGE_NAME_ATOMIC_FORMULA, /* effect= */ -1));
+        assertThat(e.getMessage()).isEqualTo("Unknown effect: -1");
     }
 }
