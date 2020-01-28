@@ -7,6 +7,20 @@
           "include-filter": "com.android.server.om."
         }
       ]
+    },
+    {
+      "name": "OverlayDeviceTests"
+    },
+    {
+      "name": "OverlayHostTests"
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.OverlayHostTest"
+        }
+      ]
     }
   ]
 }
