@@ -34,9 +34,9 @@ import android.service.usb.UsbIsHeadsetProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.usb.descriptors.UsbDescriptor;
@@ -418,10 +418,11 @@ public class UsbHostManager {
                         parser.getRawDescriptors());
 
                 // Stats collection
-                StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, newDevice.getVendorId(),
-                        newDevice.getProductId(), parser.hasAudioInterface(),
-                        parser.hasHIDInterface(), parser.hasStorageInterface(),
-                        StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_CONNECTED, 0);
+                FrameworkStatsLog.write(FrameworkStatsLog.USB_DEVICE_ATTACHED,
+                        newDevice.getVendorId(), newDevice.getProductId(),
+                        parser.hasAudioInterface(), parser.hasHIDInterface(),
+                        parser.hasStorageInterface(),
+                        FrameworkStatsLog.USB_DEVICE_ATTACHED__STATE__STATE_CONNECTED, 0);
             }
         }
 
@@ -454,10 +455,10 @@ public class UsbHostManager {
                     UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress,
                             current.mDescriptors);
                         // Stats collection
-                    StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, device.getVendorId(),
-                            device.getProductId(), parser.hasAudioInterface(),
+                    FrameworkStatsLog.write(FrameworkStatsLog.USB_DEVICE_ATTACHED,
+                            device.getVendorId(), device.getProductId(), parser.hasAudioInterface(),
                             parser.hasHIDInterface(),  parser.hasStorageInterface(),
-                            StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_DISCONNECTED,
+                            FrameworkStatsLog.USB_DEVICE_ATTACHED__STATE__STATE_DISCONNECTED,
                             System.currentTimeMillis() - current.mTimestamp);
                 }
             } else {
