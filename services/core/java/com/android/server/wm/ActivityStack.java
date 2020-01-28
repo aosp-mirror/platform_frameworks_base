@@ -660,6 +660,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
         super.onConfigurationChanged(newParentConfig);
 
+        updateTaskOrganizerState();
+
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getPendingTransaction());
@@ -762,6 +764,22 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
+    void updateTaskOrganizerState() {
+        if (!isRootTask()) {
+            return;
+        }
+
+        final int windowingMode = getWindowingMode();
+        /*
+         * Different windowing modes may be managed by different task organizers. If
+         * getTaskOrganizer returns null, we still call setTaskOrganizer to
+         * make sure we clear it.
+         */
+        final ITaskOrganizer org =
+            mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
+        setTaskOrganizer(org);
+    }
+
     @Override
     public void setWindowingMode(int windowingMode) {
         // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
@@ -774,15 +792,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
                 false /* creating */);
-        windowingMode = getWindowingMode();
-        /*
-         * Different windowing modes may be managed by different task organizers. If
-         * getTaskOrganizer returns null, we still call transferToTaskOrganizer to
-         * make sure we clear it.
-         */
-        final ITaskOrganizer org =
-            mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
-        transferToTaskOrganizer(org);
     }
 
     /**
@@ -1581,24 +1590,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     boolean isTopActivityVisible() {
         final ActivityRecord topActivity = getTopNonFinishingActivity();
         return topActivity != null && topActivity.mVisibleRequested;
-    }
-
-    private static void transferSingleTaskToOrganizer(Task tr, ITaskOrganizer organizer) {
-        tr.setTaskOrganizer(organizer);
-    }
-
-    /**
-     * Transfer control of the leashes and IWindowContainers to the given ITaskOrganizer.
-     * This will (or shortly there-after) invoke the taskAppeared callbacks.
-     * If the tasks had a previous TaskOrganizer, setTaskOrganizer will take care of
-     * emitting the taskVanished callbacks.
-     */
-    void transferToTaskOrganizer(ITaskOrganizer organizer) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                ActivityStack::transferSingleTaskToOrganizer,
-                PooledLambda.__(Task.class), organizer);
-        forAllTasks(c, true /* traverseTopToBottom */, this);
-        c.recycle();
     }
 
     /**
