@@ -131,6 +131,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -968,6 +969,12 @@ public class DisplayPolicy {
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
+                // Check for permission if the caller is not the recents component.
+                if (!mService.mAtmInternal.isCallerRecents(Binder.getCallingUid())) {
+                    mContext.enforceCallingOrSelfPermission(
+                            android.Manifest.permission.STATUS_BAR_SERVICE, "DisplayPolicy");
+                }
+                break;
             case TYPE_STATUS_BAR_PANEL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_VOICE_INTERACTION_STARTING:
