@@ -52,12 +52,6 @@ public interface InsetsAnimationControlCallbacks {
     void notifyFinished(InsetsAnimationControlImpl controller, boolean shown);
 
     /**
-     * Get the description of the insets state.
-     * @return {@link InsetsState} for adjusting corresponding {@link InsetsSource}.
-     */
-    InsetsState getState();
-
-    /**
      * Apply the new params to the surface.
      * @param params The {@link android.view.SyncRtSurfaceTransactionApplier.SurfaceParams} to
      *               apply.
