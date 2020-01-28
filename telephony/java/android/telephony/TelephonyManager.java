@@ -5695,7 +5695,7 @@ public class TelephonyManager {
     @NonNull
     public CdmaEriInformation getCdmaEriInformation() {
         return new CdmaEriInformation(
-               getCdmaEriIconMode(getSubId()), getCdmaEriIconIndex(getSubId()));
+               getCdmaEriIconIndex(getSubId()), getCdmaEriIconMode(getSubId()));
     }
 
     /**
