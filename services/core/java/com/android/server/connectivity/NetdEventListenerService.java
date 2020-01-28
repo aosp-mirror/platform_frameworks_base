@@ -310,6 +310,11 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         return this.VERSION;
     }
 
+    @Override
+    public String getInterfaceHash() {
+        return this.HASH;
+    }
+
     private void addWakeupEvent(WakeupEvent event) {
         String iface = event.iface;
         mWakeupEvents.append(event);
