@@ -127,7 +127,7 @@ public class DozeTriggers implements DozeMachine.Part {
             mDozeLog.tracePulseDropped("pulseOnNotificationsDisabled");
             return;
         }
-        requestPulse(DozeEvent.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */,
+        requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */,
                 onPulseSuppressedListener);
         mDozeLog.traceNotificationPulse();
     }
@@ -163,12 +163,12 @@ public class DozeTriggers implements DozeMachine.Part {
 
     @VisibleForTesting
     void onSensor(int pulseReason, float screenX, float screenY, float[] rawValues) {
-        boolean isDoubleTap = pulseReason == DozeEvent.REASON_SENSOR_DOUBLE_TAP;
-        boolean isTap = pulseReason == DozeEvent.REASON_SENSOR_TAP;
-        boolean isPickup = pulseReason == DozeEvent.REASON_SENSOR_PICKUP;
-        boolean isLongPress = pulseReason == DozeEvent.PULSE_REASON_SENSOR_LONG_PRESS;
-        boolean isWakeDisplay = pulseReason == DozeEvent.REASON_SENSOR_WAKE_UP;
-        boolean isWakeLockScreen = pulseReason == DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
+        boolean isDoubleTap = pulseReason == DozeLog.REASON_SENSOR_DOUBLE_TAP;
+        boolean isTap = pulseReason == DozeLog.REASON_SENSOR_TAP;
+        boolean isPickup = pulseReason == DozeLog.REASON_SENSOR_PICKUP;
+        boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
+        boolean isWakeDisplay = pulseReason == DozeLog.REASON_SENSOR_WAKE_UP;
+        boolean isWakeLockScreen = pulseReason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
         boolean wakeEvent = rawValues != null && rawValues.length > 0 && rawValues[0] != 0;
 
         if (isWakeDisplay) {
@@ -281,9 +281,9 @@ public class DozeTriggers implements DozeMachine.Part {
                     // Logs AOD open due to sensor wake up.
                     mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
                             .setType(MetricsEvent.TYPE_OPEN)
-                            .setSubtype(DozeEvent.REASON_SENSOR_WAKE_UP));
+                            .setSubtype(DozeLog.REASON_SENSOR_WAKE_UP));
                 }
-            }, true /* alreadyPerformedProxCheck */, DozeEvent.REASON_SENSOR_WAKE_UP);
+            }, true /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
             boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
             boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
@@ -292,7 +292,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 // Logs AOD close due to sensor wake up.
                 mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
                         .setType(MetricsEvent.TYPE_CLOSE)
-                        .setSubtype(DozeEvent.REASON_SENSOR_WAKE_UP));
+                        .setSubtype(DozeLog.REASON_SENSOR_WAKE_UP));
             }
         }
     }
@@ -361,7 +361,7 @@ public class DozeTriggers implements DozeMachine.Part {
         // When already pulsing we're allowed to show the wallpaper directly without
         // requesting a new pulse.
         if (mMachine.getState() == DozeMachine.State.DOZE_PULSING
-                && reason == DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+                && reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
             mMachine.requestState(DozeMachine.State.DOZE_PULSING_BRIGHT);
             return;
         }
@@ -426,7 +426,7 @@ public class DozeTriggers implements DozeMachine.Part {
         public void onReceive(Context context, Intent intent) {
             if (PULSE_ACTION.equals(intent.getAction())) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "Received pulse intent");
-                requestPulse(DozeEvent.PULSE_REASON_INTENT, false, /* performedProxCheck */
+                requestPulse(DozeLog.PULSE_REASON_INTENT, false, /* performedProxCheck */
                         null /* onPulseSupressedListener */);
             }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {

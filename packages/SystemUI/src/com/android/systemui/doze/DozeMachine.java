@@ -169,7 +169,7 @@ public class DozeMachine {
     @MainThread
     public void requestState(State requestedState) {
         Preconditions.checkArgument(requestedState != State.DOZE_REQUEST_PULSE);
-        requestState(requestedState, DozeEvent.PULSE_REASON_NONE);
+        requestState(requestedState, DozeLog.PULSE_REASON_NONE);
     }
 
     @MainThread
@@ -271,7 +271,7 @@ public class DozeMachine {
         if (newState == State.DOZE_REQUEST_PULSE) {
             mPulseReason = pulseReason;
         } else if (oldState == State.DOZE_PULSE_DONE) {
-            mPulseReason = DozeEvent.PULSE_REASON_NONE;
+            mPulseReason = DozeLog.PULSE_REASON_NONE;
         }
     }
 
@@ -368,7 +368,7 @@ public class DozeMachine {
                     nextState = State.DOZE;
                 }
 
-                transitionTo(nextState, DozeEvent.PULSE_REASON_NONE);
+                transitionTo(nextState, DozeLog.PULSE_REASON_NONE);
                 break;
             default:
                 break;
