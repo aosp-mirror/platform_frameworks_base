@@ -58,7 +58,6 @@ import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -598,6 +597,34 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), anyInt(), captor.capture());
         assertFalse(captor.getValue().canBubble());
+    }
+
+    @Test
+    public void testBubble_noChannelChange() throws Exception {
+        mNotificationInfo.bindNotification(
+                mShortcutManager,
+                mLauncherApps,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mVisualStabilityManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mBubbleEntry,
+                null,
+                null,
+                null,
+                true);
+
+        assertFalse(mBubbleEntry.isBubble());
+        assertTrue(mNotificationChannel.canBubble());
+
+        // Promote it
+        mNotificationInfo.findViewById(R.id.bubble).performClick();
+        mTestableLooper.processAllMessages();
+
+        verify(mBubbleController, times(1)).onUserCreatedBubbleFromNotification(mBubbleEntry);
+        verify(mMockINotificationManager, never()).updateNotificationChannelForPackage(
+                anyString(), anyInt(), any());
     }
 
     @Test
