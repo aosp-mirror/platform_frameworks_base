@@ -860,13 +860,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                 pw.increaseIndent();
 
-                boolean enabled = isEnabled();
-                pw.println("enabled=" + enabled);
-                if (!enabled) {
-                    pw.println("allowed=" + mProvider.getState().allowed);
-                }
-
-                pw.println("properties=" + mProvider.getState().properties);
+                pw.println("enabled=" + isEnabled());
             }
 
             mProvider.dump(fd, pw, args);
