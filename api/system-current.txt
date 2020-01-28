@@ -8488,7 +8488,7 @@ package android.telephony {
   }
 
   public class CellBroadcastIntents {
-    method public static void sendOrderedBroadcastForBackgroundReceivers(@NonNull android.content.Context, @Nullable android.os.UserHandle, @NonNull android.content.Intent, @Nullable String, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
+    method public static void sendSmsCbReceivedBroadcast(@NonNull android.content.Context, @Nullable android.os.UserHandle, @NonNull android.telephony.SmsCbMessage, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, int);
   }
 
   public abstract class CellBroadcastService extends android.app.Service {
