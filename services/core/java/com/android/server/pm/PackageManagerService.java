@@ -209,6 +209,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -979,6 +980,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private File mCacheDir;
 
     private Future<?> mPrepareAppDataFuture;
+
+    private final ConditionVariable mBlockDeleteOnUserRemoveForTest = new ConditionVariable(true);
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -23686,8 +23689,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.i(TAG, "  Removing package " + packageName);
                 }
                 //end run
-                mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
-                        userHandle, 0));
+                mHandler.post(() -> {
+                    if (!mBlockDeleteOnUserRemoveForTest.block(30000 /* 30 seconds*/)) {
+                        mBlockDeleteOnUserRemoveForTest.open();
+                    }
+                    deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
+                            userHandle, 0);
+                });
             }
         }
     }
@@ -25048,6 +25056,16 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
             }
+        }
+
+        @Override
+        public void notifyingOnNextUserRemovalForTest() {
+            mBlockDeleteOnUserRemoveForTest.close();
+        }
+
+        @Override
+        public void userRemovedForTest() {
+            mBlockDeleteOnUserRemoveForTest.open();
         }
     }
 
