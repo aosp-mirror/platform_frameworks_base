@@ -63,6 +63,10 @@ public class HighPriorityProvider {
         }
 
         final NotificationEntry notifEntry = entry.getRepresentativeEntry();
+        if (notifEntry == null) {
+            return false;
+        }
+
         return notifEntry.getRanking().getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
                 || hasHighPriorityCharacteristics(notifEntry)
                 || hasHighPriorityChild(entry);
