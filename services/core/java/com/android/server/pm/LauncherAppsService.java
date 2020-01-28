@@ -34,6 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageInstallerCallback;
+import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
@@ -69,7 +70,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -119,6 +119,7 @@ public class LauncherAppsService extends SystemService {
 
         private final Context mContext;
         private final UserManager mUm;
+        private final IPackageManager mIPM;
         private final UserManagerInternal mUserManagerInternal;
         private final UsageStatsManagerInternal mUsageStatsManagerInternal;
         private final ActivityManagerInternal mActivityManagerInternal;
@@ -136,6 +137,7 @@ public class LauncherAppsService extends SystemService {
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
+            mIPM = AppGlobals.getPackageManager();
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             mUserManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(UserManagerInternal.class));
@@ -781,6 +783,17 @@ public class LauncherAppsService extends SystemService {
             final int callingUid = injectBinderCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
+                final int state = mIPM.getComponentEnabledSetting(component, user.getIdentifier());
+                switch (state) {
+                    case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                        break; // Need to check the manifest's enabled state.
+                    case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                        return true;
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                    case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED:
+                        return false;
+                }
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
                 ActivityInfo info = pmInt.getActivityInfo(component,
