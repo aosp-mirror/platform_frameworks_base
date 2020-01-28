@@ -292,7 +292,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -325,6 +324,7 @@ import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HexFunction;
@@ -3069,10 +3069,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "updateBatteryStats: comp=" + activity + "res=" + resumed);
         }
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
                 uid, activity.getPackageName(), activity.getShortClassName(),
-                resumed ? StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
-                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
+                resumed ? FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
+                        FrameworkStatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
         synchronized (stats) {
             if (resumed) {
                 stats.noteActivityResumedLocked(uid);
@@ -3796,7 +3796,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // On the device which doesn't have Cgroup, log LmkStateChanged which is used as a signal
         // for pulling memory stats of other running processes when this process died.
         if (!hasMemcg()) {
-            StatsLog.write(StatsLog.APP_DIED, SystemClock.elapsedRealtime());
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_DIED, SystemClock.elapsedRealtime());
         }
     }
 
@@ -4442,7 +4442,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 proc.pkgList.mPkgList);
                         for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                                     proc.info.uid,
                                     holder.state.getName(),
                                     holder.state.getPackage(),
@@ -4500,7 +4500,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 ProcessStats.ADD_PSS_EXTERNAL, endTime-startTime, proc.pkgList.mPkgList);
                         for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                                     proc.info.uid,
                                     holder.state.getName(),
                                     holder.state.getPackage(),
@@ -5223,12 +5223,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
 
-        StatsLog.write(
-                StatsLog.PROCESS_START_TIME,
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.PROCESS_START_TIME,
                 app.info.uid,
                 app.pid,
                 app.info.packageName,
-                StatsLog.PROCESS_START_TIME__TYPE__COLD,
+                FrameworkStatsLog.PROCESS_START_TIME__TYPE__COLD,
                 app.startTime,
                 (int) (bindApplicationTimeMillis - app.startTime),
                 (int) (SystemClock.elapsedRealtime() - app.startTime),
@@ -8843,8 +8843,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         UserHandle.getUserId(workSourceUid), SystemClock.elapsedRealtime());
             }
 
-            StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, workSource, tag, sourcePkg,
-                    standbyBucket);
+            FrameworkStatsLog.write(FrameworkStatsLog.WAKEUP_ALARM_OCCURRED, workSource, tag,
+                    sourcePkg, standbyBucket);
             if (DEBUG_POWER) {
                 Slog.w(TAG, "noteWakeupAlarm[ sourcePkg=" + sourcePkg + ", sourceUid=" + sourceUid
                         + ", workSource=" + workSource + ", tag=" + tag + ", standbyBucket="
@@ -8855,8 +8855,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 standbyBucket = mUsageStatsService.getAppStandbyBucket(sourcePkg,
                         UserHandle.getUserId(sourceUid), SystemClock.elapsedRealtime());
             }
-            StatsLog.write_non_chained(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid, null, tag,
-                    sourcePkg, standbyBucket);
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.WAKEUP_ALARM_OCCURRED, sourceUid,
+                    null, tag, sourcePkg, standbyBucket);
             if (DEBUG_POWER) {
                 Slog.w(TAG, "noteWakeupAlarm[ sourcePkg=" + sourcePkg + ", sourceUid=" + sourceUid
                         + ", workSource=" + workSource + ", tag=" + tag + ", standbyBucket="
@@ -9590,20 +9590,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 crashInfo.throwFileName,
                 crashInfo.throwLineNumber);
 
-        StatsLog.write(StatsLog.APP_CRASH_OCCURRED,
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_CRASH_OCCURRED,
                 Binder.getCallingUid(),
                 eventType,
                 processName,
                 Binder.getCallingPid(),
                 (r != null && r.info != null) ? r.info.packageName : "",
                 (r != null && r.info != null) ? (r.info.isInstantApp()
-                        ? StatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__TRUE
-                        : StatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__FALSE)
-                        : StatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__UNAVAILABLE,
+                        ? FrameworkStatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__TRUE
+                        : FrameworkStatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__FALSE)
+                        : FrameworkStatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__UNAVAILABLE,
                 r != null ? (r.isInterestingToUserLocked()
-                        ? StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__FOREGROUND
-                        : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__BACKGROUND)
-                        : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN,
+                        ? FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__FOREGROUND
+                        : FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__BACKGROUND)
+                        : FrameworkStatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN,
                 processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                         : (r != null) ? r.getProcessClassEnum()
                                       : ServerProtoEnums.ERROR_SOURCE_UNKNOWN
@@ -9788,7 +9788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmWtf(UserHandle.getUserId(callingUid), callingPid,
                 processName, r == null ? -1 : r.info.flags, tag, crashInfo.exceptionMessage);
 
-        StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
+        FrameworkStatsLog.write(FrameworkStatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid, (r != null) ? r.getProcessClassEnum() : 0);
 
         addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
@@ -13027,7 +13027,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 reportType, endTime-startTime, r.pkgList.mPkgList);
                         for (int ipkg = r.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = r.pkgList.valueAt(ipkg);
-                            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                                     r.info.uid,
                                     holder.state.getName(),
                                     holder.state.getPackage(),
@@ -13631,7 +13631,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             reportType, endTime-startTime, r.pkgList.mPkgList);
                     for (int ipkg = r.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                         ProcessStats.ProcessStateHolder holder = r.pkgList.valueAt(ipkg);
-                        StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                                 r.info.uid,
                                 holder.state.getName(),
                                 holder.state.getPackage(),
@@ -14198,7 +14198,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             catPw.flush();
         }
         dropBuilder.append(catSw.toString());
-        StatsLog.write(StatsLog.LOW_MEM_REPORTED);
+        FrameworkStatsLog.write(FrameworkStatsLog.LOW_MEM_REPORTED);
         addErrorToDropBox("lowmem", null, "system_server", null,
                 null, null, tag.toString(), dropBuilder.toString(), null, null);
         //Slog.i(TAG, "Sent to dropbox:");
@@ -16838,7 +16838,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pss, uss, rss, true, statType, pssDuration, proc.pkgList.mPkgList);
         for (int ipkg = proc.pkgList.mPkgList.size() - 1; ipkg >= 0; ipkg--) {
             ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+            FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_MEMORY_STAT_REPORTED,
                     proc.info.uid,
                     holder.state.getName(),
                     holder.state.getPackage(),
@@ -17198,7 +17198,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
                         for (int ipkg = app.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                             ProcessStats.ProcessStateHolder holder = app.pkgList.valueAt(ipkg);
-                            StatsLog.write(StatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
+                            FrameworkStatsLog.write(FrameworkStatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
                                     app.info.uid,
                                     holder.state.getName(),
                                     holder.state.getPackage(),
@@ -17485,7 +17485,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (memFactor != mLastMemoryLevel) {
             EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
-            StatsLog.write(StatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
+            FrameworkStatsLog.write(FrameworkStatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mProcessList.getLruSizeLocked();

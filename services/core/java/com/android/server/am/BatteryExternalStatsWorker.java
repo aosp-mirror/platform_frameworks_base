@@ -33,11 +33,11 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.IntArray;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.util.EmptyArray;
@@ -374,8 +374,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 // Clean up any UIDs if necessary.
                 synchronized (mStats) {
                     for (int uid : uidsToRemove) {
-                        StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, -1, uid,
-                                StatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
+                        FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, -1, uid,
+                                FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
                         mStats.removeIsolatedUidLocked(uid);
                     }
                     mStats.clearPendingRemovedUids();
