@@ -32,12 +32,22 @@ import java.util.Objects;
  * A time suggestion from an identified telephony source. e.g. from NITZ information from a specific
  * radio.
  *
- * <p>The time value can be {@code null} to indicate that the telephony source has entered an
- * "un-opinionated" state and any previous suggestions from the source are being withdrawn. When not
- * {@code null}, the value consists of the number of milliseconds elapsed since 1/1/1970 00:00:00
- * UTC and the time according to the elapsed realtime clock when that number was established. The
- * elapsed realtime clock is considered accurate but volatile, so time suggestions must not be
- * persisted across device resets.
+ * <p>{@code slotIndex} identifies the suggestion source. This enables detection logic to identify
+ * suggestions from the same source when there are several in use.
+ *
+ * <p>{@code utcTime}. When not {@code null}, the {@code utcTime.value} is the number of
+ * milliseconds elapsed since 1/1/1970 00:00:00 UTC. The {@code utcTime.referenceTimeMillis} is the
+ * value of the elapsed realtime clock when the {@code utcTime.value} was established.
+ * Note that the elapsed realtime clock is considered accurate but it is volatile, so time
+ * suggestions cannot be persisted across device resets. {@code utcTime} can be {@code null} to
+ * indicate that the telephony source has entered an "un-opinionated" state and any previous
+ * suggestion from the source is being withdrawn.
+ *
+ * <p>{@code debugInfo} contains debugging metadata associated with the suggestion. This is used to
+ * record why the suggestion exists, e.g. what triggered it to be made and what heuristic was used
+ * to determine the time or its absence. This information exists only to aid in debugging and
+ * therefore is used by {@link #toString()}, but it is not for use in detection logic and is not
+ * considered in {@link #hashCode()} or {@link #equals(Object)}.
  *
  * @hide
  */
@@ -93,16 +103,18 @@ public final class PhoneTimeSuggestion implements Parcelable {
     }
 
     /**
-     * Returns an identifier for the source of this suggestion. When a device has several sim slots
-     * or equivalent, it is used to identify which one the suggestion is from.
+     * Returns an identifier for the source of this suggestion.
+     *
+     * <p>See {@link PhoneTimeSuggestion} for more information about {@code slotIndex}.
      */
     public int getSlotIndex() {
         return mSlotIndex;
     }
 
     /**
-     * Returns the suggestion. {@code null} means that the caller is no longer sure what time it
-     * is.
+     * Returns the suggested time or {@code null} if there isn't one.
+     *
+     * <p>See {@link PhoneTimeSuggestion} for more information about {@code utcTime}.
      */
     @Nullable
     public TimestampedValue<Long> getUtcTime() {
@@ -110,8 +122,9 @@ public final class PhoneTimeSuggestion implements Parcelable {
     }
 
     /**
-     * Returns debug metadata for the suggestion. The information is present in {@link #toString()}
-     * but is not considered for {@link #equals(Object)} and {@link #hashCode()}.
+     * Returns debug metadata for the suggestion.
+     *
+     * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
      */
     @NonNull
     public List<String> getDebugInfo() {
@@ -120,9 +133,9 @@ public final class PhoneTimeSuggestion implements Parcelable {
     }
 
     /**
-     * Associates information with the instance that can be useful for debugging / logging. The
-     * information is present in {@link #toString()} but is not considered for
-     * {@link #equals(Object)} and {@link #hashCode()}.
+     * Associates information with the instance that can be useful for debugging / logging.
+     *
+     * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
      */
     public void addDebugInfo(@NonNull String debugInfo) {
         if (mDebugInfo == null) {
@@ -132,9 +145,9 @@ public final class PhoneTimeSuggestion implements Parcelable {
     }
 
     /**
-     * Associates information with the instance that can be useful for debugging / logging. The
-     * information is present in {@link #toString()} but is not considered for
-     * {@link #equals(Object)} and {@link #hashCode()}.
+     * Associates information with the instance that can be useful for debugging / logging.
+     *
+     * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
      */
     public void addDebugInfo(@NonNull List<String> debugInfo) {
         if (mDebugInfo == null) {
@@ -181,12 +194,20 @@ public final class PhoneTimeSuggestion implements Parcelable {
         @Nullable private TimestampedValue<Long> mUtcTime;
         @Nullable private List<String> mDebugInfo;
 
-        /** Creates a builder with the specified {@code slotIndex}. */
+        /**
+         * Creates a builder with the specified {@code slotIndex}.
+         *
+         * <p>See {@link PhoneTimeSuggestion} for more information about {@code slotIndex}.
+         */
         public Builder(int slotIndex) {
             mSlotIndex = slotIndex;
         }
 
-        /** Returns the builder for call chaining. */
+        /**
+         * Returns the builder for call chaining.
+         *
+         * <p>See {@link PhoneTimeSuggestion} for more information about {@code utcTime}.
+         */
         @NonNull
         public Builder setUtcTime(@Nullable TimestampedValue<Long> utcTime) {
             if (utcTime != null) {
@@ -198,7 +219,11 @@ public final class PhoneTimeSuggestion implements Parcelable {
             return this;
         }
 
-        /** Returns the builder for call chaining. */
+        /**
+         * Returns the builder for call chaining.
+         *
+         * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
+         */
         @NonNull
         public Builder addDebugInfo(@NonNull String debugInfo) {
             if (mDebugInfo == null) {
