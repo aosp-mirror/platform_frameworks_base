@@ -65,7 +65,7 @@ public class SeamlessAppRotationTest extends FlickerTestBase {
     @Parameters(name = "{0}")
     public static Collection<Object[]> getParams() {
         int[] supportedRotations =
-                {Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_270};
+                {Surface.ROTATION_0, Surface.ROTATION_90};
         Collection<Object[]> params = new ArrayList<>();
 
         ArrayList<Intent> testIntents = new ArrayList<>();
@@ -108,7 +108,7 @@ public class SeamlessAppRotationTest extends FlickerTestBase {
 
         super.runTransition(
                 changeAppRotation(mIntent, intentId, InstrumentationRegistry.getContext(),
-                        mUiDevice, mBeginRotation, mEndRotation).repeat(5).build());
+                        mUiDevice, mBeginRotation, mEndRotation).build());
     }
 
     @Test
