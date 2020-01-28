@@ -20,8 +20,12 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.ApnType;
@@ -199,6 +203,13 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * To check the SDK version for {@link #listenForSubscriber}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)
+    private static final long LISTEN_CODE_CHANGE = 147600208L;
+
+    /**
      * Listen for incoming subscriptions
      * @param subId Subscription ID
      * @param pkg Package name
@@ -210,6 +221,16 @@ public class TelephonyRegistryManager {
     public void listenForSubscriber(int subId, @NonNull String pkg, @NonNull String featureId,
             @NonNull PhoneStateListener listener, int events, boolean notifyNow) {
         try {
+            // subId from PhoneStateListener is deprecated Q on forward, use the subId from
+            // TelephonyManager instance. Keep using subId from PhoneStateListener for pre-Q.
+            if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
+                // Since mSubId in PhoneStateListener is deprecated from Q on forward, this is
+                // the only place to set mSubId and its for "informational" only.
+                listener.mSubId = (events == PhoneStateListener.LISTEN_NONE)
+                        ? SubscriptionManager.INVALID_SUBSCRIPTION_ID : subId;
+            } else if (listener.mSubId != null) {
+                subId = listener.mSubId;
+            }
             sRegistry.listenForSubscriber(
                     subId, pkg, featureId, listener.callback, events, notifyNow);
         } catch (RemoteException e) {
