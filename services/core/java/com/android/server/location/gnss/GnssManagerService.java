@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.location.gnss;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -45,6 +45,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.FgThread;
+import com.android.server.LocationManagerService;
+import com.android.server.LocationManagerServiceUtils;
 import com.android.server.LocationManagerServiceUtils.LinkedListener;
 import com.android.server.LocationManagerServiceUtils.LinkedListenerBase;
 import com.android.server.location.CallerIdentity;
@@ -322,7 +325,7 @@ public class GnssManagerService {
         synchronized (mGnssBatchingLock) {
             mGnssBatchingCallback = callback;
             mGnssBatchingDeathCallback =
-                    new LocationManagerServiceUtils.LinkedListener<>(
+                    new LinkedListener<>(
                             callback,
                             "BatchedLocationCallback",
                             callerIdentity,
@@ -757,7 +760,10 @@ public class GnssManagerService {
         }
     }
 
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    /**
+     * Dump for debugging.
+     */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
@@ -776,7 +782,7 @@ public class GnssManagerService {
                     mGnssMeasurementsListeners
                             .values()) {
                 ipw.println(listener + ": " + mLocationManagerService.isThrottlingExemptLocked(
-                        listener.mCallerIdentity));
+                        listener.getCallerIdentity()));
             }
         }
         ipw.decreaseIndent();
@@ -787,7 +793,7 @@ public class GnssManagerService {
             for (LinkedListenerBase listener :
                     mGnssNavigationMessageListeners.values()) {
                 ipw.println(listener + ": " + mLocationManagerService.isThrottlingExemptLocked(
-                        listener.mCallerIdentity));
+                        listener.getCallerIdentity()));
             }
         }
         ipw.decreaseIndent();
@@ -798,7 +804,7 @@ public class GnssManagerService {
             for (LinkedListenerBase listener :
                     mGnssStatusListeners.values()) {
                 ipw.println(listener + ": " + mLocationManagerService.isThrottlingExemptLocked(
-                        listener.mCallerIdentity));
+                        listener.getCallerIdentity()));
             }
         }
         ipw.decreaseIndent();
