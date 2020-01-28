@@ -541,7 +541,7 @@ java_library {
     srcs: [":framework-all-sources"],
     installable: false,
     static_libs: [
-        "exoplayer2-core",
+        "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
     ],
     libs: ["icing-java-proto-lite"],
@@ -561,7 +561,7 @@ java_library {
         "compat-changeid-annotation-processor",
     ],
     static_libs: [
-        "exoplayer2-core",
+        "exoplayer2-extractor",
         "android.hardware.wifi-V1.0-java-constants",
     ]
 }
