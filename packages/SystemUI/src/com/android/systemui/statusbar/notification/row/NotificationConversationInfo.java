@@ -29,6 +29,7 @@ import static com.android.systemui.statusbar.notification.row.NotificationConver
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_HOME;
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_MUTE;
 import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_SNOOZE;
+import static com.android.systemui.statusbar.notification.row.NotificationConversationInfo.UpdateChannelRunnable.ACTION_UNBUBBLE;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -121,7 +122,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     boolean mSkipPost = false;
 
     private OnClickListener mOnBubbleClick = v -> {
-        mSelectedAction = ACTION_BUBBLE;
+        mSelectedAction = mStartedAsBubble ? ACTION_UNBUBBLE : ACTION_BUBBLE;
         if (mStartedAsBubble) {
             mBubbleController.onUserDemotedBubbleFromNotification(mEntry);
         } else {
@@ -586,6 +587,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         static final int ACTION_SNOOZE = 3;
         static final int ACTION_MUTE = 4;
         static final int ACTION_DEMOTE = 5;
+        static final int ACTION_UNBUBBLE = 6;
 
         private final INotificationManager mINotificationManager;
         private final String mAppPkg;
@@ -606,9 +608,17 @@ public class NotificationConversationInfo extends LinearLayout implements
         @Override
         public void run() {
             try {
+                boolean channelSettingChanged = mAction != ACTION_HOME && mAction != ACTION_SNOOZE;
                 switch (mAction) {
                     case ACTION_BUBBLE:
-                        mChannelToUpdate.setAllowBubbles(!mChannelToUpdate.canBubble());
+                    case ACTION_UNBUBBLE:
+                        boolean canBubble = mAction == ACTION_BUBBLE;
+                        if (mChannelToUpdate.canBubble() != canBubble) {
+                            channelSettingChanged = true;
+                            mChannelToUpdate.setAllowBubbles(canBubble);
+                        } else {
+                            channelSettingChanged = false;
+                        }
                         break;
                     case ACTION_FAVORITE:
                         // TODO: extend beyond DND
@@ -629,7 +639,7 @@ public class NotificationConversationInfo extends LinearLayout implements
 
                 }
 
-                if (mAction != ACTION_HOME && mAction != ACTION_SNOOZE) {
+                if (channelSettingChanged) {
                     mINotificationManager.updateNotificationChannelForPackage(
                             mAppPkg, mAppUid, mChannelToUpdate);
                 }
