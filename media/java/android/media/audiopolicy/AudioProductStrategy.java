@@ -134,7 +134,9 @@ public final class AudioProductStrategy implements Parcelable {
                             + "DO NOT USE STREAM TO CONTROL THE VOLUME");
                     return AudioSystem.STREAM_MUSIC;
                 }
-                return streamType;
+                if (streamType < AudioSystem.getNumStreamTypes()) {
+                    return streamType;
+                }
             }
         }
         return AudioSystem.STREAM_MUSIC;

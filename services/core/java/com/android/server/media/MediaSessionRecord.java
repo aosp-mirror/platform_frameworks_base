@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -92,6 +93,20 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             PlaybackState.STATE_CONNECTING,
             PlaybackState.STATE_PLAYING);
 
+    private static final AudioAttributes DEFAULT_ATTRIBUTES =
+            new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
+
+    private static int getVolumeStream(@Nullable AudioAttributes attr) {
+        if (attr == null) {
+            return DEFAULT_ATTRIBUTES.getVolumeControlStream();
+        }
+        final int stream = attr.getVolumeControlStream();
+        if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            return DEFAULT_ATTRIBUTES.getVolumeControlStream();
+        }
+        return stream;
+    }
+
     private final MessageHandler mHandler;
 
     private final int mOwnerPid;
@@ -162,7 +177,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mHandler = new MessageHandler(handlerLooper);
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
-        mAudioAttrs = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
+        mAudioAttrs = DEFAULT_ATTRIBUTES;
 
         // May throw RemoteException if the session app is killed.
         mSessionCb.mCb.asBinder().linkToDeath(this, 0);
@@ -262,7 +277,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             // Adjust the volume with a handler not to be blocked by other system service.
-            int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
+            int stream = getVolumeStream(mAudioAttrs);
             postAdjustLocalVolume(stream, direction, flags, opPackageName, pid, uid,
                     asSystemService, useSuggested, previousFlagPlaySound);
         } else {
@@ -302,7 +317,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private void setVolumeTo(String packageName, String opPackageName, int pid, int uid, int value,
             int flags) {
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
-            int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
+            int stream = getVolumeStream(mAudioAttrs);
             final int volumeValue = value;
             mHandler.post(new Runnable() {
                 @Override
@@ -720,7 +735,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             volumeType = mVolumeType;
             attributes = mAudioAttrs;
         }
-        int stream = AudioAttributes.toLegacyStreamType(attributes);
+        int stream = getVolumeStream(attributes);
         int max = mAudioManager.getStreamMaxVolume(stream);
         int current = mAudioManager.getStreamVolume(stream);
         return new PlaybackInfo(volumeType, VolumeProvider.VOLUME_CONTROL_ABSOLUTE, max,
