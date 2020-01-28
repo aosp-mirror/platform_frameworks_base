@@ -268,9 +268,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     appCert,
                     appInstallMetadata.getVersionCode(),
                     installerPackageName,
-                    getLoggingResponse(result),
-                    isCausedByAppCertRule(result),
-                    isCausedByInstallerRule(result));
+                    result.getLoggingResponse(),
+                    result.isCausedByAppCertRule(),
+                    result.isCausedByInstallerRule());
             mPackageManagerInternal.setIntegrityVerificationResult(
                     verificationId,
                     result.getEffect() == IntegrityCheckResult.Effect.ALLOW
@@ -581,26 +581,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
-    }
-
-    private static int getLoggingResponse(IntegrityCheckResult result) {
-        if (result.getEffect() == IntegrityCheckResult.Effect.DENY) {
-            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
-        } else if (result.getRule() != null) {
-            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
-        } else {
-            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
-        }
-    }
-
-    private static boolean isCausedByAppCertRule(IntegrityCheckResult result) {
-        // TODO(b/147095027): implement this.
-        return true;
-    }
-
-    private static boolean isCausedByInstallerRule(IntegrityCheckResult result) {
-        // TODO(b/147095027): implement this.
-        return true;
     }
 
     private List<String> getAllowedRuleProviders() {

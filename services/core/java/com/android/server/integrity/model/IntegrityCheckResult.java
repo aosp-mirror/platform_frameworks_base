@@ -18,6 +18,7 @@ package com.android.server.integrity.model;
 
 import android.annotation.Nullable;
 import android.content.integrity.Rule;
+import android.util.StatsLog;
 
 /**
  * A class encapsulating the result from the evaluation engine after evaluating rules against app
@@ -76,4 +77,34 @@ public final class IntegrityCheckResult {
     public static IntegrityCheckResult deny(Rule rule) {
         return new IntegrityCheckResult(Effect.DENY, rule);
     }
+
+    /**
+     * Returns the in value of the integrity check result for logging purposes.
+     */
+    public int getLoggingResponse() {
+        if (getEffect() == IntegrityCheckResult.Effect.DENY) {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
+        } else if (getRule() != null) {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
+        } else {
+            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
+        }
+    }
+
+    /**
+     * Returns true when the {@code Effect.DENY} result is caused by an app certificate mismatch.
+     */
+    public boolean isCausedByAppCertRule() {
+        // TODO(b/147095027): implement this.
+        return true;
+    }
+
+    /**
+     * Returns true when the {@code Effect.DENY} result is caused by an installer rule.
+     */
+    public boolean isCausedByInstallerRule() {
+        // TODO(b/147095027): implement this.
+        return true;
+    }
+
 }
