@@ -20,6 +20,6 @@ import android.os.ICancellationSignal;
 
 /** @hide */
 oneway interface IDataShareReadAdapter {
-    void start(in ParcelFileDescriptor fd, in ICancellationSignal cancellationSignal);
+    void start(in ParcelFileDescriptor fd);
     void error(int errorCode);
 }

@@ -17,17 +17,10 @@
 package android.view.contentcapture;
 
 import android.annotation.NonNull;
-import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
 /** Adapter class used by apps to share data with the Content Capture service. */
 public interface DataShareWriteAdapter {
-
-    /** Request has been rejected, because a concurrent data share sessions is in progress. */
-    int ERROR_CONCURRENT_REQUEST = 1;
-
-    /** Data share session timed out. */
-    int ERROR_UNKNOWN = 2;
 
     /**
      * Method invoked when the data share session has been started and the app needs to start
@@ -36,12 +29,9 @@ public interface DataShareWriteAdapter {
      * <p>App needs to handle explicitly cases when the file descriptor is closed and handle
      * gracefully if IOExceptions happen.
      *
-     * @param destination file descriptor used to write data into
-     * @param cancellationSignal cancellation signal that the app can use to subscribe to cancel
-     *                           operations.
+     * @param destination file descriptor used to write data into.
      */
-    void onWrite(@NonNull ParcelFileDescriptor destination,
-            @NonNull CancellationSignal cancellationSignal);
+    void onWrite(@NonNull ParcelFileDescriptor destination);
 
     /** Data share sessions has been rejected by the Content Capture service. */
     void onRejected();
