@@ -372,7 +372,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(mMockPackageManager).when(mService).getPackageManagerInternalLocked();
         doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
         doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyInt(), anyInt(),
-                anyBoolean(), anyInt());
+                anyInt(), anyBoolean(), anyInt());
 
         // Never review permissions
         doReturn(false).when(mMockPackageManager).isPermissionsReviewRequired(any(), anyInt());

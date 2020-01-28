@@ -179,6 +179,7 @@ import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
+import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
@@ -6128,8 +6129,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
-        return resolveIntentInternal(intent, resolvedType, flags, userId, false,
-                Binder.getCallingUid());
+        return resolveIntentInternal(intent, resolvedType, flags, 0 /*privateResolveFlags*/,
+                userId, false, Binder.getCallingUid());
     }
 
     /**
@@ -6137,8 +6138,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * However, if {@code resolveForStart} is {@code true}, all instant apps are visible
      * since we need to allow the system to start any installed application.
      */
-    private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType,
-            int flags, int userId, boolean resolveForStart, int filterCallingUid) {
+    private ResolveInfo resolveIntentInternal(Intent intent, String resolvedType, int flags,
+            @PrivateResolveFlags int privateResolveFlags, int userId, boolean resolveForStart,
+            int filterCallingUid) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
@@ -6150,11 +6152,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType,
-                    flags, filterCallingUid, userId, resolveForStart, true /*allowDynamicSplits*/);
+                    flags, privateResolveFlags, filterCallingUid, userId, resolveForStart,
+                    true /*allowDynamicSplits*/);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             final ResolveInfo bestChoice =
-                    chooseBestActivity(intent, resolvedType, flags, query, userId);
+                    chooseBestActivity(
+                            intent, resolvedType, flags, privateResolveFlags, query, userId);
             return bestChoice;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -6312,7 +6316,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
-            int flags, List<ResolveInfo> query, int userId) {
+            int flags, int privateResolveFlags, List<ResolveInfo> query, int userId) {
         if (query != null) {
             final int N = query.size();
             if (N == 1) {
@@ -6353,6 +6357,10 @@ public class PackageManagerService extends IPackageManager.Stub
                             return ri;
                         }
                     }
+                }
+                if ((privateResolveFlags
+                        & PackageManagerInternal.RESOLVE_NON_RESOLVER_ONLY) != 0) {
+                    return null;
                 }
                 ri = new ResolveInfo(mResolveInfo);
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
@@ -6767,13 +6775,13 @@ public class PackageManagerService extends IPackageManager.Stub
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, int flags, int userId) {
         return queryIntentActivitiesInternal(
-                intent, resolvedType, flags, Binder.getCallingUid(), userId,
-                false /*resolveForStart*/, true /*allowDynamicSplits*/);
+                intent, resolvedType, flags, 0 /*privateResolveFlags*/, Binder.getCallingUid(),
+                userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
     }
 
     private @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
-            String resolvedType, int flags, int filterCallingUid, int userId,
-            boolean resolveForStart, boolean allowDynamicSplits) {
+            String resolvedType, int flags, @PrivateResolveFlags int privateResolveFlags,
+            int filterCallingUid, int userId, boolean resolveForStart, boolean allowDynamicSplits) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final String instantAppPkgName = getInstantAppPackageName(filterCallingUid);
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -6858,7 +6866,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Check for results in the current profile.
                 result = filterIfNotSystemUser(mComponentResolver.queryActivities(
-                        intent, resolvedType, flags, userId), userId);
+                        intent, resolvedType, flags, privateResolveFlags, userId), userId);
                 addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                         false /*skipPackageCheck*/);
                 // Check for cross profile results.
@@ -6957,7 +6965,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         | PackageManager.GET_RESOLVED_FILTER
                         | PackageManager.MATCH_INSTANT
                         | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
-                    userId);
+                    0, userId);
             for (int i = instantApps.size() - 1; i >= 0; --i) {
                 final ResolveInfo info = instantApps.get(i);
                 final String packageName = info.activityInfo.packageName;
@@ -7061,7 +7069,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, parentUserId);
+                resolvedType, flags, 0, parentUserId);
 
         if (resultTargetUser == null || resultTargetUser.isEmpty()) {
             return null;
@@ -7246,8 +7254,9 @@ public class PackageManagerService extends IPackageManager.Stub
         failureActivityIntent.setPackage(packageName);
         // IMPORTANT: disallow dynamic splits to avoid an infinite loop
         final List<ResolveInfo> result = queryIntentActivitiesInternal(
-                failureActivityIntent, null /*resolvedType*/, 0 /*flags*/, filterCallingUid, userId,
-                false /*resolveForStart*/, false /*allowDynamicSplits*/);
+                failureActivityIntent, null /*resolvedType*/, 0 /*flags*/,
+                0 /*privateResolveFlags*/, filterCallingUid, userId, false /*resolveForStart*/,
+                false /*allowDynamicSplits*/);
         final int NR = result.size();
         if (NR > 0) {
             for (int i = 0; i < NR; i++) {
@@ -7502,7 +7511,7 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int sourceUserId) {
         int targetUserId = filter.getTargetUserId();
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(intent,
-                resolvedType, flags, targetUserId);
+                resolvedType, flags, 0, targetUserId);
         if (resultTargetUser != null && isUserEnabled(targetUserId)) {
             // If all the matches in the target profile are suspended, return null.
             for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
@@ -23324,7 +23333,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public List<ResolveInfo> queryIntentActivities(
                 Intent intent, String resolvedType, int flags, int filterCallingUid, int userId) {
             return PackageManagerService.this
-                    .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
+                    .queryIntentActivitiesInternal(intent, resolvedType, flags, 0, filterCallingUid,
                             userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
         }
 
@@ -23610,9 +23619,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public ResolveInfo resolveIntent(Intent intent, String resolvedType,
-                int flags, int userId, boolean resolveForStart, int filterCallingUid) {
+                int flags, int privateResolveFlags, int userId, boolean resolveForStart,
+                int filterCallingUid) {
             return resolveIntentInternal(
-                    intent, resolvedType, flags, userId, resolveForStart, filterCallingUid);
+                    intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
+                    filterCallingUid);
         }
 
         @Override

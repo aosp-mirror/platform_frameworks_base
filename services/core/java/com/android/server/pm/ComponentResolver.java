@@ -32,6 +32,7 @@ import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.PrivateResolveFlags;
 import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
@@ -229,9 +230,11 @@ public class ComponentResolver {
     }
 
     @Nullable
-    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags, int userId) {
+    List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
+            @PrivateResolveFlags int privateResolveFlags, int userId) {
         synchronized (mLock) {
-            return mActivities.queryIntent(intent, resolvedType, flags, userId);
+            return mActivities.queryIntent(
+                    intent, resolvedType, flags, privateResolveFlags, userId);
         }
     }
 
@@ -368,7 +371,7 @@ public class ComponentResolver {
     @Nullable
     List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
-            return mReceivers.queryIntent(intent, resolvedType, flags, userId);
+            return mReceivers.queryIntent(intent, resolvedType, flags, 0, userId);
         }
     }
 
@@ -1154,11 +1157,12 @@ public class ComponentResolver {
         }
 
         List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
-                int userId) {
+                int privateResolveFlags, int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
             mFlags = flags;
+            mPrivateResolveFlags = privateResolveFlags;
             return super.queryIntent(intent, resolvedType,
                     (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
                     userId);
@@ -1388,6 +1392,11 @@ public class ComponentResolver {
                 }
                 return null;
             }
+            final boolean matchNonBrowserOnly =
+                    (mPrivateResolveFlags & PackageManagerInternal.RESOLVE_NON_BROWSER_ONLY) != 0;
+            if (matchNonBrowserOnly && info.handleAllWebDataURI()) {
+                return null;
+            }
             final ResolveInfo res = new ResolveInfo();
             res.activityInfo = ai;
             if ((mFlags & PackageManager.GET_RESOLVED_FILTER) != 0) {
@@ -1465,6 +1474,7 @@ public class ComponentResolver {
         private final ArrayMap<ComponentName, ParsedActivity> mActivities =
                 new ArrayMap<>();
         private int mFlags;
+        private int mPrivateResolveFlags;
     }
 
     // Both receivers and activities share a class, but point to different get methods
