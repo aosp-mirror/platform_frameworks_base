@@ -1595,11 +1595,11 @@ class ActivityStarter {
                 mRootWindowContainer.resumeFocusedStacksTopActivities(
                         mTargetStack, mStartActivity, mOptions);
             }
-        } else if (mStartActivity != null) {
-            mSupervisor.mRecentTasks.add(mStartActivity.getTask());
         }
         mRootWindowContainer.updateUserStack(mStartActivity.mUserId, mTargetStack);
 
+        // Update the recent tasks list immediately when the activity starts
+        mSupervisor.mRecentTasks.add(mStartActivity.getTask());
         mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(),
                 preferredWindowingMode, mPreferredDisplayId, mTargetStack);
 
