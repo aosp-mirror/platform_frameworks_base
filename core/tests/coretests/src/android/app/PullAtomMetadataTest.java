@@ -32,7 +32,7 @@ public final class PullAtomMetadataTest {
 
     @Test
     public void testEmpty() {
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder().build();
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder().build();
         assertThat(metadata.getTimeoutNs()).isEqualTo(StatsManager.DEFAULT_TIMEOUT_NS);
         assertThat(metadata.getCoolDownNs()).isEqualTo(StatsManager.DEFAULT_COOL_DOWN_NS);
         assertThat(metadata.getAdditiveFields()).isNull();
@@ -42,7 +42,7 @@ public final class PullAtomMetadataTest {
     public void testSetTimeoutNs() {
         long timeoutNs = 500_000_000L;
         PullAtomMetadata metadata =
-                PullAtomMetadata.newBuilder().setTimeoutNs(timeoutNs).build();
+                new PullAtomMetadata.Builder().setTimeoutNs(timeoutNs).build();
         assertThat(metadata.getTimeoutNs()).isEqualTo(timeoutNs);
         assertThat(metadata.getCoolDownNs()).isEqualTo(StatsManager.DEFAULT_COOL_DOWN_NS);
         assertThat(metadata.getAdditiveFields()).isNull();
@@ -52,7 +52,7 @@ public final class PullAtomMetadataTest {
     public void testSetCoolDownNs() {
         long coolDownNs = 10_000_000_000L;
         PullAtomMetadata metadata =
-                PullAtomMetadata.newBuilder().setCoolDownNs(coolDownNs).build();
+                new PullAtomMetadata.Builder().setCoolDownNs(coolDownNs).build();
         assertThat(metadata.getTimeoutNs()).isEqualTo(StatsManager.DEFAULT_TIMEOUT_NS);
         assertThat(metadata.getCoolDownNs()).isEqualTo(coolDownNs);
         assertThat(metadata.getAdditiveFields()).isNull();
@@ -62,7 +62,7 @@ public final class PullAtomMetadataTest {
     public void testSetAdditiveFields() {
         int[] fields = {2, 4, 6};
         PullAtomMetadata metadata =
-                PullAtomMetadata.newBuilder().setAdditiveFields(fields).build();
+                new PullAtomMetadata.Builder().setAdditiveFields(fields).build();
         assertThat(metadata.getTimeoutNs()).isEqualTo(StatsManager.DEFAULT_TIMEOUT_NS);
         assertThat(metadata.getCoolDownNs()).isEqualTo(StatsManager.DEFAULT_COOL_DOWN_NS);
         assertThat(metadata.getAdditiveFields()).isEqualTo(fields);
@@ -73,7 +73,7 @@ public final class PullAtomMetadataTest {
         long timeoutNs = 300L;
         long coolDownNs = 9572L;
         int[] fields = {3, 2};
-        PullAtomMetadata metadata = PullAtomMetadata.newBuilder()
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setTimeoutNs(timeoutNs)
                 .setCoolDownNs(coolDownNs)
                 .setAdditiveFields(fields)
