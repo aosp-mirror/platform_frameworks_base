@@ -133,6 +133,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int fullBackupContent = 0;
 
     /**
+     * <code>true</code> if the package is capable of presenting a unified interface representing
+     * multiple profiles.
+     * @hide
+     */
+    public boolean crossProfile;
+
+    /**
      * The default extra UI options for activities in this application.
      * Set from the {@link android.R.attr#uiOptions} attribute in the
      * activity's manifest.
@@ -1382,6 +1389,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 pw.println(prefix + "fullBackupContent="
                         + (fullBackupContent < 0 ? "false" : "true"));
             }
+            pw.println("crossProfile=" + (crossProfile ? "true" : "false"));
             if (networkSecurityConfigRes != 0) {
                 pw.println(prefix + "networkSecurityConfigRes=0x"
                         + Integer.toHexString(networkSecurityConfigRes));
@@ -1586,6 +1594,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uiOptions = orig.uiOptions;
         backupAgentName = orig.backupAgentName;
         fullBackupContent = orig.fullBackupContent;
+        crossProfile = orig.crossProfile;
         networkSecurityConfigRes = orig.networkSecurityConfigRes;
         category = orig.category;
         targetSandboxVersion = orig.targetSandboxVersion;
@@ -1665,6 +1674,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
         dest.writeInt(fullBackupContent);
+        dest.writeBoolean(crossProfile);
         dest.writeInt(networkSecurityConfigRes);
         dest.writeInt(category);
         dest.writeInt(targetSandboxVersion);
@@ -1741,6 +1751,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
         fullBackupContent = source.readInt();
+        crossProfile = source.readBoolean();
         networkSecurityConfigRes = source.readInt();
         category = source.readInt();
         targetSandboxVersion = source.readInt();

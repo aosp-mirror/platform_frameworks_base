@@ -2382,6 +2382,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         appInfo.uiOptions = uiOptions;
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
+        appInfo.crossProfile = isCrossProfile();
 
         appInfo.setBaseCodePath(baseCodePath);
         appInfo.setBaseResourcePath(baseCodePath);
