@@ -1,6 +1,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.provider.Telephony;
 import android.telecom.Connection;
 import android.telephony.data.ApnSetting;
 
@@ -651,4 +652,13 @@ public class Annotation {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UiccAppType{}
+
+    /** @hide */
+    @IntDef({
+            Telephony.Carriers.SKIP_464XLAT_DEFAULT,
+            Telephony.Carriers.SKIP_464XLAT_DISABLE,
+            Telephony.Carriers.SKIP_464XLAT_ENABLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Skip464XlatStatus {}
 }
