@@ -77,7 +77,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -85,6 +84,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
@@ -1171,9 +1171,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 jobStatus.enqueueWorkLocked(work);
             }
 
-            StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED,
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     uId, null, jobStatus.getBatteryName(),
-                    StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
+                    FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
                     JobProtoEnums.STOP_REASON_CANCELLED, jobStatus.getStandbyBucket(),
                     jobStatus.getJobId());
 
@@ -2567,7 +2567,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 BatteryStatsInternal mBatteryStatsInternal = LocalServices.getService
                         (BatteryStatsInternal.class);
                 mBatteryStatsInternal.noteJobsDeferred(uid, counter.numDeferred(), sinceLast);
-                StatsLog.write_non_chained(StatsLog.DEFERRED_JOB_STATS_REPORTED, uid, null,
+                FrameworkStatsLog.write_non_chained(
+                        FrameworkStatsLog.DEFERRED_JOB_STATS_REPORTED, uid, null,
                         counter.numDeferred(), sinceLast);
             }
         }
