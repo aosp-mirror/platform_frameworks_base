@@ -2721,6 +2721,7 @@ public final class Settings {
                                                 }
                                             }
                                         });
+                                        currentGeneration = generation;
                                     }
                                 }
                                 if (mGenerationTracker != null && currentGeneration ==
@@ -2801,14 +2802,7 @@ public final class Settings {
                         }
                         mValues.clear();
                     } else {
-                        boolean prefixCached = false;
-                        int size = mValues.size();
-                        for (int i = 0; i < size; ++i) {
-                            if (mValues.keyAt(i).startsWith(prefix)) {
-                                prefixCached = true;
-                                break;
-                            }
-                        }
+                        boolean prefixCached = mValues.containsKey(prefix);
                         if (prefixCached) {
                             if (!names.isEmpty()) {
                                 for (String name : names) {
@@ -2817,9 +2811,11 @@ public final class Settings {
                                     }
                                 }
                             } else {
-                                for (int i = 0; i < size; ++i) {
+                                for (int i = 0; i < mValues.size(); ++i) {
                                     String key = mValues.keyAt(i);
-                                    if (key.startsWith(prefix)) {
+                                    // Explicitly exclude the prefix as it is only there to
+                                    // signal that the prefix has been cached.
+                                    if (key.startsWith(prefix) && !key.equals(prefix)) {
                                         keyValues.put(key, mValues.get(key));
                                     }
                                 }
@@ -2907,12 +2903,15 @@ public final class Settings {
                                     }
                                 }
                             });
+                            currentGeneration = generation;
                         }
                     }
                     if (mGenerationTracker != null && currentGeneration
                             == mGenerationTracker.getCurrentGeneration()) {
                         // cache the complete list of flags for the namespace
                         mValues.putAll(flagsToValues);
+                        // Adding the prefix as a signal that the prefix is cached.
+                        mValues.put(prefix, null);
                     }
                 }
                 return keyValues;
@@ -14104,7 +14103,7 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-        static Map<String, String> getStrings(@NonNull ContentResolver resolver,
+        public static Map<String, String> getStrings(@NonNull ContentResolver resolver,
                 @NonNull String namespace, @NonNull List<String> names) {
             List<String> compositeNames = new ArrayList<>(names.size());
             for (String name : names) {
@@ -14163,8 +14162,9 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean setStrings(@NonNull ContentResolver resolver, @NonNull String namespace,
-                @NonNull Map<String, String> keyValues) throws DeviceConfig.BadConfigException {
+        public static boolean setStrings(@NonNull ContentResolver resolver,
+                @NonNull String namespace, @NonNull Map<String, String> keyValues)
+                throws DeviceConfig.BadConfigException {
             HashMap<String, String> compositeKeyValueMap = new HashMap<>(keyValues.keySet().size());
             for (Map.Entry<String, String> entry : keyValues.entrySet()) {
                 compositeKeyValueMap.put(
@@ -14239,6 +14239,12 @@ public final class Settings {
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't register config monitor callback", e);
             }
+        }
+
+        /** @hide */
+        public static void clearProviderForTest() {
+            sProviderHolder.clearProviderForTest();
+            sNameValueCache.clearGenerationTrackerForTest();
         }
 
         private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
