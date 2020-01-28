@@ -35,7 +35,6 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Debug;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Telephony;
@@ -195,7 +194,7 @@ public final class SmsApplication {
         final int callingUid = Binder.getCallingUid();
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getIncomingUserHandle caller=" + callingUid + ", myuid="
-                    + android.os.Process.myUid() + "\n\t" + Debug.getCallers(4));
+                    + android.os.Process.myUid());
         }
         if (UserHandle.getAppId(callingUid)
                 < android.os.Process.FIRST_APPLICATION_UID) {
