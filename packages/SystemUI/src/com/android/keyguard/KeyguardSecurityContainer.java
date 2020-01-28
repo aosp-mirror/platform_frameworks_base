@@ -15,7 +15,12 @@
  */
 package com.android.keyguard;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.ViewRootImpl.sNewInsetsMode;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.systemBars;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static java.lang.Integer.max;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -38,6 +43,7 @@ import android.view.SurfaceControl;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -339,12 +345,21 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     @Override
-    protected boolean fitSystemWindows(Rect insets) {
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+
         // Consume bottom insets because we're setting the padding locally (for IME and navbar.)
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), insets.bottom);
-        insets.bottom = 0;
-        return false;
+        int inset;
+        if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+            int bottomInset = insets.getInsetsIgnoringVisibility(systemBars()).bottom;
+            int imeInset = insets.getInsets(ime()).bottom;
+            inset = max(bottomInset, imeInset);
+        } else {
+            inset = insets.getSystemWindowInsetBottom();
+        }
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), inset);
+        return insets.inset(0, 0, 0, inset);
     }
+
 
     private void showDialog(String title, String message) {
         if (mAlertDialog != null) {

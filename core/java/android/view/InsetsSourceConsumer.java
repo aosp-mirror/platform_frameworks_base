@@ -181,8 +181,9 @@ public class InsetsSourceConsumer {
     }
 
     private void applyHiddenToControl() {
-        if (mSourceControl == null || mSourceControl.getLeash() == null
-                || mController.getAnimationType(mType) != ANIMATION_TYPE_NONE) {
+
+        // TODO: Handle case properly when animation is running already (it shouldn't!)
+        if (mSourceControl == null || mSourceControl.getLeash() == null) {
             return;
         }
 

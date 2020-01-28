@@ -187,6 +187,10 @@ class InsetsPolicy {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mTransientControlTarget;
         }
+        if (focusedWin == mPolicy.getNotificationShade()) {
+            // Notification shade has control anyways, no reason to force anything.
+            return focusedWin;
+        }
         if (areSystemBarsForciblyVisible() || isKeyguardOrStatusBarForciblyVisible()) {
             return null;
         }
@@ -197,6 +201,10 @@ class InsetsPolicy {
         if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
             return mTransientControlTarget;
         }
+        if (focusedWin == mPolicy.getNotificationShade()) {
+            // Notification shade has control anyways, no reason to force anything.
+            return focusedWin;
+        }
         if (areSystemBarsForciblyVisible() || isNavBarForciblyVisible()) {
             return null;
         }
@@ -204,9 +212,6 @@ class InsetsPolicy {
     }
 
     private boolean isKeyguardOrStatusBarForciblyVisible() {
-        if (mPolicy.isKeyguardShowing()) {
-            return true;
-        }
         final WindowState statusBar = mPolicy.getStatusBar();
         if (statusBar != null) {
             // TODO(b/118118435): Pretend to the app that it's still able to control it?
