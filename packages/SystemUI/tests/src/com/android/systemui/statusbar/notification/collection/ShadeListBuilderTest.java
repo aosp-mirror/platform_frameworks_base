@@ -45,12 +45,12 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.O
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
+import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -81,7 +81,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private ShadeListBuilder mListBuilder;
     private FakeSystemClock mSystemClock = new FakeSystemClock();
 
-    @Mock private NotifLog mNotifLog;
+    @Mock private ShadeListBuilderLogger mLogger;
     @Mock private NotifCollection mNotifCollection;
     @Spy private OnBeforeTransformGroupsListener mOnBeforeTransformGroupsListener;
     @Spy private OnBeforeSortListener mOnBeforeSortListener;
@@ -103,7 +103,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
 
-        mListBuilder = new ShadeListBuilder(mSystemClock, mNotifLog, mock(DumpController.class));
+        mListBuilder = new ShadeListBuilder(mSystemClock, mLogger, mock(DumpController.class));
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);

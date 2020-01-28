@@ -44,7 +44,6 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.DumpController;
@@ -56,6 +55,7 @@ import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoa
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
 
@@ -100,6 +100,7 @@ import javax.inject.Singleton;
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
     private final FeatureFlags mFeatureFlags;
+    private final NotifCollectionLogger mLogger;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -116,9 +117,11 @@ public class NotifCollection implements Dumpable {
     public NotifCollection(
             IStatusBarService statusBarService,
             DumpController dumpController,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            NotifCollectionLogger logger) {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
+        mLogger = logger;
         dumpController.registerDumpable(TAG, this);
         mFeatureFlags = featureFlags;
     }
@@ -190,8 +193,8 @@ public class NotifCollection implements Dumpable {
     private void onNotificationGroupPosted(List<CoalescedEvent> batch) {
         Assert.isMainThread();
 
-        Log.d(TAG, "POSTED GROUP " + batch.get(0).getSbn().getGroupKey()
-                + " (" + batch.size() + " events)");
+        mLogger.logNotifGroupPosted(batch.get(0).getSbn().getGroupKey(), batch.size());
+
         for (CoalescedEvent event : batch) {
             postNotification(event.getSbn(), event.getRanking(), null);
         }
@@ -204,7 +207,7 @@ public class NotifCollection implements Dumpable {
             int reason) {
         Assert.isMainThread();
 
-        Log.d(TAG, "REMOVED " + sbn.getKey() + " reason=" + reason);
+        mLogger.logNotifRemoved(sbn.getKey(), reason);
         removeNotification(sbn.getKey(), rankingMap, reason, null);
     }
 
@@ -222,7 +225,7 @@ public class NotifCollection implements Dumpable {
 
         if (entry == null) {
             // A new notification!
-            Log.d(TAG, "POSTED  " + sbn.getKey());
+            mLogger.logNotifPosted(sbn.getKey());
 
             entry = new NotificationEntry(sbn, ranking);
             mNotificationSet.put(sbn.getKey(), entry);
@@ -234,7 +237,7 @@ public class NotifCollection implements Dumpable {
 
         } else {
             // Update to an existing entry
-            Log.d(TAG, "UPDATED " + sbn.getKey());
+            mLogger.logNotifUpdated(sbn.getKey());
 
             // Notification is updated so it is essentially re-added and thus alive again.  Don't
             // need to keep its lifetime extended.

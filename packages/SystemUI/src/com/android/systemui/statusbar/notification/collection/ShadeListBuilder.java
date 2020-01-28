@@ -32,19 +32,20 @@ import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState;
+import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
-import com.android.systemui.statusbar.notification.logging.NotifEvent;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -69,7 +70,7 @@ import javax.inject.Singleton;
 @Singleton
 public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
-    private final NotifLog mNotifLog;
+    private final ShadeListBuilderLogger mLogger;
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
@@ -98,11 +99,11 @@ public class ShadeListBuilder implements Dumpable {
     @Inject
     public ShadeListBuilder(
             SystemClock systemClock,
-            NotifLog notifLog,
+            ShadeListBuilderLogger logger,
             DumpController dumpController) {
         Assert.isMainThread();
         mSystemClock = systemClock;
-        mNotifLog = notifLog;
+        mLogger = logger;
         dumpController.registerDumpable(TAG, this);
     }
 
@@ -205,8 +206,7 @@ public class ShadeListBuilder implements Dumpable {
                     Assert.isMainThread();
                     mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
 
-                    mNotifLog.log(NotifEvent.ON_BUILD_LIST, "Request received from "
-                            + "NotifCollection");
+                    mLogger.logOnBuildList();
                     mAllEntries = entries;
                     buildList();
                 }
@@ -215,21 +215,15 @@ public class ShadeListBuilder implements Dumpable {
     private void onPreGroupFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.PRE_GROUP_FILTER_INVALIDATED, String.format(
-                "Filter \"%s\" invalidated; pipeline state is %d",
-                filter.getName(),
-                mPipelineState.getState()));
+        mLogger.logPreGroupFilterInvalidated(filter.getName(), mPipelineState.getState());
 
         rebuildListIfBefore(STATE_PRE_GROUP_FILTERING);
     }
 
-    private void onPromoterInvalidated(NotifPromoter filter) {
+    private void onPromoterInvalidated(NotifPromoter promoter) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.PROMOTER_INVALIDATED, String.format(
-                "NotifPromoter \"%s\" invalidated; pipeline state is %d",
-                filter.getName(),
-                mPipelineState.getState()));
+        mLogger.logPromoterInvalidated(promoter.getName(), mPipelineState.getState());
 
         rebuildListIfBefore(STATE_TRANSFORMING);
     }
@@ -237,10 +231,7 @@ public class ShadeListBuilder implements Dumpable {
     private void onNotifSectionInvalidated(NotifSection section) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.SECTION_INVALIDATED, String.format(
-                "Section \"%s\" invalidated; pipeline state is %d",
-                section.getName(),
-                mPipelineState.getState()));
+        mLogger.logNotifSectionInvalidated(section.getName(), mPipelineState.getState());
 
         rebuildListIfBefore(STATE_SORTING);
     }
@@ -248,10 +239,7 @@ public class ShadeListBuilder implements Dumpable {
     private void onPreRenderFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.PRE_RENDER_FILTER_INVALIDATED, String.format(
-                "Filter \"%s\" invalidated; pipeline state is %d",
-                filter.getName(),
-                mPipelineState.getState()));
+        mLogger.logPreRenderFilterInvalidated(filter.getName(), mPipelineState.getState());
 
         rebuildListIfBefore(STATE_PRE_RENDER_FILTERING);
     }
@@ -259,10 +247,7 @@ public class ShadeListBuilder implements Dumpable {
     private void onNotifComparatorInvalidated(NotifComparator comparator) {
         Assert.isMainThread();
 
-        mNotifLog.log(NotifEvent.COMPARATOR_INVALIDATED, String.format(
-                "Comparator \"%s\" invalidated; pipeline state is %d",
-                comparator.getName(),
-                mPipelineState.getState()));
+        mLogger.logNotifComparatorInvalidated(comparator.getName(), mPipelineState.getState());
 
         rebuildListIfBefore(STATE_SORTING);
     }
@@ -288,7 +273,7 @@ public class ShadeListBuilder implements Dumpable {
      * if we detect that behavior, we should crash instantly.
      */
     private void buildList() {
-        mNotifLog.log(NotifEvent.START_BUILD_LIST, "Run #" + mIterationCount + "...");
+        mLogger.logStartBuildList(mIterationCount);
 
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
         mPipelineState.setState(STATE_BUILD_STARTED);
@@ -334,16 +319,16 @@ public class ShadeListBuilder implements Dumpable {
         freeEmptyGroups();
 
         // Step 6: Dispatch the new list, first to any listeners and then to the view layer
-        mNotifLog.log(NotifEvent.DISPATCH_FINAL_LIST, "List finalized, is:\n"
-                + ListDumper.dumpTree(mNotifList, false, "\t\t"));
+        if (mIterationCount % 10 == 0) {
+            mLogger.logFinalList(mNotifList);
+        }
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
 
         // Step 7: We're done!
-        mNotifLog.log(NotifEvent.LIST_BUILD_COMPLETE,
-                "Notif list build #" + mIterationCount + " completed");
+        mLogger.logEndBuildList(mIterationCount);
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
     }
@@ -429,11 +414,10 @@ public class ShadeListBuilder implements Dumpable {
                     if (existingSummary == null) {
                         group.setSummary(entry);
                     } else {
-                        mNotifLog.log(NotifEvent.WARN, String.format(
-                                "Duplicate summary for group '%s': '%s' vs. '%s'",
+                        mLogger.logDuplicateSummary(
                                 group.getKey(),
                                 existingSummary.getKey(),
-                                entry.getKey()));
+                                entry.getKey());
 
                         // Use whichever one was posted most recently
                         if (entry.getSbn().getPostTime()
@@ -452,8 +436,7 @@ public class ShadeListBuilder implements Dumpable {
 
                 final String topLevelKey = entry.getKey();
                 if (mGroups.containsKey(topLevelKey)) {
-                    mNotifLog.log(NotifEvent.WARN,
-                            "Duplicate non-group top-level key: " + topLevelKey);
+                    mLogger.logDuplicateTopLevelKey(topLevelKey);
                 } else {
                     entry.setParent(ROOT_ENTRY);
                     out.add(entry);
@@ -617,24 +600,22 @@ public class ShadeListBuilder implements Dumpable {
     private void logParentingChanges() {
         for (NotificationEntry entry : mAllEntries) {
             if (entry.getParent() != entry.getPreviousParent()) {
-                mNotifLog.log(NotifEvent.PARENT_CHANGED, String.format(
-                        "%s: parent changed from %s to %s",
+                mLogger.logParentChanged(
                         entry.getKey(),
                         entry.getPreviousParent() == null
-                                ? "null" : entry.getPreviousParent().getKey(),
+                                ? null : entry.getPreviousParent().getKey(),
                         entry.getParent() == null
-                                ? "null" : entry.getParent().getKey()));
+                                ? null : entry.getParent().getKey());
             }
         }
         for (GroupEntry group : mGroups.values()) {
             if (group.getParent() != group.getPreviousParent()) {
-                mNotifLog.log(NotifEvent.PARENT_CHANGED, String.format(
-                        "%s: parent changed from %s to %s",
+                mLogger.logParentChanged(
                         group.getKey(),
                         group.getPreviousParent() == null
-                                ? "null" : group.getPreviousParent().getKey(),
+                                ? null : group.getPreviousParent().getKey(),
                         group.getParent() == null
-                                ? "null" : group.getParent().getKey()));
+                                ? null : group.getParent().getKey());
             }
         }
     }
@@ -684,23 +665,10 @@ public class ShadeListBuilder implements Dumpable {
         NotifFilter filter = findRejectingFilter(entry, now, filters);
 
         if (filter != entry.mExcludingFilter) {
-            if (entry.mExcludingFilter == null) {
-                mNotifLog.log(NotifEvent.FILTER_CHANGED, String.format(
-                        "%s: filtered out by '%s'",
-                        entry.getKey(),
-                        filter.getName()));
-            } else if (filter == null) {
-                mNotifLog.log(NotifEvent.FILTER_CHANGED, String.format(
-                        "%s: no longer filtered out (previous filter was '%s')",
-                        entry.getKey(),
-                        entry.mExcludingFilter.getName()));
-            } else {
-                mNotifLog.log(NotifEvent.FILTER_CHANGED, String.format(
-                        "%s: filter changed: '%s' -> '%s'",
-                        entry.getKey(),
-                        entry.mExcludingFilter,
-                        filter));
-            }
+            mLogger.logFilterChanged(
+                    entry.getKey(),
+                    entry.mExcludingFilter != null ? entry.mExcludingFilter.getName() : null,
+                    filter != null ? filter.getName() : null);
 
             // Note that groups and summaries can also be filtered out later if they're part of a
             // malformed group. We currently don't have a great way to track that beyond parenting
@@ -728,23 +696,10 @@ public class ShadeListBuilder implements Dumpable {
         NotifPromoter promoter = findPromoter(entry);
 
         if (promoter != entry.mNotifPromoter) {
-            if (entry.mNotifPromoter == null) {
-                mNotifLog.log(NotifEvent.PROMOTER_CHANGED, String.format(
-                        "%s: Entry promoted to top level by '%s'",
-                        entry.getKey(),
-                        promoter.getName()));
-            } else if (promoter == null) {
-                mNotifLog.log(NotifEvent.PROMOTER_CHANGED, String.format(
-                        "%s: Entry is no longer promoted to top level (previous promoter was '%s')",
-                        entry.getKey(),
-                        entry.mNotifPromoter.getName()));
-            } else {
-                mNotifLog.log(NotifEvent.PROMOTER_CHANGED, String.format(
-                        "%s: Top-level promoter changed: '%s' -> '%s'",
-                        entry.getKey(),
-                        entry.mNotifPromoter,
-                        promoter));
-            }
+            mLogger.logPromoterChanged(
+                    entry.getKey(),
+                    entry.mNotifPromoter != null ? entry.mNotifPromoter.getName() : null,
+                    promoter != null ? promoter.getName() : null);
             entry.mNotifPromoter = promoter;
         }
 
@@ -767,21 +722,12 @@ public class ShadeListBuilder implements Dumpable {
         final Integer sectionIndex = sectionWithIndex.second;
 
         if (section != entry.mNotifSection) {
-            if (entry.mNotifSection == null) {
-                mNotifLog.log(NotifEvent.SECTION_CHANGED, String.format(
-                        "%s: sectioned by '%s' [index=%d].",
-                        entry.getKey(),
-                        section.getName(),
-                        sectionIndex));
-            } else {
-                mNotifLog.log(NotifEvent.SECTION_CHANGED, String.format(
-                        "%s: section changed: '%s' [index=%d] -> '%s [index=%d]'.",
-                        entry.getKey(),
-                        entry.mNotifSection,
-                        entry.getSection(),
-                        section,
-                        sectionIndex));
-            }
+            mLogger.logSectionChanged(
+                    entry.getKey(),
+                    entry.mNotifSection != null ? entry.mNotifSection.getName() : null,
+                    entry.getSection(),
+                    section.getName(),
+                    sectionIndex);
 
             entry.mNotifSection = section;
             entry.setSection(sectionIndex);
@@ -826,7 +772,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
         pw.println("\t" + TAG + " shade notifications:");
         if (getShadeList().size() == 0) {
             pw.println("\t\t None");
