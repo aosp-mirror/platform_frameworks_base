@@ -2674,7 +2674,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         if (response.supportsInlineSuggestions()) {
             if (requestShowInlineSuggestions(response)) {
-                //TODO(b/137800469): Add logging instead of bypassing below logic.
+                //TODO(b/137800469): Fix it to log showed only when IME asks for inflation, rather
+                // than here where framework sends back the response.
+                mService.logDatasetShown(id, mClientState);
                 return;
             }
         }

@@ -3043,6 +3043,7 @@ package android.service.autofill.augmented {
     ctor public AugmentedAutofillService();
     method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method protected void dump(@NonNull java.io.PrintWriter, @NonNull String[]);
+    method @Nullable public final android.service.autofill.FillEventHistory getFillEventHistory();
     method public void onConnected();
     method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
@@ -3072,6 +3073,7 @@ package android.service.autofill.augmented {
   public static final class FillResponse.Builder {
     ctor public FillResponse.Builder();
     method @NonNull public android.service.autofill.augmented.FillResponse build();
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@Nullable android.service.autofill.augmented.FillWindow);
     method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@Nullable java.util.List<android.service.autofill.Dataset>);
   }

@@ -60,7 +60,7 @@ public final class FillCallback {
 
         List<Dataset> inlineSuggestions = response.getInlineSuggestions();
         if (inlineSuggestions != null && !inlineSuggestions.isEmpty()) {
-            mProxy.onInlineSuggestionsDataReady(inlineSuggestions);
+            mProxy.onInlineSuggestionsDataReady(inlineSuggestions, response.getClientState());
             return;
         }
 

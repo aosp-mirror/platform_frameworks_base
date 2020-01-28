@@ -31,6 +31,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,6 +40,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.Dataset;
+import android.service.autofill.FillEventHistory;
 import android.service.autofill.augmented.PresentationParams.SystemPopupPresentationParams;
 import android.util.Log;
 import android.util.Pair;
@@ -319,6 +321,31 @@ public abstract class AugmentedAutofillService extends Service {
         pw.print(getClass().getName()); pw.println(": nothing to dump");
     }
 
+    /**
+     * Gets the inline augmented autofill events that happened after the last
+     * {@link #onFillRequest(FillRequest, CancellationSignal, FillController, FillCallback)} call.
+     *
+     * <p>The history is not persisted over reboots, and it's cleared every time the service
+     * replies to a
+     * {@link #onFillRequest(FillRequest, CancellationSignal, FillController, FillCallback)}
+     * by calling {@link FillCallback#onSuccess(FillResponse)}. Hence, the service should call
+     * {@link #getFillEventHistory() before finishing the {@link FillCallback}.
+     *
+     * <p>Also note that the events from the dropdown suggestion UI is not stored in the history
+     * since the service owns the UI.
+     *
+     * @return The history or {@code null} if there are no events.
+     */
+    @Nullable public final FillEventHistory getFillEventHistory() {
+        final AutofillManager afm = getSystemService(AutofillManager.class);
+
+        if (afm == null) {
+            return null;
+        } else {
+            return afm.getFillEventHistory();
+        }
+    }
+
     /** @hide */
     static final class AutofillProxy {
 
@@ -487,9 +514,10 @@ public abstract class AugmentedAutofillService extends Service {
             }
         }
 
-        public void onInlineSuggestionsDataReady(@NonNull List<Dataset> inlineSuggestionsData) {
+        public void onInlineSuggestionsDataReady(@NonNull List<Dataset> inlineSuggestionsData,
+                @Nullable Bundle clientState) {
             try {
-                mCallback.onSuccess(inlineSuggestionsData.toArray(new Dataset[]{}));
+                mCallback.onSuccess(inlineSuggestionsData.toArray(new Dataset[]{}), clientState);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling back with the inline suggestions data: " + e);
             }
@@ -511,7 +539,8 @@ public abstract class AugmentedAutofillService extends Service {
                         }
                     }
                     try {
-                        mCallback.onSuccess(/* mInlineSuggestionsData= */null);
+                        mCallback.onSuccess(/* inlineSuggestionsData= */null, /* clientState=*/
+                                null);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Error reporting success: " + e);
                     }

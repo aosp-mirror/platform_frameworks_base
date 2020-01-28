@@ -152,6 +152,13 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     private FillEventHistory mEventHistory;
 
+    /**
+     * The last inline augmented autofill selection. Note that we don't log the selection from the
+     * dropdown UI since the service owns the UI in that case.
+     */
+    @GuardedBy("mLock")
+    private FillEventHistory mAugmentedAutofillEventHistory;
+
     /** Shared instance, doesn't need to be logged */
     private final AutofillCompatState mAutofillCompatState;
 
@@ -694,12 +701,25 @@ final class AutofillManagerServiceImpl
         }
     }
 
+    void setLastAugmentedAutofillResponse(int sessionId) {
+        synchronized (mLock) {
+            mAugmentedAutofillEventHistory = new FillEventHistory(sessionId, /* clientState= */
+                    null);
+        }
+    }
+
     /**
      * Resets the last fill selection.
      */
     void resetLastResponse() {
         synchronized (mLock) {
             mEventHistory = null;
+        }
+    }
+
+    void resetLastAugmentedAutofillResponse() {
+        synchronized (mLock) {
+            mAugmentedAutofillEventHistory = null;
         }
     }
 
@@ -782,6 +802,32 @@ final class AutofillManagerServiceImpl
                         new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                                 null, null, null, null, null));
             }
+        }
+    }
+
+    void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
+            @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillEventHistory == null
+                    || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
+                return;
+            }
+            mAugmentedAutofillEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASET_SELECTED, suggestionId, clientState, null, null,
+                            null, null, null, null, null, null));
+        }
+    }
+
+    void logAugmentedAutofillShown(int sessionId, @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillEventHistory == null
+                    || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
+                return;
+            }
+            mAugmentedAutofillEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
+                            null, null, null, null, null));
+
         }
     }
 
@@ -868,14 +914,18 @@ final class AutofillManagerServiceImpl
      * Gets the fill event history.
      *
      * @param callingUid The calling uid
-     *
-     * @return The history or {@code null} if there is none.
+     * @return The history for the autofill or the augmented autofill events depending on the {@code
+     * callingUid}, or {@code null} if there is none.
      */
     FillEventHistory getFillEventHistory(int callingUid) {
         synchronized (mLock) {
             if (mEventHistory != null
                     && isCalledByServiceLocked("getFillEventHistory", callingUid)) {
                 return mEventHistory;
+            }
+            if (mAugmentedAutofillEventHistory != null && isCalledByAugmentedAutofillServiceLocked(
+                    "getFillEventHistory", callingUid)) {
+                return mAugmentedAutofillEventHistory;
             }
         }
         return null;
@@ -1150,8 +1200,32 @@ final class AutofillManagerServiceImpl
                 Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): " + componentName);
             }
 
-            mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
-                    componentName, mUserId, new RemoteAugmentedAutofillServiceCallbacks() {
+            final RemoteAugmentedAutofillServiceCallbacks callbacks =
+                    new RemoteAugmentedAutofillServiceCallbacks() {
+                        @Override
+                        public void resetLastResponse() {
+                            AutofillManagerServiceImpl.this.resetLastAugmentedAutofillResponse();
+                        }
+
+                        @Override
+                        public void setLastResponse(int sessionId) {
+                            AutofillManagerServiceImpl.this.setLastAugmentedAutofillResponse(
+                                    sessionId);
+                        }
+
+                        @Override
+                        public void logAugmentedAutofillShown(int sessionId, Bundle clientState) {
+                            AutofillManagerServiceImpl.this.logAugmentedAutofillShown(sessionId,
+                                    clientState);
+                        }
+
+                        @Override
+                        public void logAugmentedAutofillSelected(int sessionId, String suggestionId,
+                                Bundle clientState) {
+                            AutofillManagerServiceImpl.this.logAugmentedAutofillSelected(sessionId,
+                                    suggestionId, clientState);
+                        }
+
                         @Override
                         public void onServiceDied(@NonNull RemoteAugmentedAutofillService service) {
                             Slog.w(TAG, "remote augmented autofill service died");
@@ -1162,8 +1236,10 @@ final class AutofillManagerServiceImpl
                             }
                             mRemoteAugmentedAutofillService = null;
                         }
-                    }, mMaster.isInstantServiceAllowed(), mMaster.verbose,
-                    mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
+                    };
+            mRemoteAugmentedAutofillService = new RemoteAugmentedAutofillService(getContext(),
+                    componentName, mUserId, callbacks, mMaster.isInstantServiceAllowed(),
+                    mMaster.verbose, mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
                     mMaster.mAugmentedServiceRequestTimeoutMs);
         }
 
