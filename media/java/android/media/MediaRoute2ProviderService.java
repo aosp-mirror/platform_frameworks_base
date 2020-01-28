@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -57,6 +58,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class MediaRoute2ProviderService extends Service {
     private static final String TAG = "MR2ProviderService";
 
+    /**
+     * The {@link Intent} action that must be declared as handled by the service.
+     * Put this in your manifest to provide media routes.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.media.MediaRoute2ProviderService";
 
     /**
