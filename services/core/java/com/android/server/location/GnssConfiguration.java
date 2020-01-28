@@ -23,7 +23,8 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.StatsLog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import libcore.io.IoUtils;
 
@@ -283,7 +284,7 @@ class GnssConfiguration {
     }
 
     private void logConfigurations() {
-        StatsLog.write(StatsLog.GNSS_CONFIGURATION_REPORTED,
+        FrameworkStatsLog.write(FrameworkStatsLog.GNSS_CONFIGURATION_REPORTED,
                 getSuplHost(),
                 getSuplPort(0),
                 getC2KHost(),
