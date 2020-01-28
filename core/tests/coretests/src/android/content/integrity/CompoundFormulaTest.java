@@ -16,11 +16,9 @@
 
 package android.content.integrity;
 
-import static android.content.integrity.TestUtils.assertExpectException;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.expectThrows;
 
 import android.os.Parcel;
 
@@ -46,32 +44,32 @@ public class CompoundFormulaTest {
                 new CompoundFormula(
                         CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
 
-        assertEquals(CompoundFormula.AND, compoundFormula.getConnector());
-        assertEquals(
-                Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2), compoundFormula.getFormulas());
+        assertThat(compoundFormula.getConnector()).isEqualTo(CompoundFormula.AND);
+        assertThat(compoundFormula.getFormulas()).containsAllOf(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2);
     }
 
     @Test
     public void testValidateAuxiliaryFormula_binaryConnectors() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */
-                "Connector AND must have at least 2 formulas",
-                () ->
-                        new CompoundFormula(
-                                CompoundFormula.AND, Collections.singletonList(ATOMIC_FORMULA_1)));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new CompoundFormula(
+                                        CompoundFormula.AND,
+                                        Collections.singletonList(ATOMIC_FORMULA_1)));
+        assertThat(e.getMessage()).matches("Connector AND must have at least 2 formulas");
     }
 
     @Test
     public void testValidateAuxiliaryFormula_unaryConnectors() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */
-                "Connector NOT must have 1 formula only",
-                () ->
-                        new CompoundFormula(
-                                CompoundFormula.NOT,
-                                Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new CompoundFormula(
+                                        CompoundFormula.NOT,
+                                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+        assertThat(e.getMessage()).matches("Connector NOT must have 1 formula only");
     }
 
     @Test
@@ -82,20 +80,20 @@ public class CompoundFormulaTest {
         Parcel p = Parcel.obtain();
         formula.writeToParcel(p, 0);
         p.setDataPosition(0);
-        CompoundFormula newFormula = CompoundFormula.CREATOR.createFromParcel(p);
 
-        assertEquals(formula, newFormula);
+        assertThat(CompoundFormula.CREATOR.createFromParcel(p)).isEqualTo(formula);
     }
 
     @Test
     public void testInvalidCompoundFormula_invalidConnector() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */ "Unknown connector: -1",
-                () ->
-                        new CompoundFormula(
-                                /* connector= */ -1,
-                                Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new CompoundFormula(
+                                        /* connector= */ -1,
+                                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+        assertThat(e.getMessage()).matches("Unknown connector: -1");
     }
 
     @Test

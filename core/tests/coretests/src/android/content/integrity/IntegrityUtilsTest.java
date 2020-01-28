@@ -18,6 +18,7 @@ package android.content.integrity;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.testng.Assert.expectThrows;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import org.junit.Test;
@@ -43,15 +44,20 @@ public class IntegrityUtilsTest {
     }
 
     @Test
-    public void testInvalidHexDigest() {
-        TestUtils.assertExpectException(
-                IllegalArgumentException.class,
-                "must have even length",
-                () -> IntegrityUtils.getBytesFromHexDigest("ABC"));
+    public void testInvalidHexDigest_mustHaveEvenLength() {
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () -> IntegrityUtils.getBytesFromHexDigest("ABC"));
+        assertThat(e.getMessage()).containsMatch("must have even length");
+    }
 
-        TestUtils.assertExpectException(
-                IllegalArgumentException.class,
-                "Invalid hex char",
-                () -> IntegrityUtils.getBytesFromHexDigest("GH"));
+    @Test
+    public void testInvalidHexDigest_invalidHexChar() {
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () -> IntegrityUtils.getBytesFromHexDigest("GH"));
+        assertThat(e.getMessage()).containsMatch("Invalid hex char");
     }
 }
