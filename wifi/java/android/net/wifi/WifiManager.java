@@ -1334,10 +1334,12 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will return an empty list,
-     * except for:
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return an
+     * empty list.
+     * <p>
+     * Deprecation Exemptions:
      * <ul>
-     * <li>Device Owner (DO) & Profile Owner (PO) apps will have access to the full list.
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps will have access to the full list.
      * <li>Callers with Carrier privilege will receive a restricted list only containing
      * configurations which they created.
      * </ul>
@@ -1528,7 +1530,13 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code -1}.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code -1}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public int addNetwork(WifiConfiguration config) {
@@ -1563,7 +1571,13 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code -1}.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code -1}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public int updateNetwork(WifiConfiguration config) {
@@ -1961,8 +1975,13 @@ public class WifiManager {
      * See {@link #addNetworkSuggestions(List)}, {@link #removeNetworkSuggestions(List)} for new
      * API to add Wi-Fi networks for consideration when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#R} or above, except for system of DO/PO apps, this API
-     * will throw {@link IllegalArgumentException}
+     * {@link android.os.Build.VERSION_CODES#R} or above, this API will always fail and throw
+     * {@link IllegalArgumentException}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     public void addOrUpdatePasspointConfiguration(PasspointConfiguration config) {
         try {
@@ -2088,7 +2107,13 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code false}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public boolean removeNetwork(int netId) {
@@ -2132,7 +2157,12 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code false}.
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public boolean enableNetwork(int netId, boolean attemptConnect) {
@@ -2162,7 +2192,13 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code false}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public boolean disableNetwork(int netId) {
@@ -2185,7 +2221,13 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code false}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public boolean disconnect() {
@@ -2209,7 +2251,13 @@ public class WifiManager {
      * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
      * when auto-connecting to wifi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code false}.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public boolean reconnect() {
@@ -2803,9 +2851,14 @@ public class WifiManager {
      * @deprecated Starting with Build.VERSION_CODES#Q, applications are not allowed to
      * enable/disable Wi-Fi.
      * <b>Compatibility Note:</b> For applications targeting
-     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code false}
-     * and will have no effect. If apps are targeting an older SDK (
-     * {@link android.os.Build.VERSION_CODES#P} or below), they can continue to use this API.
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always fail and return
+     * {@code false}. If apps are targeting an older SDK ({@link android.os.Build.VERSION_CODES#P}
+     * or below), they can continue to use this API.
+     * <p>
+     * Deprecation Exemptions:
+     * <ul>
+     * <li>Device Owner (DO), Profile Owner (PO) and system apps.
+     * </ul>
      */
     @Deprecated
     public boolean setWifiEnabled(boolean enabled) {
