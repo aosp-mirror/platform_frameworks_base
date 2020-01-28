@@ -17,7 +17,9 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
@@ -32,6 +34,8 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
+@TestApi
 @SystemService(Context.ETHERNET_SERVICE)
 public class EthernetManager {
     private static final String TAG = "EthernetManager";
@@ -62,12 +66,14 @@ public class EthernetManager {
 
     /**
      * A listener interface to receive notification on changes in Ethernet.
+     * @hide
      */
     public interface Listener {
         /**
          * Called when Ethernet port's availability is changed.
          * @param iface Ethernet interface name
          * @param isAvailable {@code true} if Ethernet port exists.
+         * @hide
          */
         @UnsupportedAppUsage
         void onAvailabilityChanged(String iface, boolean isAvailable);
@@ -78,6 +84,7 @@ public class EthernetManager {
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#ETHERNET_SERVICE Context.ETHERNET_SERVICE}.
+     * @hide
      */
     public EthernetManager(Context context, IEthernetManager service) {
         mContext = context;
@@ -87,6 +94,7 @@ public class EthernetManager {
     /**
      * Get Ethernet configuration.
      * @return the Ethernet Configuration, contained in {@link IpConfiguration}.
+     * @hide
      */
     @UnsupportedAppUsage
     public IpConfiguration getConfiguration(String iface) {
@@ -99,6 +107,7 @@ public class EthernetManager {
 
     /**
      * Set Ethernet configuration.
+     * @hide
      */
     @UnsupportedAppUsage
     public void setConfiguration(String iface, IpConfiguration config) {
@@ -111,6 +120,7 @@ public class EthernetManager {
 
     /**
      * Indicates whether the system currently has one or more Ethernet interfaces.
+     * @hide
      */
     @UnsupportedAppUsage
     public boolean isAvailable() {
@@ -121,6 +131,7 @@ public class EthernetManager {
      * Indicates whether the system has given interface.
      *
      * @param iface Ethernet interface name
+     * @hide
      */
     @UnsupportedAppUsage
     public boolean isAvailable(String iface) {
@@ -135,6 +146,7 @@ public class EthernetManager {
      * Adds a listener.
      * @param listener A {@link Listener} to add.
      * @throws IllegalArgumentException If the listener is null.
+     * @hide
      */
     @UnsupportedAppUsage
     public void addListener(Listener listener) {
@@ -153,6 +165,7 @@ public class EthernetManager {
 
     /**
      * Returns an array of available Ethernet interface names.
+     * @hide
      */
     @UnsupportedAppUsage
     public String[] getAvailableInterfaces() {
@@ -167,6 +180,7 @@ public class EthernetManager {
      * Removes a listener.
      * @param listener A {@link Listener} to remove.
      * @throws IllegalArgumentException If the listener is null.
+     * @hide
      */
     @UnsupportedAppUsage
     public void removeListener(Listener listener) {
