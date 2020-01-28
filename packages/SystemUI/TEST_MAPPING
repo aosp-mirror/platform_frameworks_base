@@ -16,5 +16,24 @@
         }
       ]
     }
+  ],
+  "platinum-postsubmit": [
+    {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
+        },
+        {
+            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
+        },
+        {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+            "exclude-annotation": "android.platform.helpers.Staging"
+        }
+      ]
+    }
   ]
 }
