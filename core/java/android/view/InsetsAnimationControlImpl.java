@@ -191,13 +191,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         if (mCancelled) {
             return;
         }
-        InsetsState state = new InsetsState(mController.getState());
-        for (int i = mControls.size() - 1; i >= 0; i--) {
-            InsetsSourceControl control = mControls.valueAt(i);
-            state.getSource(control.getType()).setVisible(shown);
-        }
-        Insets insets = getInsetsFromState(state, mFrame, null /* typeSideMap */);
-        setInsetsAndAlpha(insets, 1f /* alpha */, 1f /* fraction */);
+        setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */);
         mFinished = true;
         mShownOnFinish = shown;
     }
