@@ -18,134 +18,216 @@ package com.google.android.test.windowinsetstests;
 
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
-import android.animation.ObjectAnimator;
-import android.animation.TypeEvaluator;
-import android.animation.ValueAnimator;
-import android.app.Activity;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.Context;
 import android.graphics.Insets;
 import android.os.Bundle;
-import android.util.Property;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation;
+import android.view.WindowInsetsAnimation.Callback;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
+import android.view.animation.LinearInterpolator;
+import android.widget.LinearLayout;
 
-import com.google.android.test.windowinsetstests.R;
+import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class WindowInsetsActivity extends Activity {
+public class WindowInsetsActivity extends AppCompatActivity {
 
     private View mRoot;
-    private View mButton;
 
-    private static class InsetsProperty extends Property<WindowInsetsAnimationController, Insets> {
-
-        private final View mViewToAnimate;
-        private final Insets mShowingInsets;
-
-        public InsetsProperty(View viewToAnimate, Insets showingInsets) {
-            super(Insets.class, "Insets");
-            mViewToAnimate = viewToAnimate;
-            mShowingInsets = showingInsets;
-        }
-
-        @Override
-        public Insets get(WindowInsetsAnimationController object) {
-            return object.getCurrentInsets();
-        }
-
-        @Override
-        public void set(WindowInsetsAnimationController object, Insets value) {
-            object.setInsetsAndAlpha(value, 1.0f, 0.5f);
-            if (mShowingInsets.bottom != 0) {
-                mViewToAnimate.setTranslationY(mShowingInsets.bottom - value.bottom);
-            } else if (mShowingInsets.right != 0) {
-                mViewToAnimate.setTranslationX(mShowingInsets.right - value.right);
-            } else if (mShowingInsets.left != 0) {
-                mViewToAnimate.setTranslationX(value.left - mShowingInsets.left);
-            }
-        }
-    };
-
-    float startY;
-    float endY;
-    WindowInsetsAnimation imeAnim;
+    final ArrayList<Transition> mTransitions = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.window_inset_activity);
+
+        setSupportActionBar(findViewById(R.id.toolbar));
+
         mRoot = findViewById(R.id.root);
-        mButton = findViewById(R.id.button);
-        mButton.setOnClickListener(v -> {
-            if (!v.getRootWindowInsets().isVisible(Type.ime())) {
-                v.getWindowInsetsController().show(Type.ime());
-            } else {
-                v.getWindowInsetsController().hide(Type.ime());
+        mRoot.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
+        mTransitions.add(new Transition(findViewById(R.id.scrollView)));
+        mTransitions.add(new Transition(findViewById(R.id.editText)));
+
+        mRoot.setOnTouchListener(new View.OnTouchListener() {
+            private final ViewConfiguration mViewConfiguration =
+                    ViewConfiguration.get(WindowInsetsActivity.this);
+            WindowInsetsAnimationController mAnimationController;
+            WindowInsetsAnimationControlListener mCurrentRequest;
+            boolean mRequestedController = false;
+            float mDown = 0;
+            float mCurrent = 0;
+            Insets mDownInsets = Insets.NONE;
+            boolean mShownAtDown;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mCurrent = event.getY();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        mDown = event.getY();
+                        mDownInsets = v.getRootWindowInsets().getInsets(Type.ime());
+                        mShownAtDown = v.getRootWindowInsets().isVisible(Type.ime());
+                        mRequestedController = false;
+                        mCurrentRequest = null;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        if (mAnimationController != null) {
+                            updateInset();
+                        } else if (Math.abs(mDown - event.getY())
+                                > mViewConfiguration.getScaledTouchSlop()
+                                && !mRequestedController) {
+                            mRequestedController = true;
+                            v.getWindowInsetsController().controlWindowInsetsAnimation(Type.ime(),
+                                    1000, new LinearInterpolator(),
+                                    mCurrentRequest = new WindowInsetsAnimationControlListener() {
+                                        @Override
+                                        public void onReady(
+                                                @NonNull WindowInsetsAnimationController controller,
+                                                int types) {
+                                            if (mCurrentRequest == this) {
+                                                mAnimationController = controller;
+                                                updateInset();
+                                            } else {
+                                                controller.finish(mShownAtDown);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled() {
+                                            mAnimationController = null;
+                                        }
+                                    });
+                        }
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        if (mAnimationController != null) {
+                            boolean isCancel = event.getAction() == MotionEvent.ACTION_CANCEL;
+                            mAnimationController.finish(isCancel ? mShownAtDown : !mShownAtDown);
+                            mAnimationController = null;
+                        }
+                        mRequestedController = false;
+                        mCurrentRequest = null;
+                        break;
+                }
+                return true;
+            }
+
+            private void updateInset() {
+                int inset = (int) (mDownInsets.bottom + (mDown - mCurrent));
+                final int hidden = mAnimationController.getHiddenStateInsets().bottom;
+                final int shown = mAnimationController.getShownStateInsets().bottom;
+                final int start = mShownAtDown ? shown : hidden;
+                final int end = mShownAtDown ? hidden : shown;
+                inset = max(inset, hidden);
+                inset = min(inset, shown);
+                mAnimationController.setInsetsAndAlpha(
+                        Insets.of(0, 0, 0, inset),
+                        1f, (inset - start) / (float)(end - start));
             }
         });
-        mRoot.setWindowInsetsAnimationCallback(new WindowInsetsAnimation.Callback(
-                DISPATCH_MODE_STOP) {
+
+        mRoot.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                mRoot.setPadding(insets.getSystemWindowInsetLeft(),
+                        insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(),
+                        insets.getSystemWindowInsetBottom());
+                return WindowInsets.CONSUMED;
+            }
+        });
+
+        mRoot.setWindowInsetsAnimationCallback(new Callback(DISPATCH_MODE_STOP) {
 
             @Override
             public void onPrepare(WindowInsetsAnimation animation) {
-                if ((animation.getTypeMask() & Type.ime()) != 0) {
-                    imeAnim = animation;
-                }
-                startY = mButton.getTop();
+                mTransitions.forEach(it -> it.onPrepare(animation));
             }
 
             @Override
             public WindowInsets onProgress(WindowInsets insets,
-                    List<WindowInsetsAnimation> runningAnimations) {
-                mButton.setY(startY + (endY - startY) * imeAnim.getInterpolatedFraction());
+                    @NonNull List<WindowInsetsAnimation> runningAnimations) {
+                mTransitions.forEach(it -> it.onProgress(insets));
                 return insets;
             }
 
             @Override
             public WindowInsetsAnimation.Bounds onStart(WindowInsetsAnimation animation,
                     WindowInsetsAnimation.Bounds bounds) {
-                endY = mButton.getTop();
+                mTransitions.forEach(Transition::onStart);
                 return bounds;
             }
 
             @Override
             public void onEnd(WindowInsetsAnimation animation) {
-                imeAnim = null;
+                mTransitions.forEach(it -> it.onFinish(animation));
             }
         });
     }
 
     @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    public void onResume() {
+        super.onResume();
+        // TODO: move this to onCreate once setDecorFitsSystemWindows can be safely called there.
+        getWindow().getDecorView().post(() -> getWindow().setDecorFitsSystemWindows(false));
+    }
 
-        TypeEvaluator<Insets> evaluator = (fraction, startValue, endValue) -> Insets.of(
-                (int)(startValue.left + fraction * (endValue.left - startValue.left)),
-                (int)(startValue.top + fraction * (endValue.top - startValue.top)),
-                (int)(startValue.right + fraction * (endValue.right - startValue.right)),
-                (int)(startValue.bottom + fraction * (endValue.bottom - startValue.bottom)));
+    static class Transition {
+        private int mEndBottom;
+        private int mStartBottom;
+        private final View mView;
+        private WindowInsetsAnimation mInsetsAnimation;
 
-        WindowInsetsAnimationControlListener listener = new WindowInsetsAnimationControlListener() {
-            @Override
-            public void onReady(WindowInsetsAnimationController controller, int types) {
-                ObjectAnimator animator = ObjectAnimator.ofObject(controller,
-                        new InsetsProperty(findViewById(R.id.button),
-                                controller.getShownStateInsets()),
-                        evaluator, controller.getShownStateInsets(),
-                        controller.getHiddenStateInsets());
-                animator.setRepeatCount(ValueAnimator.INFINITE);
-                animator.setRepeatMode(ValueAnimator.REVERSE);
-                animator.start();
+        Transition(View root) {
+            mView = root;
+        }
+
+        void onPrepare(WindowInsetsAnimation animation) {
+            if ((animation.getTypeMask() & Type.ime()) != 0) {
+                mInsetsAnimation = animation;
             }
+            mStartBottom = mView.getBottom();
+        }
 
-            @Override
-            public void onCancelled() {
+        void onProgress(WindowInsets insets) {
+            mView.setY(mStartBottom + (mEndBottom - mStartBottom)
+                    * mInsetsAnimation.getInterpolatedFraction()
+                    - mView.getHeight());
+        }
 
+        void onStart() {
+            mEndBottom = mView.getBottom();
+        }
+
+        void onFinish(WindowInsetsAnimation animation) {
+            if (mInsetsAnimation == animation) {
+                mInsetsAnimation = null;
             }
-        };
+        }
+    }
+
+    static class ImeLinearLayout extends LinearLayout {
+
+        public ImeLinearLayout(Context context,
+                @Nullable AttributeSet attrs) {
+            super(context, attrs);
+        }
     }
 }

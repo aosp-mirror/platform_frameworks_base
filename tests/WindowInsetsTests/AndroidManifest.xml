@@ -20,7 +20,7 @@
 
     <application android:label="@string/activity_title">
         <activity android:name=".WindowInsetsActivity"
-            android:theme="@android:style/Theme.Material"
+            android:theme="@style/appTheme"
             android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
