@@ -999,4 +999,16 @@ public abstract class PackageManagerInternal {
      * Migrates legacy obb data to its new location.
      */
     public abstract void migrateLegacyObbData();
+
+    /**
+     * Ensures that we block deletion of unused packages on user removal. This is purely for the
+     * purpose of ensuring that b/141413692 is not reproducible on Q.
+     */
+    public abstract void notifyingOnNextUserRemovalForTest();
+
+    /**
+     * Notifies PackageManager of the removal of a user. This is purely for the purpose of ensuring
+     * that b/141413692 is not reproducible on Q.
+     */
+    public abstract void userRemovedForTest();
 }
