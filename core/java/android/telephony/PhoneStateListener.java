@@ -168,6 +168,16 @@ public class PhoneStateListener {
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
     /**
+     * Listen for always reported changes of the network signal strengths (cellular),
+     * even in some situations such as the screen of the device is off.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
+    @SystemApi
+    public static final int LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH          = 0x00000200;
+
+    /**
      * Listen for changes to observed cell info.
      *
      * @see #onCellInfoChanged
