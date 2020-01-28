@@ -49,13 +49,13 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.view.WindowManagerPolicyConstants.OnReason;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -199,8 +199,8 @@ public class Notifier {
         try {
             mBatteryStats.noteInteractive(true);
         } catch (RemoteException ex) { }
-        StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
-                StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
+        FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
+                FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
     }
 
     /**
@@ -247,13 +247,15 @@ public class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockStartFromSource(tag, historyTag, workSource);
-                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
-                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
+                FrameworkStatsLog.write(FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        workSource, tag, historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             } else {
                 mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
-                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        ownerUid, null, tag, historyTag,
-                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
+                FrameworkStatsLog.write_non_chained(
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, ownerUid, null, tag,
+                        historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -270,13 +272,15 @@ public class Notifier {
         try {
             if (workSource != null) {
                 mBatteryStats.noteLongPartialWakelockFinishFromSource(tag, historyTag, workSource);
-                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, workSource,
-                        tag, historyTag, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
+                FrameworkStatsLog.write(FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
+                        workSource, tag, historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             } else {
                 mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
-                StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        ownerUid, null, tag, historyTag,
-                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
+                FrameworkStatsLog.write_non_chained(
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, ownerUid, null, tag,
+                        historyTag,
+                        FrameworkStatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             }
         } catch (RemoteException ex) {
             // Ignore
@@ -415,9 +419,9 @@ public class Notifier {
             try {
                 mBatteryStats.noteInteractive(interactive);
             } catch (RemoteException ex) { }
-            StatsLog.write(StatsLog.INTERACTIVE_STATE_CHANGED,
-                    interactive ? StatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON :
-                            StatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
+            FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
+                    interactive ? FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON :
+                            FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
 
             // Handle early behaviors.
             mInteractive = interactive;

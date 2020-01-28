@@ -65,13 +65,13 @@ import android.provider.Settings.SettingNotFoundException;
 import android.util.DebugUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1370,8 +1370,8 @@ public class VibratorService extends IVibratorService.Stub
     private void noteVibratorOnLocked(int uid, long millis) {
         try {
             mBatteryStatsService.noteVibratorOn(uid, millis);
-            StatsLog.write_non_chained(StatsLog.VIBRATOR_STATE_CHANGED, uid, null,
-                    StatsLog.VIBRATOR_STATE_CHANGED__STATE__ON, millis);
+            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.VIBRATOR_STATE_CHANGED, uid, null,
+                    FrameworkStatsLog.VIBRATOR_STATE_CHANGED__STATE__ON, millis);
             mCurVibUid = uid;
             mIsVibrating = true;
         } catch (RemoteException e) {
@@ -1382,8 +1382,8 @@ public class VibratorService extends IVibratorService.Stub
         if (mCurVibUid >= 0) {
             try {
                 mBatteryStatsService.noteVibratorOff(mCurVibUid);
-                StatsLog.write_non_chained(StatsLog.VIBRATOR_STATE_CHANGED, mCurVibUid, null,
-                        StatsLog.VIBRATOR_STATE_CHANGED__STATE__OFF, 0);
+                FrameworkStatsLog.write_non_chained(FrameworkStatsLog.VIBRATOR_STATE_CHANGED,
+                        mCurVibUid, null, FrameworkStatsLog.VIBRATOR_STATE_CHANGED__STATE__OFF, 0);
             } catch (RemoteException e) { }
             mCurVibUid = -1;
         }
