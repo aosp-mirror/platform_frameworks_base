@@ -16,7 +16,9 @@
 
 package android.compat.testing;
 
+import android.Manifest;
 import android.app.Instrumentation;
+import android.app.UiAutomation;
 import android.compat.Compatibility;
 import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
@@ -83,12 +85,16 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
         @Override
         public void evaluate() throws Throwable {
             Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+            UiAutomation uiAutomation = instrumentation.getUiAutomation();
             String packageName = instrumentation.getTargetContext().getPackageName();
             IPlatformCompat platformCompat = IPlatformCompat.Stub
                     .asInterface(ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
             if (platformCompat == null) {
                 throw new IllegalStateException("Could not get IPlatformCompat service!");
             }
+            uiAutomation.adoptShellPermissionIdentity(
+                    Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+                    Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG);
             Compatibility.setOverrides(mConfig);
             try {
                 platformCompat.setOverridesForTest(new CompatibilityChangeConfig(mConfig),
@@ -101,6 +107,7 @@ public class PlatformCompatChangeRule extends CoreCompatChangeRule {
             } catch (RemoteException e) {
                 throw new RuntimeException("Could not call IPlatformCompat binder method!", e);
             } finally {
+                uiAutomation.dropShellPermissionIdentity();
                 Compatibility.clearOverrides();
             }
         }
