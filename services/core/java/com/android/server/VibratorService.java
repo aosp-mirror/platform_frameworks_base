@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.os.VibrationEffect.Composition.PrimitiveEffect;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -73,8 +75,10 @@ import com.android.internal.util.DumpUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 public class VibratorService extends IVibratorService.Stub
         implements InputManager.InputDeviceListener {
@@ -128,10 +132,11 @@ public class VibratorService extends IVibratorService.Stub
     private final boolean mAllowPriorityVibrationsInLowPowerMode;
     private final boolean mSupportsAmplitudeControl;
     private final boolean mSupportsExternalControl;
+    private final List<Integer> mSupportedEffects;
     private final long mCapabilities;
     private final int mDefaultVibrationAmplitude;
     private final SparseArray<VibrationEffect> mFallbackEffects;
-    private final SparseArray<Integer> mProcStatesCache = new SparseArray();
+    private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
     private final WorkSource mTmpWorkSource = new WorkSource();
     private final Handler mH = new Handler();
     private final Object mLock = new Object();
@@ -150,7 +155,7 @@ public class VibratorService extends IVibratorService.Stub
 
     // mInputDeviceVibrators lock should be acquired after mLock, if both are
     // to be acquired
-    private final ArrayList<Vibrator> mInputDeviceVibrators = new ArrayList<Vibrator>();
+    private final ArrayList<Vibrator> mInputDeviceVibrators = new ArrayList<>();
     private boolean mVibrateInputDevicesSetting; // guarded by mInputDeviceVibrators
     private boolean mInputDeviceListenerRegistered; // guarded by mInputDeviceVibrators
 
@@ -171,7 +176,10 @@ public class VibratorService extends IVibratorService.Stub
     static native void vibratorOff();
     static native boolean vibratorSupportsAmplitudeControl();
     static native void vibratorSetAmplitude(int amplitude);
+    static native int[] vibratorGetSupportedEffects();
     static native long vibratorPerformEffect(long effect, long strength, Vibration vibration);
+    static native void vibratorPerformComposedEffect(
+            VibrationEffect.Composition.PrimitiveEffect[] effect, Vibration vibration);
     static native boolean vibratorSupportsExternalControl();
     static native void vibratorSetExternalControl(boolean enabled);
     static native long vibratorGetCapabilities();
@@ -238,6 +246,8 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
 
+        // Called by native
+        @SuppressWarnings("unused")
         private void onComplete() {
             synchronized (mLock) {
                 if (this == mCurrentVibration) {
@@ -346,10 +356,11 @@ public class VibratorService extends IVibratorService.Stub
 
         mSupportsAmplitudeControl = vibratorSupportsAmplitudeControl();
         mSupportsExternalControl = vibratorSupportsExternalControl();
+        mSupportedEffects = asList(vibratorGetSupportedEffects());
         mCapabilities = vibratorGetCapabilities();
 
         mContext = context;
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = context.getSystemService(PowerManager.class);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
         mWakeLock.setReferenceCounted(true);
 
@@ -510,12 +521,47 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     @Override // Binder call
+    public boolean[] areEffectsSupported(int[] effectIds) {
+        // Return null to indicate that the HAL doesn't actually tell us what effects are
+        // supported.
+        if (mSupportedEffects == null) {
+            return null;
+        }
+        boolean[] supported = new boolean[effectIds.length];
+        for (int i = 0; i < effectIds.length; i++) {
+            supported[i] = mSupportedEffects.contains(effectIds[i]);
+        }
+        return supported;
+    }
+
+    @Override // Binder call
+    public boolean[] arePrimitivesSupported(int[] primitiveIds) {
+        boolean[] supported = new boolean[primitiveIds.length];
+        if (hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+            Arrays.fill(supported, true);
+        }
+        return supported;
+    }
+
+
+    private static List<Integer> asList(int... vals) {
+        if (vals == null) {
+            return null;
+        }
+        List<Integer> l = new ArrayList<>(vals.length);
+        for (int val : vals) {
+            l.add(val);
+        }
+        return l;
+    }
+
+    @Override // Binder call
     public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, VibrationEffect effect,
             VibrationAttributes attrs) {
         if (!hasPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)) {
             throw new SecurityException("Requires VIBRATE_ALWAYS_ON permission");
         }
-        if ((mCapabilities & IVibrator.CAP_ALWAYS_ON_CONTROL) == 0) {
+        if (!hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
             Slog.e(TAG, "Always-on effects not supported.");
             return false;
         }
@@ -817,6 +863,14 @@ public class VibratorService extends IVibratorService.Stub
                 if (timeout > 0) {
                     mH.postDelayed(mVibrationEndRunnable, timeout);
                 }
+            } else if (vib.effect instanceof  VibrationEffect.Composed) {
+                Trace.asyncTraceBegin(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+                doVibratorComposedEffectLocked(vib);
+                // FIXME: We rely on the completion callback here, but I don't think we require that
+                // devices which support composition also support the completion callback. If we
+                // ever get a device that supports the former but not the latter, then we have no
+                // real way of knowing how long a given effect should last.
+                mH.postDelayed(mVibrationEndRunnable, 10000);
             } else {
                 Slog.e(TAG, "Unknown vibration type, ignoring");
             }
@@ -1148,7 +1202,7 @@ public class VibratorService extends IVibratorService.Stub
                     }
                 } else {
                     // Note: ordering is important here! Many haptic drivers will reset their
-                    // amplitude when enabled, so we always have to enable frst, then set the
+                    // amplitude when enabled, so we always have to enable first, then set the
                     // amplitude.
                     vibratorOn(millis);
                     doVibratorSetAmplitude(amplitude);
@@ -1201,7 +1255,7 @@ public class VibratorService extends IVibratorService.Stub
                 long duration = vibratorPerformEffect(prebaked.getId(),
                         prebaked.getEffectStrength(), vib);
                 long timeout = duration;
-                if ((mCapabilities & IVibrator.CAP_PERFORM_CALLBACK) != 0) {
+                if (hasCapability(IVibrator.CAP_PERFORM_CALLBACK)) {
                     timeout *= ASYNC_TIMEOUT_MULTIPLIER;
                 }
                 if (timeout > 0) {
@@ -1227,6 +1281,41 @@ public class VibratorService extends IVibratorService.Stub
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
         }
+    }
+
+    @GuardedBy("mLock")
+    private void doVibratorComposedEffectLocked(Vibration vib) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "doVibratorComposedEffectLocked");
+
+        try {
+            final VibrationEffect.Composed composed = (VibrationEffect.Composed) vib.effect;
+            final boolean usingInputDeviceVibrators;
+            synchronized (mInputDeviceVibrators) {
+                usingInputDeviceVibrators = !mInputDeviceVibrators.isEmpty();
+            }
+            // Input devices don't support composed effect, so skip trying it with them.
+            if (usingInputDeviceVibrators) {
+                return;
+            }
+
+            if (!hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
+                return;
+            }
+
+            PrimitiveEffect[] primitiveEffects =
+                    composed.getPrimitiveEffects().toArray(new PrimitiveEffect[0]);
+            vibratorPerformComposedEffect(primitiveEffects, vib);
+
+            // Composed effects don't actually give us an estimated duration, so we just guess here.
+            noteVibratorOnLocked(vib.uid, 10 * primitiveEffects.length);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+        }
+
+    }
+
+    private boolean hasCapability(long capability) {
+        return (mCapabilities & capability) == capability;
     }
 
     private VibrationEffect getFallbackEffect(int effectId) {
@@ -1424,7 +1513,7 @@ public class VibratorService extends IVibratorService.Stub
                 long[] timings, int[] amplitudes, int startIndex, int repeatIndex) {
             int i = startIndex;
             long timing = 0;
-            while(amplitudes[i] != 0) {
+            while (amplitudes[i] != 0) {
                 timing += timings[i++];
                 if (i >= timings.length) {
                     if (repeatIndex >= 0) {
@@ -1475,18 +1564,14 @@ public class VibratorService extends IVibratorService.Stub
             } else {
                 pw.println("null");
             }
-            pw.print("  mCurrentExternalVibration=");
-            if (mCurrentExternalVibration != null) {
-                pw.println(mCurrentExternalVibration.toString());
-            } else {
-                pw.println("null");
-            }
+            pw.print("  mCurrentExternalVibration=" + mCurrentExternalVibration);
             pw.println("  mVibratorUnderExternalControl=" + mVibratorUnderExternalControl);
             pw.println("  mLowPowerMode=" + mLowPowerMode);
             pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
             pw.println("  mNotificationIntensity=" + mNotificationIntensity);
             pw.println("  mRingIntensity=" + mRingIntensity);
-            pw.println("");
+            pw.println("  mSupportedEffects=" + mSupportedEffects);
+            pw.println();
             pw.println("  Previous ring vibrations:");
             for (VibrationInfo info : mPreviousRingVibrations) {
                 pw.print("    ");
@@ -1495,34 +1580,29 @@ public class VibratorService extends IVibratorService.Stub
 
             pw.println("  Previous notification vibrations:");
             for (VibrationInfo info : mPreviousNotificationVibrations) {
-                pw.print("    ");
-                pw.println(info.toString());
+                pw.println("    " + info);
             }
 
             pw.println("  Previous alarm vibrations:");
             for (VibrationInfo info : mPreviousAlarmVibrations) {
-                pw.print("    ");
-                pw.println(info.toString());
+                pw.println("    " + info);
             }
 
             pw.println("  Previous vibrations:");
             for (VibrationInfo info : mPreviousVibrations) {
-                pw.print("    ");
-                pw.println(info.toString());
+                pw.println("    " + info);
             }
 
             pw.println("  Previous external vibrations:");
             for (ExternalVibration vib : mPreviousExternalVibrations) {
-                pw.print("    ");
-                pw.println(vib.toString());
+                pw.println("    " + vib);
             }
         }
     }
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-            String[] args, ShellCallback callback, ResultReceiver resultReceiver)
-            throws RemoteException {
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
         new VibratorShellCommand(this).exec(this, in, out, err, args, callback, resultReceiver);
     }
 

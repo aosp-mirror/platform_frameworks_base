@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
@@ -41,37 +42,42 @@ public abstract class Vibrator {
 
     /**
      * Vibration intensity: no vibrations.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_OFF = 0;
 
     /**
      * Vibration intensity: low.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_LOW = 1;
 
     /**
      * Vibration intensity: medium.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_MEDIUM = 2;
 
     /**
      * Vibration intensity: high.
+     *
      * @hide
      */
     public static final int VIBRATION_INTENSITY_HIGH = 3;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "VIBRATION_INTENSITY_" }, value = {
-        VIBRATION_INTENSITY_OFF,
-        VIBRATION_INTENSITY_LOW,
-        VIBRATION_INTENSITY_MEDIUM,
-        VIBRATION_INTENSITY_HIGH
+    @IntDef(prefix = {"VIBRATION_INTENSITY_"}, value = {
+            VIBRATION_INTENSITY_OFF,
+            VIBRATION_INTENSITY_LOW,
+            VIBRATION_INTENSITY_MEDIUM,
+            VIBRATION_INTENSITY_HIGH
     })
-    public @interface VibrationIntensity{}
+    public @interface VibrationIntensity {
+    }
 
     private final String mPackageName;
     // The default vibration intensity level for haptic feedback.
@@ -117,6 +123,7 @@ public abstract class Vibrator {
 
     /**
      * Get the default vibration intensity for haptic feedback.
+     *
      * @hide
      */
     public int getDefaultHapticFeedbackIntensity() {
@@ -125,13 +132,16 @@ public abstract class Vibrator {
 
     /**
      * Get the default vibration intensity for notifications.
+     *
      * @hide
      */
     public int getDefaultNotificationVibrationIntensity() {
         return mDefaultNotificationVibrationIntensity;
     }
 
-    /** Get the default vibration intensity for ringtones.
+    /**
+     * Get the default vibration intensity for ringtones.
+     *
      * @hide
      */
     public int getDefaultRingVibrationIntensity() {
@@ -156,11 +166,12 @@ public abstract class Vibrator {
      * Configure an always-on haptics effect.
      *
      * @param alwaysOnId The board-specific always-on ID to configure.
-     * @param effect Vibration effect to assign to always-on id. Passing null will disable it.
+     * @param effect     Vibration effect to assign to always-on id. Passing null will disable it.
      * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *        vibrations associated with incoming calls. May only be null when effect is null.
+     *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *                   vibrations associated with incoming calls. May only be null when effect is
+     *                   null.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE_ALWAYS_ON)
@@ -183,7 +194,6 @@ public abstract class Vibrator {
      * Vibrate constantly for the specified period of time.
      *
      * @param milliseconds The number of milliseconds to vibrate.
-     *
      * @deprecated Use {@link #vibrate(VibrationEffect)} instead.
      */
     @Deprecated
@@ -196,11 +206,10 @@ public abstract class Vibrator {
      * Vibrate constantly for the specified period of time.
      *
      * @param milliseconds The number of milliseconds to vibrate.
-     * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *        vibrations associated with incoming calls.
-     *
+     * @param attributes   {@link AudioAttributes} corresponding to the vibration. For example,
+     *                     specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *                     {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *                     vibrations associated with incoming calls.
      * @deprecated Use {@link #vibrate(VibrationEffect, AudioAttributes)} instead.
      */
     @Deprecated
@@ -231,9 +240,8 @@ public abstract class Vibrator {
      * </p>
      *
      * @param pattern an array of longs of times for which to turn the vibrator on or off.
-     * @param repeat the index into pattern at which to repeat, or -1 if
-     *        you don't want to repeat.
-     *
+     * @param repeat  the index into pattern at which to repeat, or -1 if
+     *                you don't want to repeat.
      * @deprecated Use {@link #vibrate(VibrationEffect)} instead.
      */
     @Deprecated
@@ -256,14 +264,13 @@ public abstract class Vibrator {
      * to start the repeat, or -1 to disable repeating.
      * </p>
      *
-     * @param pattern an array of longs of times for which to turn the vibrator on or off.
-     * @param repeat the index into pattern at which to repeat, or -1 if
-     *        you don't want to repeat.
+     * @param pattern    an array of longs of times for which to turn the vibrator on or off.
+     * @param repeat     the index into pattern at which to repeat, or -1 if
+     *                   you don't want to repeat.
      * @param attributes {@link AudioAttributes} corresponding to the vibration. For example,
-     *        specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
-     *        {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
-     *        vibrations associated with incoming calls.
-     *
+     *                   specify {@link AudioAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link AudioAttributes#USAGE_NOTIFICATION_RINGTONE} for
+     *                   vibrations associated with incoming calls.
      * @deprecated Use {@link #vibrate(VibrationEffect, AudioAttributes)} instead.
      */
     @Deprecated
@@ -295,13 +302,93 @@ public abstract class Vibrator {
     }
 
     /**
-     * Like {@link #vibrate(int, String, VibrationEffect, AudioAttributes)}, but allows the
+     * Like {@link #vibrate(VibrationEffect, AudioAttributes)}, but allows the
      * caller to specify the vibration is owned by someone else and set reason for vibration.
+     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void vibrate(int uid, String opPkg, VibrationEffect vibe,
             String reason, AudioAttributes attributes);
+
+    /**
+     * Query whether the vibrator supports the given effects.
+     *
+     * If the returned array is {@code null}, the hardware doesn't support querying its supported
+     * effects. It may support any or all effects, but there's no way to programmatically know
+     * whether a {@link #vibrate} call will be successful.
+     *
+     * If the returned array is non-null, then it will be the same length as the query array and
+     * the value at a given index will contain whether the effect at that same index in the
+     * querying array is supported or not.
+     *
+     * @param effectIds Which effects to query for.
+     * @return Whether the effects are supported. Null when the hardware doesn't tell us what it
+     *         supports.
+     */
+    @Nullable
+    public boolean[] areEffectsSupported(
+            @NonNull @VibrationEffect.EffectType int... effectIds) {
+        return new boolean[effectIds.length];
+    }
+
+    /**
+     * Query whether the vibrator supports all of the given effects.
+     *
+     * If the result is {@code null}, the hardware doesn't support querying its supported
+     * effects. It may support any or all effects, but there's no way to programmatically know
+     * whether a {@link #vibrate} call will be successful.
+     *
+     * If the returned array is non-null, then it will return whether all of the effects are
+     * supported by the hardware.
+     *
+     * @param effectIds Which effects to query for.
+     * @return Whether the effects are supported. {@code null} when the hardware doesn't tell us
+     *         what it supports.
+     */
+    @Nullable
+    public Boolean areAllEffectsSupported(
+            @NonNull @VibrationEffect.EffectType int... effectIds) {
+        for (boolean supported : areEffectsSupported(effectIds)) {
+            if (!supported) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * Query whether the vibrator supports the given primitives.
+     *
+     * The returned array will be the same length as the query array and the value at a given index
+     * will contain whether the effect at that same index in the querying array is supported or
+     * not.
+     *
+     * @param primitiveIds Which primitives to query for.
+     * @return Whether the primitives are supported.
+     */
+    @NonNull
+    public boolean[] arePrimitivesSupported(
+            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+        return new boolean[primitiveIds.length];
+    }
+
+    /**
+     * Query whether the vibrator supports all of the given primitives.
+     *
+     * @param primitiveIds Which primitives to query for.
+     * @return Whether primitives effects are supported.
+     */
+    public boolean areAllPrimitivesSupported(
+            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+        for (boolean supported : arePrimitivesSupported(primitiveIds)) {
+            if (!supported) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Turn the vibrator off.
