@@ -748,8 +748,8 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
         parcel.writeInt(mFlags);
         parcel.writeIntArray(mCancelIds);
-        parcel.writeInt(mRequestId);
         parcel.writeParcelable(mInlineActions, flags);
+        parcel.writeInt(mRequestId);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<FillResponse> CREATOR =
