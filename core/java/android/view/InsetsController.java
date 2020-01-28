@@ -19,6 +19,7 @@ package android.view;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
@@ -31,6 +32,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -55,6 +57,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 
 /**
  * Implements {@link WindowInsetsController} on the client.
@@ -64,6 +67,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private static final int ANIMATION_DURATION_SHOW_MS = 275;
     private static final int ANIMATION_DURATION_HIDE_MS = 340;
+    private static final int PENDING_CONTROL_TIMEOUT_MS = 2000;
 
     static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
 
@@ -235,11 +239,35 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         DefaultAnimationControlListener(boolean show) {
             super(show);
         }
-
+        
         @Override
         protected void setStartingAnimation(boolean startingAnimation) {
             mStartingAnimation = startingAnimation;
         }
+    }
+    /**
+     * Represents a control request that we had to defer because we are waiting for the IME to
+     * process our show request.
+     */
+    private static class PendingControlRequest {
+
+        PendingControlRequest(@InsetsType int types, WindowInsetsAnimationControlListener listener,
+                long durationMs, Interpolator interpolator, @AnimationType int animationType,
+                @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+            this.types = types;
+            this.listener = listener;
+            this.durationMs = durationMs;
+            this.interpolator = interpolator;
+            this.animationType = animationType;
+            this.layoutInsetsDuringAnimation = layoutInsetsDuringAnimation;
+        }
+
+        final @InsetsType int types;
+        final WindowInsetsAnimationControlListener listener;
+        final long durationMs;
+        final Interpolator interpolator;
+        final @AnimationType int animationType;
+        final @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation;
     }
 
     private final String TAG = "InsetsControllerImpl";
@@ -248,8 +276,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final InsetsState mTmpState = new InsetsState();
 
     private final Rect mFrame = new Rect();
+    private final BiFunction<InsetsController, Integer, InsetsSourceConsumer> mConsumerCreator;
     private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
     private final ViewRootImpl mViewRoot;
+    private final Handler mHandler;
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
     private final ArrayList<RunningAnimation> mRunningAnimations = new ArrayList<>();
@@ -263,7 +293,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final Rect mLastLegacyContentInsets = new Rect();
     private final Rect mLastLegacyStableInsets = new Rect();
 
-    private int mPendingTypesToShow;
+    /** Pending control request that is waiting on IME to be ready to be shown */
+    private PendingControlRequest mPendingImeControlRequest;
 
     private int mLastLegacySoftInputMode;
     private int mLastLegacySystemUiFlags;
@@ -271,8 +302,26 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private SyncRtSurfaceTransactionApplier mApplier;
 
+    private Runnable mPendingControlTimeout = this::abortPendingImeControlRequest;
+
     public InsetsController(ViewRootImpl viewRoot) {
+        this(viewRoot, (controller, type) -> {
+            if (type == ITYPE_IME) {
+                return new ImeInsetsSourceConsumer(controller.mState, Transaction::new, controller);
+            } else {
+                return new InsetsSourceConsumer(type, controller.mState, Transaction::new,
+                        controller);
+            }
+        }, viewRoot.mHandler);
+    }
+
+    @VisibleForTesting
+    public InsetsController(ViewRootImpl viewRoot,
+            BiFunction<InsetsController, Integer, InsetsSourceConsumer> consumerCreator,
+            Handler handler) {
         mViewRoot = viewRoot;
+        mConsumerCreator = consumerCreator;
+        mHandler = handler;
         mAnimCallback = () -> {
             mAnimCallbackScheduled = false;
             if (mRunningAnimations.isEmpty()) {
@@ -393,7 +442,21 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         show(types, false /* fromIme */);
     }
 
-    void show(@InsetsType int types, boolean fromIme) {
+    @VisibleForTesting
+    public void show(@InsetsType int types, boolean fromIme) {
+
+        // Handle pending request ready in case there was one set.
+        if (fromIme && mPendingImeControlRequest != null) {
+            PendingControlRequest pendingRequest = mPendingImeControlRequest;
+            mPendingImeControlRequest = null;
+            mHandler.removeCallbacks(mPendingControlTimeout);
+            controlAnimationUnchecked(pendingRequest.types, pendingRequest.listener, mFrame,
+                    true /* fromIme */, pendingRequest.durationMs, pendingRequest.interpolator,
+                    false /* fade */, pendingRequest.animationType,
+                    pendingRequest.layoutInsetsDuringAnimation);
+            return;
+        }
+
         // TODO: Support a ResultReceiver for IME.
         // TODO(b/123718661): Make show() work for multi-session IME.
         int typesReady = 0;
@@ -463,6 +526,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
         if (types == 0) {
             // nothing to animate.
+            listener.onCancelled();
             return;
         }
         cancelExistingControllers(types);
@@ -471,18 +535,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
 
         Pair<Integer, Boolean> typesReadyPair = collectSourceControls(
-                fromIme, internalTypes, controls, listener);
+                fromIme, internalTypes, controls);
         int typesReady = typesReadyPair.first;
-        boolean isReady = typesReadyPair.second;
-        if (!isReady) {
-            // IME isn't ready, all requested types would be shown once IME is ready.
-            mPendingTypesToShow = typesReady;
-            // TODO: listener for pending types.
+        boolean imeReady = typesReadyPair.second;
+        if (!imeReady) {
+            // IME isn't ready, all requested types will be animated once IME is ready
+            abortPendingImeControlRequest();
+            mPendingImeControlRequest = new PendingControlRequest(types, listener, durationMs,
+                    interpolator, animationType, layoutInsetsDuringAnimation);
+            mHandler.postDelayed(mPendingControlTimeout, PENDING_CONTROL_TIMEOUT_MS);
             return;
         }
-
-        // pending types from previous request.
-        typesReady = collectPendingTypes(typesReady);
 
         if (typesReady == 0) {
             listener.onCancelled();
@@ -496,13 +559,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @return Pair of (types ready to animate, is ready to animate).
+     * @return Pair of (types ready to animate, IME ready to animate).
      */
     private Pair<Integer, Boolean> collectSourceControls(boolean fromIme,
-            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceControl> controls,
-            WindowInsetsAnimationControlListener listener) {
+            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceControl> controls) {
         int typesReady = 0;
-        boolean isReady = true;
+        boolean imeReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
             boolean setVisible = !consumer.isRequestedVisible();
@@ -512,16 +574,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     case ShowResult.SHOW_IMMEDIATELY:
                         typesReady |= InsetsState.toPublicType(consumer.getType());
                         break;
-                    case ShowResult.SHOW_DELAYED:
-                        isReady = false;
+                    case ShowResult.IME_SHOW_DELAYED:
+                        imeReady = false;
                         break;
-                    case ShowResult.SHOW_FAILED:
+                    case ShowResult.IME_SHOW_FAILED:
                         // IME cannot be shown (since it didn't have focus), proceed
                         // with animation of other types.
-                        if (mPendingTypesToShow != 0) {
-                            // remove IME from pending because view no longer has focus.
-                            mPendingTypesToShow &= ~InsetsState.toPublicType(ITYPE_IME);
-                        }
                         break;
                 }
             } else {
@@ -538,13 +596,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 controls.put(consumer.getType(), control);
             }
         }
-        return new Pair<>(typesReady, isReady);
-    }
-
-    private int collectPendingTypes(@InsetsType int typesReady) {
-        typesReady |= mPendingTypesToShow;
-        mPendingTypesToShow = 0;
-        return typesReady;
+        return new Pair<>(typesReady, imeReady);
     }
 
     private @LayoutInsetsDuringAnimation int getLayoutInsetsDuringAnimationMode(
@@ -577,6 +629,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 cancelAnimation(control, true /* invokeCallback */);
             }
         }
+        if ((types & ime()) != 0) {
+            abortPendingImeControlRequest();
+        }
+    }
+
+    private void abortPendingImeControlRequest() {
+        if (mPendingImeControlRequest != null) {
+            mPendingImeControlRequest.listener.onCancelled();
+            mPendingImeControlRequest = null;
+            mHandler.removeCallbacks(mPendingControlTimeout);
+        }
     }
 
     @VisibleForTesting
@@ -608,6 +671,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 cancelAnimation(control, true /* invokeCallback */);
             }
         }
+        if (consumer.getType() == ITYPE_IME) {
+            abortPendingImeControlRequest();
+        }
     }
 
     private void cancelAnimation(InsetsAnimationControlImpl control, boolean invokeCallback) {
@@ -635,7 +701,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (controller != null) {
             return controller;
         }
-        controller = createConsumerOfType(type);
+        controller = mConsumerCreator.apply(this, type);
         mSourceConsumers.put(type, controller);
         return controller;
     }
@@ -694,14 +760,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
         return ANIMATION_TYPE_NONE;
-    }
-
-    private InsetsSourceConsumer createConsumerOfType(int type) {
-        if (type == ITYPE_IME) {
-            return new ImeInsetsSourceConsumer(mState, Transaction::new, this);
-        } else {
-            return new InsetsSourceConsumer(type, mState, Transaction::new, this);
-        }
     }
 
     /**

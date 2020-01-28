@@ -636,6 +636,7 @@ public final class ViewRootImpl implements ViewParent,
             InputEventConsistencyVerifier.isInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(this, 0) : null;
 
+    private final InsetsController mInsetsController;
     private final ImeFocusController mImeFocusController;
 
     /**
@@ -646,7 +647,6 @@ public final class ViewRootImpl implements ViewParent,
         return mImeFocusController;
     }
 
-    private final InsetsController mInsetsController = new InsetsController(this);
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
 
@@ -705,6 +705,7 @@ public final class ViewRootImpl implements ViewParent,
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
+        mInsetsController = new InsetsController(this);
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
