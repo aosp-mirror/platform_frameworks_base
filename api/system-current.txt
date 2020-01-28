@@ -5377,7 +5377,7 @@ package android.media.tv.tuner.frontend {
   public static class Atsc3FrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setBandwidth(int);
-    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(byte);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(int);
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setPlpSettings(@NonNull android.media.tv.tuner.frontend.Atsc3PlpSettings[]);
   }
 
@@ -5431,7 +5431,7 @@ package android.media.tv.tuner.frontend {
 
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder(@NonNull android.content.Context);
-    method public byte getAnnex();
+    method public int getAnnex();
     method public long getFec();
     method public int getModulation();
     method public int getOuterFec();
@@ -5459,7 +5459,7 @@ package android.media.tv.tuner.frontend {
 
   public static class DvbcFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
-    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(byte);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);

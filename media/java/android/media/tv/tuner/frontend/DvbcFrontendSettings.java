@@ -147,11 +147,11 @@ public class DvbcFrontendSettings extends FrontendSettings {
     private final long mFec;
     private final int mSymbolRate;
     private final int mOuterFec;
-    private final byte mAnnex;
+    private final int mAnnex;
     private final int mSpectralInversion;
 
     private DvbcFrontendSettings(int frequency, int modulation, long fec, int symbolRate,
-            int outerFec, byte annex, int spectralInversion) {
+            int outerFec, int annex, int spectralInversion) {
         super(frequency);
         mModulation = modulation;
         mFec = fec;
@@ -192,7 +192,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
      * Gets Annex.
      */
     @Annex
-    public byte getAnnex() {
+    public int getAnnex() {
         return mAnnex;
     }
     /**
@@ -223,7 +223,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
         private long mFec;
         private int mSymbolRate;
         private int mOuterFec;
-        private byte mAnnex;
+        private int mAnnex;
         private int mSpectralInversion;
 
         private Builder() {
@@ -265,7 +265,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
          * Sets Annex.
          */
         @NonNull
-        public Builder setAnnex(@Annex byte annex) {
+        public Builder setAnnex(@Annex int annex) {
             mAnnex = annex;
             return this;
         }
