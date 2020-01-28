@@ -1615,6 +1615,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%1$d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%2$d</xliff:g> න් පසුව, ඔබගේ ඊ-තැපැල් ලිපිනය භාවිතයෙන් ඔබගේ දුරකථනය අගුළු හැරීමට ඔබගෙන් අසයි.\n\n තත්පර <xliff:g id="NUMBER_2">%3$d</xliff:g> න් පසුව නැවත උත්සහ කරන්න."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ඉවත් කරන්න"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"නිර්දේශිතයි මට්ටමට වඩා ශබ්දය වැඩිද?\n\nදිගු කාලයක් සඳහා ඉහළ ශබ්දයක් ඇසීමෙන් ඇතැම් විට ඔබගේ ඇසීමට හානි විය හැක."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ප්‍රවේශ්‍යතා කෙටිමඟ භාවිතා කරන්නද?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"කෙටිමඟ සක්‍රිය විට, හඬ බොත්තම් දෙකම තත්පර 3ක් අල්ලාගෙන සිටීමෙන් ප්‍රවේශ්‍යත අංගයක් ඇරඹේ.\n\n වත්මන් ප්‍රවේශ්‍යතා අංගය:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n සැකසීම් &gt; ප්‍රවේශ්‍යතාව තුළ ඔබට අංගය වෙනස් කළ හැක."</string>
