@@ -99,6 +99,10 @@ inline bool isVendorPulledAtom(int atomId) {
     return atomId >= StatsdStats::kVendorPulledAtomStartTag && atomId < StatsdStats::kMaxAtomTag;
 }
 
+inline bool isPulledAtom(int atomId) {
+    return atomId >= StatsdStats::kPullAtomStartTag && atomId < StatsdStats::kVendorAtomStartTag;
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
