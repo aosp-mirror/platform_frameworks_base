@@ -224,6 +224,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
+     * Listener to be notified when a bubbles' notification suppression state changes.
+     */
+    public interface NotificationSuppressionChangedListener {
+        /**
+         * Called when the notification suppression state of a bubble changes.
+         */
+        void onBubbleNotificationSuppressionChange(Bubble bubble);
+
+    }
+
+    /**
      * Listens for the current state of the status bar and updates the visibility state
      * of bubbles as needed.
      */
@@ -303,9 +314,22 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         configurationController.addCallback(this /* configurationListener */);
 
+        mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
-        mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
+        mBubbleData.setSuppressionChangedListener(new NotificationSuppressionChangedListener() {
+            @Override
+            public void onBubbleNotificationSuppressionChange(Bubble bubble) {
+                // Make sure NoMan knows it's not showing in the shade anymore so anyone querying it
+                // can tell.
+                try {
+                    mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
+                            !bubble.showInShade());
+                } catch (RemoteException e) {
+                    // Bad things have happened
+                }
+            }
+        });
 
         mNotificationEntryManager = entryManager;
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
@@ -720,7 +744,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 Bubble bubble = mBubbleData.getBubbleWithKey(key);
                 boolean bubbleExtended = entry != null && entry.isBubble() && userRemovedNotif;
                 if (bubbleExtended) {
-                    bubble.setShowInShade(false);
+                    bubble.setSuppressNotification(true);
                     bubble.setShowDot(false /* show */, true /* animate */);
                     mNotificationEntryManager.updateNotifications(
                             "BubbleController.onNotificationRemoveRequested");
@@ -747,7 +771,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 // As far as group manager is concerned, once a child is no longer shown
                 // in the shade, it is essentially removed.
                 mNotificationGroupManager.onEntryRemoved(bubbleChild.getEntry());
-                bubbleChild.setShowInShade(false);
+                bubbleChild.setSuppressNotification(true);
                 bubbleChild.setShowDot(false /* show */, true /* animate */);
             }
             // And since all children are removed, remove the summary.

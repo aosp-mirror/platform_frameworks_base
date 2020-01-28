@@ -5438,6 +5438,46 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnBubbleNotificationSuppressionChanged() throws Exception {
+        // Bubble notification
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
+
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(PKG, nr.sbn.getUserId(), true /* global */,
+                true /* app */, true /* channel */);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.sbn.getTag(),
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // NOT suppressed
+        Notification n =  mBinderService.getActiveNotifications(PKG)[0].getNotification();
+        assertFalse(n.getBubbleMetadata().isNotificationSuppressed());
+
+        // Reset as this is called when the notif is first sent
+        reset(mListeners);
+
+        // Test: update suppression to true
+        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), true);
+        waitForIdle();
+
+        // Check
+        n =  mBinderService.getActiveNotifications(PKG)[0].getNotification();
+        assertTrue(n.getBubbleMetadata().isNotificationSuppressed());
+
+        // Reset to check again
+        reset(mListeners);
+
+        // Test: update suppression to false
+        mService.mNotificationDelegate.onBubbleNotificationSuppressionChanged(nr.getKey(), false);
+        waitForIdle();
+
+        // Check
+        n = mBinderService.getActiveNotifications(PKG)[0].getNotification();
+        assertFalse(n.getBubbleMetadata().isNotificationSuppressed());
+    }
+
+    @Test
     public void testGrantInlineReplyUriPermission_recordExists() throws Exception {
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",

@@ -8644,17 +8644,23 @@ public class Notification implements Parcelable
         public static final int FLAG_AUTO_EXPAND_BUBBLE = 0x00000001;
 
         /**
-         * If set and the app posting the bubble is in the foreground, the bubble will
-         * be posted <b>without</b> the associated notification in the notification shade.
+         * Indicates whether the notification associated with the bubble is being visually
+         * suppressed from the notification shade. When <code>true</code> the notification is
+         * hidden, when <code>false</code> the notification shows as normal.
          *
-         * <p>This flag has no effect if the app posting the bubble is not in the foreground.
-         * The app is considered foreground if it is visible and on the screen, note that
-         * a foreground service does not qualify.
-         * </p>
+         * <p>Apps sending bubbles may set this flag so that the bubble is posted <b>without</b>
+         * the associated notification in the notification shade.</p>
          *
-         * <p>Generally this flag should only be set if the user has performed an action to request
-         * or create a bubble, or if the user has seen the content in the notification and the
-         * notification is no longer relevant.</p>
+         * <p>Apps sending bubbles can only apply this flag when the app is in the foreground,
+         * otherwise the flag is not respected. The app is considered foreground if it is visible
+         * and on the screen, note that a foreground service does not qualify.</p>
+         *
+         * <p>Generally this flag should only be set by the app if the user has performed an
+         * action to request or create a bubble, or if the user has seen the content in the
+         * notification and the notification is no longer relevant. </p>
+         *
+         * <p>The system will also update this flag with <code>true</code> to hide the notification
+         * from the user once the bubble has been expanded. </p>
          *
          * @hide
          */
@@ -8772,6 +8778,24 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Indicates whether the notification associated with the bubble is being visually
+         * suppressed from the notification shade. When <code>true</code> the notification is
+         * hidden, when <code>false</code> the notification shows as normal.
+         *
+         * <p>Apps sending bubbles may set this flag so that the bubble is posted <b>without</b>
+         * the associated notification in the notification shade.</p>
+         *
+         * <p>Apps sending bubbles can only apply this flag when the app is in the foreground,
+         * otherwise the flag is not respected. The app is considered foreground if it is visible
+         * and on the screen, note that a foreground service does not qualify.</p>
+         *
+         * <p>Generally the app should only set this flag if the user has performed an
+         * action to request or create a bubble, or if the user has seen the content in the
+         * notification and the notification is no longer relevant. </p>
+         *
+         * <p>The system will update this flag with <code>true</code> to hide the notification
+         * from the user once the bubble has been expanded.</p>
+         *
          * @return whether this bubble should suppress the notification when it is posted.
          *
          * @see BubbleMetadata.Builder#setSuppressNotification(boolean)
