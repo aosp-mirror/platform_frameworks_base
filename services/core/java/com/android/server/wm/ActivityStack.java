@@ -356,6 +356,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     // TODO(task-hierarchy): remove when tiles can be actual parents
     TaskTile mTile = null;
 
+    private int mLastTaskOrganizerWindowingMode = -1;
+
     private final Handler mHandler;
 
     private class ActivityStackHandler extends Handler {
@@ -794,6 +796,13 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
 
         final int windowingMode = getWindowingMode();
+        if (windowingMode == mLastTaskOrganizerWindowingMode) {
+            // If our windowing mode hasn't actually changed, then just stick
+            // with our old organizer. This lets us implement the semantic
+            // where SysUI can continue to manage it's old tasks
+            // while CTS temporarily takes over the registration.
+            return;
+        }
         /*
          * Different windowing modes may be managed by different task organizers. If
          * getTaskOrganizer returns null, we still call setTaskOrganizer to
@@ -802,6 +811,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         final ITaskOrganizer org =
             mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
         setTaskOrganizer(org);
+        mLastTaskOrganizerWindowingMode = windowingMode;
     }
 
     @Override
