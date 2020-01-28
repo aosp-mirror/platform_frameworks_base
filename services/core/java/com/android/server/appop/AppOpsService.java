@@ -25,6 +25,9 @@ import static android.app.AppOpsManager.FILTER_BY_OP_NAMES;
 import static android.app.AppOpsManager.FILTER_BY_PACKAGE_NAME;
 import static android.app.AppOpsManager.FILTER_BY_UID;
 import static android.app.AppOpsManager.HistoricalOpsRequestFilter;
+import static android.app.AppOpsManager.KEY_BG_STATE_SETTLE_TIME;
+import static android.app.AppOpsManager.KEY_FG_SERVICE_STATE_SETTLE_TIME;
+import static android.app.AppOpsManager.KEY_TOP_STATE_SETTLE_TIME;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.NoteOpEvent;
 import static android.app.AppOpsManager.OP_CAMERA;
@@ -352,30 +355,25 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     @VisibleForTesting
     final class Constants extends ContentObserver {
-        // Key names stored in the settings value.
-        private static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
-        private static final String KEY_FG_SERVICE_STATE_SETTLE_TIME
-                = "fg_service_state_settle_time";
-        private static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
 
         /**
          * How long we want for a drop in uid state from top to settle before applying it.
          * @see Settings.Global#APP_OPS_CONSTANTS
-         * @see #KEY_TOP_STATE_SETTLE_TIME
+         * @see AppOpsManager#KEY_TOP_STATE_SETTLE_TIME
          */
         public long TOP_STATE_SETTLE_TIME;
 
         /**
          * How long we want for a drop in uid state from foreground to settle before applying it.
          * @see Settings.Global#APP_OPS_CONSTANTS
-         * @see #KEY_FG_SERVICE_STATE_SETTLE_TIME
+         * @see AppOpsManager#KEY_FG_SERVICE_STATE_SETTLE_TIME
          */
         public long FG_SERVICE_STATE_SETTLE_TIME;
 
         /**
          * How long we want for a drop in uid state from background to settle before applying it.
          * @see Settings.Global#APP_OPS_CONSTANTS
-         * @see #KEY_BG_STATE_SETTLE_TIME
+         * @see AppOpsManager#KEY_BG_STATE_SETTLE_TIME
          */
         public long BG_STATE_SETTLE_TIME;
 

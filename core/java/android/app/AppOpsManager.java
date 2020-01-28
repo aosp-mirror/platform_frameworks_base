@@ -161,6 +161,38 @@ public class AppOpsManager {
 
     static IBinder sClientId;
 
+    /**
+     * How many seconds we want for a drop in uid state from top to settle before applying it.
+     *
+     * <>Set a parameter to {@link android.provider.Settings.Global#APP_OPS_CONSTANTS}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
+
+    /**
+     * How many second we want for a drop in uid state from foreground to settle before applying it.
+     *
+     * <>Set a parameter to {@link android.provider.Settings.Global#APP_OPS_CONSTANTS}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME =
+            "fg_service_state_settle_time";
+
+    /**
+     * How many seconds we want for a drop in uid state from background to settle before applying
+     * it.
+     *
+     * <>Set a parameter to {@link android.provider.Settings.Global#APP_OPS_CONSTANTS}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "HISTORICAL_MODE_" }, value = {
