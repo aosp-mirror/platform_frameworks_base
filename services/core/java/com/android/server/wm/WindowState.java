@@ -5616,4 +5616,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isNonToastWindowVisibleForPid(int pid) {
         return mSession.mPid == pid && isNonToastOrStarting() && isVisibleNow();
     }
+
+    SurfaceControl getDeferTransactionBarrier() {
+        return mWinAnimator.getDeferTransactionBarrier();
+    }
 }

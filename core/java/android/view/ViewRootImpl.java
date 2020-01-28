@@ -507,7 +507,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
     private final SurfaceControl mSurfaceControl = new SurfaceControl();
-    private SurfaceControl mBlastSurfaceControl;
+    private SurfaceControl mBlastSurfaceControl = new SurfaceControl();
 
     private BLASTBufferQueue mBlastBufferQueue;
 
@@ -1690,23 +1690,17 @@ public final class ViewRootImpl implements ViewParent,
                     .build();
             setBoundsLayerCrop();
             mTransaction.show(mBoundsLayer).apply();
-        }
-        return mBoundsLayer;
+        } 
+       return mBoundsLayer;
     }
 
     Surface getOrCreateBLASTSurface(int width, int height) {
         if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
             return null;
         }
-        if (mBlastSurfaceControl == null) {
-            mBlastSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
-            .setParent(mSurfaceControl)
-            .setName("BLAST")
-            .setBLASTLayer()
-            .build();
+        if ((mBlastBufferQueue != null) && mBlastSurfaceControl.isValid()) {
             mBlastBufferQueue = new BLASTBufferQueue(
                 mBlastSurfaceControl, width, height);
-
         }
         mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
 
@@ -7341,7 +7335,8 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrame, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingBackDropFrame, mPendingDisplayCutout,
-                mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize);
+                mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize,
+                mBlastSurfaceControl);
         if (mSurfaceControl.isValid()) {
             if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
                 mSurface.copyFrom(mSurfaceControl);
