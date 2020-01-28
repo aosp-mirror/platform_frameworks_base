@@ -66,7 +66,7 @@ public class ChangeAppRotationTest extends FlickerTestBase {
     @Parameters(name = "{0}-{1}")
     public static Collection<Object[]> getParams() {
         int[] supportedRotations =
-                {Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_270};
+                {Surface.ROTATION_0, Surface.ROTATION_90};
         Collection<Object[]> params = new ArrayList<>();
         for (int begin : supportedRotations) {
             for (int end : supportedRotations) {
