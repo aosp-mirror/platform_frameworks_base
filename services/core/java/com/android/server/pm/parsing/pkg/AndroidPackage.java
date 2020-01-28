@@ -16,8 +16,6 @@
 
 package com.android.server.pm.parsing.pkg;
 
-import static android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -26,12 +24,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
 import android.content.pm.parsing.ParsingPackageRead;
+import android.content.pm.parsing.component.ParsedFeature;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import com.android.internal.R;
 
@@ -55,14 +55,6 @@ import java.util.UUID;
  */
 public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPackageRead, Parcelable {
 
-    //TODO(b/135203078): Remove in favor of individual methods
-    @Deprecated
-    int getFlags();
-
-    //TODO(b/135203078): Remove in favor of individual methods
-    @Deprecated
-    int getPrivateFlags();
-
     //TODO(b/135203078): Move to PackageSetting
     @Deprecated
     @Nullable
@@ -77,15 +69,6 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
      */
     @Deprecated
     AndroidPackageWrite mutate();
-
-    @Deprecated
-    String getCredentialProtectedDataDir();
-
-    @Deprecated
-    String getDataDir();
-
-    @Deprecated
-    String getDeviceProtectedDataDir();
 
     /**
      * The names of packages to adopt ownership of permissions from, parsed under
@@ -197,7 +180,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
      * TODO(b/135203078): Is this actually used/working?
      */
     @NonNull
-    List<ParsedActivityIntentInfo> getPreferredActivityFilters();
+    List<Pair<String, ParsedIntentInfo>> getPreferredActivityFilters();
 
     /**
      * System protected broadcasts.

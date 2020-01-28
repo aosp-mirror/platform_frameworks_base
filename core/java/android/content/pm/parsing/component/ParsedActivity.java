@@ -190,38 +190,41 @@ public class ParsedActivity extends ParsedMainComponent {
 //        alias.metaData = target.metaData;
     }
 
-    public void setMaxAspectRatio(int resizeMode, float maxAspectRatio) {
+    public ParsedActivity setMaxAspectRatio(int resizeMode, float maxAspectRatio) {
         if (resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE
                 || resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
             // Resizeable activities can be put in any aspect ratio.
-            return;
+            return this;
         }
 
         if (maxAspectRatio < 1.0f && maxAspectRatio != 0) {
             // Ignore any value lesser than 1.0.
-            return;
+            return this;
         }
 
         this.maxAspectRatio = maxAspectRatio;
+        return this;
     }
 
-    public void setMinAspectRatio(int resizeMode, float minAspectRatio) {
+    public ParsedActivity setMinAspectRatio(int resizeMode, float minAspectRatio) {
         if (resizeMode == RESIZE_MODE_RESIZEABLE
                 || resizeMode == RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION) {
             // Resizeable activities can be put in any aspect ratio.
-            return;
+            return this;
         }
 
         if (minAspectRatio < 1.0f && minAspectRatio != 0) {
             // Ignore any value lesser than 1.0.
-            return;
+            return this;
         }
 
         this.minAspectRatio = minAspectRatio;
+        return this;
     }
 
-    public void setFlags(int flags) {
+    public ParsedActivity setFlags(int flags) {
         this.flags = flags;
+        return this;
     }
 
     public ParsedActivity setResizeMode(int resizeMode) {

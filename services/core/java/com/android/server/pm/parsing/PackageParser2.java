@@ -19,8 +19,12 @@ package com.android.server.pm.parsing;
 import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.SystemClock;
@@ -43,16 +47,16 @@ public class PackageParser2 {
     private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
     private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
 
-    private ThreadLocal<ParsingPackageUtils.ParseResult> mSharedResult = ThreadLocal.withInitial(
-            ParsingPackageUtils.ParseResult::new);
+    private ThreadLocal<ParseTypeImpl> mSharedResult = ThreadLocal.withInitial(ParseTypeImpl::new);
 
     private final String[] mSeparateProcesses;
     private final boolean mOnlyCoreApps;
     private final DisplayMetrics mDisplayMetrics;
-    private final Callback mCallback;
 
     @Nullable
     protected PackageCacher mCacher;
+
+    private ParsingPackageUtils parsingUtils;
 
     /**
      * @param onlyCoreApps Flag indicating this parser should only consider apps with
@@ -73,12 +77,14 @@ public class PackageParser2 {
 
         mCacher = cacheDir == null ? null : new PackageCacher(cacheDir);
         // TODO(b/135203078): Remove nullability of callback
-        mCallback = callback != null ? callback : new Callback() {
+        callback = callback != null ? callback : new Callback() {
             @Override
             public boolean hasFeature(String feature) {
                 return false;
             }
         };
+
+        parsingUtils = new ParsingPackageUtils(onlyCoreApps, separateProcesses, displayMetrics, callback);
     }
 
     /**
@@ -86,7 +92,7 @@ public class PackageParser2 {
      */
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches)
-            throws PackageParser.PackageParserException {
+            throws PackageParserException {
         if (useCaches && mCacher != null) {
             ParsedPackage parsed = mCacher.getCachedResult(packageFile, flags);
             if (parsed != null) {
@@ -95,10 +101,14 @@ public class PackageParser2 {
         }
 
         long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
-        ParsingPackageUtils.ParseInput parseInput = mSharedResult.get().reset();
-        ParsedPackage parsed = (ParsedPackage) ParsingPackageUtils.parsePackage(parseInput,
-                mSeparateProcesses, mCallback, mDisplayMetrics, mOnlyCoreApps, packageFile, flags)
-                .hideAsParsed();
+        ParseInput input = mSharedResult.get().reset();
+        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags);
+        if (result.isError()) {
+            throw new PackageParserException(result.getErrorCode(), result.getErrorMessage(),
+                    result.getException());
+        }
+
+        ParsedPackage parsed = (ParsedPackage) result.getResult().hideAsParsed();
 
         long cacheTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         if (mCacher != null) {

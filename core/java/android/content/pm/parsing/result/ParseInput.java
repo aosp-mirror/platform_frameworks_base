@@ -19,6 +19,7 @@ package android.content.pm.parsing.result;
 import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManager;
 
 /**
  * Used as a method parameter which is then transformed into a {@link ParseResult}. This is
@@ -34,7 +35,10 @@ public interface ParseInput {
     /** @see #error(int, String, Exception) */
     <ResultType> ParseResult<ResultType> error(int parseError);
 
-    /** @see #error(int, String, Exception) */
+    /**
+     * This will assign errorCode to {@link PackageManager#INSTALL_PARSE_FAILED_MANIFEST_MALFORMED}.
+     * @see #error(int, String, Exception)
+     */
     <ResultType> ParseResult<ResultType> error(@NonNull String parseError);
 
     /** @see #error(int, String, Exception) */

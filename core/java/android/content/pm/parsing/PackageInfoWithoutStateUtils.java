@@ -40,18 +40,20 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
-import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
+import android.content.pm.parsing.ParsingPackage;
 import android.os.Environment;
 import android.os.UserHandle;
 
 import com.android.internal.util.ArrayUtils;
+import android.content.pm.parsing.component.ComponentParseUtils;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 
 import libcore.util.EmptyArray;
 
@@ -99,7 +101,8 @@ public class PackageInfoWithoutStateUtils {
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final ParsedActivity a = pkg.getActivities().get(i);
-                    if (state.isMatch(false, pkg.isEnabled(), a, flags)) {
+                    if (ComponentParseUtils.isMatch(state, false, pkg.isEnabled(), a,
+                            flags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
                                 a.getName())) {
                             continue;
@@ -118,7 +121,8 @@ public class PackageInfoWithoutStateUtils {
                 final ActivityInfo[] res = new ActivityInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedActivity a = pkg.getReceivers().get(i);
-                    if (state.isMatch(false, pkg.isEnabled(), a, flags)) {
+                    if (ComponentParseUtils.isMatch(state, false, pkg.isEnabled(), a,
+                            flags)) {
                         res[num++] = generateActivityInfo(pkg, a, flags, state,
                                 applicationInfo, userId);
                     }
@@ -133,7 +137,8 @@ public class PackageInfoWithoutStateUtils {
                 final ServiceInfo[] res = new ServiceInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedService s = pkg.getServices().get(i);
-                    if (state.isMatch(false, pkg.isEnabled(), s, flags)) {
+                    if (ComponentParseUtils.isMatch(state, false, pkg.isEnabled(), s,
+                            flags)) {
                         res[num++] = generateServiceInfo(pkg, s, flags, state,
                                 applicationInfo, userId);
                     }
@@ -149,7 +154,8 @@ public class PackageInfoWithoutStateUtils {
                 for (int i = 0; i < size; i++) {
                     final ParsedProvider pr = pkg.getProviders()
                             .get(i);
-                    if (state.isMatch(false, pkg.isEnabled(), pr, flags)) {
+                    if (ComponentParseUtils.isMatch(state, false, pkg.isEnabled(), pr,
+                            flags)) {
                         res[num++] = generateProviderInfo(pkg, pr, flags, state,
                                 applicationInfo, userId);
                     }
@@ -375,32 +381,34 @@ public class PackageInfoWithoutStateUtils {
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo();
         assignSharedFieldsForComponentInfo(ai, a);
-        ai.targetActivity = a.targetActivity;
+        ai.targetActivity = a.getTargetActivity();
         ai.processName = a.getProcessName();
-        ai.exported = a.exported;
-        ai.theme = a.theme;
-        ai.uiOptions = a.uiOptions;
-        ai.parentActivityName = a.parentActivityName;
+        ai.exported = a.isExported();
+        ai.theme = a.getTheme();
+        ai.uiOptions = a.getUiOptions();
+        ai.parentActivityName = a.getParentActivityName();
         ai.permission = a.getPermission();
-        ai.taskAffinity = a.taskAffinity;
-        ai.flags = a.flags;
-        ai.privateFlags = a.privateFlags;
-        ai.launchMode = a.launchMode;
-        ai.documentLaunchMode = a.documentLaunchMode;
-        ai.maxRecents = a.maxRecents;
-        ai.configChanges = a.configChanges;
-        ai.softInputMode = a.softInputMode;
-        ai.persistableMode = a.persistableMode;
-        ai.lockTaskLaunchMode = a.lockTaskLaunchMode;
-        ai.screenOrientation = a.screenOrientation;
-        ai.resizeMode = a.resizeMode;
-        ai.maxAspectRatio = a.maxAspectRatio;
-        ai.minAspectRatio = a.minAspectRatio;
-        ai.requestedVrComponent = a.requestedVrComponent;
-        ai.rotationAnimation = a.rotationAnimation;
-        ai.colorMode = a.colorMode;
-        ai.preferMinimalPostProcessing = a.preferMinimalPostProcessing;
-        ai.windowLayout = a.windowLayout;
+        ai.taskAffinity = a.getTaskAffinity();
+        ai.flags = a.getFlags();
+        ai.privateFlags = a.getPrivateFlags();
+        ai.launchMode = a.getLaunchMode();
+        ai.documentLaunchMode = a.getDocumentLaunchMode();
+        ai.maxRecents = a.getMaxRecents();
+        ai.configChanges = a.getConfigChanges();
+        ai.softInputMode = a.getSoftInputMode();
+        ai.persistableMode = a.getPersistableMode();
+        ai.lockTaskLaunchMode = a.getLockTaskLaunchMode();
+        ai.screenOrientation = a.getScreenOrientation();
+        ai.resizeMode = a.getResizeMode();
+        Float maxAspectRatio = a.getMaxAspectRatio();
+        ai.maxAspectRatio = maxAspectRatio != null ? maxAspectRatio : 0f;
+        Float minAspectRatio = a.getMinAspectRatio();
+        ai.minAspectRatio = minAspectRatio != null ? minAspectRatio : 0f;
+        ai.requestedVrComponent = a.getRequestedVrComponent();
+        ai.rotationAnimation = a.getRotationAnimation();
+        ai.colorMode = a.getColorMode();
+        ai.preferMinimalPostProcessing = a.isPreferMinimalPostProcessing();
+        ai.windowLayout = a.getWindowLayout();
         ai.metaData = a.getMetaData();
         ai.applicationInfo = applicationInfo;
         return ai;
@@ -426,12 +434,12 @@ public class PackageInfoWithoutStateUtils {
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo();
         assignSharedFieldsForComponentInfo(si, s);
-        si.exported = s.exported;
-        si.flags = s.flags;
+        si.exported = s.isExported();
+        si.flags = s.getFlags();
         si.metaData = s.getMetaData();
         si.permission = s.getPermission();
         si.processName = s.getProcessName();
-        si.mForegroundServiceType = s.foregroundServiceType;
+        si.mForegroundServiceType = s.getForegroundServiceType();
         si.applicationInfo = applicationInfo;
         return si;
     }
@@ -492,8 +500,8 @@ public class PackageInfoWithoutStateUtils {
         assignSharedFieldsForPackageItemInfo(ii, i);
         ii.targetPackage = i.getTargetPackage();
         ii.targetProcesses = i.getTargetProcesses();
-        ii.handleProfiling = i.handleProfiling;
-        ii.functionalTest = i.functionalTest;
+        ii.handleProfiling = i.isHandleProfiling();
+        ii.functionalTest = i.isFunctionalTest();
 
         ii.sourceDir = pkg.getBaseCodePath();
         ii.publicSourceDir = pkg.getBaseCodePath();
@@ -501,9 +509,8 @@ public class PackageInfoWithoutStateUtils {
         ii.splitSourceDirs = pkg.getSplitCodePaths();
         ii.splitPublicSourceDirs = pkg.getSplitCodePaths();
         ii.splitDependencies = pkg.getSplitDependencies();
-        ii.dataDir = getDataDir(pkg, UserHandle.myUserId()).getAbsolutePath();
-        ii.deviceProtectedDataDir = getDeviceProtectedDataDir(pkg, userId)
-                .getAbsolutePath();
+        ii.dataDir = getDataDir(pkg, userId).getAbsolutePath();
+        ii.deviceProtectedDataDir = getDeviceProtectedDataDir(pkg, userId).getAbsolutePath();
         ii.credentialProtectedDataDir = getCredentialProtectedDataDir(pkg,
                 userId).getAbsolutePath();
 
@@ -519,15 +526,15 @@ public class PackageInfoWithoutStateUtils {
             @PackageManager.ComponentInfoFlags int flags) {
         if (p == null) return null;
 
-        PermissionInfo pi = new PermissionInfo(p.backgroundPermission);
+        PermissionInfo pi = new PermissionInfo(p.getBackgroundPermission());
 
         assignSharedFieldsForPackageItemInfo(pi, p);
 
         pi.group = p.getGroup();
-        pi.requestRes = p.requestRes;
-        pi.protectionLevel = p.protectionLevel;
-        pi.descriptionRes = p.descriptionRes;
-        pi.flags = p.flags;
+        pi.requestRes = p.getRequestRes();
+        pi.protectionLevel = p.getProtectionLevel();
+        pi.descriptionRes = p.getDescriptionRes();
+        pi.flags = p.getFlags();
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return pi;
@@ -542,16 +549,16 @@ public class PackageInfoWithoutStateUtils {
         if (pg == null) return null;
 
         PermissionGroupInfo pgi = new PermissionGroupInfo(
-                pg.requestDetailResourceId,
-                pg.backgroundRequestResourceId,
-                pg.backgroundRequestDetailResourceId
+                pg.getRequestDetailResourceId(),
+                pg.getBackgroundRequestResourceId(),
+                pg.getBackgroundRequestDetailResourceId()
         );
 
         assignSharedFieldsForPackageItemInfo(pgi, pg);
-        pgi.descriptionRes = pg.descriptionRes;
-        pgi.priority = pg.priority;
-        pgi.requestRes = pg.requestRes;
-        pgi.flags = pg.flags;
+        pgi.descriptionRes = pg.getDescriptionRes();
+        pgi.priority = pg.getPriority();
+        pgi.requestRes = pg.getRequestRes();
+        pgi.flags = pg.getFlags();
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return pgi;
@@ -563,7 +570,7 @@ public class PackageInfoWithoutStateUtils {
     private static void assignSharedFieldsForComponentInfo(@NonNull ComponentInfo componentInfo,
             @NonNull ParsedMainComponent mainComponent) {
         assignSharedFieldsForPackageItemInfo(componentInfo, mainComponent);
-        componentInfo.descriptionRes = mainComponent.descriptionRes;
+        componentInfo.descriptionRes = mainComponent.getDescriptionRes();
         componentInfo.directBootAware = mainComponent.isDirectBootAware();
         componentInfo.enabled = mainComponent.isEnabled();
         componentInfo.splitName = mainComponent.getSplitName();
@@ -571,12 +578,12 @@ public class PackageInfoWithoutStateUtils {
 
     private static void assignSharedFieldsForPackageItemInfo(
             @NonNull PackageItemInfo packageItemInfo, @NonNull ParsedComponent component) {
-        packageItemInfo.nonLocalizedLabel = component.nonLocalizedLabel;
-        packageItemInfo.icon = component.icon;
+        packageItemInfo.nonLocalizedLabel = ComponentParseUtils.getNonLocalizedLabel(component);
+        packageItemInfo.icon = ComponentParseUtils.getIcon(component);
 
-        packageItemInfo.banner = component.banner;
-        packageItemInfo.labelRes = component.labelRes;
-        packageItemInfo.logo = component.logo;
+        packageItemInfo.banner = component.getBanner();
+        packageItemInfo.labelRes = component.getLabelRes();
+        packageItemInfo.logo = component.getLogo();
         packageItemInfo.name = component.getName();
         packageItemInfo.packageName = component.getPackageName();
     }
@@ -661,7 +668,6 @@ public class PackageInfoWithoutStateUtils {
         // If available for the target user
         return state.isAvailable(flags);
     }
-
 
     @NonNull
     public static File getDataDir(ParsingPackageRead pkg, int userId) {

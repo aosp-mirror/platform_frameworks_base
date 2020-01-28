@@ -28,7 +28,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPON
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.BaseBundle;
 import android.os.Debug;
 import android.os.PersistableBundle;

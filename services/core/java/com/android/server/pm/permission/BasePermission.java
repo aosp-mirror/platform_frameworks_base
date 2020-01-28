@@ -32,8 +32,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.Signature;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermission;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -43,6 +42,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.PackageSettingBase;
 import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -172,12 +172,12 @@ public final class BasePermission {
         return 0;
     }
 
-    public boolean isPermission(@NonNull ParsedPermission perm) {
+    public boolean isPermission(ParsedPermission perm) {
         if (this.perm == null) {
             return false;
         }
         return Objects.equals(this.perm.getPackageName(), perm.getPackageName())
-                && Objects.equals(this.perm.className, perm.className);
+                && Objects.equals(this.perm.getName(), perm.getName());
     }
 
     public boolean isDynamic() {
@@ -195,24 +195,24 @@ public final class BasePermission {
     }
 
     public boolean isRemoved() {
-        return perm != null && (perm.flags & PermissionInfo.FLAG_REMOVED) != 0;
+        return perm != null && (perm.getFlags() & PermissionInfo.FLAG_REMOVED) != 0;
     }
 
     public boolean isSoftRestricted() {
-        return perm != null && (perm.flags & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0;
+        return perm != null && (perm.getFlags() & PermissionInfo.FLAG_SOFT_RESTRICTED) != 0;
     }
 
     public boolean isHardRestricted() {
-        return perm != null && (perm.flags & PermissionInfo.FLAG_HARD_RESTRICTED) != 0;
+        return perm != null && (perm.getFlags() & PermissionInfo.FLAG_HARD_RESTRICTED) != 0;
     }
 
     public boolean isHardOrSoftRestricted() {
-        return perm != null && (perm.flags & (PermissionInfo.FLAG_HARD_RESTRICTED
+        return perm != null && (perm.getFlags() & (PermissionInfo.FLAG_HARD_RESTRICTED
                 | PermissionInfo.FLAG_SOFT_RESTRICTED)) != 0;
     }
 
     public boolean isImmutablyRestricted() {
-        return perm != null && (perm.flags & PermissionInfo.FLAG_IMMUTABLY_RESTRICTED) != 0;
+        return perm != null && (perm.getFlags() & PermissionInfo.FLAG_IMMUTABLY_RESTRICTED) != 0;
     }
 
     public boolean isSignature() {
@@ -326,15 +326,8 @@ public final class BasePermission {
             final BasePermission tree = findPermissionTree(permissionTrees, name);
             if (tree != null && tree.perm != null) {
                 sourcePackageSetting = tree.sourcePackageSetting;
-                perm = new ParsedPermission(tree.perm);
-                perm.protectionLevel = pendingPermissionInfo.protectionLevel;
-                perm.flags = pendingPermissionInfo.flags;
-                perm.setGroup(pendingPermissionInfo.group);
-                perm.backgroundPermission = pendingPermissionInfo.backgroundPermission;
-                perm.descriptionRes = pendingPermissionInfo.descriptionRes;
-                perm.requestRes = pendingPermissionInfo.requestRes;
-                perm.setPackageName(tree.perm.getPackageName());
-                perm.setName(name);
+                perm = new ParsedPermission(tree.perm, pendingPermissionInfo,
+                        tree.perm.getPackageName(), name);
                 uid = tree.uid;
             }
         }
@@ -364,7 +357,7 @@ public final class BasePermission {
             if (pkg.isSystem()) {
                 if (bp.type == BasePermission.TYPE_BUILTIN && bp.perm == null) {
                     // It's a built-in permission and no owner, take ownership now
-                    p.flags |= PermissionInfo.FLAG_INSTALLED;
+                    p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
                     bp.sourcePackageSetting = pkgSetting;
                     bp.perm = p;
                     bp.uid = pkg.getUid();
@@ -387,7 +380,7 @@ public final class BasePermission {
                 final BasePermission tree = findPermissionTree(permissionTrees, p.getName());
                 if (tree == null
                         || tree.sourcePackageName.equals(p.getPackageName())) {
-                    p.flags |= PermissionInfo.FLAG_INSTALLED;
+                    p.setFlags(p.getFlags() | PermissionInfo.FLAG_INSTALLED);
                     bp.sourcePackageSetting = pkgSetting;
                     bp.perm = p;
                     bp.uid = pkg.getUid();
@@ -421,8 +414,8 @@ public final class BasePermission {
             r.append(p.getName());
         }
         if (bp.perm != null && Objects.equals(bp.perm.getPackageName(), p.getPackageName())
-                && Objects.equals(bp.perm.className, p.className)) {
-            bp.protectionLevel = p.protectionLevel;
+                && Objects.equals(bp.perm.getName(), p.getName())) {
+            bp.protectionLevel = p.getProtectionLevel();
         }
         if (PackageManagerService.DEBUG_PACKAGE_SCANNING && r != null) {
             Log.d(TAG, "  Permissions: " + r);
@@ -572,9 +565,9 @@ public final class BasePermission {
         if (type == BasePermission.TYPE_DYNAMIC) {
             if (perm != null || pendingPermissionInfo != null) {
                 serializer.attribute(null, "type", "dynamic");
-                int icon = perm != null ? perm.icon : pendingPermissionInfo.icon;
+                int icon = perm != null ? perm.getIcon() : pendingPermissionInfo.icon;
                 CharSequence nonLocalizedLabel = perm != null
-                        ? perm.nonLocalizedLabel
+                        ? perm.getNonLocalizedLabel()
                         : pendingPermissionInfo.nonLocalizedLabel;
 
                 if (icon != 0) {
@@ -602,11 +595,11 @@ public final class BasePermission {
     }
 
     private static boolean comparePermissionInfos(ParsedPermission pi1, PermissionInfo pi2) {
-        if (pi1.icon != pi2.icon) return false;
-        if (pi1.logo != pi2.logo) return false;
-        if (pi1.protectionLevel != pi2.protectionLevel) return false;
+        if (pi1.getIcon() != pi2.icon) return false;
+        if (pi1.getLogo() != pi2.logo) return false;
+        if (pi1.getProtectionLevel() != pi2.protectionLevel) return false;
         if (!compareStrings(pi1.getName(), pi2.name)) return false;
-        if (!compareStrings(pi1.nonLocalizedLabel, pi2.nonLocalizedLabel)) return false;
+        if (!compareStrings(pi1.getNonLocalizedLabel(), pi2.nonLocalizedLabel)) return false;
         // We'll take care of setting this one.
         if (!compareStrings(pi1.getPackageName(), pi2.packageName)) return false;
         // These are not currently stored in settings.
@@ -644,9 +637,9 @@ public final class BasePermission {
                 pw.println(PermissionInfo.protectionToString(protectionLevel));
         if (perm != null) {
             pw.print("    perm="); pw.println(perm);
-            if ((perm.flags & PermissionInfo.FLAG_INSTALLED) == 0
-                    || (perm.flags & PermissionInfo.FLAG_REMOVED) != 0) {
-                pw.print("    flags=0x"); pw.println(Integer.toHexString(perm.flags));
+            if ((perm.getFlags() & PermissionInfo.FLAG_INSTALLED) == 0
+                    || (perm.getFlags() & PermissionInfo.FLAG_REMOVED) != 0) {
+                pw.print("    flags=0x"); pw.println(Integer.toHexString(perm.getFlags()));
             }
         }
         if (sourcePackageSetting != null) {

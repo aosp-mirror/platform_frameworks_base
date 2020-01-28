@@ -305,9 +305,6 @@ public class PackageParser {
 
     public int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
-    public ThreadLocal<ParsingPackageUtils.ParseResult> mSharedResult
-            = ThreadLocal.withInitial(ParsingPackageUtils.ParseResult::new);
-
     public static boolean sCompatibilityModeEnabled = true;
     public static boolean sUseRoundIcon = false;
 
@@ -1489,7 +1486,7 @@ public class PackageParser {
         }
     }
 
-    private static String validateName(String name, boolean requireSeparator,
+    public static String validateName(String name, boolean requireSeparator,
             boolean requireFilename) {
         final int N = name.length();
         boolean hasSep = false;

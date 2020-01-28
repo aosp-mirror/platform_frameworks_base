@@ -33,19 +33,22 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
-import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProcess;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.component.ComponentParseUtils;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedProcess;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageSetting;
@@ -103,7 +106,8 @@ public class PackageInfoUtils {
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final ParsedActivity a = pkg.getActivities().get(i);
-                    if (state.isMatch(pkg.isSystem(), pkg.isEnabled(), a, flags)) {
+                    if (ComponentParseUtils.isMatch(state, pkg.isSystem(), pkg.isEnabled(), a,
+                            flags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
                                 a.getName())) {
                             continue;
@@ -122,7 +126,8 @@ public class PackageInfoUtils {
                 final ActivityInfo[] res = new ActivityInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedActivity a = pkg.getReceivers().get(i);
-                    if (state.isMatch(pkg.isSystem(), pkg.isEnabled(), a, flags)) {
+                    if (ComponentParseUtils.isMatch(state, pkg.isSystem(), pkg.isEnabled(), a,
+                            flags)) {
                         res[num++] = generateActivityInfo(pkg, a, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -137,7 +142,8 @@ public class PackageInfoUtils {
                 final ServiceInfo[] res = new ServiceInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedService s = pkg.getServices().get(i);
-                    if (state.isMatch(pkg.isSystem(), pkg.isEnabled(), s, flags)) {
+                    if (ComponentParseUtils.isMatch(state, pkg.isSystem(), pkg.isEnabled(), s,
+                            flags)) {
                         res[num++] = generateServiceInfo(pkg, s, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -153,7 +159,8 @@ public class PackageInfoUtils {
                 for (int i = 0; i < size; i++) {
                     final ParsedProvider pr = pkg.getProviders()
                             .get(i);
-                    if (state.isMatch(pkg.isSystem(), pkg.isEnabled(), pr, flags)) {
+                    if (ComponentParseUtils.isMatch(state, pkg.isSystem(), pkg.isEnabled(), pr,
+                            flags)) {
                         res[num++] = generateProviderInfo(pkg, pr, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -342,9 +349,8 @@ public class PackageInfoUtils {
         ArrayMap<String, ProcessInfo> retProcs = new ArrayMap<>(numProcs);
         for (String key : procs.keySet()) {
             ParsedProcess proc = procs.get(key);
-            retProcs.put(proc.name, new ProcessInfo(proc.name,
-                    proc.deniedPermissions != null
-                            ? new ArraySet<>(proc.deniedPermissions) : null));
+            retProcs.put(proc.getName(), new ProcessInfo(proc.getName(),
+                    new ArraySet<>(proc.getDeniedPermissions())));
         }
         return retProcs;
     }
@@ -374,7 +380,7 @@ public class PackageInfoUtils {
     private static void assignSharedFieldsForComponentInfo(@NonNull ComponentInfo componentInfo,
             @NonNull ParsedMainComponent mainComponent, @Nullable PackageSetting pkgSetting) {
         assignStateFieldsForPackageItemInfo(componentInfo, mainComponent, pkgSetting);
-        componentInfo.descriptionRes = mainComponent.descriptionRes;
+        componentInfo.descriptionRes = mainComponent.getDescriptionRes();
         componentInfo.directBootAware = mainComponent.isDirectBootAware();
         componentInfo.enabled = mainComponent.isEnabled();
         componentInfo.splitName = mainComponent.getSplitName();

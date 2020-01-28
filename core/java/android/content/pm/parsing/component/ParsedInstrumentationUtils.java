@@ -41,8 +41,8 @@ public class ParsedInstrumentationUtils {
                 instrumentation = new ParsedInstrumentation();
         String tag = "<" + parser.getName() + ">";
 
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestInstrumentation)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestInstrumentation);
+        try {
             ParseResult<ParsedInstrumentation> result = ParsedComponentUtils.parseComponent(
                     instrumentation, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestInstrumentation_banner,
@@ -64,6 +64,8 @@ public class ParsedInstrumentationUtils {
             instrumentation.handleProfiling = sa.getBoolean(R.styleable.AndroidManifestInstrumentation_handleProfiling, false);
             instrumentation.functionalTest = sa.getBoolean(R.styleable.AndroidManifestInstrumentation_functionalTest, false);
             // @formatter:on
+        } finally {
+            sa.recycle();
         }
 
         return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, instrumentation,

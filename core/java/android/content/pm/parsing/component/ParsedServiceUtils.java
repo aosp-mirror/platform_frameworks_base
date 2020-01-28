@@ -55,7 +55,8 @@ public class ParsedServiceUtils {
         final ParsedService service = new ParsedService();
         String tag = parser.getName();
 
-        try (TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestService)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestService);
+        try {
             ParseResult<ParsedService> result = ParsedMainComponentUtils.parseMainComponent(
                     service, tag, separateProcesses, pkg, sa, flags, useRoundIcon, input,
                     R.styleable.AndroidManifestService_banner,
@@ -106,6 +107,8 @@ public class ParsedServiceUtils {
                 service.flags |= ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                 pkg.setVisibleToInstantApps(true);
             }
+        } finally {
+            sa.recycle();
         }
 
         if (pkg.isCantSaveState()) {

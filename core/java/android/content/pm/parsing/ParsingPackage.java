@@ -23,15 +23,15 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
-import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProcess;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedFeature;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedProcess;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.Bundle;
 import android.util.SparseArray;
 
@@ -71,7 +71,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addPermissionGroup(ParsedPermissionGroup permissionGroup);
 
-    ParsingPackage addPreferredActivityFilter(ParsedActivityIntentInfo intentInfo);
+    ParsingPackage addPreferredActivityFilter(String className, ParsedIntentInfo intentInfo);
 
     ParsingPackage addProtectedBroadcast(String protectedBroadcast);
 
@@ -332,12 +332,4 @@ public interface ParsingPackage extends ParsingPackageRead {
     //  for moving to the next step
     @Deprecated
     Object hideAsParsed();
-
-    //TODO(b/135203078): Remove in favor of individual methods
-    @Deprecated
-    int getFlags();
-
-    //TODO(b/135203078): Remove in favor of individual methods
-    @Deprecated
-    int getPrivateFlags();
 }

@@ -46,13 +46,15 @@ public class ParsedProcessUtils {
     private static ParseResult<Set<String>> parseDenyPermission(Set<String> perms,
             Resources res, XmlResourceParser parser, ParseInput input)
             throws IOException, XmlPullParserException {
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestDenyPermission)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestDenyPermission);
+        try {
             String perm = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestDenyPermission_name, 0);
             if (perm != null && perm.equals(android.Manifest.permission.INTERNET)) {
                 perms = CollectionUtils.add(perms, perm);
             }
+        } finally {
+            sa.recycle();
         }
         XmlUtils.skipCurrentTag(parser);
         return input.success(perms);
@@ -62,13 +64,15 @@ public class ParsedProcessUtils {
     private static ParseResult<Set<String>> parseAllowPermission(Set<String> perms, Resources res,
             XmlResourceParser parser, ParseInput input)
             throws IOException, XmlPullParserException {
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestAllowPermission)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestAllowPermission);
+        try {
             String perm = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestAllowPermission_name, 0);
             if (perm != null && perm.equals(android.Manifest.permission.INTERNET)) {
                 perms = CollectionUtils.remove(perms, perm);
             }
+        } finally {
+            sa.recycle();
         }
         XmlUtils.skipCurrentTag(parser);
         return input.success(perms);
@@ -76,10 +80,11 @@ public class ParsedProcessUtils {
 
     @NonNull
     private static ParseResult<ParsedProcess> parseProcess(Set<String> perms, String[] separateProcesses,
-            ParsingPackage parsingPackage, Resources res, XmlResourceParser parser, int flags,
+            ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags,
             ParseInput input) throws IOException, XmlPullParserException {
         ParsedProcess proc = new ParsedProcess();
-        try (TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProcess)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProcess);
+        try {
             if (perms != null) {
                 proc.deniedPermissions = new ArraySet<>(perms);
             }
@@ -87,7 +92,7 @@ public class ParsedProcessUtils {
             proc.name = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestProcess_process, 0);
             ParseResult<String> processNameResult = ComponentParseUtils.buildProcessName(
-                    parsingPackage.getPackageName(), null, proc.name, flags, separateProcesses,
+                    pkg.getPackageName(), pkg.getPackageName(), proc.name, flags, separateProcesses,
                     input);
             if (processNameResult.isError()) {
                 return input.error(processNameResult);
@@ -98,15 +103,8 @@ public class ParsedProcessUtils {
             if (proc.name == null || proc.name.length() <= 0) {
                 return input.error("<process> does not specify android:process");
             }
-
-            processNameResult = ComponentParseUtils.buildProcessName(parsingPackage.getPackageName(),
-                    parsingPackage.getPackageName(), proc.name,
-                    flags, separateProcesses, input);
-            if (processNameResult.isError()) {
-                return input.error(processNameResult);
-            }
-
-            proc.name = processNameResult.getResult();
+        } finally {
+            sa.recycle();
         }
 
         int type;
@@ -138,7 +136,7 @@ public class ParsedProcessUtils {
                     }
                     break;
                 default:
-                    result = ParsingUtils.unknownTag("<process>", parsingPackage, parser, input);
+                    result = ParsingUtils.unknownTag("<process>", pkg, parser, input);
                     break;
             }
 
@@ -152,7 +150,7 @@ public class ParsedProcessUtils {
 
     @NonNull
     public static ParseResult<ArrayMap<String, ParsedProcess>> parseProcesses(
-            String[] separateProcesses, ParsingPackage parsingPackage, Resources res,
+            String[] separateProcesses, ParsingPackage pkg, Resources res,
             XmlResourceParser parser, int flags, ParseInput input)
             throws IOException, XmlPullParserException {
         Set<String> deniedPerms = null;
@@ -188,7 +186,7 @@ public class ParsedProcessUtils {
                     break;
                 case "process":
                     ParseResult<ParsedProcess> processResult = parseProcess(deniedPerms,
-                            separateProcesses, parsingPackage, res, parser, flags, input);
+                            separateProcesses, pkg, res, parser, flags, input);
                     result = processResult;
                     if (processResult.isSuccess()) {
                         ParsedProcess process = processResult.getResult();
@@ -199,7 +197,7 @@ public class ParsedProcessUtils {
                     }
                     break;
                 default:
-                    result = ParsingUtils.unknownTag("<processes>", parsingPackage, parser, input);
+                    result = ParsingUtils.unknownTag("<processes>", pkg, parser, input);
                     break;
             }
 

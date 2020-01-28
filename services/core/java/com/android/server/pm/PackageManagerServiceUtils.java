@@ -824,11 +824,11 @@ public class PackageManagerServiceUtils {
      * Checks whenever downgrade of an app is permitted.
      *
      * @param installFlags flags of the current install.
-     * @param applicationFlags flags of the currently installed version of the app.
+     * @param isAppDebuggable if the currently installed version of the app is debuggable.
      * @return {@code true} if downgrade is permitted according to the {@code installFlags} and
      *         {@code applicationFlags}.
      */
-    public static boolean isDowngradePermitted(int installFlags, int applicationFlags) {
+    public static boolean isDowngradePermitted(int installFlags, boolean isAppDebuggable) {
         // If installed, the package will get access to data left on the device by its
         // predecessor. As a security measure, this is permitted only if this is not a
         // version downgrade or if the predecessor package is marked as debuggable and
@@ -850,9 +850,7 @@ public class PackageManagerServiceUtils {
         if (!downgradeRequested) {
             return false;
         }
-        final boolean isDebuggable =
-                Build.IS_DEBUGGABLE || ((applicationFlags
-                        & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        final boolean isDebuggable = Build.IS_DEBUGGABLE || isAppDebuggable;
         if (isDebuggable) {
             return true;
         }

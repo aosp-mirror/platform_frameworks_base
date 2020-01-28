@@ -29,10 +29,7 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedMainComponent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
@@ -40,6 +37,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.PackageList;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;

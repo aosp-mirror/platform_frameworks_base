@@ -320,6 +320,21 @@ public class CollectionUtils {
     }
 
     /**
+     * Similar to {@link Set#addAll(Collection)}}, but with support for list values of {@code null}
+     * and {@link Collections#emptySet}
+     */
+    public static @NonNull <T> Set<T> addAll(@Nullable Set<T> cur, @Nullable Collection<T> val) {
+        if (isEmpty(val)) {
+            return cur != null ? cur : Collections.emptySet();
+        }
+        if (cur == null || cur == Collections.emptySet()) {
+            cur = new ArraySet<>();
+        }
+        cur.addAll(val);
+        return cur;
+    }
+
+    /**
      * @see #add(List, Object)
      */
     public static @NonNull <T> Set<T> add(@Nullable Set<T> cur, T val) {

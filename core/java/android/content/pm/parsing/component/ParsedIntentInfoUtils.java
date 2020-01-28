@@ -52,9 +52,8 @@ public class ParsedIntentInfoUtils {
             boolean allowAutoVerify, ParseInput input)
             throws XmlPullParserException, IOException {
         ParsedIntentInfo intentInfo = new ParsedIntentInfo();
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestIntentFilter)) {
-
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestIntentFilter);
+        try {
             intentInfo.setPriority(sa.getInt(R.styleable.AndroidManifestIntentFilter_priority, 0));
             intentInfo.setOrder(sa.getInt(R.styleable.AndroidManifestIntentFilter_order, 0));
 
@@ -80,6 +79,8 @@ public class ParsedIntentInfoUtils {
                         R.styleable.AndroidManifestIntentFilter_autoVerify,
                         false));
             }
+        } finally {
+            sa.recycle();
         }
         final int depth = parser.getDepth();
         int type;
@@ -149,12 +150,10 @@ public class ParsedIntentInfoUtils {
     }
 
     @NonNull
-    private static ParseResult<ParsedIntentInfo> parseData(
-            ParsedIntentInfo intentInfo,
+    private static ParseResult<ParsedIntentInfo> parseData(ParsedIntentInfo intentInfo,
             Resources resources, XmlResourceParser parser, boolean allowGlobs, ParseInput input) {
-        try (TypedArray sa = resources.obtainAttributes(parser,
-                R.styleable.AndroidManifestData)) {
-
+        TypedArray sa = resources.obtainAttributes(parser, R.styleable.AndroidManifestData);
+        try {
             String str = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestData_mimeType, 0);
             if (str != null) {
@@ -163,6 +162,12 @@ public class ParsedIntentInfoUtils {
                 } catch (IntentFilter.MalformedMimeTypeException e) {
                     return input.error(e.toString());
                 }
+            }
+
+            str = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestData_mimeGroup, 0);
+            if (str != null) {
+                intentInfo.addMimeGroup(str);
             }
 
             str = sa.getNonConfigurationString(
@@ -237,6 +242,8 @@ public class ParsedIntentInfoUtils {
             }
 
             return input.success(null);
+        } finally {
+            sa.recycle();
         }
     }
 }

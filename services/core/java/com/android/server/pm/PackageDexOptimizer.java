@@ -113,7 +113,7 @@ public class PackageDexOptimizer {
 
     static boolean canOptimizePackage(AndroidPackage pkg) {
         // We do not dexopt a package with no code.
-        if ((pkg.getFlags() & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+        if (!pkg.isHasCode()) {
             return false;
         }
 
@@ -174,7 +174,7 @@ public class PackageDexOptimizer {
         // For each code path in the package, this array contains the class loader context that
         // needs to be passed to dexopt in order to ensure correct optimizations.
         boolean[] pathsWithCode = new boolean[paths.size()];
-        pathsWithCode[0] = (pkg.getFlags() & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        pathsWithCode[0] = pkg.isHasCode();
         for (int i = 1; i < paths.size(); i++) {
             pathsWithCode[i] = (pkg.getSplitFlags()[i - 1] & ApplicationInfo.FLAG_HAS_CODE) != 0;
         }
@@ -563,8 +563,7 @@ public class PackageDexOptimizer {
         // PackageDexOptimizer#canOptimizePackage or PackageManagerService#getOptimizablePackages
         // but that would have the downside of possibly producing a big odex files which would
         // be ignored anyway.
-        boolean vmSafeModeOrDebuggable = ((pkg.getFlags() & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0)
-                || ((pkg.getFlags() & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+        boolean vmSafeModeOrDebuggable = pkg.isVmSafeMode() || pkg.isDebuggable();
 
         if (vmSafeModeOrDebuggable) {
             return getSafeModeCompilerFilter(targetCompilerFilter);
@@ -584,13 +583,13 @@ public class PackageDexOptimizer {
     }
 
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
-        return getDexFlags(info.flags, info.getHiddenApiEnforcementPolicy(),
-                info.splitDependencies, info.requestsIsolatedSplitLoading(), compilerFilter,
-                options);
+        return getDexFlags((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0,
+                info.getHiddenApiEnforcementPolicy(), info.splitDependencies,
+                info.requestsIsolatedSplitLoading(), compilerFilter, options);
     }
-    private int getDexFlags(AndroidPackage pkg, String compilerFilter,
-            DexoptOptions options) {
-        return getDexFlags(pkg.getFlags(), AndroidPackageUtils.getHiddenApiEnforcementPolicy(pkg),
+    private int getDexFlags(AndroidPackage pkg, String compilerFilter, DexoptOptions options) {
+        return getDexFlags(pkg.isDebuggable(),
+                AndroidPackageUtils.getHiddenApiEnforcementPolicy(pkg),
                 pkg.getSplitDependencies(), pkg.isIsolatedSplitLoading(), compilerFilter,
                 options);
     }
@@ -599,10 +598,9 @@ public class PackageDexOptimizer {
      * Computes the dex flags that needs to be pass to installd for the given package and compiler
      * filter.
      */
-    private int getDexFlags(int flags, int hiddenApiEnforcementPolicy,
+    private int getDexFlags(boolean debuggable, int hiddenApiEnforcementPolicy,
             SparseArray<int[]> splitDependencies, boolean requestsIsolatedSplitLoading,
             String compilerFilter, DexoptOptions options) {
-        boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         // Profile guide compiled oat files should not be public unles they are based
         // on profiles from dex metadata archives.
         // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that

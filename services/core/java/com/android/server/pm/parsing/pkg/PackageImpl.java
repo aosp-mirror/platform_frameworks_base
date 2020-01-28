@@ -24,11 +24,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageImpl;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.Parcel;
@@ -43,6 +44,7 @@ import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -150,16 +152,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Deprecated
     private boolean hiddenUntilInstalled;
 
-    @Deprecated
-    @Nullable
-    private String credentialProtectedDataDir;
-    @Deprecated
-    @Nullable
-    private String dataDir;
-    @Deprecated
-    @Nullable
-    private String deviceProtectedDataDir;
-
     /**
      * This is an appId, the uid if the userId is == USER_SYSTEM
      */
@@ -189,16 +181,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     public AndroidPackage hideAsFinal() {
         // TODO(b/135203078): Lock as immutable
         return this;
-    }
-
-    @Override
-    public int getFlags() {
-        return PackageInfoUtils.appInfoFlags(this, null);
-    }
-
-    @Override
-    public int getPrivateFlags() {
-        return PackageInfoUtils.appInfoPrivateFlags(this, null);
     }
 
     @Override
@@ -351,22 +333,22 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     public PackageImpl setAllComponentsDirectBootAware(boolean allComponentsDirectBootAware) {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).directBootAware = allComponentsDirectBootAware;
+            activities.get(index).setDirectBootAware(allComponentsDirectBootAware);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).directBootAware = allComponentsDirectBootAware;
+            receivers.get(index).setDirectBootAware(allComponentsDirectBootAware);
         }
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).directBootAware = allComponentsDirectBootAware;
+            providers.get(index).setDirectBootAware(allComponentsDirectBootAware);
         }
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).directBootAware = allComponentsDirectBootAware;
+            services.get(index).setDirectBootAware(allComponentsDirectBootAware);
         }
 
         return this;
@@ -443,7 +425,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         int size = permissionGroups.size();
         for (int index = size - 1; index >= 0; --index) {
             // TODO(b/135203078): Builder/immutability
-            permissionGroups.get(index).priority = 0;
+            permissionGroups.get(index).setPriority(0);
         }
         return this;
     }
@@ -454,8 +436,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
             ParsedActivity receiver = receivers.get(index);
-            if ((receiver.flags & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                receiver.exported = false;
+            if ((receiver.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
+                receiver.setExported(false);
             }
         }
 
@@ -463,8 +445,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
             ParsedService service = services.get(index);
-            if ((service.flags & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                service.exported = false;
+            if ((service.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
+                service.setExported(false);
             }
         }
 
@@ -491,32 +473,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         return "ApplicationInfo{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + getPackageName() + "}";
-    }
-
-    @Override
-    public PackageImpl initForUser(int userId) {
-        // TODO(b/135203078): Move this user state to some other data structure
-        this.uid = UserHandle.getUid(userId, UserHandle.getAppId(this.uid));
-
-        if ("android".equals(packageName)) {
-            dataDir = Environment.getDataSystemDirectory().getAbsolutePath();
-            return this;
-        }
-
-        deviceProtectedDataDir = Environment
-                .getDataUserDePackageDirectory(volumeUuid, userId, packageName)
-                .getAbsolutePath();
-        credentialProtectedDataDir = Environment
-                .getDataUserCePackageDirectory(volumeUuid, userId, packageName)
-                .getAbsolutePath();
-
-        if (isDefaultToDeviceProtectedStorage()
-                && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            dataDir = deviceProtectedDataDir;
-        } else {
-            dataDir = credentialProtectedDataDir;
-        }
-        return this;
     }
 
     @Override
@@ -601,9 +557,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         appInfo.uid = uid;
         appInfo.sharedLibraryFiles = usesLibraryFiles;
         appInfo.sharedLibraryInfos = usesLibraryInfos;
-        appInfo.credentialProtectedDataDir = credentialProtectedDataDir;
-        appInfo.dataDir = dataDir;
-        appInfo.deviceProtectedDataDir = deviceProtectedDataDir;
         return appInfo;
     }
 
@@ -638,10 +591,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         dest.writeBoolean(this.product);
         dest.writeBoolean(this.odm);
         dest.writeBoolean(this.signedWithPlatformKey);
-        dest.writeBoolean(this.hiddenUntilInstalled);
-        dest.writeString(this.credentialProtectedDataDir);
-        dest.writeString(this.dataDir);
-        dest.writeString(this.deviceProtectedDataDir);
+        dest.writeBoolean(this.hiddenUntilInstalled);;
         dest.writeLongArray(this.lastPackageUsageTimeInMills);
         dest.writeStringArray(this.usesLibraryFiles);
         dest.writeTypedList(this.usesLibraryInfos);
@@ -673,9 +623,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         this.odm = in.readBoolean();
         this.signedWithPlatformKey = in.readBoolean();
         this.hiddenUntilInstalled = in.readBoolean();
-        this.credentialProtectedDataDir = in.readString();
-        this.dataDir = in.readString();
-        this.deviceProtectedDataDir = in.readString();
         this.lastPackageUsageTimeInMills = in.createLongArray();
         this.usesLibraryFiles = in.createStringArray();
         this.usesLibraryInfos = in.createTypedArrayList(SharedLibraryInfo.CREATOR);
@@ -818,27 +765,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         return hiddenUntilInstalled;
     }
 
-    @Deprecated
-    @Nullable
-    @Override
-    public String getCredentialProtectedDataDir() {
-        return credentialProtectedDataDir;
-    }
-
-    @Deprecated
-    @Nullable
-    @Override
-    public String getDataDir() {
-        return dataDir;
-    }
-
-    @Deprecated
-    @Nullable
-    @Override
-    public String getDeviceProtectedDataDir() {
-        return deviceProtectedDataDir;
-    }
-
     /**
      * This is an appId, the uid if the userId is == USER_SYSTEM
      */
@@ -939,24 +865,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         return this;
     }
 
-    @DataClass.Generated.Member
-    public PackageImpl setCredentialProtectedDataDir(@Deprecated @Nullable String value) {
-        credentialProtectedDataDir = value;
-        return this;
-    }
-
-    @DataClass.Generated.Member
-    public PackageImpl setDataDir(@Deprecated @Nullable String value) {
-        dataDir = value;
-        return this;
-    }
-
-    @DataClass.Generated.Member
-    public PackageImpl setDeviceProtectedDataDir(@Deprecated @Nullable String value) {
-        deviceProtectedDataDir = value;
-        return this;
-    }
-
     /**
      * This is an appId, the uid if the userId is == USER_SYSTEM
      */
@@ -965,4 +873,17 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         uid = value;
         return this;
     }
+
+    @DataClass.Generated(
+            time = 1579914619453L,
+            codegenVersion = "1.0.14",
+            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/parsing/pkg/PackageImpl.java",
+            inputSignatures = "private final @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String manifestPackageName\nprivate  boolean updatedSystemApp\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String cpuAbiOverride\nprivate  boolean stub\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String nativeLibraryDir\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String nativeLibraryRootDir\nprivate  boolean nativeLibraryRootRequiresIsa\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String primaryCpuAbi\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String secondaryCpuAbi\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String secondaryNativeLibraryDir\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String seInfo\nprotected @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String seInfoUser\nprivate  boolean system\nprivate  boolean factoryTest\nprivate  boolean systemExt\nprivate  boolean privileged\nprivate  boolean oem\nprivate  boolean vendor\nprivate  boolean product\nprivate  boolean odm\nprivate  boolean signedWithPlatformKey\nprivate  int uid\npublic static final  com.android.server.pm.parsing.pkg.Creator<com.android.server.pm.parsing.pkg.PackageImpl> CREATOR\npublic static  com.android.server.pm.parsing.pkg.PackageImpl forParsing(java.lang.String,java.lang.String,java.lang.String,android.content.res.TypedArray,boolean)\npublic static  com.android.server.pm.parsing.pkg.AndroidPackage buildFakeForDeletion(java.lang.String,java.lang.String)\npublic static @com.android.internal.annotations.VisibleForTesting android.content.pm.parsing.ParsingPackage forTesting(java.lang.String)\npublic static @com.android.internal.annotations.VisibleForTesting android.content.pm.parsing.ParsingPackage forTesting(java.lang.String,java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage hideAsParsed()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.AndroidPackage hideAsFinal()\npublic @java.lang.Override int getFlags()\npublic @java.lang.Override int getPrivateFlags()\npublic @java.lang.Override long getLongVersionCode()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl removePermission(int)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl addUsesOptionalLibrary(int,java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl addUsesLibrary(int,java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl removeUsesLibrary(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl removeUsesOptionalLibrary(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSigningDetails(android.content.pm.PackageParser.SigningDetails)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setRestrictUpdateHash(byte)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setRealPackage(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setPersistent(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setDefaultToDeviceProtectedStorage(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setDirectBootAware(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl clearProtectedBroadcasts()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl clearOriginalPackages()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl clearAdoptPermissions()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setCodePath(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setPackageName(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setAllComponentsDirectBootAware(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setBaseCodePath(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setCpuAbiOverride(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setNativeLibraryDir(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setNativeLibraryRootDir(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setPrimaryCpuAbi(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSecondaryCpuAbi(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSecondaryNativeLibraryDir(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSeInfo(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSeInfoUser(java.lang.String)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl setSplitCodePaths(java.lang.String[])\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl capPermissionPriorities()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.PackageImpl markNotActivitiesAsNotExportedIfSingleUser()\npublic @java.lang.Override java.util.UUID getStorageUuid()\npublic @java.lang.Deprecated @java.lang.Override java.lang.String toAppInfoToString()\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage setCoreApp(boolean)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage setVersionCode(int)\npublic @java.lang.Override com.android.server.pm.parsing.pkg.ParsedPackage setVersionCodeMajor(int)\npublic @java.lang.Override android.content.pm.ApplicationInfo toAppInfoWithoutState()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass PackageImpl extends android.content.pm.parsing.ParsingPackageImpl implements [com.android.server.pm.parsing.pkg.ParsedPackage, com.android.server.pm.parsing.pkg.AndroidPackage]\n@com.android.internal.util.DataClass(genConstructor=false, genParcelable=false, genAidl=false, genBuilder=false, genHiddenConstructor=false, genCopyConstructor=false)")
+    @Deprecated
+    private void __metadata() {}
+
+
+    //@formatter:on
+    // End of generated code
+
 }

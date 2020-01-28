@@ -18,7 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProcess;
+import android.content.pm.parsing.component.ParsedProcess;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -85,10 +85,10 @@ public final class SharedUserSetting extends SettingBase {
             }
             for (String key : newProcs.keySet()) {
                 ParsedProcess newProc = newProcs.get(key);
-                ParsedProcess proc = processes.get(newProc.name);
+                ParsedProcess proc = processes.get(newProc.getName());
                 if (proc == null) {
                     proc = new ParsedProcess(newProc);
-                    processes.put(newProc.name, proc);
+                    processes.put(newProc.getName(), proc);
                 } else {
                     proc.addStateFrom(newProc);
                 }
@@ -224,7 +224,7 @@ public final class SharedUserSetting extends SettingBase {
             for (int i = 0; i < numProcs; i++) {
                 ParsedProcess proc =
                         new ParsedProcess(sharedUser.processes.valueAt(i));
-                this.processes.put(proc.name, proc);
+                this.processes.put(proc.getName(), proc);
             }
         } else {
             this.processes = null;

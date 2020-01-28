@@ -48,8 +48,8 @@ public class ParsedPermissionUtils {
         String tag = "<" + parser.getName() + ">";
         final ParseResult<ParsedPermission> result;
 
-        try (TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermission)) {
-
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermission);
+        try {
             result = ParsedComponentUtils.parseComponent(
                     permission, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermission_banner,
@@ -102,6 +102,8 @@ public class ParsedPermissionUtils {
                             + " restricted: " + permission.getName());
                 }
             }
+        } finally {
+            sa.recycle();
         }
 
         // TODO(b/135203078): This is impossible because of default value in above getInt
@@ -133,9 +135,8 @@ public class ParsedPermissionUtils {
         String tag = "<" + parser.getName() + ">";
         final ParseResult<ParsedPermission> result;
 
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestPermissionTree)) {
-
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermissionTree);
+        try {
             result = ParsedComponentUtils.parseComponent(
                     permission, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermissionTree_banner,
@@ -148,6 +149,8 @@ public class ParsedPermissionUtils {
             if (result.isError()) {
                 return result;
             }
+        } finally {
+            sa.recycle();
         }
 
         int index = permission.getName().indexOf('.');
@@ -174,8 +177,8 @@ public class ParsedPermissionUtils {
                 permissionGroup = new ParsedPermissionGroup();
         String tag = "<" + parser.getName() + ">";
 
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestPermissionGroup)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestPermissionGroup);
+        try {
             ParseResult<ParsedPermissionGroup> result = ParsedComponentUtils.parseComponent(
                     permissionGroup, tag, pkg, sa, useRoundIcon, input,
                     R.styleable.AndroidManifestPermissionGroup_banner,
@@ -197,6 +200,8 @@ public class ParsedPermissionUtils {
             permissionGroup.flags = sa.getInt(R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags,0);
             permissionGroup.priority = sa.getInt(R.styleable.AndroidManifestPermissionGroup_priority, 0);
             // @formatter:on
+        } finally {
+            sa.recycle();
         }
 
         return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permissionGroup,

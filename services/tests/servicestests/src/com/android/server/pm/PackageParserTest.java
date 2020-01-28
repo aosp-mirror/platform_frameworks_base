@@ -33,16 +33,15 @@ import android.content.pm.PackageUserState;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
-import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -357,44 +356,42 @@ public class PackageParserTest {
         assertEquals(a.toString(), b.toString());
     }
 
-    private static void assertComponentsEqual(ParsedComponent<?> a,
-            ParsedComponent<?> b) {
-        assertEquals(a.className, b.className);
+    private static void assertComponentsEqual(ParsedComponent a, ParsedComponent b) {
+        assertEquals(a.getName(), b.getName());
         assertBundleApproximateEquals(a.getMetaData(), b.getMetaData());
         assertEquals(a.getComponentName(), b.getComponentName());
 
-        if (a.intents != null && b.intents != null) {
-            assertEquals(a.intents.size(), b.intents.size());
-        } else if (a.intents == null || b.intents == null) {
+        if (a.getIntents() != null && b.getIntents() != null) {
+            assertEquals(a.getIntents().size(), b.getIntents().size());
+        } else if (a.getIntents() == null || b.getIntents() == null) {
             return;
         }
 
-        for (int i = 0; i < a.intents.size(); ++i) {
-            ParsedIntentInfo aIntent = a.intents.get(i);
-            ParsedIntentInfo bIntent = b.intents.get(i);
+        for (int i = 0; i < a.getIntents().size(); ++i) {
+            ParsedIntentInfo aIntent = a.getIntents().get(i);
+            ParsedIntentInfo bIntent = b.getIntents().get(i);
 
-            assertEquals(aIntent.hasDefault, bIntent.hasDefault);
-            assertEquals(aIntent.labelRes, bIntent.labelRes);
-            assertEquals(aIntent.nonLocalizedLabel, bIntent.nonLocalizedLabel);
-            assertEquals(aIntent.icon, bIntent.icon);
+            assertEquals(aIntent.isHasDefault(), bIntent.isHasDefault());
+            assertEquals(aIntent.getLabelRes(), bIntent.getLabelRes());
+            assertEquals(aIntent.getNonLocalizedLabel(), bIntent.getNonLocalizedLabel());
+            assertEquals(aIntent.getIcon(), bIntent.getIcon());
         }
     }
 
-    private static void assertPermissionsEqual(ParsedPermission a,
-            ParsedPermission b) {
+    private static void assertPermissionsEqual(ParsedPermission a, ParsedPermission b) {
         assertComponentsEqual(a, b);
-        assertEquals(a.tree, b.tree);
+        assertEquals(a.isTree(), b.isTree());
 
         // Verify basic flags in PermissionInfo to make sure they're consistent. We don't perform
         // a full structural equality here because the code that serializes them isn't parser
         // specific and is tested elsewhere.
         assertEquals(a.getProtection(), b.getProtection());
         assertEquals(a.getGroup(), b.getGroup());
-        assertEquals(a.flags, b.flags);
+        assertEquals(a.getFlags(), b.getFlags());
 
-        if (a.parsedPermissionGroup != null && b.parsedPermissionGroup != null) {
-            assertPermissionGroupsEqual(a.parsedPermissionGroup, b.parsedPermissionGroup);
-        } else if (a.parsedPermissionGroup != null || b.parsedPermissionGroup != null) {
+        if (a.getParsedPermissionGroup() != null && b.getParsedPermissionGroup() != null) {
+            assertPermissionGroupsEqual(a.getParsedPermissionGroup(), b.getParsedPermissionGroup());
+        } else if (a.getParsedPermissionGroup() != null || b.getParsedPermissionGroup() != null) {
             throw new AssertionError();
         }
     }
@@ -406,6 +403,8 @@ public class PackageParserTest {
         // Sanity check for InstrumentationInfo.
         assertEquals(a.getTargetPackage(), b.getTargetPackage());
         assertEquals(a.getTargetProcesses(), b.getTargetProcesses());
+        assertEquals(a.isHandleProfiling(), b.isHandleProfiling());
+        assertEquals(a.isFunctionalTest(), b.isFunctionalTest());
     }
 
     private static void assertServicesEqual(
@@ -465,7 +464,7 @@ public class PackageParserTest {
 
         // Sanity check for PermissionGroupInfo.
         assertEquals(a.getName(), b.getName());
-        assertEquals(a.descriptionRes, b.descriptionRes);
+        assertEquals(a.getDescriptionRes(), b.getDescriptionRes());
     }
 
     private static void assertApplicationInfoEqual(ApplicationInfo a, ApplicationInfo that) {
@@ -518,7 +517,7 @@ public class PackageParserTest {
         bundle.putString("key", "value");
 
         ParsedPermission permission = new ParsedPermission();
-        permission.parsedPermissionGroup = new ParsedPermissionGroup();
+        permission.setParsedPermissionGroup(new ParsedPermissionGroup());
 
         ((ParsedPackage) pkg.setBaseRevisionCode(100)
                 .setBaseHardwareAccelerated(true)
@@ -569,8 +568,7 @@ public class PackageParserTest {
                 .setOverlayTarget("foo21")
                 .setOverlayPriority(100)
                 .setUpgradeKeySets(new ArraySet<>())
-                .addPreferredActivityFilter(
-                        new ComponentParseUtils.ParsedActivityIntentInfo("foo", "className"))
+                .addPreferredActivityFilter("className", new ParsedIntentInfo())
                 .addConfigPreference(new ConfigurationInfo())
                 .addReqFeature(new FeatureInfo())
                 .addFeatureGroup(new FeatureGroupInfo())

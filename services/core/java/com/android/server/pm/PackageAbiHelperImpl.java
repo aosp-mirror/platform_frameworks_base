@@ -274,7 +274,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // ABI that's higher on the list, i.e, a device that's configured to prefer
             // 64 bit apps will see a 64 bit primary ABI,
 
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_MULTIARCH) == 0) {
+            if (!pkg.isMultiArch()) {
                 Slog.e(PackageManagerService.TAG,
                         "Package " + pkg + " has multiple bundled libs, but is not multiarch.");
             }
@@ -305,7 +305,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                 pkg.isUpdatedSystemApp());
 
         // We shouldn't attempt to extract libs from system app when it was not updated.
-        if (PackageManagerService.isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) {
+        if (pkg.isSystem() && !pkg.isUpdatedSystemApp()) {
             extractLibs = false;
         }
 
@@ -330,7 +330,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             // Null out the abis so that they can be recalculated.
             primaryCpuAbi = null;
             secondaryCpuAbi = null;
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_MULTIARCH) != 0) {
+            if (pkg.isMultiArch()) {
                 // Warn if we've set an abiOverride for multi-lib packages..
                 // By definition, we need to copy both 32 and 64 bit libraries for
                 // such packages.

@@ -16,8 +16,6 @@
 
 package android.content.pm.parsing;
 
-import static android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -32,15 +30,17 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
-import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
-import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProcess;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
-import android.content.pm.parsing.ComponentParseUtils.ParsedService;
+import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedFeature;
+import android.content.pm.parsing.component.ParsedInstrumentation;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedProcess;
+import android.content.pm.parsing.component.ParsedProvider;
+import android.content.pm.parsing.component.ParsedService;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,6 +49,7 @@ import android.os.Parcelable;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.R;
@@ -61,11 +62,12 @@ import com.android.internal.util.Parcelling.BuiltIn.ForBoolean;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringArray;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringList;
-import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringValueMap;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet;
+import com.android.internal.util.Parcelling.BuiltIn.ForInternedStringValueMap;
 
 import java.security.PublicKey;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,6 +97,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
             ForInternedStringValueMap.class);
     public static ForInternedStringSet sForStringSet = Parcelling.Cache.getOrCreate(
             ForInternedStringSet.class);
+    protected static ParsedIntentInfo.StringPairListParceler sForIntentInfoPairs =
+            Parcelling.Cache.getOrCreate(ParsedIntentInfo.StringPairListParceler.class);
+
+    private static final Comparator<ParsedMainComponent> ORDER_COMPARATOR =
+            (first, second) -> Integer.compare(second.getOrder(), first.getOrder());
 
     // These are objects because null represents not explicitly set
     @Nullable
@@ -248,7 +255,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     protected List<ParsedInstrumentation> instrumentations = emptyList();
 
     @NonNull
-    private List<ParsedActivityIntentInfo> preferredActivityFilters = emptyList();
+    @DataClass.ParcelWith(ParsedIntentInfo.ListParceler.class)
+    private List<Pair<String, ParsedIntentInfo>> preferredActivityFilters = emptyList();
 
     @NonNull
     private Map<String, ParsedProcess> processes = emptyMap();
@@ -471,19 +479,19 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @Override
     public ParsingPackageImpl sortActivities() {
-        Collections.sort(this.activities, (a1, a2) -> Integer.compare(a2.order, a1.order));
+        Collections.sort(this.activities, ORDER_COMPARATOR);
         return this;
     }
 
     @Override
     public ParsingPackageImpl sortReceivers() {
-        Collections.sort(this.receivers, (a1, a2) -> Integer.compare(a2.order, a1.order));
+        Collections.sort(this.receivers, ORDER_COMPARATOR);
         return this;
     }
 
     @Override
     public ParsingPackageImpl sortServices() {
-        Collections.sort(this.services, (a1, a2) -> Integer.compare(a2.order, a1.order));
+        Collections.sort(this.services, ORDER_COMPARATOR);
         return this;
     }
 
@@ -503,16 +511,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public Object hideAsParsed() {
         // There is no equivalent for core-only parsing
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getFlags() {
-        return PackageInfoWithoutStateUtils.appInfoFlags(this);
-    }
-
-    @Override
-    public int getPrivateFlags() {
-        return PackageInfoWithoutStateUtils.appInfoPrivateFlags(this);
     }
 
     @Override
@@ -690,9 +688,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl addPreferredActivityFilter(ParsedActivityIntentInfo intentInfo) {
+    public ParsingPackageImpl addPreferredActivityFilter(String className,
+            ParsedIntentInfo intentInfo) {
         this.preferredActivityFilters = CollectionUtils.add(this.preferredActivityFilters,
-                intentInfo);
+                Pair.create(className, intentInfo));
         return this;
     }
 
@@ -1098,7 +1097,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeTypedList(this.permissions);
         dest.writeTypedList(this.permissionGroups);
         dest.writeTypedList(this.instrumentations);
-        ParsedIntentInfo.writeIntentsList(this.preferredActivityFilters, dest, flags);
+        sForIntentInfoPairs.parcel(this.preferredActivityFilters, dest, flags);
         dest.writeMap(this.processes);
         dest.writeBundle(this.metaData);
         sForString.parcel(this.volumeUuid, dest, flags);
@@ -1256,7 +1255,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);
         this.permissionGroups = in.createTypedArrayList(ParsedPermissionGroup.CREATOR);
         this.instrumentations = in.createTypedArrayList(ParsedInstrumentation.CREATOR);
-        this.preferredActivityFilters = ParsedIntentInfo.createIntentsList(in);
+        this.preferredActivityFilters = sForIntentInfoPairs.unparcel(in);
         this.processes = in.readHashMap(boot);
         this.metaData = in.readBundle(boot);
         this.volumeUuid = sForString.unparcel(in);
@@ -1637,7 +1636,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public List<ParsedActivityIntentInfo> getPreferredActivityFilters() {
+    public List<Pair<String,ParsedIntentInfo>> getPreferredActivityFilters() {
         return preferredActivityFilters;
     }
 
@@ -1653,9 +1652,9 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return metaData;
     }
 
-    private void addMimeGroupsFromComponent(ComponentParseUtils.ParsedComponent<?> component) {
-        for (int i = component.intents.size() - 1; i >= 0; i--) {
-            IntentFilter filter = component.intents.get(i);
+    private void addMimeGroupsFromComponent(ParsedComponent component) {
+        for (int i = component.getIntents().size() - 1; i >= 0; i--) {
+            IntentFilter filter = component.getIntents().get(i);
             for (int groupIndex = filter.countMimeGroups() - 1; groupIndex >= 0; groupIndex--) {
                 mimeGroups = ArrayUtils.add(mimeGroups, filter.getMimeGroup(groupIndex));
             }

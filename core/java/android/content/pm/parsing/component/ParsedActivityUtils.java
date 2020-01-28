@@ -70,7 +70,8 @@ public class ParsedActivityUtils {
 
         boolean receiver = "receiver".equals(parser.getName());
         String tag = "<" + parser.getName() + ">";
-        try (TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivity)){
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivity);
+        try {
             ParseResult<ParsedActivity> result =
                     ParsedMainComponentUtils.parseMainComponent(
                     activity, tag, separateProcesses,
@@ -199,6 +200,8 @@ public class ParsedActivityUtils {
                     R.styleable.AndroidManifestActivity_permission,
                     R.styleable.AndroidManifestActivity_exported
             );
+        } finally {
+            sa.recycle();
         }
     }
 
@@ -206,8 +209,8 @@ public class ParsedActivityUtils {
     public static ParseResult<ParsedActivity> parseActivityAlias(ParsingPackage pkg, Resources res,
             XmlResourceParser parser, boolean useRoundIcon, ParseInput input)
             throws XmlPullParserException, IOException {
-        try (TypedArray sa = res.obtainAttributes(parser,
-                R.styleable.AndroidManifestActivityAlias)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivityAlias);
+        try {
             String targetActivity = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestActivityAlias_targetActivity,
                     Configuration.NATIVE_CONFIG_VERSION);
@@ -269,6 +272,8 @@ public class ParsedActivityUtils {
                     R.styleable.AndroidManifestActivityAlias_parentActivityName,
                     R.styleable.AndroidManifestActivityAlias_permission,
                     R.styleable.AndroidManifestActivityAlias_exported);
+        } finally {
+            sa.recycle();
         }
     }
 
@@ -444,7 +449,8 @@ public class ParsedActivityUtils {
     @NonNull
     private static ParseResult<ActivityInfo.WindowLayout> parseLayout(Resources res,
             AttributeSet attrs, ParseInput input) {
-        try (TypedArray sw = res.obtainAttributes(attrs, R.styleable.AndroidManifestLayout)) {
+        TypedArray sw = res.obtainAttributes(attrs, R.styleable.AndroidManifestLayout);
+        try {
             int width = -1;
             float widthFraction = -1f;
             int height = -1;
@@ -471,6 +477,8 @@ public class ParsedActivityUtils {
                     -1);
             return input.success(new ActivityInfo.WindowLayout(width, widthFraction, height,
                     heightFraction, gravity, minWidth, minHeight));
+        } finally {
+            sw.recycle();
         }
     }
 }

@@ -49,10 +49,12 @@ import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedMainComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedIntentInfo;
+import android.content.pm.parsing.component.ParsedMainComponent;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedProcess;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -76,6 +78,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -96,6 +99,7 @@ import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionSettings;
@@ -2674,15 +2678,19 @@ public final class Settings {
 
             StringBuilder sb = new StringBuilder();
             for (final PackageSetting pkg : mPackages.values()) {
-                if (pkg.pkg == null || pkg.pkg.getDataDir() == null) {
+                // TODO(b/135203078): This doesn't handle multiple users
+                final String dataPath = pkg.pkg == null ? null :
+                        PackageInfoWithoutStateUtils.getDataDir(pkg.pkg,
+                                UserHandle.USER_SYSTEM).getAbsolutePath();
+
+                if (pkg.pkg == null || dataPath == null) {
                     if (!"android".equals(pkg.name)) {
                         Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
                     }
                     continue;
                 }
 
-                final String dataPath = pkg.pkg.getDataDir();
-                final boolean isDebug = (pkg.pkg.getFlags() & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                final boolean isDebug = pkg.pkg.isDebuggable();
                 final int[] gids = pkg.getPermissionsState().computeGids(userIds);
 
                 // Avoid any application that has a space in its path.
@@ -3155,14 +3163,14 @@ public final class Settings {
         final PackageManagerInternal pmInternal =
                 LocalServices.getService(PackageManagerInternal.class);
         for (PackageSetting ps : mPackages.values()) {
-            if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0 && ps.pkg != null
+            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 && ps.pkg != null
                     && !ps.pkg.getPreferredActivityFilters().isEmpty()) {
-                List<ComponentParseUtils.ParsedActivityIntentInfo> intents
+                List<Pair<String, ParsedIntentInfo>> intents
                         = ps.pkg.getPreferredActivityFilters();
                 for (int i=0; i<intents.size(); i++) {
-                    ComponentParseUtils.ParsedActivityIntentInfo aii = intents.get(i);
-                    applyDefaultPreferredActivityLPw(pmInternal, aii, new ComponentName(
-                                    ps.name, aii.getClassName()), userId);
+                    Pair<String, ParsedIntentInfo> pair = intents.get(i);
+                    applyDefaultPreferredActivityLPw(pmInternal, pair.second, new ComponentName(
+                            ps.name, pair.first), userId);
                 }
             }
         }
@@ -4597,12 +4605,13 @@ public final class Settings {
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
             // TODO(b/135203078): Is there anything to print here with AppInfo removed?
             pw.print(prefix); pw.print("  applicationInfo=");
-            pw.println(pkg.toAppInfoWithoutState().toString());
-            pw.print(prefix); pw.print("  flags="); printFlags(pw, pkg.getFlags(),
-                    FLAG_DUMP_SPEC); pw.println();
-            if (pkg.getPrivateFlags() != 0) {
+            pw.println(pkg.toAppInfoToString());
+            pw.print(prefix); pw.print("  flags=");
+            printFlags(pw, PackageInfoUtils.appInfoFlags(pkg, ps), FLAG_DUMP_SPEC); pw.println();
+            int privateFlags = PackageInfoUtils.appInfoPrivateFlags(pkg, ps);
+            if (privateFlags != 0) {
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
-                        pkg.getPrivateFlags(), PRIVATE_FLAG_DUMP_SPEC); pw.println();
+                        privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             }
             pw.print(prefix); pw.print("  forceQueryable="); pw.print(ps.pkg.isForceQueryable());
             if (ps.forceQueryableOverride) {
@@ -4615,40 +4624,41 @@ public final class Settings {
             if (!ps.pkg.getQueriesIntents().isEmpty()) {
                 pw.append(prefix).append("  queriesIntents=").println(ps.pkg.getQueriesIntents());
             }
-            pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.getDataDir());
+            File dataDir = PackageInfoWithoutStateUtils.getDataDir(pkg, UserHandle.myUserId());
+            pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
+            if (pkg.isSupportsSmallScreens()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("small");
             }
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
+            if (pkg.isSupportsNormalScreens()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("medium");
             }
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+            if (pkg.isSupportsLargeScreens()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("large");
             }
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+            if (pkg.isSupportsExtraLargeScreens()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("xlarge");
             }
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+            if (pkg.isResizeable()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("resizeable");
             }
-            if ((pkg.getFlags() & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+            if (pkg.isAnyDensity()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
@@ -4670,18 +4680,17 @@ public final class Settings {
                 pw.print(" version:"); pw.println(pkg.getStaticSharedLibVersion());
             }
 
-            final List<String> usesLibraries = pkg.getUsesLibraries();
-            if (usesLibraries != null && usesLibraries.size() > 0) {
+            List<String> usesLibraries = pkg.getUsesLibraries();
+            if (usesLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesLibraries:");
                 for (int i=0; i< usesLibraries.size(); i++) {
                     pw.print(prefix); pw.print("    "); pw.println(usesLibraries.get(i));
                 }
             }
 
-            final List<String> usesStaticLibraries = pkg.getUsesStaticLibraries();
-            final long[] usesStaticLibrariesVersions = pkg.getUsesStaticLibrariesVersions();
-            if (usesStaticLibraries != null
-                    && usesStaticLibraries.size() > 0) {
+            List<String> usesStaticLibraries = pkg.getUsesStaticLibraries();
+            long[] usesStaticLibrariesVersions = pkg.getUsesStaticLibrariesVersions();
+            if (usesStaticLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesStaticLibraries:");
                 for (int i=0; i< usesStaticLibraries.size(); i++) {
                     pw.print(prefix); pw.print("    ");
@@ -4690,9 +4699,8 @@ public final class Settings {
                 }
             }
 
-            final List<String> usesOptionalLibraries = pkg.getUsesOptionalLibraries();
-            if (usesOptionalLibraries != null
-                    && usesOptionalLibraries.size() > 0) {
+            List<String> usesOptionalLibraries = pkg.getUsesOptionalLibraries();
+            if (usesOptionalLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesOptionalLibraries:");
                 for (int i=0; i< usesOptionalLibraries.size(); i++) {
                     pw.print(prefix); pw.print("    ");
@@ -4708,15 +4716,15 @@ public final class Settings {
                     pw.print(prefix); pw.print("    "); pw.println(usesLibraryFiles[i]);
                 }
             }
-            final Map<String, ComponentParseUtils.ParsedProcess> procs = pkg.getProcesses();
+            final Map<String, ParsedProcess> procs = pkg.getProcesses();
             if (!procs.isEmpty()) {
                 pw.print(prefix); pw.println("  processes:");
-                for (ComponentParseUtils.ParsedProcess proc : procs.values()) {
-                    pw.print(prefix); pw.print("    "); pw.println(proc.name);
-                    if (proc.deniedPermissions != null) {
-                        for (int j = 0; j < proc.deniedPermissions.size(); j++) {
+                for (ParsedProcess proc : procs.values()) {
+                    pw.print(prefix); pw.print("    "); pw.println(proc.getName());
+                    if (proc.getDeniedPermissions() != null) {
+                        for (String deniedPermission : proc.getDeniedPermissions()) {
                             pw.print(prefix); pw.print("      deny: ");
-                            pw.println(proc.deniedPermissions.valueAt(j));
+                            pw.println(deniedPermission);
                         }
                     }
                 }
@@ -4762,14 +4770,14 @@ public final class Settings {
                 }
                 pw.print(prefix); pw.print("    "); pw.print(perm.getName());
                 pw.print(": prot=");
-                pw.print(PermissionInfo.protectionToString(perm.protectionLevel));
-                if ((perm.flags&PermissionInfo.FLAG_COSTS_MONEY) != 0) {
+                pw.print(PermissionInfo.protectionToString(perm.getProtectionLevel()));
+                if ((perm.getFlags() &PermissionInfo.FLAG_COSTS_MONEY) != 0) {
                     pw.print(", COSTS_MONEY");
                 }
-                if ((perm.flags&PermissionInfo.FLAG_REMOVED) != 0) {
+                if ((perm.getFlags() &PermissionInfo.FLAG_REMOVED) != 0) {
                     pw.print(", HIDDEN");
                 }
-                if ((perm.flags&PermissionInfo.FLAG_INSTALLED) != 0) {
+                if ((perm.getFlags() &PermissionInfo.FLAG_INSTALLED) != 0) {
                     pw.print(", INSTALLED");
                 }
                 pw.println();

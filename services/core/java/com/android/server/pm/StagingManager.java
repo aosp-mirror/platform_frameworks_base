@@ -29,6 +29,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -284,8 +285,10 @@ public class StagingManager {
             throws PackageManagerException {
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
         final long newVersionCode = newPackage.applicationInfo.longVersionCode;
+        boolean isAppDebuggable = (activePackage.applicationInfo.flags
+                & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
-                session.params.installFlags, activePackage.applicationInfo.flags);
+                session.params.installFlags, isAppDebuggable);
         if (activeVersion > newVersionCode && !allowsDowngrade) {
             if (!mApexManager.abortStagedSession(session.sessionId)) {
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId);

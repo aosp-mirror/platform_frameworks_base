@@ -413,8 +413,9 @@ public class ScanTests {
 
         final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.request.parsedPackage.getFlags(),
-                hasFlag(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP));
+        int appInfoFlags = PackageInfoUtils.appInfoFlags(scanResult.request.parsedPackage,
+                scanResult.pkgSetting);
+        assertThat(appInfoFlags, hasFlag(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP));
     }
 
     @Test
@@ -428,8 +429,9 @@ public class ScanTests {
                 true /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
 
-        assertThat(scanResult.request.parsedPackage.getFlags(),
-                hasFlag(ApplicationInfo.FLAG_FACTORY_TEST));
+        int appInfoFlags = PackageInfoUtils.appInfoFlags(scanResult.request.parsedPackage,
+                scanResult.request.pkgSetting);
+        assertThat(appInfoFlags, hasFlag(ApplicationInfo.FLAG_FACTORY_TEST));
     }
 
     @Test

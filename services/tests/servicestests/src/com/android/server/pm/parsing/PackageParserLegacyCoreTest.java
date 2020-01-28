@@ -29,8 +29,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedPermission;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -369,9 +369,9 @@ public class PackageParserLegacyCoreTest {
     /**
      * Asserts basic properties about a component.
      */
-    private void assertComponent(String className, int numIntents, ParsedComponent<?> component) {
-        assertEquals(className, component.className);
-        assertEquals(numIntents, component.intents.size());
+    private void assertComponent(String className, int numIntents, ParsedComponent component) {
+        assertEquals(className, component.getName());
+        assertEquals(numIntents, component.getIntents().size());
     }
 
     /**
@@ -467,7 +467,7 @@ public class PackageParserLegacyCoreTest {
         // Hidden "app details" activity is added to every package.
         boolean foundAppDetailsActivity = false;
         for (int i = 0; i < ArrayUtils.size(p.getActivities()); i++) {
-            if (p.getActivities().get(i).className.equals(
+            if (p.getActivities().get(i).getClassName().equals(
                     PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME)) {
                 foundAppDetailsActivity = true;
                 p.getActivities().remove(i);
@@ -501,11 +501,11 @@ public class PackageParserLegacyCoreTest {
 
         assertEquals("Expected exactly one activity", 1, p.getActivities().size());
         assertEquals("Expected exactly one intent filter",
-                1, p.getActivities().get(0).intents.size());
+                1, p.getActivities().get(0).getIntents().size());
         assertEquals("Expected exactly one mime group in intent filter",
-                1, p.getActivities().get(0).intents.get(0).countMimeGroups());
+                1, p.getActivities().get(0).getIntents().get(0).countMimeGroups());
         assertTrue("Did not find expected mime group 'mime_group_1'",
-                p.getActivities().get(0).intents.get(0).hasMimeGroup("mime_group_1"));
+                p.getActivities().get(0).getIntents().get(0).hasMimeGroup("mime_group_1"));
     }
 
     @Test

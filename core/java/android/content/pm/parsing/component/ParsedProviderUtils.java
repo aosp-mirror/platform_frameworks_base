@@ -60,7 +60,8 @@ public class ParsedProviderUtils {
         final ParsedProvider provider = new ParsedProvider();
         final String tag = parser.getName();
 
-        try (TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProvider)) {
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestProvider);
+        try {
             ParseResult<ParsedProvider> result =
                     ParsedMainComponentUtils.parseMainComponent(provider, tag, separateProcesses,
                     pkg, sa, flags, useRoundIcon, input,
@@ -124,6 +125,8 @@ public class ParsedProviderUtils {
                 provider.flags |= ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP;
                 pkg.setVisibleToInstantApps(true);
             }
+        } finally {
+            sa.recycle();
         }
 
         if (pkg.isCantSaveState()) {
@@ -202,8 +205,9 @@ public class ParsedProviderUtils {
     @NonNull
     private static ParseResult<ParsedProvider> parseGrantUriPermission(ParsedProvider provider,
             ParsingPackage pkg, Resources resources, XmlResourceParser parser, ParseInput input) {
-        try (TypedArray sa = resources.obtainAttributes(parser,
-                R.styleable.AndroidManifestGrantUriPermission)) {
+        TypedArray sa = resources.obtainAttributes(parser,
+                R.styleable.AndroidManifestGrantUriPermission);
+        try {
             String name = parser.getName();
             // Pattern has priority over prefix over literal path
             PatternMatcher pa = null;
@@ -247,14 +251,17 @@ public class ParsedProviderUtils {
             }
 
             return input.success(provider);
+        } finally {
+            sa.recycle();
         }
     }
 
     @NonNull
     private static ParseResult<ParsedProvider> parsePathPermission(ParsedProvider provider,
             ParsingPackage pkg, Resources resources, XmlResourceParser parser, ParseInput input) {
-        try (TypedArray sa = resources.obtainAttributes(parser,
-                R.styleable.AndroidManifestPathPermission)) {
+        TypedArray sa = resources.obtainAttributes(parser,
+                R.styleable.AndroidManifestPathPermission);
+        try {
             String name = parser.getName();
 
             String permission = sa.getNonConfigurationString(
@@ -341,6 +348,8 @@ public class ParsedProviderUtils {
             }
 
             return input.success(provider);
+        } finally {
+            sa.recycle();
         }
     }
 }

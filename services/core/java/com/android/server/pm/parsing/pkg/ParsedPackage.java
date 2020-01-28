@@ -65,9 +65,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setSplitCodePaths(String[] splitCodePaths);
 
-    @Deprecated
-    ParsedPackage initForUser(int userId);
-
     ParsedPackage setNativeLibraryRootRequiresIsa(boolean nativeLibraryRootRequiresIsa);
 
     ParsedPackage setAllComponentsDirectBootAware(boolean allComponentsDirectBootAware);

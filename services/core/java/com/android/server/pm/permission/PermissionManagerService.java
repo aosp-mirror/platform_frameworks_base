@@ -71,9 +71,8 @@ import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
+import android.content.pm.parsing.component.ParsedPermission;
+import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -129,6 +128,7 @@ import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultBrowserProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultDialerProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.DefaultHomeProvider;
@@ -2082,9 +2082,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         for (int i = 0; i < numOldPackagePermissions; i++) {
             final ParsedPermission permission = oldPackage.getPermissions().get(i);
 
-            if (permission.parsedPermissionGroup != null) {
+            if (permission.getParsedPermissionGroup() != null) {
                 oldPermissionNameToGroupName.put(permission.getName(),
-                        permission.parsedPermissionGroup.getName());
+                        permission.getParsedPermissionGroup().getName());
             }
         }
 
@@ -2098,8 +2098,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             if ((newProtection & PermissionInfo.PROTECTION_DANGEROUS) != 0) {
                 final String permissionName = newPermission.getName();
-                final String newPermissionGroupName = newPermission.parsedPermissionGroup == null
-                        ? null : newPermission.parsedPermissionGroup.getName();
+                final String newPermissionGroupName =
+                        newPermission.getParsedPermissionGroup() == null
+                                ? null : newPermission.getParsedPermissionGroup().getName();
                 final String oldPermissionGroupName = oldPermissionNameToGroupName.get(
                         permissionName);
 
@@ -2144,7 +2145,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ParsedPermission p = pkg.getPermissions().get(i);
 
             // Assume by default that we did not install this permission into the system.
-            p.flags &= ~PermissionInfo.FLAG_INSTALLED;
+            p.setFlags(p.getFlags() & ~PermissionInfo.FLAG_INSTALLED);
 
             synchronized (PermissionManagerService.this.mLock) {
                 // Now that permission groups have a special meaning, we ignore permission
@@ -2152,16 +2153,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // permissions for one app being granted to someone just because they happen
                 // to be in a group defined by another app (before this had no implications).
                 if (pkg.getTargetSdkVersion() > Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    p.parsedPermissionGroup = mSettings.mPermissionGroups.get(p.getGroup());
+                    p.setParsedPermissionGroup(mSettings.mPermissionGroups.get(p.getGroup()));
                     // Warn for a permission in an unknown group.
                     if (DEBUG_PERMISSIONS
-                            && p.getGroup() != null && p.parsedPermissionGroup == null) {
+                            && p.getGroup() != null && p.getParsedPermissionGroup() == null) {
                         Slog.i(TAG, "Permission " + p.getName() + " from package "
                                 + p.getPackageName() + " in an unknown group " + p.getGroup());
                     }
                 }
 
-                if (p.tree) {
+                if (p.isTree()) {
                     final BasePermission bp = BasePermission.createOrUpdate(
                             mPackageManagerInt,
                             mSettings.getPermissionTreeLocked(p.getName()), p, pkg,
@@ -2766,7 +2767,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             Slog.i(TAG, "Un-granting permission " + perm
                                     + " from package " + pkg.getPackageName()
                                     + " (protectionLevel=" + bp.getProtectionLevel()
-                                    + " flags=0x" + Integer.toHexString(pkg.getFlags())
+                                    + " flags=0x"
+                                    + Integer.toHexString(PackageInfoUtils.appInfoFlags(pkg, ps))
                                     + ")");
                         }
                     } else if (bp.isAppOp()) {
@@ -2778,7 +2780,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             Slog.i(TAG, "Not granting permission " + perm
                                     + " to package " + pkg.getPackageName()
                                     + " (protectionLevel=" + bp.getProtectionLevel()
-                                    + " flags=0x" + Integer.toHexString(pkg.getFlags())
+                                    + " flags=0x"
+                                    + Integer.toHexString(PackageInfoUtils.appInfoFlags(pkg, ps))
                                     + ")");
                         }
                     }
@@ -3722,9 +3725,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Only system declares background permissions, hence mapping does never change.
                 mBackgroundPermissions = new ArrayMap<>();
                 for (BasePermission bp : mSettings.getAllPermissionsLocked()) {
-                    if (bp.perm != null && bp.perm.backgroundPermission != null) {
+                    if (bp.perm != null && bp.perm.getBackgroundPermission() != null) {
                         String fgPerm = bp.name;
-                        String bgPerm = bp.perm.backgroundPermission;
+                        String bgPerm = bp.perm.getBackgroundPermission();
 
                         List<String> fgPerms = mBackgroundPermissions.get(bgPerm);
                         if (fgPerms == null) {

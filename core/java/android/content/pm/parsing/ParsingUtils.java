@@ -16,7 +16,19 @@
 
 package android.content.pm.parsing;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageParser;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.res.XmlResourceParser;
+import android.util.Slog;
+
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 
 /** @hide **/
 public class ParsingUtils {
@@ -41,5 +53,18 @@ public class ParsingUtils {
             return b.toString();
         }
         return cls;
+    }
+
+    @NonNull
+    public static ParseResult unknownTag(String parentTag, ParsingPackage pkg,
+            XmlResourceParser parser, ParseInput input) throws IOException, XmlPullParserException {
+        if (PackageParser.RIGID_PARSER) {
+            return input.error("Bad element under " + parentTag + ": " + parser.getName());
+        }
+        Slog.w(TAG, "Unknown element under " + parentTag + ": "
+                + parser.getName() + " at " + pkg.getBaseCodePath() + " "
+                + parser.getPositionDescription());
+        XmlUtils.skipCurrentTag(parser);
+        return input.success(null); // Type doesn't matter
     }
 }
