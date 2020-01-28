@@ -62,6 +62,8 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
+import java.io.PrintWriter;
+
 /**
  * Sends broadcasts about important power state changes.
  * <p>
@@ -123,6 +125,7 @@ public class Notifier {
     @Nullable private final StatusBarManagerInternal mStatusBarManagerInternal;
     private final TrustManager mTrustManager;
     private final Vibrator mVibrator;
+    private final WakeLockLog mWakeLockLog;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -190,6 +193,8 @@ public class Notifier {
         mShowWirelessChargingAnimationConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showBuiltinWirelessChargingAnim);
 
+        mWakeLockLog = new WakeLockLog();
+
         // Initialize interactive state for battery stats.
         try {
             mBatteryStats.noteInteractive(true);
@@ -228,6 +233,8 @@ public class Notifier {
                 // Ignore
             }
         }
+
+        mWakeLockLog.onWakeLockAcquired(tag, ownerUid, flags);
     }
 
     public void onLongPartialWakeLockStart(String tag, int ownerUid, WorkSource workSource,
@@ -338,6 +345,7 @@ public class Notifier {
                 // Ignore
             }
         }
+        mWakeLockLog.onWakeLockReleased(tag, ownerUid);
     }
 
     private int getBatteryStatsWakeLockMonitorType(int flags) {
@@ -645,6 +653,17 @@ public class Notifier {
         msg.setAsynchronous(true);
         msg.arg1 = userId;
         mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Dumps data for bugreports.
+     *
+     * @param pw The stream to print to.
+     */
+    public void dump(PrintWriter pw) {
+        if (mWakeLockLog != null) {
+            mWakeLockLog.dump(pw);
+        }
     }
 
     private void updatePendingBroadcastLocked() {
