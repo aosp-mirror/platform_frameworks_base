@@ -426,7 +426,6 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                                 config.event_metric_size() + config.gauge_metric_size() +
                                 config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
-    StatsPullerManager statsPullerManager;
 
     // Construct map from metric id to metric activation index. The map will be used to determine
     // the metric activation corresponding to a metric.
@@ -661,7 +660,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             return false;
         }
         int atomTagId = *(atomMatcher->getAtomIds().begin());
-        int pullTagId = statsPullerManager.PullerForMatcherExists(atomTagId) ? atomTagId : -1;
+        int pullTagId = pullerManager->PullerForMatcherExists(atomTagId) ? atomTagId : -1;
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
@@ -753,7 +752,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             return false;
         }
         int atomTagId = *(atomMatcher->getAtomIds().begin());
-        int pullTagId = statsPullerManager.PullerForMatcherExists(atomTagId) ? atomTagId : -1;
+        int pullTagId = pullerManager->PullerForMatcherExists(atomTagId) ? atomTagId : -1;
 
         int triggerTrackerIndex;
         int triggerAtomId = -1;
