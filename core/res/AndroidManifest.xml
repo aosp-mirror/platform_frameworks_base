@@ -4311,6 +4311,10 @@
          android.service.chooser.ChooserTargetService}, to ensure that
          only the system can bind to it.
          <p>Protection level: signature
+
+         @deprecated For publishing direct share targets, please follow the instructions in
+         https://developer.android.com/training/sharing/receive.html#providing-direct-share-targets
+         instead.
     -->
     <permission android:name="android.permission.BIND_CHOOSER_TARGET_SERVICE"
         android:protectionLevel="signature" />
