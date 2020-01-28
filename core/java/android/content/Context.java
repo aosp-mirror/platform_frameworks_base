@@ -4022,16 +4022,16 @@ public abstract class Context {
     public static final String LOWPAN_SERVICE = "lowpan";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.net.EthernetManager} for handling management of
-     * Ethernet access.
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.EthernetManager}
+     * for handling management of Ethernet access.
      *
      * @see #getSystemService(String)
      * @see android.net.EthernetManager
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**

@@ -130,6 +130,18 @@ public class TetheringManager {
      */
     public static final int TETHERING_WIFI_P2P = 3;
 
+    /**
+     * Ncm local tethering type.
+     * @see #startTethering(TetheringRequest, Executor, StartTetheringCallback)
+     */
+    public static final int TETHERING_NCM = 4;
+
+    /**
+     * Ethernet tethering type.
+     * @see #startTethering(TetheringRequest, Executor, StartTetheringCallback)
+     */
+    public static final int TETHERING_ETHERNET = 5;
+
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     public static final int TETHER_ERROR_UNKNOWN_IFACE      = 1;
     public static final int TETHER_ERROR_SERVICE_UNAVAIL    = 2;
