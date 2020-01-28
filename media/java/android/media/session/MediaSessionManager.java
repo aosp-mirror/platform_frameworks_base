@@ -932,7 +932,7 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Listener to receive when the media session service
+     * Listener to be called when the media session service dispatches a media key event.
      * @hide
      */
     @SystemApi
@@ -944,15 +944,15 @@ public final class MediaSessionManager {
          * is released.
          *
          * @param event Dispatched media key event.
-         * @param packageName Package
+         * @param packageName The package name
          * @param sessionToken The media session's token. Can be {@code null}.
          */
-        default void onMediaKeyEventDispatched(@NonNull KeyEvent event, @NonNull String packageName,
-                @Nullable MediaSession.Token sessionToken) { }
+        void onMediaKeyEventDispatched(@NonNull KeyEvent event, @NonNull String packageName,
+                @Nullable MediaSession.Token sessionToken);
     }
 
     /**
-     * Listener to receive changes in the media key event session, which would receive the media key
+     * Listener to receive changes in the media key event session, which would receive a media key
      * event unless specified.
      * @hide
      */
@@ -964,13 +964,14 @@ public final class MediaSessionManager {
          * has specified the target.
          * <p>
          * The session token can be {@link null} if the media button session is unset. In that case,
-         * framework would dispatch to the last sessions's media button receiver.
+         * framework would dispatch to the last sessions's media button receiver. If the media
+         * button receive isn't set as well, then it
          *
          * @param packageName The package name who would receive the media key event. Can be empty.
-         * @param sessionToken The media session's token. Can be {@code null.}
+         * @param sessionToken The media session's token. Can be {@code null}.
          */
-        default void onMediaKeyEventSessionChanged(@NonNull String packageName,
-                @Nullable MediaSession.Token sessionToken) { }
+        void onMediaKeyEventSessionChanged(@NonNull String packageName,
+                @Nullable MediaSession.Token sessionToken);
     }
 
     /**

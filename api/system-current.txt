@@ -4373,11 +4373,11 @@ package android.media.session {
   }
 
   public static interface MediaSessionManager.OnMediaKeyEventDispatchedListener {
-    method public default void onMediaKeyEventDispatched(@NonNull android.view.KeyEvent, @NonNull String, @Nullable android.media.session.MediaSession.Token);
+    method public void onMediaKeyEventDispatched(@NonNull android.view.KeyEvent, @NonNull String, @Nullable android.media.session.MediaSession.Token);
   }
 
   public static interface MediaSessionManager.OnMediaKeyEventSessionChangedListener {
-    method public default void onMediaKeyEventSessionChanged(@NonNull String, @Nullable android.media.session.MediaSession.Token);
+    method public void onMediaKeyEventSessionChanged(@NonNull String, @Nullable android.media.session.MediaSession.Token);
   }
 
   public static interface MediaSessionManager.OnMediaKeyListener {
