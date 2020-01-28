@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
+import android.telephony.Annotation;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
@@ -744,7 +745,7 @@ public class ApnSetting implements Parcelable {
      * @return SKIP_464XLAT_DEFAULT, SKIP_464XLAT_DISABLE or SKIP_464XLAT_ENABLE
      * @hide
      */
-    @Carriers.Skip464XlatStatus
+    @Annotation.Skip464XlatStatus
     public int getSkip464Xlat() {
         return mSkip464Xlat;
     }
@@ -2061,10 +2062,10 @@ public class ApnSetting implements Parcelable {
         /**
          * Sets skip464xlat flag for this APN.
          *
-         * @param skip464xlat skip464xlat for this APN
+         * @param skip464xlat skip464xlat for this APN.
          * @hide
          */
-        public Builder setSkip464Xlat(@Carriers.Skip464XlatStatus int skip464xlat) {
+        public Builder setSkip464Xlat(@Annotation.Skip464XlatStatus int skip464xlat) {
             this.mSkip464Xlat = skip464xlat;
             return this;
         }
