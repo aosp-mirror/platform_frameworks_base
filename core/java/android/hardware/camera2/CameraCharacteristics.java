@@ -2875,7 +2875,28 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES =
             new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
-
+    /**
+     * <p>An array of mandatory concurrent stream combinations.
+     * This is an app-readable conversion of the concurrent mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each device
+     * which has its Id present in the set returned by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds}.
+     * Clients can use the array as a quick reference to find an appropriate camera stream
+     * combination.
+     * The mandatory stream combination array will be {@code null} in case the device is not a part
+     * of at least one set of combinations returned by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryConcurrentStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
      * distortion correction has been applied.</p>

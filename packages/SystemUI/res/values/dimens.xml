@@ -1181,5 +1181,12 @@
     <dimen name="magnifier_up_down_controls_width">45dp</dimen>
     <dimen name="magnifier_up_down_controls_height">40dp</dimen>
 
+    <!-- Home Controls -->
+    <dimen name="control_spacing">5dp</dimen>
+    <dimen name="control_corner_radius">15dp</dimen>
+    <dimen name="control_height">100dp</dimen>
+    <dimen name="control_padding">15dp</dimen>
+    <dimen name="control_status_normal">12dp</dimen>
+    <dimen name="control_status_expanded">18dp</dimen>
     <dimen name="app_icon_size">32dp</dimen>
 </resources>

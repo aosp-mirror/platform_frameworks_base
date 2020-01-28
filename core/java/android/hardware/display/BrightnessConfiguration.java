@@ -61,7 +61,7 @@ public final class BrightnessConfiguration implements Parcelable {
     private static final String ATTR_MODEL_LOWER_BOUND = "model-lower-bound";
     private static final String ATTR_MODEL_UPPER_BOUND = "model-upper-bound";
     /**
-     * Returned from {@link #getShortTermModelTimeout()} if no timeout has been set.
+     * Returned from {@link #getShortTermModelTimeoutMillis()} if no timeout has been set.
      * In this case the device will use the default timeout available in the
      * {@link BrightnessConfiguration} returned from
      * {@link DisplayManager#getDefaultBrightnessConfiguration()}.
@@ -160,7 +160,7 @@ public final class BrightnessConfiguration implements Parcelable {
      * {@link #getShortTermModelUpperLuxMultiplier()} to decide whether to keep any adjustment
      * the user has made to adaptive brightness.
      */
-    public long getShortTermModelTimeout() {
+    public long getShortTermModelTimeoutMillis() {
         return mShortTermModelTimeout;
     }
 
@@ -326,7 +326,7 @@ public final class BrightnessConfiguration implements Parcelable {
             builder.setDescription(description);
             final boolean shouldCollectColorSamples = in.readBoolean();
             builder.setShouldCollectColorSamples(shouldCollectColorSamples);
-            builder.setShortTermModelTimeout(in.readLong());
+            builder.setShortTermModelTimeoutMillis(in.readLong());
             builder.setShortTermModelLowerLuxMultiplier(in.readFloat());
             builder.setShortTermModelUpperLuxMultiplier(in.readFloat());
             return builder.build();
@@ -487,7 +487,7 @@ public final class BrightnessConfiguration implements Parcelable {
             builder.addCorrectionByCategory(category, correction);
         }
         builder.setShouldCollectColorSamples(shouldCollectColorSamples);
-        builder.setShortTermModelTimeout(shortTermModelTimeout);
+        builder.setShortTermModelTimeoutMillis(shortTermModelTimeout);
         builder.setShortTermModelLowerLuxMultiplier(shortTermModelLowerLuxMultiplier);
         builder.setShortTermModelUpperLuxMultiplier(shortTermModelUpperLuxMultiplier);
         return builder.build();
@@ -673,8 +673,8 @@ public final class BrightnessConfiguration implements Parcelable {
          * adjustment the user has made to adaptive brightness.
          */
         @NonNull
-        public Builder setShortTermModelTimeout(long shortTermModelTimeout) {
-            mShortTermModelTimeout = shortTermModelTimeout;
+        public Builder setShortTermModelTimeoutMillis(long shortTermModelTimeoutMillis) {
+            mShortTermModelTimeout = shortTermModelTimeoutMillis;
             return this;
         }
 

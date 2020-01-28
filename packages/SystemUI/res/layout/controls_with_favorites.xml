@@ -1,0 +1,35 @@
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+    <TextView
+        android:text="@string/quick_controls_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:gravity="center"
+        android:textSize="25dp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+    <ImageView
+        android:id="@+id/controls_more"
+        android:src="@drawable/ic_more_vert"
+        android:layout_width="34dp"
+        android:layout_height="24dp" 
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <LinearLayout
+      android:id="@+id/global_actions_controls_list"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical" />
+</merge>

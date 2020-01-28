@@ -19,6 +19,7 @@ android_test {
     certificate: "platform",
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
     ],
     test_suites: [
         "device-tests",

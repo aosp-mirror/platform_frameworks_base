@@ -4854,12 +4854,18 @@ public class WifiManager {
     /**
      * Set Wi-Fi verbose logging level from developer settings.
      *
-     * @param verbose the verbose logging level to set. 0 will disable verbose logging, a positive
-     *                integer will enable verbose logging.
+     * @param enable true to enable verbose logging, false to disable.
      *
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setVerboseLoggingEnabled(boolean enable) {
+        enableVerboseLogging(enable ? 1 : 0);
+    }
+
+    /** @hide */
+    @UnsupportedAppUsage
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void enableVerboseLogging (int verbose) {
         try {
@@ -4871,15 +4877,23 @@ public class WifiManager {
     }
 
     /**
-     * Get the persisted WiFi verbose logging level, set by {@link #enableVerboseLogging(int)}.
+     * Get the persisted Wi-Fi verbose logging level, set by
+     * {@link #setVerboseLoggingEnabled(boolean)}.
      * No permissions are required to call this method.
      *
-     * @return 0 to indicate that verbose logging is disabled, a positive integer to indicate that
-     * verbose logging is enabled.
+     * @return true to indicate that verbose logging is enabled, false to indicate that verbose
+     * logging is disabled.
      *
      * @hide
      */
     @SystemApi
+    public boolean isVerboseLoggingEnabled() {
+        return getVerboseLoggingLevel() > 0;
+    }
+
+    /** @hide */
+    // TODO(b/145484145): remove once SUW stops calling this via reflection
+    @UnsupportedAppUsage
     public int getVerboseLoggingLevel() {
         try {
             return mService.getVerboseLoggingLevel();
@@ -4910,7 +4924,10 @@ public class WifiManager {
      */
     @Nullable
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD
+    })
     public Network getCurrentNetwork() {
         try {
             return mService.getCurrentNetwork();
@@ -5012,10 +5029,8 @@ public class WifiManager {
      * and ipconfig.txt file.
      * @param supplicantData bytes representing wpa_supplicant.conf
      * @param ipConfigData bytes representing ipconfig.txt
-     * @deprecated this is no longer supported.
      * @hide
      */
-    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void restoreSupplicantBackupData(
@@ -5204,7 +5219,7 @@ public class WifiManager {
      * level from wifi service.
      */
     private void updateVerboseLoggingEnabledFromService() {
-        mVerboseLoggingEnabled = getVerboseLoggingLevel() > 0;
+        mVerboseLoggingEnabled = isVerboseLoggingEnabled();
     }
 
     /**

@@ -317,16 +317,8 @@ public class TelephonyIntents {
             "com.android.internal.telephony.ACTION_LINE1_NUMBER_ERROR_DETECTED";
 
     /**
-     * Broadcast action to notify radio bug.
-     *
-     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
-     *
-     * @hide
+     * Broadcast sent when a user activity is detected.
      */
-    public static final String ACTION_REPORT_RADIO_BUG =
-            "com.android.internal.telephony.ACTION_REPORT_RADIO_BUG";
-
-    // ACTION_REPORT_RADIO_BUG extra keys
-    public static final String EXTRA_SLOT_ID = "slotId";
-    public static final String EXTRA_RADIO_BUG_TYPE = "radioBugType";
+    public static final String ACTION_USER_ACTIVITY_NOTIFICATION =
+            "android.intent.action.USER_ACTIVITY_NOTIFICATION";
 }

@@ -19,8 +19,11 @@ package com.android.systemui.controls.ui
 import android.content.ComponentName
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
+import android.view.ViewGroup
 
 interface ControlsUiController {
+    fun show(parent: ViewGroup)
+    fun hide()
     fun onRefreshState(componentName: ComponentName, controls: List<Control>)
     fun onActionResponse(
         componentName: ComponentName,

@@ -1001,18 +1001,22 @@ public class DisplayRotation {
      * Given an orientation constant, returns the appropriate surface rotation, taking into account
      * sensors, docking mode, rotation lock, and other factors.
      *
-     * @param orientation An orientation constant, such as
-     *                    {@link ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
+     * @param orientation  An orientation constant, such as
+     *                     {@link ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
      * @param lastRotation The most recently used rotation.
      * @return The surface rotation to use.
      */
     @VisibleForTesting
-    int rotationForOrientation(int orientation, int lastRotation) {
-        ProtoLog.v(WM_DEBUG_ORIENTATION, "rotationForOrientation(orient=%d, last=%d); user=%d %s",
-                    orientation, lastRotation, mUserRotation,
-                    mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
-                            ? "USER_ROTATION_LOCKED" : ""
-                        );
+    @Surface.Rotation
+    int rotationForOrientation(@ScreenOrientation int orientation,
+            @Surface.Rotation int lastRotation) {
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "rotationForOrientation(orient=%s (%d), last=%s (%d)); user=%s (%d) %s",
+                ActivityInfo.screenOrientationToString(orientation), orientation,
+                Surface.rotationToString(lastRotation), lastRotation,
+                Surface.rotationToString(mUserRotation), mUserRotation,
+                mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
+                        ? "USER_ROTATION_LOCKED" : "");
 
         if (isFixedToUserRotation()) {
             return mUserRotation;

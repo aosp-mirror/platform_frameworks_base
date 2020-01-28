@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -27,6 +28,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
+import static com.android.server.job.JobSchedulerService.RARE_INDEX;
+import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -566,6 +570,48 @@ public class ConnectivityControllerTest {
         inOrder.verify(mNetPolicyManagerInternal, times(1))
                 .setAppIdleWhitelist(eq(UID_RED), eq(false));
         assertFalse(controller.isStandbyExceptionRequestedLocked(UID_RED));
+    }
+
+    @Test
+    public void testRestrictedJobTracking() {
+        final JobStatus networked = createJobStatus(createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_CELLULAR), UID_RED);
+        final JobStatus unnetworked = createJobStatus(createJob(), UID_BLUE);
+        networked.setStandbyBucket(FREQUENT_INDEX);
+        unnetworked.setStandbyBucket(FREQUENT_INDEX);
+
+        final Network cellularNet = new Network(101);
+        final NetworkCapabilities cellularCaps =
+                createCapabilities().addTransportType(TRANSPORT_CELLULAR);
+        reset(mConnManager);
+        answerNetwork(UID_RED, cellularNet, cellularCaps);
+        answerNetwork(UID_BLUE, cellularNet, cellularCaps);
+
+        final ConnectivityController controller = new ConnectivityController(mService);
+        controller.maybeStartTrackingJobLocked(networked, null);
+        controller.maybeStartTrackingJobLocked(unnetworked, null);
+
+        assertTrue(networked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+        assertFalse(unnetworked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+
+        networked.setStandbyBucket(RESTRICTED_INDEX);
+        unnetworked.setStandbyBucket(RESTRICTED_INDEX);
+        controller.startTrackingRestrictedJobLocked(networked);
+        controller.startTrackingRestrictedJobLocked(unnetworked);
+        assertFalse(networked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+        // Unnetworked shouldn't be affected by ConnectivityController since it doesn't have a
+        // connectivity constraint.
+        assertFalse(unnetworked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+
+        networked.setStandbyBucket(RARE_INDEX);
+        unnetworked.setStandbyBucket(RARE_INDEX);
+        controller.stopTrackingRestrictedJobLocked(networked);
+        controller.stopTrackingRestrictedJobLocked(unnetworked);
+        assertTrue(networked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
+        // Unnetworked shouldn't be affected by ConnectivityController since it doesn't have a
+        // connectivity constraint.
+        assertFalse(unnetworked.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
     }
 
     private void answerNetwork(int uid, Network net, NetworkCapabilities caps) {

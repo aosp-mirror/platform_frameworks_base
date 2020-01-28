@@ -429,14 +429,14 @@ public final class PhoneCapability implements Parcelable {
     /**
      * {@link Parcelable#describeContents}
      */
-    public @Parcelable.ContentsFlags int describeContents() {
+    public int describeContents() {
         return 0;
     }
 
     /**
      * {@link Parcelable#writeToParcel}
      */
-    public void writeToParcel(@NonNull Parcel dest, @Parcelable.WriteFlags int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mUtranUeCategoryDl);
         dest.writeInt(mUtranUeCategoryUl);
         dest.writeInt(mEutranUeCategoryDl);

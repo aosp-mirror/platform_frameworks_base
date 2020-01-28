@@ -46,7 +46,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.RemoteException;
 import android.util.Slog;
 import android.util.StatsLog;
 
@@ -158,8 +157,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
     @Override
     public void updateRuleSet(
-            String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver)
-            throws RemoteException {
+            String version, ParceledListSlice<Rule> rules, IntentSender statusReceiver) {
         String ruleProvider = getCallerPackageNameOrThrow();
 
         mHandler.post(
@@ -190,7 +188,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
-    public String getCurrentRuleSetVersion() throws RemoteException {
+    public String getCurrentRuleSetVersion() {
         getCallerPackageNameOrThrow();
 
         RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
@@ -200,7 +198,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     @Override
-    public String getCurrentRuleSetProvider() throws RemoteException {
+    public String getCurrentRuleSetProvider() {
         getCallerPackageNameOrThrow();
 
         RuleMetadata ruleMetadata = mIntegrityFileManager.readMetadata();
@@ -211,14 +209,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
     private void handleIntegrityVerification(Intent intent) {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
-
-        // Fail early if we don't have any rules at all.
-        if (!mIntegrityFileManager.initialized()) {
-            Slog.i(TAG, "Rules not initialized. Skipping integrity check.");
-            mPackageManagerInternal.setIntegrityVerificationResult(
-                    verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-            return;
-        }
 
         try {
             Slog.i(TAG, "Received integrity verification intent " + intent.toString());

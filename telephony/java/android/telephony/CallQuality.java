@@ -400,14 +400,14 @@ public final class CallQuality implements Parcelable {
     /**
      * {@link Parcelable#describeContents}
      */
-    public @Parcelable.ContentsFlags int describeContents() {
+    public int describeContents() {
         return 0;
     }
 
     /**
      * {@link Parcelable#writeToParcel}
      */
-    public void writeToParcel(Parcel dest, @Parcelable.WriteFlags int flags) {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mDownlinkCallQualityLevel);
         dest.writeInt(mUplinkCallQualityLevel);
         dest.writeInt(mCallDuration);

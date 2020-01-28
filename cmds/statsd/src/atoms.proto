@@ -137,7 +137,7 @@ message Atom {
         DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true];
         OverlayStateChanged overlay_state_changed = 59;
         ForegroundServiceStateChanged foreground_service_state_changed = 60;
-        CallStateChanged call_state_changed = 61;
+        CallStateChanged call_state_changed = 61 [(module) = "telecom"];
         KeyguardStateChanged keyguard_state_changed = 62 [(module) = "sysui"];
         KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63 [(module) = "sysui"];
         KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64 [(module) = "sysui"];
@@ -255,7 +255,8 @@ message Atom {
         PermissionGrantRequestResultReported permission_grant_request_result_reported =
             170 [(module) = "permissioncontroller"];
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
-        DeviceIdentifierAccessDenied device_identifier_access_denied = 172;
+        DeviceIdentifierAccessDenied device_identifier_access_denied =
+                172 [(module) = "telephony_common"];
         BubbleDeveloperErrorReported bubble_developer_error_reported = 173;
         AssistGestureStageReported assist_gesture_stage_reported = 174;
         AssistGestureFeedbackReported assist_gesture_feedback_reported = 175;
@@ -288,8 +289,8 @@ message Atom {
         MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
         MediametricsRecorderReported mediametrics_recorder_reported = 200;
         MediametricsDrmManagerReported mediametrics_drmmanager_reported = 201;
-        CarPowerStateChanged car_power_state_changed = 203;
-        GarageModeInfo garage_mode_info = 204;
+        CarPowerStateChanged car_power_state_changed = 203 [(module) = "car"];
+        GarageModeInfo garage_mode_info = 204 [(module) = "car"];
         TestAtomReported test_atom_reported = 205 [(module) = "cts"];
         ContentCaptureCallerMismatchReported content_capture_caller_mismatch_reported = 206;
         ContentCaptureServiceEvents content_capture_service_events = 207;
@@ -324,7 +325,8 @@ message Atom {
         AppCompatibilityChangeReported app_compatibility_change_reported =
             228 [(allow_from_any_uid) = true];
         PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
-        VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
+        VmsClientConnectionStateChanged vms_client_connection_state_changed =
+                230 [(module) = "car"];
         MediaProviderScanEvent media_provider_scan_event = 233 [(module) = "mediaprovider"];
         MediaProviderDeletionEvent media_provider_deletion_event = 234 [(module) = "mediaprovider"];
         MediaProviderPermissionEvent media_provider_permission_event =
@@ -343,6 +345,10 @@ message Atom {
         NotificationChannelModified notification_panel_modified = 246;
         IntegrityCheckResultReported integrity_check_result_reported = 247;
         IntegrityRulesPushed integrity_rules_pushed = 248;
+        CellBroadcastMessageReported cb_message_reported =
+            249 [(module) = "cellbroadcast"];
+        CellBroadcastMessageError cb_message_error =
+            250 [(module) = "cellbroadcast"];
     }
 
     // Pulled events will start at field 10000.
@@ -412,7 +418,7 @@ message Atom {
         SurfaceflingerStatsGlobalInfo surfaceflinger_stats_global_info = 10062;
         SurfaceflingerStatsLayerInfo surfaceflinger_stats_layer_info = 10063;
         ProcessMemorySnapshot process_memory_snapshot = 10064;
-        VmsClientStats vms_client_stats = 10065;
+        VmsClientStats vms_client_stats = 10065 [(module) = "car"];
         NotificationRemoteViews notification_remote_views = 10066;
         DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
         GraphicsStats graphics_stats = 10068;
@@ -8111,4 +8117,56 @@ message IntegrityRulesPushed {
     // Version string of arbitrary format provided by the rule provider to
     // identify the rules.
     optional string rule_version = 3;
+}
+
+/**
+ * Logs when a cell broadcast message is received on the device.
+ *
+ * Logged from CellBroadcastService module:
+ *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ */
+message CellBroadcastMessageReported {
+    // The type of Cell Broadcast message
+    enum CbType {
+        UNKNOWN_TYPE = 0;
+        GSM = 1;
+        CDMA = 2;
+        CDMA_SPC = 3;
+    }
+
+    // GSM, CDMA, CDMA-SCP
+    optional CbType type = 1;
+}
+
+/**
+ * Logs when an error occurs while handling a cell broadcast message;
+ *
+ * Logged from CellBroadcastService module:
+ *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ */
+message CellBroadcastMessageError {
+    // The type of error raised when trying to handle a cell broadcast message
+    enum ErrorType {
+        UNKNOWN_TYPE = 0;
+        CDMA_DECODING_ERROR = 1;
+        CDMA_SCP_EMPTY = 2;
+        CDMA_SCP_HANDLING_ERROR = 3;
+        GSM_INVALID_HEADER_LENGTH = 4;
+        GSM_UNSUPPORTED_HEADER_MESSAGE_TYPE = 5;
+        GSM_UNSUPPORTED_HEADER_DATA_CODING_SCHEME = 6;
+        GSM_INVALID_PDU = 7;
+        GSM_INVALID_GEO_FENCING_DATA = 8;
+        GSM_UMTS_INVALID_WAC = 9;
+        FAILED_TO_INSERT_TO_DB = 10;
+        UNEXPECTED_GEOMETRY_FROM_FWK = 11;
+        UNEXPECTED_GSM_MESSAGE_TYPE_FROM_FWK = 12;
+        UNEXPECTED_CDMA_MESSAGE_TYPE_FROM_FWK = 13;
+        UNEXPECTED_CDMA_SCP_MESSAGE_TYPE_FROM_FWK = 14;
+    }
+
+    // What kind of error occurred
+    optional ErrorType type = 1;
+
+    // Exception message (or log message) associated with the error (max 1000 chars)
+    optional string exception_message = 2;
 }

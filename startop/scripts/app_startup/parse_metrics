@@ -50,7 +50,7 @@ source "$DIR/lib/common"
 
 package=""
 activity=""
-timeout=10
+timeout=5
 simulate="n"
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
@@ -123,6 +123,9 @@ parse_metric_from_logcat() {
   local pattern="$2"
   local re_pattern="$3"
   local retcode
+  local result
+  local sec
+  local ms
 
   # parse logcat for 'Displayed...' and that other one...
 
@@ -137,14 +140,28 @@ parse_metric_from_logcat() {
     return 0
   fi
 
-  logcat_extract_pattern "$timeout" "$timestamp" "$pattern" "$re_pattern"
+  result="$(logcat_extract_pattern "$timeout" "$timestamp" "$pattern" "$re_pattern")"
   retcode=$?
 
   if [[ $retcode -ne 0 ]]; then
     # Timed out before finding the pattern. Could also mean the pattern is wrong.
+    echo "Parse $re_pattern from logcat TIMED OUT after $timeout seconds." >&2
     echo "-$?"
+    return $retcode
   fi
 
+  # "10s123ms" -> "10s123"
+  result=${result/ms/}
+  if [[ $result =~ s ]]; then
+    ms=${result/*s/}
+    sec=${result/s*/}
+  else
+    sec=0
+    ms=$result
+  fi
+  ((result=sec*1000+ms))
+
+  echo "$result"
   return $retcode
 }
 
@@ -169,9 +186,16 @@ echo "TotalTime_ms=$total_time"
 
 # 05-06 14:34:08.854 29460 29481 I ActivityTaskManager: Displayed com.google.android.dialer/.extensions.GoogleDialtactsActivity: +361ms
 pattern="ActivityTaskManager: Displayed ${package}"
-re_pattern='.*Displayed[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+\).*'
+re_pattern='.*Displayed[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+ms\|[[:digit:]]\+s[[:digit:]]\+ms\).*'
 
 parse_metric_from_logcat "Displayed_ms" "$pattern" "$re_pattern"
+
+# 01-16 17:31:44.550 11172 11204 I ActivityTaskManager: Fully drawn com.google.android.GoogleCamera/com.android.camera.CameraLauncher: +10s897ms
+pattern="ActivityTaskManager: Fully drawn ${package}"
+#re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+\).*'
+re_pattern='.*Fully drawn[[:blank:]]\+'"${package}"'[/][^[:blank:]]\+[[:blank:]]+\([[:digit:]]\+ms\|[[:digit:]]\+s[[:digit:]]\+ms\).*'
+
+parse_metric_from_logcat "Fully_drawn_ms" "$pattern" "$re_pattern"
 
 # also call into package-specific scripts if there are additional metrics
 if [[ -x "$DIR/metrics/$package" ]]; then

@@ -310,13 +310,11 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * The user has performed a double tap gesture on the touch screen.
-     * @hide
      */
     public static final int GESTURE_DOUBLE_TAP = 17;
 
     /**
      * The user has performed a double tap and hold gesture on the touch screen.
-     * @hide
      */
     public static final int GESTURE_DOUBLE_TAP_AND_HOLD = 18;
 

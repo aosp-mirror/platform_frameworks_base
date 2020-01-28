@@ -32,11 +32,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -59,7 +57,6 @@ import android.os.Message;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
-import com.android.server.LocalServices;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.testutils.TestUtils;
@@ -147,29 +144,8 @@ public class AppIntegrityManagerServiceImplTest {
         when(mIntegrityFileManager.initialized()).thenReturn(true);
     }
 
-    // This is not a test of the class, but more of a safeguard that we don't block any install in
-    // the default case. This is needed because we don't have any emergency kill switch to disable
-    // this component.
-    @Test
-    public void default_allow() throws Exception {
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
-        mService = AppIntegrityManagerServiceImpl.create(mMockContext);
-        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext, times(2))
-                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
-        Intent intent = makeVerificationIntent();
-
-        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
-
-        // Since we are not mocking handler in this case, we must wait.
-        // 2 seconds should be a sensible timeout.
-        Thread.sleep(2000);
-        verify(mPackageManagerInternal)
-                .setIntegrityVerificationResult(
-                        1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-    }
+    // TODO(b/148370598): Implement a test to validate that allow response is retuned when the test
+    //    request times out.
 
     @Test
     public void updateRuleSet_notAuthorized() throws Exception {
@@ -381,10 +357,10 @@ public class AppIntegrityManagerServiceImplTest {
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();
 
+        // The evaluation will still run since we still evaluate manifest based rules.
         verify(mPackageManagerInternal)
                 .setIntegrityVerificationResult(
                         1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-        verify(mSpyPackageManager, never()).getPackageArchiveInfo(any(), anyInt());
     }
 
     @Test
@@ -432,8 +408,8 @@ public class AppIntegrityManagerServiceImplTest {
 
     private Intent makeVerificationIntent() throws Exception {
         PackageInfo packageInfo =
-                mRealContext.getPackageManager().getPackageInfo(TEST_FRAMEWORK_PACKAGE,
-                        PackageManager.GET_SIGNATURES);
+                mRealContext.getPackageManager()
+                        .getPackageInfo(TEST_FRAMEWORK_PACKAGE, PackageManager.GET_SIGNATURES);
         doReturn(packageInfo)
                 .when(mSpyPackageManager)
                 .getPackageInfo(eq(INSTALLER), anyInt());

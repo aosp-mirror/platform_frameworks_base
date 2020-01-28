@@ -156,7 +156,6 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
     static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
     static final String EXTRA_ID = "android.intent.extra.ID";
-    static final String EXTRA_MAX = "android.intent.extra.MAX";
     static final String EXTRA_NAME = "android.intent.extra.NAME";
     static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
@@ -173,7 +172,6 @@ public class BugreportProgressService extends Service {
 
     // Maximum progress displayed in %.
     private static final int CAPPED_PROGRESS = 99;
-    private static final int CAPPED_MAX = 100;
 
     /** Show the progress log every this percent. */
     private static final int LOG_PROGRESS_STEP = 10;
@@ -528,12 +526,10 @@ public class BugreportProgressService extends Service {
             }
             final String action = intent.getAction();
             final int id = intent.getIntExtra(EXTRA_ID, 0);
-            final int max = intent.getIntExtra(EXTRA_MAX, -1);
             final String name = intent.getStringExtra(EXTRA_NAME);
 
             if (DEBUG)
-                Log.v(TAG, "action: " + action + ", name: " + name + ", id: " + id
-                        + ", max: " + max);
+                Log.v(TAG, "action: " + action + ", name: " + name + ", id: " + id);
             switch (action) {
                 case INTENT_BUGREPORT_REQUESTED:
                     startBugreportAPI(intent);
@@ -608,7 +604,7 @@ public class BugreportProgressService extends Service {
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name,
-                100 /* max progress*/, shareTitle, shareDescription, bugreportType);
+                shareTitle, shareDescription, bugreportType);
 
         ParcelFileDescriptor bugreportFd = info.createBugreportFd();
         if (bugreportFd == null) {
@@ -662,8 +658,8 @@ public class BugreportProgressService extends Service {
      * Updates the system notification for a given bugreport.
      */
     private void updateProgress(BugreportInfo info) {
-        if (info.max <= 0 || info.progress < 0) {
-            Log.e(TAG, "Invalid progress values for " + info);
+        if (info.progress < 0) {
+            Log.e(TAG, "Invalid progress value for " + info);
             return;
         }
 
@@ -676,7 +672,7 @@ public class BugreportProgressService extends Service {
         final NumberFormat nf = NumberFormat.getPercentInstance();
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
-        final String percentageText = nf.format((double) info.progress / info.max);
+        final String percentageText = nf.format((double) info.progress / 100);
 
         String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
 
@@ -684,7 +680,7 @@ public class BugreportProgressService extends Service {
         if (mIsWatch) {
             nf.setMinimumFractionDigits(0);
             nf.setMaximumFractionDigits(0);
-            final String watchPercentageText = nf.format((double) info.progress / info.max);
+            final String watchPercentageText = nf.format((double) info.progress / 100);
             title = title + "\n" + watchPercentageText;
         }
 
@@ -695,7 +691,7 @@ public class BugreportProgressService extends Service {
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(name)
-                .setProgress(info.max, info.progress, false)
+                .setProgress(100 /* max value of progress percentage */, info.progress, false)
                 .setOngoing(true);
 
         // Wear and ATV bugreport doesn't need the bug info dialog, screenshot and cancel action.
@@ -724,7 +720,7 @@ public class BugreportProgressService extends Service {
                 .setActions(infoAction, screenshotAction, cancelAction);
         }
         // Show a debug log, every LOG_PROGRESS_STEP percent.
-        final int progress = (info.progress * 100) / info.max;
+        final int progress = info.progress;
 
         if ((info.progress == 0) || (info.progress >= 100) ||
                 ((progress / LOG_PROGRESS_STEP) != (mLastProgressPercent / LOG_PROGRESS_STEP))) {
@@ -1457,7 +1453,6 @@ public class BugreportProgressService extends Service {
         }
         final StringBuilder buffer = new StringBuilder(action).append(" extras: ");
         addExtra(buffer, intent, EXTRA_ID);
-        addExtra(buffer, intent, EXTRA_MAX);
         addExtra(buffer, intent, EXTRA_NAME);
         addExtra(buffer, intent, EXTRA_DESCRIPTION);
         addExtra(buffer, intent, EXTRA_BUGREPORT);
@@ -1761,24 +1756,9 @@ public class BugreportProgressService extends Service {
         String description;
 
         /**
-         * Maximum progress of the bugreport generation as displayed by the UI.
-         */
-        int max;
-
-        /**
-         * Current progress of the bugreport generation as displayed by the UI.
+         * Current progress (in percentage) of the bugreport generation as displayed by the UI.
          */
         int progress;
-
-        /**
-         * Maximum progress of the bugreport generation as reported by dumpstate.
-         */
-        int realMax;
-
-        /**
-         * Current progress of the bugreport generation as reported by dumpstate.
-         */
-        int realProgress;
 
         /**
          * Time of the last progress update.
@@ -1831,12 +1811,11 @@ public class BugreportProgressService extends Service {
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
          */
-        BugreportInfo(Context context, String baseName, String name, int max,
+        BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
                 @BugreportParams.BugreportMode int type) {
             this.context = context;
             this.name = this.initialName = name;
-            this.max = this.realMax = max;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
             this.shareDescription = shareDescription == null ? "" : shareDescription;
             this.type = type;
@@ -1930,8 +1909,6 @@ public class BugreportProgressService extends Service {
 
         @Override
         public String toString() {
-            final float percent = ((float) progress * 100 / max);
-            final float realPercent = ((float) realProgress * 100 / realMax);
 
             final StringBuilder builder = new StringBuilder()
                     .append("\tid: ").append(id)
@@ -1953,10 +1930,7 @@ public class BugreportProgressService extends Service {
             return builder
                 .append("\n\tfile: ").append(bugreportFile)
                 .append("\n\tscreenshots: ").append(screenshotFiles)
-                .append("\n\tprogress: ").append(progress).append("/").append(max)
-                .append(" (").append(percent).append(")")
-                .append("\n\treal progress: ").append(realProgress).append("/").append(realMax)
-                .append(" (").append(realPercent).append(")")
+                .append("\n\tprogress: ").append(progress)
                 .append("\n\tlast_update: ").append(getFormattedLastUpdate())
                 .append("\n\taddingDetailsToZip: ").append(addingDetailsToZip)
                 .append(" addedDetailsToZip: ").append(addedDetailsToZip)
@@ -1974,10 +1948,7 @@ public class BugreportProgressService extends Service {
             initialName = in.readString();
             title = in.readString();
             description = in.readString();
-            max = in.readInt();
             progress = in.readInt();
-            realMax = in.readInt();
-            realProgress = in.readInt();
             lastUpdate = in.readLong();
             formattedLastUpdate = in.readString();
             bugreportFile = readFile(in);
@@ -2001,10 +1972,7 @@ public class BugreportProgressService extends Service {
             dest.writeString(initialName);
             dest.writeString(title);
             dest.writeString(description);
-            dest.writeInt(max);
             dest.writeInt(progress);
-            dest.writeInt(realMax);
-            dest.writeInt(realProgress);
             dest.writeLong(lastUpdate);
             dest.writeString(getFormattedLastUpdate());
             writeFile(dest, bugreportFile);
@@ -2055,22 +2023,13 @@ public class BugreportProgressService extends Service {
         if (progress > CAPPED_PROGRESS) {
             progress = CAPPED_PROGRESS;
         }
-        updateProgressInfo(info, progress, CAPPED_MAX);
-    }
-
-    private void updateProgressInfo(BugreportInfo info, int progress, int max) {
         if (DEBUG) {
             if (progress != info.progress) {
                 Log.v(TAG, "Updating progress for name " + info.name + "(id: " + info.id
                         + ") from " + info.progress + " to " + progress);
             }
-            if (max != info.max) {
-                Log.v(TAG, "Updating max progress for name " + info.name + "(id: " + info.id
-                        + ") from " + info.max + " to " + max);
-            }
         }
         info.progress = progress;
-        info.max = max;
         info.lastUpdate = System.currentTimeMillis();
 
         updateProgress(info);

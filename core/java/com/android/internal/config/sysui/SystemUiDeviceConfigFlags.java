@@ -364,6 +364,12 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String NAV_BAR_HANDLE_FORCE_OPAQUE = "nav_bar_handle_force_opaque";
 
+    /**
+     * (boolean) Whether to force the Nav Bar handle to remain visible over the lockscreen.
+     */
+    public static final String NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN =
+            "nav_bar_handle_show_over_lockscreen";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

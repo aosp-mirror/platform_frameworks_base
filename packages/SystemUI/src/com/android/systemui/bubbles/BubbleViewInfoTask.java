@@ -246,7 +246,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                     bubbleMessage.senderName = sender != null
                             ? sender.getName()
                             : null;
-                    bubbleMessage.senderAvatar = sender != null
+                    bubbleMessage.senderAvatar = sender != null && sender.getIcon() != null
                             ? sender.getIcon().loadDrawable(context)
                             : null;
                     return bubbleMessage;

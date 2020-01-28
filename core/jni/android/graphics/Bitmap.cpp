@@ -34,7 +34,6 @@
 #include <string>
 
 #define DEBUG_PARCEL 0
-#define ASHMEM_BITMAP_MIN_SIZE (128 * (1 << 10))
 
 static jclass   gBitmap_class;
 static jfieldID gBitmap_nativePtr;
@@ -587,7 +586,6 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    const bool        isMutable = p->readInt32() != 0;
     const SkColorType colorType = (SkColorType)p->readInt32();
     const SkAlphaType alphaType = (SkAlphaType)p->readInt32();
     const uint32_t    colorSpaceSize = p->readUint32();
@@ -636,11 +634,10 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     // Map the bitmap in place from the ashmem region if possible otherwise copy.
     sk_sp<Bitmap> nativeBitmap;
-    if (blob.fd() >= 0 && (blob.isMutable() || !isMutable) && (size >= ASHMEM_BITMAP_MIN_SIZE)) {
+    if (blob.fd() >= 0 && !blob.isMutable()) {
 #if DEBUG_PARCEL
-        ALOGD("Bitmap.createFromParcel: mapped contents of %s bitmap from %s blob "
+        ALOGD("Bitmap.createFromParcel: mapped contents of bitmap from %s blob "
                 "(fds %s)",
-                isMutable ? "mutable" : "immutable",
                 blob.isMutable() ? "mutable" : "immutable",
                 p->allowFds() ? "allowed" : "forbidden");
 #endif
@@ -657,7 +654,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         // Map the pixels in place and take ownership of the ashmem region. We must also respect the
         // rowBytes value already set on the bitmap instead of attempting to compute our own.
         nativeBitmap = Bitmap::createFrom(bitmap->info(), bitmap->rowBytes(), dupFd,
-                                          const_cast<void*>(blob.data()), size, !isMutable);
+                                          const_cast<void*>(blob.data()), size, true);
         if (!nativeBitmap) {
             close(dupFd);
             blob.release();
@@ -695,7 +692,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     }
 
     return createBitmap(env, nativeBitmap.release(),
-            getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);
+            getPremulBitmapCreateFlags(false), NULL, NULL, density);
 #else
     doThrowRE(env, "Cannot use parcels outside of Android");
     return NULL;
@@ -703,9 +700,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 }
 
 static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
-                                     jlong bitmapHandle,
-                                     jboolean isMutable, jint density,
-                                     jobject parcel) {
+                                     jlong bitmapHandle, jint density, jobject parcel) {
 #ifdef __ANDROID__ // Layoutlib does not support parcel
     if (parcel == NULL) {
         SkDebugf("------- writeToParcel null parcel\n");
@@ -718,7 +713,6 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     auto bitmapWrapper = reinterpret_cast<BitmapWrapper*>(bitmapHandle);
     bitmapWrapper->getSkBitmap(&bitmap);
 
-    p->writeInt32(isMutable);
     p->writeInt32(bitmap.colorType());
     p->writeInt32(bitmap.alphaType());
     SkColorSpace* colorSpace = bitmap.colorSpace();
@@ -745,7 +739,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     // Transfer the underlying ashmem region if we have one and it's immutable.
     android::status_t status;
     int fd = bitmapWrapper->bitmap().getAshmemFd();
-    if (fd >= 0 && !isMutable && p->allowFds()) {
+    if (fd >= 0 && p->allowFds()) {
 #if DEBUG_PARCEL
         ALOGD("Bitmap.writeToParcel: transferring immutable bitmap's ashmem fd as "
                 "immutable blob (fds %s)",
@@ -761,17 +755,14 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     }
 
     // Copy the bitmap to a new blob.
-    bool mutableCopy = isMutable;
 #if DEBUG_PARCEL
-    ALOGD("Bitmap.writeToParcel: copying %s bitmap into new %s blob (fds %s)",
-            isMutable ? "mutable" : "immutable",
-            mutableCopy ? "mutable" : "immutable",
+    ALOGD("Bitmap.writeToParcel: copying bitmap into new blob (fds %s)",
             p->allowFds() ? "allowed" : "forbidden");
 #endif
 
     size_t size = bitmap.computeByteSize();
     android::Parcel::WritableBlob blob;
-    status = p->writeBlob(size, mutableCopy, &blob);
+    status = p->writeBlob(size, false, &blob);
     if (status) {
         doThrowRE(env, "Could not copy bitmap to parcel blob.");
         return JNI_FALSE;
@@ -1109,7 +1100,7 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeCreateFromParcel",
         "(Landroid/os/Parcel;)Landroid/graphics/Bitmap;",
         (void*)Bitmap_createFromParcel },
-    {   "nativeWriteToParcel",      "(JZILandroid/os/Parcel;)Z",
+    {   "nativeWriteToParcel",      "(JILandroid/os/Parcel;)Z",
         (void*)Bitmap_writeToParcel },
     {   "nativeExtractAlpha",       "(JJ[I)Landroid/graphics/Bitmap;",
         (void*)Bitmap_extractAlpha },

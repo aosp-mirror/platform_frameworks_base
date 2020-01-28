@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.app.ITransientNotificationCallback;
 import android.app.Notification;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
@@ -497,6 +498,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             if (mBar != null) {
                 try {
                     mBar.abortTransient(displayId, types);
+                } catch (RemoteException ex) { }
+            }
+        }
+
+        @Override
+        public void showToast(String packageName, IBinder token, CharSequence text,
+                IBinder windowToken, int duration,
+                @Nullable ITransientNotificationCallback callback) {
+            if (mBar != null) {
+                try {
+                    mBar.showToast(packageName, token, text, windowToken, duration, callback);
+                } catch (RemoteException ex) { }
+            }
+        }
+
+        @Override
+        public void hideToast(String packageName, IBinder token) {
+            if (mBar != null) {
+                try {
+                    mBar.hideToast(packageName, token);
                 } catch (RemoteException ex) { }
             }
         }

@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.annotation.Dimension.DP;
+import static android.graphics.drawable.Icon.TYPE_URI;
+import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
 import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
@@ -2502,6 +2504,14 @@ public class Notification implements Parcelable
                         .getMessagesFromBundleArray(historic)) {
                     visitor.accept(message.getDataUri());
                 }
+            }
+        }
+
+        if (mBubbleMetadata != null && mBubbleMetadata.getBubbleIcon() != null) {
+            final Icon icon = mBubbleMetadata.getBubbleIcon();
+            final int iconType = icon.getType();
+            if (iconType == TYPE_URI_ADAPTIVE_BITMAP || iconType == TYPE_URI) {
+                visitor.accept(icon.getUri());
             }
         }
     }
@@ -8899,6 +8909,12 @@ public class Notification implements Parcelable
                 }
                 if (icon == null) {
                     throw new IllegalArgumentException("Bubbles require non-null icon");
+                }
+                if (icon.getType() != TYPE_URI_ADAPTIVE_BITMAP
+                        && icon.getType() != TYPE_URI) {
+                    Log.w(TAG, "Bubbles work best with icons of TYPE_URI or "
+                            + "TYPE_URI_ADAPTIVE_BITMAP. "
+                            + "In the future, using an icon of this type will be required.");
                 }
                 mShortcutId = null;
                 mPendingIntent = intent;

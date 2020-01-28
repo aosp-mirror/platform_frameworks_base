@@ -94,7 +94,6 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.OVERLAY_REMOVED" />
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
-    <protected-broadcast android:name="android.intent.action.USER_ACTIVITY_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
 

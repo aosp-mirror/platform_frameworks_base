@@ -104,6 +104,7 @@ import com.android.server.location.MockProvider;
 import com.android.server.location.MockableLocationProvider;
 import com.android.server.location.PassiveProvider;
 import com.android.server.location.UserInfoStore;
+import com.android.server.location.gnss.GnssManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;

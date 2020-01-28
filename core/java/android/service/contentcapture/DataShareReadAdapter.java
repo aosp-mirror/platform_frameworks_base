@@ -40,8 +40,7 @@ public interface DataShareReadAdapter {
     void onStart(@NonNull ParcelFileDescriptor fd, @NonNull CancellationSignal cancellationSignal);
 
     /**
-     * Signals that the session failed to start or terminated unsuccessfully (e.g. due to a
-     * timeout).
+     * Signals that the session failed to start or terminated unsuccessfully.
      **/
     void onError(int errorCode);
 }

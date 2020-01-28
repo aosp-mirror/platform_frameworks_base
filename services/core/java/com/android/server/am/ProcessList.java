@@ -1551,6 +1551,45 @@ public final class ProcessList {
         }
     }
 
+    private int[] computeGidsForProcess(int mountExternal, int uid, int[] permGids) {
+        ArrayList<Integer> gidList = new ArrayList<>(permGids.length + 5);
+
+        final int sharedAppGid = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
+        final int cacheAppGid = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
+        final int userGid = UserHandle.getUserGid(UserHandle.getUserId(uid));
+
+        // Add shared application and profile GIDs so applications can share some
+        // resources like shared libraries and access user-wide resources
+        for (int permGid : permGids) {
+            gidList.add(permGid);
+        }
+        if (sharedAppGid != UserHandle.ERR_GID) {
+            gidList.add(sharedAppGid);
+        }
+        if (cacheAppGid != UserHandle.ERR_GID) {
+            gidList.add(cacheAppGid);
+        }
+        if (userGid != UserHandle.ERR_GID) {
+            gidList.add(userGid);
+        }
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+            // For DownloadProviders and MTP: To grant access to /sdcard/Android/
+            gidList.add(Process.SDCARD_RW_GID);
+        }
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
+            // For the FUSE daemon: To grant access to the lower filesystem.
+            // EmulatedVolumes: /data/media and /mnt/expand/<volume>/data/media
+            // PublicVolumes: /mnt/media_rw/<volume>
+            gidList.add(Process.MEDIA_RW_GID);
+        }
+
+        int[] gidArray = new int[gidList.size()];
+        for (int i = 0; i < gidArray.length; i++) {
+            gidArray[i] = gidList.get(i);
+        }
+        return gidArray;
+    }
+
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
@@ -1625,38 +1664,7 @@ public final class ProcessList {
                     }
                 }
 
-                int numGids = 3;
-                if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
-                        || app.info.packageName.equals("com.android.externalstorage")) {
-                    numGids++;
-                }
-
-                /*
-                 * Add shared application and profile GIDs so applications can share some
-                 * resources like shared libraries and access user-wide resources
-                 */
-                if (ArrayUtils.isEmpty(permGids)) {
-                    gids = new int[numGids];
-                } else {
-                    gids = new int[permGids.length + numGids];
-                    System.arraycopy(permGids, 0, gids, numGids, permGids.length);
-                }
-                gids[0] = UserHandle.getSharedAppGid(UserHandle.getAppId(uid));
-                gids[1] = UserHandle.getCacheAppGid(UserHandle.getAppId(uid));
-                gids[2] = UserHandle.getUserGid(UserHandle.getUserId(uid));
-
-                if (numGids > 3) {
-                    if (app.info.packageName.equals("com.android.externalstorage")) {
-                        // Allows access to 'unreliable' (USB OTG) volumes via SAF
-                        gids[3] = Process.MEDIA_RW_GID;
-                    } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
-                        gids[3] = Process.SDCARD_RW_GID;
-                    }
-                }
-
-                // Replace any invalid GIDs
-                if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
-                if (gids[1] == UserHandle.ERR_GID) gids[1] = gids[2];
+                gids = computeGidsForProcess(mountExternal, uid, permGids);
             }
             app.mountMode = mountExternal;
             checkSlow(startTime, "startProcess: building args");
@@ -1875,11 +1883,11 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    public void killAppZygoteIfNeededLocked(AppZygote appZygote) {
+    public void killAppZygoteIfNeededLocked(AppZygote appZygote, boolean force) {
         final ApplicationInfo appInfo = appZygote.getAppInfo();
         ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
-        if (zygoteProcesses != null && zygoteProcesses.size() == 0) {
-            // Only remove if no longer in use now
+        if (zygoteProcesses != null && (force || zygoteProcesses.size() == 0)) {
+            // Only remove if no longer in use now, or forced kill
             mAppZygotes.remove(appInfo.processName, appInfo.uid);
             mAppZygoteProcesses.remove(appZygote);
             mAppIsolatedUidRangeAllocator.freeUidRangeLocked(appInfo);
@@ -1907,7 +1915,7 @@ public final class ProcessList {
                 if (app.removed) {
                     // If we stopped this process because the package hosting it was removed,
                     // there's no point in delaying the app zygote kill.
-                    killAppZygoteIfNeededLocked(appZygote);
+                    killAppZygoteIfNeededLocked(appZygote, false /* force */);
                 } else {
                     Message msg = mService.mHandler.obtainMessage(KILL_APP_ZYGOTE_MSG);
                     msg.obj = appZygote;
@@ -2385,6 +2393,33 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
+    void killAppZygotesLocked(String packageName, int appId, int userId, boolean force) {
+        // See if there are any app zygotes running for this packageName / UID combination,
+        // and kill it if so.
+        final ArrayList<AppZygote> zygotesToKill = new ArrayList<>();
+        for (SparseArray<AppZygote> appZygotes : mAppZygotes.getMap().values()) {
+            for (int i = 0; i < appZygotes.size(); ++i) {
+                final int appZygoteUid = appZygotes.keyAt(i);
+                if (userId != UserHandle.USER_ALL && UserHandle.getUserId(appZygoteUid) != userId) {
+                    continue;
+                }
+                if (appId >= 0 && UserHandle.getAppId(appZygoteUid) != appId) {
+                    continue;
+                }
+                final AppZygote appZygote = appZygotes.valueAt(i);
+                if (packageName != null
+                        && !packageName.equals(appZygote.getAppInfo().packageName)) {
+                    continue;
+                }
+                zygotesToKill.add(appZygote);
+            }
+        }
+        for (AppZygote appZygote : zygotesToKill) {
+            killAppZygoteIfNeededLocked(appZygote, force);
+        }
+    }
+
+    @GuardedBy("mService")
     final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
             boolean doit, boolean evenPersistent, boolean setRemoved, String reason) {
@@ -2461,29 +2496,7 @@ public final class ProcessList {
         for (int i=0; i<N; i++) {
             removeProcessLocked(procs.get(i), callerWillRestart, allowRestart, reason);
         }
-        // See if there are any app zygotes running for this packageName / UID combination,
-        // and kill it if so.
-        final ArrayList<AppZygote> zygotesToKill = new ArrayList<>();
-        for (SparseArray<AppZygote> appZygotes : mAppZygotes.getMap().values()) {
-            for (int i = 0; i < appZygotes.size(); ++i) {
-                final int appZygoteUid = appZygotes.keyAt(i);
-                if (userId != UserHandle.USER_ALL && UserHandle.getUserId(appZygoteUid) != userId) {
-                    continue;
-                }
-                if (appId >= 0 && UserHandle.getAppId(appZygoteUid) != appId) {
-                    continue;
-                }
-                final AppZygote appZygote = appZygotes.valueAt(i);
-                if (packageName != null
-                        && !packageName.equals(appZygote.getAppInfo().packageName)) {
-                    continue;
-                }
-                zygotesToKill.add(appZygote);
-            }
-        }
-        for (AppZygote appZygote : zygotesToKill) {
-            killAppZygoteIfNeededLocked(appZygote);
-        }
+        killAppZygotesLocked(packageName, appId, userId, false /* force */);
         mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
         return N > 0;
     }

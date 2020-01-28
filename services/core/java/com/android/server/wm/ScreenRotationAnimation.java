@@ -370,6 +370,11 @@ class ScreenRotationAnimation {
             }
         }
 
+        ProtoLog.d(WM_DEBUG_ORIENTATION, "Start rotation animation. customAnim=%s, "
+                        + "mCurRotation=%s, mOriginalRotation=%s",
+                customAnim, Surface.rotationToString(mCurRotation),
+                Surface.rotationToString(mOriginalRotation));
+
         mRotateExitAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
         mRotateExitAnimation.restrictDuration(maxAnimationDuration);
         mRotateExitAnimation.scaleCurrentDuration(animationScale);

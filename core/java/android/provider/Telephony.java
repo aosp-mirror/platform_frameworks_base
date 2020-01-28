@@ -3745,6 +3745,7 @@ public final class Telephony {
          * @deprecated this column is no longer supported, use {@link #NETWORK_TYPE_BITMASK} instead
          */
         @Deprecated
+        @SystemApi
         public static final String BEARER_BITMASK = "bearer_bitmask";
 
         /**
@@ -3794,6 +3795,7 @@ public final class Telephony {
          * <p>Type: INTEGER</p>
          *@hide
          */
+        @SystemApi
         public static final String PROFILE_ID = "profile_id";
 
         /**
@@ -3994,6 +3996,7 @@ public final class Telephony {
          *
          * @hide
          */
+        @SystemApi
         public static final String SKIP_464XLAT = "skip_464xlat";
 
         /**
@@ -4002,6 +4005,7 @@ public final class Telephony {
          *
          * @hide
          */
+        @SystemApi
         public static final int SKIP_464XLAT_DEFAULT = -1;
 
         /**
@@ -4010,6 +4014,7 @@ public final class Telephony {
          *
          * @hide
          */
+        @SystemApi
         public static final int SKIP_464XLAT_DISABLE = 0;
 
         /**
@@ -4018,6 +4023,7 @@ public final class Telephony {
          *
          * @hide
          */
+        @SystemApi
         public static final int SKIP_464XLAT_ENABLE = 1;
 
 

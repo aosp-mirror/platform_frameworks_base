@@ -39,7 +39,7 @@ public class TelephonyServiceManager {
     /**
      * A class that exposes the methods to register and obtain each system service.
      */
-    public final class ServiceRegisterer {
+    public static final class ServiceRegisterer {
         private final String mServiceName;
 
         /**

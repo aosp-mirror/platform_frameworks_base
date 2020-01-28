@@ -27,11 +27,7 @@ import android.telephony.SubscriptionManager;
 
 /**
  * Provides access to information about Telephony IMS services on the device.
- *
- * @hide
  */
-@SystemApi
-@TestApi
 @SystemService(Context.TELEPHONY_IMS_SERVICE)
 public class ImsManager {
 
@@ -45,7 +41,10 @@ public class ImsManager {
      * <p class="note">
      * Carrier applications may listen to this broadcast to be notified of possible IMS provisioning
      * issues.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     // Moved from TelephonyIntents, need to keep backwards compatibility with OEM apps that have
     // this value hard-coded in BroadcastReceiver.
     @SuppressLint("ActionValue")
@@ -104,7 +103,10 @@ public class ImsManager {
      * @param subscriptionId The ID of the subscription that this ImsRcsManager will use.
      * @throws IllegalArgumentException if the subscription is invalid.
      * @return a ImsRcsManager instance with the specific subscription ID.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     @NonNull
     public ImsRcsManager getImsRcsManager(int subscriptionId) {
         if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {

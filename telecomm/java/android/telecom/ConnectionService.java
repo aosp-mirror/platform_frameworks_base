@@ -194,6 +194,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_CREATE_CONFERENCE = 35;
     private static final int MSG_CREATE_CONFERENCE_COMPLETE = 36;
     private static final int MSG_CREATE_CONFERENCE_FAILED = 37;
+    private static final int MSG_REJECT_WITH_REASON = 38;
 
     private static Connection sNullConnection;
 
@@ -444,6 +445,21 @@ public abstract class ConnectionService extends Service {
                 args.arg1 = callId;
                 args.arg2 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_REJECT, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void rejectWithReason(String callId,
+                @android.telecom.Call.RejectReason int rejectReason, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_REJECT);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.argi1 = rejectReason;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_REJECT_WITH_REASON, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1047,6 +1063,17 @@ public abstract class ConnectionService extends Service {
                     Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_REJECT);
                     try {
                         reject((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_REJECT_WITH_REASON: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg2, SESSION_HANDLER + SESSION_REJECT);
+                    try {
+                        reject((String) args.arg1, args.argi1);
                     } finally {
                         args.recycle();
                         Log.endSession();
@@ -1979,6 +2006,11 @@ public abstract class ConnectionService extends Service {
     private void reject(String callId, String rejectWithMessage) {
         Log.d(this, "reject %s with message", callId);
         findConnectionForAction(callId, "reject").onReject(rejectWithMessage);
+    }
+
+    private void reject(String callId, @android.telecom.Call.RejectReason int rejectReason) {
+        Log.d(this, "reject %s with reason %d", callId, rejectReason);
+        findConnectionForAction(callId, "reject").onReject(rejectReason);
     }
 
     private void silence(String callId) {
