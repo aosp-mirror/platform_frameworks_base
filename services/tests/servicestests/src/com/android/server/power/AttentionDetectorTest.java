@@ -92,18 +92,18 @@ public class AttentionDetectorTest extends AndroidTestCase {
         mNextDimming = SystemClock.uptimeMillis() + 3000L;
 
         // Save the existing state.
-        mIsSettingEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
-                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
+        mIsSettingEnabled = Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                Settings.Secure.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
 
-        Settings.System.putIntForUser(getContext().getContentResolver(),
-                Settings.System.ADAPTIVE_SLEEP, 1, UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.ADAPTIVE_SLEEP, 1, UserHandle.USER_CURRENT);
         mAttentionDetector.updateEnabledFromSettings(getContext());
     }
 
     @After
     public void tearDown() {
-        Settings.System.putIntForUser(getContext().getContentResolver(),
-                Settings.System.ADAPTIVE_SLEEP, mIsSettingEnabled, UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.ADAPTIVE_SLEEP, mIsSettingEnabled, UserHandle.USER_CURRENT);
 
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_PRE_DIM_CHECK_DURATION_MILLIS,
@@ -122,8 +122,8 @@ public class AttentionDetectorTest extends AndroidTestCase {
 
     @Test
     public void testOnUserActivity_doesntCheckIfNotEnabled() {
-        Settings.System.putIntForUser(getContext().getContentResolver(),
-                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
         mAttentionDetector.updateEnabledFromSettings(getContext());
         long when = registerAttention();
         verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
@@ -163,8 +163,8 @@ public class AttentionDetectorTest extends AndroidTestCase {
                 PackageManager.PERMISSION_DENIED);
 
         registerAttention();
-        boolean enabled = Settings.System.getIntForUser(getContext().getContentResolver(),
-                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
+        boolean enabled = Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                Settings.Secure.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT) == 1;
         assertFalse(enabled);
     }
 

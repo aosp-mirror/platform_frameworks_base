@@ -1813,6 +1813,12 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_MAGNIFICATION_MODE);
         p.end(accessibilityToken);
 
+        final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
+        dumpSetting(s, p,
+                Settings.Secure.ADAPTIVE_SLEEP,
+                SecureSettingsProto.AdaptiveSleep.ENABLED);
+        p.end(adaptiveSleepToken);
+
         dumpSetting(s, p,
                 Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                 SecureSettingsProto.ALLOWED_GEOLOCATION_ORIGINS);
