@@ -126,8 +126,8 @@ public class PipTouchHandler {
     // Touch state
     private final PipTouchState mTouchState;
     private final FlingAnimationUtils mFlingAnimationUtils;
-    private final PipTouchGesture[] mGestures;
     private final PipMotionHelper mMotionHelper;
+    private PipTouchGesture mGesture;
 
     // Temp vars
     private final Rect mTmpBounds = new Rect();
@@ -185,9 +185,7 @@ public class PipTouchHandler {
         mSnapAlgorithm = new PipSnapAlgorithm(mContext);
         mFlingAnimationUtils = new FlingAnimationUtils(context.getResources().getDisplayMetrics(),
                 2.5f);
-        mGestures = new PipTouchGesture[] {
-                mDefaultMovementGesture
-        };
+        mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mActivityTaskManager,
                 mMenuController, mSnapAlgorithm, mFlingAnimationUtils);
         mTouchState = new PipTouchState(mViewConfig, mHandler,
@@ -208,6 +206,10 @@ public class PipTouchHandler {
         mPipBoundsHandler = pipBoundsHandler;
         mConnection = new PipAccessibilityInteractionConnection(mMotionHelper,
                 this::onAccessibilityShowMenu, mHandler);
+    }
+
+    public void setTouchGesture(PipTouchGesture gesture) {
+        mGesture = gesture;
     }
 
     public void setTouchEnabled(boolean enabled) {
@@ -363,17 +365,12 @@ public class PipTouchHandler {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
                 mMotionHelper.synchronizePinnedStackBounds();
-
-                for (PipTouchGesture gesture : mGestures) {
-                    gesture.onDown(mTouchState);
-                }
+                mGesture.onDown(mTouchState);
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                for (PipTouchGesture gesture : mGestures) {
-                    if (gesture.onMove(mTouchState)) {
-                        break;
-                    }
+                if (mGesture.onMove(mTouchState)) {
+                    break;
                 }
 
                 shouldDeliverToMenu = !mTouchState.isDragging();
@@ -384,10 +381,8 @@ public class PipTouchHandler {
                 // dragging (ie. when the IME shows)
                 updateMovementBounds(mMenuState);
 
-                for (PipTouchGesture gesture : mGestures) {
-                    if (gesture.onUp(mTouchState)) {
-                        break;
-                    }
+                if (mGesture.onUp(mTouchState)) {
+                    break;
                 }
 
                 // Fall through to clean up
@@ -591,7 +586,7 @@ public class PipTouchHandler {
     /**
      * Gesture controlling normal movement of the PIP.
      */
-    private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {
+    private class DefaultPipTouchGesture extends PipTouchGesture {
         // Whether the PiP was on the left side of the screen at the start of the gesture
         private boolean mStartedOnLeft;
         private final Point mStartPosition = new Point();
@@ -623,7 +618,7 @@ public class PipTouchHandler {
         }
 
         @Override
-        boolean onMove(PipTouchState touchState) {
+        public boolean onMove(PipTouchState touchState) {
             if (!touchState.isUserInteracting()) {
                 return false;
             }
