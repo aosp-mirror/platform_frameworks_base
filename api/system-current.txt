@@ -8856,7 +8856,7 @@ package android.os {
     ctor public TelephonyServiceManager.ServiceNotFoundException(@NonNull String);
   }
 
-  public final class TelephonyServiceManager.ServiceRegisterer {
+  public static final class TelephonyServiceManager.ServiceRegisterer {
     method @Nullable public android.os.IBinder get();
     method @NonNull public android.os.IBinder getOrThrow() throws android.os.TelephonyServiceManager.ServiceNotFoundException;
     method public void register(@NonNull android.os.IBinder);
