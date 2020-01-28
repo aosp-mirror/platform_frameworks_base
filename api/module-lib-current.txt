@@ -87,8 +87,8 @@ package android.timezone {
     method @NonNull public java.util.List<android.timezone.CountryTimeZones.TimeZoneMapping> getEffectiveTimeZoneMappingsAt(long);
     method public boolean hasUtcZone(long);
     method public boolean isDefaultTimeZoneBoosted();
-    method public boolean isForCountryCode(@NonNull String);
     method @Nullable public android.timezone.CountryTimeZones.OffsetResult lookupByOffsetWithBias(int, @Nullable Boolean, @Nullable Integer, long, @Nullable android.icu.util.TimeZone);
+    method public boolean matchesCountryCode(@NonNull String);
   }
 
   public static final class CountryTimeZones.OffsetResult {
@@ -98,7 +98,7 @@ package android.timezone {
   }
 
   public static final class CountryTimeZones.TimeZoneMapping {
-    method @Nullable public android.icu.util.TimeZone getTimeZone();
+    method @NonNull public android.icu.util.TimeZone getTimeZone();
     method @NonNull public String getTimeZoneId();
   }
 

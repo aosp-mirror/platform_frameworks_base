@@ -51,8 +51,10 @@ public final class CountryTimeZones {
         }
 
         /**
-         * Returns the ID for this mapping. See also {@link #getTimeZone()} which handles when the
-         * ID is unrecognized.
+         * Returns the ID for this mapping. The ID is a tzdb time zone identifier like
+         * "America/Los_Angeles" that can be used with methods such as {@link
+         * TimeZone#getFrozenTimeZone(String)}. See {@link #getTimeZone()} which returns a frozen
+         * {@link TimeZone} object.
          */
         @NonNull
         public String getTimeZoneId() {
@@ -60,10 +62,9 @@ public final class CountryTimeZones {
         }
 
         /**
-         * Returns a {@link TimeZone} object for this mapping, or {@code null} if the ID is
-         * unrecognized.
+         * Returns a frozen {@link TimeZone} object for this mapping.
          */
-        @Nullable
+        @NonNull
         public TimeZone getTimeZone() {
             return mDelegate.getTimeZone();
         }
@@ -158,9 +159,10 @@ public final class CountryTimeZones {
     }
 
     /**
-     * Returns true if the ISO code for the country is a match for the one specified.
+     * Returns true if the ISO code for the country is a case-insensitive match for the one
+     * supplied.
      */
-    public boolean isForCountryCode(@NonNull String countryIso) {
+    public boolean matchesCountryCode(@NonNull String countryIso) {
         return mDelegate.isForCountryCode(countryIso);
     }
 
@@ -183,15 +185,25 @@ public final class CountryTimeZones {
     }
 
     /**
-     * Qualifier for a country's default time zone. {@code true} indicates whether the default
-     * would be a good choice <em>generally</em> when there's no other information available.
+     * Qualifier for a country's default time zone. {@code true} indicates that the country's
+     * default time zone would be a good choice <em>generally</em> when there's no UTC offset
+     * information available. This will only be {@code true} in countries with multiple zones where
+     * a large majority of the population is covered by only one of them.
      */
     public boolean isDefaultTimeZoneBoosted() {
         return mDelegate.getDefaultTimeZoneBoost();
     }
 
     /**
-     * Returns true if the country has at least one zone that is the same as UTC at the given time.
+     * Returns {@code true} if the country has at least one time zone that uses UTC at the given
+     * time. This is an efficient check when trying to validate received UTC offset information.
+     * For example, there are situations when a detected zero UTC offset cannot be distinguished
+     * from "no information available" or a corrupted signal. This method is useful because checking
+     * offset information for large countries is relatively expensive but it is generally only the
+     * countries close to the prime meridian that use UTC at <em>any</em> time of the year.
+     *
+     * @param whenMillis the time the offset information is for in milliseconds since the beginning
+     *     of the Unix epoch
      */
     public boolean hasUtcZone(long whenMillis) {
         return mDelegate.hasUtcZone(whenMillis);
