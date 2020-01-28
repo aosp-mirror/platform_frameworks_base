@@ -2583,11 +2583,18 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void addWindowToken(IBinder binder, int type, int displayId) {
         addWindowTokenWithOptions(binder, type, displayId, null /* options */,
-                null /* packageName */);
+                null /* packageName */, false /* fromClientToken */);
     }
 
+    @Override
     public int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
             String packageName) {
+        return addWindowTokenWithOptions(binder, type, displayId, options, packageName,
+                true /* fromClientToken */);
+    }
+
+    private int addWindowTokenWithOptions(IBinder binder, int type, int displayId, Bundle options,
+            String packageName, boolean fromClientToken) {
         final boolean callerCanManageAppTokens =
                 checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
         if (!callerCanManageAppTokens) {
