@@ -653,6 +653,7 @@ package android.content {
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
+    field public static final String ETHERNET_SERVICE = "ethernet";
     field public static final String NETWORK_STACK_SERVICE = "network_stack";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String ROLLBACK_SERVICE = "rollback";
@@ -1392,6 +1393,19 @@ package android.net {
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
   }
 
+  public class EthernetManager {
+    method @NonNull public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+  }
+
+  public static interface EthernetManager.TetheredInterfaceCallback {
+    method public void onAvailable(@NonNull String);
+    method public void onUnavailable();
+  }
+
+  public static class EthernetManager.TetheredInterfaceRequest {
+    method public void release();
+  }
+
   public final class IpPrefix implements android.os.Parcelable {
     ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
@@ -1540,7 +1554,9 @@ package android.net {
     field public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
     field public static final String EXTRA_ERRORED_TETHER = "erroredArray";
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
+    field public static final int TETHERING_ETHERNET = 5; // 0x5
     field public static final int TETHERING_INVALID = -1; // 0xffffffff
+    field public static final int TETHERING_NCM = 4; // 0x4
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
     field public static final int TETHERING_WIFI_P2P = 3; // 0x3

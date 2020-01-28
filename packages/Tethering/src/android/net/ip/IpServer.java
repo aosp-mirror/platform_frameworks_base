@@ -93,6 +93,8 @@ public class IpServer extends StateMachine {
     private static final int WIFI_HOST_IFACE_PREFIX_LENGTH = 24;
     private static final String WIFI_P2P_IFACE_ADDR = "192.168.49.1";
     private static final int WIFI_P2P_IFACE_PREFIX_LENGTH = 24;
+    private static final String ETHERNET_IFACE_ADDR = "192.168.50.1";
+    private static final int ETHERNET_IFACE_PREFIX_LENGTH = 24;
 
     // TODO: have PanService use some visible version of this constant
     private static final String BLUETOOTH_IFACE_ADDR = "192.168.44.1";
@@ -416,7 +418,8 @@ public class IpServer extends StateMachine {
         final Inet4Address srvAddr;
         int prefixLen = 0;
         try {
-            if (mInterfaceType == TetheringManager.TETHERING_USB) {
+            if (mInterfaceType == TetheringManager.TETHERING_USB
+                    || mInterfaceType == TetheringManager.TETHERING_NCM) {
                 srvAddr = (Inet4Address) parseNumericAddress(USB_NEAR_IFACE_ADDR);
                 prefixLen = USB_PREFIX_LENGTH;
             } else if (mInterfaceType == TetheringManager.TETHERING_WIFI) {
@@ -425,6 +428,10 @@ public class IpServer extends StateMachine {
             } else if (mInterfaceType == TetheringManager.TETHERING_WIFI_P2P) {
                 srvAddr = (Inet4Address) parseNumericAddress(WIFI_P2P_IFACE_ADDR);
                 prefixLen = WIFI_P2P_IFACE_PREFIX_LENGTH;
+            } else if (mInterfaceType == TetheringManager.TETHERING_ETHERNET) {
+                // TODO: randomize address for tethering too, similarly to wifi
+                srvAddr = (Inet4Address) parseNumericAddress(ETHERNET_IFACE_ADDR);
+                prefixLen = ETHERNET_IFACE_PREFIX_LENGTH;
             } else {
                 // BT configures the interface elsewhere: only start DHCP.
                 // TODO: make all tethering types behave the same way, and delete the bluetooth

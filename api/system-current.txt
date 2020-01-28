@@ -1577,6 +1577,7 @@ package android.content {
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
+    field public static final String ETHERNET_SERVICE = "ethernet";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String NETD_SERVICE = "netd";
@@ -3285,10 +3286,12 @@ package android.hardware.usb {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
     field public static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
+    field public static final long FUNCTION_NCM = 1024L; // 0x400L
     field public static final long FUNCTION_NONE = 0L; // 0x0L
     field public static final long FUNCTION_RNDIS = 32L; // 0x20L
     field public static final String USB_CONFIGURED = "configured";
     field public static final String USB_CONNECTED = "connected";
+    field public static final String USB_FUNCTION_NCM = "ncm";
     field public static final String USB_FUNCTION_RNDIS = "rndis";
   }
 
@@ -4380,6 +4383,19 @@ package android.net {
     method @Deprecated public void onUpstreamChanged(@Nullable android.net.Network);
   }
 
+  public class EthernetManager {
+    method @NonNull public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+  }
+
+  public static interface EthernetManager.TetheredInterfaceCallback {
+    method public void onAvailable(@NonNull String);
+    method public void onUnavailable();
+  }
+
+  public static class EthernetManager.TetheredInterfaceRequest {
+    method public void release();
+  }
+
   public class InvalidPacketException extends java.lang.Exception {
     ctor public InvalidPacketException(int);
     field public static final int ERROR_INVALID_IP_ADDRESS = -21; // 0xffffffeb
@@ -4753,7 +4769,9 @@ package android.net {
     field public static final String EXTRA_AVAILABLE_TETHER = "availableArray";
     field public static final String EXTRA_ERRORED_TETHER = "erroredArray";
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
+    field public static final int TETHERING_ETHERNET = 5; // 0x5
     field public static final int TETHERING_INVALID = -1; // 0xffffffff
+    field public static final int TETHERING_NCM = 4; // 0x4
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
     field public static final int TETHERING_WIFI_P2P = 3; // 0x3
