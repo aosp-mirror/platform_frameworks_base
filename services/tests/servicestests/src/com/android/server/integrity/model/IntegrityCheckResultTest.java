@@ -26,6 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Collections;
+
 @RunWith(JUnit4.class)
 public class IntegrityCheckResultTest {
 
@@ -34,7 +36,7 @@ public class IntegrityCheckResultTest {
         IntegrityCheckResult allowResult = IntegrityCheckResult.allow();
 
         assertThat(allowResult.getEffect()).isEqualTo(IntegrityCheckResult.Effect.ALLOW);
-        assertThat(allowResult.getRule()).isNull();
+        assertThat(allowResult.getMatchedRules()).isEmpty();
         assertThat(allowResult.getLoggingResponse())
                 .isEqualTo(StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED);
     }
@@ -48,10 +50,11 @@ public class IntegrityCheckResultTest {
                                 packageName),
                         Rule.FORCE_ALLOW);
 
-        IntegrityCheckResult allowResult = IntegrityCheckResult.allow(forceAllowRule);
+        IntegrityCheckResult allowResult =
+                IntegrityCheckResult.allow(Collections.singletonList(forceAllowRule));
 
         assertThat(allowResult.getEffect()).isEqualTo(IntegrityCheckResult.Effect.ALLOW);
-        assertThat(allowResult.getRule()).isEqualTo(forceAllowRule);
+        assertThat(allowResult.getMatchedRules()).containsExactly(forceAllowRule);
         assertThat(allowResult.getLoggingResponse())
                 .isEqualTo(StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED);
     }
@@ -65,10 +68,11 @@ public class IntegrityCheckResultTest {
                                 packageName),
                         Rule.DENY);
 
-        IntegrityCheckResult denyResult = IntegrityCheckResult.deny(failedRule);
+        IntegrityCheckResult denyResult =
+                IntegrityCheckResult.deny(Collections.singletonList(failedRule));
 
         assertThat(denyResult.getEffect()).isEqualTo(IntegrityCheckResult.Effect.DENY);
-        assertThat(denyResult.getRule()).isEqualTo(failedRule);
+        assertThat(denyResult.getMatchedRules()).containsExactly(failedRule);
         assertThat(denyResult.getLoggingResponse())
                 .isEqualTo(StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED);
     }
