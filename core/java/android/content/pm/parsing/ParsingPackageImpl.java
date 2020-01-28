@@ -84,16 +84,16 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     private static final String TAG = "PackageImpl";
 
-    protected static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
-    protected static ForInternedString sForString = Parcelling.Cache.getOrCreate(
+    public static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
+    public static ForInternedString sForString = Parcelling.Cache.getOrCreate(
             ForInternedString.class);
-    protected static ForInternedStringArray sForStringArray = Parcelling.Cache.getOrCreate(
+    public static ForInternedStringArray sForStringArray = Parcelling.Cache.getOrCreate(
             ForInternedStringArray.class);
-    protected static ForInternedStringList sForStringList = Parcelling.Cache.getOrCreate(
+    public static ForInternedStringList sForStringList = Parcelling.Cache.getOrCreate(
             ForInternedStringList.class);
-    protected static ForInternedStringValueMap sForStringValueMap = Parcelling.Cache.getOrCreate(
+    public static ForInternedStringValueMap sForStringValueMap = Parcelling.Cache.getOrCreate(
             ForInternedStringValueMap.class);
-    protected static ForInternedStringSet sForStringSet = Parcelling.Cache.getOrCreate(
+    public static ForInternedStringSet sForStringSet = Parcelling.Cache.getOrCreate(
             ForInternedStringSet.class);
 
     // These are objects because null represents not explicitly set
