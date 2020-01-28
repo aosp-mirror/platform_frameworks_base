@@ -67,6 +67,22 @@ public final class AccessNetworkConstants {
         }
     }
 
+    /**
+     * Access network type
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RADIO_ACCESS_NETWORK_TYPE_"},
+            value = {
+                    AccessNetworkType.UNKNOWN,
+                    AccessNetworkType.GERAN,
+                    AccessNetworkType.UTRAN,
+                    AccessNetworkType.EUTRAN,
+                    AccessNetworkType.CDMA2000,
+                    AccessNetworkType.IWLAN,
+                    AccessNetworkType.NGRAN})
+    public @interface RadioAccessNetworkType {}
+
     public static final class AccessNetworkType {
         public static final int UNKNOWN = 0;
         public static final int GERAN = 1;
@@ -115,11 +131,11 @@ public final class AccessNetworkConstants {
         public static final int BAND_ER900 = 14;
 
         /** @hide */
-        private GeranBand() {};
+        private GeranBand() {}
     }
 
     /**
-     * Frenquency bands for UTRAN.
+     * Frequency bands for UTRAN.
      * http://www.etsi.org/deliver/etsi_ts/125100_125199/125104/13.03.00_60/ts_125104v130p.pdf
      */
     public static final class UtranBand {
@@ -146,12 +162,19 @@ public final class AccessNetworkConstants {
         public static final int BAND_25 = 25;
         public static final int BAND_26 = 26;
 
+        /** Frequency bands for TD-SCDMA. Defined in 3GPP TS 25.102, Table 5.2. */
+        public static final int BAND_A = 101;
+        public static final int BAND_B = 102;
+        public static final int BAND_C = 103;
+        public static final int BAND_D = 104;
+        public static final int BAND_E = 105;
+        public static final int BAND_F = 106;
         /** @hide */
-        private UtranBand() {};
+        private UtranBand() {}
     }
 
     /**
-     * Frenquency bands for EUTRAN.
+     * Frequency bands for EUTRAN.
      * http://www.etsi.org/deliver/etsi_ts/136100_136199/136101/14.03.00_60/ts_136101v140p.pdf
      */
     public static final class EutranBand {
@@ -209,7 +232,7 @@ public final class AccessNetworkConstants {
     }
 
     /**
-     * Frenquency bands for CDMA2000.
+     * Frequency bands for CDMA2000.
      * http://www.3gpp2.org/Public_html/Specs/C.S0057-E_v1.0_Bandclass_Specification.pdf
      * @hide
      *
@@ -240,7 +263,7 @@ public final class AccessNetworkConstants {
         public static final int BAND_21 = 22;
 
         /** @hide */
-        private CdmaBands() {};
+        private CdmaBands() {}
     }
 
     /**
@@ -295,7 +318,7 @@ public final class AccessNetworkConstants {
         public static final int BAND_261 = 261;
 
         /** @hide */
-        private NgranBands() {};
+        private NgranBands() {}
     }
 
     /** @hide */
