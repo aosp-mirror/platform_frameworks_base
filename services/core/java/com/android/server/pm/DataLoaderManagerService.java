@@ -50,7 +50,7 @@ public class DataLoaderManagerService extends SystemService {
     private final DataLoaderManagerBinderService mBinderService;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
-    private SparseArray<DataLoaderServiceConnection> mServiceConnections;
+    private SparseArray<DataLoaderServiceConnection> mServiceConnections = new SparseArray<>();
 
     public DataLoaderManagerService(Context context) {
         super(context);
@@ -68,9 +68,6 @@ public class DataLoaderManagerService extends SystemService {
         public boolean initializeDataLoader(int dataLoaderId, Bundle params,
                 IDataLoaderStatusListener listener) {
             synchronized (mLock) {
-                if (mServiceConnections == null) {
-                    mServiceConnections = new SparseArray<>();
-                }
                 if (mServiceConnections.get(dataLoaderId) != null) {
                     Slog.e(TAG, "Data loader of ID=" + dataLoaderId + " already exists.");
                     return false;
@@ -156,9 +153,6 @@ public class DataLoaderManagerService extends SystemService {
         @Override
         public @Nullable IDataLoader getDataLoader(int dataLoaderId) {
             synchronized (mLock) {
-                if (mServiceConnections == null) {
-                    return null;
-                }
                 DataLoaderServiceConnection serviceConnection = mServiceConnections.get(
                         dataLoaderId, null);
                 if (serviceConnection == null) {
@@ -174,9 +168,6 @@ public class DataLoaderManagerService extends SystemService {
         @Override
         public void destroyDataLoader(int dataLoaderId) {
             synchronized (mLock) {
-                if (mServiceConnections == null) {
-                    return;
-                }
                 DataLoaderServiceConnection serviceConnection = mServiceConnections.get(
                         dataLoaderId, null);
 
