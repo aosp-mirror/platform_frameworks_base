@@ -36,23 +36,22 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * CameraServiceProxy is the system_server analog to the camera service running in cameraserver.
@@ -315,22 +314,22 @@ public class CameraServiceProxy extends SystemService
          * Package-private
          */
         private void logCameraUsageEvent(CameraUsageEvent e) {
-            int facing = StatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
+            int facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__UNKNOWN;
             switch(e.mCameraFacing) {
                 case ICameraServiceProxy.CAMERA_FACING_BACK:
-                    facing = StatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__BACK;
                     break;
                 case ICameraServiceProxy.CAMERA_FACING_FRONT:
-                    facing = StatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__FRONT;
                     break;
                 case ICameraServiceProxy.CAMERA_FACING_EXTERNAL:
-                    facing = StatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
+                    facing = FrameworkStatsLog.CAMERA_ACTION_EVENT__FACING__EXTERNAL;
                     break;
                 default:
                     Slog.w(TAG, "Unknown camera facing: " + e.mCameraFacing);
             }
-            StatsLog.write(StatsLog.CAMERA_ACTION_EVENT, e.getDuration(), e.mAPILevel,
-                    e.mClientName, facing);
+            FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_ACTION_EVENT, e.getDuration(),
+                    e.mAPILevel, e.mClientName, facing);
         }
     }
 

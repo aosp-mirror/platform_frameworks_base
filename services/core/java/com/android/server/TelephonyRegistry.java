@@ -77,7 +77,6 @@ import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.LocalLog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -87,6 +86,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
 
@@ -2395,12 +2395,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         try {
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 mBatteryStats.notePhoneOff();
-                StatsLog.write(StatsLog.PHONE_STATE_CHANGED,
-                        StatsLog.PHONE_STATE_CHANGED__STATE__OFF);
+                FrameworkStatsLog.write(FrameworkStatsLog.PHONE_STATE_CHANGED,
+                        FrameworkStatsLog.PHONE_STATE_CHANGED__STATE__OFF);
             } else {
                 mBatteryStats.notePhoneOn();
-                StatsLog.write(StatsLog.PHONE_STATE_CHANGED,
-                        StatsLog.PHONE_STATE_CHANGED__STATE__ON);
+                FrameworkStatsLog.write(FrameworkStatsLog.PHONE_STATE_CHANGED,
+                        FrameworkStatsLog.PHONE_STATE_CHANGED__STATE__ON);
             }
         } catch (RemoteException e) {
             /* The remote entity disappeared, we can safely ignore the exception. */

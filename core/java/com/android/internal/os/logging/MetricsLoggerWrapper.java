@@ -20,11 +20,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Pair;
-import android.util.StatsLog;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Used to wrap different logging calls in one, so that client side code base is clean and more
@@ -39,10 +39,10 @@ public class MetricsLoggerWrapper {
             Pair<ComponentName, Integer> topActivityInfo) {
         MetricsLogger.action(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                 METRIC_VALUE_DISMISSED_BY_TAP);
-        StatsLog.write(StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
                 getUid(context, topActivityInfo.first, topActivityInfo.second),
                 topActivityInfo.first.flattenToString(),
-                StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__DISMISSED);
+                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__DISMISSED);
     }
 
     public static void logPictureInPictureDismissByDrag(Context context,
@@ -50,20 +50,20 @@ public class MetricsLoggerWrapper {
         MetricsLogger.action(context,
                 MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
                 METRIC_VALUE_DISMISSED_BY_DRAG);
-        StatsLog.write(StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
                 getUid(context, topActivityInfo.first, topActivityInfo.second),
                 topActivityInfo.first.flattenToString(),
-                StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__DISMISSED);
+                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__DISMISSED);
     }
 
     public static void logPictureInPictureMinimize(Context context, boolean isMinimized,
             Pair<ComponentName, Integer> topActivityInfo) {
         MetricsLogger.action(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
                 isMinimized);
-        StatsLog.write(StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
                 getUid(context, topActivityInfo.first, topActivityInfo.second),
                 topActivityInfo.first.flattenToString(),
-                StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__MINIMIZED);
+                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__MINIMIZED);
     }
 
     /**
@@ -92,29 +92,29 @@ public class MetricsLoggerWrapper {
             int uid, String shortComponentName, boolean supportsEnterPipOnTaskSwitch) {
         MetricsLogger.action(context, MetricsEvent.ACTION_PICTURE_IN_PICTURE_ENTERED,
                 supportsEnterPipOnTaskSwitch);
-        StatsLog.write(StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED, uid,
+        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED, uid,
                 shortComponentName,
-                StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__ENTERED);
+                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__ENTERED);
     }
 
     public static void logPictureInPictureFullScreen(Context context, int uid,
             String shortComponentName) {
         MetricsLogger.action(context,
                 MetricsEvent.ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
-        StatsLog.write(StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED,
                 uid,
                 shortComponentName,
-                StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__EXPANDED_TO_FULL_SCREEN);
+                FrameworkStatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__EXPANDED_TO_FULL_SCREEN);
     }
 
     public static void logAppOverlayEnter(int uid, String packageName, boolean changed, int type, boolean usingAlertWindow) {
         if (changed) {
             if (type != LayoutParams.TYPE_APPLICATION_OVERLAY) {
-                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, true,
-                        StatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
+                FrameworkStatsLog.write(FrameworkStatsLog.OVERLAY_STATE_CHANGED, uid, packageName,
+                        true, FrameworkStatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
             } else if (!usingAlertWindow){
-                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, false,
-                        StatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
+                FrameworkStatsLog.write(FrameworkStatsLog.OVERLAY_STATE_CHANGED, uid, packageName,
+                        false, FrameworkStatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
             }
         }
     }
@@ -122,11 +122,11 @@ public class MetricsLoggerWrapper {
     public static void logAppOverlayExit(int uid, String packageName, boolean changed, int type, boolean usingAlertWindow) {
         if (changed) {
             if (type != LayoutParams.TYPE_APPLICATION_OVERLAY) {
-                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, true,
-                        StatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
+                FrameworkStatsLog.write(FrameworkStatsLog.OVERLAY_STATE_CHANGED, uid, packageName,
+                        true, FrameworkStatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
             } else if (!usingAlertWindow){
-                StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, false,
-                        StatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
+                FrameworkStatsLog.write(FrameworkStatsLog.OVERLAY_STATE_CHANGED, uid, packageName,
+                        false, FrameworkStatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
             }
         }
     }

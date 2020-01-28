@@ -28,6 +28,8 @@ import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
  * define custom metrics inside statsd.
@@ -60,7 +62,7 @@ public final class StatsLog extends StatsLogInternal {
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(label,
-                        StatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
+                        FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
@@ -88,7 +90,8 @@ public final class StatsLog extends StatsLogInternal {
                     }
                     return false;
                 }
-                service.sendAppBreadcrumbAtom(label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
+                service.sendAppBreadcrumbAtom(
+                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
@@ -117,7 +120,7 @@ public final class StatsLog extends StatsLogInternal {
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
+                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
                 return true;
             } catch (RemoteException e) {
                 sService = null;

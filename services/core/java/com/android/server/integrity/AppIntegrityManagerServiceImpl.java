@@ -47,10 +47,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
@@ -170,7 +170,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         success = false;
                     }
 
-                    StatsLog.write(StatsLog.INTEGRITY_RULES_PUSHED, success, ruleProvider, version);
+                    FrameworkStatsLog.write(FrameworkStatsLog.INTEGRITY_RULES_PUSHED, success,
+                            ruleProvider, version);
 
                     Intent intent = new Intent();
                     intent.putExtra(EXTRA_STATUS, success ? STATUS_SUCCESS : STATUS_FAILURE);
@@ -262,8 +263,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                             + " due to "
                             + result.getMatchedRules());
 
-            StatsLog.write(
-                    StatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
                     packageName,
                     appCert,
                     appInstallMetadata.getVersionCode(),

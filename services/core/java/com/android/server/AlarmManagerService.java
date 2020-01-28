@@ -86,7 +86,6 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -94,6 +93,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocalLog;
 import com.android.internal.util.StatLogger;
@@ -3915,7 +3915,7 @@ class AlarmManagerService extends SystemService {
                             Slog.v(TAG, "Time changed notification from kernel; rebatching");
                         }
                         // StatsLog requires currentTimeMillis(), which == nowRTC to within usecs.
-                        StatsLog.write(StatsLog.WALL_CLOCK_TIME_SHIFTED, nowRTC);
+                        FrameworkStatsLog.write(FrameworkStatsLog.WALL_CLOCK_TIME_SHIFTED, nowRTC);
                         removeImpl(null, mTimeTickTrigger);
                         removeImpl(mDateChangeSender, null);
                         rebatchAllAlarms();

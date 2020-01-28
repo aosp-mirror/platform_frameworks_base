@@ -16,7 +16,7 @@
 
 package com.android.server.rollback;
 
-import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -38,9 +38,9 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
@@ -224,14 +224,15 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                         saveStagedRollbackId(rollbackId);
                     }
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            StatsLog
+                            FrameworkStatsLog
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
                             WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
                             "");
                 } else if (sessionInfo.isStagedSessionFailed()
                         && markStagedSessionHandled(rollbackId)) {
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                            FrameworkStatsLog
+                                    .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                             WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
                             "");
                     mContext.unregisterReceiver(listener);
@@ -337,7 +338,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
         final VersionedPackage logPackage = logPackageTemp;
         WatchdogRollbackLogger.logEvent(logPackage,
-                StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
+                FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
                 reasonToLog, failedPackageToLog);
         final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver((Intent result) -> {
             int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
@@ -355,7 +356,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                             logPackage);
                 } else {
                     WatchdogRollbackLogger.logEvent(logPackage,
-                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                            FrameworkStatsLog
+                                    .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
                             reasonToLog, failedPackageToLog);
                 }
             } else {
@@ -363,7 +365,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                     markStagedSessionHandled(rollback.getRollbackId());
                 }
                 WatchdogRollbackLogger.logEvent(logPackage,
-                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                        FrameworkStatsLog
+                                .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         reasonToLog, failedPackageToLog);
             }
         });

@@ -18,7 +18,8 @@ package com.android.server.integrity.model;
 
 import android.annotation.Nullable;
 import android.content.integrity.Rule;
-import android.util.StatsLog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.Collections;
 import java.util.List;
@@ -86,11 +87,11 @@ public final class IntegrityCheckResult {
      */
     public int getLoggingResponse() {
         if (getEffect() == Effect.DENY) {
-            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
+            return FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED;
         } else if (getEffect() == Effect.ALLOW && getMatchedRules().isEmpty()) {
-            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
+            return FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__ALLOWED;
         } else if (getEffect() == Effect.ALLOW && !getMatchedRules().isEmpty()) {
-            return StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
+            return FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__FORCE_ALLOWED;
         } else {
             throw new IllegalStateException("IntegrityCheckResult is not valid.");
         }
