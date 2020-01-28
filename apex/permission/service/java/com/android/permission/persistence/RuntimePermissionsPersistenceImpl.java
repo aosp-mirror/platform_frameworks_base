@@ -19,6 +19,7 @@ package com.android.permission.persistence;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ApexContext;
+import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -242,9 +243,10 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
             serializer.startTag(null, TAG_PERMISSION);
             serializer.attribute(null, ATTRIBUTE_NAME, permissionState.getName());
             serializer.attribute(null, ATTRIBUTE_GRANTED, Boolean.toString(
-                    permissionState.isGranted()));
+                    permissionState.isGranted() && (permissionState.getFlags()
+                            & PackageManager.FLAG_PERMISSION_ONE_TIME) == 0));
             serializer.attribute(null, ATTRIBUTE_FLAGS, Integer.toHexString(
-                    permissionState.getFlags()));
+                    permissionState.getFlags() & ~PackageManager.FLAG_PERMISSION_ONE_TIME));
             serializer.endTag(null, TAG_PERMISSION);
         }
     }
