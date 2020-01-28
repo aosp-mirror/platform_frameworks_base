@@ -22,10 +22,6 @@ import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LO
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.WindowInsets.Type.ime;
-import static android.view.WindowInsets.Type.systemBars;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
 import static java.lang.Math.max;
@@ -146,7 +142,6 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
-import com.android.internal.policy.DecorView;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -22140,6 +22135,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *      4. Draw children
          *      5. If necessary, draw the fading edges and restore layers
          *      6. Draw decorations (scrollbars for instance)
+         *      7. If necessary, draw the default focus highlight
          */
 
         // Step 1, draw the background, if needed
@@ -22345,6 +22341,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // Step 6, draw decorations (foreground, scrollbars)
         onDrawForeground(canvas);
+
+        // Step 7, draw the default focus highlight
+        drawDefaultFocusHighlight(canvas);
 
         if (isShowingLayoutBounds()) {
             debugDrawFocus(canvas);
@@ -23241,11 +23240,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Draw the default focus highlight onto the canvas.
+     * Draw the default focus highlight onto the canvas if there is one and this view is focused.
      * @param canvas the canvas where we're drawing the highlight.
      */
     private void drawDefaultFocusHighlight(Canvas canvas) {
-        if (mDefaultFocusHighlight != null) {
+        if (mDefaultFocusHighlight != null && isFocused()) {
             if (mDefaultFocusHighlightSizeChanged) {
                 mDefaultFocusHighlightSizeChanged = false;
                 final int l = mScrollX;
