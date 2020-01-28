@@ -7420,6 +7420,28 @@ message AppPermissionFragmentActionReported {
 
     // The result of the permission grant
     optional bool permission_granted = 6;
+
+    // State of Permission Flags after grant as per android.content.pm.PermissionFlags
+    optional int32 permission_flags = 7;
+
+    enum Button {
+        UNDEFINED = 0;
+        // Allow button
+        ALLOW = 1;
+        // Deny button
+        DENY = 2;
+        // Ask every time button
+        ASK_EVERY_TIME = 3;
+        // Allow all the time button
+        ALLOW_ALWAYS = 4;
+        // Allow only while using the app button
+        ALLOW_FOREGROUND = 5;
+        // Same is Deny button but shown in while in use dialog
+        DENY_FOREGROUND = 6;
+    }
+
+    // Button pressed in the dialog
+    optional Button button_pressed = 8;
 }
 
 /**
