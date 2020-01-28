@@ -290,10 +290,12 @@ public class UserManager {
 
     /**
      * Specifies if airplane mode is disallowed on the device.
-     *
-     * <p> This restriction can only be set by the device owner and the profile owner on the
-     * primary user and it applies globally - i.e. it disables airplane mode on the entire device.
-     * <p>The default value is <code>false</code>.
+     * <p>
+     * This restriction can only be set by the device owner, the profile owner on the primary user
+     * or the profile owner of an organization-owned managed profile on the parent profile, and it
+     * applies globally - i.e. it disables airplane mode on the entire device.
+     * <p>
+     * The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -729,9 +731,12 @@ public class UserManager {
     public static final String DISALLOW_APPS_CONTROL = "no_control_apps";
 
     /**
-     * Specifies if a user is disallowed from mounting
-     * physical external media. This can only be set by device owners and profile owners on the
-     * primary user. The default value is <code>false</code>.
+     * Specifies if a user is disallowed from mounting physical external media.
+     * <p>
+     * This restriction can only be set by the device owner, the profile owner on the primary user
+     * or the profile owner of an organization-owned managed profile on the parent profile.
+     * <p>
+     * The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -743,10 +748,15 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adjusting microphone volume. If set, the microphone
-     * will be muted. This can be set by device owners and profile owners. The default value is
-     * <code>false</code>.
+     * will be muted.
+     * <p>
+     * The default value is <code>false</code>.
+     * <p>
+     * Device owner and profile owner can set this restriction, although the restriction has no
+     * effect in a managed profile. When it is set by the profile owner of an organization-owned
+     * managed profile on the parent profile, it will disallow the personal user from adjusting the
+     * microphone volume.
      *
-     * <p>This restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -773,10 +783,15 @@ public class UserManager {
     public static final String DISALLOW_ADJUST_VOLUME = "no_adjust_volume";
 
     /**
-     * Specifies that the user is not allowed to make outgoing
-     * phone calls. Emergency calls are still permitted.
+     * Specifies that the user is not allowed to make outgoing phone calls. Emergency calls are
+     * still permitted.
+     * <p>
      * The default value is <code>false</code>.
-     * <p>This restriction has no effect on managed profiles.
+     * <p>
+     * Device owner and profile owner can set this restriction, although the restriction has no
+     * effect in a managed profile. When it is set by the profile owner of an organization-owned
+     * managed profile on the parent profile, it will disallow the personal user from making
+     * outgoing phone calls.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

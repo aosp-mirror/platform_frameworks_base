@@ -1986,7 +1986,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                     UserManager.DISALLOW_SAFE_BOOT,
                     UserManager.DISALLOW_SHARE_LOCATION,
                     UserManager.DISALLOW_SMS,
-                    UserManager.DISALLOW_USB_FILE_TRANSFER
+                    UserManager.DISALLOW_USB_FILE_TRANSFER,
+                    UserManager.DISALLOW_AIRPLANE_MODE,
+                    UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
+                    UserManager.DISALLOW_OUTGOING_CALLS,
+                    UserManager.DISALLOW_UNMUTE_MICROPHONE
             );
 
     public void testSetUserRestriction_asPoOfOrgOwnedDevice() throws Exception {
