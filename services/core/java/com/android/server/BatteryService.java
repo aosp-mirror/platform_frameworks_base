@@ -18,6 +18,7 @@ package com.android.server;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
@@ -1318,8 +1319,7 @@ public final class BatteryService extends SystemService {
      *
      * @hide Should only be used internally.
      */
-    @VisibleForTesting
-    static final class HealthServiceWrapper {
+    public static final class HealthServiceWrapper {
         private static final String TAG = "HealthServiceWrapper";
         public static final String INSTANCE_HEALTHD = "backup";
         public static final String INSTANCE_VENDOR = "default";
@@ -1341,11 +1341,19 @@ public final class BatteryService extends SystemService {
          * init should be called after constructor. For testing purposes, init is not called by
          * constructor.
          */
-        HealthServiceWrapper() {
+        public HealthServiceWrapper() {
         }
 
-        IHealth getLastService() {
+        public IHealth getLastService() {
             return mLastService.get();
+        }
+
+        /**
+         * See {@link #init(Callback, IServiceManagerSupplier, IHealthSupplier)}
+         */
+        public void init() throws RemoteException, NoSuchElementException {
+            init(/* callback= */null, new HealthServiceWrapper.IServiceManagerSupplier() {},
+                    new HealthServiceWrapper.IHealthSupplier() {});
         }
 
         /**
@@ -1354,7 +1362,7 @@ public final class BatteryService extends SystemService {
          * only be called once.
          *
          * mCallback.onRegistration() is called synchronously (aka in init thread) before
-         * this method returns.
+         * this method returns if callback is not null.
          *
          * @throws RemoteException transaction error when talking to IServiceManager
          * @throws NoSuchElementException if one of the following cases:
@@ -1362,18 +1370,17 @@ public final class BatteryService extends SystemService {
          *         - none of {@code sAllInstances} are in manifests (i.e. not
          *           available on this device), or none of these instances are available to current
          *           process.
-         * @throws NullPointerException when callback is null or supplier is null
+         * @throws NullPointerException when supplier is null
          */
-        void init(Callback callback,
+        void init(@Nullable Callback callback,
                   IServiceManagerSupplier managerSupplier,
                   IHealthSupplier healthSupplier)
                 throws RemoteException, NoSuchElementException, NullPointerException {
-            if (callback == null || managerSupplier == null || healthSupplier == null)
+            if (managerSupplier == null || healthSupplier == null) {
                 throw new NullPointerException();
-
+            }
             IServiceManager manager;
 
-            mCallback = callback;
             mHealthSupplier = healthSupplier;
 
             // Initialize mLastService and call callback for the first time (in init thread)
@@ -1399,7 +1406,11 @@ public final class BatteryService extends SystemService {
                         "No IHealth service instance among %s is available. Perhaps no permission?",
                         sAllInstances.toString()));
             }
-            mCallback.onRegistration(null, newService, mInstanceName);
+
+            if (callback != null) {
+                mCallback = callback;
+                mCallback.onRegistration(null, newService, mInstanceName);
+            }
 
             // Register for future service registrations
             traceBegin("HealthInitRegisterNotification");
