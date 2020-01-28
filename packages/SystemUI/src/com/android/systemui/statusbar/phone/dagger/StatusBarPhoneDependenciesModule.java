@@ -16,14 +16,7 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import android.content.Context;
-import android.os.Handler;
-import android.view.IWindowManager;
-
-import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
-import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -39,16 +32,6 @@ import dagger.Provides;
  */
 @Module
 public interface StatusBarPhoneDependenciesModule {
-    /** */
-    @Singleton
-    @Provides
-    static AutoHideController newAutoHideController(Context context,
-            @Main Handler handler,
-            NotificationRemoteInputManager notificationRemoteInputManager,
-            IWindowManager iWindowManager) {
-        return new AutoHideController(context, handler, notificationRemoteInputManager,
-                iWindowManager);
-    }
 
     /** */
     @Singleton
