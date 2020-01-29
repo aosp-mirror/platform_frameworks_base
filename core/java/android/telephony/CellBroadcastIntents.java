@@ -19,6 +19,8 @@ package android.telephony;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -41,6 +43,14 @@ public class CellBroadcastIntents {
     private static final String LOG_TAG = "CellBroadcastIntents";
 
     private static final String EXTRA_MESSAGE = "message";
+
+    /**
+     * Broadcast intent action for notifying area information has been updated. The information
+     * can be retrieved by {@link CellBroadcastService#getCellBroadcastAreaInfo(int)}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AREA_INFO_UPDATED =
+            "android.telephony.action.AREA_INFO_UPDATED";
 
     /**
      * @hide
