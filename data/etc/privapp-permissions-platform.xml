@@ -343,6 +343,9 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
         <!-- Permission required for Tethering CTS tests. -->
         <permission name="android.permission.TETHER_PRIVILEGED"/>
+        <!-- Permissions required to test ambient display. -->
+        <permission name="android.permission.READ_DREAM_STATE" />
+        <permission name="android.permission.WRITE_DREAM_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
