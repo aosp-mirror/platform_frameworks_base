@@ -53,7 +53,7 @@ public class WindowContext extends ContextWrapper {
      * @param type Window type to be used with this context.
      * @hide
      */
-    public WindowContext(Context base, IBinder token, int type) {
+    public WindowContext(Context base, IBinder token, int type, Bundle options) {
         super(null /* base */);
 
         mWms = WindowManagerGlobal.getWindowManagerService();
@@ -76,7 +76,7 @@ public class WindowContext extends ContextWrapper {
             return;
         }
         try {
-            mWms.addWindowContextToken(mToken, type, mDisplayId, getPackageName());
+            mWms.addWindowTokenWithOptions(mToken, type, mDisplayId, options, getPackageName());
             // TODO(window-context): remove token with a DeathObserver
         }  catch (RemoteException e) {
             mOwnsToken = false;

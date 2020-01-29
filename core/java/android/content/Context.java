@@ -5767,7 +5767,7 @@ public abstract class Context {
      * final DisplayManager dm = anyContext.getSystemService(DisplayManager.class);
      * final Display primaryDisplay = dm.getDisplay(DEFAULT_DISPLAY);
      * final Context windowContext = anyContext.createDisplayContext(primaryDisplay)
-     *         .createWindowContext(TYPE_APPLICATION_OVERLAY);
+     *         .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
      * final View overlayView = Inflater.from(windowContext).inflate(someLayoutXml, null);
      *
      * // WindowManager.LayoutParams initialization
@@ -5787,6 +5787,7 @@ public abstract class Context {
      * </p>
      *
      * @param type Window type in {@link WindowManager.LayoutParams}
+     * @param options Bundle used to pass window-related options.
      * @return A {@link Context} that can be used to create windows.
      * @throws UnsupportedOperationException if this is called on a non-UI context, such as
      *         {@link android.app.Application Application} or {@link android.app.Service Service}.
@@ -5798,7 +5799,7 @@ public abstract class Context {
      * @see #WALLPAPER_SERVICE
      * @throws IllegalArgumentException if token is invalid
      */
-    public @NonNull Context createWindowContext(int type)  {
+    public @NonNull Context createWindowContext(int type, @Nullable Bundle options)  {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

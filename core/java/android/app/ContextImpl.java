@@ -2364,13 +2364,13 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public @NonNull WindowContext createWindowContext(int type) {
+    public @NonNull WindowContext createWindowContext(int type, Bundle options) {
         if (getDisplay() == null) {
             throw new UnsupportedOperationException("WindowContext can only be created from "
                     + "other visual contexts, such as Activity or one created with "
                     + "Context#createDisplayContext(Display)");
         }
-        return new WindowContext(this, null /* token */, type);
+        return new WindowContext(this, null /* token */, type, options);
     }
 
     ContextImpl createBaseWindowContext(IBinder token) {
