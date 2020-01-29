@@ -469,10 +469,11 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
-    public void sendOrderedBroadcast(Intent intent, String receiverPermission, String receiverAppOp,
-            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
-            String initialData, Bundle initialExtras) {
+    public void sendOrderedBroadcast(Intent intent, int initialCode, String receiverPermission,
+            String receiverAppOp, BroadcastReceiver resultReceiver, Handler scheduler,
+            String initialData, Bundle initialExtras, Bundle options) {
         throw new UnsupportedOperationException();
     }
 

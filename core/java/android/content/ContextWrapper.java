@@ -583,13 +583,13 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent, int initialCode,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
-            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
-            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
-            @Nullable Bundle initialExtras) {
-        mBase.sendOrderedBroadcast(intent, receiverPermission, receiverAppOp, options,
-                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            @Nullable String initialData, @Nullable Bundle initialExtras,
+            @Nullable Bundle options) {
+        mBase.sendOrderedBroadcast(intent, initialCode, receiverPermission, receiverAppOp,
+                resultReceiver, scheduler, initialData, initialExtras, options);
     }
 
     @Override
