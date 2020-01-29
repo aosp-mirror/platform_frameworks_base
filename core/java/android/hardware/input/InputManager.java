@@ -16,6 +16,7 @@
 
 package android.hardware.input;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -51,6 +52,7 @@ import com.android.internal.os.SomeArgs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.List;
 
 /**
@@ -1233,6 +1235,32 @@ public final class InputManager {
         @Override
         public boolean hasVibrator() {
             return true;
+        }
+
+        @Override
+        public boolean isVibrating() {
+            throw new UnsupportedOperationException(
+                "isVibrating not supported in InputDeviceVibrator");
+        }
+
+        @Override
+        public void addVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+            throw new UnsupportedOperationException(
+                "addVibratorStateListener not supported in InputDeviceVibrator");
+        }
+
+        @Override
+        public void addVibratorStateListener(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull OnVibratorStateChangedListener listener) {
+            throw new UnsupportedOperationException(
+                "addVibratorStateListener not supported in InputDeviceVibrator");
+        }
+
+        @Override
+        public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+            throw new UnsupportedOperationException(
+                "removeVibratorStateListener not supported in InputDeviceVibrator");
         }
 
         @Override

@@ -18,6 +18,7 @@ package android {
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final String ACCESS_TV_TUNER = "android.permission.ACCESS_TV_TUNER";
+    field public static final String ACCESS_VIBRATOR_STATE = "android.permission.ACCESS_VIBRATOR_STATE";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
@@ -9090,6 +9091,17 @@ package android.os {
   }
 
   @IntDef(flag=true, prefix={"RESTRICTION_"}, value={android.os.UserManager.RESTRICTION_NOT_SET, android.os.UserManager.RESTRICTION_SOURCE_SYSTEM, android.os.UserManager.RESTRICTION_SOURCE_DEVICE_OWNER, android.os.UserManager.RESTRICTION_SOURCE_PROFILE_OWNER}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface UserManager.UserRestrictionSource {
+  }
+
+  public abstract class Vibrator {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void addVibratorStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public boolean isVibrating();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE) public void removeVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+  }
+
+  public static interface Vibrator.OnVibratorStateChangedListener {
+    method public void onVibratorStateChanged(boolean);
   }
 
   public class WorkSource implements android.os.Parcelable {

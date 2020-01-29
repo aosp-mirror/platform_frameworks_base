@@ -2605,6 +2605,17 @@ package android.os {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Waveform> CREATOR;
   }
 
+  public abstract class Vibrator {
+    method @RequiresPermission("android.permission.ACCESS_VIBRATOR_STATE") public void addVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @RequiresPermission("android.permission.ACCESS_VIBRATOR_STATE") public void addVibratorStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+    method @RequiresPermission("android.permission.ACCESS_VIBRATOR_STATE") public boolean isVibrating();
+    method @RequiresPermission("android.permission.ACCESS_VIBRATOR_STATE") public void removeVibratorStateListener(@NonNull android.os.Vibrator.OnVibratorStateChangedListener);
+  }
+
+  public static interface Vibrator.OnVibratorStateChangedListener {
+    method public void onVibratorStateChanged(boolean);
+  }
+
   public class VintfObject {
     method public static String[] getHalNamesAndVersions();
     method public static String getSepolicyVersion();
