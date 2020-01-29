@@ -55,9 +55,6 @@
             android:clipChildren="false"
             systemui:viewType="com.android.systemui.plugins.qs.QS" />
 
-        <!-- Temporary area to test out home controls -->
-        <include layout="@layout/home_controls" />
-
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_marginTop="@dimen/notification_panel_margin_top"

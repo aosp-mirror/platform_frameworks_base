@@ -129,8 +129,6 @@ public class Utils {
      */
     public static boolean useQsMediaPlayer(Context context) {
         int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_player", 0);
-        flag |= Settings.System.getInt(context.getContentResolver(), "npv_plugin_flag", 0);
-
         return flag > 0;
     }
 }
