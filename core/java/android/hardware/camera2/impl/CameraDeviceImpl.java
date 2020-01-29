@@ -91,7 +91,7 @@ public class CameraDeviceImpl extends CameraDevice
     private boolean mIdle = true;
 
     /** map request IDs to callback/request data */
-    private final SparseArray<CaptureCallbackHolder> mCaptureCallbackMap =
+    private SparseArray<CaptureCallbackHolder> mCaptureCallbackMap =
             new SparseArray<CaptureCallbackHolder>();
 
     private int mRepeatingRequestId = REQUEST_ID_NONE;
@@ -123,7 +123,7 @@ public class CameraDeviceImpl extends CameraDevice
      * An object tracking received frame numbers.
      * Updated when receiving callbacks from ICameraDeviceCallbacks.
      */
-    private final FrameNumberTracker mFrameNumberTracker = new FrameNumberTracker();
+    private FrameNumberTracker mFrameNumberTracker = new FrameNumberTracker();
 
     private CameraCaptureSessionCore mCurrentSession;
     private int mNextSessionId = 0;
@@ -892,6 +892,7 @@ public class CameraDeviceImpl extends CameraDevice
         HashSet<Integer> offlineStreamIds = new HashSet<Integer>();
         SparseArray<OutputConfiguration> offlineConfiguredOutputs =
                 new SparseArray<OutputConfiguration>();
+        CameraOfflineSession ret;
 
         synchronized(mInterfaceLock) {
             if (mOfflineSessionImpl != null) {
@@ -919,15 +920,20 @@ public class CameraDeviceImpl extends CameraDevice
 
                 offlineStreamIds.add(streamId);
             }
+            stopRepeating();
 
             mOfflineSessionImpl = new CameraOfflineSessionImpl(mCameraId,
                     mCharacteristics, executor, listener, offlineConfiguredOutputs,
-                    mConfiguredInput, mFrameNumberTracker, mCaptureCallbackMap,
+                    mConfiguredInput, mConfiguredOutputs, mFrameNumberTracker, mCaptureCallbackMap,
                     mRequestLastFrameNumbersList);
+            ret = mOfflineSessionImpl;
 
             mOfflineSwitchService = Executors.newSingleThreadExecutor();
             mConfiguredOutputs.clear();
             mConfiguredInput = new SimpleEntry<Integer, InputConfiguration>(REQUEST_ID_NONE, null);
+            mIdle = true;
+            mCaptureCallbackMap = new SparseArray<CaptureCallbackHolder>();
+            mFrameNumberTracker = new FrameNumberTracker();
 
             mCurrentSession.closeWithoutDraining();
             mCurrentSession = null;
@@ -949,11 +955,13 @@ public class CameraDeviceImpl extends CameraDevice
                     mOfflineSessionImpl.setRemoteSession(remoteOfflineSession);
                 } catch (CameraAccessException e) {
                     mOfflineSessionImpl.notifyFailedSwitch();
+                } finally {
+                    mOfflineSessionImpl = null;
                 }
             }
         });
 
-        return mOfflineSessionImpl;
+        return ret;
     }
 
     public boolean supportsOfflineProcessing(Surface surface) {
