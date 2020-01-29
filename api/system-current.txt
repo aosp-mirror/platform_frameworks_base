@@ -8411,7 +8411,7 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setLocationMode(int);
   }
 
-  public class BatteryStatsManager {
+  public final class BatteryStatsManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.CellularBatteryStats getCellularBatteryStats();
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.WifiBatteryStats getWifiBatteryStats();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
