@@ -35,7 +35,7 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* int32 event_id = 1 */ p.getUiEvent().getId(),
                 /* int32 uid = 2 */ r.getUid(),
                 /* string package_name = 3 */ r.sbn.getPackageName(),
-                /* int32 instance_id = 4 */ 0,  // TODO generate and fill instance ids
+                /* int32 instance_id = 4 */ p.getInstanceId(),
                 /* int32 notification_id = 5 */ r.sbn.getId(),
                 /* string notification_tag = 6 */ r.sbn.getTag(),
                 /* string channel_id = 7 */ r.sbn.getChannelIdLogTag(),

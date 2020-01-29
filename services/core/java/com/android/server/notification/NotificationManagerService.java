@@ -232,6 +232,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -380,6 +381,8 @@ public class NotificationManagerService extends SystemService {
     private static final String SCHEME_TIMEOUT = "timeout";
     private static final String EXTRA_KEY = "key";
 
+    private static final int NOTIFICATION_INSTANCE_ID_MAX = (1 << 13);
+
     /**
      * Apps that post custom toasts in the background will have those blocked. Apps can
      * still post toasts created with
@@ -519,6 +522,7 @@ public class NotificationManagerService extends SystemService {
 
     private final SavePolicyFileRunnable mSavePolicyFile = new SavePolicyFileRunnable();
     private NotificationRecordLogger mNotificationRecordLogger;
+    private InstanceIdSequence mNotificationInstanceIdSequence;
 
     private static class Archive {
         final int mBufferSize;
@@ -1690,18 +1694,22 @@ public class NotificationManagerService extends SystemService {
     }
 
     public NotificationManagerService(Context context) {
-        this(context, new NotificationRecordLoggerImpl());
+        this(context,
+                new NotificationRecordLoggerImpl(),
+                new InstanceIdSequence(NOTIFICATION_INSTANCE_ID_MAX));
     }
 
     @VisibleForTesting
     public NotificationManagerService(Context context,
-            NotificationRecordLogger notificationRecordLogger) {
+            NotificationRecordLogger notificationRecordLogger,
+            InstanceIdSequence notificationInstanceIdSequence) {
         super(context);
         mNotificationRecordLogger = notificationRecordLogger;
+        mNotificationInstanceIdSequence = notificationInstanceIdSequence;
         Notification.processWhitelistToken = WHITELIST_TOKEN;
     }
 
-    // TODO - replace these methods with a single VisibleForTesting constructor
+    // TODO - replace these methods with new fields in the VisibleForTesting constructor
     @VisibleForTesting
     void setAudioManager(AudioManager audioMananger) {
         mAudioManager = audioMananger;
@@ -6260,6 +6268,14 @@ public class NotificationManagerService extends SystemService {
                     NotificationRecord old = mNotificationsByKey.get(key);
                     final StatusBarNotification n = r.sbn;
                     final Notification notification = n.getNotification();
+
+                    // Make sure the SBN has an instance ID for statsd logging.
+                    if (old == null || old.sbn.getInstanceId() == null) {
+                        n.setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+                    } else {
+                        n.setInstanceId(old.sbn.getInstanceId());
+                    }
+
                     int index = indexOfNotificationLocked(n.getKey());
                     if (index < 0) {
                         mNotificationList.add(r);

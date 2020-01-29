@@ -72,6 +72,8 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.util.IntPair;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LogicalLight;
@@ -99,6 +101,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     @Mock
     IAccessibilityManager mAccessibilityService;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
+    private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
+            1 << 30);
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -149,7 +153,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
         assertTrue(accessibilityManager.isEnabled());
 
-        mService = spy(new NotificationManagerService(getContext(), mNotificationRecordLogger));
+        mService = spy(new NotificationManagerService(getContext(), mNotificationRecordLogger,
+                mNotificationInstanceIdSequence));
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);

@@ -35,6 +35,7 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -68,6 +69,8 @@ public class StatusBarNotification implements Parcelable {
     private final UserHandle user;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final long postTime;
+    // A small per-notification ID, used for statsd logging.
+    private InstanceId mInstanceId;  // Not final, see setInstanceId()
 
     private Context mContext; // used for inflation & icon expansion
 
@@ -131,8 +134,9 @@ public class StatusBarNotification implements Parcelable {
         this.postTime = in.readLong();
         if (in.readInt() != 0) {
             this.overrideGroupKey = in.readString();
-        } else {
-            this.overrideGroupKey = null;
+        }
+        if (in.readInt() != 0) {
+            this.mInstanceId = InstanceId.CREATOR.createFromParcel(in);
         }
         this.key = key();
         this.groupKey = groupKey();
@@ -196,11 +200,16 @@ public class StatusBarNotification implements Parcelable {
         out.writeInt(this.initialPid);
         this.notification.writeToParcel(out, flags);
         user.writeToParcel(out, flags);
-
         out.writeLong(this.postTime);
         if (this.overrideGroupKey != null) {
             out.writeInt(1);
             out.writeString(this.overrideGroupKey);
+        } else {
+            out.writeInt(0);
+        }
+        if (this.mInstanceId != null) {
+            out.writeInt(1);
+            mInstanceId.writeToParcel(out, flags);
         } else {
             out.writeInt(0);
         }
@@ -385,6 +394,20 @@ public class StatusBarNotification implements Parcelable {
      */
     public void clearPackageContext() {
         mContext = null;
+    }
+
+    /**
+     * @hide
+     */
+    public InstanceId getInstanceId() {
+        return mInstanceId;
+    }
+
+    /**
+     * @hide
+     */
+    public void setInstanceId(InstanceId instanceId) {
+        mInstanceId = instanceId;
     }
 
     /**

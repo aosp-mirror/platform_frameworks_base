@@ -138,5 +138,9 @@ public interface NotificationRecordLogger {
             String assistant = r.getAdjustmentIssuer();
             return (assistant == null) ? 0 : assistant.hashCode();
         }
+
+        int getInstanceId() {
+            return (r.sbn.getInstanceId() == null ? 0 : r.sbn.getInstanceId().getId());
+        }
     }
 }

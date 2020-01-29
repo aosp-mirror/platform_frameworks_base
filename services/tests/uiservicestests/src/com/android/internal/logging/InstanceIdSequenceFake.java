@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.logging.testing;
-
-import android.annotation.SuppressLint;
-
-import com.android.internal.logging.InstanceId;
-import com.android.internal.logging.InstanceIdSequence;
+package com.android.internal.logging;
 
 /**
  * A fake implementation of InstanceIdSequence that returns 0, 1, 2, ...
@@ -30,27 +25,15 @@ public class InstanceIdSequenceFake extends InstanceIdSequence {
         super(instanceIdMax);
     }
 
-    /**
-     * Extend InstanceId to add a constructor we can call, strictly for testing purposes.
-     * Public so that tests can check whether the InstanceIds they see are fake.
-     */
-    public static class InstanceIdFake extends InstanceId {
-        @SuppressLint("VisibleForTests")  // This is test infrastructure, which ought to count
-        InstanceIdFake(int id) {
-            super(id);
-        }
-    }
-
     private int mNextId = 0;
 
     @Override
     public InstanceId newInstanceId() {
         synchronized (this) {
-            ++mNextId;
             if (mNextId >= mInstanceIdMax) {
                 mNextId = 0;
             }
-            return new InstanceIdFake(mNextId);
+            return newInstanceIdInternal(mNextId++);
         }
     }
 }
