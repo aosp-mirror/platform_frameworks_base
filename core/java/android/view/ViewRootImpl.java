@@ -4887,8 +4887,14 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 case MSG_INSETS_CONTROL_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
+
+                    // Deliver state change before control change, such that:
+                    // a) When gaining control, controller can compare with server state to evaluate
+                    // whether it needs to run animation.
+                    // b) When loosing control, controller can restore server state by taking last
+                    // dispatched state as truth.
                     mInsetsController.onStateChanged((InsetsState) args.arg1);
+                    mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
                     break;
                 }
                 case MSG_SHOW_INSETS: {

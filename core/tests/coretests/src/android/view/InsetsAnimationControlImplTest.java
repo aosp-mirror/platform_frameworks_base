@@ -109,13 +109,14 @@ public class InsetsAnimationControlImplTest {
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0)));
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0)),
+                new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
                 mInsetsState, () -> mMockTransaction, mMockController);
-        navConsumer.hide();
         navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash,
-                new Point(400, 0)));
+                new Point(400, 0)), new int[1], new int[1]);
+        navConsumer.hide();
 
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
         controls.put(ITYPE_STATUS_BAR, topConsumer.getControl());

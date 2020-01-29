@@ -121,9 +121,20 @@ public class InsetsControllerTest {
                 if (type == ITYPE_IME) {
                     return new InsetsSourceConsumer(type, controller.getState(),
                             Transaction::new, controller) {
+
+                        private boolean mImeRequestedShow;
+
+                        @Override
+                        public void show(boolean fromIme) {
+                            super.show(fromIme);
+                            if (fromIme) {
+                                mImeRequestedShow = true;
+                            }
+                        }
+
                         @Override
                         public int requestShow(boolean fromController) {
-                            if (fromController) {
+                            if (fromController || mImeRequestedShow) {
                                 return SHOW_IMMEDIATELY;
                             } else {
                                 return IME_SHOW_DELAYED;
@@ -394,6 +405,84 @@ public class InsetsControllerTest {
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testRestoreStartsAnimation() {
+        InsetsSourceControl control =
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point());
+        mController.onControlsChanged(new InsetsSourceControl[]{control});
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mController.hide(Type.statusBars());
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(ITYPE_STATUS_BAR).isRequestedVisible());
+            assertFalse(mController.getState().getSource(ITYPE_STATUS_BAR).isVisible());
+
+            // Loosing control
+            InsetsState state = new InsetsState(mController.getState());
+            state.setSourceVisible(ITYPE_STATUS_BAR, true);
+            mController.onStateChanged(state);
+            mController.onControlsChanged(new InsetsSourceControl[0]);
+            assertFalse(mController.getSourceConsumer(ITYPE_STATUS_BAR).isRequestedVisible());
+            assertTrue(mController.getState().getSource(ITYPE_STATUS_BAR).isVisible());
+
+            // Gaining control
+            mController.onControlsChanged(new InsetsSourceControl[]{control});
+            assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ITYPE_STATUS_BAR));
+            mController.cancelExistingAnimation();
+            assertFalse(mController.getSourceConsumer(ITYPE_STATUS_BAR).isRequestedVisible());
+            assertFalse(mController.getState().getSource(ITYPE_STATUS_BAR).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testStartImeAnimationAfterGettingControl() {
+        InsetsSourceControl control =
+                new InsetsSourceControl(ITYPE_IME, mLeash, new Point());
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+
+            mController.show(ime());
+            assertFalse(mController.getState().getSource(ITYPE_IME).isVisible());
+
+            // Pretend IME is calling
+            mController.show(ime(), true /* fromIme */);
+
+            // Gaining control shortly after
+            mController.onControlsChanged(new InsetsSourceControl[]{control});
+
+            assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_IME));
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(ITYPE_IME).isRequestedVisible());
+            assertTrue(mController.getState().getSource(ITYPE_IME).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testStartImeAnimationAfterGettingControl_imeLater() {
+        InsetsSourceControl control =
+                new InsetsSourceControl(ITYPE_IME, mLeash, new Point());
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+
+            mController.show(ime());
+            assertFalse(mController.getState().getSource(ITYPE_IME).isVisible());
+
+            // Gaining control shortly after
+            mController.onControlsChanged(new InsetsSourceControl[]{control});
+
+            // Pretend IME is calling
+            mController.show(ime(), true /* fromIme */);
+
+            assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ITYPE_IME));
+            mController.cancelExistingAnimation();
+            assertTrue(mController.getSourceConsumer(ITYPE_IME).isRequestedVisible());
+            assertTrue(mController.getState().getSource(ITYPE_IME).isVisible());
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
