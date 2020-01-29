@@ -124,6 +124,12 @@ class SecondFingerMultiTap extends GestureMatcher {
     }
 
     @Override
+    protected void onUp(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        // Cancel early when possible, or it will take precedence over two-finger double tap.
+        cancelGesture(event, rawEvent, policyFlags);
+    }
+
+    @Override
     public String getGestureName() {
         switch (mTargetTaps) {
             case 2:
