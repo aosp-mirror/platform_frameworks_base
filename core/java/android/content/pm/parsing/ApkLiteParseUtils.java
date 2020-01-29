@@ -231,9 +231,9 @@ public class ApkLiteParseUtils {
                 final boolean skipVerify = (flags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0;
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
-                    signingDetails =
-                            ApkParseUtils.collectCertificates(apkFile.getAbsolutePath(), skipVerify,
-                                    false, PackageParser.SigningDetails.UNKNOWN);
+                    signingDetails = ApkParseUtils.collectCertificates(apkFile.getAbsolutePath(),
+                            skipVerify, false, PackageParser.SigningDetails.UNKNOWN,
+                            DEFAULT_TARGET_SDK_VERSION);
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }

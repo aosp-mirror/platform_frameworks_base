@@ -3176,7 +3176,8 @@ public class ApkParseUtils {
                     pkg.getBaseCodePath(),
                     skipVerify,
                     pkg.isStaticSharedLibrary(),
-                    pkg.getSigningDetails()
+                    pkg.getSigningDetails(),
+                    pkg.getTargetSdkVersion()
             ));
 
             String[] splitCodePaths = pkg.getSplitCodePaths();
@@ -3186,7 +3187,8 @@ public class ApkParseUtils {
                             splitCodePaths[i],
                             skipVerify,
                             pkg.isStaticSharedLibrary(),
-                            pkg.getSigningDetails()
+                            pkg.getSigningDetails(),
+                            pkg.getTargetSdkVersion()
                     ));
                 }
             }
@@ -3199,9 +3201,11 @@ public class ApkParseUtils {
             String baseCodePath,
             boolean skipVerify,
             boolean isStaticSharedLibrary,
-            @NonNull SigningDetails existingSigningDetails
+            @NonNull SigningDetails existingSigningDetails,
+            int targetSdk
     ) throws PackageParserException {
-        int minSignatureScheme = SigningDetails.SignatureSchemeVersion.JAR;
+        int minSignatureScheme = ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                targetSdk);
         if (isStaticSharedLibrary) {
             // must use v2 signing scheme
             minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2;
