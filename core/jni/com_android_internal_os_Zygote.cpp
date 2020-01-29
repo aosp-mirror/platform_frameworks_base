@@ -1084,6 +1084,13 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
   android_fdsan_error_level fdsan_error_level = android_fdsan_get_error_level();
 
+  // Purge unused native memory in an attempt to reduce the amount of false
+  // sharing with the child process.  By reducing the size of the libc_malloc
+  // region shared with the child process we reduce the number of pages that
+  // transition to the private-dirty state when malloc adjusts the meta-data
+  // on each of the pages it is managing after the fork.
+  mallopt(M_PURGE, 0);
+
   pid_t pid = fork();
 
   if (pid == 0) {
