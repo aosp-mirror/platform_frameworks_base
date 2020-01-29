@@ -64,11 +64,11 @@ public class SystemWindows {
     final HashMap<View, SurfaceControlViewHost> mViewRoots = new HashMap<>();
     Context mContext;
     IWindowSession mSession;
-    DisplayWindowController mDisplayController;
+    DisplayController mDisplayController;
     IWindowManager mWmService;
 
-    private final DisplayWindowController.DisplayWindowListener mDisplayListener =
-            new DisplayWindowController.DisplayWindowListener() {
+    private final DisplayController.OnDisplaysChangedListener mDisplayListener =
+            new DisplayController.OnDisplaysChangedListener() {
                 @Override
                 public void onDisplayAdded(int displayId) { }
 
@@ -86,7 +86,7 @@ public class SystemWindows {
             };
 
     @Inject
-    public SystemWindows(Context context, DisplayWindowController displayController,
+    public SystemWindows(Context context, DisplayController displayController,
             IWindowManager wmService) {
         mContext = context;
         mWmService = wmService;

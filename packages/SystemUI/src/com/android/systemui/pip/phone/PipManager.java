@@ -46,7 +46,8 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.wm.DisplayWindowController;
+import com.android.systemui.wm.DisplayChangeController;
+import com.android.systemui.wm.DisplayController;
 
 import java.io.PrintWriter;
 
@@ -79,7 +80,7 @@ public class PipManager implements BasePipManager {
     /**
      * Handler for display rotation changes.
      */
-    private final DisplayWindowController.OnDisplayWindowRotationController mRotationController = (
+    private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
                 displayId, fromRotation, toRotation, t);
@@ -230,7 +231,7 @@ public class PipManager implements BasePipManager {
      * Initializes {@link PipManager}.
      */
     public void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
-            DisplayWindowController displayWindowController) {
+            DisplayController displayController) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -251,7 +252,7 @@ public class PipManager implements BasePipManager {
                 mMenuController, mInputConsumerController, mPipBoundsHandler);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
-        displayWindowController.addRotationController(mRotationController);
+        displayController.addDisplayChangingController(mRotationController);
 
         // If SystemUI restart, and it already existed a pinned stack,
         // register the pip input consumer to ensure touch can send to it.
