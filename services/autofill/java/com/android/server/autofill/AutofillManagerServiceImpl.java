@@ -216,7 +216,7 @@ final class AutofillManagerServiceImpl
         updateRemoteAugmentedAutofillService();
 
         final ComponentName componentName = RemoteInlineSuggestionRenderService
-                .getServiceComponentName(getContext());
+                .getServiceComponentName(getContext(), mUserId);
         if (componentName != null) {
             mRemoteInlineSuggestionRenderService = new RemoteInlineSuggestionRenderService(
                     getContext(), componentName, InlineSuggestionRenderService.SERVICE_INTERFACE,
