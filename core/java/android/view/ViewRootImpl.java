@@ -3348,7 +3348,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private void performLayout(WindowManager.LayoutParams lp, int desiredWindowWidth,
             int desiredWindowHeight) {
-        mLayoutRequested = false;
         mScrollMayChange = true;
         mInLayout = true;
 
