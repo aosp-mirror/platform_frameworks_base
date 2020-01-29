@@ -20,7 +20,6 @@ import static com.android.server.accessibility.gestures.GestureUtils.MM_PER_CM;
 import static com.android.server.accessibility.gestures.TouchExplorer.DEBUG;
 
 import android.content.Context;
-import android.gesture.GesturePoint;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -48,7 +47,7 @@ class Swipe extends GestureMatcher {
     private final float mGestureDetectionThresholdPixels;
 
     // Buffer for storing points for gesture detection.
-    private final ArrayList<GesturePoint> mStrokeBuffer = new ArrayList<GesturePoint>(100);
+    private final ArrayList<PointF> mStrokeBuffer = new ArrayList<>(100);
 
     // The minimal delta between moves to add a gesture point.
     private static final int TOUCH_TOLERANCE_PIX = 3;
@@ -78,7 +77,6 @@ class Swipe extends GestureMatcher {
     private int[] mDirections;
     private float mBaseX;
     private float mBaseY;
-    private long mBaseTime;
     private float mPreviousGestureX;
     private float mPreviousGestureY;
     // Constants for sampling motion event points.
@@ -136,7 +134,6 @@ class Swipe extends GestureMatcher {
     protected void clear() {
         mBaseX = Float.NaN;
         mBaseY = Float.NaN;
-        mBaseTime = 0;
         mStrokeBuffer.clear();
         super.clear();
     }
@@ -147,7 +144,6 @@ class Swipe extends GestureMatcher {
         if (Float.isNaN(mBaseX) && Float.isNaN(mBaseY)) {
             mBaseX = rawEvent.getX();
             mBaseY = rawEvent.getY();
-            mBaseTime = event.getEventTime();
             mPreviousGestureX = mBaseX;
             mPreviousGestureY = mBaseY;
         }
@@ -158,10 +154,8 @@ class Swipe extends GestureMatcher {
     protected void onMove(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         final float x = rawEvent.getX();
         final float y = rawEvent.getY();
-        final long time = event.getEventTime();
         final float dX = Math.abs(x - mPreviousGestureX);
         final float dY = Math.abs(y - mPreviousGestureY);
-        final long timeDelta = time - mBaseTime;
         final double moveDelta = Math.hypot(Math.abs(x - mBaseX), Math.abs(y - mBaseY));
         if (DEBUG) {
             Slog.d(
@@ -184,7 +178,7 @@ class Swipe extends GestureMatcher {
                     return;
                 } else {
                     // This is confirmed to be some kind of swipe so start tracking points.
-                    mStrokeBuffer.add(new GesturePoint(mBaseX, mBaseY, mBaseTime));
+                    mStrokeBuffer.add(new PointF(mBaseX, mBaseY));
                 }
             }
             if (moveDelta > mGestureDetectionThresholdPixels) {
@@ -192,7 +186,6 @@ class Swipe extends GestureMatcher {
                 // update the stored values.
                 mBaseX = x;
                 mBaseY = y;
-                mBaseTime = time;
                 if (getState() == STATE_CLEAR) {
                     startGesture(event, rawEvent, policyFlags);
                     cancelAfterPauseThreshold(event, rawEvent, policyFlags);
@@ -203,7 +196,7 @@ class Swipe extends GestureMatcher {
             if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
                 mPreviousGestureX = x;
                 mPreviousGestureY = y;
-                mStrokeBuffer.add(new GesturePoint(x, y, time));
+                mStrokeBuffer.add(new PointF(x, y));
                 cancelAfterPauseThreshold(event, rawEvent, policyFlags);
             }
         }
@@ -218,11 +211,10 @@ class Swipe extends GestureMatcher {
 
         final float x = rawEvent.getX();
         final float y = rawEvent.getY();
-        final long time = event.getEventTime();
         final float dX = Math.abs(x - mPreviousGestureX);
         final float dY = Math.abs(y - mPreviousGestureY);
         if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
-            mStrokeBuffer.add(new GesturePoint(x, y, time));
+            mStrokeBuffer.add(new PointF(x, y));
         }
         recognizeGesture(event, rawEvent, policyFlags);
     }
@@ -277,7 +269,7 @@ class Swipe extends GestureMatcher {
         // 90 degrees.
 
         ArrayList<PointF> path = new ArrayList<>();
-        PointF lastDelimiter = new PointF(mStrokeBuffer.get(0).x, mStrokeBuffer.get(0).y);
+        PointF lastDelimiter = mStrokeBuffer.get(0);
         path.add(lastDelimiter);
 
         float dX = 0; // Sum of unit vectors from last delimiter to each following point
@@ -285,9 +277,9 @@ class Swipe extends GestureMatcher {
         int count = 0; // Number of points since last delimiter
         float length = 0; // Vector length from delimiter to most recent point
 
-        PointF next = new PointF();
+        PointF next = null;
         for (int i = 1; i < mStrokeBuffer.size(); ++i) {
-            next = new PointF(mStrokeBuffer.get(i).x, mStrokeBuffer.get(i).y);
+            next = mStrokeBuffer.get(i);
             if (count > 0) {
                 // Average of unit vectors from delimiter to following points
                 float currentDX = dX / count;
