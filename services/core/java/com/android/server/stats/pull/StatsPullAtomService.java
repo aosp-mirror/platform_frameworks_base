@@ -2562,7 +2562,7 @@ public class StatsPullAtomService extends SystemService {
                     reportedUids.add(pkg.applicationInfo.uid);
 
                     if (atomTag == StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
-                            && ThreadLocalRandom.current().nextFloat() > 0.2f) {
+                            && ThreadLocalRandom.current().nextFloat() > 0.01f) {
                         continue;
                     }
 
