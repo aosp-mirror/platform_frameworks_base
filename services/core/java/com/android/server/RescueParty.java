@@ -213,10 +213,10 @@ public class RescueParty {
     }
 
     /**
-     * Get the current rescue level.
+     * Get the next rescue level. This indicates the next level of mitigation that may be taken.
      */
-    private static int getRescueLevel() {
-        return MathUtils.constrain(SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE),
+    private static int getNextRescueLevel() {
+        return MathUtils.constrain(SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
                 LEVEL_NONE, LEVEL_FACTORY_RESET);
     }
 
@@ -225,9 +225,7 @@ public class RescueParty {
      * probably want to call {@link #executeRescueLevel(Context, String)}.
      */
     private static void incrementRescueLevel(int triggerUid) {
-        final int level = MathUtils.constrain(
-                SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
-                LEVEL_NONE, LEVEL_FACTORY_RESET);
+        final int level = getNextRescueLevel();
         SystemProperties.set(PROP_RESCUE_LEVEL, Integer.toString(level));
 
         EventLogTags.writeRescueLevel(level, triggerUid);
@@ -397,10 +395,7 @@ public class RescueParty {
                 @FailureReasons int failureReason) {
             if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
-                int rescueLevel = MathUtils.constrain(
-                        SystemProperties.getInt(PROP_RESCUE_LEVEL, LEVEL_NONE) + 1,
-                        LEVEL_NONE, LEVEL_FACTORY_RESET);
-                return mapRescueLevelToUserImpact(rescueLevel);
+                return mapRescueLevelToUserImpact(getNextRescueLevel());
             } else {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;
             }
@@ -449,7 +444,7 @@ public class RescueParty {
             if (isDisabled()) {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;
             }
-            return mapRescueLevelToUserImpact(getRescueLevel());
+            return mapRescueLevelToUserImpact(getNextRescueLevel());
         }
 
         @Override
