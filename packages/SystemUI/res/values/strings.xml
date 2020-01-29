@@ -1812,16 +1812,16 @@
     <string name="demote">Mark this notification as not a conversation</string>
 
     <!-- [CHAR LIMIT=100] Mark this conversation as a favorite -->
-    <string name="notification_conversation_favorite">Favorite</string>
+    <string name="notification_conversation_favorite">Mark as important</string>
 
     <!-- [CHAR LIMIT=100] Unmark this conversation as a favorite -->
-    <string name="notification_conversation_unfavorite">Unfavorite</string>
+    <string name="notification_conversation_unfavorite">Mark as unimportant</string>
 
     <!-- [CHAR LIMIT=100] Mute this conversation -->
-    <string name="notification_conversation_mute">Mute</string>
+    <string name="notification_conversation_mute">Silence</string>
 
     <!-- [CHAR LIMIT=100] Umute this conversation -->
-    <string name="notification_conversation_unmute">Unmute</string>
+    <string name="notification_conversation_unmute">Alerting</string>
 
     <!-- [CHAR LIMIT=100] Show notification as bubble -->
     <string name="notification_conversation_bubble">Show as bubble</string>

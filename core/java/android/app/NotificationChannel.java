@@ -31,7 +31,6 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
@@ -105,6 +104,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_ORIG_IMP = "orig_imp";
     private static final String ATT_PARENT_CHANNEL = "parent";
     private static final String ATT_CONVERSATION_ID = "conv_id";
+    private static final String ATT_IMP_CONVERSATION = "imp_conv";
     private static final String ATT_DEMOTE = "dem";
     private static final String DELIMITER = ",";
 
@@ -196,6 +196,7 @@ public final class NotificationChannel implements Parcelable {
     private String mParentId = null;
     private String mConversationId = null;
     private boolean mDemoted = false;
+    private boolean mImportantConvo = false;
 
     /**
      * Creates a notification channel.
@@ -263,6 +264,7 @@ public final class NotificationChannel implements Parcelable {
         mParentId = in.readString();
         mConversationId = in.readString();
         mDemoted = in.readBoolean();
+        mImportantConvo = in.readBoolean();
     }
 
     @Override
@@ -321,6 +323,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeString(mParentId);
         dest.writeString(mConversationId);
         dest.writeBoolean(mDemoted);
+        dest.writeBoolean(mImportantConvo);
     }
 
     /**
@@ -351,6 +354,14 @@ public final class NotificationChannel implements Parcelable {
     @TestApi
     public void setDeleted(boolean deleted) {
         mDeleted = deleted;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setImportantConversation(boolean importantConvo) {
+        mImportantConvo = importantConvo;
     }
 
     /**
@@ -598,6 +609,18 @@ public final class NotificationChannel implements Parcelable {
      */
     public boolean canBypassDnd() {
         return mBypassDnd;
+    }
+
+    /**
+     * Whether or not notifications in this conversation are considered important.
+     *
+     * <p>Important conversations may get special visual treatment, and might be able to bypass DND.
+     *
+     * <p>This is only valid for channels that represent conversations, that is, those with a valid
+     * {@link #getConversationId() conversation id}.
+     */
+    public boolean isImportantConversation() {
+        return mImportantConvo;
     }
 
     /**
@@ -852,6 +875,7 @@ public final class NotificationChannel implements Parcelable {
         setConversationId(parser.getAttributeValue(null, ATT_PARENT_CHANNEL),
                 parser.getAttributeValue(null, ATT_CONVERSATION_ID));
         setDemoted(safeBool(parser, ATT_DEMOTE, false));
+        setImportantConversation(safeBool(parser, ATT_IMP_CONVERSATION, false));
     }
 
     @Nullable
@@ -984,6 +1008,9 @@ public final class NotificationChannel implements Parcelable {
         }
         if (isDemoted()) {
             out.attribute(null, ATT_DEMOTE, Boolean.toString(isDemoted()));
+        }
+        if (isImportantConversation()) {
+            out.attribute(null, ATT_IMP_CONVERSATION, Boolean.toString(isImportantConversation()));
         }
 
         // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
@@ -1145,7 +1172,8 @@ public final class NotificationChannel implements Parcelable {
                 && mOriginalImportance == that.mOriginalImportance
                 && Objects.equals(getParentChannelId(), that.getParentChannelId())
                 && Objects.equals(getConversationId(), that.getConversationId())
-                && isDemoted() == that.isDemoted();
+                && isDemoted() == that.isDemoted()
+                && isImportantConversation() == that.isImportantConversation();
     }
 
     @Override
@@ -1156,7 +1184,7 @@ public final class NotificationChannel implements Parcelable {
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
                 getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
                 mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
-                mParentId, mConversationId, mDemoted);
+                mParentId, mConversationId, mDemoted, mImportantConvo);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
     }
@@ -1204,7 +1232,8 @@ public final class NotificationChannel implements Parcelable {
                 + ", mOriginalImp=" + mOriginalImportance
                 + ", mParent=" + mParentId
                 + ", mConversationId=" + mConversationId
-                + ", mDemoted=" + mDemoted;
+                + ", mDemoted=" + mDemoted
+                + ", mImportantConvo=" + mImportantConvo;
     }
 
     /** @hide */

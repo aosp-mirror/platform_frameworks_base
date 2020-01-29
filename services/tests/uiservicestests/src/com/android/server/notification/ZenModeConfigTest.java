@@ -91,6 +91,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         int priorityCategories = originalPolicy.priorityCategories;
         int priorityCallSenders = originalPolicy.priorityCallSenders;
         int priorityMessageSenders = originalPolicy.priorityMessageSenders;
+        int priorityConversationsSenders = originalPolicy.priorityConversationSenders;
         int suppressedVisualEffects = originalPolicy.suppressedVisualEffects;
         priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
         priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
@@ -99,7 +100,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
 
         Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
-                priorityMessageSenders, suppressedVisualEffects, 0);
+                priorityMessageSenders, suppressedVisualEffects, 0, priorityConversationsSenders);
 
         assertEquals(expectedPolicy, config.toNotificationPolicy(zenPolicy));
     }
@@ -235,6 +236,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         config.areChannelsBypassingDnd = false;
         config.allowCallsFrom = ZenModeConfig.SOURCE_ANYONE;
         config.allowMessagesFrom = ZenModeConfig.SOURCE_ANYONE;
+        config.allowConversations = true;
+        config.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
 
         config.suppressedVisualEffects = 0;
         return config;
@@ -252,6 +255,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         config.allowReminders = false;
         config.allowEvents = false;
         config.areChannelsBypassingDnd = false;
+        config.allowConversations = false;
+        config.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_NONE;
 
         config.suppressedVisualEffects = 0;
         return config;
