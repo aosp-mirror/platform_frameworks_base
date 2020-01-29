@@ -19,9 +19,9 @@ package com.android.systemui.bubbles;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.Display.INVALID_DISPLAY;
-
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
+
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -56,6 +56,7 @@ import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.AlphaOptimizedButton;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
  * Container for the expanded bubble view, handles rendering the caret and settings icon.
@@ -146,7 +147,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             // the bubble again so we'll just remove it.
                             Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                                     + ", " + e.getMessage() + "; removing bubble");
-                            mBubbleController.removeBubble(getBubbleKey(),
+                            mBubbleController.removeBubble(getBubbleEntry(),
                                     BubbleController.DISMISS_INVALID_INTENT);
                         }
                     });
@@ -190,7 +191,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             }
             if (mBubble != null && !mBubbleController.isUserCreatedBubble(mBubble.getKey())) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbleController.removeBubble(mBubble.getKey(),
+                post(() -> mBubbleController.removeBubble(mBubble.getEntry(),
                         BubbleController.DISMISS_TASK_FINISHED));
             }
         }
@@ -277,6 +278,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     private String getBubbleKey() {
         return mBubble != null ? mBubble.getKey() : "null";
+    }
+
+    private NotificationEntry getBubbleEntry() {
+        return mBubble != null ? mBubble.getEntry() : null;
     }
 
     void applyThemeAttrs() {

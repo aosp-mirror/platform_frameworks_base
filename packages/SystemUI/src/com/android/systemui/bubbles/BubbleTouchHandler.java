@@ -198,9 +198,14 @@ class BubbleTouchHandler implements View.OnTouchListener {
                                 if (isStack) {
                                     mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
                                 } else {
-                                    mController.removeBubble(
-                                            individualBubbleKey,
-                                            BubbleController.DISMISS_USER_GESTURE);
+                                    final Bubble bubble =
+                                            mBubbleData.getBubbleWithKey(individualBubbleKey);
+                                    // bubble can be null if the user is in the middle of
+                                    // dismissing the bubble, but the app also sent a cancel
+                                    if (bubble != null) {
+                                        mController.removeBubble(bubble.getEntry(),
+                                                BubbleController.DISMISS_USER_GESTURE);
+                                    }
                                 }
                             });
                 } else if (isFlyout) {

@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.util.Assert;
 
@@ -116,6 +117,7 @@ public class NotifCollection implements Dumpable {
     @Nullable private CollectionReadyForBuildListener mBuildListener;
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
     private final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
+    private final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
     private boolean mAttached = false;
     private boolean mAmDispatchingToOtherCode;
@@ -176,10 +178,21 @@ public class NotifCollection implements Dumpable {
         extender.setCallback(this::onEndLifetimeExtension);
     }
 
+    /** @see NotifPipeline#addNotificationDismissInterceptor(NotifDismissInterceptor) */
+    void addNotificationDismissInterceptor(NotifDismissInterceptor interceptor) {
+        Assert.isMainThread();
+        checkForReentrantCall();
+        if (mDismissInterceptors.contains(interceptor)) {
+            throw new IllegalArgumentException("Interceptor " + interceptor + " already added.");
+        }
+        mDismissInterceptors.add(interceptor);
+        interceptor.setCallback(this::onEndDismissInterception);
+    }
+
     /**
      * Dismiss a notification on behalf of the user.
      */
-    void dismissNotification(NotificationEntry entry, @NonNull DismissedByUserStats stats) {
+    public void dismissNotification(NotificationEntry entry, @NonNull DismissedByUserStats stats) {
         Assert.isMainThread();
         requireNonNull(stats);
         checkForReentrantCall();
@@ -189,6 +202,12 @@ public class NotifCollection implements Dumpable {
         }
 
         if (entry.getDismissState() == DISMISSED) {
+            return;
+        }
+
+        updateDismissInterceptors(entry);
+        if (isDismissIntercepted(entry)) {
+            mLogger.logNotifDismissedIntercepted(entry.getKey());
             return;
         }
 
@@ -236,7 +255,6 @@ public class NotifCollection implements Dumpable {
         for (NotificationEntry canceledEntry : canceledEntries) {
             tryRemoveNotification(canceledEntry);
         }
-
         rebuildList();
     }
 
@@ -307,11 +325,11 @@ public class NotifCollection implements Dumpable {
             // Update to an existing entry
             mLogger.logNotifUpdated(sbn.getKey());
 
+            // Notification is updated so it is essentially re-added and thus alive again, so we
+            // can reset its state.
             cancelLocalDismissal(entry);
-
-            // Notification is updated so it is essentially re-added and thus alive again. Don't
-            // need to keep its lifetime extended.
             cancelLifetimeExtension(entry);
+            cancelDismissInterception(entry);
             entry.mCancellationReason = REASON_NOT_CANCELED;
 
             entry.setSbn(sbn);
@@ -348,6 +366,7 @@ public class NotifCollection implements Dumpable {
 
         if (!isLifetimeExtended(entry)) {
             mNotificationSet.remove(entry.getKey());
+            cancelDismissInterception(entry);
             dispatchOnEntryRemoved(entry, entry.mCancellationReason);
             dispatchOnEntryCleanUp(entry);
             return true;
@@ -436,6 +455,17 @@ public class NotifCollection implements Dumpable {
         mAmDispatchingToOtherCode = false;
     }
 
+    private void updateDismissInterceptors(@NonNull NotificationEntry entry) {
+        entry.mDismissInterceptors.clear();
+        mAmDispatchingToOtherCode = true;
+        for (NotifDismissInterceptor interceptor : mDismissInterceptors) {
+            if (interceptor.shouldInterceptDismissal(entry)) {
+                entry.mDismissInterceptors.add(interceptor);
+            }
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
     private void cancelLocalDismissal(NotificationEntry entry) {
         if (isDismissedByUser(entry)) {
             entry.setDismissState(NOT_DISMISSED);
@@ -448,6 +478,42 @@ public class NotifCollection implements Dumpable {
                 }
             }
         }
+    }
+
+    private void onEndDismissInterception(
+            NotifDismissInterceptor interceptor,
+            NotificationEntry entry,
+            @NonNull DismissedByUserStats stats) {
+        Assert.isMainThread();
+        if (!mAttached) {
+            return;
+        }
+        checkForReentrantCall();
+
+        if (!entry.mDismissInterceptors.remove(interceptor)) {
+            throw new IllegalStateException(
+                    String.format(
+                            "Cannot end dismiss interceptor for interceptor \"%s\" (%s)",
+                            interceptor.getName(),
+                            interceptor));
+        }
+
+        if (!isDismissIntercepted(entry)) {
+            dismissNotification(entry, stats);
+        }
+    }
+
+    private void cancelDismissInterception(NotificationEntry entry) {
+        mAmDispatchingToOtherCode = true;
+        for (NotifDismissInterceptor interceptor : entry.mDismissInterceptors) {
+            interceptor.cancelDismissInterception(entry);
+        }
+        mAmDispatchingToOtherCode = false;
+        entry.mDismissInterceptors.clear();
+    }
+
+    private boolean isDismissIntercepted(NotificationEntry entry) {
+        return entry.mDismissInterceptors.size() > 0;
     }
 
     private void checkForReentrantCall() {
