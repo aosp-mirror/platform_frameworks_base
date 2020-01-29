@@ -53,8 +53,6 @@ cc_defaults {
         host: {
             include_dirs: [
                 "external/vulkan-headers/include",
-                "frameworks/native/libs/math/include",
-                "frameworks/native/libs/ui/include",
             ],
             cflags: [
                 "-Wno-unused-variable",
@@ -71,6 +69,10 @@ cc_defaults {
         "libminikin",
     ],
 
+    static_libs: [
+        "libui-types",
+    ],
+
     target: {
         android: {
             shared_libs: [
@@ -83,7 +85,6 @@ cc_defaults {
                 "libGLESv2",
                 "libGLESv3",
                 "libvulkan",
-                "libui",
                 "libnativedisplay",
                 "libnativewindow",
                 "libprotobuf-cpp-lite",
@@ -236,6 +237,7 @@ cc_defaults {
                 "service/GraphicsStatsService.cpp",
                 "thread/CommonPool.cpp",
                 "utils/GLUtils.cpp",
+                "utils/NdkUtils.cpp",
                 "utils/StringUtils.cpp",
                 "AutoBackendTextureRelease.cpp",
                 "DeferredLayerUpdater.cpp",
@@ -292,6 +294,7 @@ cc_defaults {
         android: {
             shared_libs: [
 	        "libgui",
+	        "libui",
 	    ],
 	}
     },

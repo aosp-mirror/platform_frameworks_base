@@ -15,22 +15,24 @@
  */
 
 #include "VkInteropFunctorDrawable.h"
-#include <private/hwui/DrawGlInfo.h>
 
-#include <utils/Color.h>
-#include <utils/Trace.h>
-#include <utils/TraceUtils.h>
-#include <thread>
-#include "renderthread/EglManager.h"
-#include "thread/ThreadBase.h"
-#include "utils/TimeUtils.h"
-
+#include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
-
+#include <private/android/AHardwareBufferHelpers.h>
+#include <private/hwui/DrawGlInfo.h>
+#include <utils/Color.h>
 #include <utils/GLUtils.h>
+#include <utils/Trace.h>
+#include <utils/TraceUtils.h>
+
+#include <thread>
+
+#include "renderthread/EglManager.h"
+#include "thread/ThreadBase.h"
+#include "utils/TimeUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -75,20 +77,23 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
 
     SkImageInfo surfaceInfo = canvas->imageInfo();
 
-    if (!mFrameBuffer.get() || mFBInfo != surfaceInfo) {
+    if (mFrameBuffer == nullptr || mFBInfo != surfaceInfo) {
         // Buffer will be used as an OpenGL ES render target.
-        mFrameBuffer = new GraphicBuffer(
-                // TODO: try to reduce the size of the buffer: possibly by using clip bounds.
-                static_cast<uint32_t>(surfaceInfo.width()),
-                static_cast<uint32_t>(surfaceInfo.height()),
-                ColorTypeToPixelFormat(surfaceInfo.colorType()),
-                GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
-                        GraphicBuffer::USAGE_SW_READ_NEVER | GraphicBuffer::USAGE_HW_RENDER,
-                std::string("VkInteropFunctorDrawable::onDraw pid [") + std::to_string(getpid()) +
-                        "]");
-        status_t error = mFrameBuffer->initCheck();
-        if (error < 0) {
-            ALOGW("VkInteropFunctorDrawable::onDraw() failed in GraphicBuffer.create()");
+        AHardwareBuffer_Desc desc = {
+                .width = static_cast<uint32_t>(surfaceInfo.width()),
+                .height = static_cast<uint32_t>(surfaceInfo.height()),
+                .layers = 1,
+                .format = ColorTypeToBufferFormat(surfaceInfo.colorType()),
+                .usage = AHARDWAREBUFFER_USAGE_CPU_READ_NEVER |
+                         AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER |
+                         AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+                         AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER,
+        };
+
+        mFrameBuffer = allocateAHardwareBuffer(desc);
+
+        if (!mFrameBuffer) {
+            ALOGW("VkInteropFunctorDrawable::onDraw() failed in AHardwareBuffer_allocate()");
             return;
         }
 
@@ -106,7 +111,8 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
                             uirenderer::renderthread::EglManager::eglErrorString());
         // We use an EGLImage to access the content of the GraphicBuffer
         // The EGL image is later bound to a 2D texture
-        EGLClientBuffer clientBuffer = (EGLClientBuffer)mFrameBuffer->getNativeBuffer();
+        EGLClientBuffer clientBuffer =
+                (EGLClientBuffer)AHardwareBuffer_to_ANativeWindowBuffer(mFrameBuffer.get());
         AutoEglImage autoImage(display, clientBuffer);
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",
@@ -179,9 +185,9 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     // drawing into the offscreen surface, so we need to reset it here.
     canvas->resetMatrix();
 
-    auto functorImage = SkImage::MakeFromAHardwareBuffer(
-            reinterpret_cast<AHardwareBuffer*>(mFrameBuffer.get()), kPremul_SkAlphaType,
-            canvas->imageInfo().refColorSpace(), kBottomLeft_GrSurfaceOrigin);
+    auto functorImage = SkImage::MakeFromAHardwareBuffer(mFrameBuffer.get(), kPremul_SkAlphaType,
+                                                         canvas->imageInfo().refColorSpace(),
+                                                         kBottomLeft_GrSurfaceOrigin);
     canvas->drawImage(functorImage, 0, 0, &paint);
     canvas->restore();
 }

@@ -17,8 +17,6 @@
 
 #include <system/graphics.h>
 #include <system/window.h>
-#include <ui/BufferQueueDefs.h>
-#include <ui/PixelFormat.h>
 #include <vulkan/vulkan.h>
 
 #include <SkRefCnt.h>
@@ -91,7 +89,7 @@ private:
 
     struct WindowInfo {
         SkISize size;
-        PixelFormat pixelFormat;
+        uint32_t bufferFormat;
         android_dataspace dataspace;
         int transform;
         size_t bufferCount;
@@ -111,8 +109,13 @@ private:
     static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
     void releaseBuffers();
 
+    // TODO: This number comes from ui/BufferQueueDefs. We're not pulling the
+    // header in so that we don't need to depend on libui, but we should share
+    // this constant somewhere. But right now it's okay to keep here because we
+    // can't safely change the slot count anyways.
+    static constexpr size_t kNumBufferSlots = 64;
     // TODO: Just use a vector?
-    NativeBufferInfo mNativeBuffers[android::BufferQueueDefs::NUM_BUFFER_SLOTS];
+    NativeBufferInfo mNativeBuffers[kNumBufferSlots];
 
     sp<ANativeWindow> mNativeWindow;
     WindowInfo mWindowInfo;

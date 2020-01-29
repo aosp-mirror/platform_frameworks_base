@@ -207,9 +207,9 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
         }
     }
 
-    outWindowInfo->pixelFormat = ColorTypeToPixelFormat(colorType);
+    outWindowInfo->bufferFormat = ColorTypeToBufferFormat(colorType);
     VkFormat vkPixelFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    if (outWindowInfo->pixelFormat == PIXEL_FORMAT_RGBA_FP16) {
+    if (outWindowInfo->bufferFormat == AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT) {
         vkPixelFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
     }
 
@@ -263,10 +263,10 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
 bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo) {
     ATRACE_CALL();
 
-    int err = native_window_set_buffers_format(window, windowInfo.pixelFormat);
+    int err = native_window_set_buffers_format(window, windowInfo.bufferFormat);
     if (err != 0) {
         ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffers_format(%d) failed: %s (%d)",
-              windowInfo.pixelFormat, strerror(-err), err);
+              windowInfo.bufferFormat, strerror(-err), err);
         return false;
     }
 

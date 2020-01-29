@@ -18,7 +18,6 @@
 
 #include <sync/sync.h>
 #include <system/window.h>
-#include <ui/GraphicBuffer.h>
 
 #include "DeferredLayerUpdater.h"
 #include "Properties.h"
@@ -28,6 +27,7 @@
 #include "renderthread/VulkanManager.h"
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
+#include "utils/NdkUtils.h"
 #include "utils/TraceUtils.h"
 
 using namespace android::uirenderer::renderthread;
@@ -54,8 +54,7 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& srcRect,
         return CopyResult::SourceEmpty;
     }
 
-    std::unique_ptr<AHardwareBuffer, decltype(&AHardwareBuffer_release)> sourceBuffer(
-            rawSourceBuffer, AHardwareBuffer_release);
+    UniqueAHardwareBuffer sourceBuffer{rawSourceBuffer};
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(sourceBuffer.get(), &description);
     if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {

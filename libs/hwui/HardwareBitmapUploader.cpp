@@ -16,12 +16,7 @@
 
 #include "HardwareBitmapUploader.h"
 
-#include "hwui/Bitmap.h"
-#include "renderthread/EglManager.h"
-#include "renderthread/VulkanManager.h"
-#include "thread/ThreadBase.h"
-#include "utils/TimeUtils.h"
-
+#include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -29,10 +24,19 @@
 #include <GrContext.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
+#include <private/android/AHardwareBufferHelpers.h>
 #include <utils/GLUtils.h>
+#include <utils/NdkUtils.h>
 #include <utils/Trace.h>
 #include <utils/TraceUtils.h>
+
 #include <thread>
+
+#include "hwui/Bitmap.h"
+#include "renderthread/EglManager.h"
+#include "renderthread/VulkanManager.h"
+#include "thread/ThreadBase.h"
+#include "utils/TimeUtils.h"
 
 namespace android::uirenderer {
 
@@ -42,7 +46,7 @@ class AHBUploader;
 static sp<AHBUploader> sUploader = nullptr;
 
 struct FormatInfo {
-    PixelFormat pixelFormat;
+    AHardwareBuffer_Format bufferFormat;
     GLint format, type;
     VkFormat vkFormat;
     bool isSupported = false;
@@ -71,10 +75,10 @@ public:
     }
 
     bool uploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                              sp<GraphicBuffer> graphicBuffer) {
+                              AHardwareBuffer* ahb) {
         ATRACE_CALL();
         beginUpload();
-        bool result = onUploadHardwareBitmap(bitmap, format, graphicBuffer);
+        bool result = onUploadHardwareBitmap(bitmap, format, ahb);
         endUpload();
         return result;
     }
@@ -93,7 +97,7 @@ private:
     virtual void onDestroy() = 0;
 
     virtual bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                                        sp<GraphicBuffer> graphicBuffer) = 0;
+                                        AHardwareBuffer* ahb) = 0;
     virtual void onBeginUpload() = 0;
 
     bool shouldTimeOutLocked() {
@@ -165,16 +169,16 @@ private:
     }
 
     bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                                sp<GraphicBuffer> graphicBuffer) override {
+                                AHardwareBuffer* ahb) override {
         ATRACE_CALL();
 
         EGLDisplay display = getUploadEglDisplay();
 
         LOG_ALWAYS_FATAL_IF(display == EGL_NO_DISPLAY, "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
                             uirenderer::renderthread::EglManager::eglErrorString());
-        // We use an EGLImage to access the content of the GraphicBuffer
+        // We use an EGLImage to access the content of the buffer
         // The EGL image is later bound to a 2D texture
-        EGLClientBuffer clientBuffer = (EGLClientBuffer)graphicBuffer->getNativeBuffer();
+        EGLClientBuffer clientBuffer = (EGLClientBuffer)AHardwareBuffer_to_ANativeWindowBuffer(ahb);
         AutoEglImage autoImage(display, clientBuffer);
         if (autoImage.image == EGL_NO_IMAGE_KHR) {
             ALOGW("Could not create EGL image, err =%s",
@@ -272,13 +276,13 @@ private:
     }
 
     bool onUploadHardwareBitmap(const SkBitmap& bitmap, const FormatInfo& format,
-                                sp<GraphicBuffer> graphicBuffer) override {
+                                AHardwareBuffer* ahb) override {
         ATRACE_CALL();
 
         std::lock_guard _lock{mLock};
 
-        sk_sp<SkImage> image = SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(),
-            bitmap.pixmap(), reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()));
+        sk_sp<SkImage> image =
+                SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(), ahb);
         return (image.get() != nullptr);
     }
 
@@ -294,13 +298,17 @@ bool HardwareBitmapUploader::hasFP16Support() {
     // Gralloc shouldn't let us create a USAGE_HW_TEXTURE if GLES is unable to consume it, so
     // we don't need to double-check the GLES version/extension.
     std::call_once(sOnce, []() {
-        sp<GraphicBuffer> buffer = new GraphicBuffer(1, 1, PIXEL_FORMAT_RGBA_FP16,
-                                                     GraphicBuffer::USAGE_HW_TEXTURE |
-                                                             GraphicBuffer::USAGE_SW_WRITE_NEVER |
-                                                             GraphicBuffer::USAGE_SW_READ_NEVER,
-                                                     "tempFp16Buffer");
-        status_t error = buffer->initCheck();
-        hasFP16Support = !error;
+        AHardwareBuffer_Desc desc = {
+                .width = 1,
+                .height = 1,
+                .layers = 1,
+                .format = AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT,
+                .usage = AHARDWAREBUFFER_USAGE_CPU_READ_NEVER |
+                         AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER |
+                         AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+        };
+        UniqueAHardwareBuffer buffer = allocateAHardwareBuffer(desc);
+        hasFP16Support = buffer != nullptr;
     });
 
     return hasFP16Support;
@@ -314,7 +322,7 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
             [[fallthrough]];
         // ARGB_4444 is upconverted to RGBA_8888
         case kARGB_4444_SkColorType:
-            formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;
+            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
             formatInfo.format = GL_RGBA;
             formatInfo.type = GL_UNSIGNED_BYTE;
             formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -323,25 +331,25 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
             formatInfo.isSupported = HardwareBitmapUploader::hasFP16Support();
             if (formatInfo.isSupported) {
                 formatInfo.type = GL_HALF_FLOAT;
-                formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_FP16;
+                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT;
                 formatInfo.vkFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
             } else {
                 formatInfo.type = GL_UNSIGNED_BYTE;
-                formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;
+                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
                 formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
             }
             formatInfo.format = GL_RGBA;
             break;
         case kRGB_565_SkColorType:
             formatInfo.isSupported = true;
-            formatInfo.pixelFormat = PIXEL_FORMAT_RGB_565;
+            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM;
             formatInfo.format = GL_RGB;
             formatInfo.type = GL_UNSIGNED_SHORT_5_6_5;
             formatInfo.vkFormat = VK_FORMAT_R5G6B5_UNORM_PACK16;
             break;
         case kGray_8_SkColorType:
             formatInfo.isSupported = usingGL;
-            formatInfo.pixelFormat = PIXEL_FORMAT_RGBA_8888;
+            formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
             formatInfo.format = GL_LUMINANCE;
             formatInfo.type = GL_UNSIGNED_BYTE;
             formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -394,28 +402,27 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
     }
 
     SkBitmap bitmap = makeHwCompatible(format, sourceBitmap);
-    sp<GraphicBuffer> buffer = new GraphicBuffer(
-            static_cast<uint32_t>(bitmap.width()), static_cast<uint32_t>(bitmap.height()),
-            format.pixelFormat,
-            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
-                    GraphicBuffer::USAGE_SW_READ_NEVER,
-            std::string("Bitmap::allocateHardwareBitmap pid [") + std::to_string(getpid()) +
-                    "]");
-
-    status_t error = buffer->initCheck();
-    if (error < 0) {
-        ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
+    AHardwareBuffer_Desc desc = {
+            .width = static_cast<uint32_t>(bitmap.width()),
+            .height = static_cast<uint32_t>(bitmap.height()),
+            .layers = 1,
+            .format = format.bufferFormat,
+            .usage = AHARDWAREBUFFER_USAGE_CPU_READ_NEVER | AHARDWAREBUFFER_USAGE_CPU_WRITE_NEVER |
+                     AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+    };
+    UniqueAHardwareBuffer ahb = allocateAHardwareBuffer(desc);
+    if (!ahb) {
+        ALOGW("allocateHardwareBitmap() failed in AHardwareBuffer_allocate()");
         return nullptr;
-    }
+    };
 
     createUploader(usingGL);
 
-    if (!sUploader->uploadHardwareBitmap(bitmap, format, buffer)) {
+    if (!sUploader->uploadHardwareBitmap(bitmap, format, ahb.get())) {
         return nullptr;
     }
-    return Bitmap::createFrom(buffer->toAHardwareBuffer(), bitmap.colorType(),
-                              bitmap.refColorSpace(), bitmap.alphaType(),
-			      Bitmap::computePalette(bitmap));
+    return Bitmap::createFrom(ahb.get(), bitmap.colorType(), bitmap.refColorSpace(),
+                              bitmap.alphaType(), Bitmap::computePalette(bitmap));
 }
 
 void HardwareBitmapUploader::initialize() {
