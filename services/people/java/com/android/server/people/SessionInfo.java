@@ -24,6 +24,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.people.data.DataManager;
 import com.android.server.people.prediction.ConversationPredictor;
 
 import java.util.List;
@@ -37,9 +38,9 @@ class SessionInfo {
     private final RemoteCallbackList<IPredictionCallback> mCallbacks =
             new RemoteCallbackList<>();
 
-    SessionInfo(AppPredictionContext predictionContext) {
+    SessionInfo(AppPredictionContext predictionContext, DataManager dataManager) {
         mConversationPredictor = new ConversationPredictor(predictionContext,
-                this::updatePredictions);
+                this::updatePredictions, dataManager);
     }
 
     void addCallback(IPredictionCallback callback) {
