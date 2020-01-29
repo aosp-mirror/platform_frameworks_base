@@ -27,7 +27,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-public class TelephonyNetwork {
+public final class TelephonyNetwork {
 
     @NonNull
     private final libcore.timezone.TelephonyNetwork mDelegate;
