@@ -4325,7 +4325,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     } else if (shell.targetsUid && shell.packageName != null) {
                         try {
                             final int uid = shell.mInternal.mContext.getPackageManager()
-                                    .getPackageUid(shell.packageName, shell.userId);
+                                    .getPackageUidAsUser(shell.packageName, shell.userId);
                             shell.mInterface.setUidMode(shell.op, uid, mode);
                         } catch (PackageManager.NameNotFoundException e) {
                             return -1;
