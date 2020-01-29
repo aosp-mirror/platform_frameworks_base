@@ -209,6 +209,19 @@ public final class CellIdentityLte extends CellIdentity {
     }
 
     /**
+     * Get bands of the cell
+     *
+     * Reference: 3GPP TS 36.101 section 5.5
+     *
+     * @return List of band number or empty list if not available.
+     */
+    @NonNull
+    public List<Integer> getBands() {
+        // Todo: Add actual support
+        return Collections.emptyList();
+    }
+
+    /**
      * @return Cell bandwidth in kHz,
      *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
