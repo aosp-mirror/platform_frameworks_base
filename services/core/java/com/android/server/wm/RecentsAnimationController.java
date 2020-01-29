@@ -34,6 +34,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -834,6 +835,19 @@ public class RecentsAnimationController implements DeathRecipient {
     boolean shouldIgnoreForAccessibility(WindowState windowState) {
         final Task task = windowState.getTask();
         return task != null && isAnimatingTask(task) && !isTargetApp(windowState.mActivityRecord);
+    }
+
+    /**
+     * If the animation target ActivityRecord has a fixed rotation ({@link
+     * WindowToken#hasFixedRotationTransform()}, the provided wallpaper will be rotated accordingly.
+     *
+     * This avoids any screen rotation animation when animating to the Recents view.
+     */
+    void applyFixedRotationTransformIfNeeded(@NonNull WindowToken wallpaper) {
+        if (mTargetActivityRecord == null) {
+            return;
+        }
+        wallpaper.applyFixedRotationTransform(mTargetActivityRecord);
     }
 
     @VisibleForTesting
