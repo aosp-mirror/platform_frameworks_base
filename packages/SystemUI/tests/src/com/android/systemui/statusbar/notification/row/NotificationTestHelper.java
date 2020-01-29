@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -24,6 +24,7 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -40,23 +41,28 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubblesTestActivity;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
-import com.android.systemui.statusbar.notification.row.NotifRemoteViewCache;
-import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.tests.R;
+
+import org.mockito.ArgumentCaptor;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -82,6 +88,9 @@ public class NotificationTestHelper {
     private final NotificationGroupManager mGroupManager;
     private ExpandableNotificationRow mRow;
     private HeadsUpManagerPhone mHeadsUpManager;
+    private final NotifBindPipeline mBindPipeline;
+    private final NotificationEntryListener mBindPipelineEntryListener;
+    private final RowContentBindStage mBindStage;
 
     public NotificationTestHelper(Context context, TestableDependency dependency) {
         mContext = context;
@@ -95,6 +104,23 @@ public class NotificationTestHelper {
                 mock(KeyguardBypassController.class));
         mHeadsUpManager.setUp(null, mGroupManager, null, null);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
+
+
+        NotificationContentInflater contentBinder = new NotificationContentInflater(
+                mock(NotifRemoteViewCache.class),
+                mock(NotificationRemoteInputManager.class));
+        contentBinder.setInflateSynchronously(true);
+        mBindStage = new RowContentBindStage(contentBinder, mock(IStatusBarService.class));
+
+        NotificationEntryManager entryManager = mock(NotificationEntryManager.class);
+
+        mBindPipeline = new NotifBindPipeline(entryManager);
+        mBindPipeline.setStage(mBindStage);
+
+        ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
+                ArgumentCaptor.forClass(NotificationEntryListener.class);
+        verify(entryManager).addNotificationEntryListener(entryListenerCaptor.capture());
+        mBindPipelineEntryListener = entryListenerCaptor.getValue();
     }
 
     /**
@@ -331,10 +357,8 @@ public class NotificationTestHelper {
         entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
 
-        NotificationContentInflater contentBinder = new NotificationContentInflater(
-                mock(NotifRemoteViewCache.class),
-                mock(NotificationRemoteInputManager.class));
-        contentBinder.setInflateSynchronously(true);
+        mBindPipelineEntryListener.onPendingEntryAdded(entry);
+        mBindPipeline.manageRow(entry, row);
 
         row.initialize(
                 APP_NAME,
@@ -343,12 +367,11 @@ public class NotificationTestHelper {
                 mock(KeyguardBypassController.class),
                 mGroupManager,
                 mHeadsUpManager,
-                contentBinder,
+                mBindStage,
                 mock(OnExpandClickListener.class));
         row.setAboveShelfChangedListener(aboveShelf -> { });
-
-        row.setInflationFlags(extraInflationFlags);
-        inflateAndWait(row);
+        mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
+        inflateAndWait(entry, mBindStage);
 
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
         // the callback chain, so we need to make up for not adding it to the group manager
@@ -357,24 +380,10 @@ public class NotificationTestHelper {
         return row;
     }
 
-    private static void inflateAndWait(ExpandableNotificationRow row) throws Exception {
+    private static void inflateAndWait(NotificationEntry entry, RowContentBindStage stage)
+            throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        NotificationContentInflater.InflationCallback callback =
-                new NotificationContentInflater.InflationCallback() {
-                    @Override
-                    public void handleInflationException(NotificationEntry entry,
-                            Exception e) {
-                        countDownLatch.countDown();
-                    }
-
-                    @Override
-                    public void onAsyncInflationFinished(NotificationEntry entry,
-                            int inflatedFlags) {
-                        countDownLatch.countDown();
-                    }
-                };
-        row.setInflationCallback(callback);
-        row.inflateViews();
+        stage.requestRebind(entry, en -> countDownLatch.countDown());
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

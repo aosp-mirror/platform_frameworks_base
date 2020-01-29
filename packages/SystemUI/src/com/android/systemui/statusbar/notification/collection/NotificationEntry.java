@@ -600,12 +600,8 @@ public final class NotificationEntry extends ListEntry {
 
     public void setInflationTask(InflationTask abortableTask) {
         // abort any existing inflation
-        InflationTask existing = mRunningTask;
         abortTask();
         mRunningTask = abortableTask;
-        if (existing != null && mRunningTask != null) {
-            mRunningTask.supersedeTask(existing);
-        }
     }
 
     public void onInflationTaskFinished() {

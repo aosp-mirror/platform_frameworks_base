@@ -93,8 +93,7 @@ class PeopleHubDataSourceImpl @Inject constructor(
     private val peopleHubManagerForUser = SparseArray<PeopleHubManager>()
 
     private val notificationEntryListener = object : NotificationEntryListener {
-        override fun onEntryInflated(entry: NotificationEntry, inflatedFlags: Int) =
-                addVisibleEntry(entry)
+        override fun onEntryInflated(entry: NotificationEntry) = addVisibleEntry(entry)
 
         override fun onEntryReinflated(entry: NotificationEntry) = addVisibleEntry(entry)
 

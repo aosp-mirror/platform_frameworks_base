@@ -71,7 +71,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
         // WHEN inflation flags are set and pipeline is invalidated.
         final int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(flags, true /* shouldBeBound */);
+        params.requireContentViews(flags);
         mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
 
         // THEN binder binds inflation flags.
@@ -88,11 +88,11 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void testSetShouldContentViewsBeBound_unbindsContent() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(FLAG_CONTENT_VIEW_ALL, true /* shouldBeBound */);
+        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
 
         // WHEN inflation flags are cleared and stage executed.
         final int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
-        params.setShouldContentViewsBeBound(flags, false /* shouldBeBound */);
+        params.freeContentViews(flags);
         mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
 
         // THEN binder unbinds flags.
@@ -103,7 +103,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void testSetUseLowPriority() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(FLAG_CONTENT_VIEW_ALL, true /* shouldBeBound */);
+        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
         params.clearDirtyContentViews();
 
         // WHEN low priority is set and stage executed.
@@ -127,7 +127,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void testSetUseGroupInChild() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(FLAG_CONTENT_VIEW_ALL, true /* shouldBeBound */);
+        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
         params.clearDirtyContentViews();
 
         // WHEN use group is set and stage executed.
@@ -151,11 +151,11 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void testSetUseIncreasedHeight() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(FLAG_CONTENT_VIEW_ALL, true /* shouldBeBound */);
+        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
         params.clearDirtyContentViews();
 
         // WHEN use increased height is set and stage executed.
-        params.setUseIncreasedHeight(true);
+        params.setUseIncreasedCollapsedHeight(true);
         mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
 
         // THEN binder is called with group view and contracted is bound.
@@ -175,7 +175,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void testSetUseIncreasedHeadsUpHeight() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(FLAG_CONTENT_VIEW_ALL, true /* shouldBeBound */);
+        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
         params.clearDirtyContentViews();
 
         // WHEN use increased heads up height is set and stage executed.
@@ -199,7 +199,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void testSetNeedsReinflation() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        params.setShouldContentViewsBeBound(FLAG_CONTENT_VIEW_ALL, true /* shouldBeBound */);
+        params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
         params.clearDirtyContentViews();
 
         // WHEN needs reinflation is set.
@@ -213,6 +213,35 @@ public class RowContentBindStageTest extends SysuiTestCase {
                 eq(FLAG_CONTENT_VIEW_ALL),
                 any(),
                 eq(true),
+                any());
+    }
+
+    @Test
+    public void testSupersedesPreviousContentViews() {
+        // GIVEN a view with content view bind already in progress.
+        RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
+        int defaultFlags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
+        params.requireContentViews(defaultFlags);
+        mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
+
+        // WHEN we bind with another content view before the first finishes.
+        params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
+        mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
+
+        // THEN binder is called with BOTH content views.
+        verify(mBinder).bindContent(
+                eq(mEntry),
+                any(),
+                eq(defaultFlags),
+                any(),
+                anyBoolean(),
+                any());
+        verify(mBinder).bindContent(
+                eq(mEntry),
+                any(),
+                eq(defaultFlags | FLAG_CONTENT_VIEW_HEADS_UP),
+                any(),
+                anyBoolean(),
                 any());
     }
 }

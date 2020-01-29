@@ -25,14 +25,13 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 /**
  * Parameters for {@link RowContentBindStage}.
  */
-final class RowContentBindParams {
-
+public final class RowContentBindParams {
     private boolean mUseLowPriority;
     private boolean mUseChildInGroup;
     private boolean mUseIncreasedHeight;
     private boolean mUseIncreasedHeadsUpHeight;
-    private @InflationFlag int mContentViews;
     private boolean mViewsNeedReinflation;
+    private @InflationFlag int mContentViews = DEFAULT_INFLATION_FLAGS;
 
     /**
      * Content views that are out of date and need to be rebound.
@@ -40,7 +39,7 @@ final class RowContentBindParams {
      * TODO: This should go away once {@link NotificationContentInflater} is broken down into
      * smaller stages as then the stage itself would be invalidated.
      */
-    private @InflationFlag int mDirtyContentViews;
+    private @InflationFlag int mDirtyContentViews = mContentViews;
 
     /**
      * Set whether content should use a low priority version of its content views.
@@ -73,7 +72,7 @@ final class RowContentBindParams {
     /**
      * Set whether content should use an increased height version of its contracted view.
      */
-    public void setUseIncreasedHeight(boolean useIncreasedHeight) {
+    public void setUseIncreasedCollapsedHeight(boolean useIncreasedHeight) {
         if (mUseIncreasedHeight != useIncreasedHeight) {
             mDirtyContentViews |= FLAG_CONTENT_VIEW_CONTRACTED;
         }
@@ -99,19 +98,24 @@ final class RowContentBindParams {
     }
 
     /**
-     * Set whether the specified content views should be bound. See {@link InflationFlag}.
+     * Require the specified content views to be bound after the rebind request.
+     *
+     * @see InflationFlag
      */
-    public void setShouldContentViewsBeBound(
-            @InflationFlag int contentViews,
-            boolean shouldBeBound) {
-        if (shouldBeBound) {
-            @InflationFlag int newContentViews = contentViews &= ~mContentViews;
-            mContentViews |= contentViews;
-            mDirtyContentViews |= newContentViews;
-        } else {
-            mContentViews &= ~contentViews;
-            mDirtyContentViews &= ~contentViews;
-        }
+    public void requireContentViews(@InflationFlag int contentViews) {
+        @InflationFlag int newContentViews = contentViews &= ~mContentViews;
+        mContentViews |= contentViews;
+        mDirtyContentViews |= newContentViews;
+    }
+
+    /**
+     * Free the content view so that it will no longer be bound after the rebind request.
+     *
+     * @see InflationFlag
+     */
+    public void freeContentViews(@InflationFlag int contentViews) {
+        mContentViews &= ~contentViews;
+        mDirtyContentViews &= ~contentViews;
     }
 
     public @InflationFlag int getContentViews() {
@@ -144,4 +148,10 @@ final class RowContentBindParams {
     public boolean needsReinflation() {
         return mViewsNeedReinflation;
     }
+
+    /**
+     * Content views that should be inflated by default for all notifications.
+     */
+    @InflationFlag private static final int DEFAULT_INFLATION_FLAGS =
+            FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
 }

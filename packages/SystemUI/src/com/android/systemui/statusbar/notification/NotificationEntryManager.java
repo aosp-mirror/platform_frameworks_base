@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.logging.NotifEvent;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -318,8 +317,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void onAsyncInflationFinished(NotificationEntry entry,
-            @InflationFlag int inflatedFlags) {
+    public void onAsyncInflationFinished(NotificationEntry entry) {
         mPendingNotifications.remove(entry.getKey());
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
@@ -328,7 +326,7 @@ public class NotificationEntryManager implements
             if (isNew) {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     mNotifLog.log(NotifEvent.INFLATED, entry);
-                    listener.onEntryInflated(entry, inflatedFlags);
+                    listener.onEntryInflated(entry);
                 }
                 addActiveNotification(entry);
                 updateNotifications("onAsyncInflationFinished");

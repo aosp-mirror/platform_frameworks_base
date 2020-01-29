@@ -94,8 +94,7 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
             }
 
             @Override
-            public void onAsyncInflationFinished(NotificationEntry entry,
-                    @InflationFlag int inflatedFlags) {
+            public void onAsyncInflationFinished(NotificationEntry entry) {
                 entry.setHasInflationError(false);
                 getStageParams(entry).clearDirtyContentViews();
                 callback.onStageFinished(entry);

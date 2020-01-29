@@ -146,9 +146,7 @@ public interface NotificationRowContentBinder {
          * Callback for after the content views finish inflating.
          *
          * @param entry the entry with the content views set
-         * @param inflatedFlags the flags associated with the content views that were inflated
          */
-        void onAsyncInflationFinished(NotificationEntry entry,
-                @InflationFlag int inflatedFlags);
+        void onAsyncInflationFinished(NotificationEntry entry);
     }
 }
