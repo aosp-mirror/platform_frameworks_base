@@ -92,6 +92,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -670,7 +671,7 @@ public final class ContentCaptureManagerService extends
 
                 service.onDataSharedLocked(request,
                         new DataShareCallbackDelegate(request, clientCancellationSignal,
-                                clientAdapter));
+                                clientAdapter, ContentCaptureManagerService.this));
             }
         }
 
@@ -918,20 +919,22 @@ public final class ContentCaptureManagerService extends
         }
     }
 
-    // TODO(b/148265162): DataShareCallbackDelegate should be a static class keeping week references
-    //  to the needed info
-    private class DataShareCallbackDelegate extends IDataShareCallback.Stub {
+    private static class DataShareCallbackDelegate extends IDataShareCallback.Stub {
 
         @NonNull private final DataShareRequest mDataShareRequest;
-        @NonNull private final ICancellationSignal mClientCancellationSignal;
-        @NonNull private final IDataShareWriteAdapter mClientAdapter;
+        @NonNull
+        private final WeakReference<ICancellationSignal> mClientCancellationSignalReference;
+        @NonNull private final WeakReference<IDataShareWriteAdapter> mClientAdapterReference;
+        @NonNull private final WeakReference<ContentCaptureManagerService> mParentServiceReference;
 
         DataShareCallbackDelegate(@NonNull DataShareRequest dataShareRequest,
                 @NonNull ICancellationSignal clientCancellationSignal,
-                @NonNull IDataShareWriteAdapter clientAdapter) {
+                @NonNull IDataShareWriteAdapter clientAdapter,
+                ContentCaptureManagerService parentService) {
             mDataShareRequest = dataShareRequest;
-            mClientCancellationSignal = clientCancellationSignal;
-            mClientAdapter = clientAdapter;
+            mClientCancellationSignalReference = new WeakReference<>(clientCancellationSignal);
+            mClientAdapterReference = new WeakReference<>(clientAdapter);
+            mParentServiceReference = new WeakReference<>(parentService);
         }
 
         @Override
@@ -939,41 +942,52 @@ public final class ContentCaptureManagerService extends
                 IDataShareReadAdapter serviceAdapter) throws RemoteException {
             Slog.i(TAG, "Data share request accepted by Content Capture service");
 
+            final ContentCaptureManagerService parentService = mParentServiceReference.get();
+            final ICancellationSignal clientCancellationSignal =
+                    mClientCancellationSignalReference.get();
+            final IDataShareWriteAdapter clientAdapter = mClientAdapterReference.get();
+            if (parentService == null || clientCancellationSignal == null
+                    || clientAdapter == null) {
+                Slog.w(TAG, "Can't fulfill accept() request, because remote objects have been "
+                        + "GC'ed");
+                return;
+            }
+
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
             if (clientPipe == null) {
-                mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                clientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
                 serviceAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
                 return;
             }
 
-            ParcelFileDescriptor source_in = clientPipe.second;
-            ParcelFileDescriptor sink_in = clientPipe.first;
+            ParcelFileDescriptor sourceIn = clientPipe.second;
+            ParcelFileDescriptor sinkIn = clientPipe.first;
 
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> servicePipe = createPipe();
             if (servicePipe == null) {
-                bestEffortCloseFileDescriptors(source_in, sink_in);
+                bestEffortCloseFileDescriptors(sourceIn, sinkIn);
 
-                mClientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
+                clientAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
                 serviceAdapter.error(DataShareWriteAdapter.ERROR_UNKNOWN);
                 return;
             }
 
-            ParcelFileDescriptor source_out = servicePipe.second;
-            ParcelFileDescriptor sink_out = servicePipe.first;
+            ParcelFileDescriptor sourceOut = servicePipe.second;
+            ParcelFileDescriptor sinkOut = servicePipe.first;
 
             ICancellationSignal cancellationSignalTransport =
                     CancellationSignal.createTransport();
-            mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
+            parentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
 
-            mClientAdapter.write(source_in);
-            serviceAdapter.start(sink_out, cancellationSignalTransport);
+            clientAdapter.write(sourceIn);
+            serviceAdapter.start(sinkOut, cancellationSignalTransport);
 
             CancellationSignal cancellationSignal =
                     CancellationSignal.fromTransport(cancellationSignalTransport);
 
             cancellationSignal.setOnCancelListener(() -> {
                 try {
-                    mClientCancellationSignal.cancel();
+                    clientCancellationSignal.cancel();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to propagate cancel operation to the caller", e);
                 }
@@ -982,13 +996,13 @@ public final class ContentCaptureManagerService extends
             // File descriptor received by the client app will be a copy of the current one. Close
             // the one that belongs to the system server, so there's only 1 open left for the
             // current pipe.
-            bestEffortCloseFileDescriptor(source_in);
+            bestEffortCloseFileDescriptor(sourceIn);
 
-            mDataShareExecutor.execute(() -> {
+            parentService.mDataShareExecutor.execute(() -> {
                 try (InputStream fis =
-                             new ParcelFileDescriptor.AutoCloseInputStream(sink_in);
+                             new ParcelFileDescriptor.AutoCloseInputStream(sinkIn);
                      OutputStream fos =
-                             new ParcelFileDescriptor.AutoCloseOutputStream(source_out)) {
+                             new ParcelFileDescriptor.AutoCloseOutputStream(sourceOut)) {
 
                     byte[] byteBuffer = new byte[DATA_SHARE_BYTE_BUFFER_LENGTH];
                     while (true) {
@@ -1005,52 +1019,86 @@ public final class ContentCaptureManagerService extends
                 }
             });
 
-            mHandler.postDelayed(() -> {
-                synchronized (mLock) {
-                    mPackagesWithShareRequests.remove(mDataShareRequest.getPackageName());
-
-                    // Interaction finished successfully <=> all data has been written to Content
-                    // Capture Service. If it hasn't been read successfully, service would be able
-                    // to signal through the cancellation signal.
-                    boolean finishedSuccessfully = !sink_in.getFileDescriptor().valid()
-                            && !source_out.getFileDescriptor().valid();
-
-                    if (finishedSuccessfully) {
-                        Slog.i(TAG, "Content capture data sharing session terminated "
-                                + "successfully for package '"
-                                + mDataShareRequest.getPackageName()
-                                + "'");
-                    } else {
-                        Slog.i(TAG, "Reached the timeout of Content Capture data sharing session "
-                                + "for package '"
-                                + mDataShareRequest.getPackageName()
-                                + "', terminating the pipe.");
-                    }
-
-                    // Ensure all the descriptors are closed after the session.
-                    bestEffortCloseFileDescriptors(source_in, sink_in, source_out, sink_out);
-
-                    if (!finishedSuccessfully) {
-                        try {
-                            mClientCancellationSignal.cancel();
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Failed to cancel() the client operation", e);
-                        }
-                        try {
-                            serviceCancellationSignal.cancel();
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Failed to cancel() the service operation", e);
-                        }
-                    }
-                }
-            }, MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS);
+            parentService.mHandler.postDelayed(() ->
+                    enforceDataSharingTtl(
+                            sourceIn,
+                            sinkIn,
+                            sourceOut,
+                            sinkOut,
+                            new WeakReference<>(serviceCancellationSignal)),
+                    MAX_DATA_SHARE_FILE_DESCRIPTORS_TTL_MS);
         }
 
         @Override
         public void reject() throws RemoteException {
             Slog.i(TAG, "Data share request rejected by Content Capture service");
 
-            mClientAdapter.rejected();
+            IDataShareWriteAdapter clientAdapter = mClientAdapterReference.get();
+            if (clientAdapter == null) {
+                Slog.w(TAG, "Can't fulfill reject() request, because remote objects have been "
+                        + "GC'ed");
+                return;
+            }
+
+            clientAdapter.rejected();
+        }
+
+        private void enforceDataSharingTtl(ParcelFileDescriptor sourceIn,
+                ParcelFileDescriptor sinkIn,
+                ParcelFileDescriptor sourceOut,
+                ParcelFileDescriptor sinkOut,
+                WeakReference<ICancellationSignal> serviceCancellationSignalReference) {
+
+            final ContentCaptureManagerService parentService = mParentServiceReference.get();
+            final ICancellationSignal clientCancellationSignal =
+                    mClientCancellationSignalReference.get();
+            final ICancellationSignal serviceCancellationSignal =
+                    serviceCancellationSignalReference.get();
+            if (parentService == null || clientCancellationSignal == null
+                    || serviceCancellationSignal == null) {
+                Slog.w(TAG, "Can't enforce data sharing TTL, because remote objects have been "
+                        + "GC'ed");
+                return;
+            }
+
+            synchronized (parentService.mLock) {
+                parentService.mPackagesWithShareRequests
+                        .remove(mDataShareRequest.getPackageName());
+
+                // Interaction finished successfully <=> all data has been written to Content
+                // Capture Service. If it hasn't been read successfully, service would be able
+                // to signal through the cancellation signal.
+                boolean finishedSuccessfully = !sinkIn.getFileDescriptor().valid()
+                        && !sourceOut.getFileDescriptor().valid();
+
+                if (finishedSuccessfully) {
+                    Slog.i(TAG, "Content capture data sharing session terminated "
+                            + "successfully for package '"
+                            + mDataShareRequest.getPackageName()
+                            + "'");
+                } else {
+                    Slog.i(TAG, "Reached the timeout of Content Capture data sharing session "
+                            + "for package '"
+                            + mDataShareRequest.getPackageName()
+                            + "', terminating the pipe.");
+                }
+
+                // Ensure all the descriptors are closed after the session.
+                bestEffortCloseFileDescriptors(sourceIn, sinkIn, sourceOut, sinkOut);
+
+                if (!finishedSuccessfully) {
+                    try {
+                        clientCancellationSignal.cancel();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to cancel() the client operation", e);
+                    }
+                    try {
+                        serviceCancellationSignal.cancel();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to cancel() the service operation", e);
+                    }
+                }
+            }
         }
 
         private Pair<ParcelFileDescriptor, ParcelFileDescriptor> createPipe() {
