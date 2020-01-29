@@ -22,6 +22,8 @@ import android.os.RemoteException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.UUID;
 
 /**
  * Provides operations on an Incremental File System directory, using IncrementalServiceNative.
@@ -64,14 +66,14 @@ public final class IncrementalStorage {
      * Temporarily bind-mounts a subdir under the current storage directory to a target directory.
      * The bind-mount will NOT be preserved between device reboots.
      *
-     * @param sourcePathUnderStorage Source path as a relative path under current storage
-     *                               directory.
-     * @param targetPath             Absolute path to the target directory.
+     * @param sourcePath Source path as a relative path under current storage
+     *                   directory.
+     * @param targetPath Absolute path to the target directory.
      */
-    public void bind(@NonNull String sourcePathUnderStorage, @NonNull String targetPath)
+    public void bind(@NonNull String sourcePath, @NonNull String targetPath)
             throws IOException {
         try {
-            int res = mService.makeBindMount(mId, sourcePathUnderStorage, targetPath,
+            int res = mService.makeBindMount(mId, sourcePath, targetPath,
                     IIncrementalManagerNative.BIND_TEMPORARY);
             if (res < 0) {
                 throw new IOException("bind() failed with errno " + -res);
@@ -96,13 +98,13 @@ public final class IncrementalStorage {
      * Permanently bind-mounts a subdir under the current storage directory to a target directory.
      * The bind-mount WILL be preserved between device reboots.
      *
-     * @param sourcePathUnderStorage Relative path under the current storage directory.
-     * @param targetPath             Absolute path to the target directory.
+     * @param sourcePath Relative path under the current storage directory.
+     * @param targetPath Absolute path to the target directory.
      */
-    public void bindPermanent(@NonNull String sourcePathUnderStorage, @NonNull String targetPath)
+    public void bindPermanent(@NonNull String sourcePath, @NonNull String targetPath)
             throws IOException {
         try {
-            int res = mService.makeBindMount(mId, sourcePathUnderStorage, targetPath,
+            int res = mService.makeBindMount(mId, sourcePath, targetPath,
                     IIncrementalManagerNative.BIND_PERMANENT);
             if (res < 0) {
                 throw new IOException("bind() permanent failed with errno " + -res);
@@ -131,11 +133,11 @@ public final class IncrementalStorage {
     /**
      * Creates a sub-directory under the current storage directory.
      *
-     * @param pathUnderStorage Relative path of the sub-directory, e.g., "subdir"
+     * @param path Relative path of the sub-directory, e.g., "subdir"
      */
-    public void makeDirectory(@NonNull String pathUnderStorage) throws IOException {
+    public void makeDirectory(@NonNull String path) throws IOException {
         try {
-            int res = mService.makeDirectory(mId, pathUnderStorage);
+            int res = mService.makeDirectory(mId, path);
             if (res < 0) {
                 throw new IOException("makeDirectory() failed with errno " + -res);
             }
@@ -148,11 +150,11 @@ public final class IncrementalStorage {
      * Creates a sub-directory under the current storage directory. If its parent dirs do not exist,
      * create the parent dirs as well.
      *
-     * @param pathUnderStorage Relative path of the sub-directory, e.g., "subdir/subsubdir"
+     * @param path Full path.
      */
-    public void makeDirectories(@NonNull String pathUnderStorage) throws IOException {
+    public void makeDirectories(@NonNull String path) throws IOException {
         try {
-            int res = mService.makeDirectories(mId, pathUnderStorage);
+            int res = mService.makeDirectories(mId, path);
             if (res < 0) {
                 throw new IOException("makeDirectory() failed with errno " + -res);
             }
@@ -164,15 +166,27 @@ public final class IncrementalStorage {
     /**
      * Creates a file under the current storage directory.
      *
-     * @param pathUnderStorage Relative path of the new file.
+     * @param path             Relative path of the new file.
      * @param size             Size of the new file in bytes.
      * @param metadata         Metadata bytes.
      */
-    public void makeFile(@NonNull String pathUnderStorage, long size,
-            @Nullable byte[] metadata) throws IOException {
+    public void makeFile(@NonNull String path, long size, @Nullable UUID id,
+            @Nullable byte[] metadata, int hashAlgorithm, @Nullable byte[] rootHash,
+            @Nullable byte[] additionalData, @Nullable byte[] signature) throws IOException {
         try {
-            int res = mService.makeFile(mId, pathUnderStorage, size, metadata);
-            if (res < 0) {
+            final IncrementalNewFileParams params = new IncrementalNewFileParams();
+            params.size = size;
+            params.metadata = metadata;
+            params.fileId = idToBytes(id);
+            if (hashAlgorithm != 0 || signature != null) {
+                params.signature = new IncrementalSignature();
+                params.signature.hashAlgorithm = hashAlgorithm;
+                params.signature.rootHash = rootHash;
+                params.signature.additionalData = additionalData;
+                params.signature.signature = signature;
+            }
+            int res = mService.makeFile(mId, path, params);
+            if (res != 0) {
                 throw new IOException("makeFile() failed with errno " + -res);
             }
         } catch (RemoteException e) {
@@ -184,15 +198,15 @@ public final class IncrementalStorage {
      * Creates a file in Incremental storage. The content of the file is mapped from a range inside
      * a source file in the same storage.
      *
-     * @param destRelativePath   Target relative path under storage.
-     * @param sourceRelativePath Source relative path under storage.
+     * @param destPath           Target full path.
+     * @param sourcePath         Source full path.
      * @param rangeStart         Starting offset (in bytes) in the source file.
      * @param rangeEnd           Ending offset (in bytes) in the source file.
      */
-    public void makeFileFromRange(@NonNull String destRelativePath,
-            @NonNull String sourceRelativePath, long rangeStart, long rangeEnd) throws IOException {
+    public void makeFileFromRange(@NonNull String destPath,
+            @NonNull String sourcePath, long rangeStart, long rangeEnd) throws IOException {
         try {
-            int res = mService.makeFileFromRange(mId, destRelativePath, sourceRelativePath,
+            int res = mService.makeFileFromRange(mId, destPath, sourcePath,
                     rangeStart, rangeEnd);
             if (res < 0) {
                 throw new IOException("makeFileFromRange() failed, errno " + -res);
@@ -206,15 +220,15 @@ public final class IncrementalStorage {
      * Creates a hard-link between two paths, which can be under different storages but in the same
      * Incremental File System.
      *
-     * @param sourcePathUnderStorage The relative path of the source.
-     * @param destStorage            The target storage of the link target.
-     * @param destPathUnderStorage   The relative path of the target.
+     * @param sourcePath    The absolute path of the source.
+     * @param destStorage   The target storage of the link target.
+     * @param destPath      The absolute path of the target.
      */
-    public void makeLink(@NonNull String sourcePathUnderStorage, IncrementalStorage destStorage,
-            @NonNull String destPathUnderStorage) throws IOException {
+    public void makeLink(@NonNull String sourcePath, IncrementalStorage destStorage,
+            @NonNull String destPath) throws IOException {
         try {
-            int res = mService.makeLink(mId, sourcePathUnderStorage, destStorage.getId(),
-                    destPathUnderStorage);
+            int res = mService.makeLink(mId, sourcePath, destStorage.getId(),
+                    destPath);
             if (res < 0) {
                 throw new IOException("makeLink() failed with errno " + -res);
             }
@@ -226,11 +240,11 @@ public final class IncrementalStorage {
     /**
      * Deletes a hard-link under the current storage directory.
      *
-     * @param pathUnderStorage The relative path of the target.
+     * @param path The absolute path of the target.
      */
-    public void unlink(@NonNull String pathUnderStorage) throws IOException {
+    public void unlink(@NonNull String path) throws IOException {
         try {
-            int res = mService.unlink(mId, pathUnderStorage);
+            int res = mService.unlink(mId, path);
             if (res < 0) {
                 throw new IOException("unlink() failed with errno " + -res);
             }
@@ -242,13 +256,14 @@ public final class IncrementalStorage {
     /**
      * Rename an old file name to a new file name under the current storage directory.
      *
-     * @param sourcePathUnderStorage Old file path as a relative path to the storage directory.
-     * @param destPathUnderStorage   New file path as a relative path to the storage directory.
+     * @param sourcepath Old file path as a full path to the storage directory.
+     * @param destpath   New file path as a full path to the storage directory.
      */
-    public void moveFile(@NonNull String sourcePathUnderStorage,
-            @NonNull String destPathUnderStorage) throws IOException {
+    public void moveFile(@NonNull String sourcepath,
+            @NonNull String destpath) throws IOException {
+        //TODO(zyy): implement using rename(2) when confirmed that IncFS supports it.
         try {
-            int res = mService.makeLink(mId, sourcePathUnderStorage, mId, destPathUnderStorage);
+            int res = mService.makeLink(mId, sourcepath, mId, destpath);
             if (res < 0) {
                 throw new IOException("moveFile() failed at makeLink(), errno " + -res);
             }
@@ -256,7 +271,7 @@ public final class IncrementalStorage {
             e.rethrowFromSystemServer();
         }
         try {
-            mService.unlink(mId, sourcePathUnderStorage);
+            mService.unlink(mId, sourcepath);
         } catch (RemoteException ignored) {
         }
     }
@@ -274,7 +289,7 @@ public final class IncrementalStorage {
             throw new IOException("moveDir() requires that destination dir already exists.");
         }
         try {
-            int res = mService.makeBindMount(mId, "", destPath,
+            int res = mService.makeBindMount(mId, sourcePath, destPath,
                     IIncrementalManagerNative.BIND_PERMANENT);
             if (res < 0) {
                 throw new IOException("moveDir() failed at making bind mount, errno " + -res);
@@ -291,24 +306,24 @@ public final class IncrementalStorage {
     /**
      * Checks whether a file under the current storage directory is fully loaded.
      *
-     * @param pathUnderStorage The relative path of the file.
+     * @param path The relative path of the file.
      * @return True if the file is fully loaded.
      */
-    public boolean isFileFullyLoaded(@NonNull String pathUnderStorage) {
-        return isFileRangeLoaded(pathUnderStorage, 0, -1);
+    public boolean isFileFullyLoaded(@NonNull String path) {
+        return isFileRangeLoaded(path, 0, -1);
     }
 
     /**
      * Checks whether a range in a file if loaded.
      *
-     * @param pathUnderStorage The relative path of the file.
+     * @param path The relative path of the file.
      * @param start            The starting offset of the range.
      * @param end              The ending offset of the range.
      * @return True if the file is fully loaded.
      */
-    public boolean isFileRangeLoaded(@NonNull String pathUnderStorage, long start, long end) {
+    public boolean isFileRangeLoaded(@NonNull String path, long start, long end) {
         try {
-            return mService.isFileRangeLoaded(mId, pathUnderStorage, start, end);
+            return mService.isFileRangeLoaded(mId, path, start, end);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;
@@ -318,13 +333,65 @@ public final class IncrementalStorage {
     /**
      * Returns the metadata object of an IncFs File.
      *
-     * @param pathUnderStorage The relative path of the file.
+     * @param path The relative path of the file.
      * @return Byte array that contains metadata bytes.
      */
     @Nullable
-    public byte[] getFileMetadata(@NonNull String pathUnderStorage) {
+    public byte[] getFileMetadata(@NonNull String path) {
         try {
-            return mService.getFileMetadata(mId, pathUnderStorage);
+            return mService.getMetadataByPath(mId, path);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    private static final int UUID_BYTE_SIZE = 16;
+
+    /**
+     * Converts UUID to a byte array usable for Incremental API calls
+     *
+     * @param id The id to convert
+     * @return Byte array that contains the same ID.
+     */
+    public static byte[] idToBytes(UUID id) {
+        if (id == null) {
+            return null;
+        }
+        final ByteBuffer buf = ByteBuffer.wrap(new byte[UUID_BYTE_SIZE]);
+        buf.putLong(id.getMostSignificantBits());
+        buf.putLong(id.getLeastSignificantBits());
+        return buf.array();
+    }
+
+    /**
+     * Converts UUID from a byte array usable for Incremental API calls
+     *
+     * @param bytes The id in byte array format, 16 bytes long
+     * @return UUID constructed from the byte array.
+     */
+    public static UUID bytesToId(byte[] bytes) {
+        if (bytes.length != UUID_BYTE_SIZE) {
+            throw new IllegalArgumentException("Expected array of size " + UUID_BYTE_SIZE
+                                               + ", got " + bytes.length);
+        }
+        final ByteBuffer buf = ByteBuffer.wrap(bytes);
+        long msb = buf.getLong();
+        long lsb = buf.getLong();
+        return new UUID(msb, lsb);
+    }
+
+    /**
+     * Returns the metadata object of an IncFs File.
+     *
+     * @param id The file id.
+     * @return Byte array that contains metadata bytes.
+     */
+    @Nullable
+    public byte[] getFileMetadata(@NonNull UUID id) {
+        try {
+            final byte[] rawId = idToBytes(id);
+            return mService.getMetadataById(mId, rawId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;

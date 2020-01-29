@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package android.os.incremental;
 
+import android.os.incremental.IncrementalSignature;
+
 /**
- * Wraps the file descriptors Incremental Service uses to communicate
- * with Incremental FileSystem.
+ * All the parameters to create a new file on IncFS
+ * FileId is a 16 byte-long identifier.
  * @hide
  */
-parcelable IncrementalFileSystemControlParcel {
-    ParcelFileDescriptor cmd;
-    ParcelFileDescriptor pendingReads;
-    ParcelFileDescriptor log;
+parcelable IncrementalNewFileParams {
+    long size;
+    byte[] fileId;
+    byte[] metadata;
+    @nullable IncrementalSignature signature;
 }

@@ -30,6 +30,8 @@
 #include <binder/BinderService.h>
 #include <binder/ParcelFileDescriptor.h>
 #include <binder/Status.h>
+
+#include <openssl/sha.h>
 #include <sys/stat.h>
 #include <uuid/uuid.h>
 #include <zlib.h>
@@ -55,7 +57,6 @@ using IncrementalFileSystemControlParcel =
 struct Constants {
     static constexpr auto backing = "backing_store"sv;
     static constexpr auto mount = "mount"sv;
-    static constexpr auto image = "incfs.img"sv;
     static constexpr auto storagePrefix = "st"sv;
     static constexpr auto mountpointMdPrefix = ".mountpoint."sv;
     static constexpr auto infoMdName = ".info"sv;
@@ -70,7 +71,7 @@ template <base::LogSeverity level = base::ERROR>
 bool mkdirOrLog(std::string_view name, int mode = 0770, bool allowExisting = true) {
     auto cstr = path::c_str(name);
     if (::mkdir(cstr, mode)) {
-        if (errno != EEXIST) {
+        if (!allowExisting || errno != EEXIST) {
             PLOG(level) << "Can't create directory '" << name << '\'';
             return false;
         }
@@ -80,6 +81,11 @@ bool mkdirOrLog(std::string_view name, int mode = 0770, bool allowExisting = tru
             return false;
         }
     }
+    if (::chmod(cstr, mode)) {
+        PLOG(level) << "Changing permission failed for '" << name << '\'';
+        return false;
+    }
+
     return true;
 }
 
@@ -106,7 +112,7 @@ static std::pair<std::string, std::string> makeMountDir(std::string_view increme
     for (int counter = 0; counter < 1000;
          mountKey.resize(prefixSize), base::StringAppendF(&mountKey, "%d", counter++)) {
         auto mountRoot = path::join(incrementalDir, mountKey);
-        if (mkdirOrLog(mountRoot, 0770, false)) {
+        if (mkdirOrLog(mountRoot, 0777, false)) {
             return {mountKey, mountRoot};
         }
     }
@@ -116,11 +122,7 @@ static std::pair<std::string, std::string> makeMountDir(std::string_view increme
 template <class ProtoMessage, class Control>
 static ProtoMessage parseFromIncfs(const IncFsWrapper* incfs, Control&& control,
                                    std::string_view path) {
-    struct stat st;
-    if (::stat(path::c_str(path), &st)) {
-        return {};
-    }
-    auto md = incfs->getMetadata(control, st.st_ino);
+    auto md = incfs->getMetadata(control, path);
     ProtoMessage message;
     return message.ParseFromArray(md.data(), md.size()) ? message : ProtoMessage{};
 }
@@ -161,35 +163,66 @@ IncrementalService::IncFsMount::~IncFsMount() {
 }
 
 auto IncrementalService::IncFsMount::makeStorage(StorageId id) -> StorageMap::iterator {
-    metadata::Storage st;
-    st.set_id(id);
-    auto metadata = st.SerializeAsString();
-
     std::string name;
     for (int no = nextStorageDirNo.fetch_add(1, std::memory_order_relaxed), i = 0;
          i < 1024 && no >= 0; no = nextStorageDirNo.fetch_add(1, std::memory_order_relaxed), ++i) {
         name.clear();
-        base::StringAppendF(&name, "%.*s%d", int(constants().storagePrefix.size()),
-                            constants().storagePrefix.data(), no);
-        if (auto node =
-                    incrementalService.mIncFs->makeDir(control, name, INCFS_ROOT_INODE, metadata);
-            node >= 0) {
+        base::StringAppendF(&name, "%.*s_%d_%d", int(constants().storagePrefix.size()),
+                            constants().storagePrefix.data(), id, no);
+        auto fullName = path::join(root, constants().mount, name);
+        if (auto err = incrementalService.mIncFs->makeDir(control, fullName); !err) {
             std::lock_guard l(lock);
-            return storages.insert_or_assign(id, Storage{std::move(name), node}).first;
+            return storages.insert_or_assign(id, Storage{std::move(fullName)}).first;
+        } else if (err != EEXIST) {
+            LOG(ERROR) << __func__ << "(): failed to create dir |" << fullName << "| " << err;
+            break;
         }
     }
     nextStorageDirNo = 0;
     return storages.end();
 }
 
+static std::unique_ptr<DIR, decltype(&::closedir)> openDir(const char* path) {
+    return {::opendir(path), ::closedir};
+}
+
+static int rmDirContent(const char* path) {
+    auto dir = openDir(path);
+    if (!dir) {
+        return -EINVAL;
+    }
+    while (auto entry = ::readdir(dir.get())) {
+        if (entry->d_name == "."sv || entry->d_name == ".."sv) {
+            continue;
+        }
+        auto fullPath = android::base::StringPrintf("%s/%s", path, entry->d_name);
+        if (entry->d_type == DT_DIR) {
+            if (const auto err = rmDirContent(fullPath.c_str()); err != 0) {
+                PLOG(WARNING) << "Failed to delete " << fullPath << " content";
+                return err;
+            }
+            if (const auto err = ::rmdir(fullPath.c_str()); err != 0) {
+                PLOG(WARNING) << "Failed to rmdir " << fullPath;
+                return err;
+            }
+        } else {
+            if (const auto err = ::unlink(fullPath.c_str()); err != 0) {
+                PLOG(WARNING) << "Failed to delete " << fullPath;
+                return err;
+            }
+        }
+    }
+    return 0;
+}
+
 void IncrementalService::IncFsMount::cleanupFilesystem(std::string_view root) {
-    ::unlink(path::join(root, constants().backing, constants().image).c_str());
+    rmDirContent(path::join(root, constants().backing).c_str());
     ::rmdir(path::join(root, constants().backing).c_str());
     ::rmdir(path::join(root, constants().mount).c_str());
     ::rmdir(path::c_str(root));
 }
 
-IncrementalService::IncrementalService(const ServiceManagerWrapper& sm, std::string_view rootDir)
+IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir)
       : mVold(sm.getVoldService()),
         mIncrementalManager(sm.getIncrementalManager()),
         mIncFs(sm.getIncFs()),
@@ -203,6 +236,23 @@ IncrementalService::IncrementalService(const ServiceManagerWrapper& sm, std::str
     // TODO(b/136132412): check that root dir should already exist
     // TODO(b/136132412): enable mount existing dirs after SELinux rules are merged
     // mountExistingImages();
+}
+
+FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
+    incfs::FileId id = {};
+    if (size_t(metadata.size()) <= sizeof(id)) {
+        memcpy(&id, metadata.data(), metadata.size());
+    } else {
+        uint8_t buffer[SHA_DIGEST_LENGTH];
+        static_assert(sizeof(buffer) >= sizeof(id));
+
+        SHA_CTX ctx;
+        SHA1_Init(&ctx);
+        SHA1_Update(&ctx, metadata.data(), metadata.size());
+        SHA1_Final(buffer, &ctx);
+        memcpy(&id, buffer, sizeof(id));
+    }
+    return id;
 }
 
 IncrementalService::~IncrementalService() = default;
@@ -300,26 +350,36 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
             std::unique_ptr<std::string, decltype(firstCleanup)>(&mountRoot, firstCleanup);
 
     auto mountTarget = path::join(mountRoot, constants().mount);
-    if (!mkdirOrLog(path::join(mountRoot, constants().backing)) || !mkdirOrLog(mountTarget)) {
+    const auto backing = path::join(mountRoot, constants().backing);
+    if (!mkdirOrLog(backing, 0777) || !mkdirOrLog(mountTarget)) {
         return kInvalidStorageId;
     }
 
-    const auto image = path::join(mountRoot, constants().backing, constants().image);
     IncFsMount::Control control;
     {
         std::lock_guard l(mMountOperationLock);
         IncrementalFileSystemControlParcel controlParcel;
-        auto status = mVold->mountIncFs(image, mountTarget, incfs::truncate, &controlParcel);
+
+        if (auto err = rmDirContent(backing.c_str())) {
+            LOG(ERROR) << "Coudn't clean the backing directory " << backing << ": " << err;
+            return kInvalidStorageId;
+        }
+        if (!mkdirOrLog(path::join(backing, ".index"), 0777)) {
+            return kInvalidStorageId;
+        }
+        auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
         if (!status.isOk()) {
             LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
             return kInvalidStorageId;
         }
-        if (!controlParcel.cmd || !controlParcel.log) {
+        if (controlParcel.cmd.get() < 0 || controlParcel.pendingReads.get() < 0 ||
+            controlParcel.log.get() < 0) {
             LOG(ERROR) << "Vold::mountIncFs() returned invalid control parcel.";
             return kInvalidStorageId;
         }
-        control.cmdFd = controlParcel.cmd->release();
-        control.logFd = controlParcel.log->release();
+        control.cmd = controlParcel.cmd.release().release();
+        control.pendingReads = controlParcel.pendingReads.release().release();
+        control.logs = controlParcel.log.release().release();
     }
 
     std::unique_lock l(mLock);
@@ -344,7 +404,7 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
 
     const auto storageIt = ifs->makeStorage(ifs->mountId);
     if (storageIt == ifs->storages.end()) {
-        LOG(ERROR) << "Can't create default storage directory";
+        LOG(ERROR) << "Can't create a default storage directory";
         return kInvalidStorageId;
     }
 
@@ -359,9 +419,12 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         m.mutable_loader()->release_arguments();
         m.mutable_loader()->release_class_name();
         m.mutable_loader()->release_package_name();
-        if (auto err = mIncFs->makeFile(ifs->control, constants().infoMdName, INCFS_ROOT_INODE, 0,
-                                        metadata);
-            err < 0) {
+        if (auto err =
+                    mIncFs->makeFile(ifs->control,
+                                     path::join(ifs->root, constants().mount,
+                                                constants().infoMdName),
+                                     0777, idFromMetadata(metadata),
+                                     {.metadata = {metadata.data(), (IncFsSize)metadata.size()}})) {
             LOG(ERROR) << "Saving mount metadata failed: " << -err;
             return kInvalidStorageId;
         }
@@ -369,8 +432,8 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
 
     const auto bk =
             (options & CreateOptions::PermanentBind) ? BindKind::Permanent : BindKind::Temporary;
-    if (auto err = addBindMount(*ifs, storageIt->first, std::string(storageIt->second.name),
-                                std::move(mountNorm), bk, l);
+    if (auto err = addBindMount(*ifs, storageIt->first, storageIt->second.name,
+                                std::string(storageIt->second.name), std::move(mountNorm), bk, l);
         err < 0) {
         LOG(ERROR) << "adding bind mount failed: " << -err;
         return kInvalidStorageId;
@@ -419,8 +482,9 @@ StorageId IncrementalService::createLinkedStorage(std::string_view mountPoint,
 
     const auto bk =
             (options & CreateOptions::PermanentBind) ? BindKind::Permanent : BindKind::Temporary;
-    if (auto err = addBindMount(*ifs, storageIt->first, std::string(storageIt->second.name),
-                                path::normalize(mountPoint), bk, l);
+    if (auto err = addBindMount(*ifs, storageIt->first, storageIt->second.name,
+                                std::string(storageIt->second.name), path::normalize(mountPoint),
+                                bk, l);
         err < 0) {
         LOG(ERROR) << "bindMount failed with error: " << err;
         return kInvalidStorageId;
@@ -492,40 +556,36 @@ StorageId IncrementalService::openStorage(std::string_view pathInMount) {
     return findStorageId(path::normalize(pathInMount));
 }
 
-Inode IncrementalService::nodeFor(StorageId storage, std::string_view subpath) const {
+FileId IncrementalService::nodeFor(StorageId storage, std::string_view subpath) const {
     const auto ifs = getIfs(storage);
     if (!ifs) {
-        return -1;
+        return kIncFsInvalidFileId;
     }
     std::unique_lock l(ifs->lock);
     auto storageIt = ifs->storages.find(storage);
     if (storageIt == ifs->storages.end()) {
-        return -1;
+        return kIncFsInvalidFileId;
     }
     if (subpath.empty() || subpath == "."sv) {
-        return storageIt->second.node;
+        return kIncFsInvalidFileId;
     }
     auto path = path::join(ifs->root, constants().mount, storageIt->second.name, subpath);
     l.unlock();
-    struct stat st;
-    if (::stat(path.c_str(), &st)) {
-        return -1;
-    }
-    return st.st_ino;
+    return mIncFs->getFileId(ifs->control, path);
 }
 
-std::pair<Inode, std::string_view> IncrementalService::parentAndNameFor(
+std::pair<FileId, std::string_view> IncrementalService::parentAndNameFor(
         StorageId storage, std::string_view subpath) const {
     auto name = path::basename(subpath);
     if (name.empty()) {
-        return {-1, {}};
+        return {kIncFsInvalidFileId, {}};
     }
     auto dir = path::dirname(subpath);
     if (dir.empty() || dir == "/"sv) {
-        return {-1, {}};
+        return {kIncFsInvalidFileId, {}};
     }
-    auto inode = nodeFor(storage, dir);
-    return {inode, name};
+    auto id = nodeFor(storage, dir);
+    return {id, name};
 }
 
 IncrementalService::IfsMountPtr IncrementalService::getIfs(StorageId storage) const {
@@ -542,8 +602,8 @@ const IncrementalService::IfsMountPtr& IncrementalService::getIfsLocked(StorageI
     return it->second;
 }
 
-int IncrementalService::bind(StorageId storage, std::string_view sourceSubdir,
-                             std::string_view target, BindKind kind) {
+int IncrementalService::bind(StorageId storage, std::string_view source, std::string_view target,
+                             BindKind kind) {
     if (!isValidMountTarget(target)) {
         return -EINVAL;
     }
@@ -552,15 +612,20 @@ int IncrementalService::bind(StorageId storage, std::string_view sourceSubdir,
     if (!ifs) {
         return -EINVAL;
     }
+    auto normSource = path::normalize(source);
+
     std::unique_lock l(ifs->lock);
     const auto storageInfo = ifs->storages.find(storage);
     if (storageInfo == ifs->storages.end()) {
         return -EINVAL;
     }
-    auto source = path::join(storageInfo->second.name, sourceSubdir);
+    if (!path::startsWith(normSource, storageInfo->second.name)) {
+        return -EINVAL;
+    }
     l.unlock();
     std::unique_lock l2(mLock, std::defer_lock);
-    return addBindMount(*ifs, storage, std::move(source), path::normalize(target), kind, l2);
+    return addBindMount(*ifs, storage, storageInfo->second.name, std::move(normSource),
+                        path::normalize(target), kind, l2);
 }
 
 int IncrementalService::unbind(StorageId storage, std::string_view target) {
@@ -599,90 +664,72 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
         ifs->bindPoints.erase(bindIt);
         l2.unlock();
         if (!savedFile.empty()) {
-            mIncFs->unlink(ifs->control, INCFS_ROOT_INODE, savedFile);
+            mIncFs->unlink(ifs->control, path::join(ifs->root, constants().mount, savedFile));
         }
     }
     return 0;
 }
 
-Inode IncrementalService::makeFile(StorageId storageId, std::string_view pathUnderStorage,
-                                   long size, std::string_view metadata,
-                                   std::string_view signature) {
-    (void)signature;
-    auto [parentInode, name] = parentAndNameFor(storageId, pathUnderStorage);
-    if (parentInode < 0) {
-        return -EINVAL;
-    }
-    if (auto ifs = getIfs(storageId)) {
-        auto inode = mIncFs->makeFile(ifs->control, name, parentInode, size, metadata);
-        if (inode < 0) {
-            return inode;
+int IncrementalService::makeFile(StorageId storage, std::string_view path, int mode, FileId id,
+                                 incfs::NewFileParams params) {
+    if (auto ifs = getIfs(storage)) {
+        auto err = mIncFs->makeFile(ifs->control, path, mode, id, params);
+        if (err) {
+            return err;
         }
-        auto metadataBytes = std::vector<uint8_t>();
-        if (metadata.data() != nullptr && metadata.size() > 0) {
-            metadataBytes.insert(metadataBytes.end(), &metadata.data()[0],
-                                 &metadata.data()[metadata.size()]);
+        std::vector<uint8_t> metadataBytes;
+        if (params.metadata.data && params.metadata.size > 0) {
+            metadataBytes.assign(params.metadata.data, params.metadata.data + params.metadata.size);
         }
-        mIncrementalManager->newFileForDataLoader(ifs->mountId, inode, metadataBytes);
-        return inode;
+        mIncrementalManager->newFileForDataLoader(ifs->mountId, id, metadataBytes);
+        return 0;
     }
     return -EINVAL;
 }
 
-Inode IncrementalService::makeDir(StorageId storageId, std::string_view pathUnderStorage,
-                                  std::string_view metadata) {
-    auto [parentInode, name] = parentAndNameFor(storageId, pathUnderStorage);
-    if (parentInode < 0) {
-        return -EINVAL;
-    }
+int IncrementalService::makeDir(StorageId storageId, std::string_view path, int mode) {
     if (auto ifs = getIfs(storageId)) {
-        return mIncFs->makeDir(ifs->control, name, parentInode, metadata);
+        return mIncFs->makeDir(ifs->control, path, mode);
     }
     return -EINVAL;
 }
 
-Inode IncrementalService::makeDirs(StorageId storageId, std::string_view pathUnderStorage,
-                                   std::string_view metadata) {
+int IncrementalService::makeDirs(StorageId storageId, std::string_view path, int mode) {
     const auto ifs = getIfs(storageId);
     if (!ifs) {
         return -EINVAL;
     }
-    std::string_view parentDir(pathUnderStorage);
-    auto p = parentAndNameFor(storageId, pathUnderStorage);
-    std::stack<std::string> pathsToCreate;
-    while (p.first < 0) {
-        parentDir = path::dirname(parentDir);
-        pathsToCreate.emplace(parentDir);
-        p = parentAndNameFor(storageId, parentDir);
+
+    auto err = mIncFs->makeDir(ifs->control, path, mode);
+    if (err == -EEXIST) {
+        return 0;
+    } else if (err != -ENOENT) {
+        return err;
     }
-    Inode inode;
-    while (!pathsToCreate.empty()) {
-        p = parentAndNameFor(storageId, pathsToCreate.top());
-        pathsToCreate.pop();
-        inode = mIncFs->makeDir(ifs->control, p.second, p.first, metadata);
-        if (inode < 0) {
-            return inode;
-        }
+    if (auto err = makeDirs(storageId, path::dirname(path), mode)) {
+        return err;
     }
-    return mIncFs->makeDir(ifs->control, path::basename(pathUnderStorage), inode, metadata);
+    return mIncFs->makeDir(ifs->control, path, mode);
 }
 
-int IncrementalService::link(StorageId storage, Inode item, Inode newParent,
-                             std::string_view newName) {
-    if (auto ifs = getIfs(storage)) {
-        return mIncFs->link(ifs->control, item, newParent, newName);
+int IncrementalService::link(StorageId sourceStorageId, std::string_view oldPath,
+                             StorageId destStorageId, std::string_view newPath) {
+    if (auto ifsSrc = getIfs(sourceStorageId), ifsDest = getIfs(destStorageId);
+        ifsSrc && ifsSrc == ifsDest) {
+        return mIncFs->link(ifsSrc->control, oldPath, newPath);
     }
     return -EINVAL;
 }
 
-int IncrementalService::unlink(StorageId storage, Inode parent, std::string_view name) {
+int IncrementalService::unlink(StorageId storage, std::string_view path) {
     if (auto ifs = getIfs(storage)) {
-        return mIncFs->unlink(ifs->control, parent, name);
+        return mIncFs->unlink(ifs->control, path);
     }
     return -EINVAL;
 }
 
-int IncrementalService::addBindMount(IncFsMount& ifs, StorageId storage, std::string&& sourceSubdir,
+int IncrementalService::addBindMount(IncFsMount& ifs, StorageId storage,
+                                     std::string_view storageRoot, std::string&& source,
                                      std::string&& target, BindKind kind,
                                      std::unique_lock<std::mutex>& mainLock) {
     if (!isValidMountTarget(target)) {
@@ -694,30 +741,30 @@ int IncrementalService::addBindMount(IncFsMount& ifs, StorageId storage, std::st
         metadata::BindPoint bp;
         bp.set_storage_id(storage);
         bp.set_allocated_dest_path(&target);
-        bp.set_allocated_source_subdir(&sourceSubdir);
+        bp.set_source_subdir(std::string(path::relativize(storageRoot, source)));
         const auto metadata = bp.SerializeAsString();
-        bp.release_source_subdir();
         bp.release_dest_path();
         mdFileName = makeBindMdName();
-        auto node = mIncFs->makeFile(ifs.control, mdFileName, INCFS_ROOT_INODE, 0, metadata);
-        if (node < 0) {
+        auto node =
+                mIncFs->makeFile(ifs.control, path::join(ifs.root, constants().mount, mdFileName),
+                                 0444, idFromMetadata(metadata),
+                                 {.metadata = {metadata.data(), (IncFsSize)metadata.size()}});
+        if (node) {
             return int(node);
         }
     }
 
-    return addBindMountWithMd(ifs, storage, std::move(mdFileName), std::move(sourceSubdir),
+    return addBindMountWithMd(ifs, storage, std::move(mdFileName), std::move(source),
                               std::move(target), kind, mainLock);
 }
 
 int IncrementalService::addBindMountWithMd(IncrementalService::IncFsMount& ifs, StorageId storage,
-                                           std::string&& metadataName, std::string&& sourceSubdir,
+                                           std::string&& metadataName, std::string&& source,
                                            std::string&& target, BindKind kind,
                                            std::unique_lock<std::mutex>& mainLock) {
-    LOG(INFO) << "Adding bind mount: " << sourceSubdir << " -> " << target;
     {
-        auto path = path::join(ifs.root, constants().mount, sourceSubdir);
         std::lock_guard l(mMountOperationLock);
-        const auto status = mVold->bindMount(path, target);
+        const auto status = mVold->bindMount(source, target);
         if (!status.isOk()) {
             LOG(ERROR) << "Calling Vold::bindMount() failed: " << status.toString8();
             return status.exceptionCode() == binder::Status::EX_SERVICE_SPECIFIC
@@ -736,12 +783,12 @@ int IncrementalService::addBindMountWithMd(IncrementalService::IncFsMount& ifs, 
     const auto [it, _] =
             ifs.bindPoints.insert_or_assign(target,
                                             IncFsMount::Bind{storage, std::move(metadataName),
-                                                             std::move(sourceSubdir), kind});
+                                                             std::move(source), kind});
     mBindsByPath[std::move(target)] = it;
     return 0;
 }
 
-RawMetadata IncrementalService::getMetadata(StorageId storage, Inode node) const {
+RawMetadata IncrementalService::getMetadata(StorageId storage, FileId node) const {
     const auto ifs = getIfs(storage);
     if (!ifs) {
         return {};
@@ -831,21 +878,18 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
     LOG(INFO) << "Trying to mount: " << key;
 
     auto mountTarget = path::join(root, constants().mount);
-    const auto image = path::join(root, constants().backing, constants().image);
+    const auto backing = path::join(root, constants().backing);
 
     IncFsMount::Control control;
     IncrementalFileSystemControlParcel controlParcel;
-    auto status = mVold->mountIncFs(image, mountTarget, 0, &controlParcel);
+    auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
     if (!status.isOk()) {
         LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();
         return false;
     }
-    if (controlParcel.cmd) {
-        control.cmdFd = controlParcel.cmd->release();
-    }
-    if (controlParcel.log) {
-        control.logFd = controlParcel.log->release();
-    }
+    control.cmd = controlParcel.cmd.release().release();
+    control.pendingReads = controlParcel.pendingReads.release().release();
+    control.logs = controlParcel.log.release().release();
 
     auto ifs = std::make_shared<IncFsMount>(std::string(root), -1, std::move(control), *this);
 
@@ -860,8 +904,7 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
     mNextId = std::max(mNextId, ifs->mountId + 1);
 
     std::vector<std::pair<std::string, metadata::BindPoint>> bindPoints;
-    auto d = std::unique_ptr<DIR, decltype(&::closedir)>(::opendir(path::c_str(mountTarget)),
-                                                         ::closedir);
+    auto d = openDir(path::c_str(mountTarget));
     while (auto e = ::readdir(d.get())) {
         if (e->d_type == DT_REG) {
             auto name = std::string_view(e->d_name);
@@ -874,7 +917,7 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
                 if (bindPoints.back().second.dest_path().empty() ||
                     bindPoints.back().second.source_subdir().empty()) {
                     bindPoints.pop_back();
-                    mIncFs->unlink(ifs->control, INCFS_ROOT_INODE, name);
+                    mIncFs->unlink(ifs->control, path::join(ifs->root, constants().mount, name));
                 }
             }
         } else if (e->d_type == DT_DIR) {
@@ -891,9 +934,7 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
                                  << " for mount " << root;
                     continue;
                 }
-                ifs->storages.insert_or_assign(md.id(),
-                                               IncFsMount::Storage{std::string(name),
-                                                                   Inode(e->d_ino)});
+                ifs->storages.insert_or_assign(md.id(), IncFsMount::Storage{std::string(name)});
                 mNextId = std::max(mNextId, md.id() + 1);
             }
         }
@@ -973,10 +1014,10 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     }
     FileSystemControlParcel fsControlParcel;
     fsControlParcel.incremental = std::make_unique<IncrementalFileSystemControlParcel>();
-    fsControlParcel.incremental->cmd =
-            std::make_unique<os::ParcelFileDescriptor>(base::unique_fd(::dup(ifs.control.cmdFd)));
-    fsControlParcel.incremental->log =
-            std::make_unique<os::ParcelFileDescriptor>(base::unique_fd(::dup(ifs.control.logFd)));
+    fsControlParcel.incremental->cmd.reset(base::unique_fd(::dup(ifs.control.cmd)));
+    fsControlParcel.incremental->pendingReads.reset(
+            base::unique_fd(::dup(ifs.control.pendingReads)));
+    fsControlParcel.incremental->log.reset(base::unique_fd(::dup(ifs.control.logs)));
     sp<IncrementalDataLoaderListener> listener = new IncrementalDataLoaderListener(*this);
     bool created = false;
     auto status = mIncrementalManager->prepareDataLoader(ifs.mountId, fsControlParcel, *dlp,

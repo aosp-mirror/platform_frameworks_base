@@ -134,8 +134,8 @@ public final class IncrementalFileStorages {
         }
 
         if (!new File(mDefaultDir, apk.getName()).exists()) {
-            mDefaultStorage.makeFile(apk.getName(), apk.getSize(),
-                    apk.getMetadata());
+            mDefaultStorage.makeFile(apk.getName(), apk.getSize(), null,
+                    apk.getMetadata(), 0, null, null, null);
         }
         // Assuming APK files are already named properly, e.g., "base.apk"
         mDefaultStorage.makeLink(apk.getName(), mApkStorage, apk.getName());
@@ -167,7 +167,8 @@ public final class IncrementalFileStorages {
             current += '/';
         }
         String libFilePath = current + Paths.get(lib.getName()).getFileName();
-        mDefaultStorage.makeFile(libFilePath, lib.getSize(), lib.getMetadata());
+        mDefaultStorage.makeFile(libFilePath, lib.getSize(), null, lib.getMetadata(), 0, null, null,
+                                 null);
         mDefaultStorage.makeLink(libFilePath, mApkStorage, libFilePath);
     }
 
@@ -183,7 +184,8 @@ public final class IncrementalFileStorages {
                     IncrementalManager.CREATE_MODE_CREATE
                             | IncrementalManager.CREATE_MODE_TEMPORARY_BIND);
         }
-        mDefaultStorage.makeFile(obb.getName(), obb.getSize(), obb.getMetadata());
+        mDefaultStorage.makeFile(obb.getName(), obb.getSize(), null, obb.getMetadata(), 0, null,
+                                 null, null);
         mDefaultStorage.makeLink(obb.getName(), mObbStorage, obb.getName());
     }
 

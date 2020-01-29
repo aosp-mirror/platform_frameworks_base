@@ -939,6 +939,8 @@ filegroup {
     srcs: [
         "core/java/android/os/incremental/IIncrementalManager.aidl",
         "core/java/android/os/incremental/IIncrementalManagerNative.aidl",
+        "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
+        "core/java/android/os/incremental/IncrementalSignature.aidl",
     ],
     path: "core/java",
 }

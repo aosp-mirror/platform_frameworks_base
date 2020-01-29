@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package android.os.incremental;
 
-/**
- * Wraps the file descriptors Incremental Service uses to communicate
- * with Incremental FileSystem.
- * @hide
- */
-parcelable IncrementalFileSystemControlParcel {
-    ParcelFileDescriptor cmd;
-    ParcelFileDescriptor pendingReads;
-    ParcelFileDescriptor log;
+/** {@hide} */
+parcelable IncrementalSignature {
+    /*
+     * Stable AIDL doesn't support constants, but here's the possible values
+     *   const int HASH_ALGO_NONE = 0;
+     *   const int HASH_ALGO_SHA256 = 1;
+    */
+
+    int hashAlgorithm = 0;
+    byte[] rootHash;
+    byte[] additionalData;
+    byte[] signature;
 }

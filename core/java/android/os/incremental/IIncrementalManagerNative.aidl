@@ -17,6 +17,7 @@
 package android.os.incremental;
 
 import android.content.pm.DataLoaderParamsParcel;
+import android.os.incremental.IncrementalNewFileParams;
 
 /** @hide */
 interface IIncrementalManagerNative {
@@ -40,7 +41,7 @@ interface IIncrementalManagerNative {
      */
     const int BIND_TEMPORARY = 0;
     const int BIND_PERMANENT = 1;
-    int makeBindMount(int storageId, in @utf8InCpp String pathUnderStorage, in @utf8InCpp String targetFullPath, int bindType);
+    int makeBindMount(int storageId, in @utf8InCpp String sourcePath, in @utf8InCpp String targetFullPath, int bindType);
 
     /**
      * Deletes an existing bind mount on a path under a storage. Returns 0 on success, and -errno on failure.
@@ -48,49 +49,50 @@ interface IIncrementalManagerNative {
     int deleteBindMount(int storageId, in @utf8InCpp String targetFullPath);
 
     /**
-     * Creates a directory under a storage. The target directory is specified by its relative path under the storage.
+     * Creates a directory under a storage. The target directory is specified by its path.
      */
-    int makeDirectory(int storageId, in @utf8InCpp String pathUnderStorage);
+    int makeDirectory(int storageId, in @utf8InCpp String path);
 
     /**
-     * Recursively creates a directory under a storage. The target directory is specified by its relative path under the storage.
+     * Recursively creates a directory under a storage. The target directory is specified by its path.
      * All the parent directories of the target directory will be created if they do not exist already.
      */
-    int makeDirectories(int storageId, in @utf8InCpp String pathUnderStorage);
+    int makeDirectories(int storageId, in @utf8InCpp String path);
 
     /**
-     * Creates a file under a storage, specifying its name, size and metadata.
+     * Creates a file under a storage.
      */
-    int makeFile(int storageId, in @utf8InCpp String pathUnderStorage, long size, in byte[] metadata);
+    int makeFile(int storageId, in @utf8InCpp String path, in IncrementalNewFileParams params);
 
     /**
      * Creates a file under a storage. Content of the file is from a range inside another file.
-     * Both files are specified by relative paths under storage.
+     * Both files are specified by their paths.
      */
-    int makeFileFromRange(int storageId, in @utf8InCpp String targetPathUnderStorage, in @utf8InCpp String sourcePathUnderStorage, long start, long end);
+    int makeFileFromRange(int storageId, in @utf8InCpp String targetPath, in @utf8InCpp String sourcePath, long start, long end);
 
     /**
      * Creates a hard link between two files in two storage instances.
-     * Source and dest specified by parent storage IDs and their relative paths under the storage.
+     * Source and dest specified by parent storage IDs and their paths.
      * The source and dest storage instances should be in the same fs mount.
      * Note: destStorageId can be the same as sourceStorageId.
      */
-    int makeLink(int sourceStorageId, in @utf8InCpp String sourcePathUnderStorage, int destStorageId, in @utf8InCpp String destPathUnderStorage);
+    int makeLink(int sourceStorageId, in @utf8InCpp String sourcePath, int destStorageId, in @utf8InCpp String destPath);
 
     /**
-     * Deletes a hard link in a storage, specified by the relative path of the link target under storage.
+     * Deletes a hard link in a storage, specified by its path.
      */
-    int unlink(int storageId, in @utf8InCpp String pathUnderStorage);
+    int unlink(int storageId, in @utf8InCpp String path);
 
     /**
-     * Checks if a file's certain range is loaded. File is specified by relative file path under storage.
+     * Checks if a file's certain range is loaded. File is specified by its path.
      */
-    boolean isFileRangeLoaded(int storageId, in @utf8InCpp String pathUnderStorage, long start, long end);
+    boolean isFileRangeLoaded(int storageId, in @utf8InCpp String path, long start, long end);
 
     /**
-     * Reads the metadata of a file. File is specified by relative path under storage.
+     * Reads the metadata of a file. File is specified by either its path or 16 byte id.
      */
-    byte[] getFileMetadata(int storageId, in @utf8InCpp String pathUnderStorage);
+    byte[] getMetadataByPath(int storageId, in @utf8InCpp String path);
+    byte[] getMetadataById(int storageId, in byte[] fileId);
 
     /**
      * Starts loading data for a storage.
