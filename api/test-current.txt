@@ -2662,9 +2662,9 @@ package android.permission {
   }
 
   public final class PermissionManager {
-    method @IntRange(from=0) @RequiresPermission("android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY") public int getRuntimePermissionsVersion();
+    method @IntRange(from=0) @RequiresPermission(anyOf={"android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY", "android.permission.UPGRADE_RUNTIME_PERMISSIONS"}) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
-    method @RequiresPermission("android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY") public void setRuntimePermissionsVersion(@IntRange(from=0) int);
+    method @RequiresPermission(anyOf={"android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY", "android.permission.UPGRADE_RUNTIME_PERMISSIONS"}) public void setRuntimePermissionsVersion(@IntRange(from=0) int);
   }
 
   public static final class PermissionManager.SplitPermissionInfo {

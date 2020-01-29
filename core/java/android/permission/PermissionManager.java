@@ -93,7 +93,10 @@ public final class PermissionManager {
      */
     @TestApi
     @SystemApi
-    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+            Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS
+    })
     public @IntRange(from = 0) int getRuntimePermissionsVersion() {
         try {
             return mPackageManager.getRuntimePermissionsVersion(mContext.getUserId());
@@ -111,7 +114,10 @@ public final class PermissionManager {
      */
     @TestApi
     @SystemApi
-    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+            Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS
+    })
     public void setRuntimePermissionsVersion(@IntRange(from = 0) int version) {
         try {
             mPackageManager.setRuntimePermissionsVersion(version, mContext.getUserId());

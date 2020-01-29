@@ -23821,9 +23821,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int getRuntimePermissionsVersion(@UserIdInt int userId) {
         Preconditions.checkArgumentNonnegative(userId);
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                "setRuntimePermissionVersion");
+        enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
+                "getRuntimePermissionVersion");
         synchronized (mLock) {
             return mSettings.getDefaultRuntimePermissionsVersionLPr(userId);
         }
@@ -23833,11 +23832,24 @@ public class PackageManagerService extends IPackageManager.Stub
     public void setRuntimePermissionsVersion(int version, @UserIdInt int userId) {
         Preconditions.checkArgumentNonnegative(version);
         Preconditions.checkArgumentNonnegative(userId);
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+        enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
                 "setRuntimePermissionVersion");
         synchronized (mLock) {
             mSettings.setDefaultRuntimePermissionsVersionLPr(version, userId);
+        }
+    }
+
+    private void enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
+            @NonNull String message) {
+        if (mContext.checkCallingOrSelfPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(message + " requires "
+                    + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " or "
+                    + Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS);
         }
     }
 
