@@ -25,8 +25,6 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.systemui.statusbar.phone.StatusBar.ONLY_CORE_APPS;
 
-import android.annotation.Nullable;
-import android.app.ITransientNotificationCallback;
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.Disable2Flags;
 import android.app.StatusBarManager.DisableFlags;
@@ -121,8 +119,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_TOP_APP_WINDOW_CHANGED            = 50 << MSG_SHIFT;
     private static final int MSG_SHOW_INATTENTIVE_SLEEP_WARNING    = 51 << MSG_SHIFT;
     private static final int MSG_DISMISS_INATTENTIVE_SLEEP_WARNING = 52 << MSG_SHIFT;
-    private static final int MSG_SHOW_TOAST                        = 53 << MSG_SHIFT;
-    private static final int MSG_HIDE_TOAST                        = 54 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -312,19 +308,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * due to prolonged user inactivity should be dismissed.
          */
         default void dismissInattentiveSleepWarning(boolean animated) { }
-
-        /**
-         * @see IStatusBar#showToast(String, IBinder, CharSequence, IBinder, int,
-         * ITransientNotificationCallback)
-         */
-        default void showToast(String packageName, IBinder token, CharSequence text,
-                IBinder windowToken, int duration,
-                @Nullable ITransientNotificationCallback callback) { }
-
-        /**
-         * @see IStatusBar#hideToast(String, IBinder) (String, IBinder)
-         */
-        default void hideToast(String packageName, IBinder token) { }
     }
 
     public CommandQueue(Context context) {
@@ -778,31 +761,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void showToast(String packageName, IBinder token, CharSequence text,
-            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
-        synchronized (mLock) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = packageName;
-            args.arg2 = token;
-            args.arg3 = text;
-            args.arg4 = windowToken;
-            args.arg5 = callback;
-            args.argi1 = duration;
-            mHandler.obtainMessage(MSG_SHOW_TOAST, args).sendToTarget();
-        }
-    }
-
-    @Override
-    public void hideToast(String packageName, IBinder token) {
-        synchronized (mLock) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = packageName;
-            args.arg2 = token;
-            mHandler.obtainMessage(MSG_HIDE_TOAST, args).sendToTarget();
-        }
-    }
-
-    @Override
     public void onBiometricAuthenticated() {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
@@ -1220,30 +1178,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                         mCallbacks.get(i).dismissInattentiveSleepWarning((Boolean) msg.obj);
                     }
                     break;
-                case MSG_SHOW_TOAST: {
-                    args = (SomeArgs) msg.obj;
-                    String packageName = (String) args.arg1;
-                    IBinder token = (IBinder) args.arg2;
-                    CharSequence text = (CharSequence) args.arg3;
-                    IBinder windowToken = (IBinder) args.arg4;
-                    ITransientNotificationCallback callback =
-                            (ITransientNotificationCallback) args.arg5;
-                    int duration = args.argi1;
-                    for (Callbacks callbacks : mCallbacks) {
-                        callbacks.showToast(packageName, token, text, windowToken, duration,
-                                callback);
-                    }
-                    break;
-                }
-                case MSG_HIDE_TOAST: {
-                    args = (SomeArgs) msg.obj;
-                    String packageName = (String) args.arg1;
-                    IBinder token = (IBinder) args.arg2;
-                    for (Callbacks callbacks : mCallbacks) {
-                        callbacks.hideToast(packageName, token);
-                    }
-                    break;
-                }
             }
         }
     }

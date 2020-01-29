@@ -17,7 +17,6 @@
 package android.widget;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -25,9 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
-import android.app.ITransientNotificationCallback;
-import android.compat.Compatibility;
-import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -109,45 +105,15 @@ public class Toast {
      */
     public static final int LENGTH_LONG = 1;
 
-    /**
-     * Text toasts will be rendered by SystemUI instead of in-app, so apps can't circumvent
-     * background custom toast restrictions.
-     *
-     * TODO(b/144152069): Add @EnabledAfter(Q) to target R+ after assessing impact on dogfood
-     */
-    @ChangeId
-    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long CHANGE_TEXT_TOASTS_IN_THE_SYSTEM = 147798919L;
-
-
     private final Binder mToken;
     private final Context mContext;
-    private final Handler mHandler;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final TN mTN;
     @UnsupportedAppUsage
     int mDuration;
-
-    /**
-     * This is also passed to {@link TN} object, where it's also accessed with itself as its own
-     * lock.
-     */
-    @GuardedBy("mCallbacks")
-    private final List<Callback> mCallbacks;
-
-    /**
-     * View to be displayed, in case this is a custom toast (e.g. not created with {@link
-     * #makeText(Context, int, int)} or its variants).
-     */
-    @Nullable
-    private View mNextView;
-
-    /**
-     * Text to be shown, in case this is NOT a custom toast (e.g. created with {@link
-     * #makeText(Context, int, int)} or its variants).
-     */
-    @Nullable
-    private CharSequence mText;
+    View mNextView;
+    // TODO(b/128611929): Remove this and check for null view when toast creation is in the system
+    boolean mIsCustomToast = false;
 
     /**
      * Construct an empty Toast object.  You must call {@link #setView} before you
@@ -167,34 +133,19 @@ public class Toast {
     public Toast(@NonNull Context context, @Nullable Looper looper) {
         mContext = context;
         mToken = new Binder();
-        looper = getLooper(looper);
-        mHandler = new Handler(looper);
-        mCallbacks = new ArrayList<>();
-        mTN = new TN(context.getPackageName(), mToken, mCallbacks, looper);
+        mTN = new TN(context.getPackageName(), mToken, looper);
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
         mTN.mGravity = context.getResources().getInteger(
                 com.android.internal.R.integer.config_toastDefaultGravity);
     }
 
-    private Looper getLooper(@Nullable Looper looper) {
-        if (looper != null) {
-            return looper;
-        }
-        return checkNotNull(Looper.myLooper(),
-                "Can't toast on a thread that has not called Looper.prepare()");
-    }
-
     /**
      * Show the view for the specified duration.
      */
     public void show() {
-        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
-            checkState(mNextView != null || mText != null, "You must either set a text or a view");
-        } else {
-            if (mNextView == null) {
-                throw new RuntimeException("setView must have been called");
-            }
+        if (mNextView == null) {
+            throw new RuntimeException("setView must have been called");
         }
 
         INotificationManager service = getService();
@@ -204,18 +155,10 @@ public class Toast {
         final int displayId = mContext.getDisplayId();
 
         try {
-            if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
-                if (mNextView != null) {
-                    // It's a custom toast
-                    service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
-                } else {
-                    // It's a text toast
-                    ITransientNotificationCallback callback =
-                            new CallbackBinder(mCallbacks, mHandler);
-                    service.enqueueTextToast(pkg, mToken, mText, mDuration, displayId, callback);
-                }
-            } else {
+            if (mIsCustomToast) {
                 service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
+            } else {
+                service.enqueueTextToast(pkg, mToken, tn, mDuration, displayId);
             }
         } catch (RemoteException e) {
             // Empty
@@ -228,16 +171,7 @@ public class Toast {
      * after the appropriate duration.
      */
     public void cancel() {
-        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)
-                && mNextView == null) {
-            try {
-                getService().cancelToast(mContext.getOpPackageName(), mToken);
-            } catch (RemoteException e) {
-                // Empty
-            }
-        } else {
-            mTN.cancel();
-        }
+        mTN.cancel();
     }
 
     /**
@@ -253,6 +187,7 @@ public class Toast {
      */
     @Deprecated
     public void setView(View view) {
+        mIsCustomToast = true;
         mNextView = view;
     }
 
@@ -268,6 +203,7 @@ public class Toast {
      *      will not have custom toast views displayed.
      */
     public View getView() {
+        mIsCustomToast = true;
         return mNextView;
     }
 
@@ -362,8 +298,8 @@ public class Toast {
      */
     public void addCallback(@NonNull Callback callback) {
         checkNotNull(callback);
-        synchronized (mCallbacks) {
-            mCallbacks.add(callback);
+        synchronized (mTN.mCallbacks) {
+            mTN.mCallbacks.add(callback);
         }
     }
 
@@ -371,8 +307,8 @@ public class Toast {
      * Removes a callback previously added with {@link #addCallback(Callback)}.
      */
     public void removeCallback(@NonNull Callback callback) {
-        synchronized (mCallbacks) {
-            mCallbacks.remove(callback);
+        synchronized (mTN.mCallbacks) {
+            mTN.mCallbacks.remove(callback);
         }
     }
 
@@ -402,30 +338,22 @@ public class Toast {
     /**
      * Make a standard toast to display using the specified looper.
      * If looper is null, Looper.myLooper() is used.
-     *
      * @hide
      */
     public static Toast makeText(@NonNull Context context, @Nullable Looper looper,
             @NonNull CharSequence text, @Duration int duration) {
-        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
-            Toast result = new Toast(context, looper);
-            result.mText = text;
-            result.mDuration = duration;
-            return result;
-        } else {
-            Toast result = new Toast(context, looper);
+        Toast result = new Toast(context, looper);
 
-            LayoutInflater inflate = (LayoutInflater)
-                    context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);
-            TextView tv = (TextView) v.findViewById(com.android.internal.R.id.message);
-            tv.setText(text);
+        LayoutInflater inflate = (LayoutInflater)
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);
+        TextView tv = (TextView)v.findViewById(com.android.internal.R.id.message);
+        tv.setText(text);
 
-            result.mNextView = v;
-            result.mDuration = duration;
+        result.mNextView = v;
+        result.mDuration = duration;
 
-            return result;
-        }
+        return result;
     }
 
     /**
@@ -457,23 +385,14 @@ public class Toast {
      * @param s The new text for the Toast.
      */
     public void setText(CharSequence s) {
-        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
-            if (mNextView != null) {
-                throw new IllegalStateException(
-                        "Text provided for custom toast, remove previous setView() calls if you "
-                                + "want a text toast instead.");
-            }
-            mText = s;
-        } else {
-            if (mNextView == null) {
-                throw new RuntimeException("This Toast was not created with Toast.makeText()");
-            }
-            TextView tv = mNextView.findViewById(com.android.internal.R.id.message);
-            if (tv == null) {
-                throw new RuntimeException("This Toast was not created with Toast.makeText()");
-            }
-            tv.setText(s);
+        if (mNextView == null) {
+            throw new RuntimeException("This Toast was not created with Toast.makeText()");
         }
+        TextView tv = mNextView.findViewById(com.android.internal.R.id.message);
+        if (tv == null) {
+            throw new RuntimeException("This Toast was not created with Toast.makeText()");
+        }
+        tv.setText(s);
     }
 
     // =======================================================================================
@@ -523,18 +442,12 @@ public class Toast {
         final Binder mToken;
 
         @GuardedBy("mCallbacks")
-        private final List<Callback> mCallbacks;
+        private final List<Callback> mCallbacks = new ArrayList<>();
 
         static final long SHORT_DURATION_TIMEOUT = 4000;
         static final long LONG_DURATION_TIMEOUT = 7000;
 
-        /**
-         * Creates a {@link ITransientNotification} object.
-         *
-         * The parameter {@code callbacks} is not copied and is accessed with itself as its own
-         * lock.
-         */
-        TN(String packageName, Binder token, List<Callback> callbacks, @Nullable Looper looper) {
+        TN(String packageName, Binder token, @Nullable Looper looper) {
             // XXX This should be changed to use a Dialog, with a Theme.Toast
             // defined that sets up the layout params appropriately.
             final WindowManager.LayoutParams params = mParams;
@@ -551,8 +464,15 @@ public class Toast {
 
             mPackageName = packageName;
             mToken = token;
-            mCallbacks = callbacks;
 
+            if (looper == null) {
+                // Use Looper.myLooper() if looper is not specified.
+                looper = Looper.myLooper();
+                if (looper == null) {
+                    throw new RuntimeException(
+                            "Can't toast on a thread that has not called Looper.prepare()");
+                }
+            }
             mHandler = new Handler(looper, null) {
                 @Override
                 public void handleMessage(Message msg) {
@@ -734,47 +654,5 @@ public class Toast {
          * Called when the toast is hidden.
          */
         public void onToastHidden() {}
-    }
-
-    private static class CallbackBinder extends ITransientNotificationCallback.Stub {
-        private final Handler mHandler;
-
-        @GuardedBy("mCallbacks")
-        private final List<Callback> mCallbacks;
-
-        /**
-         * Creates a {@link ITransientNotificationCallback} object.
-         *
-         * The parameter {@code callbacks} is not copied and is accessed with itself as its own
-         * lock.
-         */
-        private CallbackBinder(List<Callback> callbacks, Handler handler) {
-            mCallbacks = callbacks;
-            mHandler = handler;
-        }
-
-        @Override
-        public void onToastShown() {
-            mHandler.post(() -> {
-                for (Callback callback : getCallbacks()) {
-                    callback.onToastShown();
-                }
-            });
-        }
-
-        @Override
-        public void onToastHidden() {
-            mHandler.post(() -> {
-                for (Callback callback : getCallbacks()) {
-                    callback.onToastHidden();
-                }
-            });
-        }
-
-        private List<Callback> getCallbacks() {
-            synchronized (mCallbacks) {
-                return new ArrayList<>(mCallbacks);
-            }
-        }
     }
 }
