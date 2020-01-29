@@ -180,6 +180,23 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
         }
 
         /**
+         * Sets whether the provider provides system routes or not
+         */
+        @NonNull
+        public Builder setSystemRouteProvider(boolean isSystem) {
+            int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                MediaRoute2Info route = mRoutes.valueAt(i);
+                if (route.isSystemRoute() != isSystem) {
+                    mRoutes.setValueAt(i, new MediaRoute2Info.Builder(route)
+                            .setSystemRoute(isSystem)
+                            .build());
+                }
+            }
+            return this;
+        }
+
+        /**
          * Adds a route to the provider
          */
         @NonNull

@@ -230,7 +230,11 @@ public class MediaRouter2 {
     /**
      * Gets the unmodifiable list of {@link MediaRoute2Info routes} currently
      * known to the media router.
+     * <p>
+     * {@link MediaRoute2Info#isSystemRoute() System routes} such as phone speaker,
+     * Bluetooth devices are always included in the list.
      * Please note that the list can be changed before callbacks are invoked.
+     * </p>
      *
      * @return the list of routes that contains at least one of the route features in discovery
      * preferences registered by the application
@@ -243,7 +247,8 @@ public class MediaRouter2 {
 
                 List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
                 for (MediaRoute2Info route : mRoutes.values()) {
-                    if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                    if (route.isSystemRoute()
+                            || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                         filteredRoutes.add(route);
                     }
                 }
@@ -307,12 +312,18 @@ public class MediaRouter2 {
      * with the given route.
      *
      * @param route the route you want to create a controller with.
+     * @throws IllegalArgumentException if the given route is
+     * {@link MediaRoute2Info#isSystemRoute() system route}
      *
      * @see RoutingControllerCallback#onControllerCreated
      * @see RoutingControllerCallback#onControllerCreationFailed
      */
     public void requestCreateController(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
+        if (route.isSystemRoute()) {
+            throw new IllegalArgumentException("Can't create a route controller with "
+                    + "a system route. Use getSystemController().");
+        }
         // TODO: Check the given route exists
 
         final int requestId;

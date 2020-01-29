@@ -161,14 +161,15 @@ public class MediaRouter2Manager {
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
+        List<MediaRoute2Info> routes = new ArrayList<>();
+
         List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
         if (preferredFeatures == null) {
-            return Collections.emptyList();
+            preferredFeatures = Collections.emptyList();
         }
-        List<MediaRoute2Info> routes = new ArrayList<>();
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.hasAnyFeatures(preferredFeatures)) {
+                if (route.isSystemRoute() || route.hasAnyFeatures(preferredFeatures)) {
                     routes.add(route);
                 }
             }

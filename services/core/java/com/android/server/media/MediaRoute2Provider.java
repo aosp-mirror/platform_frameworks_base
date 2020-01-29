@@ -36,6 +36,7 @@ abstract class MediaRoute2Provider {
     final Object mLock = new Object();
 
     Callback mCallback;
+    boolean mIsSystemRouteProvider;
     private volatile MediaRoute2ProviderInfo mProviderInfo;
 
     @GuardedBy("mLock")
@@ -85,6 +86,7 @@ abstract class MediaRoute2Provider {
         } else {
             mProviderInfo = new MediaRoute2ProviderInfo.Builder(providerInfo)
                     .setUniqueId(mUniqueId)
+                    .setSystemRouteProvider(mIsSystemRouteProvider)
                     .build();
         }
     }

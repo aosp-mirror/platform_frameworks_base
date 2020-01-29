@@ -197,6 +197,7 @@ public final class MediaRoute2Info implements Parcelable {
     final List<String> mFeatures;
     @DeviceType
     final int mDeviceType;
+    final boolean mIsSystem;
     final Uri mIconUri;
     final CharSequence mDescription;
     @ConnectionState
@@ -213,6 +214,7 @@ public final class MediaRoute2Info implements Parcelable {
         mName = builder.mName;
         mFeatures = builder.mFeatures;
         mDeviceType = builder.mDeviceType;
+        mIsSystem = builder.mIsSystem;
         mIconUri = builder.mIconUri;
         mDescription = builder.mDescription;
         mConnectionState = builder.mConnectionState;
@@ -229,6 +231,7 @@ public final class MediaRoute2Info implements Parcelable {
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mFeatures = in.createStringArrayList();
         mDeviceType = in.readInt();
+        mIsSystem = in.readBoolean();
         mIconUri = in.readParcelable(null);
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mConnectionState = in.readInt();
@@ -284,6 +287,17 @@ public final class MediaRoute2Info implements Parcelable {
     @DeviceType
     public int getDeviceType() {
         return mDeviceType;
+    }
+
+    /**
+     * Returns whether the route is a system route or not.
+     * <p>
+     * System routes are media routes directly controlled by the system
+     * such as phone speaker, wired headset, and Bluetooth devices.
+     * </p>
+     */
+    public boolean isSystemRoute() {
+        return mIsSystem;
     }
 
     /**
@@ -423,6 +437,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mName, other.mName)
                 && Objects.equals(mFeatures, other.mFeatures)
                 && (mDeviceType == other.mDeviceType)
+                && (mIsSystem == other.mIsSystem)
                 && Objects.equals(mIconUri, other.mIconUri)
                 && Objects.equals(mDescription, other.mDescription)
                 && (mConnectionState == other.mConnectionState)
@@ -436,7 +451,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Override
     public int hashCode() {
         // Note: mExtras is not included.
-        return Objects.hash(mId, mName, mFeatures, mDeviceType, mIconUri, mDescription,
+        return Objects.hash(mId, mName, mFeatures, mDeviceType, mIsSystem, mIconUri, mDescription,
                 mConnectionState, mClientPackageName, mVolumeHandling, mVolumeMax, mVolume,
                 mProviderId);
     }
@@ -473,6 +488,7 @@ public final class MediaRoute2Info implements Parcelable {
         TextUtils.writeToParcel(mName, dest, flags);
         dest.writeStringList(mFeatures);
         dest.writeInt(mDeviceType);
+        dest.writeBoolean(mIsSystem);
         dest.writeParcelable(mIconUri, flags);
         TextUtils.writeToParcel(mDescription, dest, flags);
         dest.writeInt(mConnectionState);
@@ -494,6 +510,7 @@ public final class MediaRoute2Info implements Parcelable {
 
         @DeviceType
         int mDeviceType = DEVICE_TYPE_UNKNOWN;
+        boolean mIsSystem;
         Uri mIconUri;
         CharSequence mDescription;
         @ConnectionState
@@ -540,6 +557,7 @@ public final class MediaRoute2Info implements Parcelable {
             mName = routeInfo.mName;
             mFeatures = new ArrayList<>(routeInfo.mFeatures);
             mDeviceType = routeInfo.mDeviceType;
+            mIsSystem = routeInfo.mIsSystem;
             mIconUri = routeInfo.mIconUri;
             mDescription = routeInfo.mDescription;
             mConnectionState = routeInfo.mConnectionState;
@@ -604,6 +622,16 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setDeviceType(@DeviceType int deviceType) {
             mDeviceType = deviceType;
+            return this;
+        }
+
+        /**
+         * Sets whether the route is a system route or not.
+         * @hide
+         */
+        @NonNull
+        public Builder setSystemRoute(boolean isSystem) {
+            mIsSystem = isSystem;
             return this;
         }
 
