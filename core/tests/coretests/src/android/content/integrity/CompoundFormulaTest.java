@@ -225,6 +225,63 @@ public class CompoundFormulaTest {
         assertThat(compoundFormula.matches(appInstallMetadata)).isFalse();
     }
 
+    @Test
+    public void testIsAppCertificateFormula_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+
+        assertThat(compoundFormula.isAppCertificateFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsAppCertificateFormula_true() {
+        AtomicFormula appCertFormula =
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE,
+                        "app.cert", /* isHashed= */false);
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2, appCertFormula));
+
+        assertThat(compoundFormula.isAppCertificateFormula()).isTrue();
+    }
+
+    @Test
+    public void testIsInstallerFormula_false() {
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+
+        assertThat(compoundFormula.isInstallerFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsInstallerFormula_installerName_true() {
+        AtomicFormula installerNameFormula =
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.INSTALLER_NAME,
+                        "com.test.installer", /* isHashed= */false);
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2, installerNameFormula));
+
+        assertThat(compoundFormula.isInstallerFormula()).isTrue();
+    }
+
+    @Test
+    public void testIsInstallerFormula_installerCertificate_true() {
+        AtomicFormula installerCertificateFormula =
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.INSTALLER_CERTIFICATE,
+                        "cert", /* isHashed= */false);
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2,
+                        installerCertificateFormula));
+
+        assertThat(compoundFormula.isInstallerFormula()).isTrue();
+    }
+
     /** Returns a builder with all fields filled with some dummy data. */
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()

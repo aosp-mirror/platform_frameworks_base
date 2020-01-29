@@ -96,20 +96,14 @@ public final class IntegrityCheckResult {
         }
     }
 
-    /**
-     * Returns true when the {@code Effect.DENY} result is caused by an app certificate mismatch.
-     */
+    /** Returns true when the {@code mEffect} is caused by an app certificate mismatch. */
     public boolean isCausedByAppCertRule() {
-        // TODO(b/147095027): implement this.
-        return true;
+        return mRuleList.stream().anyMatch(rule -> rule.getFormula().isAppCertificateFormula());
     }
 
-    /**
-     * Returns true when the {@code Effect.DENY} result is caused by an installer rule.
-     */
+    /** Returns true when the {@code mEffect} is caused by an installer rule. */
     public boolean isCausedByInstallerRule() {
-        // TODO(b/147095027): implement this.
-        return true;
+        return mRuleList.stream().anyMatch(rule -> rule.getFormula().isInstallerFormula());
     }
 
 }
