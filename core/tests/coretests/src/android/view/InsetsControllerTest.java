@@ -432,7 +432,7 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlInputMethodAnimation(0, new LinearInterpolator(), listener);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -456,7 +456,7 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlInputMethodAnimation(0, new LinearInterpolator(), listener);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -476,7 +476,7 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlInputMethodAnimation(0, new LinearInterpolator(), listener);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();

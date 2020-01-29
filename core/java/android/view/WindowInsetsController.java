@@ -167,62 +167,6 @@ public interface WindowInsetsController {
             @NonNull WindowInsetsAnimationControlListener listener);
 
     /**
-     * Lets the application control the animation for showing the IME in a frame-by-frame manner by
-     * modifying the position of the IME when it's causing insets.
-     *
-     * @param durationMillis Duration of the animation in
-     *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
-     *                       animation doesn't have a predetermined duration. This value will be
-     *                       passed to {@link InsetsAnimation#getDurationMillis()}
-     * @param interpolator The interpolator used for this animation, or {@code null} if this
-     *                     animation doesn't follow an interpolation curve. This value will be
-     *                     passed to {@link InsetsAnimation#getInterpolator()} and used to calculate
-     *                     {@link InsetsAnimation#getInterpolatedFraction()}.
-     * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
-     *                 IME are ready to be controlled, among other callbacks.
-     *
-     * @see InsetsAnimation#getFraction()
-     * @see InsetsAnimation#getInterpolatedFraction()
-     * @see InsetsAnimation#getInterpolator()
-     * @see InsetsAnimation#getDurationMillis()
-     */
-    default void controlInputMethodAnimation(long durationMillis,
-            @Nullable Interpolator interpolator,
-            @NonNull WindowInsetsAnimationControlListener listener) {
-        controlWindowInsetsAnimation(ime(), durationMillis, interpolator, listener);
-    }
-
-    /**
-     * Makes the IME appear on screen.
-     * <p>
-     * Note that if the window currently doesn't have control over the IME, because it doesn't have
-     * focus, it will apply the change as soon as the window gains control. The app can listen to
-     * the event by observing {@link View#onApplyWindowInsets} and checking visibility with
-     * {@link WindowInsets#isVisible}.
-     *
-     * @see #controlInputMethodAnimation
-     * @see #hideInputMethod()
-     */
-    default void showInputMethod() {
-        show(ime());
-    }
-
-    /**
-     * Makes the IME disappear on screen.
-     * <p>
-     * Note that if the window currently doesn't have control over IME, because it doesn't have
-     * focus, it will apply the change as soon as the window gains control. The app can listen to
-     * the event by observing {@link View#onApplyWindowInsets} and checking visibility with
-     * {@link WindowInsets#isVisible}.
-     *
-     * @see #controlInputMethodAnimation
-     * @see #showInputMethod()
-     */
-    default void hideInputMethod() {
-        hide(ime());
-    }
-
-    /**
      * Controls the appearance of system bars.
      * <p>
      * For example, the following statement adds {@link #APPEARANCE_LIGHT_STATUS_BARS}:

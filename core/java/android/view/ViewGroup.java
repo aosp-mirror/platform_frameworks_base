@@ -7239,6 +7239,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void dispatchWindowInsetsAnimationPrepare(
             @NonNull InsetsAnimation animation) {
         super.dispatchWindowInsetsAnimationPrepare(animation);
+
+        // If we are root-level content view that fits insets, set dispatch mode to stop to imitate
+        // consume behavior.
+        boolean isOptionalFitSystemWindows = (mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
+                || isFrameworkOptionalFitsSystemWindows();
+        if (isOptionalFitSystemWindows && mAttachInfo != null
+                && getListenerInfo().mWindowInsetsAnimationCallback == null
+                && mAttachInfo.mContentOnApplyWindowInsetsListener != null) {
+            mInsetsAnimationDispatchMode = DISPATCH_MODE_STOP;
+            return;
+        }
+
         if (mInsetsAnimationDispatchMode == DISPATCH_MODE_STOP) {
             return;
         }
