@@ -3339,13 +3339,6 @@
     <permission android:name="android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE"
                 android:protectionLevel="signature" />
 
-    <!-- Must be required by an {@link android.service.autofill.InlineSuggestionRenderService}
-         to ensure that only the system can bind to it.
-         @hide This is not a third-party API (intended for OEMs and system apps).
-    -->
-    <permission android:name="android.permission.BIND_INLINE_SUGGESTION_RENDER_SERVICE"
-                android:protectionLevel="signature" />
-
     <!-- Must be required by a android.service.textclassifier.TextClassifierService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
