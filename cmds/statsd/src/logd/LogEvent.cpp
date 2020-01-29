@@ -809,6 +809,26 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
     return 0.0;
 }
 
+std::vector<uint8_t> LogEvent::GetStorage(size_t key, status_t* err) const {
+    int field = getSimpleField(key);
+    for (const auto& value : mValues) {
+      if (value.mField.getField() == field) {
+        if (value.mValue.getType() == STORAGE) {
+          return value.mValue.storage_value;
+        } else {
+          *err = BAD_TYPE;
+          return vector<uint8_t>();
+        }
+      }
+      if ((size_t)value.mField.getPosAtDepth(0) > key) {
+        break;
+      }
+    }
+
+    *err = BAD_INDEX;
+    return vector<uint8_t>();
+}
+
 string LogEvent::ToString() const {
     string result;
     result += StringPrintf("{ uid(%d) %lld %lld (%d)", mLogUid, (long long)mLogdTimestampNs,

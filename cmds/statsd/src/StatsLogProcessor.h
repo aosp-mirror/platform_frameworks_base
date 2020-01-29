@@ -196,6 +196,14 @@ private:
     // Handler over the isolated uid change event.
     void onIsolatedUidChangedEventLocked(const LogEvent& event);
 
+    // Handler over the binary push state changed event.
+    void onBinaryPushStateChangedEventLocked(LogEvent* event);
+
+    // Updates train info on disk based on binary push state changed info and
+    // write disk info into parameters.
+    void getAndUpdateTrainInfoOnDisk(int32_t state, int64_t* trainVersionCode,
+                                     string* trainName, std::vector<int64_t>* experimentIds);
+
     // Reset all configs.
     void resetConfigsLocked(const int64_t timestampNs);
     // Reset the specified configs.

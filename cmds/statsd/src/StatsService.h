@@ -193,16 +193,6 @@ public:
     virtual Status unregisterNativePullAtomCallback(int32_t atomTag) override;
 
     /**
-     * Binder call to log BinaryPushStateChanged atom.
-     */
-    virtual Status sendBinaryPushStateChangedAtom(
-            const android::String16& trainNameIn,
-            const int64_t trainVersionCodeIn,
-            const int options,
-            const int32_t state,
-            const std::vector<int64_t>& experimentIdsIn) override;
-
-    /**
      * Binder call to log WatchdogRollbackOccurred atom.
      */
     virtual Status sendWatchdogRollbackOccurredAtom(

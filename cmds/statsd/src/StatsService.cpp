@@ -70,24 +70,11 @@ static binder::Status exception(uint32_t code, const std::string& msg) {
     return binder::Status::fromExceptionCode(code, String8(msg.c_str()));
 }
 
-
 static bool checkPermission(const char* permission) {
-    sp<IStatsCompanionService> scs = getStatsCompanionService();
-    if (scs == nullptr) {
-        return false;
-    }
-
-    bool success;
     pid_t pid = IPCThreadState::self()->getCallingPid();
     uid_t uid = IPCThreadState::self()->getCallingUid();
-
-    binder::Status status = scs->checkPermission(String16(permission), pid, uid, &success);
-    if (!status.isOk()) {
-        return false;
-    }
-    return success;
+    return checkPermissionForIds(permission, pid, uid);
 }
-
 
 binder::Status checkUid(uid_t expectedUid) {
     uid_t uid = IPCThreadState::self()->getCallingUid();
@@ -870,18 +857,8 @@ status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args)
         dprintf(out, "Incorrect number of argument supplied\n");
         return UNKNOWN_ERROR;
     }
-    android::String16 trainName = android::String16(args[1].c_str());
+    string trainName = string(args[1].c_str());
     int64_t trainVersion = strtoll(args[2].c_str(), nullptr, 10);
-    int options = 0;
-    if (args[3] == "1") {
-        options = options | IStatsd::FLAG_REQUIRE_STAGING;
-    }
-    if (args[4] == "1") {
-        options = options | IStatsd::FLAG_ROLLBACK_ENABLED;
-    }
-    if (args[5] == "1") {
-        options = options | IStatsd::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
-    }
     int32_t state = atoi(args[6].c_str());
     vector<int64_t> experimentIds;
     if (argCount == 8) {
@@ -892,7 +869,10 @@ status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args)
         }
     }
     dprintf(out, "Logging BinaryPushStateChanged\n");
-    sendBinaryPushStateChangedAtom(trainName, trainVersion, options, state, experimentIds);
+    vector<uint8_t> experimentIdBytes;
+    writeExperimentIdsToProto(experimentIds, &experimentIdBytes);
+    LogEvent event(trainName, trainVersion, args[3], args[4], args[5], state, experimentIdBytes, 0);
+    mProcessor->OnLogEvent(&event);
     return NO_ERROR;
 }
 
@@ -1310,101 +1290,6 @@ Status StatsService::unregisterNativePullAtomCallback(int32_t atomTag) {
     VLOG("StatsService::unregisterNativePullAtomCallback called.");
     int32_t uid = IPCThreadState::self()->getCallingUid();
     mPullerManager->UnregisterPullAtomCallback(uid, atomTag);
-    return Status::ok();
-}
-
-Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainNameIn,
-                                                    const int64_t trainVersionCodeIn,
-                                                    const int options,
-                                                    const int32_t state,
-                                                    const std::vector<int64_t>& experimentIdsIn) {
-    // Note: We skip the usage stats op check here since we do not have a package name.
-    // This is ok since we are overloading the usage_stats permission.
-    // This method only sends data, it does not receive it.
-    pid_t pid = IPCThreadState::self()->getCallingPid();
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-    // Root, system, and shell always have access
-    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
-        // Caller must be granted these permissions
-        if (!checkPermission(kPermissionDump)) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionDump));
-        }
-        if (!checkPermission(kPermissionUsage)) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionUsage));
-        }
-    }
-
-    bool readTrainInfoSuccess = false;
-    InstallTrainInfo trainInfoOnDisk;
-    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
-
-    bool resetExperimentIds = false;
-    int64_t trainVersionCode = trainVersionCodeIn;
-    std::string trainNameUtf8 = std::string(String8(trainNameIn).string());
-    if (readTrainInfoSuccess) {
-        // Keep the old train version if we received an empty version.
-        if (trainVersionCodeIn == -1) {
-            trainVersionCode = trainInfoOnDisk.trainVersionCode;
-        } else if (trainVersionCodeIn != trainInfoOnDisk.trainVersionCode) {
-        // Reset experiment ids if we receive a new non-empty train version.
-            resetExperimentIds = true;
-        }
-
-        // Keep the old train name if we received an empty train name.
-        if (trainNameUtf8.size() == 0) {
-            trainNameUtf8 = trainInfoOnDisk.trainName;
-        } else if (trainNameUtf8 != trainInfoOnDisk.trainName) {
-            // Reset experiment ids if we received a new valid train name.
-            resetExperimentIds = true;
-        }
-
-        // Reset if we received a different experiment id.
-        if (!experimentIdsIn.empty() &&
-                (trainInfoOnDisk.experimentIds.empty() ||
-                 experimentIdsIn[0] != trainInfoOnDisk.experimentIds[0])) {
-            resetExperimentIds = true;
-        }
-    }
-
-    // Find the right experiment IDs
-    std::vector<int64_t> experimentIds;
-    if (resetExperimentIds || !readTrainInfoSuccess) {
-        experimentIds = experimentIdsIn;
-    } else {
-        experimentIds = trainInfoOnDisk.experimentIds;
-    }
-
-    if (!experimentIds.empty()) {
-        int64_t firstId = experimentIds[0];
-        switch (state) {
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
-                experimentIds.push_back(firstId + 1);
-                break;
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
-                experimentIds.push_back(firstId + 2);
-                break;
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
-                experimentIds.push_back(firstId + 3);
-                break;
-        }
-    }
-
-    // Flatten the experiment IDs to proto
-    vector<uint8_t> experimentIdsProtoBuffer;
-    writeExperimentIdsToProto(experimentIds, &experimentIdsProtoBuffer);
-    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
-
-    userid_t userId = multiuser_get_user_id(uid);
-    bool requiresStaging = options & IStatsd::FLAG_REQUIRE_STAGING;
-    bool rollbackEnabled = options & IStatsd::FLAG_ROLLBACK_ENABLED;
-    bool requiresLowLatencyMonitor = options & IStatsd::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
-    LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
-                   requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
-    mProcessor->OnLogEvent(&event);
     return Status::ok();
 }
 

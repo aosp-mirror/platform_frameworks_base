@@ -27,6 +27,7 @@ import android.content.Context;
 import android.os.IStatsd;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FrameworkStatsLog;
 
@@ -37,6 +38,7 @@ import com.android.internal.util.FrameworkStatsLog;
 public final class StatsLog {
     private static final String TAG = "StatsLog";
     private static final boolean DEBUG = false;
+    private static final int EXPERIMENT_IDS_FIELD_ID = 1;
 
     private static IStatsd sService;
 
@@ -152,28 +154,25 @@ public final class StatsLog {
     public static boolean logBinaryPushStateChanged(@NonNull String trainName,
             long trainVersionCode, int options, int state,
             @NonNull long[] experimentIds) {
-        synchronized (sLogLock) {
-            try {
-                IStatsd service = getIStatsdLocked();
-                if (service == null) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging event");
-                    }
-                    return false;
-                }
-                service.sendBinaryPushStateChangedAtom(
-                        trainName, trainVersionCode, options, state, experimentIds);
-                return true;
-            } catch (RemoteException e) {
-                sService = null;
-                if (DEBUG) {
-                    Slog.d(TAG,
-                            "Failed to connect to StatsCompanionService when logging "
-                                    + "BinaryPushStateChanged");
-                }
-                return false;
-            }
+        ProtoOutputStream proto = new ProtoOutputStream();
+        for (long id : experimentIds) {
+            proto.write(
+                    ProtoOutputStream.FIELD_TYPE_INT64
+                    | ProtoOutputStream.FIELD_COUNT_REPEATED
+                    | EXPERIMENT_IDS_FIELD_ID,
+                    id);
         }
+        FrameworkStatsLog.write(FrameworkStatsLog.BINARY_PUSH_STATE_CHANGED,
+                trainName,
+                trainVersionCode,
+                (options & IStatsd.FLAG_REQUIRE_STAGING) > 0,
+                (options & IStatsd.FLAG_ROLLBACK_ENABLED) > 0,
+                (options & IStatsd.FLAG_REQUIRE_LOW_LATENCY_MONITOR) > 0,
+                state,
+                proto.getBytes(),
+                0,
+                0);
+        return true;
     }
 
     /**
