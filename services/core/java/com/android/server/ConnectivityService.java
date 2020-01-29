@@ -2955,6 +2955,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         public int getInterfaceVersion() {
             return this.VERSION;
         }
+
+        @Override
+        public String getInterfaceHash() {
+            return this.HASH;
+        }
     }
 
     private boolean networkRequiresPrivateDnsValidation(NetworkAgentInfo nai) {
