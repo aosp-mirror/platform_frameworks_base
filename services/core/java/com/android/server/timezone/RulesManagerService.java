@@ -49,7 +49,7 @@ import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 import libcore.timezone.TimeZoneDataFiles;
 import libcore.timezone.TimeZoneFinder;
 import libcore.timezone.TzDataSetVersion;
-import libcore.timezone.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDb;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -518,9 +518,9 @@ public final class RulesManagerService extends IRulesManager.Stub {
                         case 'a': {
                             // Report the active rules version (i.e. the rules in use by the current
                             // process).
-                            pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
+                            pw.println("Active rules version (ICU, ZoneInfoDb, TimeZoneFinder): "
                                     + TimeZone.getTZDataVersion() + ","
-                                    + ZoneInfoDB.getInstance().getVersion() + ","
+                                    + ZoneInfoDb.getInstance().getVersion() + ","
                                     + TimeZoneFinder.getInstance().getIanaVersion());
                             break;
                         }
@@ -536,7 +536,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
         pw.println("RulesManagerService state: " + toString());
         pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
                 + TimeZone.getTZDataVersion() + ","
-                + ZoneInfoDB.getInstance().getVersion() + ","
+                + ZoneInfoDb.getInstance().getVersion() + ","
                 + TimeZoneFinder.getInstance().getIanaVersion());
         pw.println("Distro state: " + rulesState.toString());
         mPackageTracker.dump(pw);
