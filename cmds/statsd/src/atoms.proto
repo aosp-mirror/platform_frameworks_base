@@ -466,8 +466,8 @@ message Atom {
         DangerousPermissionStateSampled dangerous_permission_state_sampled =
                 10067 [(module) = "framework"];
         GraphicsStats graphics_stats = 10068;
-        RuntimeAppOpsAccess runtime_app_ops_access = 10069;
-        IonHeapSize ion_heap_size = 10070 [(module) = "framework"];
+        RuntimeAppOpAccess runtime_app_op_access = 10069 [(module) = "framework"];
+        IonHeapSize ion_heap_size = 10070;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -8132,15 +8132,15 @@ message GraphicsStats {
 /**
  * Message related to dangerous (runtime) app ops access
  */
-message RuntimeAppOpsAccess {
+message RuntimeAppOpAccess {
     // Uid of the package accessing app op
     optional int32 uid = 1 [(is_uid) = true];
 
     // Name of the package accessing app op
     optional string package_name = 2;
 
-    // operation id; maps to the OP_* constants in AppOpsManager.java
-    optional int32 op_id = 3;
+    // operation string id per OPSTR_ constants in AppOpsManager.java
+    optional string op = 3;
 
     // feature id; provided by developer when accessing related API, limited at 50 chars by API.
     // Features must be provided through manifest using <feature> tag available in R and above.
