@@ -210,4 +210,14 @@ oneway interface IStatusBar
      * Cancels toast with token {@code token} in {@code packageName}.
      */
     void hideToast(String packageName, IBinder token);
+
+    /**
+     * Notifies SystemUI to start tracing.
+     */
+    void startTracing();
+
+    /**
+     * Notifies SystemUI to stop tracing.
+     */
+    void stopTracing();
 }

@@ -30,6 +30,7 @@ import android.util.proto.ProtoOutputStream;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.TraceBuffer;
 
 import org.junit.After;
 import org.junit.Before;

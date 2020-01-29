@@ -19,6 +19,8 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 
 import com.android.systemui.statusbar.notification.row.NotificationRowModule;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.tracing.ProtoTracer;
 
 import javax.inject.Singleton;
 
@@ -35,8 +37,8 @@ public class StatusBarDependenciesModule {
      */
     @Provides
     @Singleton
-    public CommandQueue provideCommandQueue(Context context) {
-        return new CommandQueue(context);
+    public CommandQueue provideCommandQueue(Context context, ProtoTracer protoTracer) {
+        return new CommandQueue(context, protoTracer);
     }
 
 }

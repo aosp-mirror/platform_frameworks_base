@@ -38,7 +38,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.protolog.common.IProtoLogGroup;
 import com.android.server.protolog.common.LogDataType;
-import com.android.server.utils.TraceBuffer;
+import com.android.internal.util.TraceBuffer;
 import com.android.server.wm.ProtoLogGroup;
 
 import java.io.File;

@@ -35,7 +35,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 
 import com.android.server.protolog.ProtoLogImpl;
-import com.android.server.utils.TraceBuffer;
+import com.android.internal.util.TraceBuffer;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +64,7 @@ class WindowTracing {
 
     private final Object mEnabledLock = new Object();
     private final File mTraceFile;
-    private final com.android.server.utils.TraceBuffer mBuffer;
+    private final TraceBuffer mBuffer;
     private final Choreographer.FrameCallback mFrameCallback = (frameTimeNanos) ->
             log("onFrame" /* where */);
 

@@ -29,6 +29,7 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WIN
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
@@ -67,6 +68,7 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
@@ -485,7 +487,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyService(Context context, DeviceProvisionedController provisionController,
+    public OverviewProxyService(Context context, CommandQueue commandQueue,
+            DeviceProvisionedController provisionController,
             NavigationBarController navBarController, NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             PipUI pipUI, Optional<Divider> dividerOptional,
@@ -530,6 +533,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         // Listen for status bar state changes
         statusBarWinController.registerCallback(mStatusBarWindowCallback);
         mScreenshotHelper = new ScreenshotHelper(context);
+
+        // Listen for tracing state changes
+        commandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void onTracingStateChanged(boolean enabled) {
+                mSysUiState.setFlag(SYSUI_STATE_TRACING_ENABLED, enabled)
+                        .commitUpdate(mContext.getDisplayId());
+            }
+        });
     }
 
     public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
@@ -573,14 +585,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void onStatusBarStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
             boolean bouncerShowing) {
-        int displayId = mContext.getDisplayId();
-
         mSysUiState.setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
                         keyguardShowing && !keyguardOccluded)
                 .setFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED,
                         keyguardShowing && keyguardOccluded)
                 .setFlag(SYSUI_STATE_BOUNCER_SHOWING, bouncerShowing)
-                .commitUpdate(displayId);
+                .commitUpdate(mContext.getDisplayId());
     }
 
     /**
@@ -599,10 +609,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Log.e(TAG_OPS, "Failed to call onActiveNavBarRegionChanges()", e);
             }
         }
-    }
-
-    public float getBackButtonAlpha() {
-        return mNavBarButtonAlpha;
     }
 
     public void cleanupAfterDeath() {

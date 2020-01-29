@@ -54,6 +54,10 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.shared.tracing.ProtoTraceable;
+import com.android.systemui.tracing.ProtoTracer;
+import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
+import com.android.systemui.tracing.nano.SystemUiTraceProto;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -62,7 +66,7 @@ import java.util.concurrent.Executor;
  * Utility class to handle edge swipes for back gesture
  */
 public class EdgeBackGestureHandler implements DisplayListener,
-        PluginListener<NavigationEdgeBackPlugin> {
+        PluginListener<NavigationEdgeBackPlugin>, ProtoTraceable<SystemUiTraceProto> {
 
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
@@ -161,6 +165,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
         mMainExecutor = context.getMainExecutor();
         mOverviewProxyService = overviewProxyService;
         mPluginManager = pluginManager;
+        Dependency.get(ProtoTracer.class).add(this);
 
         // Reduce the default touch slop to ensure that we can intercept the gesture
         // before the app starts to react to it.
@@ -399,6 +404,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
             // forward touch
             mEdgeBackPlugin.onMotionEvent(ev);
         }
+
+        Dependency.get(ProtoTracer.class).update();
     }
 
     @Override
@@ -456,6 +463,14 @@ public class EdgeBackGestureHandler implements DisplayListener,
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mEdgeWidth=" + mEdgeWidth);
+    }
+
+    @Override
+    public void writeToProto(SystemUiTraceProto proto) {
+        if (proto.edgeBackGestureHandler == null) {
+            proto.edgeBackGestureHandler = new EdgeBackGestureHandlerProto();
+        }
+        proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
     }
 
     class SysUiInputEventReceiver extends InputEventReceiver {

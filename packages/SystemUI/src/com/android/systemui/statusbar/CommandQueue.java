@@ -53,6 +53,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.tracing.ProtoTracer;
 
 import java.util.ArrayList;
 
@@ -123,6 +124,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_DISMISS_INATTENTIVE_SLEEP_WARNING = 52 << MSG_SHIFT;
     private static final int MSG_SHOW_TOAST                        = 53 << MSG_SHIFT;
     private static final int MSG_HIDE_TOAST                        = 54 << MSG_SHIFT;
+    private static final int MSG_TRACING_STATE_CHANGED             = 55 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -143,6 +145,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
      * event.
      */
     private int mLastUpdatedImeDisplayId = INVALID_DISPLAY;
+    private ProtoTracer mProtoTracer;
 
     /**
      * These methods are called back on the main thread.
@@ -325,9 +328,19 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * @see IStatusBar#hideToast(String, IBinder) (String, IBinder)
          */
         default void hideToast(String packageName, IBinder token) { }
+
+        /**
+         * @param enabled
+         */
+        default void onTracingStateChanged(boolean enabled) { }
     }
 
     public CommandQueue(Context context) {
+        this(context, null);
+    }
+
+    public CommandQueue(Context context, ProtoTracer protoTracer) {
+        mProtoTracer = protoTracer;
         context.getSystemService(DisplayManager.class).registerDisplayListener(this, mHandler);
         // We always have default display.
         setDisabled(DEFAULT_DISPLAY, DISABLE_NONE, DISABLE2_NONE);
@@ -917,6 +930,26 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         }
     }
 
+    @Override
+    public void startTracing() {
+        synchronized (mLock) {
+            if (mProtoTracer != null) {
+                mProtoTracer.start();
+            }
+            mHandler.obtainMessage(MSG_TRACING_STATE_CHANGED, true).sendToTarget();
+        }
+    }
+
+    @Override
+    public void stopTracing() {
+        synchronized (mLock) {
+            if (mProtoTracer != null) {
+                mProtoTracer.stop();
+            }
+            mHandler.obtainMessage(MSG_TRACING_STATE_CHANGED, false).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1244,6 +1277,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     }
                     break;
                 }
+                case MSG_TRACING_STATE_CHANGED:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onTracingStateChanged((Boolean) msg.obj);
+                    }
+                    break;
             }
         }
     }
