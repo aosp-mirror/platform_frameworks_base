@@ -479,6 +479,14 @@ bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* str
 
 bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
                       int32_t quality, SkWStream* stream) {
+    if (bitmap.colorType() == kAlpha_8_SkColorType) {
+        // None of the JavaCompressFormats have a sensible way to compress an
+        // ALPHA_8 Bitmap. SkPngEncoder will compress one, but it uses a non-
+        // standard format that most decoders do not understand, so this is
+        // likely not useful.
+        return false;
+    }
+
     SkEncodedImageFormat fm;
     switch (format) {
         case JavaCompressFormat::Jpeg:
