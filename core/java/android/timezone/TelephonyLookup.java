@@ -30,9 +30,9 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-public class TelephonyLookup {
+public final class TelephonyLookup {
 
-    private static Object sLock = new Object();
+    private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static TelephonyLookup sInstance;
 

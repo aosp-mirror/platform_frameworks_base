@@ -32,7 +32,7 @@ import java.util.Objects;
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TimeZoneFinder {
 
-    private static Object sLock = new Object();
+    private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static TimeZoneFinder sInstance;
 
