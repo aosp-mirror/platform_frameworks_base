@@ -526,8 +526,13 @@ public class BubbleStackView extends FrameLayout {
                 R.layout.bubble_expanded_view, this /* root */, false /* attachToRoot */);
         mOverflowExpandedView.setOverflow(true);
 
-        mInflater.inflate(R.layout.bubble_overflow_button, this);
-        mOverflowBtn = findViewById(R.id.bubble_overflow_button);
+        mOverflowBtn = (ImageView) mInflater.inflate(R.layout.bubble_overflow_button,
+                this /* root */,
+                false /* attachToRoot */);
+
+        mBubbleContainer.addView(mOverflowBtn, 0,
+                new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+
         mOverflowBtn.setOnClickListener(v -> {
             setSelectedBubble(null);
         });
@@ -541,11 +546,13 @@ public class BubbleStackView extends FrameLayout {
         ColorDrawable bg = new ColorDrawable(bgColor);
         AdaptiveIconDrawable adaptiveIcon = new AdaptiveIconDrawable(bg, fg);
         mOverflowBtn.setImageDrawable(adaptiveIcon);
+
         mOverflowBtn.setVisibility(GONE);
     }
 
     void showExpandedViewContents(int displayId) {
-        if (mOverflowExpandedView.getVirtualDisplayId() == displayId) {
+        if (mOverflowExpandedView != null
+                && mOverflowExpandedView.getVirtualDisplayId() == displayId) {
             mOverflowExpandedView.setContentVisibility(true);
         } else if (mExpandedBubble != null
                 && mExpandedBubble.getExpandedView().getVirtualDisplayId() == displayId) {
@@ -714,7 +721,7 @@ public class BubbleStackView extends FrameLayout {
     private void updateSystemGestureExcludeRects() {
         // Exclude the region occupied by the first BubbleView in the stack
         Rect excludeZone = mSystemGestureExclusionRects.get(0);
-        if (mBubbleContainer.getChildCount() > 0) {
+        if (getBubbleCount() > 0) {
             View firstBubble = mBubbleContainer.getChildAt(0);
             excludeZone.set(firstBubble.getLeft(), firstBubble.getTop(), firstBubble.getRight(),
                     firstBubble.getBottom());
@@ -775,7 +782,7 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "addBubble: " + bubble);
         }
 
-        if (mBubbleContainer.getChildCount() == 0) {
+        if (getBubbleCount() == 0) {
             mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
         }
 
@@ -817,16 +824,13 @@ public class BubbleStackView extends FrameLayout {
         }
         if (mIsExpanded) {
             if (DEBUG_BUBBLE_STACK_VIEW) {
-                Log.d(TAG, "Expanded && overflow > 0. Show overflow button at");
-                Log.d(TAG, "x: " + mExpandedAnimationController.getOverflowBtnLeft());
-                Log.d(TAG, "y: " + mExpandedAnimationController.getExpandedY());
+                Log.d(TAG, "Show overflow button.");
             }
-            mOverflowBtn.setX(mExpandedAnimationController.getOverflowBtnLeft());
-            mOverflowBtn.setY(mExpandedAnimationController.getExpandedY());
             mOverflowBtn.setVisibility(VISIBLE);
-            mExpandedAnimationController.setShowOverflowBtn(true);
             if (apply) {
-                mExpandedAnimationController.expandFromStack(null /* after */);
+                mExpandedAnimationController.expandFromStack(() -> {
+                    updatePointerPosition();
+                } /* after */);
             }
         } else {
             if (DEBUG_BUBBLE_STACK_VIEW) {
@@ -947,7 +951,7 @@ public class BubbleStackView extends FrameLayout {
         if (mIsExpanded) {
             if (isIntersecting(mBubbleContainer, x, y)) {
                 // Could be tapping or dragging a bubble while expanded
-                for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
+                for (int i = 0; i < getBubbleCount(); i++) {
                     BadgedImageView view = (BadgedImageView) mBubbleContainer.getChildAt(i);
                     if (isIntersecting(view, x, y)) {
                         return view;
@@ -1103,7 +1107,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Return the BubbleView at the given index from the bubble container. */
     public BadgedImageView getBubbleAt(int i) {
-        return mBubbleContainer.getChildCount() > i
+        return getBubbleCount() > i
                 ? (BadgedImageView) mBubbleContainer.getChildAt(i)
                 : null;
     }
@@ -1567,7 +1571,7 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
         if (!mIsExpanded) {
-            if (mBubbleContainer.getChildCount() > 0) {
+            if (getBubbleCount() > 0) {
                 mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
             }
             // Increase the touch target size of the bubble
@@ -1661,7 +1665,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Sets the appropriate Z-order and dot position for each bubble in the stack. */
     private void updateBubbleZOrdersAndDotPosition(boolean animate) {
-        int bubbleCount = mBubbleContainer.getChildCount();
+        int bubbleCount = getBubbleCount();
         for (int i = 0; i < bubbleCount; i++) {
             BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
             bv.setZ((mMaxBubbles * mBubbleElevation) - i);
@@ -1677,30 +1681,23 @@ public class BubbleStackView extends FrameLayout {
         if (expandedBubble == null) {
             return;
         }
-
         int index = getBubbleIndex(expandedBubble);
-        if (index >= mMaxBubbles) {
-            // In between state, where extra bubble will be overflowed, and new bubble added
-            index = 0;
-        }
         float bubbleLeftFromScreenLeft = mExpandedAnimationController.getBubbleLeft(index);
         float halfBubble = mBubbleSize / 2f;
         float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble;
         // Padding might be adjusted for insets, so get it directly from the view
         bubbleCenter -= mExpandedViewContainer.getPaddingLeft();
-
-        if (index >= mMaxBubbles) {
-            Bubble first = mBubbleData.getBubbles().get(0);
-            first.getExpandedView().setPointerPosition(bubbleCenter);
-        } else {
-            expandedBubble.getExpandedView().setPointerPosition(bubbleCenter);
-        }
+        expandedBubble.getExpandedView().setPointerPosition(bubbleCenter);
     }
 
     /**
      * @return the number of bubbles in the stack view.
      */
     public int getBubbleCount() {
+        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
+            // Subtract 1 for the overflow button which is always in the bubble container.
+            return mBubbleContainer.getChildCount() - 1;
+        }
         return mBubbleContainer.getChildCount();
     }
 
@@ -1797,7 +1794,7 @@ public class BubbleStackView extends FrameLayout {
     /** For debugging only */
     List<Bubble> getBubblesOnScreen() {
         List<Bubble> bubbles = new ArrayList<>();
-        for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
+        for (int i = 0; i < getBubbleCount(); i++) {
             View child = mBubbleContainer.getChildAt(i);
             if (child instanceof BadgedImageView) {
                 String key = ((BadgedImageView) child).getKey();

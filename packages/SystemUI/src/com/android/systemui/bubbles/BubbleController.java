@@ -866,10 +866,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mOverflowCallback.run();
             }
 
-            if (update.addedBubble != null) {
-                mStackView.addBubble(update.addedBubble);
-            }
-
             // Collapsing? Do this first before remaining steps.
             if (update.expandedChanged && !update.expanded) {
                 mStackView.setExpanded(false);
@@ -914,6 +910,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         }
                     }
                 }
+            }
+
+            if (update.addedBubble != null) {
+                mStackView.addBubble(update.addedBubble);
             }
 
             if (update.updatedBubble != null) {
