@@ -123,6 +123,14 @@ jint com_android_server_storage_AppFuseBridge_add_bridge(
     return proxyFd[1].release();
 }
 
+void com_android_server_storage_AppFuseBridge_lock(JNIEnv* env, jobject self) {
+    fuse::FuseBridgeLoop::Lock();
+}
+
+void com_android_server_storage_AppFuseBridge_unlock(JNIEnv* env, jobject self) {
+    fuse::FuseBridgeLoop::Unlock();
+}
+
 const JNINativeMethod methods[] = {
     {
         "native_new",
@@ -143,6 +151,16 @@ const JNINativeMethod methods[] = {
         "native_add_bridge",
         "(JII)I",
         reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_add_bridge)
+    },
+    {
+        "native_lock",
+        "()V",
+        reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_lock)
+    },
+    {
+        "native_unlock",
+        "()V",
+        reinterpret_cast<void*>(com_android_server_storage_AppFuseBridge_unlock)
     }
 };
 
