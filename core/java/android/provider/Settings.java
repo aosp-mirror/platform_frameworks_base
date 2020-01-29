@@ -5215,7 +5215,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NUM_OPEN_NETWORKS_KEPT);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_DEVICE_NAME);
-            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SAVED_STATE);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_ENHANCED_AUTO_JOIN);
@@ -10321,16 +10320,6 @@ public final class Settings {
          * @hide
          */
         public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
-
-       /**
-        * Used to save the Wifi_ON state prior to tethering.
-        * This state will be checked to restore Wifi after
-        * the user turns off tethering.
-        *
-        * @hide
-        */
-       @UnsupportedAppUsage
-       public static final String WIFI_SAVED_STATE = "wifi_saved_state";
 
        /**
         * The interval in milliseconds to scan as used by the wifi supplicant
