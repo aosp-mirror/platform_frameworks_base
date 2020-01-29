@@ -79,6 +79,11 @@ public final class MediaRoute2Info implements Parcelable {
      */
     public static final int CONNECTION_STATE_CONNECTED = 2;
 
+    /** @hide */
+    @IntDef({PLAYBACK_VOLUME_FIXED, PLAYBACK_VOLUME_VARIABLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PlaybackVolume {}
+
     /**
      * Playback information indicating the playback volume is fixed, i&#46;e&#46; it cannot be
      * controlled from this object. An example of fixed playback volume is a remote player,
@@ -326,6 +331,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @return {@link #PLAYBACK_VOLUME_FIXED} or {@link #PLAYBACK_VOLUME_VARIABLE}
      */
+    @PlaybackVolume
     public int getVolumeHandling() {
         return mVolumeHandling;
     }
@@ -375,6 +381,7 @@ public final class MediaRoute2Info implements Parcelable {
      *
      * @param features the list of route features to consider
      * @return true if the route has at least one feature in the list
+     * @hide
      */
     public boolean hasAnyFeatures(@NonNull Collection<String> features) {
         Objects.requireNonNull(features, "features must not be null");
@@ -548,6 +555,12 @@ public final class MediaRoute2Info implements Parcelable {
 
         /**
          * Adds a feature for the route.
+         * @param feature a feature that the route has. May be one of predefined features
+         *                such as {@link #FEATURE_LIVE_AUDIO}, {@link #FEATURE_LIVE_VIDEO} or
+         *                {@link #FEATURE_REMOTE_PLAYBACK} or a custom feature defined by
+         *                a provider.
+         *
+         * @see #addFeatures(Collection)
          */
         @NonNull
         public Builder addFeature(@NonNull String feature) {
@@ -560,6 +573,12 @@ public final class MediaRoute2Info implements Parcelable {
 
         /**
          * Adds features for the route. A route must support at least one route type.
+         * @param features features that the route has. May include predefined features
+         *                such as {@link #FEATURE_LIVE_AUDIO}, {@link #FEATURE_LIVE_VIDEO} or
+         *                {@link #FEATURE_REMOTE_PLAYBACK} or custom features defined by
+         *                a provider.
+         *
+         * @see #addFeature(String)
          */
         @NonNull
         public Builder addFeatures(@NonNull Collection<String> features) {
@@ -643,7 +662,7 @@ public final class MediaRoute2Info implements Parcelable {
          * Sets the route's volume handling.
          */
         @NonNull
-        public Builder setVolumeHandling(int volumeHandling) {
+        public Builder setVolumeHandling(@PlaybackVolume int volumeHandling) {
             mVolumeHandling = volumeHandling;
             return this;
         }
