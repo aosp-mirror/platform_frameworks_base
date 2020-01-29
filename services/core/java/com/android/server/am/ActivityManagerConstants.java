@@ -438,14 +438,15 @@ final class ActivityManagerConstants extends ContentObserver {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(),
                 mOnDeviceConfigChangedListener);
-        updateMaxCachedProcesses();
+        loadDeviceConfigConstants();
+        // The following read from Settings.
         updateActivityStartsLoggingEnabled();
-        updateBackgroundActivityStarts();
-        updateForceRestrictedBackgroundCheck();
         updateForegroundServiceStartsLoggingEnabled();
-        updateBackgroundFgsStartsRestriction();
-        updateOomAdjUpdatePolicy();
-        updateImperceptibleKillExemptions();
+    }
+
+    private void loadDeviceConfigConstants() {
+        mOnDeviceConfigChangedListener.onPropertiesChanged(
+                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER));
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
