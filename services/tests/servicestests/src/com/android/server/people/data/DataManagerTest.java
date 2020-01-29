@@ -18,6 +18,8 @@ package com.android.server.people.data;
 
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -58,6 +60,7 @@ import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.util.Range;
 
@@ -79,6 +82,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 @RunWith(JUnit4.class)
 public final class DataManagerTest {
@@ -90,6 +94,7 @@ public final class DataManagerTest {
     private static final String TEST_SHORTCUT_ID = "sc";
     private static final String CONTACT_URI = "content://com.android.contacts/contacts/lookup/123";
     private static final String PHONE_NUMBER = "+1234567890";
+    private static final long MILLIS_PER_MINUTE = 1000L * 60L;
 
     @Mock private Context mContext;
     @Mock private ShortcutServiceInternal mShortcutServiceInternal;
@@ -97,6 +102,7 @@ public final class DataManagerTest {
     @Mock private ShortcutManager mShortcutManager;
     @Mock private UserManager mUserManager;
     @Mock private TelephonyManager mTelephonyManager;
+    @Mock private TelecomManager mTelecomManager;
     @Mock private ContentResolver mContentResolver;
     @Mock private ScheduledExecutorService mExecutorService;
     @Mock private ScheduledFuture mScheduledFuture;
@@ -117,6 +123,9 @@ public final class DataManagerTest {
 
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
 
+        Context originalContext = getInstrumentation().getTargetContext();
+        when(mContext.getApplicationInfo()).thenReturn(originalContext.getApplicationInfo());
+
         when(mContext.getSystemService(Context.SHORTCUT_SERVICE)).thenReturn(mShortcutManager);
         when(mContext.getSystemServiceName(ShortcutManager.class)).thenReturn(
                 Context.SHORTCUT_SERVICE);
@@ -126,6 +135,11 @@ public final class DataManagerTest {
                 Context.USER_SERVICE);
 
         when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
+
+        when(mContext.getSystemService(Context.TELECOM_SERVICE)).thenReturn(mTelecomManager);
+        when(mContext.getSystemServiceName(TelecomManager.class)).thenReturn(
+                Context.TELECOM_SERVICE);
+        when(mTelecomManager.getDefaultDialerPackage(anyInt())).thenReturn(TEST_PKG_NAME);
 
         when(mExecutorService.scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(
                 TimeUnit.class))).thenReturn(mScheduledFuture);
@@ -351,6 +365,61 @@ public final class DataManagerTest {
         assertEquals(1, activeShortcutInvocationTimeSlots.size());
     }
 
+    @Test
+    public void testCallLogContentObserver() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.onShortcutAddedOrUpdated(shortcut);
+
+        ContentObserver contentObserver = mDataManager.getCallLogContentObserverForTesting();
+        contentObserver.onChange(false);
+        long currentTimestamp = System.currentTimeMillis();
+        mInjector.mCallLogQueryHelper.mEventConsumer.accept(PHONE_NUMBER,
+                new Event(currentTimestamp - MILLIS_PER_MINUTE * 15L, Event.TYPE_CALL_OUTGOING));
+        mInjector.mCallLogQueryHelper.mEventConsumer.accept(PHONE_NUMBER,
+                new Event(currentTimestamp - MILLIS_PER_MINUTE * 10L, Event.TYPE_CALL_INCOMING));
+        mInjector.mCallLogQueryHelper.mEventConsumer.accept(PHONE_NUMBER,
+                new Event(currentTimestamp - MILLIS_PER_MINUTE * 5L, Event.TYPE_CALL_MISSED));
+
+        List<Range<Long>> activeTimeSlots = new ArrayList<>();
+        mDataManager.forAllPackages(packageData ->
+                activeTimeSlots.addAll(
+                        packageData.getEventHistory(TEST_SHORTCUT_ID)
+                                .getEventIndex(Event.CALL_EVENT_TYPES)
+                                .getActiveTimeSlots()));
+        assertEquals(3, activeTimeSlots.size());
+    }
+
+    @Test
+    public void testMmsSmsContentObserver() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.onShortcutAddedOrUpdated(shortcut);
+        mDataManager.getUserDataForTesting(USER_ID_PRIMARY).setDefaultSmsApp(TEST_PKG_NAME);
+
+        ContentObserver contentObserver = mDataManager.getMmsSmsContentObserverForTesting();
+        contentObserver.onChange(false);
+        long currentTimestamp = System.currentTimeMillis();
+        Event outgoingSmsEvent =
+                new Event(currentTimestamp - MILLIS_PER_MINUTE * 10L, Event.TYPE_SMS_OUTGOING);
+        Event incomingSmsEvent =
+                new Event(currentTimestamp - MILLIS_PER_MINUTE * 5L, Event.TYPE_SMS_INCOMING);
+        mInjector.mMmsQueryHelper.mEventConsumer.accept(PHONE_NUMBER, outgoingSmsEvent);
+        mInjector.mSmsQueryHelper.mEventConsumer.accept(PHONE_NUMBER, incomingSmsEvent);
+
+        List<Range<Long>> activeTimeSlots = new ArrayList<>();
+        mDataManager.forAllPackages(packageData ->
+                activeTimeSlots.addAll(
+                        packageData.getEventHistory(TEST_SHORTCUT_ID)
+                                .getEventIndex(Event.SMS_EVENT_TYPES)
+                                .getActiveTimeSlots()));
+        assertEquals(2, activeTimeSlots.size());
+    }
+
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
         LocalServices.removeServiceForTest(clazz);
         LocalServices.addService(clazz, mock);
@@ -428,10 +497,73 @@ public final class DataManagerTest {
         }
     }
 
+    private class TestCallLogQueryHelper extends CallLogQueryHelper {
+
+        private final BiConsumer<String, Event> mEventConsumer;
+
+        TestCallLogQueryHelper(Context context, BiConsumer<String, Event> eventConsumer) {
+            super(context, eventConsumer);
+            mEventConsumer = eventConsumer;
+        }
+
+        @Override
+        boolean querySince(long sinceTime) {
+            return true;
+        }
+
+        @Override
+        long getLastCallTimestamp() {
+            return 100L;
+        }
+    }
+
+    private class TestSmsQueryHelper extends SmsQueryHelper {
+
+        private final BiConsumer<String, Event> mEventConsumer;
+
+        TestSmsQueryHelper(Context context, BiConsumer<String, Event> eventConsumer) {
+            super(context, eventConsumer);
+            mEventConsumer = eventConsumer;
+        }
+
+        @Override
+        boolean querySince(long sinceTime) {
+            return true;
+        }
+
+        @Override
+        long getLastMessageTimestamp() {
+            return 100L;
+        }
+    }
+
+    private class TestMmsQueryHelper extends MmsQueryHelper {
+
+        private final BiConsumer<String, Event> mEventConsumer;
+
+        TestMmsQueryHelper(Context context, BiConsumer<String, Event> eventConsumer) {
+            super(context, eventConsumer);
+            mEventConsumer = eventConsumer;
+        }
+
+        @Override
+        boolean querySince(long sinceTime) {
+            return true;
+        }
+
+        @Override
+        long getLastMessageTimestamp() {
+            return 100L;
+        }
+    }
+
     private class TestInjector extends DataManager.Injector {
 
         private final TestContactsQueryHelper mContactsQueryHelper =
                 new TestContactsQueryHelper(mContext);
+        private TestCallLogQueryHelper mCallLogQueryHelper;
+        private TestMmsQueryHelper mMmsQueryHelper;
+        private TestSmsQueryHelper mSmsQueryHelper;
 
         @Override
         ScheduledExecutorService createScheduledExecutor() {
@@ -441,6 +573,27 @@ public final class DataManagerTest {
         @Override
         ContactsQueryHelper createContactsQueryHelper(Context context) {
             return mContactsQueryHelper;
+        }
+
+        @Override
+        CallLogQueryHelper createCallLogQueryHelper(Context context,
+                BiConsumer<String, Event> eventConsumer) {
+            mCallLogQueryHelper = new TestCallLogQueryHelper(context, eventConsumer);
+            return mCallLogQueryHelper;
+        }
+
+        @Override
+        MmsQueryHelper createMmsQueryHelper(Context context,
+                BiConsumer<String, Event> eventConsumer) {
+            mMmsQueryHelper = new TestMmsQueryHelper(context, eventConsumer);
+            return mMmsQueryHelper;
+        }
+
+        @Override
+        SmsQueryHelper createSmsQueryHelper(Context context,
+                BiConsumer<String, Event> eventConsumer) {
+            mSmsQueryHelper = new TestSmsQueryHelper(context, eventConsumer);
+            return mSmsQueryHelper;
         }
 
         @Override
