@@ -214,7 +214,7 @@ message TaskProto {
 
     optional WindowContainerProto window_container = 1;
     optional int32 id = 2;
-    repeated AppWindowTokenProto app_window_tokens = 3;
+    repeated ActivityRecordProto activity = 3;
     optional bool fills_parent = 4;
     optional .android.graphics.RectProto bounds = 5;
     optional .android.graphics.RectProto displayed_bounds = 6;
@@ -224,12 +224,12 @@ message TaskProto {
     optional int32 surface_height = 9;
 }
 
-/* represents AppWindowToken */
-message AppWindowTokenProto {
+/* represents ActivityRecordProto */
+message ActivityRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    /* obtained from ActivityRecord */
     optional string name = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+
     optional WindowTokenProto window_token = 2;
     optional bool last_surface_showing = 3;
     optional bool is_waiting_for_transition_start = 4;
@@ -254,6 +254,13 @@ message AppWindowTokenProto {
     optional bool visible_set_from_transferred_starting_window = 22;
     repeated .android.graphics.RectProto frozen_bounds = 23;
     optional bool visible = 24;
+    // To be removed soon.
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 25 [deprecated=true];
+    optional .com.android.server.wm.IdentifierProto identifier = 26;
+    optional string state = 27;
+    optional bool front_of_task = 28;
+    optional int32 proc_id = 29;
+    optional bool translucent = 30;
 }
 
 /* represents WindowToken */
