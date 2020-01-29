@@ -660,6 +660,7 @@ filegroup {
         "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
+        "core/java/com/android/internal/annotations/GuardedBy.java",
     ],
 }
 // Build ext.jar
