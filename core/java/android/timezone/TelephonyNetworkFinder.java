@@ -28,7 +28,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-public class TelephonyNetworkFinder {
+public final class TelephonyNetworkFinder {
 
     @NonNull
     private final libcore.timezone.TelephonyNetworkFinder mDelegate;

@@ -89,7 +89,7 @@ public final class TzDataSetVersion {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static class TzDataSetException extends Exception {
+    public static final class TzDataSetException extends Exception {
 
         /** Creates an instance with a message. */
         public TzDataSetException(String message) {
