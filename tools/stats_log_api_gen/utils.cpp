@@ -334,7 +334,7 @@ void write_java_usage(FILE* out, const string& method_name, const string& atom_c
         if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
             fprintf(out, ", android.os.WorkSource workSource");
         } else if (field->javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
-            fprintf(out, ", SparseArray<Object> value_map");
+            fprintf(out, ", android.util.SparseArray<Object> value_map");
         } else if (field->javaType == JAVA_TYPE_BYTE_ARRAY) {
             fprintf(out, ", byte[] %s", field->name.c_str());
         } else {
@@ -442,7 +442,7 @@ int write_java_work_source_methods(
         for (vector<java_type_t>::const_iterator arg = signature.begin();
                 arg != signature.end(); arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                fprintf(out, ", WorkSource ws");
+                fprintf(out, ", android.os.WorkSource ws");
             } else {
                 fprintf(out, ", %s arg%d", java_type_name(*arg), argIndex);
             }
@@ -464,9 +464,10 @@ int write_java_work_source_methods(
         fprintf(out, "        }\n"); // close for-loop
 
         // write() component.
-        fprintf(out, "        ArrayList<WorkSource.WorkChain> workChains = ws.getWorkChains();\n");
+        fprintf(out, "        java.util.ArrayList<android.os.WorkSource.WorkChain> workChains = "
+                "ws.getWorkChains();\n");
         fprintf(out, "        if (workChains != null) {\n");
-        fprintf(out, "            for (WorkSource.WorkChain wc : workChains) {\n");
+        fprintf(out, "            for (android.os.WorkSource.WorkChain wc : workChains) {\n");
         fprintf(out, "                write(code");
         for (int argIndex = 1; argIndex <= argIndexMax; argIndex++) {
             if (argIndex == attributionArg) {

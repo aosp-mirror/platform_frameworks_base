@@ -73,7 +73,7 @@ static int write_java_methods(
                         java_type_name(chainField.javaType), chainField.name.c_str());
                 }
             } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", SparseArray<Object> valueMap");
+                fprintf(out, ", android.util.SparseArray<Object> valueMap");
             } else {
                 fprintf(out, ", %s arg%d", java_type_name(*arg), argIndex);
             }
@@ -85,8 +85,9 @@ static int write_java_methods(
         string indent("");
         if (supportQ) {
             // TODO(b/146235828): Use just SDK_INT check once it is incremented from Q.
-            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q ||\n");
-            fprintf(out, "                Build.VERSION.CODENAME.equals(\"R\")) {\n");
+            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q\n");
+            fprintf(out, "                || (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q\n");
+            fprintf(out, "                    && Build.VERSION.PREVIEW_SDK_INT > 0)) {\n");
             indent = "    ";
         }
 
@@ -141,16 +142,16 @@ static int write_java_methods(
                 fprintf(out,
                         "%s        final int count = valueMap.size();\n", indent.c_str());
                 fprintf(out,
-                        "%s        final SparseIntArray intMap = new SparseIntArray();\n",
+                        "%s        android.util.SparseIntArray intMap = null;\n",
                         indent.c_str());
                 fprintf(out,
-                        "%s        final SparseLongArray longMap = new SparseLongArray();\n",
+                        "%s        android.util.SparseLongArray longMap = null;\n",
                         indent.c_str());
                 fprintf(out,
-                        "%s        final SparseArray<String> stringMap = new SparseArray<>();\n",
+                        "%s        android.util.SparseArray<String> stringMap = null;\n",
                         indent.c_str());
                 fprintf(out,
-                        "%s        final SparseArray<Float> floatMap = new SparseArray<>();\n",
+                        "%s        android.util.SparseArray<Float> floatMap = null;\n",
                         indent.c_str());
                 fprintf(out,
                         "%s        for (int i = 0; i < count; i++) {\n", indent.c_str());
@@ -162,17 +163,41 @@ static int write_java_methods(
                 fprintf(out,
                         "%s            if (value instanceof Integer) {\n", indent.c_str());
                 fprintf(out,
+                        "%s                if (null == intMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    intMap = new android.util.SparseIntArray();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
+                fprintf(out,
                         "%s                intMap.put(key, (Integer) value);\n", indent.c_str());
                 fprintf(out,
                         "%s            } else if (value instanceof Long) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                if (null == longMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    longMap = new android.util.SparseLongArray();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
                 fprintf(out,
                         "%s                longMap.put(key, (Long) value);\n", indent.c_str());
                 fprintf(out,
                         "%s            } else if (value instanceof String) {\n", indent.c_str());
                 fprintf(out,
+                        "%s                if (null == stringMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    stringMap = new android.util.SparseArray<>();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
+                fprintf(out,
                         "%s                stringMap.put(key, (String) value);\n", indent.c_str());
                 fprintf(out,
                         "%s            } else if (value instanceof Float) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                if (null == floatMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    floatMap = new android.util.SparseArray<>();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
                 fprintf(out,
                         "%s                floatMap.put(key, (Float) value);\n", indent.c_str());
                 fprintf(out,
@@ -228,7 +253,8 @@ static int write_java_methods(
 
 int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
                                     const string& moduleName, const string& javaClass,
-                                    const string& javaPackage, const bool supportQ) {
+                                    const string& javaPackage, const bool supportQ,
+                                    const bool supportWorkSource) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
@@ -240,24 +266,8 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attribut
         fprintf(out, "import android.os.SystemClock;\n");
     }
 
-    if (DEFAULT_MODULE_NAME == moduleName) {
-        // Mainline modules don't use WorkSource logging.
-        fprintf(out, "import android.os.WorkSource;\n");
-
-        // SparseArray is used for writing KeyValuePairs; not supported for Mainline modules.
-        fprintf(out, "import android.util.SparseArray;\n");
-        fprintf(out, "import android.util.SparseIntArray;\n");
-        fprintf(out, "import android.util.SparseLongArray;\n");
-    }
-
     fprintf(out, "import android.util.StatsEvent;\n");
     fprintf(out, "import android.util.StatsLog;\n");
-
-    if (DEFAULT_MODULE_NAME == moduleName) {
-        // List is used for WorkSource writing. Only needed for default module.
-        fprintf(out, "\n");
-        fprintf(out, "import java.util.ArrayList;\n");
-    }
 
     fprintf(out, "\n");
     fprintf(out, "\n");
@@ -280,7 +290,7 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attribut
             out, atoms.signatures_to_modules, attributionDecl, moduleName, supportQ);
     errors += write_java_non_chained_methods(
             out, atoms.non_chained_signatures_to_modules, moduleName);
-    if (DEFAULT_MODULE_NAME == moduleName) {
+    if (supportWorkSource) {
         errors += write_java_work_source_methods(out, atoms.signatures_to_modules, moduleName);
     }
 
