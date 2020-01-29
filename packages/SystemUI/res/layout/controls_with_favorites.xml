@@ -4,7 +4,8 @@
 
   <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:paddingBottom="20dp">
 
     <TextView
         android:text="@string/quick_controls_title"
@@ -13,17 +14,23 @@
         android:singleLine="true"
         android:gravity="center"
         android:textSize="25dp"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@*android:color/foreground_material_dark"
         android:fontFamily="@*android:string/config_headlineFontFamily"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/controls_more"
         android:src="@drawable/ic_more_vert"
         android:layout_width="34dp"
         android:layout_height="24dp" 
         android:layout_marginEnd="10dp"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:tint="@*android:color/foreground_material_dark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 

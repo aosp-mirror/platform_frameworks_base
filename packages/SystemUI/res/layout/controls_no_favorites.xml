@@ -12,7 +12,7 @@
       android:paddingBottom="40dp"
       android:layout_marginLeft="10dp"
       android:layout_marginRight="10dp"
-      android:textColor="?android:attr/textColorPrimary"
+      android:textColor="@*android:color/foreground_material_dark"
       android:fontFamily="@*android:string/config_headlineFontFamily"
       android:background="@drawable/control_no_favorites_background"/>
 </merge>
