@@ -9211,6 +9211,7 @@ package android.service.autofill.augmented {
     method @NonNull public android.content.ComponentName getActivityComponent();
     method @NonNull public android.view.autofill.AutofillId getFocusedId();
     method @NonNull public android.view.autofill.AutofillValue getFocusedValue();
+    method @Nullable public android.app.assist.AssistStructure.ViewNode getFocusedViewNode();
     method @Nullable public android.view.inputmethod.InlineSuggestionsRequest getInlineSuggestionsRequest();
     method @Nullable public android.service.autofill.augmented.PresentationParams getPresentationParams();
     method public int getTaskId();
