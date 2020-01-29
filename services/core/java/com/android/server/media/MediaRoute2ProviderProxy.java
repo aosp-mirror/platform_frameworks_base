@@ -42,6 +42,7 @@ import java.util.Objects;
 /**
  * Maintains a connection to a particular media route provider service.
  */
+// TODO: Need to revisit the bind/unbind/connect/disconnect logic in this class.
 final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements ServiceConnection {
     private static final String TAG = "MR2ProviderProxy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -250,6 +251,19 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             Slog.d(TAG, this + ": Service disconnected");
         }
         disconnect();
+    }
+
+    @Override
+    public void onBindingDied(ComponentName name) {
+        if (DEBUG) {
+            Slog.d(TAG, this + ": Service binding died");
+        }
+        // TODO: Investigate whether it tries to bind endlessly when the service is
+        //       badly implemented.
+        if (shouldBind()) {
+            unbind();
+            bind();
+        }
     }
 
     private void onConnectionReady(Connection connection) {
