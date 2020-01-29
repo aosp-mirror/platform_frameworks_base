@@ -18,6 +18,7 @@ package android.net.wifi.hotspot2;
 
 import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_NONE;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -363,5 +364,55 @@ public class PasspointConfigurationTest {
         assertTrue(config.validate());
         assertTrue(config.validateForR2());
         assertTrue(config.isOsuProvisioned());
+    }
+
+    /**
+     * Verify that the unique identifier generated is correct.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateUniqueId() throws Exception {
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
+        String uniqueId;
+        uniqueId = config.getUniqueId();
+        assertEquals(uniqueId, config.getHomeSp().getFqdn());
+    }
+
+    /**
+     * Verify that the unique identifier API generates an exception if HomeSP is not initialized.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateUniqueIdExceptionWithEmptyHomeSp() throws Exception {
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
+        config.setHomeSp(null);
+        boolean exceptionCaught = false;
+        try {
+            String uniqueId = config.getUniqueId();
+        } catch (IllegalStateException e) {
+            exceptionCaught = true;
+        }
+        assertTrue(exceptionCaught);
+    }
+
+    /**
+     * Verify that the unique identifier API generates an exception if Credential is not
+     * initialized.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateUniqueIdExceptionWithEmptyCredential() throws Exception {
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
+        config.setCredential(null);
+        boolean exceptionCaught = false;
+        try {
+            String uniqueId = config.getUniqueId();
+        } catch (IllegalStateException e) {
+            exceptionCaught = true;
+        }
+        assertTrue(exceptionCaught);
     }
 }

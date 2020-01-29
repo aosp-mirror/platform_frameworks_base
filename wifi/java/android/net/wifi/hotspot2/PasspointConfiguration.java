@@ -19,6 +19,7 @@ package android.net.wifi.hotspot2;
 import static android.net.wifi.WifiConfiguration.METERED_OVERRIDE_NONE;
 import static android.net.wifi.WifiConfiguration.MeteredOverride;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.hotspot2.pps.Credential;
@@ -894,5 +895,19 @@ public final class PasspointConfiguration implements Parcelable {
      */
     public boolean isOsuProvisioned() {
         return getUpdateIdentifier() != Integer.MIN_VALUE;
+    }
+
+    /**
+     * Get a unique identifier for a PasspointConfiguration object.
+     *
+     * @return A unique identifier
+     * @throws IllegalStateException if Credential or HomeSP nodes are not initialized
+     */
+    public @NonNull String getUniqueId() throws IllegalStateException {
+        if (mCredential == null || mHomeSp == null || TextUtils.isEmpty(mHomeSp.getFqdn())) {
+            throw new IllegalStateException("Credential or HomeSP are not initialized");
+        }
+
+        return mHomeSp.getFqdn();
     }
 }
