@@ -71,6 +71,11 @@
             android:label="MediaRecorder stress tests InstrumentationRunner">
     </instrumentation>
 
+    <instrumentation android:name=".AudioTestHarnessTemplateRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="Audio Test Harness tests InstrumentationRunner">
+    </instrumentation>
+
     <instrumentation android:name=".MediaFrameworkPowerTestRunner"
             android:targetPackage="com.android.mediaframeworktest"
             android:label="Media Power tests InstrumentationRunner">
