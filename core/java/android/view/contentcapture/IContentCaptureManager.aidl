@@ -69,8 +69,7 @@ oneway interface IContentCaptureManager {
     /**
     * Requests sharing of a binary data with the content capture service.
     */
-    void shareData(in DataShareRequest request, in ICancellationSignal cancellationSignal,
-                   in IDataShareWriteAdapter adapter);
+    void shareData(in DataShareRequest request, in IDataShareWriteAdapter adapter);
 
     /**
      * Returns whether the content capture feature is enabled for the calling user.

@@ -18,7 +18,6 @@ package android.service.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -34,13 +33,16 @@ public interface DataShareReadAdapter {
      * Signals the start of the data sharing session.
      *
      * @param fd file descriptor to use for reading data, that's being shared
-     * @param cancellationSignal cancellation signal to use if data is no longer needed and the
-     *                           session needs to be terminated.
      **/
-    void onStart(@NonNull ParcelFileDescriptor fd, @NonNull CancellationSignal cancellationSignal);
+    void onStart(@NonNull ParcelFileDescriptor fd);
 
     /**
      * Signals that the session failed to start or terminated unsuccessfully.
+     *
+     * <p>Important: together with the error, file sharing stream might be closed, and therefore
+     * reading from {@code fd} from {@link #onStart} will result in the end of stream. The order of
+     * these 2 events is not defined, and it's important that the service treats end of stream
+     * correctly in this situation.
      **/
     void onError(int errorCode);
 }

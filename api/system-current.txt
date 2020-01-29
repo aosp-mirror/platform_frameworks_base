@@ -10184,7 +10184,7 @@ package android.service.contentcapture {
 
   public interface DataShareReadAdapter {
     method public void onError(int);
-    method public void onStart(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.CancellationSignal);
+    method public void onStart(@NonNull android.os.ParcelFileDescriptor);
   }
 
   public final class SnapshotData implements android.os.Parcelable {

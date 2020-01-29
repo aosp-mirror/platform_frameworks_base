@@ -34,10 +34,8 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -544,14 +542,11 @@ public abstract class ContentCaptureService extends Service {
                 Preconditions.checkNotNull(adapter);
                 Preconditions.checkNotNull(executor);
 
-                ICancellationSignal cancellationSignalTransport =
-                        CancellationSignal.createTransport();
-
-                DataShareReadAdapterDelegate delegate = new DataShareReadAdapterDelegate(
-                        executor, cancellationSignalTransport, adapter);
+                DataShareReadAdapterDelegate delegate =
+                        new DataShareReadAdapterDelegate(executor, adapter);
 
                 try {
-                    callback.accept(cancellationSignalTransport, delegate);
+                    callback.accept(delegate);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Failed to accept data sharing", e);
                 }
@@ -658,38 +653,20 @@ public abstract class ContentCaptureService extends Service {
         private final Object mLock = new Object();
         private final WeakReference<DataShareReadAdapter> mAdapterReference;
         private final WeakReference<Executor> mExecutorReference;
-        private final WeakReference<ICancellationSignal> mCancellationSignalReference;
 
-        DataShareReadAdapterDelegate(Executor executor,
-                ICancellationSignal cancellationSignalTransport, DataShareReadAdapter adapter) {
+        DataShareReadAdapterDelegate(Executor executor, DataShareReadAdapter adapter) {
             Preconditions.checkNotNull(executor);
-            Preconditions.checkNotNull(cancellationSignalTransport);
             Preconditions.checkNotNull(adapter);
 
             mExecutorReference = new WeakReference<>(executor);
-            mCancellationSignalReference = new WeakReference<>(cancellationSignalTransport);
             mAdapterReference = new WeakReference<>(adapter);
         }
 
         @Override
-        public void start(ParcelFileDescriptor fd, ICancellationSignal remoteCancellationSignal)
+        public void start(ParcelFileDescriptor fd)
                 throws RemoteException {
             synchronized (mLock) {
-                ICancellationSignal serverControlledCancellationSignal =
-                        mCancellationSignalReference.get();
-
-                if (serverControlledCancellationSignal == null) {
-                    Slog.w(TAG, "Can't execute onStart(), reference to cancellation signal has "
-                            + "been GC'ed");
-                    return;
-                }
-
-                CancellationSignal cancellationSignal =
-                        CancellationSignal.fromTransport(serverControlledCancellationSignal);
-                cancellationSignal.setRemote(remoteCancellationSignal);
-
-                executeAdapterMethodLocked(
-                        adapter -> adapter.onStart(fd, cancellationSignal), "onStart");
+                executeAdapterMethodLocked(adapter -> adapter.onStart(fd), "onStart");
             }
         }
 
