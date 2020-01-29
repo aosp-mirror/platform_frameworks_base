@@ -19,6 +19,7 @@ package com.android.server.integrity.model;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.integrity.AtomicFormula;
+import android.content.integrity.CompoundFormula;
 import android.content.integrity.Rule;
 import android.util.StatsLog;
 
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @RunWith(JUnit4.class)
@@ -75,5 +77,59 @@ public class IntegrityCheckResultTest {
         assertThat(denyResult.getMatchedRules()).containsExactly(failedRule);
         assertThat(denyResult.getLoggingResponse())
                 .isEqualTo(StatsLog.INTEGRITY_CHECK_RESULT_REPORTED__RESPONSE__REJECTED);
+    }
+
+    @Test
+    public void isDenyCausedByAppCertificate() {
+        String packageName = "com.test.deny";
+        String appCert = "app-cert";
+        Rule failedRule =
+                new Rule(
+                        new CompoundFormula(
+                                CompoundFormula.AND,
+                                Arrays.asList(
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.PACKAGE_NAME, packageName),
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.APP_CERTIFICATE, appCert))),
+                        Rule.DENY);
+        Rule otherFailedRule =
+                new Rule(
+                        new AtomicFormula.LongAtomicFormula(AtomicFormula.VERSION_CODE,
+                                AtomicFormula.EQ, 12),
+                        Rule.DENY);
+
+        IntegrityCheckResult denyResult =
+                IntegrityCheckResult.deny(Arrays.asList(failedRule, otherFailedRule));
+
+        assertThat(denyResult.isCausedByAppCertRule()).isTrue();
+        assertThat(denyResult.isCausedByInstallerRule()).isFalse();
+    }
+
+    @Test
+    public void isDenyCausedByInstaller() {
+        String packageName = "com.test.deny";
+        String appCert = "app-cert";
+        Rule failedRule =
+                new Rule(
+                        new CompoundFormula(
+                                CompoundFormula.AND,
+                                Arrays.asList(
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.PACKAGE_NAME, packageName),
+                                        new AtomicFormula.StringAtomicFormula(
+                                                AtomicFormula.INSTALLER_CERTIFICATE, appCert))),
+                        Rule.DENY);
+        Rule otherFailedRule =
+                new Rule(
+                        new AtomicFormula.LongAtomicFormula(AtomicFormula.VERSION_CODE,
+                                AtomicFormula.EQ, 12),
+                        Rule.DENY);
+
+        IntegrityCheckResult denyResult =
+                IntegrityCheckResult.deny(Arrays.asList(failedRule, otherFailedRule));
+
+        assertThat(denyResult.isCausedByAppCertRule()).isFalse();
+        assertThat(denyResult.isCausedByInstallerRule()).isTrue();
     }
 }

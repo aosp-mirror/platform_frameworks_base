@@ -205,6 +205,16 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         @Override
+        public boolean isAppCertificateFormula() {
+            return false;
+        }
+
+        @Override
+        public boolean isInstallerFormula() {
+            return false;
+        }
+
+        @Override
         public String toString() {
             if (mValue == null || mOperator == null) {
                 return String.format("(%s)", keyToString(getKey()));
@@ -375,6 +385,16 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         @Override
+        public boolean isAppCertificateFormula() {
+            return getKey() == APP_CERTIFICATE;
+        }
+
+        @Override
+        public boolean isInstallerFormula() {
+            return getKey() == INSTALLER_NAME || getKey() == INSTALLER_CERTIFICATE;
+        }
+
+        @Override
         public String toString() {
             if (mValue == null || mIsHashedValue == null) {
                 return String.format("(%s)", keyToString(getKey()));
@@ -528,6 +548,16 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 return false;
             }
             return getBooleanMetadataValue(appInstallMetadata, getKey()) == mValue;
+        }
+
+        @Override
+        public boolean isAppCertificateFormula() {
+            return false;
+        }
+
+        @Override
+        public boolean isInstallerFormula() {
+            return false;
         }
 
         @Override

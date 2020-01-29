@@ -136,6 +136,21 @@ public abstract class IntegrityFormula {
     public abstract @Tag boolean matches(AppInstallMetadata appInstallMetadata);
 
     /**
+     * Returns true when the formula (or one of its atomic formulas) has app certificate as key.
+     *
+     * @hide
+     */
+    public abstract @Tag boolean isAppCertificateFormula();
+
+    /**
+     * Returns true when the formula (or one of its atomic formulas) has installer package name
+     * or installer certificate as key.
+     *
+     * @hide
+     */
+    public abstract @Tag boolean isInstallerFormula();
+
+    /**
      * Write an {@link IntegrityFormula} to {@link android.os.Parcel}.
      *
      * <p>This helper method is needed because non-final class/interface are not allowed to be

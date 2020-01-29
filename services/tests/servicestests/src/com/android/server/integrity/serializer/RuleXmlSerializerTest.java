@@ -543,6 +543,16 @@ public class RuleXmlSerializerTest {
             }
 
             @Override
+            public boolean isAppCertificateFormula() {
+                return false;
+            }
+
+            @Override
+            public boolean isInstallerFormula() {
+                return false;
+            }
+
+            @Override
             public int hashCode() {
                 return super.hashCode();
             }

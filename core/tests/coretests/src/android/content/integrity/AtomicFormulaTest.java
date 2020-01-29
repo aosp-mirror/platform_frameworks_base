@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.testng.Assert.expectThrows;
 
 import android.content.integrity.AtomicFormula.BooleanAtomicFormula;
+import android.content.integrity.AtomicFormula.LongAtomicFormula;
 import android.content.integrity.AtomicFormula.StringAtomicFormula;
 import android.os.Parcel;
 
@@ -114,8 +115,8 @@ public class AtomicFormulaTest {
 
     @Test
     public void testValidAtomicFormula_longValue() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(
                         AtomicFormula.VERSION_CODE, AtomicFormula.GTE, 1);
 
         assertThat(longAtomicFormula.getKey()).isEqualTo(AtomicFormula.VERSION_CODE);
@@ -151,7 +152,7 @@ public class AtomicFormulaTest {
                 expectThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new AtomicFormula.LongAtomicFormula(
+                                new LongAtomicFormula(
                                         AtomicFormula.PACKAGE_NAME, AtomicFormula.EQ, 1));
         assertThat(e.getMessage()).matches(
                 "Key PACKAGE_NAME cannot be used with LongAtomicFormula");
@@ -182,14 +183,14 @@ public class AtomicFormulaTest {
 
     @Test
     public void testParcelUnparcel_int() {
-        AtomicFormula.LongAtomicFormula formula =
-                new AtomicFormula.LongAtomicFormula(
+        LongAtomicFormula formula =
+                new LongAtomicFormula(
                         AtomicFormula.VERSION_CODE, AtomicFormula.GT, 1);
         Parcel p = Parcel.obtain();
         formula.writeToParcel(p, 0);
         p.setDataPosition(0);
-        AtomicFormula.LongAtomicFormula newFormula =
-                AtomicFormula.LongAtomicFormula.CREATOR.createFromParcel(p);
+        LongAtomicFormula newFormula =
+                LongAtomicFormula.CREATOR.createFromParcel(p);
 
         assertThat(newFormula).isEqualTo(formula);
     }
@@ -211,7 +212,7 @@ public class AtomicFormulaTest {
         Exception e =
                 expectThrows(
                         IllegalArgumentException.class,
-                        () -> new AtomicFormula.LongAtomicFormula(/* key= */ -1,
+                        () -> new LongAtomicFormula(/* key= */ -1,
                                 AtomicFormula.EQ, /* value= */0));
         assertThat(e.getMessage()).matches("Unknown key: -1");
     }
@@ -222,7 +223,7 @@ public class AtomicFormulaTest {
                 expectThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new AtomicFormula.LongAtomicFormula(
+                                new LongAtomicFormula(
                                         AtomicFormula.VERSION_CODE, /* operator= */ -1, /* value= */
                                         0));
         assertThat(e.getMessage()).matches("Unknown operator: -1");
@@ -252,10 +253,59 @@ public class AtomicFormulaTest {
         assertThat(stringAtomicFormula.matches(appInstallMetadata)).isFalse();
     }
 
+
+    @Test
+    public void testIsAppCertificateFormula_string_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE, "cert", /* isHashedValue= */false);
+
+        assertThat(stringAtomicFormula.isAppCertificateFormula()).isTrue();
+    }
+
+    @Test
+    public void testIsAppCertificateFormula_string_false() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.PACKAGE_NAME, "com.test.app", /* isHashedValue= */
+                        false);
+
+        assertThat(stringAtomicFormula.isAppCertificateFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsInstallerFormula_string_false() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.APP_CERTIFICATE, "cert", /* isHashedValue= */false);
+
+        assertThat(stringAtomicFormula.isInstallerFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsInstallerFormula_string_installerName_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.INSTALLER_NAME,
+                        "com.test.installer",
+                        /* isHashedValue= */false);
+
+        assertThat(stringAtomicFormula.isInstallerFormula()).isTrue();
+    }
+
+    @Test
+    public void testIsInstallerFormula_string_installerCertificate_true() {
+        StringAtomicFormula stringAtomicFormula =
+                new StringAtomicFormula(
+                        AtomicFormula.INSTALLER_CERTIFICATE, "cert", /* isHashedValue= */false);
+
+        assertThat(stringAtomicFormula.isInstallerFormula()).isTrue();
+    }
+
     @Test
     public void testFormulaMatches_long_eq_true() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(
                         AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 0);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setVersionCode(0).build();
@@ -265,8 +315,8 @@ public class AtomicFormulaTest {
 
     @Test
     public void testFormulaMatches_long_eq_false() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(
                         AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 0);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setVersionCode(1).build();
@@ -276,8 +326,8 @@ public class AtomicFormulaTest {
 
     @Test
     public void testFormulaMatches_long_gt_true() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.GT,
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.GT,
                         0);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setVersionCode(1).build();
@@ -287,8 +337,8 @@ public class AtomicFormulaTest {
 
     @Test
     public void testFormulaMatches_long_gt_false() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.GT,
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.GT,
                         1);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setVersionCode(0).build();
@@ -298,8 +348,8 @@ public class AtomicFormulaTest {
 
     @Test
     public void testFormulaMatches_long_gte_true() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(
                         AtomicFormula.VERSION_CODE, AtomicFormula.GTE, 1);
 
         AppInstallMetadata appInstallMetadata1 =
@@ -313,13 +363,31 @@ public class AtomicFormulaTest {
 
     @Test
     public void testFormulaMatches_long_gte_false() {
-        AtomicFormula.LongAtomicFormula longAtomicFormula =
-                new AtomicFormula.LongAtomicFormula(
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(
                         AtomicFormula.VERSION_CODE, AtomicFormula.GTE, 1);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setVersionCode(0).build();
 
         assertThat(longAtomicFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testIsAppCertificateFormula_long_false() {
+        LongAtomicFormula longAtomicFormula =
+                new AtomicFormula.LongAtomicFormula(
+                        AtomicFormula.VERSION_CODE, AtomicFormula.GTE, 1);
+
+        assertThat(longAtomicFormula.isAppCertificateFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsInstallerFormula_long_false() {
+        LongAtomicFormula longAtomicFormula =
+                new LongAtomicFormula(
+                        AtomicFormula.VERSION_CODE, AtomicFormula.GTE, 1);
+
+        assertThat(longAtomicFormula.isInstallerFormula()).isFalse();
     }
 
     @Test
@@ -340,6 +408,22 @@ public class AtomicFormulaTest {
                 getAppInstallMetadataBuilder().setIsPreInstalled(false).build();
 
         assertThat(boolFormula.matches(appInstallMetadata)).isFalse();
+    }
+
+    @Test
+    public void testIsAppCertificateFormula_bool_false() {
+        BooleanAtomicFormula boolFormula =
+                new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true);
+
+        assertThat(boolFormula.isAppCertificateFormula()).isFalse();
+    }
+
+    @Test
+    public void testIsInstallerFormula_bool_false() {
+        BooleanAtomicFormula boolFormula =
+                new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true);
+
+        assertThat(boolFormula.isInstallerFormula()).isFalse();
     }
 
     /** Returns a builder with all fields filled with some dummy data. */
