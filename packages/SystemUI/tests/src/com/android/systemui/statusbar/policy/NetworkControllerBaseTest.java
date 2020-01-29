@@ -30,6 +30,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -95,6 +96,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected PhoneStateListener mPhoneStateListener;
     protected SignalStrength mSignalStrength;
     protected ServiceState mServiceState;
+    protected NetworkRegistrationInfo mFakeRegInfo;
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
     protected SubscriptionManager mMockSm;
@@ -157,6 +159,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
+
+        mFakeRegInfo = new NetworkRegistrationInfo.Builder()
+                .setTransportType(TRANSPORT_TYPE_WWAN)
+                .setDomain(DOMAIN_PS)
+                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_LTE)
+                .build();
+        doReturn(mFakeRegInfo).when(mServiceState)
+                .getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
 
         mEriInformation = new CdmaEriInformation(CdmaEriInformation.ERI_OFF,
                 CdmaEriInformation.ERI_ICON_MODE_NORMAL);
