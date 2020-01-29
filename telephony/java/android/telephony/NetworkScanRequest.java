@@ -20,10 +20,10 @@ import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Defines a request to peform a network scan.
@@ -221,9 +221,15 @@ public final class NetworkScanRequest implements Parcelable {
 
     private NetworkScanRequest(Parcel in) {
         mScanType = in.readInt();
-        mSpecifiers = (RadioAccessSpecifier[]) in.readParcelableArray(
-                Object.class.getClassLoader(),
-                RadioAccessSpecifier.class);
+        Parcelable[] tempSpecifiers = in.readParcelableArray(Object.class.getClassLoader());
+        if (tempSpecifiers != null) {
+            mSpecifiers = new RadioAccessSpecifier[tempSpecifiers.length];
+            for (int i = 0; i < tempSpecifiers.length; i++) {
+                mSpecifiers[i] = (RadioAccessSpecifier) tempSpecifiers[i];
+            }
+        } else {
+            mSpecifiers = null;
+        }
         mSearchPeriodicity = in.readInt();
         mMaxSearchTime = in.readInt();
         mIncrementalResults = in.readBoolean();

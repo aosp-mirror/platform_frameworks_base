@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.PersistableBundle;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.aidl.IImsConfig;
@@ -31,6 +30,7 @@ import android.util.Log;
 
 import com.android.ims.ImsConfig;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.util.RemoteCallbackListExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -257,7 +257,8 @@ public class ImsConfigImplBase {
     })
     public @interface SetConfigResult {}
 
-    private final RemoteCallbackList<IImsConfigCallback> mCallbacks = new RemoteCallbackList<>();
+    private final RemoteCallbackListExt<IImsConfigCallback> mCallbacks =
+            new RemoteCallbackListExt<>();
     ImsConfigStub mImsConfigStub;
 
     /**
@@ -298,7 +299,7 @@ public class ImsConfigImplBase {
         if (mCallbacks == null) {
             return;
         }
-        mCallbacks.broadcast(c -> {
+        mCallbacks.broadcastAction(c -> {
             try {
                 c.onIntConfigChanged(item, value);
             } catch (RemoteException e) {
@@ -312,7 +313,7 @@ public class ImsConfigImplBase {
         if (mCallbacks == null) {
             return;
         }
-        mCallbacks.broadcast(c -> {
+        mCallbacks.broadcastAction(c -> {
             try {
                 c.onStringConfigChanged(item, value);
             } catch (RemoteException e) {
