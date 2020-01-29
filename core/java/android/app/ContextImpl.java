@@ -1397,9 +1397,9 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void sendOrderedBroadcast(Intent intent, String receiverPermission, String receiverAppOp,
-            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
-            String initialData, @Nullable Bundle initialExtras) {
+    public void sendOrderedBroadcast(Intent intent, int initialCode, String receiverPermission,
+            String receiverAppOp, BroadcastReceiver resultReceiver, Handler scheduler,
+            String initialData, @Nullable Bundle initialExtras, Bundle options) {
         int intAppOp = AppOpsManager.OP_NONE;
         if (!TextUtils.isEmpty(receiverAppOp)) {
             intAppOp = AppOpsManager.strOpToOp(receiverAppOp);
