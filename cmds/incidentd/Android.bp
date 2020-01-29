@@ -43,7 +43,7 @@ cc_binary {
     ],
 
     local_include_dirs: ["src"],
-    generated_headers: ["gen-platform-proto-constants"],
+    generated_headers: ["framework-cppstream-protos"],
 
     proto: {
         type: "lite",
@@ -98,7 +98,7 @@ cc_test {
     ],
 
     local_include_dirs: ["src"],
-    generated_headers: ["gen-platform-proto-constants"],
+    generated_headers: ["framework-cppstream-protos"],
 
     srcs: [
         "tests/**/*.cpp",
