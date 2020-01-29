@@ -18,7 +18,6 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.TimestampedValue;
@@ -51,11 +50,9 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class PhoneTimeSuggestion implements Parcelable {
 
     /** @hide */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final @NonNull Parcelable.Creator<PhoneTimeSuggestion> CREATOR =
             new Parcelable.Creator<PhoneTimeSuggestion>() {
                 public PhoneTimeSuggestion createFromParcel(Parcel in) {
@@ -188,7 +185,6 @@ public final class PhoneTimeSuggestion implements Parcelable {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class Builder {
         private final int mSlotIndex;
         @Nullable private TimestampedValue<Long> mUtcTime;
