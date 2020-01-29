@@ -102,18 +102,18 @@ package android.timezone {
     method @NonNull public String getTimeZoneId();
   }
 
-  public class TelephonyLookup {
+  public final class TelephonyLookup {
     method @NonNull public static android.timezone.TelephonyLookup getInstance();
     method @Nullable public android.timezone.TelephonyNetworkFinder getTelephonyNetworkFinder();
   }
 
-  public class TelephonyNetwork {
+  public final class TelephonyNetwork {
     method @NonNull public String getCountryIsoCode();
     method @NonNull public String getMcc();
     method @NonNull public String getMnc();
   }
 
-  public class TelephonyNetworkFinder {
+  public final class TelephonyNetworkFinder {
     method @Nullable public android.timezone.TelephonyNetwork findNetworkByMccMnc(@NonNull String, @NonNull String);
   }
 
@@ -134,7 +134,7 @@ package android.timezone {
     method @NonNull public static android.timezone.TzDataSetVersion read() throws java.io.IOException, android.timezone.TzDataSetVersion.TzDataSetException;
   }
 
-  public static class TzDataSetVersion.TzDataSetException extends java.lang.Exception {
+  public static final class TzDataSetVersion.TzDataSetException extends java.lang.Exception {
     ctor public TzDataSetVersion.TzDataSetException(String);
     ctor public TzDataSetVersion.TzDataSetException(String, Throwable);
   }
