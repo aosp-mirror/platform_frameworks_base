@@ -64,26 +64,32 @@ public final class CellIdentityNr extends CellIdentity {
      * @hide
      */
     public CellIdentityNr(int pci, int tac, int nrArfcn, @NgranBand List<Integer> bands,
-                          String mccStr, String mncStr, long nci, String alphal, String alphas,
-                          List<String> additionalPlmns) {
+                          @Nullable String mccStr, @Nullable String mncStr, long nci,
+                          @Nullable String alphal, @Nullable String alphas,
+                          @NonNull List<String> additionalPlmns) {
         super(TAG, CellInfo.TYPE_NR, mccStr, mncStr, alphal, alphas);
         mPci = inRangeOrUnavailable(pci, 0, MAX_PCI);
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mNrArfcn = inRangeOrUnavailable(nrArfcn, 0, MAX_NRARFCN);
         mBands = new ArrayList<>(bands);
         mNci = inRangeOrUnavailable(nci, 0, MAX_NCI);
-        mAdditionalPlmns = new ArrayList<>(additionalPlmns);
+        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        for (String plmn : additionalPlmns) {
+            if (isValidPlmn(plmn)) {
+                mAdditionalPlmns.add(plmn);
+            }
+        }
     }
 
     /** @hide */
-    public CellIdentityNr(android.hardware.radio.V1_4.CellIdentityNr cid) {
+    public CellIdentityNr(@NonNull android.hardware.radio.V1_4.CellIdentityNr cid) {
         this(cid.pci, cid.tac, cid.nrarfcn, Collections.emptyList(), cid.mcc, cid.mnc, cid.nci,
                 cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
                 Collections.emptyList());
     }
 
     /** @hide */
-    public CellIdentityNr(android.hardware.radio.V1_5.CellIdentityNr cid) {
+    public CellIdentityNr(@NonNull android.hardware.radio.V1_5.CellIdentityNr cid) {
         this(cid.base.pci, cid.base.tac, cid.base.nrarfcn, cid.bands, cid.base.mcc, cid.base.mnc,
                 cid.base.nci, cid.base.operatorNames.alphaLong,
                 cid.base.operatorNames.alphaShort, cid.additionalPlmns);
