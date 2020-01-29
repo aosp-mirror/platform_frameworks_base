@@ -38,6 +38,12 @@ java_library {
         "android.media",
     ],
 
+    optimize: {
+        enabled: true,
+        shrink: true,
+        proguard_flags_files: ["updatable-media-proguard.flags"],
+    },
+
     installable: true,
 
     // TODO: build against stable API surface. Use core_platform for now to avoid
