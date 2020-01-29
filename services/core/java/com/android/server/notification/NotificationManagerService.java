@@ -117,7 +117,6 @@ import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
-import android.app.ITransientNotificationCallback;
 import android.app.IUriGrantsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -256,9 +255,6 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
-import com.android.server.notification.toast.CustomToastRecord;
-import com.android.server.notification.toast.TextToastRecord;
-import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -299,8 +295,8 @@ import java.util.function.BiConsumer;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
-    public static final String TAG = "NotificationService";
-    public static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
+    static final String TAG = "NotificationService";
+    static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
             = SystemProperties.getBoolean("debug.child_notifs", true);
 
@@ -397,7 +393,6 @@ public class NotificationManagerService extends SystemService {
     private PackageManager mPackageManagerClient;
     AudioManager mAudioManager;
     AudioManagerInternal mAudioManagerInternal;
-    // Can be null for wear
     @Nullable StatusBarManagerInternal mStatusBar;
     Vibrator mVibrator;
     private WindowManagerInternal mWindowManagerInternal;
@@ -853,6 +848,49 @@ public class NotificationManagerService extends SystemService {
         }
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
+    }
+
+    private static final class ToastRecord
+    {
+        public final int pid;
+        public final String pkg;
+        public final IBinder token;
+        public final ITransientNotification callback;
+        public int duration;
+        public int displayId;
+        public Binder windowToken;
+
+        ToastRecord(int pid, String pkg, IBinder token, ITransientNotification callback,
+                int duration, Binder windowToken, int displayId) {
+            this.pid = pid;
+            this.pkg = pkg;
+            this.token = token;
+            this.callback = callback;
+            this.duration = duration;
+            this.windowToken = windowToken;
+            this.displayId = displayId;
+        }
+
+        void update(int duration) {
+            this.duration = duration;
+        }
+
+        void dump(PrintWriter pw, String prefix, DumpFilter filter) {
+            if (filter != null && !filter.matches(pkg)) return;
+            pw.println(prefix + this);
+        }
+
+        @Override
+        public final String toString()
+        {
+            return "ToastRecord{"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " pkg=" + pkg
+                + " token=" + token
+                + " callback=" + callback
+                + " duration=" + duration
+                + "}";
+        }
     }
 
     @VisibleForTesting
@@ -2605,19 +2643,6 @@ public class NotificationManagerService extends SystemService {
         return userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
     }
 
-    private ToastRecord getToastRecord(int pid, String packageName, IBinder token,
-            @Nullable CharSequence text, @Nullable ITransientNotification callback, int duration,
-            Binder windowToken, int displayId,
-            @Nullable ITransientNotificationCallback textCallback) {
-        if (callback == null) {
-            return new TextToastRecord(this, mStatusBar, pid, packageName, token, text, duration,
-                    windowToken, displayId, textCallback);
-        } else {
-            return new CustomToastRecord(this, pid, packageName, token, callback, duration,
-                    windowToken, displayId);
-        }
-    }
-
     @VisibleForTesting
     NotificationManagerInternal getInternalService() {
         return mInternalService;
@@ -2629,30 +2654,28 @@ public class NotificationManagerService extends SystemService {
         // ============================================================================
 
         @Override
-        public void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration,
-                int displayId, @Nullable ITransientNotificationCallback callback) {
-            enqueueToast(pkg, token, text, null, duration, displayId, callback);
+        public void enqueueTextToast(String pkg, IBinder token, ITransientNotification callback,
+                int duration, int displayId) {
+            enqueueToast(pkg, token, callback, duration, displayId, false);
         }
 
         @Override
         public void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
                 int duration, int displayId) {
-            enqueueToast(pkg, token, null, callback, duration, displayId, null);
+            enqueueToast(pkg, token, callback, duration, displayId, true);
         }
 
-        private void enqueueToast(String pkg, IBinder token, @Nullable CharSequence text,
-                @Nullable ITransientNotification callback, int duration, int displayId,
-                @Nullable ITransientNotificationCallback textCallback) {
+        private void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
+                int duration, int displayId, boolean isCustomToast) {
             if (DBG) {
-                Slog.i(TAG, "enqueueToast pkg=" + pkg + " token=" + token
+                Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback
                         + " duration=" + duration + " displayId=" + displayId);
             }
 
-            if (pkg == null || (text == null && callback == null)
-                    || (text != null && callback != null) || token == null) {
-                Slog.e(TAG, "Not enqueuing toast. pkg=" + pkg + " text=" + text + " callback="
-                        + " token=" + token);
-                return;
+            if (pkg == null || callback == null || token == null) {
+                Slog.e(TAG, "Not enqueuing toast. pkg=" + pkg + " callback=" + callback + " token="
+                        + token);
+                return ;
             }
 
             final int callingUid = Binder.getCallingUid();
@@ -2680,7 +2703,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
 
-            if (callback != null && !appIsForeground && !isSystemToast) {
+            if (isCustomToast && !appIsForeground && !isSystemToast) {
                 boolean block;
                 try {
                     block = mPlatformCompat.isChangeEnabledByPackageName(
@@ -2722,28 +2745,28 @@ public class NotificationManagerService extends SystemService {
                             int count = 0;
                             final int N = mToastQueue.size();
                             for (int i=0; i<N; i++) {
-                                final ToastRecord r = mToastQueue.get(i);
-                                if (r.pkg.equals(pkg)) {
-                                    count++;
-                                    if (count >= MAX_PACKAGE_NOTIFICATIONS) {
-                                        Slog.e(TAG, "Package has already posted " + count
+                                 final ToastRecord r = mToastQueue.get(i);
+                                 if (r.pkg.equals(pkg)) {
+                                     count++;
+                                     if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                                         Slog.e(TAG, "Package has already posted " + count
                                                 + " toasts. Not showing more. Package=" + pkg);
-                                        return;
-                                    }
-                                }
+                                         return;
+                                     }
+                                 }
                             }
                         }
 
                         Binder windowToken = new Binder();
                         mWindowManagerInternal.addWindowToken(windowToken, TYPE_TOAST, displayId);
-                        record = getToastRecord(callingPid, pkg, token, text, callback, duration,
-                                windowToken, displayId, textCallback);
+                        record = new ToastRecord(callingPid, pkg, token, callback, duration,
+                                windowToken, displayId);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
-                        keepProcessAliveForToastIfNeededLocked(callingPid);
+                        keepProcessAliveIfNeededLocked(callingPid);
                     }
                     // If it's at index 0, it's the current toast.  It doesn't matter if it's
-                    // new or just been updated, show it.
+                    // new or just been updated.  Call back and tell it to show itself.
                     // If the callback fails, this will remove it from the list, so don't
                     // assume that it's valid after this.
                     if (index == 0) {
@@ -6912,22 +6935,40 @@ public class NotificationManagerService extends SystemService {
     void showNextToastLocked() {
         ToastRecord record = mToastQueue.get(0);
         while (record != null) {
-            if (record.show()) {
+            if (DBG) Slog.d(TAG, "Show pkg=" + record.pkg + " callback=" + record.callback);
+            try {
+                record.callback.show(record.windowToken);
                 scheduleDurationReachedLocked(record);
                 return;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Object died trying to show notification " + record.callback
+                        + " in package " + record.pkg);
+                // remove it from the list and let the process die
+                int index = mToastQueue.indexOf(record);
+                if (index >= 0) {
+                    mToastQueue.remove(index);
+                }
+                keepProcessAliveIfNeededLocked(record.pid);
+                if (mToastQueue.size() > 0) {
+                    record = mToastQueue.get(0);
+                } else {
+                    record = null;
+                }
             }
-            int index = mToastQueue.indexOf(record);
-            if (index >= 0) {
-                mToastQueue.remove(index);
-            }
-            record = (mToastQueue.size() > 0) ? mToastQueue.get(0) : null;
         }
     }
 
     @GuardedBy("mToastQueue")
     void cancelToastLocked(int index) {
         ToastRecord record = mToastQueue.get(index);
-        record.hide();
+        try {
+            record.callback.hide();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Object died trying to hide notification " + record.callback
+                    + " in package " + record.pkg);
+            // don't worry about this, we're about to remove it from
+            // the list anyway
+        }
 
         ToastRecord lastToast = mToastQueue.remove(index);
 
@@ -6940,7 +6981,7 @@ public class NotificationManagerService extends SystemService {
         // one way or another.
         scheduleKillTokenTimeout(lastToast);
 
-        keepProcessAliveForToastIfNeededLocked(record.pid);
+        keepProcessAliveIfNeededLocked(record.pid);
         if (mToastQueue.size() > 0) {
             // Show the next one. If the callback fails, this will remove
             // it from the list, so don't assume that the list hasn't changed
@@ -6963,7 +7004,7 @@ public class NotificationManagerService extends SystemService {
     {
         mHandler.removeCallbacksAndMessages(r);
         Message m = Message.obtain(mHandler, MESSAGE_DURATION_REACHED, r);
-        int delay = r.getDuration() == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
+        int delay = r.duration == Toast.LENGTH_LONG ? LONG_DELAY : SHORT_DELAY;
         // Accessibility users may need longer timeout duration. This api compares original delay
         // with user's preference and return longer one. It returns original delay if there's no
         // preference.
@@ -7012,21 +7053,13 @@ public class NotificationManagerService extends SystemService {
         return -1;
     }
 
-    /**
-     * Adjust process {@code pid} importance according to whether it has toasts in the queue or not.
-     */
-    public void keepProcessAliveForToastIfNeeded(int pid) {
-        synchronized (mToastQueue) {
-            keepProcessAliveForToastIfNeededLocked(pid);
-        }
-    }
-
     @GuardedBy("mToastQueue")
-    private void keepProcessAliveForToastIfNeededLocked(int pid) {
+    void keepProcessAliveIfNeededLocked(int pid)
+    {
         int toastCount = 0; // toasts from this pid
         ArrayList<ToastRecord> list = mToastQueue;
-        int n = list.size();
-        for (int i = 0; i < n; i++) {
+        int N = list.size();
+        for (int i=0; i<N; i++) {
             ToastRecord r = list.get(i);
             if (r.pid == pid) {
                 toastCount++;
