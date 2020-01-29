@@ -32,15 +32,16 @@ android_test {
         "truth-prebuilt",
     ],
     resource_zips: [ ":FrameworksResourceLoaderTestsAssets" ],
+    platform_apis: true,
     test_suites: ["device-tests"],
-    sdk_version: "test_current",
     aaptflags: [
         "--no-compress",
     ],
     data: [
-        ":FrameworksResourceLoaderTestsOverlay",
         ":FrameworksResourceLoaderTestsSplitOne",
         ":FrameworksResourceLoaderTestsSplitTwo",
+        ":FrameworksResourceLoaderTestsSplitThree",
+        ":FrameworksResourceLoaderTestsSplitFour",
     ],
     java_resources: [ "NonAsset.txt" ]
 }
