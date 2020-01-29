@@ -42,7 +42,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Provides accessors and listeners for all user info.
  */
-public class UserInfoStore {
+public class UserInfoHelper {
 
     /**
      * Listener for current user changes.
@@ -58,20 +58,16 @@ public class UserInfoStore {
     private final CopyOnWriteArrayList<UserChangedListener> mListeners;
 
     @GuardedBy("this")
-    @Nullable
-    private UserManager mUserManager;
+    @Nullable private UserManager mUserManager;
+
+    @UserIdInt private volatile int mCurrentUserId;
 
     @GuardedBy("this")
-    @UserIdInt
-    private int mCurrentUserId;
-
-    @GuardedBy("this")
-    @UserIdInt
-    private int mCachedParentUserId;
+    @UserIdInt private int mCachedParentUserId;
     @GuardedBy("this")
     private int[] mCachedProfileUserIds;
 
-    public UserInfoStore(Context context) {
+    public UserInfoHelper(Context context) {
         mContext = context;
         mListeners = new CopyOnWriteArrayList<>();
 
@@ -120,7 +116,7 @@ public class UserInfoStore {
     }
 
     /**
-     * Adds a listener for user changed events.
+     * Adds a listener for user changed events. Callbacks occur on an unspecified thread.
      */
     public void addListener(UserChangedListener listener) {
         mListeners.add(listener);
@@ -134,15 +130,12 @@ public class UserInfoStore {
     }
 
     private void onUserChanged(@UserIdInt int newUserId) {
-        int oldUserId;
-        synchronized (this) {
-            if (newUserId == mCurrentUserId) {
-                return;
-            }
-
-            oldUserId = mCurrentUserId;
-            mCurrentUserId = newUserId;
+        if (newUserId == mCurrentUserId) {
+            return;
         }
+
+        int oldUserId = mCurrentUserId;
+        mCurrentUserId = newUserId;
 
         for (UserChangedListener listener : mListeners) {
             listener.onUserChanged(oldUserId, newUserId);
@@ -161,7 +154,7 @@ public class UserInfoStore {
      * Returns the user id of the current user.
      */
     @UserIdInt
-    public synchronized int getCurrentUserId() {
+    public int getCurrentUserId() {
         return mCurrentUserId;
     }
 
@@ -169,9 +162,10 @@ public class UserInfoStore {
      * Returns true if the given user id is either the current user or a profile of the current
      * user.
      */
-    public synchronized boolean isCurrentUserOrProfile(@UserIdInt int userId) {
-        return userId == mCurrentUserId || ArrayUtils.contains(
-                getProfileUserIdsForParentUser(mCurrentUserId), userId);
+    public boolean isCurrentUserOrProfile(@UserIdInt int userId) {
+        int currentUserId = mCurrentUserId;
+        return userId == currentUserId || ArrayUtils.contains(
+                getProfileUserIdsForParentUser(currentUserId), userId);
     }
 
     /**
@@ -179,50 +173,44 @@ public class UserInfoStore {
      * is a parent or has no profiles.
      */
     @UserIdInt
-    public synchronized int getParentUserId(@UserIdInt int userId) {
-        int parentUserId;
-        if (userId == mCachedParentUserId || ArrayUtils.contains(mCachedProfileUserIds, userId)) {
-            parentUserId = mCachedParentUserId;
-        } else {
-            Preconditions.checkState(mUserManager != null);
-
-            long identity = Binder.clearCallingIdentity();
-            try {
-                UserInfo userInfo = mUserManager.getProfileParent(userId);
-                if (userInfo != null) {
-                    parentUserId = userInfo.id;
-                } else {
-                    // getProfileParent() returns null if the userId is already the parent...
-                    parentUserId = userId;
-                }
-
-                // force profiles into cache
-                getProfileUserIdsForParentUser(parentUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+    public int getParentUserId(@UserIdInt int userId) {
+        synchronized (this) {
+            if (userId == mCachedParentUserId || ArrayUtils.contains(mCachedProfileUserIds,
+                    userId)) {
+                return mCachedParentUserId;
             }
+
+            Preconditions.checkState(mUserManager != null);
         }
 
+        int parentUserId;
+
+        long identity = Binder.clearCallingIdentity();
+        try {
+            UserInfo userInfo = mUserManager.getProfileParent(userId);
+            parentUserId = userInfo != null ? userInfo.id : userId;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        // force profiles into cache
+        getProfileUserIdsForParentUser(parentUserId);
         return parentUserId;
     }
 
     @GuardedBy("this")
-    private int[] getProfileUserIdsForParentUser(@UserIdInt int parentUserId) {
-        Preconditions.checkState(mUserManager != null);
-
-        // only assert on debug builds as this is a more expensive check
-        if (Build.IS_DEBUGGABLE) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                Preconditions.checkArgument(mUserManager.getProfileParent(parentUserId) == null);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
+    private synchronized int[] getProfileUserIdsForParentUser(@UserIdInt int parentUserId) {
         if (parentUserId != mCachedParentUserId) {
             long identity = Binder.clearCallingIdentity();
             try {
+                Preconditions.checkState(mUserManager != null);
+
+                // more expensive check - check that argument really is a parent user id
+                if (Build.IS_DEBUGGABLE) {
+                    Preconditions.checkArgument(
+                            mUserManager.getProfileParent(parentUserId) == null);
+                }
+
                 mCachedParentUserId = parentUserId;
                 mCachedProfileUserIds = mUserManager.getProfileIdsWithDisabled(parentUserId);
             } finally {
@@ -236,8 +224,9 @@ public class UserInfoStore {
     /**
      * Dump info for debugging.
      */
-    public synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("Current User: " + mCurrentUserId + " " + Arrays.toString(
-                getProfileUserIdsForParentUser(mCurrentUserId)));
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        int currentUserId = mCurrentUserId;
+        pw.println("Current User: " + currentUserId + " " + Arrays.toString(
+                getProfileUserIdsForParentUser(currentUserId)));
     }
 }

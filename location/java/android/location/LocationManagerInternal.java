@@ -41,4 +41,19 @@ public abstract class LocationManagerInternal {
      * @throws IllegalArgumentException if provider is null
      */
     public abstract void requestSetProviderAllowed(@NonNull String provider, boolean allowed);
+
+    /**
+     * Returns true if the given package belongs to a location provider, and so should be afforded
+     * some special privileges.
+     *
+     * @param packageName The package name to check
+     * @return True is the given package belongs to a location provider, false otherwise
+     */
+    public abstract boolean isProviderPackage(@NonNull String packageName);
+
+    /**
+     * Should only be used by GNSS code.
+     */
+    // TODO: there is no reason for this to exist as part of any API. move all the logic into gnss
+    public abstract void sendNiResponse(int notifId, int userResponse);
 }
