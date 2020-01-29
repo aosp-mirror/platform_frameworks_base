@@ -664,7 +664,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void registerSystemAction(RemoteAction action, int actionId) {
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+        mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
+                Manifest.permission.MANAGE_ACCESSIBILITY,
                 FUNCTION_REGISTER_SYSTEM_ACTION);
         mSystemActionPerformer.registerSystemAction(actionId, action);
     }
@@ -676,7 +677,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void unregisterSystemAction(int actionId) {
-        mSecurityPolicy.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+        mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
+                Manifest.permission.MANAGE_ACCESSIBILITY,
                 FUNCTION_UNREGISTER_SYSTEM_ACTION);
         mSystemActionPerformer.unregisterSystemAction(actionId);
     }
