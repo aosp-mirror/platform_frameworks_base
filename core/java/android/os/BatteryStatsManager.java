@@ -42,7 +42,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 @SystemService(Context.BATTERY_STATS_SERVICE)
-public class BatteryStatsManager {
+public final class BatteryStatsManager {
     /**
      * Wifi states.
      *
