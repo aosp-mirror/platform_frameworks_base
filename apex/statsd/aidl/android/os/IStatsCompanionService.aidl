@@ -61,4 +61,11 @@ interface IStatsCompanionService {
 
     /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
     oneway void triggerUidSnapshot();
+
+    /**
+     * Ask StatsCompanionService if the given permission is allowed for a particular process
+     * and user ID. statsd is incapable of doing this check itself because checkCallingPermission
+     * is not currently supported by libbinder_ndk.
+     */
+    boolean checkPermission(String permission, int pid, int uid);
 }

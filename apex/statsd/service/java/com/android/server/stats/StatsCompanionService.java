@@ -516,6 +516,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    @Override // Binder call
+    public boolean checkPermission(String permission, int pid, int uid) {
+        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        return mContext.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED;
+    }
 
     // Statsd related code
 
