@@ -7655,6 +7655,36 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
+     * @param operatorNumeric the PLMN ID of the network to select.
+     * @param ran the initial suggested radio access network type.
+     *         If registration fails, the RAN is not available after, the RAN is not within the
+     *         network types specified by {@link #setPreferredNetworkTypeBitmask}, or the value is
+     *         {@link AccessNetworkConstants.AccessNetworkType#UNKNOWN}, modem will select
+     *         the next best RAN for network registration.
+     * @param persistSelection whether the selection will persist until reboot.
+     *         If true, only allows attaching to the selected PLMN until reboot; otherwise,
+     *         attach to the chosen PLMN and resume normal network selection next time.
+     * @return {@code true} on success; {@code false} on any failure.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean setNetworkSelectionModeManual(@NonNull String operatorNumeric,
+            @AccessNetworkConstants.RadioAccessNetworkType int ran, boolean persistSelection) {
+        return setNetworkSelectionModeManual(new OperatorInfo("" /* operatorAlphaLong */,
+                "" /* operatorAlphaShort */, operatorNumeric, ran), persistSelection);
+    }
+
+    /**
+     * Ask the radio to connect to the input network and change selection mode to manual.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @param operatorInfo included the PLMN id, long name, short name of the operator to attach to.
      * @param persistSelection whether the selection will persist until reboot. If true, only allows
      * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
