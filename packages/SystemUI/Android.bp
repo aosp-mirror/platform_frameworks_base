@@ -136,7 +136,6 @@ android_library {
     ],
     libs: [
         "android.test.runner",
-        "telephony-common",
         "android.test.base",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
