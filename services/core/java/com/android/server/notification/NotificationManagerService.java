@@ -2696,7 +2696,7 @@ public class NotificationManagerService extends SystemService {
                     // TODO(b/144152069): Remove informative toast
                     mUiHandler.post(() -> Toast.makeText(getContext(),
                             "Background custom toast blocked for package " + pkg + ".\n"
-                                    + "See go/r-toast-block.",
+                                    + "See g.co/dev/toast.",
                             Toast.LENGTH_SHORT).show());
                     Slog.w(TAG, "Blocking custom toast from package " + pkg
                             + " due to package not in the foreground");
