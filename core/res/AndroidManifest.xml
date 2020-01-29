@@ -1533,7 +1533,7 @@
          @hide
     -->
     <permission android:name="android.permission.ACCESS_CONTEXT_HUB"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
     <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB"/>
 
     <!-- @SystemApi Allows an application to create mock location providers for testing.
