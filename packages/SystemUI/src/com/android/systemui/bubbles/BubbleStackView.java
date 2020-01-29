@@ -409,8 +409,12 @@ public class BubbleStackView extends FrameLayout {
                         .setStiffness(SpringForce.STIFFNESS_LOW)
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
         mExpandedViewYAnim.addEndListener((anim, cancelled, value, velocity) -> {
-            if (mIsExpanded && mExpandedBubble != null) {
-                mExpandedBubble.getExpandedView().updateView();
+            if (mIsExpanded) {
+                if (mExpandedBubble == null) {
+                    mOverflowExpandedView.updateView();
+                } else {
+                    mExpandedBubble.getExpandedView().updateView();
+                }
             }
         });
 
@@ -525,7 +529,7 @@ public class BubbleStackView extends FrameLayout {
         mInflater.inflate(R.layout.bubble_overflow_button, this);
         mOverflowBtn = findViewById(R.id.bubble_overflow_button);
         mOverflowBtn.setOnClickListener(v -> {
-            showOverflow();
+            setSelectedBubble(null);
         });
 
         TypedArray ta = mContext.obtainStyledAttributes(
@@ -540,26 +544,13 @@ public class BubbleStackView extends FrameLayout {
         mOverflowBtn.setVisibility(GONE);
     }
 
-    void showOverflow() {
-        if (DEBUG_BUBBLE_STACK_VIEW) {
-            Log.d(TAG, "Show overflow.");
+    void showExpandedViewContents(int displayId) {
+        if (mOverflowExpandedView.getVirtualDisplayId() == displayId) {
+            mOverflowExpandedView.setContentVisibility(true);
+        } else if (mExpandedBubble != null
+                && mExpandedBubble.getExpandedView().getVirtualDisplayId() == displayId) {
+            mExpandedBubble.setContentVisibility(true);
         }
-        mExpandedViewContainer.setAlpha(0.0f);
-        mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
-            if (mExpandedBubble != null) {
-                mExpandedBubble.setContentVisibility(false);
-                mExpandedBubble = null;
-            }
-            mExpandedViewContainer.removeAllViews();
-            if (mIsExpanded) {
-                mExpandedViewContainer.addView(mOverflowExpandedView);
-                mOverflowExpandedView.populateExpandedView();
-                mExpandedViewContainer.setVisibility(VISIBLE);
-                mExpandedViewContainer.setAlpha(1.0f);
-                mOverflowExpandedView.setContentVisibility(true);
-            }
-            requestUpdate();
-        });
     }
 
     private void setUpFlyout() {
@@ -883,7 +874,9 @@ public class BubbleStackView extends FrameLayout {
             // expanded view becomes visible on the screen. See b/126856255
             mExpandedViewContainer.setAlpha(0.0f);
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
-                if (previouslySelected != null) {
+                if (previouslySelected == null) {
+                    mOverflowExpandedView.setContentVisibility(false);
+                } else {
                     previouslySelected.setContentVisibility(false);
                 }
                 updateExpandedBubble();
@@ -1055,7 +1048,9 @@ public class BubbleStackView extends FrameLayout {
                 () -> {
                     mBubbleContainer.setActiveController(mStackAnimationController);
                     afterExpandedViewAnimation();
-                    if (previouslySelected != null) {
+                    if (previouslySelected == null) {
+                        mOverflowExpandedView.setContentVisibility(false);
+                    } else {
                         previouslySelected.setContentVisibility(false);
                     }
                 });
@@ -1625,10 +1620,14 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "updateExpandedBubble()");
         }
         mExpandedViewContainer.removeAllViews();
-        if (mExpandedBubble != null && mIsExpanded) {
-            mExpandedViewContainer.addView(mExpandedBubble.getExpandedView());
-            mExpandedBubble.getExpandedView().populateExpandedView();
-            mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
+        if (mIsExpanded) {
+            BubbleExpandedView bev = mOverflowExpandedView;
+            if (mExpandedBubble != null) {
+                bev = mExpandedBubble.getExpandedView();
+            }
+            mExpandedViewContainer.addView(bev);
+            bev.populateExpandedView();
+            mExpandedViewContainer.setVisibility(VISIBLE);
             mExpandedViewContainer.setAlpha(1.0f);
         }
     }
