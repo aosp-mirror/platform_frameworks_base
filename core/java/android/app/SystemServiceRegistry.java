@@ -33,8 +33,10 @@ import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
+import android.app.timedetector.TimeDetectorImpl;
 import android.app.timezone.RulesManager;
 import android.app.timezonedetector.TimeZoneDetector;
+import android.app.timezonedetector.TimeZoneDetectorImpl;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
@@ -1196,7 +1198,7 @@ public final class SystemServiceRegistry {
                     @Override
                     public TimeDetector createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new TimeDetector();
+                        return new TimeDetectorImpl();
                     }});
 
         registerService(Context.TIME_ZONE_DETECTOR_SERVICE, TimeZoneDetector.class,
@@ -1204,7 +1206,7 @@ public final class SystemServiceRegistry {
                     @Override
                     public TimeZoneDetector createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new TimeZoneDetector();
+                        return new TimeZoneDetectorImpl();
                     }});
 
         registerService(Context.PERMISSION_SERVICE, PermissionManager.class,

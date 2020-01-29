@@ -21,29 +21,25 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
-import android.util.Log;
 
 /**
  * The interface through which system components can send signals to the TimeZoneDetectorService.
  *
- * <p>This class is non-final for mockito.
  * @hide
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.TIME_ZONE_DETECTOR_SERVICE)
-public class TimeZoneDetector {
-    private static final String TAG = "timezonedetector.TimeZoneDetector";
-    private static final boolean DEBUG = false;
+public interface TimeZoneDetector {
 
-    private final ITimeZoneDetectorService mITimeZoneDetectorService;
-
-    /** @hide */
-    public TimeZoneDetector() throws ServiceNotFoundException {
-        mITimeZoneDetectorService = ITimeZoneDetectorService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.TIME_ZONE_DETECTOR_SERVICE));
+    /**
+     * A shared utility method to create a {@link ManualTimeZoneSuggestion}.
+     *
+     * @hide
+     */
+    static ManualTimeZoneSuggestion createManualTimeZoneSuggestion(String tzId, String debugInfo) {
+        ManualTimeZoneSuggestion suggestion = new ManualTimeZoneSuggestion(tzId);
+        suggestion.addDebugInfo(debugInfo);
+        return suggestion;
     }
 
     /**
@@ -55,16 +51,7 @@ public class TimeZoneDetector {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
-    public void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion) {
-        if (DEBUG) {
-            Log.d(TAG, "suggestPhoneTimeZone called: " + timeZoneSuggestion);
-        }
-        try {
-            mITimeZoneDetectorService.suggestPhoneTimeZone(timeZoneSuggestion);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+    void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion);
 
     /**
      * Suggests the current time zone, determined for the user's manually information, to the
@@ -73,25 +60,5 @@ public class TimeZoneDetector {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
-    public void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
-        if (DEBUG) {
-            Log.d(TAG, "suggestManualTimeZone called: " + timeZoneSuggestion);
-        }
-        try {
-            mITimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * A shared utility method to create a {@link ManualTimeZoneSuggestion}.
-     *
-     * @hide
-     */
-    public static ManualTimeZoneSuggestion createManualTimeZoneSuggestion(String tzId, String why) {
-        ManualTimeZoneSuggestion suggestion = new ManualTimeZoneSuggestion(tzId);
-        suggestion.addDebugInfo(why);
-        return suggestion;
-    }
+    void suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion timeZoneSuggestion);
 }
