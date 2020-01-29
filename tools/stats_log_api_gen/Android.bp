@@ -121,7 +121,6 @@ cc_library {
     shared_libs: [
         "liblog",
         "libcutils",
-        "libstatssocket",
     ],
     apex_available: [
         "//apex_available:platform",
@@ -129,5 +128,13 @@ cc_library {
         "com.android.os.statsd",
         "test_com.android.os.statsd",
     ],
+    target: {
+        android: {
+            shared_libs: ["libstatssocket"],
+        },
+        host: {
+            static_libs: ["libstatssocket"],
+        },
+    },
 }
 
