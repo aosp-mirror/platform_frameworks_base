@@ -26,7 +26,7 @@ import android.os.SystemClock;
 import libcore.timezone.CountryTimeZones;
 import libcore.timezone.CountryTimeZones.TimeZoneMapping;
 import libcore.timezone.TimeZoneFinder;
-import libcore.timezone.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDb;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -133,7 +133,7 @@ public class TimeUtils {
      * during the lifetime of an activity.
      */
     public static String getTimeZoneDatabaseVersion() {
-        return ZoneInfoDB.getInstance().getVersion();
+        return ZoneInfoDb.getInstance().getVersion();
     }
 
     /** @hide Field length that can hold 999 days of time */

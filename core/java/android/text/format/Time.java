@@ -18,7 +18,7 @@ package android.text.format;
 
 import android.util.TimeFormatException;
 
-import libcore.timezone.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDb;
 import libcore.util.ZoneInfo;
 
 import java.io.IOException;
@@ -1107,9 +1107,9 @@ public class Time {
 
         private static ZoneInfo lookupZoneInfo(String timezoneId) {
             try {
-                ZoneInfo zoneInfo = ZoneInfoDB.getInstance().makeTimeZone(timezoneId);
+                ZoneInfo zoneInfo = ZoneInfoDb.getInstance().makeTimeZone(timezoneId);
                 if (zoneInfo == null) {
-                    zoneInfo = ZoneInfoDB.getInstance().makeTimeZone("GMT");
+                    zoneInfo = ZoneInfoDb.getInstance().makeTimeZone("GMT");
                 }
                 if (zoneInfo == null) {
                     throw new AssertionError("GMT not found: \"" + timezoneId + "\"");
