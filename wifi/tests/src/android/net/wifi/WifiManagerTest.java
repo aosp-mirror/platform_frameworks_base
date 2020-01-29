@@ -1928,16 +1928,6 @@ public class WifiManagerTest {
     }
 
     /**
-     * Test behavior of {@link WifiManager#isDualModeSupported()} ()}
-     */
-    @Test
-    public void testIsDualModeSupported() throws Exception {
-        when(mWifiService.needs5GHzToAnyApBandConversion()).thenReturn(true);
-        assertTrue(mWifiManager.isDualModeSupported());
-        verify(mWifiService).needs5GHzToAnyApBandConversion();
-    }
-
-    /**
      * Test behavior of {@link WifiManager#is5GHzBandSupported()}
      */
     @Test
