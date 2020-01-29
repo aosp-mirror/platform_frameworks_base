@@ -19,7 +19,7 @@ package android.app.timedetector {
     method @NonNull public android.app.timedetector.PhoneTimeSuggestion.Builder setUtcTime(@Nullable android.os.TimestampedValue<java.lang.Long>);
   }
 
-  public class TimeDetector {
+  public interface TimeDetector {
     method @RequiresPermission("android.permission.SUGGEST_PHONE_TIME_AND_ZONE") public void suggestPhoneTime(@NonNull android.app.timedetector.PhoneTimeSuggestion);
   }
 
@@ -59,7 +59,7 @@ package android.app.timezonedetector {
     method @NonNull public android.app.timezonedetector.PhoneTimeZoneSuggestion.Builder setZoneId(@Nullable String);
   }
 
-  public class TimeZoneDetector {
+  public interface TimeZoneDetector {
     method @RequiresPermission("android.permission.SUGGEST_PHONE_TIME_AND_ZONE") public void suggestPhoneTimeZone(@NonNull android.app.timezonedetector.PhoneTimeZoneSuggestion);
   }
 
