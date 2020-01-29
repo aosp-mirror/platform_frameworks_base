@@ -214,6 +214,7 @@ public class NotifCollection implements Dumpable {
     private void onNotificationRankingUpdate(RankingMap rankingMap) {
         Assert.isMainThread();
         applyRanking(rankingMap);
+        dispatchNotificationRankingUpdate(rankingMap);
         rebuildList();
     }
 
@@ -389,6 +390,14 @@ public class NotifCollection implements Dumpable {
         mAmDispatchingToOtherCode = true;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryUpdated(entry);
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
+    private void dispatchNotificationRankingUpdate(RankingMap map) {
+        mAmDispatchingToOtherCode = true;
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onRankingUpdate(map);
         }
         mAmDispatchingToOtherCode = false;
     }
