@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.InsetsState.ITYPE_IME;
+
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -107,6 +109,12 @@ public class InsetsSource implements Parcelable {
         }
         if (!mTmpFrame.setIntersect(frame, relativeFrame)) {
             return Insets.NONE;
+        }
+
+        // TODO: Currently, non-floating IME always intersects at bottom due to issues with cutout.
+        // However, we should let the policy decide from the server.
+        if (getType() == ITYPE_IME) {
+            return Insets.of(0, 0, 0, mTmpFrame.height());
         }
 
         // Intersecting at top/bottom
