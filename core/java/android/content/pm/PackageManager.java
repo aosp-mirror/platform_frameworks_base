@@ -3345,6 +3345,22 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
 
     /**
+     * Permission flag: The permission is whitelisted to not be auto-revoked when app goes unused.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE = 1 << 17;
+
+    /**
+     * Permission flag: Whether {@link #FLAG_PERMISSION_DONT_AUTO_REVOKE} state was set by user.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET = 1 << 18;
+
+    /**
      * Permission flags: Reserved for use by the permission controller.
      *
      * @hide
@@ -3395,7 +3411,9 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_APPLY_RESTRICTION
             | FLAG_PERMISSION_GRANTED_BY_ROLE
             | FLAG_PERMISSION_REVOKED_COMPAT
-            | FLAG_PERMISSION_ONE_TIME;
+            | FLAG_PERMISSION_ONE_TIME
+            | FLAG_PERMISSION_DONT_AUTO_REVOKE
+            | FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -4218,7 +4236,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_APPLY_RESTRICTION,
             FLAG_PERMISSION_GRANTED_BY_ROLE,
             FLAG_PERMISSION_REVOKED_COMPAT,
-            FLAG_PERMISSION_ONE_TIME
+            FLAG_PERMISSION_ONE_TIME,
+            FLAG_PERMISSION_DONT_AUTO_REVOKE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -7354,6 +7373,8 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
             case FLAG_PERMISSION_REVOKED_COMPAT: return "REVOKED_COMPAT";
             case FLAG_PERMISSION_ONE_TIME: return "ONE_TIME";
+            case FLAG_PERMISSION_DONT_AUTO_REVOKE: return "DONT_AUTO_REVOKE";
+            case FLAG_PERMISSION_DONT_AUTO_REVOKE_USER_SET: return "DONT_AUTO_REVOKE_USER_SET";
             default: return Integer.toString(flag);
         }
     }
