@@ -49,6 +49,7 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -297,6 +298,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             } finally {
                 Trace.traceEnd(TRACE_TAG_DATABASE);
             }
+        }
+
+        @Override
+        public void getTypeAsync(Uri uri, RemoteCallback callback) {
+            final Bundle result = new Bundle();
+            result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            callback.sendResult(result);
         }
 
         @Override
