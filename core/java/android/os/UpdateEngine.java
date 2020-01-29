@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.content.res.AssetFileDescriptor;
 import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
@@ -535,6 +536,7 @@ public class UpdateEngine {
      * @return See {@link AllocateSpaceResult#getErrorCode} and
      *             {@link AllocateSpaceResult#getFreeSpaceRequired}.
      */
+    @WorkerThread
     @NonNull
     public AllocateSpaceResult allocateSpace(
                 @NonNull String payloadMetadataFilename,
@@ -585,6 +587,7 @@ public class UpdateEngine {
      * @throws ServiceSpecificException if other transient errors has occurred.
      * A reboot may or may not help resolving the issue.
      */
+    @WorkerThread
     @ErrorCode
     public int cleanupAppliedPayload() {
         try {
