@@ -23,12 +23,10 @@ import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFro
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Pair;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -36,7 +34,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
@@ -83,6 +80,8 @@ public class PhoneStatusBarView extends PanelBar {
      */
     private int mCutoutSideNudge = 0;
     private boolean mHeadsUpVisible;
+
+    private int mRoundedCornerPadding = 0;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -294,15 +293,25 @@ public class PhoneStatusBarView extends PanelBar {
     public void updateResources() {
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
+        mRoundedCornerPadding = getResources().getDimensionPixelSize(
+                R.dimen.rounded_corner_content_padding);
 
+        updateStatusBarHeight();
+    }
+
+    private void updateStatusBarHeight() {
+        final int waterfallTopInset =
+                mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.height = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+        layoutParams.height =
+                getResources().getDimensionPixelSize(R.dimen.status_bar_height) - waterfallTopInset;
         setLayoutParams(layoutParams);
     }
 
     private void updateLayoutForCutout() {
-        Pair<Integer, Integer> cornerCutoutMargins = cornerCutoutMargins(mDisplayCutout,
-                getDisplay());
+        updateStatusBarHeight();
+        Pair<Integer, Integer> cornerCutoutMargins =
+                StatusBarWindowView.cornerCutoutMargins(mDisplayCutout, getDisplay());
         updateCutoutLocation(cornerCutoutMargins);
         updateSafeInsets(cornerCutoutMargins);
     }
@@ -337,47 +346,11 @@ public class PhoneStatusBarView extends PanelBar {
         // Depending on our rotation, we may have to work around a cutout in the middle of the view,
         // or letterboxing from the right or left sides.
 
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        if (mDisplayCutout == null || mDisplayCutout.isEmpty()
-                || mLastOrientation != ORIENTATION_PORTRAIT || cornerCutoutMargins == null) {
-            lp.leftMargin = 0;
-            lp.rightMargin = 0;
-            return;
-        }
+        Pair<Integer, Integer> padding =
+                StatusBarWindowView.paddingNeededForCutoutAndRoundedCorner(
+                        mDisplayCutout, cornerCutoutMargins, mRoundedCornerPadding);
 
-        lp.leftMargin = Math.max(lp.leftMargin, cornerCutoutMargins.first);
-        lp.rightMargin = Math.max(lp.rightMargin, cornerCutoutMargins.second);
-
-        // If we're already inset enough (e.g. on the status bar side), we can have 0 margin
-        WindowInsets insets = getRootWindowInsets();
-        int leftInset = insets.getSystemWindowInsetLeft();
-        int rightInset = insets.getSystemWindowInsetRight();
-        if (lp.leftMargin <= leftInset) {
-            lp.leftMargin = 0;
-        }
-        if (lp.rightMargin <= rightInset) {
-            lp.rightMargin = 0;
-        }
-    }
-
-    public static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
-            Display display) {
-        if (cutout == null) {
-            return null;
-        }
-        Point size = new Point();
-        display.getRealSize(size);
-
-        Rect bounds = new Rect();
-        boundsFromDirection(cutout, Gravity.TOP, bounds);
-
-        if (bounds.left <= 0) {
-            return new Pair<>(bounds.right, 0);
-        }
-        if (bounds.right >= size.x) {
-            return new Pair<>(0, size.x - bounds.left);
-        }
-        return null;
+        setPadding(padding.first, getPaddingTop(), padding.second, getPaddingBottom());
     }
 
     public void setHeadsUpVisible(boolean headsUpVisible) {
