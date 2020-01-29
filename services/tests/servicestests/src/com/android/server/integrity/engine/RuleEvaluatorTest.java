@@ -63,7 +63,7 @@ public class RuleEvaluatorTest {
 
     @Test
     public void testEvaluateRules_noMatchedRules_allow() {
-        Rule rule1 =
+        Rule rule =
                 new Rule(
                         new StringAtomicFormula(
                                 AtomicFormula.PACKAGE_NAME,
@@ -72,7 +72,7 @@ public class RuleEvaluatorTest {
                         Rule.DENY);
 
         IntegrityCheckResult result =
-                RuleEvaluator.evaluateRules(Collections.singletonList(rule1), APP_INSTALL_METADATA);
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(ALLOW);
     }
@@ -98,7 +98,7 @@ public class RuleEvaluatorTest {
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
-        assertThat(result.getRule()).isEqualTo(rule1);
+        assertThat(result.getMatchedRules()).containsExactly(rule1);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class RuleEvaluatorTest {
                                 PACKAGE_NAME_1,
                                 /* isHashedValue= */ false),
                         Rule.DENY);
-        CompoundFormula compoundFormula2 =
+        Rule rule2 = new Rule(
                 new CompoundFormula(
                         CompoundFormula.AND,
                         Arrays.asList(
@@ -121,33 +121,33 @@ public class RuleEvaluatorTest {
                                 new StringAtomicFormula(
                                         AtomicFormula.APP_CERTIFICATE,
                                         APP_CERTIFICATE,
-                                        /* isHashedValue= */ false)));
-        Rule rule2 = new Rule(compoundFormula2, Rule.DENY);
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
-        assertThat(result.getRule()).isEqualTo(rule1);
+        assertThat(result.getMatchedRules()).containsExactly(rule1, rule2);
     }
 
     @Test
     public void testEvaluateRules_ruleWithNot_deny() {
-        CompoundFormula compoundFormula =
+        Rule rule = new Rule(
                 new CompoundFormula(
                         CompoundFormula.NOT,
                         Collections.singletonList(
                                 new StringAtomicFormula(
                                         AtomicFormula.PACKAGE_NAME,
                                         PACKAGE_NAME_2,
-                                        /* isHashedValue= */ false)));
-        Rule rule = new Rule(compoundFormula, Rule.DENY);
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
-        assertThat(result.getRule()).isEqualTo(rule);
+        assertThat(result.getMatchedRules()).containsExactly(rule);
     }
 
     @Test
@@ -162,12 +162,12 @@ public class RuleEvaluatorTest {
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
-        assertThat(result.getRule()).isEqualTo(rule);
+        assertThat(result.getMatchedRules()).containsExactly(rule);
     }
 
     @Test
     public void testEvaluateRules_validForm_deny() {
-        CompoundFormula compoundFormula =
+        Rule rule = new Rule(
                 new CompoundFormula(
                         CompoundFormula.AND,
                         Arrays.asList(
@@ -178,19 +178,19 @@ public class RuleEvaluatorTest {
                                 new StringAtomicFormula(
                                         AtomicFormula.APP_CERTIFICATE,
                                         APP_CERTIFICATE,
-                                        /* isHashedValue= */ false)));
-        Rule rule = new Rule(compoundFormula, Rule.DENY);
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
-        assertThat(result.getRule()).isEqualTo(rule);
+        assertThat(result.getMatchedRules()).containsExactly(rule);
     }
 
     @Test
     public void testEvaluateRules_orRules() {
-        CompoundFormula compoundFormula =
+        Rule rule = new Rule(
                 new CompoundFormula(
                         CompoundFormula.OR,
                         Arrays.asList(
@@ -201,13 +201,14 @@ public class RuleEvaluatorTest {
                                 new StringAtomicFormula(
                                         AtomicFormula.APP_CERTIFICATE,
                                         APP_CERTIFICATE,
-                                        /* isHashedValue= */ false)));
-        Rule rule = new Rule(compoundFormula, Rule.DENY);
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getMatchedRules()).containsExactly(rule);
     }
 
     @Test
@@ -232,6 +233,7 @@ public class RuleEvaluatorTest {
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(DENY);
+        assertThat(result.getMatchedRules()).containsExactly(rule);
     }
 
     @Test
@@ -243,7 +245,7 @@ public class RuleEvaluatorTest {
                                 PACKAGE_NAME_1,
                                 /* isHashedValue= */ false),
                         Rule.FORCE_ALLOW);
-        CompoundFormula compoundFormula2 =
+        Rule rule2 = new Rule(
                 new CompoundFormula(
                         CompoundFormula.AND,
                         Arrays.asList(
@@ -254,13 +256,43 @@ public class RuleEvaluatorTest {
                                 new StringAtomicFormula(
                                         AtomicFormula.APP_CERTIFICATE,
                                         APP_CERTIFICATE,
-                                        /* isHashedValue= */ false)));
-        Rule rule2 = new Rule(compoundFormula2, Rule.DENY);
+                                        /* isHashedValue= */ false))),
+                Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
         assertThat(result.getEffect()).isEqualTo(ALLOW);
-        assertThat(result.getRule()).isEqualTo(rule1);
+        assertThat(result.getMatchedRules()).containsExactly(rule1);
+    }
+
+    @Test
+    public void testEvaluateRules_multipleMatches_forceAllow() {
+        Rule rule1 =
+                new Rule(
+                        new StringAtomicFormula(
+                                AtomicFormula.PACKAGE_NAME,
+                                PACKAGE_NAME_1,
+                                /* isHashedValue= */ false),
+                        Rule.FORCE_ALLOW);
+        Rule rule2 = new Rule(
+                new CompoundFormula(
+                        CompoundFormula.AND,
+                        Arrays.asList(
+                                new StringAtomicFormula(
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_1,
+                                        /* isHashedValue= */ false),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        APP_CERTIFICATE,
+                                        /* isHashedValue= */ false))),
+                Rule.FORCE_ALLOW);
+
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
+
+        assertThat(result.getEffect()).isEqualTo(ALLOW);
+        assertThat(result.getMatchedRules()).containsExactly(rule1, rule2);
     }
 }

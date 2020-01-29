@@ -16,11 +16,19 @@
 
 package com.android.systemui.bubbles;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -30,6 +38,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.tests.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +55,10 @@ public class BubbleTest extends SysuiTestCase {
 
     private NotificationEntry mEntry;
     private Bundle mExtras;
+    private Bubble mBubble;
+
+    @Mock
+    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
 
     @Before
     public void setUp() {
@@ -57,6 +70,15 @@ public class BubbleTest extends SysuiTestCase {
         mEntry = new NotificationEntryBuilder()
                 .setNotification(mNotif)
                 .build();
+
+        mBubble = new Bubble(mEntry, mSuppressionListener);
+
+        Intent target = new Intent(mContext, BubblesTestActivity.class);
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder()
+                .createIntentBubble(PendingIntent.getActivity(mContext, 0, target, 0),
+                        Icon.createWithResource(mContext, R.drawable.android))
+                .build();
+        mEntry.setBubbleMetadata(metadata);
     }
 
     @Test
@@ -122,5 +144,25 @@ public class BubbleTest extends SysuiTestCase {
         assertEquals("Mady",
                 BubbleViewInfoTask.extractFlyoutMessage(mContext,
                         mEntry).senderName);
+    }
+
+    @Test
+    public void testSuppressionListener_change_notified() {
+        assertThat(mBubble.showInShade()).isTrue();
+
+        mBubble.setSuppressNotification(true);
+
+        assertThat(mBubble.showInShade()).isFalse();
+
+        verify(mSuppressionListener).onBubbleNotificationSuppressionChange(mBubble);
+    }
+
+    @Test
+    public void testSuppressionListener_noChange_doesntNotify() {
+        assertThat(mBubble.showInShade()).isTrue();
+
+        mBubble.setSuppressNotification(false);
+
+        verify(mSuppressionListener, never()).onBubbleNotificationSuppressionChange(any());
     }
 }

@@ -16,9 +16,9 @@
 
 package android.content.integrity;
 
-import static android.content.integrity.TestUtils.assertExpectException;
-
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.testng.Assert.expectThrows;
 
 import android.content.integrity.AtomicFormula.BooleanAtomicFormula;
 import android.content.integrity.AtomicFormula.StringAtomicFormula;
@@ -133,35 +133,38 @@ public class AtomicFormulaTest {
 
     @Test
     public void testInvalidAtomicFormula_stringValue() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */
-                String.format("Key VERSION_CODE cannot be used with StringAtomicFormula"),
-                () ->
-                        new StringAtomicFormula(
-                                AtomicFormula.VERSION_CODE,
-                                "test-value",
-                                /* isHashedValue= */ false));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new StringAtomicFormula(
+                                        AtomicFormula.VERSION_CODE,
+                                        "test-value",
+                                        /* isHashedValue= */ false));
+        assertThat(e.getMessage()).matches(
+                "Key VERSION_CODE cannot be used with StringAtomicFormula");
     }
 
     @Test
     public void testInvalidAtomicFormula_longValue() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */
-                String.format("Key PACKAGE_NAME cannot be used with LongAtomicFormula"),
-                () ->
-                        new AtomicFormula.LongAtomicFormula(
-                                AtomicFormula.PACKAGE_NAME, AtomicFormula.EQ, 1));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new AtomicFormula.LongAtomicFormula(
+                                        AtomicFormula.PACKAGE_NAME, AtomicFormula.EQ, 1));
+        assertThat(e.getMessage()).matches(
+                "Key PACKAGE_NAME cannot be used with LongAtomicFormula");
     }
 
     @Test
     public void testInvalidAtomicFormula_boolValue() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */
-                String.format("Key PACKAGE_NAME cannot be used with BooleanAtomicFormula"),
-                () -> new BooleanAtomicFormula(AtomicFormula.PACKAGE_NAME, true));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () -> new BooleanAtomicFormula(AtomicFormula.PACKAGE_NAME, true));
+        assertThat(e.getMessage()).matches(
+                "Key PACKAGE_NAME cannot be used with BooleanAtomicFormula");
     }
 
     @Test
@@ -205,20 +208,24 @@ public class AtomicFormulaTest {
 
     @Test
     public void testInvalidAtomicFormula_invalidKey() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */ "Unknown key: -1",
-                () -> new AtomicFormula.LongAtomicFormula(/* key= */ -1, AtomicFormula.EQ, 0));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () -> new AtomicFormula.LongAtomicFormula(/* key= */ -1,
+                                AtomicFormula.EQ, /* value= */0));
+        assertThat(e.getMessage()).matches("Unknown key: -1");
     }
 
     @Test
     public void testInvalidAtomicFormula_invalidOperator() {
-        assertExpectException(
-                IllegalArgumentException.class,
-                /* expectedExceptionMessageRegex */ "Unknown operator: -1",
-                () ->
-                        new AtomicFormula.LongAtomicFormula(
-                                AtomicFormula.VERSION_CODE, /* operator= */ -1, 0));
+        Exception e =
+                expectThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new AtomicFormula.LongAtomicFormula(
+                                        AtomicFormula.VERSION_CODE, /* operator= */ -1, /* value= */
+                                        0));
+        assertThat(e.getMessage()).matches("Unknown operator: -1");
     }
 
     @Test

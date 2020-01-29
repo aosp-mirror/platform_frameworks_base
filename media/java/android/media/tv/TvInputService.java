@@ -1818,6 +1818,30 @@ public abstract class TvInputService extends Service {
         public abstract void onStartRecording(@Nullable Uri programUri);
 
         /**
+         * Called when the application requests to start TV program recording. Recording must start
+         * immediately when this method is called.
+         *
+         * <p>The application may supply the URI for a TV program for filling in program specific
+         * data fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
+         * A non-null {@code programUri} implies the started recording should be of that specific
+         * program, whereas null {@code programUri} does not impose such a requirement and the
+         * recording can span across multiple TV programs. In either case, the application must call
+         * {@link TvRecordingClient#stopRecording()} to stop the recording.
+         *
+         * <p>The session must call {@link #notifyError(int)} if the start request cannot be
+         * fulfilled.
+         *
+         * @param programUri The URI for the TV program to record, built by
+         *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
+         * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+         *            name, i.e. prefixed with a package name you own, so that different developers
+         *            will not create conflicting keys.
+         */
+        public void onStartRecording(@Nullable Uri programUri, @NonNull Bundle params) {
+            onStartRecording(programUri);
+        }
+
+        /**
          * Called when the application requests to stop TV program recording. Recording must stop
          * immediately when this method is called.
          *
@@ -1867,11 +1891,11 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onStartRecording(Uri)}.
+         * Calls {@link #onStartRecording(Uri, Bundle)}.
          *
          */
-        void startRecording(@Nullable  Uri programUri) {
-            onStartRecording(programUri);
+        void startRecording(@Nullable  Uri programUri, @NonNull Bundle params) {
+            onStartRecording(programUri, params);
         }
 
         /**

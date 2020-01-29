@@ -23,12 +23,15 @@ import java.io.File;
  * @hide
  */
 public final class WfaCertificateSource extends DirectoryCertificateSource {
+    private static final String CACERTS_WFA_PATH =
+            "/apex/com.android.wifi/etc/security/cacerts_wfa";
+
     private static class NoPreloadHolder {
         private static final WfaCertificateSource INSTANCE = new WfaCertificateSource();
     }
 
     private WfaCertificateSource() {
-        super(new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts_wfa"));
+        super(new File(CACERTS_WFA_PATH));
     }
 
     public static WfaCertificateSource getInstance() {

@@ -1010,7 +1010,7 @@ class WindowStateAnimator {
                         // the WS position is reset (so the stack position is shown) at the same
                         // time that the buffer size changes.
                         setOffsetPositionForStackResize(false);
-                        mSurfaceController.deferTransactionUntil(mSurfaceController.mSurfaceControl,
+                        mSurfaceController.deferTransactionUntil(mWin.getDeferTransactionBarrier(),
                                 mWin.getFrameNumber());
                     } else {
                         final ActivityStack stack = mWin.getRootTask();
@@ -1041,7 +1041,7 @@ class WindowStateAnimator {
         // comes in at the new size (normally position and crop are unfrozen).
         // deferTransactionUntil accomplishes this for us.
         if (wasForceScaled && !mForceScaleUntilResize) {
-            mSurfaceController.deferTransactionUntil(mSurfaceController.mSurfaceControl,
+            mSurfaceController.deferTransactionUntil(mWin.getDeferTransactionBarrier(),
                     mWin.getFrameNumber());
             mSurfaceController.forceScaleableInTransaction(false);
         }
@@ -1517,5 +1517,12 @@ class WindowStateAnimator {
 
     void setOffsetPositionForStackResize(boolean offsetPositionForStackResize) {
         mOffsetPositionForStackResize = offsetPositionForStackResize;
+    }
+
+    SurfaceControl getDeferTransactionBarrier() {
+        if (!hasSurface()) {
+            return null;
+        }
+        return mSurfaceController.getDeferTransactionBarrier();
     }
 }

@@ -71,6 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"સ્ક્રીનશૉટ"</string>
+    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"છબી શામેલ કરી"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"સ્ક્રીનશૉટ સાચવ્યો"</string>
@@ -84,6 +85,7 @@
     <string name="screenrecord_start_label" msgid="1539048263178882562">"રેકોર્ડિંગ શરૂ કરો"</string>
     <string name="screenrecord_mic_label" msgid="6134198080740031632">"વૉઇસઓવર રેકોર્ડ કરો"</string>
     <string name="screenrecord_taps_label" msgid="2518244240225925076">"ટૅપ કર્યાની સંખ્યા બતાવો"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"રોકવા માટે ટૅપ કરો"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"રોકો"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"થોભાવો"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ફરી શરૂ કરો"</string>
@@ -388,15 +390,14 @@
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"બૅટરી સેવર"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"સૂર્યાસ્ત વખતે"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"સૂર્યોદય સુધી"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> વાગ્યે ચાલુ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> વાગ્યા સુધી"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC સક્ષમ કરેલ છે"</string>
-    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
-    <skip />
-    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
-    <skip />
-    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"સ્ક્રીન રેકૉર્ડ કરો"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"શરૂ કરો"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"રોકો"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ઍપ સ્વિચ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ઍપને ઝડપથી સ્વિચ કરવા માટે જમણે ખેંચો"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ઝલકને ટૉગલ કરો"</string>
@@ -696,22 +697,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"કસ્ટમાઇઝ કરો"</string>
     <string name="notification_done" msgid="6215117625922713976">"થઈ ગયું"</string>
     <string name="inline_undo" msgid="9026953267645116526">"રદ કરો"</string>
-    <!-- no translation found for demote (6225813324237153980) -->
-    <skip />
-    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
-    <skip />
-    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
-    <skip />
-    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
-    <skip />
-    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
-    <skip />
+    <string name="demote" msgid="6225813324237153980">"આ નોટિફિકેશન વાતચીત ન હોવા તરીકે માર્ક કરો"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"મનપસંદ"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"મનપસંદમાંથી કાઢી નાખો"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"મ્યૂટ કરો"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"અનમ્યૂટ કરો"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"બબલ તરીકે બતાવો"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"બબલ બંધ કરો"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"હોમ સ્ક્રીન પર ઉમેરો"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"સૂચના નિયંત્રણો"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"સૂચના સ્નૂઝ કરવાના વિકલ્પો"</string>

@@ -240,6 +240,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 zen != Global.ZEN_MODE_OFF, mController.getConfig(), false));
         state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_dnd);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
+        // Keeping the secondaryLabel in contentDescription instead of stateDescription is easier
+        // to understand.
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.contentDescription =

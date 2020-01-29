@@ -87,7 +87,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * @return @see {@link android.view.InsetsSourceConsumer.ShowResult}.
      */
     @Override
-    @ShowResult int requestShow(boolean fromIme) {
+    public @ShowResult int requestShow(boolean fromIme) {
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
         if (fromIme) {
@@ -95,7 +95,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         }
 
         return getImm().requestImeShow(null /* resultReceiver */)
-                ? ShowResult.SHOW_DELAYED : ShowResult.SHOW_FAILED;
+                ? ShowResult.IME_SHOW_DELAYED : ShowResult.IME_SHOW_FAILED;
     }
 
     /**

@@ -261,8 +261,6 @@ public class PipBoundsHandler {
             mPinnedStackController.startAnimation(destinationBounds, sourceRectHint,
                     -1 /* animationDuration */);
             mLastDestinationBounds.set(destinationBounds);
-            mPinnedStackController.reportBounds(defaultBounds,
-                    getMovementBounds(defaultBounds));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to start PiP animation from SysUI", e);
         }
@@ -317,7 +315,6 @@ public class PipBoundsHandler {
             outBounds.set(postChangeStackBounds);
             mLastDestinationBounds.set(outBounds);
             mPinnedStackController.resetBoundsAnimation(outBounds);
-            mPinnedStackController.reportBounds(outBounds, getMovementBounds(outBounds));
             t.setBounds(pinnedStackInfo.stackToken, outBounds);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to resize PiP on display rotation", e);

@@ -176,8 +176,6 @@ public class InsetsAnimationControlImplTest {
         when(mMockController.getState()).thenReturn(mInsetsState);
         mController.finish(true /* shown */);
         mController.applyChangeInsets(mInsetsState);
-        assertTrue(mInsetsState.getSource(ITYPE_STATUS_BAR).isVisible());
-        assertTrue(mInsetsState.getSource(ITYPE_NAVIGATION_BAR).isVisible());
         assertEquals(Insets.of(0, 100, 100, 0), mController.getCurrentInsets());
         verify(mMockController).notifyFinished(eq(mController), eq(true /* shown */));
     }

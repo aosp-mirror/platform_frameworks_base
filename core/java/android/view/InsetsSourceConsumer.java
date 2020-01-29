@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 public class InsetsSourceConsumer {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {ShowResult.SHOW_IMMEDIATELY, ShowResult.SHOW_DELAYED, ShowResult.SHOW_FAILED})
+    @IntDef(value = {ShowResult.SHOW_IMMEDIATELY, ShowResult.IME_SHOW_DELAYED, ShowResult.IME_SHOW_FAILED})
     @interface ShowResult {
         /**
          * Window type is ready to be shown, will be shown immidiately.
@@ -46,12 +46,12 @@ public class InsetsSourceConsumer {
          * Result will be delayed. Window needs to be prepared or request is not from controller.
          * Request will be delegated to controller and may or may not be shown.
          */
-        int SHOW_DELAYED = 1;
+        int IME_SHOW_DELAYED = 1;
         /**
          * Window will not be shown because one of the conditions couldn't be met.
          * (e.g. in IME's case, when no editor is focused.)
          */
-        int SHOW_FAILED = 2;
+        int IME_SHOW_FAILED = 2;
     }
 
     protected final InsetsController mController;
@@ -155,7 +155,8 @@ public class InsetsSourceConsumer {
      *                       {@link android.inputmethodservice.InputMethodService}).
      * @return @see {@link ShowResult}.
      */
-    @ShowResult int requestShow(boolean fromController) {
+    @VisibleForTesting
+    public @ShowResult int requestShow(boolean fromController) {
         return ShowResult.SHOW_IMMEDIATELY;
     }
 

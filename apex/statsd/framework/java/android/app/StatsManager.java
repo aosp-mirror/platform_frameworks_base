@@ -474,17 +474,6 @@ public final class StatsManager {
     }
 
     /**
-     * Temp registration for while the migration is in progress.
-     *
-     * @hide
-     */
-    public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
-            @NonNull StatsPullAtomCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
-        registerPullAtomCallback(atomTag, metadata, executor, callback);
-    }
-
-    /**
      * Registers a callback for an atom when that atom is to be pulled. The stats service will
      * invoke pullData in the callback when the stats service determines that this atom needs to be
      * pulled.
@@ -588,15 +577,6 @@ public final class StatsManager {
             mCoolDownNs = coolDownNs;
             mTimeoutNs = timeoutNs;
             mAdditiveFields = additiveFields;
-        }
-
-        /**
-         * Temp for while migrations are in progress.
-         *
-         * @hide
-         */
-        public static PullAtomMetadata.Builder newBuilder() {
-            return new PullAtomMetadata.Builder();
         }
 
         /**

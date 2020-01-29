@@ -3075,7 +3075,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         event.getAction(), fallbackAction.keyCode,
                         event.getRepeatCount(), fallbackAction.metaState,
                         event.getDeviceId(), event.getScanCode(),
-                        flags, event.getSource(), event.getDisplayId(), null);
+                        flags, event.getSource(), event.getDisplayId(), null /* hmac */, null);
 
                 if (!interceptFallback(focusedToken, fallbackEvent, policyFlags)) {
                     fallbackEvent.recycle();

@@ -297,6 +297,13 @@ public class PipManager implements BasePipManager {
     }
 
     /**
+     * Sets a customized touch gesture that replaces the default one.
+     */
+    public void setTouchGesture(PipTouchGesture gesture) {
+        mTouchHandler.setTouchGesture(gesture);
+    }
+
+    /**
      * Sets both shelf visibility and its height.
      */
     @Override

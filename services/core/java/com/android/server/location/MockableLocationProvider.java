@@ -233,6 +233,9 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         AbstractLocationProvider provider;
         synchronized (mOwnerLock) {
             provider = mProvider;
+            pw.println("allowed=" + getState().allowed);
+            pw.println("properties=" + getState().properties);
+            pw.println("packages=" + getState().providerPackageNames);
             pw.println("request=" + mRequest);
         }
 

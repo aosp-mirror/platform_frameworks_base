@@ -78,9 +78,9 @@ message Atom {
     // Pushed atoms start at 2.
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
-        BleScanStateChanged ble_scan_state_changed = 2;
+        BleScanStateChanged ble_scan_state_changed = 2 [(module) = "bluetooth"];
         ProcessStateChanged process_state_changed = 3;
-        BleScanResultReceived ble_scan_result_received = 4;
+        BleScanResultReceived ble_scan_result_received = 4 [(module) = "bluetooth"];
         SensorStateChanged sensor_state_changed = 5;
         GpsScanStateChanged gps_scan_state_changed = 6;
         SyncStateChanged sync_state_changed = 7;
@@ -144,7 +144,8 @@ message Atom {
         AppDied app_died = 65;
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
-        BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
+        BluetoothConnectionStateChanged bluetooth_connection_state_changed =
+                68 [(module) = "bluetooth"];
         GpsSignalQualityChanged gps_signal_quality_changed = 69;
         UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
@@ -207,9 +208,12 @@ message Atom {
         RescuePartyResetReported rescue_party_reset_reported = 122;
         SignedConfigReported signed_config_reported = 123;
         GnssNiEventReported gnss_ni_event_reported = 124;
-        BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
-        BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
-        BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed = 127;
+        BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event =
+                125 [(module) = "bluetooth"];
+        BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed =
+                126 [(module) = "bluetooth"];
+        BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed =
+                127 [(module) = "bluetooth"];
         AppDowngraded app_downgraded = 128;
         AppOptimizedAfterDowngraded app_optimized_after_downgraded = 129;
         LowStorageStateChanged low_storage_state_changed = 130;
@@ -233,23 +237,40 @@ message Atom {
         BiometricSystemHealthIssueDetected biometric_system_health_issue_detected = 148;
         BubbleUIChanged bubble_ui_changed = 149 [(module) = "sysui"];
         ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
-        BluetoothActiveDeviceChanged bluetooth_active_device_changed = 151;
-        BluetoothA2dpPlaybackStateChanged bluetooth_a2dp_playback_state_changed = 152;
-        BluetoothA2dpCodecConfigChanged bluetooth_a2dp_codec_config_changed = 153;
-        BluetoothA2dpCodecCapabilityChanged bluetooth_a2dp_codec_capability_changed = 154;
-        BluetoothA2dpAudioUnderrunReported bluetooth_a2dp_audio_underrun_reported = 155;
-        BluetoothA2dpAudioOverrunReported bluetooth_a2dp_audio_overrun_reported = 156;
-        BluetoothDeviceRssiReported bluetooth_device_rssi_reported = 157;
-        BluetoothDeviceFailedContactCounterReported bluetooth_device_failed_contact_counter_reported = 158;
-        BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported = 159;
-        BluetoothHciTimeoutReported bluetooth_hci_timeout_reported = 160;
-        BluetoothQualityReportReported bluetooth_quality_report_reported = 161;
-        BluetoothDeviceInfoReported bluetooth_device_info_reported = 162;
-        BluetoothRemoteVersionInfoReported bluetooth_remote_version_info_reported = 163;
-        BluetoothSdpAttributeReported bluetooth_sdp_attribute_reported = 164;
-        BluetoothBondStateChanged bluetooth_bond_state_changed = 165;
-        BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
-        BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
+        BluetoothActiveDeviceChanged bluetooth_active_device_changed =
+                151 [(module) = "bluetooth"];
+        BluetoothA2dpPlaybackStateChanged bluetooth_a2dp_playback_state_changed =
+                152 [(module) = "bluetooth"];
+        BluetoothA2dpCodecConfigChanged bluetooth_a2dp_codec_config_changed =
+                153 [(module) = "bluetooth"];
+        BluetoothA2dpCodecCapabilityChanged bluetooth_a2dp_codec_capability_changed =
+                154 [(module) = "bluetooth"];
+        BluetoothA2dpAudioUnderrunReported bluetooth_a2dp_audio_underrun_reported =
+                155 [(module) = "bluetooth"];
+        BluetoothA2dpAudioOverrunReported bluetooth_a2dp_audio_overrun_reported =
+                156 [(module) = "bluetooth"];
+        BluetoothDeviceRssiReported bluetooth_device_rssi_reported =
+                157 [(module) = "bluetooth"];
+        BluetoothDeviceFailedContactCounterReported
+                bluetooth_device_failed_contact_counter_reported = 158 [(module) = "bluetooth"];
+        BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported =
+                159 [(module) = "bluetooth"];
+        BluetoothHciTimeoutReported bluetooth_hci_timeout_reported =
+                160 [(module) = "bluetooth"];
+        BluetoothQualityReportReported bluetooth_quality_report_reported =
+                161 [(module) = "bluetooth"];
+        BluetoothDeviceInfoReported bluetooth_device_info_reported =
+                162 [(module) = "bluetooth"];
+        BluetoothRemoteVersionInfoReported bluetooth_remote_version_info_reported =
+                163 [(module) = "bluetooth"];
+        BluetoothSdpAttributeReported bluetooth_sdp_attribute_reported =
+                164 [(module) = "bluetooth"];
+        BluetoothBondStateChanged bluetooth_bond_state_changed =
+                165 [(module) = "bluetooth"];
+        BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported =
+                166 [(module) = "bluetooth"];
+        BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported =
+                167 [(module) = "bluetooth"];
         ScreenTimeoutExtensionReported screen_timeout_extension_reported = 168;
         ProcessStartTime process_start_time = 169;
         PermissionGrantRequestResultReported permission_grant_request_result_reported =
@@ -272,7 +293,8 @@ message Atom {
         BiometricEnrolled biometric_enrolled = 184;
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
         TombStoneOccurred tomb_stone_occurred = 186;
-        BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
+        BluetoothClassOfDeviceReported bluetooth_class_of_device_reported =
+                187 [(module) = "bluetooth"];
         IntelligenceEventReported intelligence_event_reported =
             188 [(module) = "intelligence"];
         ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;

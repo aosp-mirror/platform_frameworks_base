@@ -25,7 +25,7 @@ import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.AccessNetworkConstants.RadioAccessNetworkType;
 import android.telephony.TelephonyManager.NetworkTypeBitMask;
 
-import com.android.internal.util.CollectionUtils;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -181,13 +181,13 @@ public final class PhoneCapability implements Parcelable {
         this.mEutranUeCategoryUl = eutranUeCategoryUl;
         this.mPsDataConnectionLingerTimeMillis = psDataConnectionLingerTimeMillis;
         this.mSupportedRats = supportedRats;
-        this.mGeranBands = CollectionUtils.emptyIfNull(geranBands);
-        this.mUtranBands = CollectionUtils.emptyIfNull(utranBands);
-        this.mEutranBands = CollectionUtils.emptyIfNull(eutranBands);
-        this.mNgranBands = CollectionUtils.emptyIfNull(ngranBands);
-        this.mLogicalModemUuids = CollectionUtils.emptyIfNull(logicalModemUuids);
-        this.mSimSlotCapabilities = CollectionUtils.emptyIfNull(simSlotCapabilities);
-        this.mConcurrentFeaturesSupport = CollectionUtils.emptyIfNull(concurrentFeaturesSupport);
+        this.mGeranBands = TelephonyUtils.emptyIfNull(geranBands);
+        this.mUtranBands = TelephonyUtils.emptyIfNull(utranBands);
+        this.mEutranBands = TelephonyUtils.emptyIfNull(eutranBands);
+        this.mNgranBands = TelephonyUtils.emptyIfNull(ngranBands);
+        this.mLogicalModemUuids = TelephonyUtils.emptyIfNull(logicalModemUuids);
+        this.mSimSlotCapabilities = TelephonyUtils.emptyIfNull(simSlotCapabilities);
+        this.mConcurrentFeaturesSupport = TelephonyUtils.emptyIfNull(concurrentFeaturesSupport);
     }
 
     private PhoneCapability(Parcel in) {

@@ -119,9 +119,9 @@ bool StatsPullerManager::PullLocked(int tagId, vector<shared_ptr<LogEvent>>* dat
 }
 
 bool StatsPullerManager::PullerForMatcherExists(int tagId) const {
-    // Vendor pulled atoms might be registered after we parse the config.
-    return isVendorPulledAtom(tagId) ||
-           kAllPullAtomInfo.find({.atomTag = tagId}) != kAllPullAtomInfo.end();
+    // Pulled atoms might be registered after we parse the config, so just make sure the id is in
+    // an appropriate range.
+    return isVendorPulledAtom(tagId) || isPulledAtom(tagId);
 }
 
 void StatsPullerManager::updateAlarmLocked() {

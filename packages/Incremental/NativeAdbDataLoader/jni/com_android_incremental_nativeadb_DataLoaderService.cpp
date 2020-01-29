@@ -32,6 +32,7 @@
 #include <utils/Log.h>
 
 #include <charconv>
+#include <span>
 #include <string>
 #include <thread>
 #include <type_traits>
@@ -92,9 +93,7 @@ struct RequestCommand {
 
 static_assert(COMMAND_SIZE == sizeof(RequestCommand));
 
-static bool sendRequest(int fd,
-                        RequestType requestType,
-                        FileId fileId = -1,
+static bool sendRequest(int fd, RequestType requestType, FileId fileId = -1,
                         BlockIdx blockIdx = -1) {
     const RequestCommand command{
             .requestType = static_cast<int16_t>(be16toh(requestType)),
@@ -267,25 +266,24 @@ private:
         std::lock_guard lock{mMapsMutex};
         CHECK(mIfs);
         for (auto&& pendingRead : pendingReads) {
-            const android::dataloader::Inode ino = pendingRead.file_ino;
-            const auto blockIdx =
-                    static_cast<BlockIdx>(pendingRead.block_index);
+            const android::dataloader::FileId id = pendingRead.id;
+            const auto blockIdx = static_cast<BlockIdx>(pendingRead.block);
             /*
             ALOGI("[AdbDataLoader] Missing: %d", (int) blockIdx);
             */
-            auto fileIdOr = getFileId(ino);
+            auto fileIdOr = getFileId(id);
             if (!fileIdOr) {
-                ALOGE("[AdbDataLoader] Failed to handle event for inode=%d. "
+                ALOGE("[AdbDataLoader] Failed to handle event for fileid=%s. "
                       "Ignore.",
-                      static_cast<int>(ino));
+                      android::incfs::toString(id).c_str());
                 continue;
             }
             const FileId fileId = *fileIdOr;
             if (mRequestedFiles.insert(fileId).second) {
                 if (!sendRequest(mOutFd, PREFETCH, fileId, blockIdx)) {
                     ALOGE("[AdbDataLoader] Failed to request prefetch for "
-                          "inode=%d. Ignore.",
-                          static_cast<int>(ino));
+                          "fileid=%s. Ignore.",
+                          android::incfs::toString(id).c_str());
                     mRequestedFiles.erase(fileId);
                     mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
                 }
@@ -296,7 +294,7 @@ private:
 
     struct TracedRead {
         uint64_t timestampUs;
-        uint64_t fileIno;
+        android::dataloader::FileId fileId;
         uint32_t firstBlockIdx;
         uint32_t count;
     };
@@ -307,26 +305,26 @@ private:
             return;
         }
 
-        TracedRead last = {0, 0, 0, 0};
+        TracedRead last = {};
         std::lock_guard lock{mMapsMutex};
         for (auto&& read : pageReads) {
-            if (read.file_ino != last.fileIno ||
-                read.block_index != last.firstBlockIdx + last.count) {
+            if (read.id != last.fileId || read.block != last.firstBlockIdx + last.count) {
                 traceOrLogRead(last, trace, log);
-                last = {read.timestamp_us, read.file_ino, read.block_index, 1};
+                last = {read.bootClockTsUs, read.id, (uint32_t)read.block, 1};
             } else {
                 ++last.count;
             }
         }
         traceOrLogRead(last, trace, log);
     }
-    void onFileCreated(android::dataloader::Inode inode, const android::dataloader::RawMetadata& metadata) {
-    }
+    void onFileCreated(android::dataloader::FileId fileid,
+                       const android::dataloader::RawMetadata& metadata) {}
 
 private:
     void receiver() {
         std::vector<uint8_t> data;
-        std::vector<incfs_new_data_block> instructions;
+        std::vector<IncFsDataBlock> instructions;
+        std::unordered_map<android::dataloader::FileId, unique_fd> writeFds;
         while (!mStopReceiving) {
             const int res = waitForDataOrSignal(mInFd, mEventFd);
             if (res == 0) {
@@ -366,21 +364,32 @@ private:
                     mStopReceiving = true;
                     break;
                 }
-                const android::dataloader::Inode ino = mIdToNodeMap[header.fileId];
-                if (!ino) {
+                const android::dataloader::FileId id = mIdToNodeMap[header.fileId];
+                if (!android::incfs::isValidFileId(id)) {
                     ALOGE("Unknown data destination for file ID %d. "
                           "Ignore.",
                           header.fileId);
                     continue;
                 }
-                auto inst = incfs_new_data_block{
-                        .file_ino = static_cast<__aligned_u64>(ino),
-                        .block_index = static_cast<uint32_t>(header.blockIdx),
-                        .data_len = static_cast<uint16_t>(header.blockSize),
-                        .data = reinterpret_cast<uint64_t>(
-                                remainingData.data()),
-                        .compression =
-                                static_cast<uint8_t>(header.compressionType)};
+
+                auto& writeFd = writeFds[id];
+                if (writeFd < 0) {
+                    writeFd.reset(this->mIfs->openWrite(id));
+                    if (writeFd < 0) {
+                        ALOGE("Failed to open file %d for writing (%d). Aboring.", header.fileId,
+                              -writeFd);
+                        break;
+                    }
+                }
+
+                const auto inst = IncFsDataBlock{
+                        .fileFd = writeFd,
+                        .pageIndex = static_cast<IncFsBlockIndex>(header.blockIdx),
+                        .compression = static_cast<IncFsCompressionKind>(header.compressionType),
+                        .kind = INCFS_BLOCK_KIND_DATA,
+                        .dataSize = static_cast<uint16_t>(header.blockSize),
+                        .data = (const char*)remainingData.data(),
+                };
                 instructions.push_back(inst);
                 remainingData = remainingData.subspan(header.blockSize);
             }
@@ -390,9 +399,8 @@ private:
         flushReadLog();
     }
 
-    void writeInstructions(std::vector<incfs_new_data_block>& instructions) {
-        auto res = this->mIfs->writeBlocks(instructions.data(),
-                                           instructions.size());
+    void writeInstructions(std::vector<IncFsDataBlock>& instructions) {
+        auto res = this->mIfs->writeBlocks(instructions);
         if (res != instructions.size()) {
             ALOGE("[AdbDataLoader] failed to write data to Incfs (res=%d when "
                   "expecting %d)",
@@ -406,30 +414,30 @@ private:
         FileId fileId;
     };
 
-    MetaPair* updateMapsForFile(android::dataloader::Inode ino) {
-        android::dataloader::RawMetadata meta = mIfs->getRawMetadata(ino);
+    MetaPair* updateMapsForFile(android::dataloader::FileId id) {
+        android::dataloader::RawMetadata meta = mIfs->getRawMetadata(id);
         FileId fileId;
         auto res =
                 std::from_chars(meta.data(), meta.data() + meta.size(), fileId);
         if (res.ec != std::errc{} || fileId < 0) {
-            ALOGE("[AdbDataLoader] Invalid metadata for inode=%d (%s)",
-                  static_cast<int>(ino), meta.data());
+            ALOGE("[AdbDataLoader] Invalid metadata for fileid=%s (%s)",
+                  android::incfs::toString(id).c_str(), meta.data());
             return nullptr;
         }
-        mIdToNodeMap[fileId] = ino;
-        auto& metaPair = mNodeToMetaMap[ino];
+        mIdToNodeMap[fileId] = id;
+        auto& metaPair = mNodeToMetaMap[id];
         metaPair.meta = std::move(meta);
         metaPair.fileId = fileId;
         return &metaPair;
     }
 
-    android::dataloader::RawMetadata* getMeta(android::dataloader::Inode ino) {
-        auto it = mNodeToMetaMap.find(ino);
+    android::dataloader::RawMetadata* getMeta(android::dataloader::FileId id) {
+        auto it = mNodeToMetaMap.find(id);
         if (it != mNodeToMetaMap.end()) {
             return &it->second.meta;
         }
 
-        auto metaPair = updateMapsForFile(ino);
+        auto metaPair = updateMapsForFile(id);
         if (!metaPair) {
             return nullptr;
         }
@@ -437,13 +445,13 @@ private:
         return &metaPair->meta;
     }
 
-    FileId* getFileId(android::dataloader::Inode ino) {
-        auto it = mNodeToMetaMap.find(ino);
+    FileId* getFileId(android::dataloader::FileId id) {
+        auto it = mNodeToMetaMap.find(id);
         if (it != mNodeToMetaMap.end()) {
             return &it->second.fileId;
         }
 
-        auto* metaPair = updateMapsForFile(ino);
+        auto* metaPair = updateMapsForFile(id);
         if (!metaPair) {
             return nullptr;
         }
@@ -456,7 +464,7 @@ private:
             return;
         }
         if (trace) {
-            auto* meta = getMeta(read.fileIno);
+            auto* meta = getMeta(read.fileId);
             auto str = android::base::StringPrintf(
                     "page_read: index=%lld count=%lld meta=%.*s",
                     static_cast<long long>(read.firstBlockIdx),
@@ -468,7 +476,7 @@ private:
         if (log) {
             mReadLog.reserve(ReadLogBufferSize);
 
-            auto fileId = getFileId(read.fileIno);
+            auto fileId = getFileId(read.fileId);
             android::base::StringAppendF(
                     &mReadLog, "%lld:%lld:%lld:%lld\n",
                     static_cast<long long>(read.timestampUs),
@@ -501,8 +509,8 @@ private:
     std::string mReadLog;
     std::thread mReceiverThread;
     std::mutex mMapsMutex;
-    std::unordered_map<android::dataloader::Inode, MetaPair> mNodeToMetaMap GUARDED_BY(mMapsMutex);
-    std::unordered_map<FileId, android::dataloader::Inode> mIdToNodeMap GUARDED_BY(mMapsMutex);
+    std::unordered_map<android::dataloader::FileId, MetaPair> mNodeToMetaMap GUARDED_BY(mMapsMutex);
+    std::unordered_map<FileId, android::dataloader::FileId> mIdToNodeMap GUARDED_BY(mMapsMutex);
     /** Tracks which files have been requested */
     std::unordered_set<FileId> mRequestedFiles;
     std::atomic<bool> mStopReceiving = false;

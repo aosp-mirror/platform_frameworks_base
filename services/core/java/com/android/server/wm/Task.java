@@ -3864,9 +3864,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     boolean isControlledByTaskOrganizer() {
-        // TODO(b/147849315): Clean-up relationship between task-org and task-hierarchy. Ideally
-        //  we only give control of the root task.
-        return getTopMostTask().mTaskOrganizer != null;
+        final Task rootTask = getRootTask();
+        return rootTask == this && rootTask.mTaskOrganizer != null;
     }
 
     @Override
@@ -3936,23 +3935,6 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
         super.getRelativeDisplayedPosition(outPos);
-    }
-
-    @Override
-    public void setWindowingMode(int windowingMode) {
-        super.setWindowingMode(windowingMode);
-        windowingMode = getWindowingMode();
-
-        // TODO(b/147849315): Clean-up relationship between task-org and task-hierarchy. Ideally
-        //  we only give control of the root task.
-        // Different windowing modes may be managed by different task organizers. If
-        // getTaskOrganizer returns null, we still call transferToTaskOrganizer to make sure we
-        // clear it.
-        if (!isRootTask()) {
-            final ITaskOrganizer org =
-                    mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
-            setTaskOrganizer(org);
-        }
     }
 
     /**

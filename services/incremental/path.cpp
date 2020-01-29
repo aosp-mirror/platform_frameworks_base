@@ -44,14 +44,43 @@ bool PathLess::operator()(std::string_view l, std::string_view r) const {
                                         PathCharsLess());
 }
 
+static void preparePathComponent(std::string_view path, bool trimFront) {
+    if (trimFront) {
+        while (!path.empty() && path.front() == '/') {
+            path.remove_prefix(1);
+        }
+    }
+    while (!path.empty() && path.back() == '/') {
+        path.remove_suffix(1);
+    }
+}
+
 void details::append_next_path(std::string& target, std::string_view path) {
+    preparePathComponent(path, true);
     if (path.empty()) {
         return;
     }
-    if (!target.empty()) {
+    if (!target.empty() && !target.ends_with('/')) {
         target.push_back('/');
     }
     target += path;
+}
+
+std::string_view relativize(std::string_view parent, std::string_view nested) {
+    if (!nested.starts_with(parent)) {
+        return nested;
+    }
+    if (nested.size() == parent.size()) {
+        return {};
+    }
+    if (nested[parent.size()] != '/') {
+        return nested;
+    }
+    auto relative = nested.substr(parent.size());
+    while (relative.front() == '/') {
+        relative.remove_prefix(1);
+    }
+    return relative;
 }
 
 bool isAbsolute(std::string_view path) {

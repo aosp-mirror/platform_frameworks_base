@@ -16,13 +16,7 @@
 
 #include "ServiceWrappers.h"
 
-#include <android-base/strings.h>
-#include <android-base/unique_fd.h>
-#include <binder/IServiceManager.h>
 #include <utils/String16.h>
-
-#include <string>
-#include <string_view>
 
 using namespace std::literals;
 
@@ -31,37 +25,38 @@ namespace android::os::incremental {
 static constexpr auto kVoldServiceName = "vold"sv;
 static constexpr auto kIncrementalManagerName = "incremental"sv;
 
-RealServiceManager::RealServiceManager(const sp<IServiceManager>& serviceManager)
-      : mServiceManager(serviceManager) {}
+RealServiceManager::RealServiceManager(sp<IServiceManager> serviceManager)
+      : mServiceManager(std::move(serviceManager)) {}
 
 template <class INTERFACE>
 sp<INTERFACE> RealServiceManager::getRealService(std::string_view serviceName) const {
-    sp<IBinder> binder = mServiceManager->getService(String16(serviceName.data()));
-    if (binder == 0) {
-        return 0;
+    sp<IBinder> binder =
+            mServiceManager->getService(String16(serviceName.data(), serviceName.size()));
+    if (!binder) {
+        return nullptr;
     }
     return interface_cast<INTERFACE>(binder);
 }
 
-std::shared_ptr<VoldServiceWrapper> RealServiceManager::getVoldService() const {
+std::unique_ptr<VoldServiceWrapper> RealServiceManager::getVoldService() {
     sp<os::IVold> vold = RealServiceManager::getRealService<os::IVold>(kVoldServiceName);
     if (vold != 0) {
-        return std::make_shared<RealVoldService>(vold);
+        return std::make_unique<RealVoldService>(vold);
     }
     return nullptr;
 }
 
-std::shared_ptr<IncrementalManagerWrapper> RealServiceManager::getIncrementalManager() const {
+std::unique_ptr<IncrementalManagerWrapper> RealServiceManager::getIncrementalManager() {
     sp<IIncrementalManager> manager =
             RealServiceManager::getRealService<IIncrementalManager>(kIncrementalManagerName);
-    if (manager != 0) {
-        return std::make_shared<RealIncrementalManager>(manager);
+    if (manager) {
+        return std::make_unique<RealIncrementalManager>(manager);
     }
     return nullptr;
 }
 
-std::shared_ptr<IncFsWrapper> RealServiceManager::getIncFs() const {
-    return std::make_shared<RealIncFs>();
+std::unique_ptr<IncFsWrapper> RealServiceManager::getIncFs() {
+    return std::make_unique<RealIncFs>();
 }
 
 } // namespace android::os::incremental

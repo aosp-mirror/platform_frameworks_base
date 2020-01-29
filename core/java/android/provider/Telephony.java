@@ -1296,17 +1296,6 @@ public final class Telephony {
                           "android.provider.action.EXTERNAL_PROVIDER_CHANGE";
 
             /**
-             * Same as {@link #ACTION_DEFAULT_SMS_PACKAGE_CHANGED} but it's implicit (e.g. sent to
-             * all apps) and requires
-             * {@link android.Manifest.permission#MONITOR_DEFAULT_SMS_PACKAGE} to receive.
-             *
-             * @hide
-             */
-            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            public static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
-                    "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
-
-            /**
              * Broadcast action: When SMS-MMS db is being created. If file-based encryption is
              * supported, this broadcast indicates creation of the db in credential-encrypted
              * storage. A boolean is specified in {@link #EXTRA_IS_INITIAL_CREATE} to indicate if
@@ -4037,15 +4026,6 @@ public final class Telephony {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EditStatus {}
-
-        /** @hide */
-        @IntDef({
-                SKIP_464XLAT_DEFAULT,
-                SKIP_464XLAT_DISABLE,
-                SKIP_464XLAT_ENABLE,
-        })
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface Skip464XlatStatus {}
 
         /**
          * Compat framework change ID for the APN db read permission change.

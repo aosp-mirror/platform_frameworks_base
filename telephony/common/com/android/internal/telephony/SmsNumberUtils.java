@@ -31,6 +31,7 @@ import android.util.Log;
 
 import com.android.internal.telephony.HbpcdLookup.MccIdd;
 import com.android.internal.telephony.HbpcdLookup.MccLookup;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -677,7 +678,7 @@ public class SmsNumberUtils {
      */
     private static String secureHash(byte[] input) {
         // Refrain from logging user personal information in user build.
-        if (android.os.Build.IS_USER) {
+        if (TelephonyUtils.IS_USER) {
             return "****";
         }
 

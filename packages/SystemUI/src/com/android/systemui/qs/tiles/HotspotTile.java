@@ -147,6 +147,7 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
 
         state.secondaryLabel = getSecondaryLabel(
                 isTileActive, isTransient, isDataSaverEnabled, numConnectedDevices);
+        state.stateDescription = state.secondaryLabel;
     }
 
     @Nullable

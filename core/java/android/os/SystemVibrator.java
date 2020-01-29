@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -102,6 +103,28 @@ public class SystemVibrator extends Vibrator {
             Log.w(TAG, "Failed to vibrate.", e);
         }
     }
+
+    @Override
+    public boolean[] areEffectsSupported(@VibrationEffect.EffectType int... effectIds) {
+        try {
+            return mService.areEffectsSupported(effectIds);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to query effect support");
+        }
+        return new boolean[effectIds.length];
+    }
+
+    @Override
+    public boolean[] arePrimitivesSupported(
+            @NonNull @VibrationEffect.Composition.Primitive int... primitiveIds) {
+        try {
+            return mService.arePrimitivesSupported(primitiveIds);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to query effect support");
+        }
+        return new boolean[primitiveIds.length];
+    }
+
 
     @Override
     public void cancel() {

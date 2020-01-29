@@ -3339,6 +3339,13 @@
     <permission android:name="android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.service.autofill.InlineSuggestionRenderService}
+         to ensure that only the system can bind to it.
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_INLINE_SUGGESTION_RENDER_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- Must be required by a android.service.textclassifier.TextClassifierService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
@@ -4848,6 +4855,19 @@
          @hide -->
     <permission android:name="android.permission.ACCESS_SHARED_LIBRARIES"
                 android:protectionLevel="signature|installer" />
+
+    <!-- Allows an app to log compat change usage.
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.LOG_COMPAT_CHANGE"
+                android:protectionLevel="signature" />
+    <!-- Allows an app to read compat change config.
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"
+                android:protectionLevel="signature" />
+    <!-- Allows an app to override compat change config.
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"
+                android:protectionLevel="signature" />
 
     <!-- Allows input events to be monitored. Very dangerous!  @hide -->
     <permission android:name="android.permission.MONITOR_INPUT"

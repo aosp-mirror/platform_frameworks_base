@@ -147,7 +147,8 @@ message DisplayContentProto {
     optional int32 id = 2;
     repeated StackProto stacks = 3;
     optional DockedStackDividerControllerProto docked_stack_divider_controller = 4;
-    optional PinnedStackControllerProto pinned_stack_controller = 5;
+    // Will be removed soon.
+    optional PinnedStackControllerProto pinned_stack_controller = 5 [deprecated=true];
     /* non app windows */
     repeated WindowTokenProto above_app_windows = 6;
     repeated WindowTokenProto below_app_windows = 7;
@@ -184,8 +185,8 @@ message DockedStackDividerControllerProto {
 message PinnedStackControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .android.graphics.RectProto default_bounds = 1;
-    optional .android.graphics.RectProto movement_bounds = 2;
+    optional .android.graphics.RectProto default_bounds = 1 [deprecated=true];
+    optional .android.graphics.RectProto movement_bounds = 2 [deprecated=true];
 }
 
 /* represents TaskStack */

@@ -221,7 +221,7 @@ static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr
     return nullptr;
   }
 
-  jstring actor_string = env->NewStringUTF(actor->first.c_str());
+  jstring actor_string = env->NewStringUTF(actor->second.c_str());
   if (env->ExceptionCheck() || actor_string == nullptr) {
     jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
     return 0;

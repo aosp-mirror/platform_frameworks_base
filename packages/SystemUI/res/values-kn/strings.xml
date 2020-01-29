@@ -71,6 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
+    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"ಚಿತ್ರವನ್ನು ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ"</string>
@@ -84,6 +85,7 @@
     <string name="screenrecord_start_label" msgid="1539048263178882562">"ರೆಕಾರ್ಡಿಂಗ್ ಆರಂಭಿಸಿ"</string>
     <string name="screenrecord_mic_label" msgid="6134198080740031632">"voiceover ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="screenrecord_taps_label" msgid="2518244240225925076">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
+    <string name="screenrecord_stop_text" msgid="6549288689506057686">"ನಿಲ್ಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"ವಿರಾಮಗೊಳಿಸಿ"</string>
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"ಮುಂದುವರಿಸಿ"</string>
@@ -388,15 +390,14 @@
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ಬ್ಯಾಟರಿ ಸೇವರ್"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"ಸೂರ್ಯಾಸ್ತ ಸಮಯದಲ್ಲಿ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> ಸಮಯದಲ್ಲಿ"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
-    <!-- no translation found for quick_settings_screen_record_label (1594046461509776676) -->
-    <skip />
-    <!-- no translation found for quick_settings_screen_record_start (1574725369331638985) -->
-    <skip />
-    <!-- no translation found for quick_settings_screen_record_stop (8087348522976412119) -->
-    <skip />
+    <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್"</string>
+    <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಬದಲಿಸಲು ತ್ವರಿತವಾಗಿ ಬಲಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ಟಾಗಲ್ ನ ಅವಲೋಕನ"</string>
@@ -696,22 +697,14 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"ಕಸ್ಟಮೈಜ್‌ ಮಾಡಿ"</string>
     <string name="notification_done" msgid="6215117625922713976">"ಮುಗಿದಿದೆ"</string>
     <string name="inline_undo" msgid="9026953267645116526">"ರದ್ದುಮಾಡಿ"</string>
-    <!-- no translation found for demote (6225813324237153980) -->
-    <skip />
-    <!-- no translation found for notification_conversation_favorite (8252976467488182853) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unfavorite (633301300443356176) -->
-    <skip />
-    <!-- no translation found for notification_conversation_mute (477431709687199671) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unmute (410885000669775294) -->
-    <skip />
-    <!-- no translation found for notification_conversation_bubble (4598142032706190028) -->
-    <skip />
-    <!-- no translation found for notification_conversation_unbubble (2303087159802926401) -->
-    <skip />
-    <!-- no translation found for notification_conversation_home_screen (8347136037958438935) -->
-    <skip />
+    <string name="demote" msgid="6225813324237153980">"ಈ ಅಧಿಸೂಚನೆಯನ್ನು ಸಂಭಾಷಣೆಯಲ್ಲ ಎಂಬುದಾಗಿ ಗುರುತಿಸಿ"</string>
+    <string name="notification_conversation_favorite" msgid="8252976467488182853">"ಮೆಚ್ಚಿನದು"</string>
+    <string name="notification_conversation_unfavorite" msgid="633301300443356176">"ಮೆಚ್ಚಿನದಲ್ಲದ್ದು"</string>
+    <string name="notification_conversation_mute" msgid="477431709687199671">"ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
+    <string name="notification_conversation_unmute" msgid="410885000669775294">"ಅನ್‌ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
+    <string name="notification_conversation_bubble" msgid="4598142032706190028">"ಗುಳ್ಳೆಯಾಗಿ ತೋರಿಸಿ"</string>
+    <string name="notification_conversation_unbubble" msgid="2303087159802926401">"ಗುಳ್ಳೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ"</string>
+    <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ಮುಖಪುಟದ ಪರದೆಗೆ ಸೇರಿಸಿ"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ಅಧಿಸೂಚನೆ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>

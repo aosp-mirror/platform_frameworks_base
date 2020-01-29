@@ -46,10 +46,10 @@ static bool incFsEnabled() {
     return incfs::enabled();
 }
 
-static bool incFsVersionValid(const sp<IVold>& vold) {
-    int version = -1;
-    auto status = vold->incFsVersion(&version);
-    if (!status.isOk() || version <= 0) {
+static bool incFsValid(const sp<IVold>& vold) {
+    bool enabled = false;
+    auto status = vold->incFsEnabled(&enabled);
+    if (!status.isOk() || !enabled) {
         return false;
     }
     return true;
@@ -74,7 +74,7 @@ BinderIncrementalService* BinderIncrementalService::start() {
         return nullptr;
     }
     sp<IVold> vold = interface_cast<IVold>(voldBinder);
-    if (!incFsVersionValid(vold)) {
+    if (!incFsValid(vold)) {
         return nullptr;
     }
 
@@ -86,6 +86,7 @@ BinderIncrementalService* BinderIncrementalService::start() {
     sp<ProcessState> ps(ProcessState::self());
     ps->startThreadPool();
     ps->giveThreadPoolName();
+    // sm->addService increments the reference count, and now we're OK with returning the pointer.
     return self.get();
 }
 
@@ -107,9 +108,9 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
     return ok();
 }
 
-binder::Status BinderIncrementalService::createStorage(
-        const std::string& path, const DataLoaderParamsParcel& params,
-        int32_t createMode, int32_t* _aidl_return) {
+binder::Status BinderIncrementalService::createStorage(const std::string& path,
+                                                       const DataLoaderParamsParcel& params,
+                                                       int32_t createMode, int32_t* _aidl_return) {
     *_aidl_return =
             mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params),
                                 android::incremental::IncrementalService::CreateOptions(
@@ -129,10 +130,10 @@ binder::Status BinderIncrementalService::createLinkedStorage(const std::string& 
 }
 
 binder::Status BinderIncrementalService::makeBindMount(int32_t storageId,
-                                                       const std::string& pathUnderStorage,
+                                                       const std::string& sourcePath,
                                                        const std::string& targetFullPath,
                                                        int32_t bindType, int32_t* _aidl_return) {
-    *_aidl_return = mImpl.bind(storageId, pathUnderStorage, targetFullPath,
+    *_aidl_return = mImpl.bind(storageId, sourcePath, targetFullPath,
                                android::incremental::IncrementalService::BindKind(bindType));
     return ok();
 }
@@ -149,75 +150,127 @@ binder::Status BinderIncrementalService::deleteStorage(int32_t storageId) {
     return ok();
 }
 
-binder::Status BinderIncrementalService::makeDirectory(int32_t storageId,
-                                                       const std::string& pathUnderStorage,
+binder::Status BinderIncrementalService::makeDirectory(int32_t storageId, const std::string& path,
                                                        int32_t* _aidl_return) {
-    auto inode = mImpl.makeDir(storageId, pathUnderStorage);
-    *_aidl_return = inode < 0 ? inode : 0;
+    *_aidl_return = mImpl.makeDir(storageId, path);
     return ok();
 }
 
-binder::Status BinderIncrementalService::makeDirectories(int32_t storageId,
-                                                         const std::string& pathUnderStorage,
-                                                         int32_t* _aidl_return) {
-    auto inode = mImpl.makeDirs(storageId, pathUnderStorage);
-    *_aidl_return = inode < 0 ? inode : 0;
-    return ok();
+static std::tuple<int, incfs::FileId, incfs::NewFileParams> toMakeFileParams(
+        const android::os::incremental::IncrementalNewFileParams& params) {
+    incfs::FileId id;
+    if (params.fileId.empty()) {
+        if (params.metadata.empty()) {
+            return {EINVAL, {}, {}};
+        }
+        id = IncrementalService::idFromMetadata(params.metadata);
+    } else if (params.fileId.size() != sizeof(id)) {
+        return {EINVAL, {}, {}};
+    } else {
+        memcpy(&id, params.fileId.data(), sizeof(id));
+    }
+    incfs::NewFileParams nfp;
+    nfp.size = params.size;
+    nfp.metadata = {(const char*)params.metadata.data(), (IncFsSize)params.metadata.size()};
+    if (!params.signature) {
+        nfp.verification = {};
+    } else {
+        nfp.verification.hashAlgorithm = IncFsHashAlgortithm(params.signature->hashAlgorithm);
+        nfp.verification.rootHash = {(const char*)params.signature->rootHash.data(),
+                                     (IncFsSize)params.signature->rootHash.size()};
+        nfp.verification.additionalData = {(const char*)params.signature->additionalData.data(),
+                                           (IncFsSize)params.signature->additionalData.size()};
+        nfp.verification.signature = {(const char*)params.signature->signature.data(),
+                                      (IncFsSize)params.signature->signature.size()};
+    }
+    return {0, id, nfp};
 }
 
-binder::Status BinderIncrementalService::makeFile(int32_t storageId,
-                                                  const std::string& pathUnderStorage, int64_t size,
-                                                  const std::vector<uint8_t>& metadata,
-                                                  int32_t* _aidl_return) {
-    auto inode = mImpl.makeFile(storageId, pathUnderStorage, size,
-                                {(const char*)metadata.data(), metadata.size()}, {});
-    *_aidl_return = inode < 0 ? inode : 0;
+binder::Status BinderIncrementalService::makeFile(
+        int32_t storageId, const std::string& path,
+        const ::android::os::incremental::IncrementalNewFileParams& params, int32_t* _aidl_return) {
+    auto [err, fileId, nfp] = toMakeFileParams(params);
+    if (err) {
+        *_aidl_return = err;
+        return ok();
+    }
+
+    *_aidl_return = mImpl.makeFile(storageId, path, 0555, fileId, nfp);
     return ok();
 }
-binder::Status BinderIncrementalService::makeFileFromRange(
-        int32_t storageId, const std::string& pathUnderStorage,
-        const std::string& sourcePathUnderStorage, int64_t start, int64_t end,
-        int32_t* _aidl_return) {
-    // TODO(b/136132412): implement this
-    *_aidl_return = -1;
-    return ok();
-}
-binder::Status BinderIncrementalService::makeLink(int32_t sourceStorageId,
-                                                  const std::string& relativeSourcePath,
-                                                  int32_t destStorageId,
-                                                  const std::string& relativeDestPath,
-                                                  int32_t* _aidl_return) {
-    auto sourceInode = mImpl.nodeFor(sourceStorageId, relativeSourcePath);
-    auto [targetParentInode, name] = mImpl.parentAndNameFor(destStorageId, relativeDestPath);
-    *_aidl_return = mImpl.link(sourceStorageId, sourceInode, targetParentInode, name);
-    return ok();
-}
-binder::Status BinderIncrementalService::unlink(int32_t storageId,
-                                                const std::string& pathUnderStorage,
-                                                int32_t* _aidl_return) {
-    auto [parentNode, name] = mImpl.parentAndNameFor(storageId, pathUnderStorage);
-    *_aidl_return = mImpl.unlink(storageId, parentNode, name);
-    return ok();
-}
-binder::Status BinderIncrementalService::isFileRangeLoaded(int32_t storageId,
-                                                           const std::string& relativePath,
+binder::Status BinderIncrementalService::makeFileFromRange(int32_t storageId,
+                                                           const std::string& targetPath,
+                                                           const std::string& sourcePath,
                                                            int64_t start, int64_t end,
-                                                           bool* _aidl_return) {
+                                                           int32_t* _aidl_return) {
+    // TODO(b/136132412): implement this
+    *_aidl_return = ENOSYS; // not implemented
+    return ok();
+}
+
+binder::Status BinderIncrementalService::makeLink(int32_t sourceStorageId,
+                                                  const std::string& sourcePath,
+                                                  int32_t destStorageId,
+                                                  const std::string& destPath,
+                                                  int32_t* _aidl_return) {
+    *_aidl_return = mImpl.link(sourceStorageId, sourcePath, destStorageId, destPath);
+    return ok();
+}
+
+binder::Status BinderIncrementalService::unlink(int32_t storageId, const std::string& path,
+                                                int32_t* _aidl_return) {
+    *_aidl_return = mImpl.unlink(storageId, path);
+    return ok();
+}
+
+binder::Status BinderIncrementalService::isFileRangeLoaded(int32_t storageId,
+                                                           const std::string& path, int64_t start,
+                                                           int64_t end, bool* _aidl_return) {
+    // TODO: implement
     *_aidl_return = false;
     return ok();
 }
-binder::Status BinderIncrementalService::getFileMetadata(int32_t storageId,
-                                                         const std::string& relativePath,
+
+binder::Status BinderIncrementalService::getMetadataByPath(int32_t storageId,
+                                                           const std::string& path,
+                                                           std::vector<uint8_t>* _aidl_return) {
+    auto fid = mImpl.nodeFor(storageId, path);
+    if (fid != kIncFsInvalidFileId) {
+        auto metadata = mImpl.getMetadata(storageId, fid);
+        _aidl_return->assign(metadata.begin(), metadata.end());
+    }
+    return ok();
+}
+
+static FileId toFileId(const std::vector<uint8_t>& id) {
+    FileId fid;
+    memcpy(&fid, id.data(), id.size());
+    return fid;
+}
+
+binder::Status BinderIncrementalService::getMetadataById(int32_t storageId,
+                                                         const std::vector<uint8_t>& id,
                                                          std::vector<uint8_t>* _aidl_return) {
-    auto inode = mImpl.nodeFor(storageId, relativePath);
-    auto metadata = mImpl.getMetadata(storageId, inode);
+    if (id.size() != sizeof(incfs::FileId)) {
+        return ok();
+    }
+    auto fid = toFileId(id);
+    auto metadata = mImpl.getMetadata(storageId, fid);
     _aidl_return->assign(metadata.begin(), metadata.end());
     return ok();
 }
+
+binder::Status BinderIncrementalService::makeDirectories(int32_t storageId, const std::string& path,
+                                                         int32_t* _aidl_return) {
+    *_aidl_return = mImpl.makeDirs(storageId, path);
+    return ok();
+}
+
 binder::Status BinderIncrementalService::startLoading(int32_t storageId, bool* _aidl_return) {
     *_aidl_return = mImpl.startLoading(storageId);
     return ok();
 }
+
 } // namespace android::os::incremental
 
 jlong Incremental_IncrementalService_Start() {

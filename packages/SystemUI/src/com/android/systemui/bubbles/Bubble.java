@@ -60,6 +60,14 @@ class Bubble {
     private long mLastUpdated;
     private long mLastAccessed;
 
+    private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
+
+    /** Whether the bubble should show a dot for the notification indicating updated content. */
+    private boolean mShowBubbleUpdateDot = true;
+
+    /** Whether flyout text should be suppressed, regardless of any other flags or state. */
+    private boolean mSuppressFlyout;
+
     // Items that are typically loaded later
     private String mAppName;
     private ShortcutInfo mShortcutInfo;
@@ -69,20 +77,6 @@ class Bubble {
     private boolean mInflated;
     private BubbleViewInfoTask mInflationTask;
     private boolean mInflateSynchronously;
-
-    /**
-     * Whether this notification should be shown in the shade when it is also displayed as a bubble.
-     *
-     * <p>When a notification is a bubble we don't show it in the shade once the bubble has been
-     * expanded</p>
-     */
-    private boolean mShowInShadeWhenBubble = true;
-
-    /** Whether the bubble should show a dot for the notification indicating updated content. */
-    private boolean mShowBubbleUpdateDot = true;
-
-    /** Whether flyout text should be suppressed, regardless of any other flags or state. */
-    private boolean mSuppressFlyout;
 
     /**
      * Presentational info about the flyout.
@@ -106,11 +100,13 @@ class Bubble {
 
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
-    Bubble(NotificationEntry e) {
+    Bubble(NotificationEntry e,
+            BubbleController.NotificationSuppressionChangedListener listener) {
         mEntry = e;
         mKey = e.getKey();
         mLastUpdated = e.getSbn().getPostTime();
         mGroupId = groupId(e);
+        mSuppressionListener = listener;
     }
 
     public String getKey() {
@@ -278,7 +274,7 @@ class Bubble {
      */
     void markAsAccessedAt(long lastAccessedMillis) {
         mLastAccessed = lastAccessedMillis;
-        setShowInShade(false);
+        setSuppressNotification(true);
         setShowDot(false /* show */, true /* animate */);
     }
 
@@ -290,20 +286,30 @@ class Bubble {
     }
 
     /**
-     * Whether this notification should be shown in the shade when it is also displayed as a
-     * bubble.
+     * Whether this notification should be shown in the shade.
      */
     boolean showInShade() {
-        return !mEntry.isRowDismissed() && !shouldSuppressNotification()
-                && (!mEntry.isClearable() || mShowInShadeWhenBubble);
+        return !shouldSuppressNotification() || !mEntry.isClearable();
     }
 
     /**
-     * Sets whether this notification should be shown in the shade when it is also displayed as a
-     * bubble.
+     * Sets whether this notification should be suppressed in the shade.
      */
-    void setShowInShade(boolean showInShade) {
-        mShowInShadeWhenBubble = showInShade;
+    void setSuppressNotification(boolean suppressNotification) {
+        boolean prevShowInShade = showInShade();
+
+        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
+        int flags = data.getFlags();
+        if (suppressNotification) {
+            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+        } else {
+            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+        }
+        data.setFlags(flags);
+
+        if (showInShade() != prevShowInShade && mSuppressionListener != null) {
+            mSuppressionListener.onBubbleNotificationSuppressionChange(this);
+        }
     }
 
     /**

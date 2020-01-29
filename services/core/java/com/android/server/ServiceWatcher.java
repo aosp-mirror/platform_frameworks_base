@@ -167,7 +167,7 @@ public class ServiceWatcher implements ServiceConnection {
 
         @Override
         public String toString() {
-            return component + "@" + version + "[u" + userId + "]";
+            return component.toShortString() + "@" + version + "[u" + userId + "]";
         }
     }
 
@@ -341,7 +341,7 @@ public class ServiceWatcher implements ServiceConnection {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
         if (D) {
-            Log.i(TAG, getLogPrefix() + " connected to " + component);
+            Log.i(TAG, getLogPrefix() + " connected to " + component.toShortString());
         }
 
         mBinder = binder;
@@ -351,11 +351,22 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     @Override
+    public void onBindingDied(ComponentName component) {
+        Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
+
+        if (D) {
+            Log.i(TAG, getLogPrefix() + " " + component.toShortString() + " died");
+        }
+
+        onBestServiceChanged(true);
+    }
+
+    @Override
     public final void onServiceDisconnected(ComponentName component) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
         if (D) {
-            Log.i(TAG, getLogPrefix() + " disconnected from " + component);
+            Log.i(TAG, getLogPrefix() + " disconnected from " + component.toShortString());
         }
 
         mBinder = null;
@@ -383,8 +394,8 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     /**
-     * Runs the given function asynchronously if currently connected. Suppresses any RemoteException
-     * thrown during execution.
+     * Runs the given function asynchronously if and only if currently connected. Suppresses any
+     * RemoteException thrown during execution.
      */
     public final void runOnBinder(BinderRunner runner) {
         runOnHandler(() -> {
@@ -472,5 +483,10 @@ public class ServiceWatcher implements ServiceConnection {
 
     private String getLogPrefix() {
         return "[" + mIntent.getAction() + "]";
+    }
+
+    @Override
+    public String toString() {
+        return mServiceInfo.toString();
     }
 }

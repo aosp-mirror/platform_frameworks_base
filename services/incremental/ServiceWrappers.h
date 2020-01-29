@@ -26,6 +26,7 @@
 #include <binder/IServiceManager.h>
 #include <incfs.h>
 
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -36,10 +37,12 @@ namespace android::os::incremental {
 
 // --- Wrapper interfaces ---
 
+using MountId = int32_t;
+
 class VoldServiceWrapper {
 public:
-    virtual ~VoldServiceWrapper(){};
-    virtual binder::Status mountIncFs(const std::string& imagePath, const std::string& targetDir,
+    virtual ~VoldServiceWrapper() = default;
+    virtual binder::Status mountIncFs(const std::string& backingPath, const std::string& targetDir,
                                       int32_t flags,
                                       IncrementalFileSystemControlParcel* _aidl_return) const = 0;
     virtual binder::Status unmountIncFs(const std::string& dir) const = 0;
@@ -49,52 +52,52 @@ public:
 
 class IncrementalManagerWrapper {
 public:
-    virtual ~IncrementalManagerWrapper() {}
-    virtual binder::Status prepareDataLoader(
-            int32_t mountId, const FileSystemControlParcel& control,
-            const DataLoaderParamsParcel& params,
-            const sp<IDataLoaderStatusListener>& listener,
-            bool* _aidl_return) const = 0;
-    virtual binder::Status startDataLoader(int32_t mountId, bool* _aidl_return) const = 0;
-    virtual binder::Status destroyDataLoader(int32_t mountId) const = 0;
-    virtual binder::Status newFileForDataLoader(int32_t mountId, int64_t inode,
-                                                const ::std::vector<uint8_t>& metadata) const = 0;
-    virtual binder::Status showHealthBlockedUI(int32_t mountId) const = 0;
+    virtual ~IncrementalManagerWrapper() = default;
+    virtual binder::Status prepareDataLoader(MountId mountId,
+                                             const FileSystemControlParcel& control,
+                                             const DataLoaderParamsParcel& params,
+                                             const sp<IDataLoaderStatusListener>& listener,
+                                             bool* _aidl_return) const = 0;
+    virtual binder::Status startDataLoader(MountId mountId, bool* _aidl_return) const = 0;
+    virtual binder::Status destroyDataLoader(MountId mountId) const = 0;
+    virtual binder::Status newFileForDataLoader(MountId mountId, FileId fileid,
+                                                const std::vector<uint8_t>& metadata) const = 0;
+    virtual binder::Status showHealthBlockedUI(MountId mountId) const = 0;
 };
 
 class IncFsWrapper {
 public:
-    virtual ~IncFsWrapper() {}
-    virtual Inode makeFile(Control control, std::string_view name, Inode parent, Size size,
-                           std::string_view metadata) const = 0;
-    virtual Inode makeDir(Control control, std::string_view name, Inode parent,
-                          std::string_view metadata, int mode = 0555) const = 0;
-    virtual RawMetadata getMetadata(Control control, Inode inode) const = 0;
-    virtual ErrorCode link(Control control, Inode item, Inode targetParent,
-                           std::string_view name) const = 0;
-    virtual ErrorCode unlink(Control control, Inode parent, std::string_view name) const = 0;
-    virtual ErrorCode writeBlocks(Control control, const incfs_new_data_block blocks[],
-                                  int blocksCount) const = 0;
+    virtual ~IncFsWrapper() = default;
+    virtual ErrorCode makeFile(Control control, std::string_view path, int mode, FileId id,
+                               NewFileParams params) const = 0;
+    virtual ErrorCode makeDir(Control control, std::string_view path, int mode = 0555) const = 0;
+    virtual RawMetadata getMetadata(Control control, FileId fileid) const = 0;
+    virtual RawMetadata getMetadata(Control control, std::string_view path) const = 0;
+    virtual FileId getFileId(Control control, std::string_view path) const = 0;
+    virtual ErrorCode link(Control control, std::string_view from, std::string_view to) const = 0;
+    virtual ErrorCode unlink(Control control, std::string_view path) const = 0;
+    virtual base::unique_fd openWrite(Control control, FileId id) const = 0;
+    virtual ErrorCode writeBlocks(std::span<const DataBlock> blocks) const = 0;
 };
 
 class ServiceManagerWrapper {
 public:
-    virtual ~ServiceManagerWrapper() {}
-    virtual std::shared_ptr<VoldServiceWrapper> getVoldService() const = 0;
-    virtual std::shared_ptr<IncrementalManagerWrapper> getIncrementalManager() const = 0;
-    virtual std::shared_ptr<IncFsWrapper> getIncFs() const = 0;
+    virtual ~ServiceManagerWrapper() = default;
+    virtual std::unique_ptr<VoldServiceWrapper> getVoldService() = 0;
+    virtual std::unique_ptr<IncrementalManagerWrapper> getIncrementalManager() = 0;
+    virtual std::unique_ptr<IncFsWrapper> getIncFs() = 0;
 };
 
 // --- Real stuff ---
 
 class RealVoldService : public VoldServiceWrapper {
 public:
-    RealVoldService(const sp<os::IVold> vold) : mInterface(vold) {}
+    RealVoldService(const sp<os::IVold> vold) : mInterface(std::move(vold)) {}
     ~RealVoldService() = default;
-    binder::Status mountIncFs(const std::string& imagePath, const std::string& targetDir,
+    binder::Status mountIncFs(const std::string& backingPath, const std::string& targetDir,
                               int32_t flags,
                               IncrementalFileSystemControlParcel* _aidl_return) const override {
-        return mInterface->mountIncFs(imagePath, targetDir, flags, _aidl_return);
+        return mInterface->mountIncFs(backingPath, targetDir, flags, _aidl_return);
     }
     binder::Status unmountIncFs(const std::string& dir) const override {
         return mInterface->unmountIncFs(dir);
@@ -113,24 +116,26 @@ public:
     RealIncrementalManager(const sp<os::incremental::IIncrementalManager> manager)
           : mInterface(manager) {}
     ~RealIncrementalManager() = default;
-    binder::Status prepareDataLoader(
-            int32_t mountId, const FileSystemControlParcel& control,
-            const DataLoaderParamsParcel& params,
-            const sp<IDataLoaderStatusListener>& listener,
-            bool* _aidl_return) const override {
+    binder::Status prepareDataLoader(MountId mountId, const FileSystemControlParcel& control,
+                                     const DataLoaderParamsParcel& params,
+                                     const sp<IDataLoaderStatusListener>& listener,
+                                     bool* _aidl_return) const override {
         return mInterface->prepareDataLoader(mountId, control, params, listener, _aidl_return);
     }
-    binder::Status startDataLoader(int32_t mountId, bool* _aidl_return) const override {
+    binder::Status startDataLoader(MountId mountId, bool* _aidl_return) const override {
         return mInterface->startDataLoader(mountId, _aidl_return);
     }
-    binder::Status destroyDataLoader(int32_t mountId) const override {
+    binder::Status destroyDataLoader(MountId mountId) const override {
         return mInterface->destroyDataLoader(mountId);
     }
-    binder::Status newFileForDataLoader(int32_t mountId, int64_t inode,
-                                        const ::std::vector<uint8_t>& metadata) const override {
-        return mInterface->newFileForDataLoader(mountId, inode, metadata);
+    binder::Status newFileForDataLoader(MountId mountId, FileId fileid,
+                                        const std::vector<uint8_t>& metadata) const override {
+        return mInterface->newFileForDataLoader(mountId,
+                                                {(const uint8_t*)fileid.data,
+                                                 (const uint8_t*)fileid.data + sizeof(fileid.data)},
+                                                metadata);
     }
-    binder::Status showHealthBlockedUI(int32_t mountId) const override {
+    binder::Status showHealthBlockedUI(MountId mountId) const override {
         return mInterface->showHealthBlockedUI(mountId);
     }
 
@@ -140,11 +145,11 @@ private:
 
 class RealServiceManager : public ServiceManagerWrapper {
 public:
-    RealServiceManager(const sp<IServiceManager>& serviceManager);
+    RealServiceManager(sp<IServiceManager> serviceManager);
     ~RealServiceManager() = default;
-    std::shared_ptr<VoldServiceWrapper> getVoldService() const override;
-    std::shared_ptr<IncrementalManagerWrapper> getIncrementalManager() const override;
-    std::shared_ptr<IncFsWrapper> getIncFs() const override;
+    std::unique_ptr<VoldServiceWrapper> getVoldService() override;
+    std::unique_ptr<IncrementalManagerWrapper> getIncrementalManager() override;
+    std::unique_ptr<IncFsWrapper> getIncFs() override;
 
 private:
     template <class INTERFACE>
@@ -156,27 +161,33 @@ class RealIncFs : public IncFsWrapper {
 public:
     RealIncFs() = default;
     ~RealIncFs() = default;
-    Inode makeFile(Control control, std::string_view name, Inode parent, Size size,
-                   std::string_view metadata) const override {
-        return incfs::makeFile(control, name, parent, size, metadata);
+    ErrorCode makeFile(Control control, std::string_view path, int mode, FileId id,
+                       NewFileParams params) const override {
+        return incfs::makeFile(control, path, mode, id, params);
     }
-    Inode makeDir(Control control, std::string_view name, Inode parent, std::string_view metadata,
-                  int mode) const override {
-        return incfs::makeDir(control, name, parent, metadata, mode);
+    ErrorCode makeDir(Control control, std::string_view path, int mode) const override {
+        return incfs::makeDir(control, path, mode);
     }
-    RawMetadata getMetadata(Control control, Inode inode) const override {
-        return incfs::getMetadata(control, inode);
+    RawMetadata getMetadata(Control control, FileId fileid) const override {
+        return incfs::getMetadata(control, fileid);
     }
-    ErrorCode link(Control control, Inode item, Inode targetParent,
-                   std::string_view name) const override {
-        return incfs::link(control, item, targetParent, name);
+    RawMetadata getMetadata(Control control, std::string_view path) const override {
+        return incfs::getMetadata(control, path);
     }
-    ErrorCode unlink(Control control, Inode parent, std::string_view name) const override {
-        return incfs::unlink(control, parent, name);
+    FileId getFileId(Control control, std::string_view path) const override {
+        return incfs::getFileId(control, path);
     }
-    ErrorCode writeBlocks(Control control, const incfs_new_data_block blocks[],
-                          int blocksCount) const override {
-        return incfs::writeBlocks(control, blocks, blocksCount);
+    ErrorCode link(Control control, std::string_view from, std::string_view to) const override {
+        return incfs::link(control, from, to);
+    }
+    ErrorCode unlink(Control control, std::string_view path) const override {
+        return incfs::unlink(control, path);
+    }
+    base::unique_fd openWrite(Control control, FileId id) const override {
+        return base::unique_fd{incfs::openWrite(control, id)};
+    }
+    ErrorCode writeBlocks(std::span<const DataBlock> blocks) const override {
+        return incfs::writeBlocks(blocks);
     }
 };
 

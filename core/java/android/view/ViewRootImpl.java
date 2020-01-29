@@ -507,7 +507,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
     private final SurfaceControl mSurfaceControl = new SurfaceControl();
-    private SurfaceControl mBlastSurfaceControl;
+    private SurfaceControl mBlastSurfaceControl = new SurfaceControl();
 
     private BLASTBufferQueue mBlastBufferQueue;
 
@@ -636,6 +636,7 @@ public final class ViewRootImpl implements ViewParent,
             InputEventConsistencyVerifier.isInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(this, 0) : null;
 
+    private final InsetsController mInsetsController;
     private final ImeFocusController mImeFocusController;
 
     /**
@@ -646,7 +647,6 @@ public final class ViewRootImpl implements ViewParent,
         return mImeFocusController;
     }
 
-    private final InsetsController mInsetsController = new InsetsController(this);
 
     private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
 
@@ -705,6 +705,7 @@ public final class ViewRootImpl implements ViewParent,
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
+        mInsetsController = new InsetsController(this);
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
@@ -1690,23 +1691,17 @@ public final class ViewRootImpl implements ViewParent,
                     .build();
             setBoundsLayerCrop();
             mTransaction.show(mBoundsLayer).apply();
-        }
-        return mBoundsLayer;
+        } 
+       return mBoundsLayer;
     }
 
     Surface getOrCreateBLASTSurface(int width, int height) {
         if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
             return null;
         }
-        if (mBlastSurfaceControl == null) {
-            mBlastSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
-            .setParent(mSurfaceControl)
-            .setName("BLAST")
-            .setBLASTLayer()
-            .build();
+        if ((mBlastBufferQueue != null) && mBlastSurfaceControl.isValid()) {
             mBlastBufferQueue = new BLASTBufferQueue(
                 mBlastSurfaceControl, width, height);
-
         }
         mBlastBufferQueue.update(mBlastSurfaceControl, width, height);
 
@@ -3683,30 +3678,27 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
         boolean usingAsyncReport = false;
+        boolean reportNextDraw = mReportNextDraw; // Capture the original value
         if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
             ArrayList<Runnable> commitCallbacks = mAttachInfo.mTreeObserver
                     .captureFrameCommitCallbacks();
-            if (mReportNextDraw) {
-                usingAsyncReport = true;
+            final boolean needFrameCompleteCallback = mNextDrawUseBLASTSyncTransaction ||
+                (commitCallbacks != null && commitCallbacks.size() > 0) ||
+                mReportNextDraw;
+            usingAsyncReport = mReportNextDraw;
+            if (needFrameCompleteCallback) {
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
                         handler.postAtFrontOfQueue(() -> {
                             finishBLASTSync();
-                            // TODO: Use the frame number
-                            pendingDrawFinished();
+                            if (reportNextDraw) {
+                                // TODO: Use the frame number
+                                pendingDrawFinished();
+                            }
                             if (commitCallbacks != null) {
                                 for (int i = 0; i < commitCallbacks.size(); i++) {
                                     commitCallbacks.get(i).run();
                                 }
-                            }
-                        }));
-            } else if (commitCallbacks != null && commitCallbacks.size() > 0) {
-                final Handler handler = mAttachInfo.mHandler;
-                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
-                        handler.postAtFrontOfQueue(() -> {
-                            finishBLASTSync();
-                            for (int i = 0; i < commitCallbacks.size(); i++) {
-                                commitCallbacks.get(i).run();
                             }
                         }));
             }
@@ -7344,7 +7336,8 @@ public final class ViewRootImpl implements ViewParent,
                 insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mTmpFrame, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingBackDropFrame, mPendingDisplayCutout,
-                mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize);
+                mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize,
+                mBlastSurfaceControl);
         if (mSurfaceControl.isValid()) {
             if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
                 mSurface.copyFrom(mSurfaceControl);

@@ -51,6 +51,11 @@ class WindowSurfaceController {
 
     SurfaceControl mSurfaceControl;
 
+    /**
+     * WM only uses for deferred transactions.
+     */
+    SurfaceControl mBLASTSurfaceControl;
+
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
     private float mSurfaceX = 0;
@@ -110,13 +115,22 @@ class WindowSurfaceController {
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
                 .setMetadata(METADATA_OWNER_UID, ownerUid);
 
-        if ((win.getAttrs().privateFlags &
-                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0) {
+        final boolean useBLAST = (win.getAttrs().privateFlags &
+                WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0;
+        if (useBLAST) {
             b.setContainerLayer();
         }
 
-
         mSurfaceControl = b.build();
+
+        if (useBLAST) {
+            mBLASTSurfaceControl = win.makeSurface()
+                .setParent(mSurfaceControl)
+                .setName("BLAST Adapter Layer")
+                .setBLASTLayer()
+                .build();
+        }
+
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -168,6 +182,9 @@ class WindowSurfaceController {
         } finally {
             setShown(false);
             mSurfaceControl = null;
+            if (mBLASTSurfaceControl != null) {
+                mBLASTSurfaceControl.release();
+            }
         }
     }
 
@@ -474,6 +491,12 @@ class WindowSurfaceController {
         outSurfaceControl.copyFrom(mSurfaceControl);
     }
 
+    void getBLASTSurfaceControl(SurfaceControl outSurfaceControl) {
+        if (mBLASTSurfaceControl != null) {
+            outSurfaceControl.copyFrom(mBLASTSurfaceControl);
+        }
+    }
+
     int getLayer() {
         return mSurfaceLayer;
     }
@@ -508,6 +531,13 @@ class WindowSurfaceController {
 
     int getHeight() {
         return mSurfaceH;
+    }
+
+    SurfaceControl getDeferTransactionBarrier() {
+        if (mBLASTSurfaceControl != null) {
+            return mBLASTSurfaceControl;
+        }
+        return mSurfaceControl;
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

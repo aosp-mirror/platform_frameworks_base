@@ -18,8 +18,6 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import static com.android.server.wm.PinnedStackControllerProto.DEFAULT_BOUNDS;
-import static com.android.server.wm.PinnedStackControllerProto.MOVEMENT_BOUNDS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -34,7 +32,6 @@ import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -97,11 +94,6 @@ class PinnedStackController {
     // Temp vars for calculation
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
 
-    // TODO(b/141200935): remove this when we have default/movement bounds tests in SysUI.
-    // Keep record of the default and movement bounds
-    private final Rect mLastReportedDefaultBounds = new Rect();
-    private final Rect mLastReportedMovementBounds = new Rect();
-
     /**
      * The callback object passed to listeners for them to notify the controller of state changes.
      */
@@ -141,14 +133,6 @@ class PinnedStackController {
                         pinnedStack.resetCurrentBoundsAnimation(bounds);
                     }
                 }
-            }
-        }
-
-        @Override
-        public void reportBounds(Rect defaultBounds, Rect movementBounds) {
-            synchronized (mService.mGlobalLock) {
-                mLastReportedDefaultBounds.set(defaultBounds);
-                mLastReportedMovementBounds.set(movementBounds);
             }
         }
     }
@@ -421,8 +405,6 @@ class PinnedStackController {
 
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "PinnedStackController");
-        pw.println(prefix + "  mLastReportedDefaultBounds=" + mLastReportedDefaultBounds);
-        pw.println(prefix + "  mLastReportedMovementBounds=" + mLastReportedMovementBounds);
         pw.println(prefix + "  mDefaultAspectRatio=" + mDefaultAspectRatio);
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
         pw.println(prefix + "  mImeHeight=" + mImeHeight);
@@ -442,12 +424,5 @@ class PinnedStackController {
             pw.println(prefix + "  ]");
         }
         pw.println(prefix + "  mDisplayInfo=" + mDisplayInfo);
-    }
-
-    void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-        mLastReportedDefaultBounds.dumpDebug(proto, DEFAULT_BOUNDS);
-        mLastReportedMovementBounds.dumpDebug(proto, MOVEMENT_BOUNDS);
-        proto.end(token);
     }
 }

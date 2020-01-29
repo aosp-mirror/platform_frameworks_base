@@ -52,16 +52,16 @@ namespace android::incremental {
 
 using MountId = int;
 using StorageId = int;
-using Inode = incfs::Inode;
+using FileId = incfs::FileId;
 using BlockIndex = incfs::BlockIndex;
 using RawMetadata = incfs::RawMetadata;
 using Clock = std::chrono::steady_clock;
 using TimePoint = std::chrono::time_point<Clock>;
 using Seconds = std::chrono::seconds;
 
-class IncrementalService {
+class IncrementalService final {
 public:
-    explicit IncrementalService(const ServiceManagerWrapper& sm, std::string_view rootDir);
+    explicit IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
@@ -85,6 +85,11 @@ public:
         Permanent = 1,
     };
 
+    static FileId idFromMetadata(std::span<const uint8_t> metadata);
+    static inline FileId idFromMetadata(std::span<const char> metadata) {
+        return idFromMetadata({(const uint8_t*)metadata.data(), metadata.size()});
+    }
+
     std::optional<std::future<void>> onSystemReady();
 
     StorageId createStorage(std::string_view mountPoint,
@@ -92,30 +97,31 @@ public:
                             CreateOptions options = CreateOptions::Default);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
-    StorageId openStorage(std::string_view pathInMount);
+    StorageId openStorage(std::string_view path);
 
-    Inode nodeFor(StorageId storage, std::string_view subpath) const;
-    std::pair<Inode, std::string_view> parentAndNameFor(StorageId storage,
-                                                        std::string_view subpath) const;
+    FileId nodeFor(StorageId storage, std::string_view path) const;
+    std::pair<FileId, std::string_view> parentAndNameFor(StorageId storage,
+                                                         std::string_view path) const;
 
-    int bind(StorageId storage, std::string_view subdir, std::string_view target, BindKind kind);
+    int bind(StorageId storage, std::string_view source, std::string_view target, BindKind kind);
     int unbind(StorageId storage, std::string_view target);
     void deleteStorage(StorageId storage);
 
-    Inode makeFile(StorageId storage, std::string_view name, long size, std::string_view metadata,
-                   std::string_view signature);
-    Inode makeDir(StorageId storage, std::string_view name, std::string_view metadata = {});
-    Inode makeDirs(StorageId storage, std::string_view name, std::string_view metadata = {});
+    int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
+                 incfs::NewFileParams params);
+    int makeDir(StorageId storage, std::string_view path, int mode = 0555);
+    int makeDirs(StorageId storage, std::string_view path, int mode = 0555);
 
-    int link(StorageId storage, Inode item, Inode newParent, std::string_view newName);
-    int unlink(StorageId storage, Inode parent, std::string_view name);
+    int link(StorageId sourceStorageId, std::string_view oldPath, StorageId destStorageId,
+             std::string_view newPath);
+    int unlink(StorageId storage, std::string_view path);
 
-    bool isRangeLoaded(StorageId storage, Inode file, std::pair<BlockIndex, BlockIndex> range) {
+    bool isRangeLoaded(StorageId storage, FileId file, std::pair<BlockIndex, BlockIndex> range) {
         return false;
     }
 
-    RawMetadata getMetadata(StorageId storage, Inode node) const;
-    std::string getSigngatureData(StorageId storage, Inode node) const { return {}; }
+    RawMetadata getMetadata(StorageId storage, FileId node) const;
+    std::string getSignatureData(StorageId storage, FileId node) const;
 
     std::vector<std::string> listFiles(StorageId storage) const;
     bool startLoading(StorageId storage) const;
@@ -142,19 +148,9 @@ private:
 
         struct Storage {
             std::string name;
-            Inode node;
         };
 
-        struct Control {
-            operator IncFsControl() const { return {cmdFd, logFd}; }
-            void reset() {
-                cmdFd.reset();
-                logFd.reset();
-            }
-
-            base::unique_fd cmdFd;
-            base::unique_fd logFd;
-        };
+        using Control = incfs::UniqueControl;
 
         using BindMap = std::map<std::string, Bind>;
         using StorageMap = std::unordered_map<StorageId, Storage>;
@@ -196,11 +192,12 @@ private:
 
     IfsMountPtr getIfs(StorageId storage) const;
     const IfsMountPtr& getIfsLocked(StorageId storage) const;
-    int addBindMount(IncFsMount& ifs, StorageId storage, std::string&& sourceSubdir,
-                     std::string&& target, BindKind kind, std::unique_lock<std::mutex>& mainLock);
+    int addBindMount(IncFsMount& ifs, StorageId storage, std::string_view storageRoot,
+                     std::string&& source, std::string&& target, BindKind kind,
+                     std::unique_lock<std::mutex>& mainLock);
 
     int addBindMountWithMd(IncFsMount& ifs, StorageId storage, std::string&& metadataName,
-                           std::string&& sourceSubdir, std::string&& target, BindKind kind,
+                           std::string&& source, std::string&& target, BindKind kind,
                            std::unique_lock<std::mutex>& mainLock);
 
     bool prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel* params);
@@ -212,10 +209,9 @@ private:
     MountMap::iterator getStorageSlotLocked();
 
     // Member variables
-    // These are shared pointers for the sake of unit testing
-    std::shared_ptr<VoldServiceWrapper> mVold;
-    std::shared_ptr<IncrementalManagerWrapper> mIncrementalManager;
-    std::shared_ptr<IncFsWrapper> mIncFs;
+    std::unique_ptr<VoldServiceWrapper> mVold;
+    std::unique_ptr<IncrementalManagerWrapper> mIncrementalManager;
+    std::unique_ptr<IncFsWrapper> mIncFs;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;

@@ -1619,6 +1619,8 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
+    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
+    <skip />
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"सर्टकट सक्रिय हुँदा, भोल्युमका दुवै बटनहरूलाई ३ सेकेन्डसम्म थिची राख्नाले पहुँच सम्बन्धी कुनै सुविधा सुरु हुनेछ।\n\n हाल व्यवहारमा रहेको पहुँच सम्बन्धी सुविधा:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n तपाईं सेटिङहरू अन्तर्गतको पहुँच सम्बन्धी विकल्पमा गई उक्त सुविधालाई बदल्न सक्नुहुन्छ।"</string>
@@ -1993,8 +1995,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> स्प्रेडसिट"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"प्रस्तुति"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> प्रस्तुति"</string>
-    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
-    <skip />
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"हवाइजहाज मोडमा ब्लुटुथ सक्रिय रहने छ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"लोड गर्दै"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फाइलहरू</item>
@@ -2015,8 +2016,7 @@
     <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
     <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> को क्याप्सन बार।"</string>
-    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
-    <skip />
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
     <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
     <skip />
     <!-- no translation found for resolver_work_tab (2690019516263167035) -->

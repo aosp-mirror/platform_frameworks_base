@@ -537,9 +537,10 @@ public:
         LOGDEATH("Receiving binderDied() on JavaDeathRecipient %p\n", this);
         if (mObject != NULL) {
             JNIEnv* env = javavm_to_jnienv(mVM);
-            jobject jBinderProxy = javaObjectForIBinder(env, who.promote());
+            ScopedLocalRef<jobject> jBinderProxy(env, javaObjectForIBinder(env, who.promote()));
             env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
-                                      gBinderProxyOffsets.mSendDeathNotice, mObject, jBinderProxy);
+                                      gBinderProxyOffsets.mSendDeathNotice, mObject,
+                                      jBinderProxy.get());
             if (env->ExceptionCheck()) {
                 jthrowable excep = env->ExceptionOccurred();
                 report_exception(env, excep,

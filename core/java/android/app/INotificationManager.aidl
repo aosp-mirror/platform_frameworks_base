@@ -18,6 +18,7 @@
 package android.app;
 
 import android.app.ITransientNotification;
+import android.app.ITransientNotificationCallback;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -45,8 +46,7 @@ interface INotificationManager
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
-    // TODO: Replace parameter (ITransientNotification callback) with (CharSequence text)
-    void enqueueTextToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId);
+    void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, int displayId, @nullable ITransientNotificationCallback callback);
     void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId);
     void cancelToast(String pkg, IBinder token);
     void finishToken(String pkg, IBinder token);

@@ -16,6 +16,7 @@
 
 package com.android.server.people;
 
+import android.annotation.NonNull;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
 import android.app.prediction.AppTarget;
@@ -29,6 +30,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
+import com.android.server.people.data.DataManager;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,8 @@ public class PeopleService extends SystemService {
 
     private static final String TAG = "PeopleService";
 
+    private final DataManager mDataManager;
+
     /**
      * Initializes the system service.
      *
@@ -48,11 +52,30 @@ public class PeopleService extends SystemService {
      */
     public PeopleService(Context context) {
         super(context);
+
+        mDataManager = new DataManager(context);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            mDataManager.initialize();
+        }
     }
 
     @Override
     public void onStart() {
         publishLocalService(PeopleServiceInternal.class, new LocalService());
+    }
+
+    @Override
+    public void onUnlockUser(@NonNull TargetUser targetUser) {
+        mDataManager.onUserUnlocked(targetUser.getUserIdentifier());
+    }
+
+    @Override
+    public void onStopUser(@NonNull TargetUser targetUser) {
+        mDataManager.onUserStopped(targetUser.getUserIdentifier());
     }
 
     @VisibleForTesting
@@ -63,7 +86,7 @@ public class PeopleService extends SystemService {
         @Override
         public void onCreatePredictionSession(AppPredictionContext context,
                 AppPredictionSessionId sessionId) {
-            mSessions.put(sessionId, new SessionInfo(context));
+            mSessions.put(sessionId, new SessionInfo(context, mDataManager));
         }
 
         @Override

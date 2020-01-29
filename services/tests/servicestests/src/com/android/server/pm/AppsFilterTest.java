@@ -27,6 +27,8 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageParser;
+import android.content.pm.Signature;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
@@ -48,8 +50,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -280,6 +284,33 @@ public class AppsFilterTest {
                 setting -> setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package"), DUMMY_CALLING_UID);
+
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+
+    @Test
+    public void testSystemSignedTarget_DoesntFilter() throws CertificateException {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+        final Signature frameworkSignature = Mockito.mock(Signature.class);
+        final PackageParser.SigningDetails frameworkSigningDetails =
+                new PackageParser.SigningDetails(new Signature[]{frameworkSignature}, 1);
+
+        final Signature otherSignature = Mockito.mock(Signature.class);
+        final PackageParser.SigningDetails otherSigningDetails =
+                new PackageParser.SigningDetails(new Signature[]{otherSignature}, 1);
+
+        simulateAddPackage(appsFilter, pkg("android"), 1000,
+                b -> b.setSigningDetails(frameworkSigningDetails));
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_UID,
+                b -> b.setSigningDetails(frameworkSigningDetails));
+        PackageSetting calling = simulateAddPackage(appsFilter,
+                pkg("com.some.other.package"), DUMMY_CALLING_UID,
+                b -> b.setSigningDetails(otherSigningDetails));
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
     }

@@ -116,7 +116,11 @@ class TaskSnapshotSurface implements StartingSurface {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SnapshotStartingWindow" : TAG_WM;
     private static final int MSG_REPORT_DRAW = 0;
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=%s";
-    private static final Point sSurfaceSize = new Point(); //tmp var for unused relayout param
+
+    //tmp vars for unused relayout params
+    private static final Point sTmpSurfaceSize = new Point();
+    private static final SurfaceControl sTmpSurfaceControl = new SurfaceControl();
+
     private final Window mWindow;
     private final Surface mSurface;
     private SurfaceControl mSurfaceControl;
@@ -230,7 +234,7 @@ class TaskSnapshotSurface implements StartingSurface {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
                     tmpFrame, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect,
                     tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState,
-                    sSurfaceSize);
+                    sTmpSurfaceSize, sTmpSurfaceControl);
         } catch (RemoteException e) {
             // Local call.
         }

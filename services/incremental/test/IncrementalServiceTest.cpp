@@ -46,7 +46,7 @@ namespace android::os::incremental {
 class MockVoldService : public VoldServiceWrapper {
 public:
     MOCK_CONST_METHOD4(mountIncFs,
-                       binder::Status(const std::string& imagePath, const std::string& targetDir,
+                       binder::Status(const std::string& backingPath, const std::string& targetDir,
                                       int32_t flags,
                                       IncrementalFileSystemControlParcel* _aidl_return));
     MOCK_CONST_METHOD1(unmountIncFs, binder::Status(const std::string& dir));
@@ -77,22 +77,20 @@ public:
     binder::Status getInvalidControlParcel(const std::string& imagePath,
                                            const std::string& targetDir, int32_t flags,
                                            IncrementalFileSystemControlParcel* _aidl_return) {
-        _aidl_return->cmd = nullptr;
-        _aidl_return->log = nullptr;
+        _aidl_return = {};
         return binder::Status::ok();
     }
     binder::Status incFsSuccess(const std::string& imagePath, const std::string& targetDir,
                                 int32_t flags, IncrementalFileSystemControlParcel* _aidl_return) {
-        _aidl_return->cmd = std::make_unique<os::ParcelFileDescriptor>(std::move(cmdFd));
-        _aidl_return->log = std::make_unique<os::ParcelFileDescriptor>(std::move(logFd));
+        _aidl_return->pendingReads.reset(base::unique_fd(dup(STDIN_FILENO)));
+        _aidl_return->cmd.reset(base::unique_fd(dup(STDIN_FILENO)));
+        _aidl_return->log.reset(base::unique_fd(dup(STDIN_FILENO)));
         return binder::Status::ok();
     }
 
 private:
     TemporaryFile cmdFile;
     TemporaryFile logFile;
-    base::unique_fd cmdFd;
-    base::unique_fd logFd;
 };
 
 class MockIncrementalManager : public IncrementalManagerWrapper {
@@ -105,7 +103,7 @@ public:
     MOCK_CONST_METHOD2(startDataLoader, binder::Status(int32_t mountId, bool* _aidl_return));
     MOCK_CONST_METHOD1(destroyDataLoader, binder::Status(int32_t mountId));
     MOCK_CONST_METHOD3(newFileForDataLoader,
-                       binder::Status(int32_t mountId, int64_t inode,
+                       binder::Status(int32_t mountId, FileId fileId,
                                       const ::std::vector<uint8_t>& metadata));
     MOCK_CONST_METHOD1(showHealthBlockedUI, binder::Status(int32_t mountId));
 
@@ -152,23 +150,21 @@ private:
 class MockIncFs : public IncFsWrapper {
 public:
     MOCK_CONST_METHOD5(makeFile,
-                       Inode(Control control, std::string_view name, Inode parent, Size size,
-                             std::string_view metadata));
-    MOCK_CONST_METHOD5(makeDir,
-                       Inode(Control control, std::string_view name, Inode parent,
-                             std::string_view metadata, int mode));
-    MOCK_CONST_METHOD2(getMetadata, RawMetadata(Control control, Inode inode));
-    MOCK_CONST_METHOD4(link,
-                       ErrorCode(Control control, Inode item, Inode targetParent,
-                                 std::string_view name));
-    MOCK_CONST_METHOD3(unlink, ErrorCode(Control control, Inode parent, std::string_view name));
-    MOCK_CONST_METHOD3(writeBlocks,
-                       ErrorCode(Control control, const incfs_new_data_block blocks[],
-                                 int blocksCount));
+                       ErrorCode(Control control, std::string_view path, int mode, FileId id,
+                                 NewFileParams params));
+    MOCK_CONST_METHOD3(makeDir, ErrorCode(Control control, std::string_view path, int mode));
+    MOCK_CONST_METHOD2(getMetadata, RawMetadata(Control control, FileId fileid));
+    MOCK_CONST_METHOD2(getMetadata, RawMetadata(Control control, std::string_view path));
+    MOCK_CONST_METHOD2(getFileId, FileId(Control control, std::string_view path));
+    MOCK_CONST_METHOD3(link,
+                       ErrorCode(Control control, std::string_view from, std::string_view to));
+    MOCK_CONST_METHOD2(unlink, ErrorCode(Control control, std::string_view path));
+    MOCK_CONST_METHOD2(openWrite, base::unique_fd(Control control, FileId id));
+    MOCK_CONST_METHOD1(writeBlocks, ErrorCode(std::span<const DataBlock> blocks));
 
     void makeFileFails() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(-1)); }
     void makeFileSuccess() { ON_CALL(*this, makeFile(_, _, _, _, _)).WillByDefault(Return(0)); }
-    RawMetadata getMountInfoMetadata(Control control, Inode inode) {
+    RawMetadata getMountInfoMetadata(Control control, std::string_view path) {
         metadata::Mount m;
         m.mutable_storage()->set_id(100);
         m.mutable_loader()->set_package_name("com.test");
@@ -176,15 +172,15 @@ public:
         const auto metadata = m.SerializeAsString();
         m.mutable_loader()->release_arguments();
         m.mutable_loader()->release_package_name();
-        return std::vector<char>(metadata.begin(), metadata.end());
+        return {metadata.begin(), metadata.end()};
     }
-    RawMetadata getStorageMetadata(Control control, Inode inode) {
+    RawMetadata getStorageMetadata(Control control, std::string_view path) {
         metadata::Storage st;
         st.set_id(100);
         auto metadata = st.SerializeAsString();
-        return std::vector<char>(metadata.begin(), metadata.end());
+        return {metadata.begin(), metadata.end()};
     }
-    RawMetadata getBindPointMetadata(Control control, Inode inode) {
+    RawMetadata getBindPointMetadata(Control control, std::string_view path) {
         metadata::BindPoint bp;
         std::string destPath = "dest";
         std::string srcPath = "src";
@@ -200,40 +196,41 @@ public:
 
 class MockServiceManager : public ServiceManagerWrapper {
 public:
-    MockServiceManager(std::shared_ptr<MockVoldService> vold,
-                       std::shared_ptr<MockIncrementalManager> manager,
-                       std::shared_ptr<MockIncFs> incfs)
-          : mVold(vold), mIncrementalManager(manager), mIncFs(incfs) {}
-    std::shared_ptr<VoldServiceWrapper> getVoldService() const override { return mVold; }
-    std::shared_ptr<IncrementalManagerWrapper> getIncrementalManager() const override {
-        return mIncrementalManager;
+    MockServiceManager(std::unique_ptr<MockVoldService> vold,
+                       std::unique_ptr<MockIncrementalManager> manager,
+                       std::unique_ptr<MockIncFs> incfs)
+          : mVold(std::move(vold)),
+            mIncrementalManager(std::move(manager)),
+            mIncFs(std::move(incfs)) {}
+    std::unique_ptr<VoldServiceWrapper> getVoldService() final { return std::move(mVold); }
+    std::unique_ptr<IncrementalManagerWrapper> getIncrementalManager() final {
+        return std::move(mIncrementalManager);
     }
-    std::shared_ptr<IncFsWrapper> getIncFs() const override { return mIncFs; }
+    std::unique_ptr<IncFsWrapper> getIncFs() final { return std::move(mIncFs); }
 
 private:
-    std::shared_ptr<MockVoldService> mVold;
-    std::shared_ptr<MockIncrementalManager> mIncrementalManager;
-    std::shared_ptr<MockIncFs> mIncFs;
+    std::unique_ptr<MockVoldService> mVold;
+    std::unique_ptr<MockIncrementalManager> mIncrementalManager;
+    std::unique_ptr<MockIncFs> mIncFs;
 };
 
 // --- IncrementalServiceTest ---
 
-static Inode inode(std::string_view path) {
-    struct stat st;
-    if (::stat(path::c_str(path), &st)) {
-        return -1;
-    }
-    return st.st_ino;
-}
-
 class IncrementalServiceTest : public testing::Test {
 public:
     void SetUp() override {
-        mVold = std::make_shared<NiceMock<MockVoldService>>();
-        mIncrementalManager = std::make_shared<NiceMock<MockIncrementalManager>>();
-        mIncFs = std::make_shared<NiceMock<MockIncFs>>();
-        MockServiceManager serviceManager = MockServiceManager(mVold, mIncrementalManager, mIncFs);
-        mIncrementalService = std::make_unique<IncrementalService>(serviceManager, mRootDir.path);
+        auto vold = std::make_unique<NiceMock<MockVoldService>>();
+        mVold = vold.get();
+        auto incrementalManager = std::make_unique<NiceMock<MockIncrementalManager>>();
+        mIncrementalManager = incrementalManager.get();
+        auto incFs = std::make_unique<NiceMock<MockIncFs>>();
+        mIncFs = incFs.get();
+        mIncrementalService =
+                std::make_unique<IncrementalService>(MockServiceManager(std::move(vold),
+                                                                        std::move(
+                                                                                incrementalManager),
+                                                                        std::move(incFs)),
+                                                     mRootDir.path);
         mDataLoaderParcel.packageName = "com.test";
         mDataLoaderParcel.arguments = "uri";
         mIncrementalService->onSystemReady();
@@ -252,20 +249,18 @@ public:
         const auto mountPointsFile = rootDir + "/dir1/mount/.mountpoint.abcd";
         ASSERT_TRUE(base::WriteStringToFile("info", mountInfoFile));
         ASSERT_TRUE(base::WriteStringToFile("mounts", mountPointsFile));
-        ASSERT_GE(inode(mountInfoFile), 0);
-        ASSERT_GE(inode(mountPointsFile), 0);
-        ON_CALL(*mIncFs, getMetadata(_, inode(mountInfoFile)))
-                .WillByDefault(Invoke(mIncFs.get(), &MockIncFs::getMountInfoMetadata));
-        ON_CALL(*mIncFs, getMetadata(_, inode(mountPointsFile)))
-                .WillByDefault(Invoke(mIncFs.get(), &MockIncFs::getBindPointMetadata));
-        ON_CALL(*mIncFs, getMetadata(_, inode(rootDir + "/dir1/mount/st0")))
-                .WillByDefault(Invoke(mIncFs.get(), &MockIncFs::getStorageMetadata));
+        ON_CALL(*mIncFs, getMetadata(_, std::string_view(mountInfoFile)))
+                .WillByDefault(Invoke(mIncFs, &MockIncFs::getMountInfoMetadata));
+        ON_CALL(*mIncFs, getMetadata(_, std::string_view(mountPointsFile)))
+                .WillByDefault(Invoke(mIncFs, &MockIncFs::getBindPointMetadata));
+        ON_CALL(*mIncFs, getMetadata(_, std::string_view(rootDir + "/dir1/mount/st0")))
+                .WillByDefault(Invoke(mIncFs, &MockIncFs::getStorageMetadata));
     }
 
 protected:
-    std::shared_ptr<NiceMock<MockVoldService>> mVold;
-    std::shared_ptr<NiceMock<MockIncFs>> mIncFs;
-    std::shared_ptr<NiceMock<MockIncrementalManager>> mIncrementalManager;
+    NiceMock<MockVoldService>* mVold;
+    NiceMock<MockIncFs>* mIncFs;
+    NiceMock<MockIncrementalManager>* mIncrementalManager;
     std::unique_ptr<IncrementalService> mIncrementalService;
     TemporaryDir mRootDir;
     DataLoaderParamsParcel mDataLoaderParcel;
@@ -412,12 +407,12 @@ TEST_F(IncrementalServiceTest, testMakeDirectory) {
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
                                                IncrementalService::CreateOptions::CreateNew);
     std::string_view dir_path("test");
-    EXPECT_CALL(*mIncFs, makeDir(_, dir_path, _, _, _));
-    int fileIno = mIncrementalService->makeDir(storageId, dir_path, "");
-    ASSERT_GE(fileIno, 0);
+    EXPECT_CALL(*mIncFs, makeDir(_, dir_path, _));
+    auto res = mIncrementalService->makeDir(storageId, dir_path, 0555);
+    ASSERT_EQ(res, 0);
 }
 
-TEST_F(IncrementalServiceTest, testMakeDirectoryNoParent) {
+TEST_F(IncrementalServiceTest, testMakeDirectoryNested) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
     mVold->bindMountSuccess();
@@ -427,13 +422,15 @@ TEST_F(IncrementalServiceTest, testMakeDirectoryNoParent) {
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
                                                IncrementalService::CreateOptions::CreateNew);
-    std::string_view first("first");
-    std::string_view second("second");
+    auto first = "first"sv;
+    auto second = "second"sv;
     std::string dir_path = std::string(first) + "/" + std::string(second);
-    EXPECT_CALL(*mIncFs, makeDir(_, first, _, _, _)).Times(0);
-    EXPECT_CALL(*mIncFs, makeDir(_, second, _, _, _)).Times(0);
-    int fileIno = mIncrementalService->makeDir(storageId, dir_path, "");
-    ASSERT_LT(fileIno, 0);
+    EXPECT_CALL(*mIncFs, makeDir(_, first, _)).Times(0);
+    EXPECT_CALL(*mIncFs, makeDir(_, second, _)).Times(0);
+    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(dir_path), _)).Times(1);
+
+    auto res = mIncrementalService->makeDir(storageId, dir_path, 0555);
+    ASSERT_EQ(res, 0);
 }
 
 TEST_F(IncrementalServiceTest, testMakeDirectories) {
@@ -446,16 +443,18 @@ TEST_F(IncrementalServiceTest, testMakeDirectories) {
     int storageId =
             mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
                                                IncrementalService::CreateOptions::CreateNew);
-    std::string_view first("first");
-    std::string_view second("second");
-    std::string_view third("third");
+    auto first = "first"sv;
+    auto second = "second"sv;
+    auto third = "third"sv;
     InSequence seq;
-    EXPECT_CALL(*mIncFs, makeDir(_, first, _, _, _));
-    EXPECT_CALL(*mIncFs, makeDir(_, second, _, _, _));
-    EXPECT_CALL(*mIncFs, makeDir(_, third, _, _, _));
-    std::string dir_path =
-            std::string(first) + "/" + std::string(second) + "/" + std::string(third);
-    int fileIno = mIncrementalService->makeDirs(storageId, dir_path, "");
-    ASSERT_GE(fileIno, 0);
+    auto parent_path = std::string(first) + "/" + std::string(second);
+    auto dir_path = parent_path + "/" + std::string(third);
+    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(dir_path), _)).WillOnce(Return(-ENOENT));
+    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(parent_path), _)).WillOnce(Return(-ENOENT));
+    EXPECT_CALL(*mIncFs, makeDir(_, first, _)).WillOnce(Return(0));
+    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(parent_path), _)).WillOnce(Return(0));
+    EXPECT_CALL(*mIncFs, makeDir(_, std::string_view(dir_path), _)).WillOnce(Return(0));
+    auto res = mIncrementalService->makeDirs(storageId, dir_path, 0555);
+    ASSERT_EQ(res, 0);
 }
 } // namespace android::os::incremental
