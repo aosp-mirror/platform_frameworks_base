@@ -2558,7 +2558,7 @@
 
     <!-- Allows telephony to suggest the time / time zone.
          <p>Not for use by third-party applications.
-         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES) @hide
+         @hide
      -->
     <permission android:name="android.permission.SUGGEST_PHONE_TIME_AND_ZONE"
         android:protectionLevel="signature|telephony" />
