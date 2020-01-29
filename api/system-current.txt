@@ -6485,8 +6485,8 @@ package android.os {
   }
 
   public static final class UpdateEngine.AllocateSpaceResult {
-    method public int errorCode();
-    method public long freeSpaceRequired();
+    method public int getErrorCode();
+    method public long getFreeSpaceRequired();
   }
 
   public static final class UpdateEngine.ErrorCodeConstants {
