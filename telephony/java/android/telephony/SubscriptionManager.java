@@ -33,7 +33,6 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -43,7 +42,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.net.INetworkPolicyManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
@@ -54,7 +52,6 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -80,7 +77,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -882,7 +878,6 @@ public class SubscriptionManager {
     public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     private final Context mContext;
-    private volatile INetworkPolicyManager mNetworkPolicy;
 
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
     // the Context and subId.
@@ -972,14 +967,6 @@ public class SubscriptionManager {
     public static SubscriptionManager from(Context context) {
         return (SubscriptionManager) context
                 .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-    }
-
-    private INetworkPolicyManager getINetworkPolicyManager() {
-        if (mNetworkPolicy == null) {
-            mNetworkPolicy = INetworkPolicyManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-        }
-        return mNetworkPolicy;
     }
 
     /**
@@ -2624,15 +2611,6 @@ public class SubscriptionManager {
                 plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
     }
 
-    /** @hide */
-    private String getSubscriptionPlansOwner(int subId) {
-        try {
-            return getINetworkPolicyManager().getSubscriptionPlansOwner(subId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Temporarily override the billing relationship plan between a carrier and
      * a specific subscriber to be considered unmetered. This will be reflected
@@ -2693,89 +2671,6 @@ public class SubscriptionManager {
         final int overrideValue = overrideCongested ? SUBSCRIPTION_OVERRIDE_CONGESTED : 0;
         getNetworkPolicyManager().setSubscriptionOverride(subId, SUBSCRIPTION_OVERRIDE_CONGESTED,
                 overrideValue, timeoutMillis, mContext.getOpPackageName());
-    }
-
-    /**
-     * Create an {@link Intent} that can be launched towards the carrier app
-     * that is currently defining the billing relationship plan through
-     * {@link #setSubscriptionPlans(int, List)}.
-     *
-     * @return ready to launch Intent targeted towards the carrier app, or
-     *         {@code null} if no carrier app is defined, or if the defined
-     *         carrier app provides no management activity.
-     * @hide
-     */
-    public @Nullable Intent createManageSubscriptionIntent(int subId) {
-        // Bail if no owner
-        final String owner = getSubscriptionPlansOwner(subId);
-        if (owner == null) return null;
-
-        // Bail if no plans
-        final List<SubscriptionPlan> plans = getSubscriptionPlans(subId);
-        if (plans.isEmpty()) return null;
-
-        final Intent intent = new Intent(ACTION_MANAGE_SUBSCRIPTION_PLANS);
-        intent.setPackage(owner);
-        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
-
-        // Bail if not implemented
-        if (mContext.getPackageManager().queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
-            return null;
-        }
-
-        return intent;
-    }
-
-    /** @hide */
-    private @Nullable Intent createRefreshSubscriptionIntent(int subId) {
-        // Bail if no owner
-        final String owner = getSubscriptionPlansOwner(subId);
-        if (owner == null) return null;
-
-        // Bail if no plans
-        final List<SubscriptionPlan> plans = getSubscriptionPlans(subId);
-        if (plans.isEmpty()) return null;
-
-        final Intent intent = new Intent(ACTION_REFRESH_SUBSCRIPTION_PLANS);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.setPackage(owner);
-        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
-
-        // Bail if not implemented
-        if (mContext.getPackageManager().queryBroadcastReceivers(intent, 0).isEmpty()) {
-            return null;
-        }
-
-        return intent;
-    }
-
-    /**
-     * Check if there is a carrier app that is currently defining the billing
-     * relationship plan through {@link #setSubscriptionPlans(int, List)} that
-     * supports refreshing of subscription plans.
-     *
-     * @hide
-     */
-    public boolean isSubscriptionPlansRefreshSupported(int subId) {
-        return createRefreshSubscriptionIntent(subId) != null;
-    }
-
-    /**
-     * Request that the carrier app that is currently defining the billing
-     * relationship plan through {@link #setSubscriptionPlans(int, List)}
-     * refresh its subscription plans.
-     * <p>
-     * If the app is able to successfully update the plans, you'll expect to
-     * receive the {@link #ACTION_SUBSCRIPTION_PLANS_CHANGED} broadcast.
-     *
-     * @hide
-     */
-    public void requestSubscriptionPlansRefresh(int subId) {
-        final Intent intent = createRefreshSubscriptionIntent(subId);
-        final BroadcastOptions options = BroadcastOptions.makeBasic();
-        options.setTemporaryAppWhitelistDuration(TimeUnit.MINUTES.toMillis(1));
-        mContext.sendBroadcast(intent, null, options.toBundle());
     }
 
     /**
