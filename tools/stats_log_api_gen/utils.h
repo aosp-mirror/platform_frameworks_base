@@ -39,6 +39,7 @@ const string DEFAULT_JAVA_CLASS = "StatsLogInternal";
 
 const int JAVA_MODULE_REQUIRES_FLOAT = 0x01;
 const int JAVA_MODULE_REQUIRES_ATTRIBUTION = 0x02;
+const int JAVA_MODULE_REQUIRES_KEY_VALUE_PAIRS = 0x04;
 
 string make_constant_name(const string& str);
 
