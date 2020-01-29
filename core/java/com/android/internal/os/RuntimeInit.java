@@ -468,7 +468,8 @@ public class RuntimeInit {
         try {
             if (ActivityManager.getService().handleApplicationWtf(
                     mApplicationObject, tag, system,
-                    new ApplicationErrorReport.ParcelableCrashInfo(t))) {
+                    new ApplicationErrorReport.ParcelableCrashInfo(t),
+                    Process.myPid())) {
                 // The Activity Manager has already written us off -- now exit.
                 Process.killProcess(Process.myPid());
                 System.exit(10);

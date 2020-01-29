@@ -287,7 +287,7 @@ interface IActivityManager {
     void killApplicationProcess(in String processName, int uid);
     // Special low-level communication with activity manager.
     boolean handleApplicationWtf(in IBinder app, in String tag, boolean system,
-            in ApplicationErrorReport.ParcelableCrashInfo crashInfo);
+            in ApplicationErrorReport.ParcelableCrashInfo crashInfo, int immediateCallerPid);
     @UnsupportedAppUsage
     void killBackgroundProcesses(in String packageName, int userId);
     boolean isUserAMonkey();
