@@ -15077,9 +15077,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return packages;
     }
 
-    private List<String> getDefaultCrossProfilePackages() {
-        return Arrays.asList(mContext.getResources()
+    @Override
+    public List<String> getDefaultCrossProfilePackages() {
+        Set<String> crossProfilePackages = new HashSet<>();
+
+        Collections.addAll(crossProfilePackages, mContext.getResources()
                 .getStringArray(R.array.cross_profile_apps));
+        Collections.addAll(crossProfilePackages, mContext.getResources()
+                .getStringArray(R.array.vendor_cross_profile_apps));
+
+        return new ArrayList<>(crossProfilePackages);
     }
 
     private List<ActiveAdmin> getProfileOwnerAdminsForCurrentProfileGroup() {

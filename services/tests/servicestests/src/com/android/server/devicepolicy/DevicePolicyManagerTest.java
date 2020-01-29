@@ -5817,6 +5817,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.packageName = admin1.getPackageName();
 
         setCrossProfileAppsList();
+        setVendorCrossProfileAppsList();
 
         assertTrue(dpm.getAllCrossProfilePackages().isEmpty());
     }
@@ -5827,6 +5828,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.packageName = admin1.getPackageName();
 
         setCrossProfileAppsList();
+        setVendorCrossProfileAppsList();
         initializeDpms();
 
         assertTrue(dpm.getAllCrossProfilePackages().isEmpty());
@@ -5839,9 +5841,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpm.setCrossProfilePackages(admin1, packages);
         setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
+        setVendorCrossProfileAppsList("TEST_VENDOR_DEFAULT_PACKAGE");
 
         assertEquals(Sets.newSet(
-                        "TEST_PACKAGE", "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE"),
+                        "TEST_PACKAGE", "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE",
+                        "TEST_VENDOR_DEFAULT_PACKAGE"),
                 dpm.getAllCrossProfilePackages());
 
     }
@@ -5854,11 +5858,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpm.setCrossProfilePackages(admin1, packages);
         setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
+        setVendorCrossProfileAppsList("TEST_VENDOR_DEFAULT_PACKAGE");
         initializeDpms();
 
         assertEquals(Sets.newSet(
-                "TEST_PACKAGE", "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE"),
+                "TEST_PACKAGE", "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE",
+                "TEST_VENDOR_DEFAULT_PACKAGE"),
                 dpm.getAllCrossProfilePackages());
+    }
+
+    public void testGetDefaultCrossProfilePackages_noPackagesSet_returnsEmpty() {
+        setCrossProfileAppsList();
+        setVendorCrossProfileAppsList();
+
+        assertThat(dpm.getDefaultCrossProfilePackages()).isEmpty();
+    }
+
+    public void testGetDefaultCrossProfilePackages_packagesSet_returnsCombinedSet() {
+        setCrossProfileAppsList("TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE");
+        setVendorCrossProfileAppsList("TEST_VENDOR_DEFAULT_PACKAGE");
+
+        assertThat(dpm.getDefaultCrossProfilePackages()).isEqualTo(Sets.newSet(
+                "TEST_DEFAULT_PACKAGE", "TEST_COMMON_PACKAGE", "TEST_VENDOR_DEFAULT_PACKAGE"
+        ));
     }
 
     public void testSetCommonCriteriaMode_asDeviceOwner() throws Exception {
@@ -5889,6 +5911,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void setCrossProfileAppsList(String... packages) {
         when(mContext.getResources()
                 .getStringArray(eq(R.array.cross_profile_apps)))
+                .thenReturn(packages);
+    }
+
+    private void setVendorCrossProfileAppsList(String... packages) {
+        when(mContext.getResources()
+                .getStringArray(eq(R.array.vendor_cross_profile_apps)))
                 .thenReturn(packages);
     }
 
