@@ -16,4 +16,4 @@
 
 package android.net.wifi;
 
-parcelable ScanResult;
+@JavaOnlyStableParcelable parcelable ScanResult;
