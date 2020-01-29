@@ -758,7 +758,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@see AnimationFlags#PARENTS}
      * {@see AnimationFlags#CHILDREN}
      */
-    final boolean isAnimating(int flags) {
+    boolean isAnimating(int flags) {
         if (mSurfaceAnimator.isAnimating()) {
             return true;
         }

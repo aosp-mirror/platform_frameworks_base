@@ -20,6 +20,8 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.ViewRootImpl.sNewInsetsMode;
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -338,7 +340,13 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             ? insets.getDisplayCutout().getSafeInsetBottom()
                             : 0);
             final int insetsBottom = Math.max(activityViewBottom - keyboardTop, 0);
-            mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
+
+            // TODO: Temporary hack to offset the view until we can properly inset Bubbles again.
+            if (sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+                mStackView.animate().translationY(-insetsBottom);
+            } else {
+                mActivityView.setForwardedInsets(Insets.of(0, 0, 0, insetsBottom));
+            }
         }
     }
 
