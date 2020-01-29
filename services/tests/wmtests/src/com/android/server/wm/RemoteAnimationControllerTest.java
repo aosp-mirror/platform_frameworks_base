@@ -247,7 +247,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testChange() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
-        mDisplayContent.mChangingApps.add(win.mActivityRecord);
+        mDisplayContent.mChangingContainers.add(win.mActivityRecord);
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(50, 100), new Rect(50, 100, 150, 150),
@@ -290,7 +290,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             verify(mThumbnailFinishedCallback).onAnimationFinished(
                     eq(ANIMATION_TYPE_WINDOW_ANIMATION), eq(record.mThumbnailAdapter));
         } finally {
-            mDisplayContent.mChangingApps.clear();
+            mDisplayContent.mChangingContainers.clear();
         }
     }
 
