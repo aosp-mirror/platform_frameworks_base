@@ -363,16 +363,10 @@ public final class TelephonyPermissions {
      */
     private static boolean reportAccessDeniedToReadIdentifiers(Context context, int subId, int pid,
             int uid, String callingPackage, String message) {
-        boolean isPreinstalled = false;
         ApplicationInfo callingPackageInfo = null;
         try {
             callingPackageInfo = context.getPackageManager().getApplicationInfoAsUser(
                     callingPackage, 0, UserHandle.getUserHandleForUid(uid));
-            if (callingPackageInfo != null) {
-                if (callingPackageInfo.isSystemApp()) {
-                    isPreinstalled = true;
-                }
-            }
         } catch (PackageManager.NameNotFoundException e) {
             // If the application info for the calling package could not be found then assume the
             // calling app is a non-preinstalled app to detect any issues with the check
@@ -393,10 +387,9 @@ public final class TelephonyPermissions {
             }
             invokedMethods.add(message);
             TelephonyCommonStatsLog.write(TelephonyCommonStatsLog.DEVICE_IDENTIFIER_ACCESS_DENIED,
-                    callingPackage, message, isPreinstalled, false);
+                    callingPackage, message, /* isPreinstalled= */ false, false);
         }
-        Log.w(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message
-                + ":isPreinstalled=" + isPreinstalled);
+        Log.w(LOG_TAG, "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message);
         // if the target SDK is pre-Q then check if the calling package would have previously
         // had access to device identifiers.
         if (callingPackageInfo != null && (

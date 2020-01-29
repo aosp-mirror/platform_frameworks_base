@@ -6873,7 +6873,8 @@ message DeviceIdentifierAccessDenied {
     optional string method_name = 2;
 
     // True if the package is preinstalled.
-    optional bool is_preinstalled = 3;
+    // Starting from Android 11, this boolean is not set and will always be false.
+    optional bool is_preinstalled = 3 [deprecated = true];
 
     // True if the package is privileged.
     // Starting from Android 11, this boolean is not set and will always be false.
