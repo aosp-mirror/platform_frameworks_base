@@ -28,6 +28,7 @@ import android.app.ITransientNotification;
 import android.app.ITransientNotificationCallback;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -112,11 +113,9 @@ public class Toast {
     /**
      * Text toasts will be rendered by SystemUI instead of in-app, so apps can't circumvent
      * background custom toast restrictions.
-     *
-     * TODO(b/144152069): Add @EnabledAfter(Q) to target R+ after assessing impact on dogfood
      */
     @ChangeId
-    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long CHANGE_TEXT_TOASTS_IN_THE_SYSTEM = 147798919L;
 
 
