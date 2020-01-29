@@ -1098,12 +1098,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void onSingleTaskDisplayDrawn(int displayId) {
-            final Bubble expandedBubble = mStackView != null
-                    ? mStackView.getExpandedBubble()
-                    : null;
-            if (expandedBubble != null && expandedBubble.getDisplayId() == displayId) {
-                expandedBubble.setContentVisibility(true);
+            if (mStackView == null) {
+                return;
             }
+            mStackView.showExpandedViewContents(displayId);
         }
 
         @Override
