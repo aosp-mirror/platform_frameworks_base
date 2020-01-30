@@ -19,12 +19,8 @@ package com.android.server.am;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
-import static android.os.Process.BLUETOOTH_UID;
-import static android.os.Process.NETWORK_STACK_UID;
 import static android.os.Process.NFC_UID;
-import static android.os.Process.PHONE_UID;
 import static android.os.Process.ROOT_UID;
-import static android.os.Process.SE_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -89,7 +85,6 @@ import android.util.EventLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
@@ -103,6 +98,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -728,8 +724,9 @@ public final class ActiveServices {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
         }
         r.callStart = false;
-        StatsLog.write(StatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid, r.name.getPackageName(),
-                r.name.getClassName(), StatsLog.SERVICE_STATE_CHANGED__STATE__START);
+        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
+                r.name.getPackageName(), r.name.getClassName(),
+                FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
         synchronized (r.stats.getBatteryStats()) {
             r.stats.startRunningLocked();
         }
@@ -768,9 +765,9 @@ public final class ActiveServices {
             service.delayedStop = true;
             return;
         }
-        StatsLog.write(StatsLog.SERVICE_STATE_CHANGED, service.appInfo.uid,
+        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, service.appInfo.uid,
                 service.name.getPackageName(), service.name.getClassName(),
-                StatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+                FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
         synchronized (service.stats.getBatteryStats()) {
             service.stats.stopRunningLocked();
         }
@@ -929,8 +926,9 @@ public final class ActiveServices {
                 }
             }
 
-            StatsLog.write(StatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid, r.name.getPackageName(),
-                    r.name.getClassName(), StatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
+                    r.name.getPackageName(), r.name.getClassName(),
+                    FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.stopRunningLocked();
             }
@@ -1435,9 +1433,9 @@ public final class ActiveServices {
                                 AppOpsManager.getToken(mAm.mAppOpsService),
                                 AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName,
                                 null, true, false, "");
-                        StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                                 r.appInfo.uid, r.shortInstanceName,
-                                StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);
+                                FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);
                         mAm.updateForegroundServiceUsageStats(r.name, r.userId, true);
                     }
                     r.postNotification();
@@ -1486,9 +1484,9 @@ public final class ActiveServices {
                 mAm.mAppOpsService.finishOperation(
                         AppOpsManager.getToken(mAm.mAppOpsService),
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
-                StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                         r.appInfo.uid, r.shortInstanceName,
-                        StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
+                        FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
                 mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);
@@ -2772,8 +2770,8 @@ public final class ActiveServices {
                 EventLogTags.writeAmCreateService(
                         r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
             }
-            StatsLog.write(StatsLog.SERVICE_LAUNCH_REPORTED, r.appInfo.uid, r.name.getPackageName(),
-                    r.name.getClassName());
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_LAUNCH_REPORTED, r.appInfo.uid,
+                    r.name.getPackageName(), r.name.getClassName());
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
@@ -3101,8 +3099,9 @@ public final class ActiveServices {
             mAm.mAppOpsService.finishOperation(
                     AppOpsManager.getToken(mAm.mAppOpsService),
                     AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName, null);
-            StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.appInfo.uid,
-                    r.shortInstanceName, StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
+            FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                    r.appInfo.uid, r.shortInstanceName,
+                    FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
         }
 

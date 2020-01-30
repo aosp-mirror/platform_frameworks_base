@@ -100,7 +100,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.StatsLog;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
@@ -109,6 +108,7 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -1473,7 +1473,7 @@ public final class ProcessList {
                 proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList, proc.lastCachedPss);
                 for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                     ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                    StatsLog.write(StatsLog.CACHED_KILL_REPORTED,
+                    FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
                             proc.info.uid,
                             holder.state.getName(),
                             holder.state.getPackage(),
@@ -1495,7 +1495,7 @@ public final class ProcessList {
                             proc.lastCachedPss);
                     for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
                         ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                        StatsLog.write(StatsLog.CACHED_KILL_REPORTED,
+                        FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
                                 proc.info.uid,
                                 holder.state.getName(),
                                 holder.state.getPackage(),
@@ -2640,8 +2640,8 @@ public final class ProcessList {
             // about the process state of the isolated UID *before* it is registered with the
             // owning application.
             mService.mBatteryStatsService.addIsolatedUid(uid, info.uid);
-            StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
-                    StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
+            FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
+                    FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
         final ProcessRecord r = new ProcessRecord(mService, info, proc, uid);
 
