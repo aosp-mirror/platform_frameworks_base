@@ -2451,8 +2451,8 @@ package android.hardware {
 package android.hardware.biometrics {
 
   public static interface BiometricManager.Authenticators {
-    field public static final int BIOMETRIC_CONVENIENCE = 4095; // 0xfff
-    field public static final int EMPTY_SET = 0; // 0x0
+    field @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static final int BIOMETRIC_CONVENIENCE = 4095; // 0xfff
+    field @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static final int EMPTY_SET = 0; // 0x0
   }
 
 }
