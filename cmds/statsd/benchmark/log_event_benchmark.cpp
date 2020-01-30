@@ -39,7 +39,7 @@ static void BM_LogEventCreation(benchmark::State& state) {
     uint8_t msg[LOGGER_ENTRY_MAX_PAYLOAD];
     size_t size = createAndParseStatsEvent(msg);
     while (state.KeepRunning()) {
-        benchmark::DoNotOptimize(LogEvent(msg, size, /*uid=*/ 1000));
+        benchmark::DoNotOptimize(LogEvent(msg, size, /*uid=*/ 1000, /*pid=*/ 1001));
     }
 }
 BENCHMARK(BM_LogEventCreation);
