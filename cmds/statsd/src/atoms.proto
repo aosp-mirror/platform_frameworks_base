@@ -180,7 +180,7 @@ message Atom {
         PhoneServiceStateChanged phone_service_state_changed = 94 [(module) = "framework"];
         PhoneStateChanged phone_state_changed = 95 [(module) = "framework"];
         UserRestrictionChanged user_restriction_changed = 96;
-        SettingsUIChanged settings_ui_changed = 97;
+        SettingsUIChanged settings_ui_changed = 97 [(module) = "settings"];
         ConnectivityStateChanged connectivity_state_changed = 98 [(module) = "framework"];
         // TODO: service state change is very noisy shortly after boot, as well
         // as at other transitions - coming out of doze, device plugged in, etc.
