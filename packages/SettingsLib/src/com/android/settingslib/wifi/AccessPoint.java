@@ -654,7 +654,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 }
             }
         }
-        return oldMetering == mIsScoredNetworkMetered;
+        return oldMetering != mIsScoredNetworkMetered;
     }
 
     /**
