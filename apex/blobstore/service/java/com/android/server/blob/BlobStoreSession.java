@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /** TODO: add doc */
 public class BlobStoreSession extends IBlobStoreSession.Stub {
@@ -155,6 +156,8 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
     @NonNull
     public ParcelFileDescriptor openWrite(@BytesLong long offsetBytes,
             @BytesLong long lengthBytes) {
+        Preconditions.checkArgumentNonnegative(offsetBytes, "offsetBytes must not be negative");
+
         assertCallerIsOwner();
         synchronized (mSessionLock) {
             if (mState != STATE_OPENED) {
@@ -242,7 +245,7 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
     public void allowPackageAccess(@NonNull String packageName,
             @NonNull byte[] certificate) {
         assertCallerIsOwner();
-        Preconditions.checkNotNull(packageName, "packageName must not be null");
+        Objects.requireNonNull(packageName, "packageName must not be null");
         synchronized (mSessionLock) {
             if (mState != STATE_OPENED) {
                 throw new IllegalStateException("Not allowed to change access type in state: "
@@ -280,7 +283,9 @@ public class BlobStoreSession extends IBlobStoreSession.Stub {
     public boolean isPackageAccessAllowed(@NonNull String packageName,
             @NonNull byte[] certificate) {
         assertCallerIsOwner();
-        Preconditions.checkNotNull(packageName, "packageName must not be null");
+        Objects.requireNonNull(packageName, "packageName must not be null");
+        Preconditions.checkByteArrayNotEmpty(certificate, "certificate");
+
         synchronized (mSessionLock) {
             if (mState != STATE_OPENED) {
                 throw new IllegalStateException("Not allowed to get access type in state: "
