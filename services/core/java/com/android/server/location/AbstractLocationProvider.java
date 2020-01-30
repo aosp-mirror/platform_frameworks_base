@@ -21,6 +21,7 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
+import android.util.ArraySet;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -120,7 +121,8 @@ public abstract class AbstractLocationProvider {
             if (providerPackageNames.equals(this.providerPackageNames)) {
                 return this;
             } else {
-                return new State(allowed, properties, providerPackageNames);
+                return new State(allowed, properties,
+                        Collections.unmodifiableSet(new ArraySet<>(providerPackageNames)));
             }
         }
 

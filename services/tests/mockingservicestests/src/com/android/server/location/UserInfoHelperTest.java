@@ -57,7 +57,7 @@ import java.util.List;
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class UserInfoStoreTest {
+public class UserInfoHelperTest {
 
     private static final int USER1_ID = 1;
     private static final int USER1_MANAGED_ID = 11;
@@ -72,7 +72,7 @@ public class UserInfoStoreTest {
     private StaticMockitoSession mMockingSession;
     private List<BroadcastReceiver> mBroadcastReceivers = new ArrayList<>();
 
-    private UserInfoStore mStore;
+    private UserInfoHelper mHelper;
 
     @Before
     public void setUp() {
@@ -97,8 +97,8 @@ public class UserInfoStoreTest {
 
         doReturn(USER1_ID).when(ActivityManager::getCurrentUser);
 
-        mStore = new UserInfoStore(mContext);
-        mStore.onSystemReady();
+        mHelper = new UserInfoHelper(mContext);
+        mHelper.onSystemReady();
     }
 
     @After
@@ -119,8 +119,9 @@ public class UserInfoStoreTest {
 
     @Test
     public void testListeners() {
-        UserInfoStore.UserChangedListener listener = mock(UserInfoStore.UserChangedListener.class);
-        mStore.addListener(listener);
+        UserInfoHelper.UserChangedListener listener = mock(
+                UserInfoHelper.UserChangedListener.class);
+        mHelper.addListener(listener);
 
         switchUser(USER1_ID);
         verify(listener, never()).onUserChanged(anyInt(), anyInt());
@@ -134,44 +135,44 @@ public class UserInfoStoreTest {
 
     @Test
     public void testCurrentUser() {
-        assertThat(mStore.getCurrentUserId()).isEqualTo(USER1_ID);
+        assertThat(mHelper.getCurrentUserId()).isEqualTo(USER1_ID);
 
         switchUser(USER2_ID);
 
-        assertThat(mStore.getCurrentUserId()).isEqualTo(USER2_ID);
+        assertThat(mHelper.getCurrentUserId()).isEqualTo(USER2_ID);
 
         switchUser(USER1_ID);
 
-        assertThat(mStore.getCurrentUserId()).isEqualTo(USER1_ID);
+        assertThat(mHelper.getCurrentUserId()).isEqualTo(USER1_ID);
     }
 
     @Test
     public void testIsCurrentUserOrProfile() {
-        assertThat(mStore.isCurrentUserOrProfile(USER1_ID)).isTrue();
-        assertThat(mStore.isCurrentUserOrProfile(USER1_MANAGED_ID)).isTrue();
-        assertThat(mStore.isCurrentUserOrProfile(USER2_ID)).isFalse();
-        assertThat(mStore.isCurrentUserOrProfile(USER2_MANAGED_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserOrProfile(USER1_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserOrProfile(USER1_MANAGED_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserOrProfile(USER2_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserOrProfile(USER2_MANAGED_ID)).isFalse();
 
         switchUser(USER2_ID);
 
-        assertThat(mStore.isCurrentUserOrProfile(USER1_ID)).isFalse();
-        assertThat(mStore.isCurrentUserOrProfile(USER2_ID)).isTrue();
-        assertThat(mStore.isCurrentUserOrProfile(USER1_MANAGED_ID)).isFalse();
-        assertThat(mStore.isCurrentUserOrProfile(USER2_MANAGED_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserOrProfile(USER1_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserOrProfile(USER2_ID)).isTrue();
+        assertThat(mHelper.isCurrentUserOrProfile(USER1_MANAGED_ID)).isFalse();
+        assertThat(mHelper.isCurrentUserOrProfile(USER2_MANAGED_ID)).isTrue();
     }
 
     @Test
     public void testGetParentUserId() {
-        assertThat(mStore.getParentUserId(USER1_ID)).isEqualTo(USER1_ID);
-        assertThat(mStore.getParentUserId(USER1_MANAGED_ID)).isEqualTo(USER1_ID);
-        assertThat(mStore.getParentUserId(USER2_ID)).isEqualTo(USER2_ID);
-        assertThat(mStore.getParentUserId(USER2_MANAGED_ID)).isEqualTo(USER2_ID);
+        assertThat(mHelper.getParentUserId(USER1_ID)).isEqualTo(USER1_ID);
+        assertThat(mHelper.getParentUserId(USER1_MANAGED_ID)).isEqualTo(USER1_ID);
+        assertThat(mHelper.getParentUserId(USER2_ID)).isEqualTo(USER2_ID);
+        assertThat(mHelper.getParentUserId(USER2_MANAGED_ID)).isEqualTo(USER2_ID);
 
         switchUser(USER2_ID);
 
-        assertThat(mStore.getParentUserId(USER1_ID)).isEqualTo(USER1_ID);
-        assertThat(mStore.getParentUserId(USER2_ID)).isEqualTo(USER2_ID);
-        assertThat(mStore.getParentUserId(USER1_MANAGED_ID)).isEqualTo(USER1_ID);
-        assertThat(mStore.getParentUserId(USER2_MANAGED_ID)).isEqualTo(USER2_ID);
+        assertThat(mHelper.getParentUserId(USER1_ID)).isEqualTo(USER1_ID);
+        assertThat(mHelper.getParentUserId(USER2_ID)).isEqualTo(USER2_ID);
+        assertThat(mHelper.getParentUserId(USER1_MANAGED_ID)).isEqualTo(USER1_ID);
+        assertThat(mHelper.getParentUserId(USER2_MANAGED_ID)).isEqualTo(USER2_ID);
     }
 }

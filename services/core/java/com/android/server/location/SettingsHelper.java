@@ -54,7 +54,7 @@ import java.util.function.Supplier;
 /**
  * Provides accessors and listeners for all location related settings.
  */
-public class LocationSettingsStore {
+public class SettingsHelper {
 
     /**
      * Listener for user-specific settings changes.
@@ -99,7 +99,7 @@ public class LocationSettingsStore {
     private final StringSetCachedGlobalSetting mIgnoreSettingsPackageWhitelist;
 
     // TODO: get rid of handler
-    public LocationSettingsStore(Context context, Handler handler) {
+    public SettingsHelper(Context context, Handler handler) {
         mContext = context;
 
         mLocationMode = new IntegerSecureSetting(context, LOCATION_MODE, handler);
@@ -118,7 +118,7 @@ public class LocationSettingsStore {
     }
 
     /** Called when system is ready. */
-    public synchronized void onSystemReady() {
+    public void onSystemReady() {
         mLocationMode.register();
         mBackgroundThrottleIntervalMs.register();
         mLocationPackageBlacklist.register();
@@ -135,7 +135,8 @@ public class LocationSettingsStore {
     }
 
     /**
-     * Add a listener for changes to the location enabled setting.
+     * Add a listener for changes to the location enabled setting. Callbacks occur on an unspecified
+     * thread.
      */
     public void addOnLocationEnabledChangedListener(UserSettingChangedListener listener) {
         mLocationMode.addListener(listener);
@@ -156,7 +157,8 @@ public class LocationSettingsStore {
     }
 
     /**
-     * Add a listener for changes to the background throttle interval.
+     * Add a listener for changes to the background throttle interval. Callbacks occur on an
+     * unspecified thread.
      */
     public void addOnBackgroundThrottleIntervalChangedListener(
             GlobalSettingChangedListener listener) {
@@ -204,7 +206,8 @@ public class LocationSettingsStore {
     }
 
     /**
-     * Add a listener for changes to the background throttle package whitelist.
+     * Add a listener for changes to the background throttle package whitelist. Callbacks occur on
+     * an unspecified thread.
      */
     public void addOnBackgroundThrottlePackageWhitelistChangedListener(
             GlobalSettingChangedListener listener) {
@@ -227,7 +230,8 @@ public class LocationSettingsStore {
     }
 
     /**
-     * Add a listener for changes to the ignore settings package whitelist.
+     * Add a listener for changes to the ignore settings package whitelist. Callbacks occur on an
+     * unspecified thread.
      */
     public void addOnIgnoreSettingsPackageWhitelistChangedListener(
             GlobalSettingChangedListener listener) {
@@ -340,6 +344,8 @@ public class LocationSettingsStore {
     private abstract static class ObservingSetting extends ContentObserver {
 
         private final CopyOnWriteArrayList<UserSettingChangedListener> mListeners;
+
+        @GuardedBy("this")
         private boolean mRegistered;
 
         private ObservingSetting(Handler handler) {
@@ -347,11 +353,11 @@ public class LocationSettingsStore {
             mListeners = new CopyOnWriteArrayList<>();
         }
 
-        protected boolean isRegistered() {
+        protected synchronized boolean isRegistered() {
             return mRegistered;
         }
 
-        protected void register(Context context, Uri uri) {
+        protected synchronized void register(Context context, Uri uri) {
             if (mRegistered) {
                 return;
             }
@@ -393,8 +399,13 @@ public class LocationSettingsStore {
         }
 
         public int getValueForUser(int defaultValue, int userId) {
-            return Settings.Secure.getIntForUser(mContext.getContentResolver(), mSettingName,
-                    defaultValue, userId);
+            long identity = Binder.clearCallingIdentity();
+            try {
+                return Settings.Secure.getIntForUser(mContext.getContentResolver(), mSettingName,
+                        defaultValue, userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -417,7 +428,7 @@ public class LocationSettingsStore {
             mCachedUserId = UserHandle.USER_NULL;
         }
 
-        public synchronized void register() {
+        public void register() {
             register(mContext, Settings.Secure.getUriFor(mSettingName));
         }
 
@@ -426,12 +437,17 @@ public class LocationSettingsStore {
 
             List<String> value = mCachedValue;
             if (userId != mCachedUserId) {
-                String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                        mSettingName, userId);
-                if (TextUtils.isEmpty(setting)) {
-                    value = Collections.emptyList();
-                } else {
-                    value = Arrays.asList(setting.split(","));
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                            mSettingName, userId);
+                    if (TextUtils.isEmpty(setting)) {
+                        value = Collections.emptyList();
+                    } else {
+                        value = Arrays.asList(setting.split(","));
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
 
                 if (isRegistered()) {
@@ -473,8 +489,13 @@ public class LocationSettingsStore {
         }
 
         public long getValue(long defaultValue) {
-            return Settings.Global.getLong(mContext.getContentResolver(), mSettingName,
-                    defaultValue);
+            long identity = Binder.clearCallingIdentity();
+            try {
+                return Settings.Global.getLong(mContext.getContentResolver(), mSettingName,
+                        defaultValue);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -499,18 +520,23 @@ public class LocationSettingsStore {
             mValid = false;
         }
 
-        public synchronized void register() {
+        public void register() {
             register(mContext, Settings.Global.getUriFor(mSettingName));
         }
 
         public synchronized Set<String> getValue() {
             ArraySet<String> value = mCachedValue;
             if (!mValid) {
-                value = new ArraySet<>(mBaseValuesSupplier.get());
-                String setting = Settings.Global.getString(mContext.getContentResolver(),
-                        mSettingName);
-                if (!TextUtils.isEmpty(setting)) {
-                    value.addAll(Arrays.asList(setting.split(",")));
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    value = new ArraySet<>(mBaseValuesSupplier.get());
+                    String setting = Settings.Global.getString(mContext.getContentResolver(),
+                            mSettingName);
+                    if (!TextUtils.isEmpty(setting)) {
+                        value.addAll(Arrays.asList(setting.split(",")));
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
                 }
 
                 if (isRegistered()) {

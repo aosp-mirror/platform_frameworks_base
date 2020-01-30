@@ -43,7 +43,6 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -76,6 +75,7 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.server.DeviceIdleInternal;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
@@ -624,12 +624,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    public GnssLocationProvider(Context context, Handler handler) {
-        super(context, new HandlerExecutor(handler));
+    public GnssLocationProvider(Context context) {
+        super(context, FgThread.getExecutor());
 
         ensureInitialized();
 
-        mLooper = handler.getLooper();
+        mLooper = FgThread.getHandler().getLooper();
 
         // Create a wake lock
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
