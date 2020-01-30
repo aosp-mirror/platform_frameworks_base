@@ -34,6 +34,16 @@ import java.util.List;
  */
 public abstract class InputMethodManagerInternal {
     /**
+     * Listener for input method list changed events.
+     */
+    public interface InputMethodListListener {
+        /**
+         * Called with the list of the installed IMEs when it's updated.
+         */
+        void onInputMethodListUpdated(List<InputMethodInfo> info, @UserIdInt int userId);
+    }
+
+    /**
      * Called by the power manager to tell the input method manager whether it
      * should start watching for wake events.
      */
@@ -85,6 +95,11 @@ public abstract class InputMethodManagerInternal {
     public abstract boolean switchToInputMethod(String imeId, @UserIdInt int userId);
 
     /**
+     * Registers a new {@link InputMethodListListener}.
+     */
+    public abstract void registerInputMethodListListener(InputMethodListListener listener);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -116,6 +131,10 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public boolean switchToInputMethod(String imeId, int userId) {
                     return false;
+                }
+
+                @Override
+                public void registerInputMethodListListener(InputMethodListListener listener) {
                 }
             };
 
