@@ -17,12 +17,9 @@
 #define LOG_NAMESPACE "StatsLog.tag."
 #define LOG_TAG "StatsLog_println"
 
-#include <assert.h>
-
 #include "jni.h"
+#include <log/log.h>
 #include <nativehelper/JNIHelp.h>
-#include "utils/misc.h"
-#include "core_jni_helpers.h"
 #include "stats_buffer_writer.h"
 
 namespace android {
@@ -57,7 +54,27 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_util_StatsLog(JNIEnv* env)
 {
-    return RegisterMethodsOrDie(env, "android/util/StatsLog", gMethods, NELEM(gMethods));
+    return jniRegisterNativeMethods(env, "android/util/StatsLog", gMethods, NELEM(gMethods));
 }
-
 }; // namespace android
+
+/*
+ * JNI Initialization
+ */
+jint JNI_OnLoad(JavaVM* jvm, void* reserved) {
+    JNIEnv* e;
+    int status;
+
+    ALOGV("statsd : loading JNI\n");
+    // Check JNI version
+    if (jvm->GetEnv((void**)&e, JNI_VERSION_1_4)) {
+        ALOGE("JNI version mismatch error");
+        return JNI_ERR;
+    }
+    status = android::register_android_util_StatsLog(e);
+    if (status < 0) {
+        ALOGE("jni statsd registration failure, status: %d", status);
+        return JNI_ERR;
+    }
+    return JNI_VERSION_1_4;
+}

@@ -19,8 +19,9 @@ apex {
 }
 
 apex_defaults {
-    // libc.so and libcutils.so are included in the apex
-    // native_shared_libs: ["libc", "libcutils"],
+    native_shared_libs: [
+        "libstats_jni",
+    ],
     // binaries: ["vold"],
     java_libs: [
         "framework-statsd",
@@ -43,4 +44,34 @@ android_app_certificate {
     // This will use com.android.os.statsd.x509.pem (the cert) and
     // com.android.os.statsd.pk8 (the private key)
     certificate: "com.android.os.statsd",
+}
+
+
+// JNI library for StatsLog.write
+cc_library_shared {
+    name: "libstats_jni",
+    srcs: ["jni/**/*.cpp"],
+    shared_libs: [
+        "libnativehelper", // Has stable abi - should not be copied into apex.
+        "liblog",  // Has a stable abi - should not be copied into apex.
+    ],
+    static_libs: [
+        //TODO: make shared - need libstatssocket to also live in the apex.
+        "libstatssocket",
+        "libcutils", // TODO: remove - needed by libstatssocket
+    ],
+    //TODO: is libc++_static correct?
+    stl: "libc++_static",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+        "-Wno-unused-parameter",
+    ],
+    apex_available: [
+        "com.android.os.statsd",
+        "test_com.android.os.statsd",
+        //TODO (b/148620413): remove platform.
+         "//apex_available:platform",
+    ],
 }
