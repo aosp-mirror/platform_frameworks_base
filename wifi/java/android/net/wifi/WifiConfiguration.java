@@ -1929,54 +1929,38 @@ public class WifiConfiguration implements Parcelable {
     private NetworkSelectionStatus mNetworkSelectionStatus = new NetworkSelectionStatus();
 
     /**
-     * @hide
      * This class is intended to store extra failure reason information for the most recent
      * connection attempt, so that it may be surfaced to the settings UI
+     * @hide
      */
-    @SystemApi
+    // TODO(b/148626966): called by SUW via reflection, remove once SUW is updated
     public static class RecentFailure {
 
         private RecentFailure() {}
 
-        /** @hide */
-        @Retention(RetentionPolicy.SOURCE)
-        @IntDef(value = {NONE, STATUS_AP_UNABLE_TO_HANDLE_NEW_STA})
-        public @interface AssociationStatus {}
-
-        /**
-         * No recent failure, or no specific reason given for the recent connection failure
-         */
-        public static final int NONE = 0;
-        /**
-         * Connection to this network recently failed due to Association Rejection Status 17
-         * (AP is full)
-         */
-        public static final int STATUS_AP_UNABLE_TO_HANDLE_NEW_STA = 17;
         /**
          * Association Rejection Status code (NONE for success/non-association-rejection-fail)
          */
-        @AssociationStatus
-        private int mAssociationStatus = NONE;
+        @RecentFailureReason
+        private int mAssociationStatus = RECENT_FAILURE_NONE;
 
         /**
          * @param status the association status code for the recent failure
-         * @hide
          */
-        public void setAssociationStatus(@AssociationStatus int status) {
+        public void setAssociationStatus(@RecentFailureReason int status) {
             mAssociationStatus = status;
         }
         /**
          * Sets the RecentFailure to NONE
-         * @hide
          */
         public void clear() {
-            mAssociationStatus = NONE;
+            mAssociationStatus = RECENT_FAILURE_NONE;
         }
         /**
-         * Get the recent failure code. One of {@link #NONE} or
-         * {@link #STATUS_AP_UNABLE_TO_HANDLE_NEW_STA}.
+         * Get the recent failure code. One of {@link #RECENT_FAILURE_NONE} or
+         * {@link #RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA}.
          */
-        @AssociationStatus
+        @RecentFailureReason
         public int getAssociationStatus() {
             return mAssociationStatus;
         }
@@ -1986,9 +1970,46 @@ public class WifiConfiguration implements Parcelable {
      * RecentFailure member
      * @hide
      */
+    // TODO(b/148626966): called by SUW via reflection, once SUW is updated, make private and
+    //  rename to mRecentFailure
     @NonNull
-    @SystemApi
     public final RecentFailure recentFailure = new RecentFailure();
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "RECENT_FAILURE_", value = {
+            RECENT_FAILURE_NONE,
+            RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA})
+    public @interface RecentFailureReason {}
+
+    /**
+     * No recent failure, or no specific reason given for the recent connection failure
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_NONE = 0;
+    /**
+     * Connection to this network recently failed due to Association Rejection Status 17
+     * (AP is full)
+     * @hide
+     */
+    @SystemApi
+    public static final int RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA = 17;
+
+    /**
+     * Get the failure reason for the most recent connection attempt, or
+     * {@link #RECENT_FAILURE_NONE} if there was no failure.
+     *
+     * Failure reasons include:
+     * {@link #RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA}
+     *
+     * @hide
+     */
+    @RecentFailureReason
+    @SystemApi
+    public int getRecentFailureReason() {
+        return recentFailure.getAssociationStatus();
+    }
 
     /**
      * Get the network selection status.
