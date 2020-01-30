@@ -137,8 +137,8 @@ public final class OomAdjuster {
     /**
      * In targetSdkVersion R and above, foreground service has camera and microphone while-in-use
      * capability only when the {@link android.R.attr#foregroundServiceType} is configured as
-     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_CAMERA} and
-     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} respectively in the
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_CAMERA} and
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} respectively in the
      * manifest file.
      * In targetSdkVersion below R, foreground service automatically have camera and microphone
      * capabilities.
