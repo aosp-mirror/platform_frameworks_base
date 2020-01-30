@@ -81,7 +81,6 @@ public class CellBroadcastIntents {
             int initialCode, int slotIndex) {
         Intent backgroundIntent = new Intent(Telephony.Sms.Intents.SMS_CB_RECEIVED_ACTION);
         backgroundIntent.putExtra(EXTRA_MESSAGE, smsCbMessage);
-        backgroundIntent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         putPhoneIdAndSubIdExtra(context, backgroundIntent, slotIndex);
 
         String receiverPermission = Manifest.permission.RECEIVE_SMS;
