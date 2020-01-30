@@ -649,7 +649,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             mEnabled = new SparseArray<>(1);
 
             // initialize last since this lets our reference escape
-            mProvider = new MockableLocationProvider(mContext, mLock, this);
+            mProvider = new MockableLocationProvider(mLock, this);
 
             // we can assume all users start with disabled location state since the initial state
             // of all providers is disabled. no need to initialize mEnabled further.
@@ -2699,7 +2699,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mProviderManagers.add(manager);
             }
 
-            manager.setMockProvider(new MockProvider(mContext, properties));
+            manager.setMockProvider(new MockProvider(properties));
         }
     }
 
