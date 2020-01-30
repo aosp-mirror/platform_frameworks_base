@@ -65,6 +65,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private String mAccessibilityClass;
     private boolean mTileState;
     private boolean mCollapsedView;
+    private boolean mClicked;
     private boolean mShowRippleEffect = true;
 
     private final ImageView mBg;
@@ -233,35 +234,13 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setLongClickable(state.handlesLongClick);
         mIcon.setIcon(state, allowAnimations);
         setContentDescription(state.contentDescription);
-        final StringBuilder stateDescription = new StringBuilder();
-        switch (state.state) {
-            case Tile.STATE_UNAVAILABLE:
-                stateDescription.append(mContext.getString(R.string.tile_unavailable));
-                break;
-            case Tile.STATE_INACTIVE:
-                if (state instanceof QSTile.BooleanState) {
-                    stateDescription.append(mContext.getString(R.string.switch_bar_off));
-                }
-                break;
-            case Tile.STATE_ACTIVE:
-                if (state instanceof QSTile.BooleanState) {
-                    stateDescription.append(mContext.getString(R.string.switch_bar_on));
-                }
-                break;
-            default:
-                break;
-        }
-        if (!TextUtils.isEmpty(state.stateDescription)) {
-            stateDescription.append(", ");
-            stateDescription.append(state.stateDescription);
-        }
-        setStateDescription(stateDescription.toString());
 
         mAccessibilityClass =
                 state.state == Tile.STATE_UNAVAILABLE ? null : state.expandedAccessibilityClassName;
         if (state instanceof QSTile.BooleanState) {
             boolean newState = ((BooleanState) state).value;
             if (mTileState != newState) {
+                mClicked = false;
                 mTileState = newState;
             }
         }
@@ -318,10 +297,23 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     }
 
     @Override
+    public boolean performClick() {
+        mClicked = true;
+        return super.performClick();
+    }
+
+    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         if (!TextUtils.isEmpty(mAccessibilityClass)) {
             event.setClassName(mAccessibilityClass);
+            if (Switch.class.getName().equals(mAccessibilityClass)) {
+                boolean b = mClicked ? !mTileState : mTileState;
+                String label = getResources()
+                        .getString(b ? R.string.switch_bar_on : R.string.switch_bar_off);
+                event.setContentDescription(label);
+                event.setChecked(b);
+            }
         }
     }
 
@@ -333,6 +325,11 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         if (!TextUtils.isEmpty(mAccessibilityClass)) {
             info.setClassName(mAccessibilityClass);
             if (Switch.class.getName().equals(mAccessibilityClass)) {
+                boolean b = mClicked ? !mTileState : mTileState;
+                String label = getResources()
+                        .getString(b ? R.string.switch_bar_on : R.string.switch_bar_off);
+                info.setText(label);
+                info.setChecked(b);
                 info.setCheckable(true);
                 if (isLongClickable()) {
                     info.addAction(
