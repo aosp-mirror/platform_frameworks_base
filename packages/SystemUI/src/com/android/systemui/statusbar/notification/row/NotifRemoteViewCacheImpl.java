@@ -22,10 +22,9 @@ import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 import java.util.Map;
@@ -40,8 +39,8 @@ public class NotifRemoteViewCacheImpl implements NotifRemoteViewCache {
             new ArrayMap<>();
 
     @Inject
-    NotifRemoteViewCacheImpl(NotificationEntryManager entryManager) {
-        entryManager.addNotificationEntryListener(mEntryListener);
+    NotifRemoteViewCacheImpl(CommonNotifCollection collection) {
+        collection.addCollectionListener(mCollectionListener);
     }
 
     @Override
@@ -93,17 +92,14 @@ public class NotifRemoteViewCacheImpl implements NotifRemoteViewCache {
         contentViews.clear();
     }
 
-    private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
+    private final NotifCollectionListener mCollectionListener = new NotifCollectionListener() {
         @Override
-        public void onPendingEntryAdded(NotificationEntry entry) {
+        public void onEntryInit(NotificationEntry entry) {
             mNotifCachedContentViews.put(entry, new SparseArray<>());
         }
 
         @Override
-        public void onEntryRemoved(
-                NotificationEntry entry,
-                @Nullable NotificationVisibility visibility,
-                boolean removedByUser) {
+        public void onEntryCleanUp(NotificationEntry entry) {
             mNotifCachedContentViews.remove(entry);
         }
     };
