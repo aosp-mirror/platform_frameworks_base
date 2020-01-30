@@ -184,6 +184,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
+import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.AutofillOptions;
@@ -6051,6 +6052,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    private boolean isInRestrictedBucket(int userId, String packageName, long nowElapsed) {
+        return UsageStatsManager.STANDBY_BUCKET_RESTRICTED
+                <= mUsageStatsService.getAppStandbyBucket(packageName, userId, nowElapsed);
+    }
+
     // Unified app-op and target sdk check
     int appRestrictedInBackgroundLocked(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
@@ -6060,7 +6066,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return ActivityManager.APP_START_MODE_DELAYED_RIGID;
         }
-        // ...and legacy apps get an AppOp check
+        // It's a legacy app. If it's in the RESTRICTED bucket, always restrict on battery.
+        if (mOnBattery // Short-circuit in common case.
+                && mConstants.FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS
+                && isInRestrictedBucket(
+                        UserHandle.getUserId(uid), packageName, SystemClock.elapsedRealtime())) {
+            if (DEBUG_BACKGROUND_CHECK) {
+                Slog.i(TAG, "Legacy app " + uid + "/" + packageName + " in RESTRICTED bucket");
+            }
+            return ActivityManager.APP_START_MODE_DELAYED;
+        }
+        // Not in the RESTRICTED bucket so policy is based on AppOp check.
         int appop = mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND,
                 uid, packageName, null, false, "");
         if (DEBUG_BACKGROUND_CHECK) {
