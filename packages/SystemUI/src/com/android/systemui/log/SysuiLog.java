@@ -48,7 +48,7 @@ import java.util.Locale;
  */
 public class SysuiLog<E extends Event> implements Dumpable {
     public static final SimpleDateFormat DATE_FORMAT =
-            new SimpleDateFormat("MM-dd HH:mm:ss", Locale.US);
+            new SimpleDateFormat("MM-dd HH:mm:ss.S", Locale.US);
 
     protected final Object mDataLock = new Object();
     private final String mId;

@@ -42,7 +42,7 @@ public class LogModule {
     @Singleton
     @DozeLog
     public static LogBuffer provideDozeLogBuffer(
-            LogcatEchoTrackerDebug bufferFilter,
+            LogcatEchoTracker bufferFilter,
             DumpController dumpController) {
         LogBuffer buffer = new LogBuffer("DozeLog", 100, 10, bufferFilter);
         buffer.attach(dumpController);

@@ -30,7 +30,12 @@ data class LogMessageImpl(
     override var int1: Int,
     override var int2: Int,
     override var long1: Long,
-    override var double1: Double
+    override var long2: Long,
+    override var double1: Double,
+    override var bool1: Boolean,
+    override var bool2: Boolean,
+    override var bool3: Boolean,
+    override var bool4: Boolean
 ) : LogMessage {
 
     fun reset(
@@ -49,7 +54,12 @@ data class LogMessageImpl(
         int1 = 0
         int2 = 0
         long1 = 0
+        long2 = 0
         double1 = 0.0
+        bool1 = false
+        bool2 = false
+        bool3 = false
+        bool4 = false
     }
 
     companion object Factory {
@@ -65,7 +75,12 @@ data class LogMessageImpl(
                     0,
                     0,
                     0,
-                    0.0)
+                    0,
+                    0.0,
+                    false,
+                    false,
+                    false,
+                    false)
         }
     }
 }
