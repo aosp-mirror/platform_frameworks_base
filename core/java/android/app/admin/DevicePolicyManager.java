@@ -328,7 +328,7 @@ public class DevicePolicyManager {
      * modified by the user and the only way of resetting the device is via factory reset.
      *
      * <p>From version {@link android.os.Build.VERSION_CODES#Q}, the admin app can choose
-     * whether to set up a fully managed device or a work profile. For the admin app to support
+     * whether to set up a fully managed device or a managed profile. For the admin app to support
      * this, it must have an activity with intent filter {@link #ACTION_GET_PROVISIONING_MODE} and
      * another one with intent filter {@link #ACTION_ADMIN_POLICY_COMPLIANCE}. For example:
      * <pre>
@@ -1781,12 +1781,13 @@ public class DevicePolicyManager {
     /**
      * Grants access to selection of KeyChain certificates on behalf of requesting apps.
      * Once granted the app will start receiving
-     * DelegatedAdminReceiver.onChoosePrivateKeyAlias. The caller (PO/DO) will
+     * {@link DelegatedAdminReceiver#onChoosePrivateKeyAlias}. The caller (PO/DO) will
      * no longer receive {@link DeviceAdminReceiver#onChoosePrivateKeyAlias}.
      * There can be at most one app that has this delegation.
      * If another app already had delegated certificate selection access,
      * it will lose the delegation when a new app is delegated.
-     *
+     * <p> The delegaetd app can also call {@link #grantKeyPairToApp} and
+     * {@link #revokeKeyPairFromApp} to directly grant KeyCain keys to other apps.
      * <p> Can be granted by Device Owner or Profile Owner.
      */
     public static final String DELEGATION_CERT_SELECTION = "delegation-cert-selection";
@@ -4313,7 +4314,7 @@ public class DevicePolicyManager {
      * additionally call this method on the parent instance.
      * Calling this method on the parent {@link DevicePolicyManager} instance would wipe the
      * entire device, while calling it on the current profile instance would relinquish the device
-     * for personal use, removing the work profile and all policies set by the profile owner.
+     * for personal use, removing the managed profile and all policies set by the profile owner.
      *
      * @param flags Bit mask of additional options: currently supported flags are
      *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
@@ -4339,7 +4340,7 @@ public class DevicePolicyManager {
      * additionally call this method on the parent instance.
      * Calling this method on the parent {@link DevicePolicyManager} instance would wipe the
      * entire device, while calling it on the current profile instance would relinquish the device
-     * for personal use, removing the work profile and all policies set by the profile owner.
+     * for personal use, removing the managed profile and all policies set by the profile owner.
      *
      * @param flags Bit mask of additional options: currently supported flags are
      *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA} and
