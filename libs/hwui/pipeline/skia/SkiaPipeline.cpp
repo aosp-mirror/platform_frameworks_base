@@ -24,6 +24,7 @@
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkTypeface.h>
 #include <SkSerialProcs.h>
 #include "LightingInfo.h"
 #include "VectorDrawable.h"
@@ -264,6 +265,9 @@ bool SkiaPipeline::setupMultiFrameCapture() {
         SkSerialProcs procs;
         procs.fImageProc = SkSharingSerialContext::serializeImage;
         procs.fImageCtx = mSerialContext.get();
+        procs.fTypefaceProc = [](SkTypeface* tf, void* ctx){
+            return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
+        };
         // SkDocuments don't take owership of the streams they write.
         // we need to keep it until after mMultiPic.close()
         // procs is passed as a pointer, but just as a method of having an optional default.
@@ -405,6 +409,10 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 std::invoke(mPictureCapturedCallback, std::move(picture));
             } else {
                 // single frame skp to file
+                SkSerialProcs procs;
+                procs.fTypefaceProc = [](SkTypeface* tf, void* ctx){
+                    return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
+                };
                 auto data = picture->serialize();
                 savePictureAsync(data, mCapturedFile);
                 mCaptureSequence = 0;
