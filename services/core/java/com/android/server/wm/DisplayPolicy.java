@@ -3073,7 +3073,9 @@ public class DisplayPolicy {
                 }
                 final InsetsControlTarget controlTarget =
                         swipeTarget.getControllableInsetProvider().getControlTarget();
-                if (controlTarget == null) {
+
+                // No transient mode on lockscreen (in notification shade window).
+                if (controlTarget == null || controlTarget == getNotificationShade()) {
                     return;
                 }
                 if (controlTarget.canShowTransient()) {

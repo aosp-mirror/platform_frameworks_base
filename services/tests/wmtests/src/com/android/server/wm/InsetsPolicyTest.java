@@ -119,18 +119,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertNull(controls);
     }
 
-    @Test
-    public void testControlsForDispatch_keyguard() {
-        addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade");
-        addWindow(TYPE_NAVIGATION_BAR, "navBar");
-        mockKeyguardShowing();
-
-        final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
-        // The app must not control the top bar.
-        assertNotNull(controls);
-        assertEquals(1, controls.length);
-    }
-
     // TODO: adjust this test if we pretend to the app that it's still able to control it.
     @Test
     public void testControlsForDispatch_forceStatusBarVisible() {
@@ -154,6 +142,21 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
 
         // The app must not control the navigation bar.
+        assertNotNull(controls);
+        assertEquals(1, controls.length);
+    }
+
+    @Test
+    public void testControlsForDispatch_statusBarForceShowNavigation_butFocusedAnyways() {
+        WindowState notifShade = addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade");
+        notifShade.mAttrs.privateFlags |= PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+        addWindow(TYPE_NAVIGATION_BAR, "navBar");
+
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(notifShade);
+        InsetsSourceControl[] controls
+                = mDisplayContent.getInsetsStateController().getControlsForDispatch(notifShade);
+
+        // The app controls the navigation bar.
         assertNotNull(controls);
         assertEquals(1, controls.length);
     }
@@ -259,11 +262,5 @@ public class InsetsPolicyTest extends WindowTestsBase {
     private InsetsSourceControl[] addWindowAndGetControlsForDispatch(WindowState win) {
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
         return mDisplayContent.getInsetsStateController().getControlsForDispatch(win);
-    }
-
-    private void mockKeyguardShowing() {
-        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        spyOn(displayPolicy);
-        doReturn(true).when(displayPolicy).isKeyguardShowing();
     }
 }
