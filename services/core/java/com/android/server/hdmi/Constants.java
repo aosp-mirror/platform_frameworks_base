@@ -306,49 +306,6 @@ final class Constants {
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
 
-
-    // TODO(OEM): Set this to false to keep the playback device in sleep upon hotplug event.
-    //            True by default.
-    static final String PROPERTY_WAKE_ON_HOTPLUG = "ro.hdmi.wake_on_hotplug";
-
-    // TODO(OEM): Set this to true to enable 'Set Menu Language' feature. False by default.
-    static final String PROPERTY_SET_MENU_LANGUAGE = "ro.hdmi.set_menu_language";
-
-    /**
-     * Property to save the ARC port id on system audio device.
-     * <p>When ARC is initiated, this port will be used to turn on ARC.
-     */
-    static final String PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT =
-            "ro.hdmi.property_sytem_audio_device_arc_port";
-
-    /**
-     * Property to disable muting logic in System Audio Control handling. Default is true.
-     *
-     * <p>True means enabling muting logic.
-     * <p>False means never mute device.
-     */
-    static final String PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE =
-            "ro.hdmi.property_system_audio_mode_muting_enable";
-
-    /**
-     * When set to true the HdmiControlService will never request a Logical Address for the
-     * playback device type. Default is false.
-     *
-     * <p> This is useful when HDMI CEC multiple device types is not supported by the cec driver
-     */
-    static final String PROPERTY_HDMI_CEC_NEVER_CLAIM_PLAYBACK_LOGICAL_ADDRESS =
-            "ro.hdmi.property_hdmi_cec_never_claim_playback_logical_address";
-
-    /**
-     * A comma separated list of logical addresses that HdmiControlService
-     * will never assign local CEC devices to.
-     *
-     * <p> This is useful when HDMI CEC hardware module can't assign multiple logical addresses
-     * in the range same range of 0-7 or 8-15.
-     */
-    static final String PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES =
-            "ro.hdmi.property_hdmi_cec_never_assign_logical_addresses";
-
     // Set to false to allow playback device to go to suspend mode even
     // when it's an active source. True by default.
     static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";
