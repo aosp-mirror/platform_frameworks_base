@@ -31,7 +31,6 @@ import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
@@ -62,7 +61,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.phone.NPVPluginManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -120,7 +118,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private FrameLayout mPluginFrame;
     private final PluginManager mPluginManager;
-    private NPVPluginManager mNPVPluginManager;
 
     private final LocalMediaManager.DeviceCallback mDeviceCallback =
             new LocalMediaManager.DeviceCallback() {
@@ -201,14 +198,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 findViewById(R.id.brightness_slider), broadcastDispatcher);
         mDumpController = dumpController;
         mPluginManager = pluginManager;
-        if (mPluginManager != null && Settings.System.getInt(
-                mContext.getContentResolver(), "npv_plugin_flag", 0) == 2) {
-            mPluginFrame = (FrameLayout) LayoutInflater.from(mContext).inflate(
-                    R.layout.status_bar_expanded_plugin_frame, this, false);
-            addView(mPluginFrame);
-            mNPVPluginManager = new NPVPluginManager(mPluginFrame, mPluginManager);
-        }
-
     }
 
     /**
@@ -556,7 +545,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mListening) {
             refreshAllTiles();
         }
-        if (mNPVPluginManager != null) mNPVPluginManager.setListening(listening);
     }
 
     public void setListening(boolean listening, boolean expanded) {

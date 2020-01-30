@@ -55,7 +55,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -132,8 +131,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private InjectionInflationController mInjectionInflationController;
     @Mock
     private DynamicPrivacyController mDynamicPrivacyController;
-    @Mock
-    private PluginManager mPluginManager;
     @Mock
     private ShadeController mShadeController;
     @Mock
@@ -218,7 +215,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mInjectionInflationController,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
-                mFalsingManager, mPluginManager, mShadeController,
+                mFalsingManager, mShadeController,
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
                 mKeyguardStateController, mStatusBarStateController, mDozeLog,
                 mDozeParameters, mCommandQueue, mVibratorHelper,
