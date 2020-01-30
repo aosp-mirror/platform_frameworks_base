@@ -57,8 +57,8 @@ import java.util.List;
  * <li>The application display area specifies the part of the display that may contain
  * an application window, excluding the system decorations.  The application display area may
  * be smaller than the real display area because the system subtracts the space needed
- * for decor elements such as the status bar.  Use the following methods to query the
- * application display area: {@link #getSize}, {@link #getRectSize} and {@link #getMetrics}.</li>
+ * for decor elements such as the status bar.  Use {@link WindowMetrics#getSize()} to query the
+ * application window size.</li>
  * <li>The real display area specifies the part of the display that contains content
  * including the system decorations.  Even so, the real display area may be smaller than the
  * physical size of the display if the window manager is emulating a smaller display
@@ -97,7 +97,7 @@ public final class Display {
     // We cache the app width and height properties briefly between calls
     // to getHeight() and getWidth() to ensure that applications perceive
     // consistent results when the size changes (most of the time).
-    // Applications should now be using getSize() instead.
+    // Applications should now be using WindowMetrics instead.
     private static final int CACHED_APP_SIZE_DURATION_MILLIS = 20;
     private long mLastCachedAppSizeUpdate;
     private int mCachedAppWidthCompat;
@@ -674,7 +674,10 @@ public final class Display {
      * </p>
      *
      * @param outSize A {@link Point} object to receive the size information.
+     * @deprecated Use {@link WindowManager#getCurrentWindowMetrics()} to obtain an instance of
+     * {@link WindowMetrics} and use {@link WindowMetrics#getSize()} instead.
      */
+    @Deprecated
     public void getSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -688,8 +691,10 @@ public final class Display {
      * Gets the size of the display as a rectangle, in pixels.
      *
      * @param outSize A {@link Rect} object to receive the size information.
-     * @see #getSize(Point)
+     * @deprecated Use {@link WindowMetrics#getSize()} to get the dimensions of the application
+     * window area.
      */
+    @Deprecated
     public void getRectSize(Rect outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
@@ -752,7 +757,7 @@ public final class Display {
     }
 
     /**
-     * @deprecated Use {@link #getSize(Point)} instead.
+     * @deprecated Use {@link WindowMetrics#getSize()} instead.
      */
     @Deprecated
     public int getWidth() {
@@ -763,7 +768,7 @@ public final class Display {
     }
 
     /**
-     * @deprecated Use {@link #getSize(Point)} instead.
+     * @deprecated Use {@link WindowMetrics#getSize()} instead.
      */
     @Deprecated
     public int getHeight() {
@@ -1102,7 +1107,10 @@ public final class Display {
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
+     * @deprecated Use {@link WindowMetrics#getSize()} to get the dimensions of the application
+     * window area, and {@link Configuration#densityDpi} to get the current density.
      */
+    @Deprecated
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
