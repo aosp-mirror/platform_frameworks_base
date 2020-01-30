@@ -63,7 +63,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -74,6 +73,7 @@ import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -1825,8 +1825,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
             native_send_ni_response(notificationId, userResponse);
 
-            StatsLog.write(StatsLog.GNSS_NI_EVENT_REPORTED,
-                    StatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_RESPONSE,
+            FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NI_EVENT_REPORTED,
+                    FrameworkStatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_RESPONSE,
                     notificationId,
                     /* niType= */ 0,
                     /* needNotify= */ false,
@@ -1891,8 +1891,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         notification.textEncoding = textEncoding;
 
         mNIHandler.handleNiNotification(notification);
-        StatsLog.write(StatsLog.GNSS_NI_EVENT_REPORTED,
-                StatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_REQUEST,
+        FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NI_EVENT_REPORTED,
+                FrameworkStatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_REQUEST,
                 notification.notificationId,
                 notification.niType,
                 notification.needNotify,
