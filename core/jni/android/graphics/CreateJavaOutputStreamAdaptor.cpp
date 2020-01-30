@@ -277,13 +277,6 @@ private:
 
 SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream,
                                          jbyteArray storage) {
-    static bool gInited;
-
-    if (!gInited) {
-
-        gInited = true;
-    }
-
     return new SkJavaOutputStream(env, stream, storage);
 }
 
