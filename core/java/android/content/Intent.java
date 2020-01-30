@@ -4284,7 +4284,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
 
     /**
-     * Used for looking up a Data Loader Service provider.
+     * Used by {@link services.core.java.com.android.server.pm.DataLoaderManagerService}
+     * for querying Data Loader Service providers. Data loader service providers register this
+     * intent filter in their manifests, so that they can be looked up and bound to by
+     * {@code DataLoaderManagerService}.
+     *
+     * Data loader service providers must be privileged apps. 
+     * See {@link com.android.server.pm.PackageManagerShellCommandDataLoader} as an example of such
+     * data loader service provider.
+     *
      * @hide
      */
     @SystemApi
