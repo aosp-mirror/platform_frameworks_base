@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -78,26 +79,31 @@ public final class CellIdentityGsm extends CellIdentity {
      *
      * @hide
      */
-    public CellIdentityGsm(int lac, int cid, int arfcn, int bsic, String mccStr,
-                            String mncStr, String alphal, String alphas,
-                            List<String> additionalPlmns) {
+    public CellIdentityGsm(int lac, int cid, int arfcn, int bsic, @Nullable String mccStr,
+            @Nullable String mncStr, @Nullable String alphal, @Nullable String alphas,
+            @NonNull List<String> additionalPlmns) {
         super(TAG, CellInfo.TYPE_GSM, mccStr, mncStr, alphal, alphas);
         mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
         mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
         mArfcn = inRangeOrUnavailable(arfcn, 0, MAX_ARFCN);
         mBsic = inRangeOrUnavailable(bsic, 0, MAX_BSIC);
-        mAdditionalPlmns = additionalPlmns;
+        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        for (String plmn : additionalPlmns) {
+            if (isValidPlmn(plmn)) {
+                mAdditionalPlmns.add(plmn);
+            }
+        }
     }
 
     /** @hide */
-    public CellIdentityGsm(android.hardware.radio.V1_0.CellIdentityGsm cid) {
+    public CellIdentityGsm(@NonNull android.hardware.radio.V1_0.CellIdentityGsm cid) {
         this(cid.lac, cid.cid, cid.arfcn,
                 cid.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE : cid.bsic,
                 cid.mcc, cid.mnc, "", "", Collections.emptyList());
     }
 
     /** @hide */
-    public CellIdentityGsm(android.hardware.radio.V1_2.CellIdentityGsm cid) {
+    public CellIdentityGsm(@NonNull android.hardware.radio.V1_2.CellIdentityGsm cid) {
         this(cid.base.lac, cid.base.cid, cid.base.arfcn,
                 cid.base.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE : cid.base.bsic, cid.base.mcc,
                 cid.base.mnc, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
@@ -105,7 +111,7 @@ public final class CellIdentityGsm extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityGsm(android.hardware.radio.V1_5.CellIdentityGsm cid) {
+    public CellIdentityGsm(@NonNull android.hardware.radio.V1_5.CellIdentityGsm cid) {
         this(cid.base.base.lac, cid.base.base.cid, cid.base.base.arfcn,
                 cid.base.base.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE
                         : cid.base.base.bsic, cid.base.base.mcc,
@@ -113,12 +119,12 @@ public final class CellIdentityGsm extends CellIdentity {
                 cid.base.operatorNames.alphaShort, cid.additionalPlmns);
     }
 
-    private CellIdentityGsm(CellIdentityGsm cid) {
+    private CellIdentityGsm(@NonNull CellIdentityGsm cid) {
         this(cid.mLac, cid.mCid, cid.mArfcn, cid.mBsic, cid.mMccStr,
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort, cid.mAdditionalPlmns);
     }
 
-    CellIdentityGsm copy() {
+    @NonNull CellIdentityGsm copy() {
         return new CellIdentityGsm(this);
     }
 
