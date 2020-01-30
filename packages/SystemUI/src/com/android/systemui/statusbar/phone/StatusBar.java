@@ -144,7 +144,6 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -794,13 +793,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBypassHeadsUpNotifier.setUp(mEntryManager);
         mBubbleController.setExpandListener(mBubbleExpandListener);
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
-        KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
-        if (sliceProvider != null) {
-            sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
-                    mKeyguardBypassController, mDozeParameters);
-        } else {
-            Log.w(TAG, "Cannot init KeyguardSliceProvider dependencies");
-        }
 
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addCallback(this,

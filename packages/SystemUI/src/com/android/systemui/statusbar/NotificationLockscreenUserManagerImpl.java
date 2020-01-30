@@ -79,6 +79,7 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final KeyguardStateController mKeyguardStateController;
+    private final Object mLock = new Object();
 
     // Lazy
     private NotificationEntryManager mEntryManager;
@@ -181,6 +182,7 @@ public class NotificationLockscreenUserManagerImpl implements
     protected final Context mContext;
     private final Handler mMainHandler;
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
+    protected final ArrayList<UserInfo> mCurrentManagedProfiles = new ArrayList<>();
 
     protected int mCurrentUserId = 0;
     protected NotificationPresenter mPresenter;
@@ -300,7 +302,7 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     public boolean isCurrentProfile(int userId) {
-        synchronized (mCurrentProfiles) {
+        synchronized (mLock) {
             return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
         }
     }
@@ -417,6 +419,20 @@ public class NotificationLockscreenUserManagerImpl implements
         return mUsersAllowingPrivateNotifications.get(userHandle);
     }
 
+    /**
+     * If all managed profiles (work profiles) can show private data in public (secure & locked.)
+     */
+    public boolean allowsManagedPrivateNotificationsInPublic() {
+        synchronized (mLock) {
+            for (UserInfo profile : mCurrentManagedProfiles) {
+                if (!userAllowsPrivateNotificationsInPublic(profile.id)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private boolean adminAllowsKeyguardFeature(int userHandle, int feature) {
         if (userHandle == UserHandle.USER_ALL) {
             return true;
@@ -495,11 +511,15 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private void updateCurrentProfilesCache() {
-        synchronized (mCurrentProfiles) {
+        synchronized (mLock) {
             mCurrentProfiles.clear();
+            mCurrentManagedProfiles.clear();
             if (mUserManager != null) {
                 for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
                     mCurrentProfiles.put(user.id, user);
+                    if (UserManager.USER_TYPE_PROFILE_MANAGED.equals(user.userType)) {
+                        mCurrentManagedProfiles.add(user);
+                    }
                 }
             }
         }
@@ -510,10 +530,29 @@ public class NotificationLockscreenUserManagerImpl implements
         });
     }
 
+    /**
+     * If any of the profiles are in public mode.
+     */
     public boolean isAnyProfilePublicMode() {
-        for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
-            if (isLockscreenPublicMode(mCurrentProfiles.valueAt(i).id)) {
-                return true;
+        synchronized (mLock) {
+            for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
+                if (isLockscreenPublicMode(mCurrentProfiles.valueAt(i).id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * If any managed/work profiles are in public mode.
+     */
+    public boolean isAnyManagedProfilePublicMode() {
+        synchronized (mLock) {
+            for (int i = mCurrentManagedProfiles.size() - 1; i >= 0; i--) {
+                if (isLockscreenPublicMode(mCurrentManagedProfiles.get(i).id)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -620,9 +659,17 @@ public class NotificationLockscreenUserManagerImpl implements
         pw.print("  mAllowLockscreenRemoteInput=");
         pw.println(mAllowLockscreenRemoteInput);
         pw.print("  mCurrentProfiles=");
-        for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
-            final int userId = mCurrentProfiles.valueAt(i).id;
-            pw.print("" + userId + " ");
+        synchronized (mLock) {
+            for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
+                final int userId = mCurrentProfiles.valueAt(i).id;
+                pw.print("" + userId + " ");
+            }
+        }
+        pw.print("  mCurrentManagedProfiles=");
+        synchronized (mLock) {
+            for (UserInfo userInfo : mCurrentManagedProfiles) {
+                pw.print("" + userInfo.id + " ");
+            }
         }
         pw.println();
     }

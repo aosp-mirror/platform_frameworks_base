@@ -52,13 +52,13 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
-import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -67,6 +67,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 /**
  * Simple Slice provider that shows the current date.
@@ -108,26 +110,31 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private final Handler mHandler;
     private final Handler mMediaHandler;
     private final AlarmManager.OnAlarmListener mUpdateNextAlarm = this::updateNextAlarm;
-    private DozeParameters mDozeParameters;
+    @Inject
+    public DozeParameters mDozeParameters;
     @VisibleForTesting
     protected SettableWakeLock mMediaWakeLock;
-    @VisibleForTesting
-    protected ZenModeController mZenModeController;
+    @Inject
+    public ZenModeController mZenModeController;
     private String mDatePattern;
     private DateFormat mDateFormat;
     private String mLastText;
     private boolean mRegistered;
     private String mNextAlarm;
-    private NextAlarmController mNextAlarmController;
-    @VisibleForTesting
-    protected AlarmManager mAlarmManager;
-    @VisibleForTesting
-    protected ContentResolver mContentResolver;
+    @Inject
+    public NextAlarmController mNextAlarmController;
+    @Inject
+    public AlarmManager mAlarmManager;
+    @Inject
+    public ContentResolver mContentResolver;
     private AlarmManager.AlarmClockInfo mNextAlarmInfo;
     private PendingIntent mPendingIntent;
-    protected NotificationMediaManager mMediaManager;
-    private StatusBarStateController mStatusBarStateController;
-    private KeyguardBypassController mKeyguardBypassController;
+    @Inject
+    public NotificationMediaManager mMediaManager;
+    @Inject
+    public StatusBarStateController mStatusBarStateController;
+    @Inject
+    public KeyguardBypassController mKeyguardBypassController;
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
@@ -186,26 +193,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
         mAlarmUri = Uri.parse(KEYGUARD_NEXT_ALARM_URI);
         mDndUri = Uri.parse(KEYGUARD_DND_URI);
         mMediaUri = Uri.parse(KEYGUARD_MEDIA_URI);
-    }
-
-    /**
-     * Initialize dependencies that don't exist during {@link android.content.ContentProvider}
-     * instantiation.
-     *
-     * @param mediaManager {@link NotificationMediaManager} singleton.
-     * @param statusBarStateController {@link StatusBarStateController} singleton.
-     */
-    public void initDependencies(
-            NotificationMediaManager mediaManager,
-            StatusBarStateController statusBarStateController,
-            KeyguardBypassController keyguardBypassController,
-            DozeParameters dozeParameters) {
-        mMediaManager = mediaManager;
-        mMediaManager.addCallback(this);
-        mStatusBarStateController = statusBarStateController;
-        mStatusBarStateController.addCallback(this);
-        mKeyguardBypassController = keyguardBypassController;
-        mDozeParameters = dozeParameters;
     }
 
     @AnyThread
@@ -310,30 +297,31 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public boolean onCreateSliceProvider() {
-        if (mContextAvailableCallback != null) {
-            mContextAvailableCallback.onContextAvailable(getContext());
-        }
+        mContextAvailableCallback.onContextAvailable(getContext());
+        inject();
         synchronized (KeyguardSliceProvider.sInstanceLock) {
             KeyguardSliceProvider oldInstance = KeyguardSliceProvider.sInstance;
             if (oldInstance != null) {
                 oldInstance.onDestroy();
             }
-
-            mAlarmManager = getContext().getSystemService(AlarmManager.class);
-            mContentResolver = getContext().getContentResolver();
-            mNextAlarmController = new NextAlarmControllerImpl(getContext());
-            mNextAlarmController.addCallback(this);
-            mZenModeController = Dependency.get(ZenModeController.class);
-            mZenModeController.addCallback(this);
             mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
             mPendingIntent = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
-            mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
-                    "media");
+            mMediaManager.addCallback(this);
+            mStatusBarStateController.addCallback(this);
+            mNextAlarmController.addCallback(this);
+            mZenModeController.addCallback(this);
             KeyguardSliceProvider.sInstance = this;
             registerClockUpdate();
             updateClockLocked();
         }
         return true;
+    }
+
+    @VisibleForTesting
+    protected void inject() {
+        SystemUIFactory.getInstance().getRootComponent().inject(this);
+        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
+                "media");
     }
 
     @VisibleForTesting

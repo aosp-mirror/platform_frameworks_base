@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 
@@ -87,6 +88,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private SettableWakeLock mMediaWakeLock;
     @Mock
     private DozeParameters mDozeParameters;
+    @Mock
+    private NextAlarmController mNextAlarmController;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
@@ -97,9 +100,9 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
+        mProvider.setContextAvailableCallback(context -> { });
         mProvider.attachInfo(getContext(), null);
-        mProvider.initDependencies(mNotificationMediaManager, mStatusBarStateController,
-                mKeyguardBypassController, mDozeParameters);
+        reset(mContentResolver);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
     }
 
@@ -254,13 +257,16 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         }
 
         @Override
-        public boolean onCreateSliceProvider() {
-            super.onCreateSliceProvider();
+        protected void inject() {
             mAlarmManager = KeyguardSliceProviderTest.this.mAlarmManager;
             mContentResolver = KeyguardSliceProviderTest.this.mContentResolver;
             mZenModeController = KeyguardSliceProviderTest.this.mZenModeController;
             mMediaWakeLock = KeyguardSliceProviderTest.this.mMediaWakeLock;
-            return true;
+            mDozeParameters = KeyguardSliceProviderTest.this.mDozeParameters;
+            mNextAlarmController = KeyguardSliceProviderTest.this.mNextAlarmController;
+            mStatusBarStateController = KeyguardSliceProviderTest.this.mStatusBarStateController;
+            mKeyguardBypassController = KeyguardSliceProviderTest.this.mKeyguardBypassController;
+            mMediaManager = KeyguardSliceProviderTest.this.mNotificationMediaManager;
         }
 
         @Override
