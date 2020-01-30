@@ -2533,7 +2533,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     @Nullable
-    @SystemApi
+    @UnsupportedAppUsage
     public StaticIpConfiguration getStaticIpConfiguration() {
         return mIpConfiguration.getStaticIpConfiguration();
     }
@@ -2549,7 +2549,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     @NonNull
-    @SystemApi
+    @UnsupportedAppUsage
     public IpConfiguration.IpAssignment getIpAssignment() {
         return mIpConfiguration.getIpAssignment();
     }
@@ -2565,7 +2565,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     @NonNull
-    @SystemApi
+    @UnsupportedAppUsage
     public IpConfiguration.ProxySettings getProxySettings() {
         return mIpConfiguration.getProxySettings();
     }
@@ -2628,7 +2628,7 @@ public class WifiConfiguration implements Parcelable {
      * Set the {@link ProxySettings} and {@link ProxyInfo} for this network.
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     public void setProxy(@NonNull ProxySettings settings, @NonNull ProxyInfo proxy) {
         mIpConfiguration.setProxySettings(settings);
         mIpConfiguration.setHttpProxy(proxy);
