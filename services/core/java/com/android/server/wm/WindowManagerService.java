@@ -7298,6 +7298,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "updateInputMethodTargetWindow: imeToken=" + imeToken
                         + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
+            final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+            if (imeTarget != null) {
+                imeTarget.getDisplayContent().updateImeControlTarget(imeTarget);
+            }
         }
 
         @Override
