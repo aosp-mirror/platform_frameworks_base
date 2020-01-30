@@ -16,14 +16,14 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.IntRange;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+
+import com.android.telephony.Rlog;
 
 import java.util.Objects;
 

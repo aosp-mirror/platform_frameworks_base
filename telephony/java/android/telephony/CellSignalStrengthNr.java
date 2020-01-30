@@ -16,13 +16,13 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

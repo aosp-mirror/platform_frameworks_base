@@ -16,13 +16,12 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.util.TelephonyUtils;
+import com.android.telephony.Rlog;
 
 import java.util.ArrayList;
 import java.util.List;

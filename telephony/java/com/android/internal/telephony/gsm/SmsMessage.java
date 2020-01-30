@@ -28,7 +28,6 @@ import static com.android.internal.telephony.SmsConstants.MessageClass;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.telephony.PhoneNumberUtils;
-import com.android.telephony.Rlog;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.EncodeException;
@@ -38,6 +37,7 @@ import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.uicc.IccUtils;
+import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
