@@ -1293,7 +1293,7 @@ public class WifiP2pManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
     public void createGroup(Channel c, ActionListener listener) {
         checkChannel(c);
-        c.mAsyncChannel.sendMessage(CREATE_GROUP, WifiP2pGroup.PERSISTENT_NET_ID,
+        c.mAsyncChannel.sendMessage(CREATE_GROUP, WifiP2pGroup.NETWORK_ID_PERSISTENT,
                 c.putListener(listener));
     }
 
