@@ -43,10 +43,10 @@ class BypassHeadsUpNotifier @Inject constructor(
     private val headsUpManager: HeadsUpManagerPhone,
     private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
     private val mediaManager: NotificationMediaManager,
+    private val entryManager: NotificationEntryManager,
     tunerService: TunerService
 ) : StatusBarStateController.StateListener, NotificationMediaManager.MediaListener {
 
-    private lateinit var entryManager: NotificationEntryManager
     private var currentMediaEntry: NotificationEntry? = null
     private var enabled = true
 
@@ -70,8 +70,7 @@ class BypassHeadsUpNotifier @Inject constructor(
                 }, Settings.Secure.SHOW_MEDIA_WHEN_BYPASSING)
     }
 
-    fun setUp(entryManager: NotificationEntryManager) {
-        this.entryManager = entryManager
+    fun setUp() {
         mediaManager.addCallback(this)
     }
 
