@@ -51,10 +51,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -371,7 +371,7 @@ public abstract class BiometricServiceBase extends SystemService
                         + identifier.getName());
                 mUtils.removeBiometricForUser(getContext(),
                         getTargetUserId(), identifier.getBiometricId());
-                StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                         statsModality(),
                         BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK);
             }
@@ -551,7 +551,7 @@ public abstract class BiometricServiceBase extends SystemService
                     + " failed to respond to cancel, starting client "
                     + (mPendingClient != null ? mPendingClient.getOwnerString() : "null"));
 
-            StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     statsModality(), BiometricsProtoEnums.ISSUE_CANCEL_TIMED_OUT);
 
             mCurrentClient = null;
@@ -673,8 +673,8 @@ public abstract class BiometricServiceBase extends SystemService
                     0 /*vendorCode */);
         });
 
-        StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED, statsModality(),
-                BiometricsProtoEnums.ISSUE_HAL_DEATH);
+        FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                statsModality(), BiometricsProtoEnums.ISSUE_HAL_DEATH);
     }
 
     protected ClientMonitor getCurrentClient() {
@@ -1249,7 +1249,7 @@ public abstract class BiometricServiceBase extends SystemService
                     template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
                     restricted, getContext().getPackageName());
             removeInternal(client);
-            StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     statsModality(),
                     BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
         } else {

@@ -60,12 +60,12 @@ import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -1142,17 +1142,17 @@ public class BiometricService extends SystemService {
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
                         + ", RequireConfirmation: "
                         + mCurrentAuthSession.mRequireConfirmation
-                        + ", State: " + StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
+                        + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
                         + ", Latency: " + latency);
             }
 
-            StatsLog.write(StatsLog.BIOMETRIC_AUTHENTICATED,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                     statsModality(),
                     mCurrentAuthSession.mUserId,
                     mCurrentAuthSession.isCrypto(),
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     mCurrentAuthSession.mRequireConfirmation,
-                    StatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
+                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
                     latency,
                     mInjector.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         } else {
@@ -1174,7 +1174,7 @@ public class BiometricService extends SystemService {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            StatsLog.write(StatsLog.BIOMETRIC_ERROR_OCCURRED,
+            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                     statsModality(),
                     mCurrentAuthSession.mUserId,
                     mCurrentAuthSession.isCrypto(),
