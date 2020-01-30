@@ -16,8 +16,6 @@
 
 package android.hardware.hdmi;
 
-import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +29,7 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteException;
-import android.os.SystemProperties;
+import android.sysprop.HdmiProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -342,8 +340,7 @@ public final class HdmiControlManager {
         mHasPlaybackDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PLAYBACK);
         mHasAudioSystemDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
-        mIsSwitchDevice = SystemProperties.getBoolean(
-            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+        mIsSwitchDevice = HdmiProperties.is_switch().orElse(false);
         addHotplugEventListener(new ClientHotplugEventListener());
     }
 
@@ -368,8 +365,8 @@ public final class HdmiControlManager {
                     if (port.getType() == HdmiPortInfo.PORT_OUTPUT) {
                         setLocalPhysicalAddress(
                                 event.isConnected()
-                                ? port.getAddress()
-                                : INVALID_PHYSICAL_ADDRESS);
+                                        ? port.getAddress()
+                                        : INVALID_PHYSICAL_ADDRESS);
                     }
                     break;
                 }

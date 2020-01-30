@@ -159,8 +159,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 @Override
                 boolean readBooleanSystemProperty(String key, boolean defVal) {
                     switch (key) {
-                        case Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE:
-                            return mMutingEnabled;
                         case Constants.PROPERTY_ARC_SUPPORT:
                             return mArcSupport;
                         default:
