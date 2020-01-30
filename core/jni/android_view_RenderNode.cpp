@@ -151,11 +151,11 @@ static jboolean android_view_RenderNode_setOutlineRoundRect(CRITICAL_JNI_PARAMS_
     return true;
 }
 
-static jboolean android_view_RenderNode_setOutlineConvexPath(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
+static jboolean android_view_RenderNode_setOutlinePath(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
         jlong outlinePathPtr, jfloat alpha) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     SkPath* outlinePath = reinterpret_cast<SkPath*>(outlinePathPtr);
-    renderNode->mutateStagingProperties().mutableOutline().setConvexPath(outlinePath, alpha);
+    renderNode->mutateStagingProperties().mutableOutline().setPath(outlinePath, alpha);
     renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
     return true;
 }
@@ -684,7 +684,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetProjectionReceiver","(JZ)Z",  (void*) android_view_RenderNode_setProjectionReceiver },
 
     { "nSetOutlineRoundRect",  "(JIIIIFF)Z", (void*) android_view_RenderNode_setOutlineRoundRect },
-    { "nSetOutlineConvexPath", "(JJF)Z", (void*) android_view_RenderNode_setOutlineConvexPath },
+    { "nSetOutlinePath",       "(JJF)Z", (void*) android_view_RenderNode_setOutlinePath },
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
     { "nHasShadow",            "(J)Z",   (void*) android_view_RenderNode_hasShadow },

@@ -687,8 +687,8 @@ public final class RenderNode {
                         outline.mRect.left, outline.mRect.top,
                         outline.mRect.right, outline.mRect.bottom,
                         outline.mRadius, outline.mAlpha);
-            case Outline.MODE_CONVEX_PATH:
-                return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath,
+            case Outline.MODE_PATH:
+                return nSetOutlinePath(mNativeRenderNode, outline.mPath.mNativePath,
                         outline.mAlpha);
         }
 
@@ -1620,7 +1620,7 @@ public final class RenderNode {
             int right, int bottom, float radius, float alpha);
 
     @CriticalNative
-    private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath,
+    private static native boolean nSetOutlinePath(long renderNode, long nativePath,
             float alpha);
 
     @CriticalNative
