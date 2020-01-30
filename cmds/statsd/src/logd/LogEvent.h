@@ -255,7 +255,15 @@ private:
             mValid = false;
             value = 0; // all primitive types can successfully cast 0
         } else {
-            value = *((T*)mBuf);
+            // When alignof(T) == 1, hopefully the compiler can optimize away
+            // this conditional as always true.
+            if ((reinterpret_cast<uintptr_t>(mBuf) % alignof(T)) == 0) {
+                // We're properly aligned, and can safely make this assignment.
+                value = *((T*)mBuf);
+            } else {
+                // We need to use memcpy.  It's slower, but safe.
+                memcpy(&value, mBuf, sizeof(T));
+            }
             mBuf += sizeof(T);
             mRemainingLen -= sizeof(T);
         }
