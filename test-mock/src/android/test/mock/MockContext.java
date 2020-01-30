@@ -834,6 +834,12 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
+    public Display getDisplayNoVerify() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public int getDisplayId() {
         throw new UnsupportedOperationException();
     }

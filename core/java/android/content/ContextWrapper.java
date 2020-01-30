@@ -1003,6 +1003,12 @@ public class ContextWrapper extends Context {
         return mBase.getDisplay();
     }
 
+    /** @hide */
+    @Override
+    public @Nullable Display getDisplayNoVerify() {
+        return mBase.getDisplayNoVerify();
+    }
+
     /**
      * @hide
      */

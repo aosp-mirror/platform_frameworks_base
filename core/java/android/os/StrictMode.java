@@ -42,6 +42,7 @@ import android.os.strictmode.DiskWriteViolation;
 import android.os.strictmode.ExplicitGcViolation;
 import android.os.strictmode.FileUriExposedViolation;
 import android.os.strictmode.ImplicitDirectBootViolation;
+import android.os.strictmode.IncorrectContextUseViolation;
 import android.os.strictmode.InstanceCountViolation;
 import android.os.strictmode.IntentReceiverLeakedViolation;
 import android.os.strictmode.LeakedClosableViolation;
@@ -250,6 +251,7 @@ public final class StrictMode {
             DETECT_VM_UNTAGGED_SOCKET,
             DETECT_VM_NON_SDK_API_USAGE,
             DETECT_VM_IMPLICIT_DIRECT_BOOT,
+            DETECT_VM_INCORRECT_CONTEXT_USE,
             PENALTY_GATHER,
             PENALTY_LOG,
             PENALTY_DIALOG,
@@ -289,6 +291,8 @@ public final class StrictMode {
     private static final int DETECT_VM_IMPLICIT_DIRECT_BOOT = 1 << 10;
     /** @hide */
     private static final int DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED = 1 << 11;
+    /** @hide */
+    private static final int DETECT_VM_INCORRECT_CONTEXT_USE = 1 << 12;
 
     /** @hide */
     private static final int DETECT_VM_ALL = 0x0000ffff;
@@ -871,6 +875,9 @@ public final class StrictMode {
                 if (targetSdk >= Build.VERSION_CODES.Q) {
                     detectCredentialProtectedWhileLocked();
                 }
+                if (targetSdk >= Build.VERSION_CODES.R) {
+                    detectIncorrectContextUse();
+                }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
                 // TODO: enable detectImplicitDirectBoot() once system is less noisy
@@ -1025,6 +1032,32 @@ public final class StrictMode {
             /** @hide */
             public @NonNull Builder permitCredentialProtectedWhileLocked() {
                 return disable(DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED);
+            }
+
+            /**
+             * Detect attempts to invoke a method on a {@link Context} that is not suited for such
+             * operation.
+             * <p>An example of this is trying to obtain an instance of visual service (e.g.
+             * {@link android.view.WindowManager}) from a non-visual {@link Context}. This is not
+             * allowed, since a non-visual {@link Context} is not adjusted to any visual area, and
+             * therefore can report incorrect metrics or resources.
+             * @see Context#getDisplay()
+             * @see Context#getSystemService(String)
+             * @hide
+             */
+            @TestApi
+            public @NonNull Builder detectIncorrectContextUse() {
+                return enable(DETECT_VM_INCORRECT_CONTEXT_USE);
+            }
+
+            /**
+             * Disable detection of incorrect context use.
+             * TODO(b/149790106): Fix usages and remove.
+             * @hide
+             */
+            @TestApi
+            public @NonNull Builder permitIncorrectContextUse() {
+                return disable(DETECT_VM_INCORRECT_CONTEXT_USE);
             }
 
             /**
@@ -2057,6 +2090,11 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static boolean vmIncorrectContextUseEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_INCORRECT_CONTEXT_USE) != 0;
+    }
+
+    /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(new SqliteObjectLeakedViolation(message, originStack));
     }
@@ -2128,6 +2166,11 @@ public final class StrictMode {
     /** @hide */
     public static void onImplicitDirectBoot() {
         onVmPolicyViolation(new ImplicitDirectBootViolation());
+    }
+
+    /** @hide */
+    public static void onIncorrectContextUsed(String message, Throwable originStack) {
+        onVmPolicyViolation(new IncorrectContextUseViolation(message, originStack));
     }
 
     /** Assume locked until we hear otherwise */
