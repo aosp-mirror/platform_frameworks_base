@@ -1901,6 +1901,7 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(e);
 
             e = StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
                     .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.SYSTEM_KEY, /* fallback */ -1L))
