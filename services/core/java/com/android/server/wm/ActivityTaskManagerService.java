@@ -222,7 +222,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
@@ -248,6 +247,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -5380,7 +5380,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
                 "Updating global configuration to: " + values);
         writeConfigurationChanged(changes);
-        StatsLog.write(StatsLog.RESOURCE_CONFIGURATION_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.RESOURCE_CONFIGURATION_CHANGED,
                 values.colorMode,
                 values.densityDpi,
                 values.fontScale,
@@ -5699,8 +5699,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // will wake up stacks or put them to sleep as appropriate.
             if (wasSleeping) {
                 mSleeping = false;
-                StatsLog.write(StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
-                        StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__AWAKE);
+                FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
+                        FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__AWAKE);
                 startTimeTrackingFocusedActivityLocked();
                 mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
                 Slog.d(TAG, "Top Process State changed to PROCESS_STATE_TOP");
@@ -5712,8 +5712,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } else if (!mSleeping && shouldSleep) {
             mSleeping = true;
-            StatsLog.write(StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
-                    StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__ASLEEP);
+            FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
+                    FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__ASLEEP);
             if (mCurAppTimeTracker != null) {
                 mCurAppTimeTracker.stop();
             }
