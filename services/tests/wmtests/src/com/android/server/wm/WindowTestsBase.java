@@ -110,7 +110,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
-            mDisplayContent = createNewDisplay();
+            mDisplayContent = createNewDisplay(true /* supportIme */);
 
             // Set-up some common windows.
             mCommonWindows = new HashSet<>();
@@ -349,16 +349,29 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return WindowTestUtils.createTaskInStack(mWm, stack, userId);
     }
 
-    /** Creates a {@link DisplayContent} and adds it to the system. */
+    /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay() {
-        return createNewDisplay(mDisplayInfo);
+        return createNewDisplay(true /* supportIme */);
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
+    private DisplayContent createNewDisplay(boolean supportIme) {
+        return createNewDisplay(mDisplayInfo, supportIme);
+    }
+
+    /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay(DisplayInfo info) {
+        return createNewDisplay(info, true /* supportIme */);
+    }
+
+    /** Creates a {@link DisplayContent} and adds it to the system. */
+    private DisplayContent createNewDisplay(DisplayInfo info, boolean supportIme) {
         final DisplayContent display =
                 new TestDisplayContent.Builder(mWm.mAtmService, info).build();
-        return display.mDisplayContent;
+        final DisplayContent dc = display.mDisplayContent;
+        // this display can show IME.
+        dc.mWmService.mDisplayWindowSettings.setShouldShowImeLocked(dc, supportIme);
+        return dc;
     }
 
     /**
@@ -372,7 +385,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.state = displayState;
-        return createNewDisplay(displayInfo);
+        return createNewDisplay(displayInfo, true /* supportIme */);
     }
 
     /** Creates a {@link com.android.server.wm.WindowTestUtils.TestWindowState} */
@@ -389,7 +402,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         displayInfo.ownerUid = SYSTEM_UID;
-        return createNewDisplay(displayInfo);
+        return createNewDisplay(displayInfo, false /* supportIme */);
     }
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */

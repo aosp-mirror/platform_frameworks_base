@@ -26,6 +26,13 @@ interface InsetsControlTarget {
     void notifyInsetsControlChanged();
 
     /**
+     * @return {@link WindowState} of this target, if any.
+     */
+    default WindowState getWindow() {
+        return null;
+    }
+
+    /**
      * Instructs the control target to show inset sources.
      *
      * @param types to specify which types of insets source window should be shown.

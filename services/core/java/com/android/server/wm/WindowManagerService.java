@@ -6991,8 +6991,15 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
         boolean show;
+        final DisplayContent dc = mRoot.getDisplayContent(displayId);
+        if (dc == null) {
+            ProtoLog.w(WM_ERROR,
+                    "Attempted to get IME flag of a display that does not exist: %d",
+                    displayId);
+            return false;
+        }
         synchronized (mGlobalLock) {
-            show = shouldShowImeSystemWindowUncheckedLocked(displayId);
+            show = dc.canShowIme();
         }
 
         return show;
@@ -7405,15 +7412,13 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void showImePostLayout(IBinder imeTargetWindowToken) {
             synchronized (mGlobalLock) {
-                final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+                WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
                 if (imeTarget == null) {
                     return;
                 }
-                final int displayId = imeTarget.getDisplayId();
-                if (!shouldShowImeSystemWindowUncheckedLocked(displayId)) {
-                    return;
-                }
+                imeTarget = imeTarget.getImeControlTarget();
 
+                final int displayId = imeTarget.getDisplayId();
                 mRoot.getDisplayContent(displayId).getInsetsStateController().getImeSourceProvider()
                         .scheduleShowImePostLayout(imeTarget);
             }
@@ -7423,12 +7428,16 @@ public class WindowManagerService extends IWindowManager.Stub
         public void hideIme(int displayId) {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc != null && dc.mInputMethodTarget != null) {
+                if (dc != null) {
+                    WindowState imeTarget = dc.getImeControlTarget();
+                    if (imeTarget == null) {
+                        return;
+                    }
                     // If there was a pending IME show(), reset it as IME has been
                     // requested to be hidden.
-                    dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
-                    dc.mInputMethodControlTarget.hideInsets(WindowInsets.Type.ime(),
-                            true /* fromIme */);
+                    imeTarget.getDisplayContent().getInsetsStateController().getImeSourceProvider()
+                            .abortShowImePostLayout();
+                    imeTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
                 }
             }
         }
@@ -7934,21 +7943,6 @@ public class WindowManagerService extends IWindowManager.Stub
         outSurfaceControl.copyFrom(mirror);
 
         return true;
-    }
-
-    private boolean shouldShowImeSystemWindowUncheckedLocked(final int displayId) {
-        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-        if (displayContent == null) {
-            ProtoLog.w(WM_ERROR,
-                    "Attempted to get IME flag of a display that does not exist: %d",
-                    displayId);
-            return false;
-        }
-        if (displayContent.isUntrustedVirtualDisplay()) {
-            return false;
-        }
-        return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
-                || mForceDesktopModeOnExternalDisplays;
     }
 
     @Override

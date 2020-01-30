@@ -3518,6 +3518,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
+    public WindowState getWindow() {
+        return this;
+    }
+
+    @Override
     public void showInsets(@InsetsType int types, boolean fromIme) {
         try {
             mClient.showInsets(types, fromIme);
@@ -5332,6 +5337,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return inTokenWithAndAboveImeTarget;
         }
         return false;
+    }
+
+    /**
+     * Get IME target that should host IME when this window's display has a parent.
+     * Note: IME is never hosted by a display that has a parent.
+     * When window calling
+     * {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} is unknown,
+     * use {@link DisplayContent#getImeControlTarget()} instead.
+     *
+     * @return {@link WindowState} of host that controls the IME.
+     *         When window is doesn't have a parent, it is returned as-is.
+     */
+    WindowState getImeControlTarget() {
+        final DisplayContent dc = getDisplayContent();
+        final WindowState parentWindow = dc.getParentWindow();
+
+        // If target's display has a parent, IME is displayed in the parent display.
+        return dc.getImeHostOrFallback(parentWindow != null ? parentWindow : this);
     }
 
     @Override

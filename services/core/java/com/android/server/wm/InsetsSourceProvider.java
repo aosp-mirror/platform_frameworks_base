@@ -222,6 +222,12 @@ class InsetsSourceProvider {
             // to control the window for now.
             return;
         }
+        if (target != null && target.getWindow() != null) {
+            // ime control target could be a different window.
+            // Refer WindowState#getImeControlTarget().
+            target = target.getWindow().getImeControlTarget();
+        }
+
         if (mWin == null) {
             mControlTarget = target;
             return;
