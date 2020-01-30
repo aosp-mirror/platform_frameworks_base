@@ -44,6 +44,7 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.CdmaEriInformation;
+import android.telephony.CellSignalStrength;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -57,7 +58,6 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
@@ -229,7 +229,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             subs.add(subscription);
         }
         when(mMockSm.getActiveSubscriptionInfoList()).thenReturn(subs);
-        when(mMockSm.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(subs);
+        when(mMockSm.getActiveAndHiddenSubscriptionInfoList()).thenReturn(subs);
         mNetworkController.doUpdateMobileControllers();
     }
 
@@ -415,7 +415,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
                     anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
         IconState iconState = iconArg.getValue();
-        int state = SignalDrawable.getState(icon, SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
+        int state = SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
                 false);
         assertEquals("Visibility in, quick settings", visible, iconState.visible);
         assertEquals("Signal icon in, quick settings", state, iconState.icon);
@@ -450,7 +450,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         IconState iconState = iconArg.getValue();
 
         int state = icon == -1 ? 0
-                : SignalDrawable.getState(icon, SignalStrength.NUM_SIGNAL_STRENGTH_BINS, !inet);
+                : SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
+                        !inet);
         assertEquals("Signal icon in status bar", state, iconState.icon);
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Visibility in status bar", visible, iconState.visible);
@@ -493,7 +494,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         IconState iconState = iconArg.getValue();
 
-        int numSignalStrengthBins = SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+        int numSignalStrengthBins = CellSignalStrength.getNumSignalStrengthLevels();
         if (mMobileSignalController.mInflateSignalStrengths) {
             numSignalStrengthBins++;
             icon++;

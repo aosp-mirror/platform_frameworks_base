@@ -41,9 +41,9 @@ import android.os.Looper;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
+import android.telephony.CellSignalStrength;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -56,7 +56,6 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
@@ -605,7 +604,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     @VisibleForTesting
     void doUpdateMobileControllers() {
         List<SubscriptionInfo> subscriptions = mSubscriptionManager
-                .getActiveSubscriptionInfoList(false);
+                .getActiveAndHiddenSubscriptionInfoList();
         if (subscriptions == null) {
             subscriptions = Collections.emptyList();
         }
@@ -1035,7 +1034,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 if (level != null) {
                     controller.getState().level = level.equals("null") ? -1
                             : Math.min(Integer.parseInt(level),
-                                    SignalStrength.NUM_SIGNAL_STRENGTH_BINS);
+                                    CellSignalStrength.getNumSignalStrengthLevels());
                     controller.getState().connected = controller.getState().level >= 0;
                 }
                 if (args.containsKey("inflate")) {

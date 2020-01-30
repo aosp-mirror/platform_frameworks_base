@@ -371,7 +371,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         checkIsHandlerThread();
         if (DEBUG_SIM_STATES) {
             Log.v(TAG, "onSubscriptionInfoChanged()");
-            List<SubscriptionInfo> sil = mSubscriptionManager.getActiveSubscriptionInfoList(false);
+            List<SubscriptionInfo> sil = mSubscriptionManager
+                    .getActiveAndHiddenSubscriptionInfoList();
             if (sil != null) {
                 for (SubscriptionInfo subInfo : sil) {
                     Log.v(TAG, "SubInfo:" + subInfo);
@@ -425,10 +426,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
-            sil = mSubscriptionManager.getActiveSubscriptionInfoList(false);
+            sil = mSubscriptionManager.getActiveAndHiddenSubscriptionInfoList();
         }
         if (sil == null) {
-            // getActiveSubscriptionInfoList was null callers expect an empty list.
+            // getActiveAndHiddenSubscriptionInfoList was null callers expect an empty list.
             mSubscriptionInfo = new ArrayList<SubscriptionInfo>();
         } else {
             mSubscriptionInfo = sil;
