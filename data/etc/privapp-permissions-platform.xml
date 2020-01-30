@@ -400,5 +400,6 @@ applications that come with the platform
     </privapp-permissions>
     <privapp-permissions package="com.android.settings">
         <permission name="android.permission.INSTALL_DYNAMIC_SYSTEM"/>
+        <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
     </privapp-permissions>
 </permissions>
