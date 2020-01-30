@@ -4538,6 +4538,27 @@ package android.net {
     field public final int netId;
   }
 
+  public abstract class NetworkAgent {
+    method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
+    method public void onAutomaticReconnectDisabled();
+    method public void onBandwidthUpdateRequested();
+    method public void onNetworkUnwanted();
+    method public void onRemoveKeepalivePacketFilter(int);
+    method public void onSaveAcceptUnvalidated(boolean);
+    method public void onSignalStrengthThresholdsUpdated(@NonNull int[]);
+    method public void onStartSocketKeepalive(int, int, @NonNull android.net.KeepalivePacketData);
+    method public void onStopSocketKeepalive(int);
+    method public void onValidationStatus(int, @Nullable String);
+    method public void sendLinkProperties(@NonNull android.net.LinkProperties);
+    method public void sendNetworkCapabilities(@NonNull android.net.NetworkCapabilities);
+    method public void sendNetworkScore(int);
+    method public void sendSocketKeepaliveEvent(int, int);
+    field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
+    field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
+    field @NonNull public final android.net.Network network;
+    field public final int providerId;
+  }
+
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getSubscriberId();
