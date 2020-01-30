@@ -91,12 +91,6 @@ bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* dat
             ptr->write(v.legacy.batteryVoltage);
             ptr->init();
             data->push_back(ptr);
-        } else if (mTagId == android::util::BATTERY_LEVEL) {
-            auto ptr = make_shared<LogEvent>(android::util::BATTERY_LEVEL, wallClockTimestampNs,
-                                             elapsedTimestampNs);
-            ptr->write(v.legacy.batteryLevel);
-            ptr->init();
-            data->push_back(ptr);
         } else if (mTagId == android::util::BATTERY_CYCLE_COUNT) {
             auto ptr = make_shared<LogEvent>(android::util::BATTERY_CYCLE_COUNT,
                                              wallClockTimestampNs, elapsedTimestampNs);

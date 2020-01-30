@@ -436,7 +436,7 @@ message Atom {
         DeviceCalculatedPowerBlameOther device_calculated_power_blame_other =
                 10041 [(module) = "framework"];
         ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042 [(module) = "framework"];
-        BatteryLevel battery_level = 10043;
+        BatteryLevel battery_level = 10043 [(module) = "framework"];
         BuildInformation build_information = 10044 [(module) = "framework"];
         BatteryCycleCount battery_cycle_count = 10045;
         DebugElapsedClock debug_elapsed_clock = 10046 [(module) = "framework"];

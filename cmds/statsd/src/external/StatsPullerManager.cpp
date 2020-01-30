@@ -74,10 +74,6 @@ StatsPullerManager::StatsPullerManager()
               {{.atomTag = android::util::BATTERY_VOLTAGE},
                new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)},
 
-              // battery_level
-              {{.atomTag = android::util::BATTERY_LEVEL},
-               new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)},
-
               // battery_cycle_count
               {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
                new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)},

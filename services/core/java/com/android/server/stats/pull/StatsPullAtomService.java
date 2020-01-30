@@ -54,6 +54,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.health.V2_0.IHealth;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.Network;
@@ -119,6 +120,7 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.BatteryService;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -238,6 +240,8 @@ public class StatsPullAtomService extends SystemService {
     private KernelCpuUidClusterTimeReader mCpuUidClusterTimeReader;
 
     private File mBaseDir;
+
+    private BatteryService.HealthServiceWrapper mHealthService;
 
     @Nullable
     private KernelCpuThreadReaderDiff mKernelCpuThreadReader;
@@ -373,6 +377,8 @@ public class StatsPullAtomService extends SystemService {
                     return pullNotificationRemoteViews(atomTag, data);
                 case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED:
                     return pullDangerousPermissionState(atomTag, data);
+                case FrameworkStatsLog.BATTERY_LEVEL:
+                    return pullBatteryLevel(atomTag, data);
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
@@ -438,6 +444,14 @@ public class StatsPullAtomService extends SystemService {
 
         // Used by PROC_STATS and PROC_STATS_PKG_PROC atoms
         mBaseDir.mkdirs();
+
+        // Initialize HealthService
+        mHealthService = new BatteryService.HealthServiceWrapper();
+        try {
+            mHealthService.init();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "failed to initialize healthHalWrapper");
+        }
     }
 
     void registerEventListeners() {
@@ -519,6 +533,7 @@ public class StatsPullAtomService extends SystemService {
         registerNotificationRemoteViews();
         registerDangerousPermissionState();
         registerDangerousPermissionStateSampled();
+        registerBatteryLevel();
     }
 
     private INetworkStatsService getINetworkStatsService() {
@@ -2961,6 +2976,34 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private void registerBatteryLevel() {
+        int tagId = FrameworkStatsLog.BATTERY_LEVEL;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullBatteryLevel(int atomTag, List<StatsEvent> pulledData) {
+        IHealth healthService = mHealthService.getLastService();
+        if (healthService == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        try {
+            healthService.getHealthInfo((result, value) -> {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(value.legacy.batteryLevel)
+                        .build();
+                pulledData.add(e);
+            });
+        } catch (RemoteException e) {
+            return StatsManager.PULL_SKIP;
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
 
     // Thermal event received from vendor thermal management subsystem
     private static final class ThermalEventListener extends IThermalEventListener.Stub {
