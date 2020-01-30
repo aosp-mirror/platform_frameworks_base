@@ -19,6 +19,8 @@ package com.android.internal.logging;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -28,8 +30,6 @@ import java.util.Random;
  * first use; try to give it a long lifetime. Safe for concurrent use.
  */
 public class InstanceIdSequence {
-    // At most 20 bits: ~1m possibilities, ~0.5% probability of collision in 100 values
-    private static final int INSTANCE_ID_MAX = 1 << 20;
     protected final int mInstanceIdMax;
     private final Random mRandom = new SecureRandom();
 
@@ -39,7 +39,7 @@ public class InstanceIdSequence {
      *                      an all-zero sequence.
      */
     public InstanceIdSequence(int instanceIdMax) {
-        mInstanceIdMax = min(max(0, instanceIdMax), INSTANCE_ID_MAX);
+        mInstanceIdMax = min(max(0, instanceIdMax), InstanceId.INSTANCE_ID_MAX);
     }
 
     /**
@@ -47,6 +47,16 @@ public class InstanceIdSequence {
      * @return new InstanceId
      */
     public InstanceId newInstanceId() {
-        return new InstanceId(mRandom.nextInt(mInstanceIdMax));
+        return newInstanceIdInternal(mRandom.nextInt(mInstanceIdMax));
+    }
+
+    /**
+     * Factory function for instance IDs, used for testing.
+     * @param id
+     * @return new InstanceId(id)
+     */
+    @VisibleForTesting
+    protected InstanceId newInstanceIdInternal(int id) {
+        return new InstanceId(id);
     }
 }

@@ -23,7 +23,7 @@ import java.util.List;
  * Fake implementation of NotificationRecordLogger, for testing.
  */
 class NotificationRecordLoggerFake implements NotificationRecordLogger {
-    class CallRecord extends NotificationRecordPair {
+    static class CallRecord extends NotificationRecordPair {
         public int position, buzzBeepBlink;
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
                 int buzzBeepBlink) {
@@ -35,7 +35,7 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
             return shouldLog(buzzBeepBlink);
         }
     }
-    List<CallRecord> mCalls = new ArrayList<CallRecord>();
+    private List<CallRecord> mCalls = new ArrayList<CallRecord>();
 
     List<CallRecord> getCalls() {
         return mCalls;

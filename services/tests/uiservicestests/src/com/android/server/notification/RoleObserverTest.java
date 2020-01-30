@@ -54,6 +54,8 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Pair;
 
+import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.server.LocalServices;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LightsManager;
@@ -92,12 +94,15 @@ public class RoleObserverTest extends UiServiceTestCase {
     @Mock
     private RoleManager mRoleManager;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
-
+    private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
+            1 << 30);
     private List<UserInfo> mUsers;
 
     private static class TestableNotificationManagerService extends NotificationManagerService {
-        TestableNotificationManagerService(Context context, NotificationRecordLogger logger) {
-            super(context, logger);
+        TestableNotificationManagerService(Context context,
+                NotificationRecordLogger logger,
+                InstanceIdSequence notificationInstanceIdSequence) {
+            super(context, logger, notificationInstanceIdSequence);
         }
 
         @Override
@@ -120,7 +125,8 @@ public class RoleObserverTest extends UiServiceTestCase {
         mUsers.add(new UserInfo(10, "second", 0));
         when(mUm.getUsers()).thenReturn(mUsers);
 
-        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger);
+        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
+                mNotificationInstanceIdSequence);
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
