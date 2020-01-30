@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -106,9 +107,11 @@ class TaskOrganizerController {
      * and receive taskVanished callbacks in the process.
      */
     void registerTaskOrganizer(ITaskOrganizer organizer, int windowingMode) {
-        if (windowingMode != WINDOWING_MODE_PINNED) {
+        if (windowingMode != WINDOWING_MODE_PINNED &&
+            windowingMode != WINDOWING_MODE_MULTI_WINDOW) {
             throw new UnsupportedOperationException(
-                    "As of now only Pinned windowing mode is supported for registerTaskOrganizer");
+                    "As of now only Pinned and Multiwindow windowing modes are"
+                    + " supported for registerTaskOrganizer");
 
         }
         clearIfNeeded(windowingMode);
