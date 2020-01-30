@@ -18,10 +18,10 @@ package com.android.internal.compat;
 
 import android.util.Log;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,8 +85,8 @@ public final class ChangeReporter {
      */
     public void reportChange(int uid, long changeId, int state) {
         if (shouldWriteToStatsLog(uid, changeId, state)) {
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid,
-                    changeId, state, mSource);
+            StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
+                    state, mSource);
         }
         if (shouldWriteToDebug(uid, changeId, state)) {
             debugLog(uid, changeId, state);
@@ -174,7 +174,7 @@ public final class ChangeReporter {
     private void debugLog(int uid, long changeId, int state) {
         String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
-        if (mSource == FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER) {
+        if (mSource == StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER) {
             Slog.d(TAG, message);
         } else {
             Log.d(TAG, message);
@@ -183,18 +183,18 @@ public final class ChangeReporter {
     }
 
     /**
-     * Transforms FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE enum to a string.
+     * Transforms StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE enum to a string.
      *
      * @param state to transform
      * @return a string representing the state
      */
     private static String stateToString(int state) {
         switch (state) {
-            case FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED:
+            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED:
                 return "LOGGED";
-            case FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED:
+            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED:
                 return "ENABLED";
-            case FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED:
+            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED:
                 return "DISABLED";
             default:
                 return "UNKNOWN";
