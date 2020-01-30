@@ -17,10 +17,13 @@
 package com.android.systemui.controls.controller
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Environment
+import android.os.UserHandle
 import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
@@ -29,14 +32,17 @@ import android.util.Log
 import com.android.internal.annotations.GuardedBy
 import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.management.ControlsFavoritingActivity
+import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Optional
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,35 +52,101 @@ class ControlsControllerImpl @Inject constructor (
     @Background private val executor: DelayableExecutor,
     private val uiController: ControlsUiController,
     private val bindingController: ControlsBindingController,
-    private val optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
+    private val listingController: ControlsListingController,
+    broadcastDispatcher: BroadcastDispatcher,
+    optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
     dumpController: DumpController
 ) : Dumpable, ControlsController {
 
     companion object {
         private const val TAG = "ControlsControllerImpl"
         const val CONTROLS_AVAILABLE = "systemui.controls_available"
+        const val USER_CHANGE_RETRY_DELAY = 500L // ms
     }
 
-    override val available = Settings.Secure.getInt(
+    // Map of map: ComponentName -> (String -> ControlInfo).
+    // Only for current user
+    @GuardedBy("currentFavorites")
+    private val currentFavorites = ArrayMap<ComponentName, MutableMap<String, ControlInfo>>()
+
+    private var userChanging = true
+    override var available = Settings.Secure.getInt(
             context.contentResolver, CONTROLS_AVAILABLE, 0) != 0
-    val persistenceWrapper = optionalWrapper.orElseGet {
+        private set
+
+    private var currentUser = context.user
+    override val currentUserId
+        get() = currentUser.identifier
+
+    private val persistenceWrapper = optionalWrapper.orElseGet {
         ControlsFavoritePersistenceWrapper(
                 Environment.buildPath(
-                        context.filesDir,
-                        ControlsFavoritePersistenceWrapper.FILE_NAME),
+                    context.filesDir,
+                    ControlsFavoritePersistenceWrapper.FILE_NAME
+                ),
                 executor
         )
     }
 
-    // Map of map: ComponentName -> (String -> ControlInfo)
-    @GuardedBy("currentFavorites")
-    private val currentFavorites = ArrayMap<ComponentName, MutableMap<String, ControlInfo>>()
-
-    init {
+    private fun setValuesForUser(newUser: UserHandle) {
+        Log.d(TAG, "Changing to user: $newUser")
+        currentUser = newUser
+        val userContext = context.createContextAsUser(currentUser, 0)
+        val fileName = Environment.buildPath(
+                userContext.filesDir, ControlsFavoritePersistenceWrapper.FILE_NAME)
+        persistenceWrapper.changeFile(fileName)
+        available = Settings.Secure.getIntForUser(
+                context.contentResolver, CONTROLS_AVAILABLE, 0) != 0
+        synchronized(currentFavorites) {
+            currentFavorites.clear()
+        }
         if (available) {
-            dumpController.registerDumpable(this)
             loadFavorites()
         }
+        bindingController.changeUser(newUser)
+        listingController.changeUser(newUser)
+        userChanging = false
+    }
+
+    private val userSwitchReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_USER_SWITCHED) {
+                userChanging = true
+                val newUser =
+                        UserHandle.of(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, sendingUserId))
+                if (currentUser == newUser) {
+                    userChanging = false
+                    return
+                }
+                setValuesForUser(newUser)
+            }
+        }
+    }
+
+    init {
+        dumpController.registerDumpable(this)
+        if (available) {
+            loadFavorites()
+        }
+        userChanging = false
+        broadcastDispatcher.registerReceiver(
+                userSwitchReceiver,
+                IntentFilter(Intent.ACTION_USER_SWITCHED),
+                executor,
+                UserHandle.ALL
+        )
+    }
+
+    private fun confirmAvailability(): Boolean {
+        if (userChanging) {
+            Log.w(TAG, "Controls not available while user is changing")
+            return false
+        }
+        if (!available) {
+            Log.d(TAG, "Controls not available")
+            return false
+        }
+        return true
     }
 
     private fun loadFavorites() {
@@ -91,8 +163,18 @@ class ControlsControllerImpl @Inject constructor (
         componentName: ComponentName,
         callback: (List<ControlStatus>) -> Unit
     ) {
-        if (!available) {
-            Log.d(TAG, "Controls not available")
+        if (!confirmAvailability()) {
+            if (userChanging) {
+                // Try again later, userChanging should not last forever. If so, we have bigger
+                // problems
+                executor.executeDelayed(
+                        { loadForComponent(componentName, callback) },
+                        USER_CHANGE_RETRY_DELAY,
+                        TimeUnit.MILLISECONDS
+                )
+            } else {
+                callback(emptyList())
+            }
             return
         }
         bindingController.bindAndLoad(componentName) {
@@ -158,10 +240,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     override fun subscribeToFavorites() {
-        if (!available) {
-            Log.d(TAG, "Controls not available")
-            return
-        }
+        if (!confirmAvailability()) return
         // Make a copy of the favorites list
         val favorites = synchronized(currentFavorites) {
             currentFavorites.flatMap { it.value.values.toList() }
@@ -170,18 +249,12 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     override fun unsubscribe() {
-        if (!available) {
-            Log.d(TAG, "Controls not available")
-            return
-        }
+        if (!confirmAvailability()) return
         bindingController.unsubscribe()
     }
 
     override fun changeFavoriteStatus(controlInfo: ControlInfo, state: Boolean) {
-        if (!available) {
-            Log.d(TAG, "Controls not available")
-            return
-        }
+        if (!confirmAvailability()) return
         var changed = false
         val listOfControls = synchronized(currentFavorites) {
             if (state) {
@@ -211,7 +284,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     override fun refreshStatus(componentName: ComponentName, control: Control) {
-        if (!available) {
+        if (!confirmAvailability()) {
             Log.d(TAG, "Controls not available")
             return
         }
@@ -227,28 +300,24 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {
-        if (!available) {
-            Log.d(TAG, "Controls not available")
-            return
-        }
+        if (!confirmAvailability()) return
         uiController.onActionResponse(componentName, controlId, response)
     }
 
     override fun getFavoriteControls(): List<ControlInfo> {
-        if (!available) {
-            Log.d(TAG, "Controls not available")
-            return emptyList()
-        }
+        if (!confirmAvailability()) return emptyList()
         synchronized(currentFavorites) {
             return favoritesAsListLocked()
         }
     }
 
     override fun action(controlInfo: ControlInfo, action: ControlAction) {
+        if (!confirmAvailability()) return
         bindingController.action(controlInfo, action)
     }
 
     override fun clearFavorites() {
+        if (!confirmAvailability()) return
         val changed = synchronized(currentFavorites) {
             currentFavorites.isNotEmpty().also {
                 currentFavorites.clear()
@@ -261,6 +330,9 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
+        pw.println("  Available: $available")
+        pw.println("  Changing users: $userChanging")
+        pw.println("  Current user: ${currentUser.identifier}")
         pw.println("  Favorites:")
         synchronized(currentFavorites) {
             currentFavorites.forEach {
@@ -269,5 +341,6 @@ class ControlsControllerImpl @Inject constructor (
                 }
             }
         }
+        pw.println(bindingController.toString())
     }
 }

@@ -24,6 +24,7 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
+import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService.CALLBACK_BUNDLE
 import android.service.controls.ControlsProviderService.CALLBACK_TOKEN
@@ -46,6 +47,7 @@ class ControlsProviderLifecycleManager(
     private val loadCallbackService: IControlsLoadCallback.Stub,
     private val actionCallbackService: IControlsActionCallback.Stub,
     private val subscriberService: IControlsSubscriber.Stub,
+    val user: UserHandle,
     val componentName: ComponentName
 ) : IBinder.DeathRecipient {
 
@@ -96,7 +98,7 @@ class ControlsProviderLifecycleManager(
             }
             bindTryCount++
             try {
-                isBound = context.bindService(intent, serviceConnection, BIND_FLAGS)
+                isBound = context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
             } catch (e: SecurityException) {
                 Log.e(TAG, "Failed to bind to service", e)
                 isBound = false
@@ -152,7 +154,9 @@ class ControlsProviderLifecycleManager(
             load()
         }
         queue.filter { it is Message.Subscribe }.flatMap { (it as Message.Subscribe).list }.run {
-            subscribe(this)
+            if (this.isNotEmpty()) {
+                subscribe(this)
+            }
         }
         queue.filter { it is Message.Action }.forEach {
             val msg = it as Message.Action
@@ -284,6 +288,15 @@ class ControlsProviderLifecycleManager(
     fun unbindService() {
         unbindImmediate = true
         maybeUnbindAndRemoveCallback()
+    }
+
+    override fun toString(): String {
+        return StringBuilder("ControlsProviderLifecycleManager(").apply {
+            append("component=$componentName")
+            append(", user=$user")
+            append(", bound=$isBound")
+            append(")")
+        }.toString()
     }
 
     sealed class Message {

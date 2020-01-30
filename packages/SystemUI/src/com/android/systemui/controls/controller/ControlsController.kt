@@ -20,8 +20,9 @@ import android.content.ComponentName
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
 import com.android.systemui.controls.ControlStatus
+import com.android.systemui.controls.UserAwareController
 
-interface ControlsController {
+interface ControlsController : UserAwareController {
     val available: Boolean
 
     fun getFavoriteControls(): List<ControlInfo>

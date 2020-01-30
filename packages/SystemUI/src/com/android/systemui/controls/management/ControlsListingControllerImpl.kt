@@ -19,6 +19,7 @@ package com.android.systemui.controls.management
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
@@ -30,6 +31,16 @@ import com.android.systemui.dagger.qualifiers.Background
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private fun createServiceListing(context: Context): ServiceListing {
+    return ServiceListing.Builder(context).apply {
+        setIntentAction(ControlsProviderService.SERVICE_CONTROLS)
+        setPermission("android.permission.BIND_CONTROLS")
+        setNoun("Controls Provider")
+        setSetting("controls_providers")
+        setTag("controls_providers")
+    }.build()
+}
 
 /**
  * Provides a listing of components to be used as ControlsServiceProvider.
@@ -43,21 +54,17 @@ import javax.inject.Singleton
 class ControlsListingControllerImpl @VisibleForTesting constructor(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
-    private val serviceListing: ServiceListing
+    private val serviceListingBuilder: (Context) -> ServiceListing
 ) : ControlsListingController {
 
     @Inject
     constructor(context: Context, executor: Executor): this(
             context,
             executor,
-            ServiceListing.Builder(context)
-                    .setIntentAction(ControlsProviderService.SERVICE_CONTROLS)
-                    .setPermission("android.permission.BIND_CONTROLS")
-                    .setNoun("Controls Provider")
-                    .setSetting("controls_providers")
-                    .setTag("controls_providers")
-                    .build()
+            ::createServiceListing
     )
+
+    private var serviceListing = serviceListingBuilder(context)
 
     companion object {
         private const val TAG = "ControlsListingControllerImpl"
@@ -65,16 +72,34 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     private var availableServices = emptyList<ServiceInfo>()
 
-    init {
-        serviceListing.addCallback {
-            Log.d(TAG, "ServiceConfig reloaded")
-            availableServices = it.toList()
+    override var currentUserId = context.userId
+        private set
 
-            backgroundExecutor.execute {
-                callbacks.forEach {
-                    it.onServicesUpdated(getCurrentServices())
-                }
+    private val serviceListingCallback = ServiceListing.Callback {
+        Log.d(TAG, "ServiceConfig reloaded")
+        availableServices = it.toList()
+
+        backgroundExecutor.execute {
+            callbacks.forEach {
+                it.onServicesUpdated(getCurrentServices())
             }
+        }
+    }
+
+    init {
+        serviceListing.addCallback(serviceListingCallback)
+    }
+
+    override fun changeUser(newUser: UserHandle) {
+        backgroundExecutor.execute {
+            callbacks.clear()
+            availableServices = emptyList()
+            serviceListing.setListening(false)
+            serviceListing.removeCallback(serviceListingCallback)
+            currentUserId = newUser.identifier
+            val contextForUser = context.createContextAsUser(newUser, 0)
+            serviceListing = serviceListingBuilder(contextForUser)
+            serviceListing.addCallback(serviceListingCallback)
         }
     }
 
@@ -91,6 +116,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      */
     override fun addCallback(listener: ControlsListingController.ControlsListingCallback) {
         backgroundExecutor.execute {
+            Log.d(TAG, "Subscribing callback")
             callbacks.add(listener)
             if (callbacks.size == 1) {
                 serviceListing.setListening(true)
@@ -108,6 +134,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      */
     override fun removeCallback(listener: ControlsListingController.ControlsListingCallback) {
         backgroundExecutor.execute {
+            Log.d(TAG, "Unsubscribing callback")
             callbacks.remove(listener)
             if (callbacks.size == 0) {
                 serviceListing.setListening(false)

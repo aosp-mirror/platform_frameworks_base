@@ -19,8 +19,9 @@ package com.android.systemui.controls.controller
 import android.content.ComponentName
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
+import com.android.systemui.controls.UserAwareController
 
-interface ControlsBindingController {
+interface ControlsBindingController : UserAwareController {
     fun bindAndLoad(component: ComponentName, callback: (List<Control>) -> Unit)
     fun bindServices(components: List<ComponentName>)
     fun subscribe(controls: List<ControlInfo>)
