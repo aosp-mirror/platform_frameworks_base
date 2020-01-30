@@ -1091,7 +1091,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setAlias(@NonNull String alias) {
         final IBluetooth service = sService;
         if (service == null) {
