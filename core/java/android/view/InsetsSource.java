@@ -53,6 +53,9 @@ public class InsetsSource implements Parcelable {
         mType = other.mType;
         mFrame = new Rect(other.mFrame);
         mVisible = other.mVisible;
+        mVisibleFrame = other.mVisibleFrame != null
+                ? new Rect(other.mVisibleFrame)
+                : null;
     }
 
     public void setFrame(Rect frame) {
@@ -165,6 +168,7 @@ public class InsetsSource implements Parcelable {
     public int hashCode() {
         int result = mType;
         result = 31 * result + mFrame.hashCode();
+        result = 31 * result + (mVisibleFrame != null ? mVisibleFrame.hashCode() : 0);
         result = 31 * result + (mVisible ? 1 : 0);
         return result;
     }

@@ -213,6 +213,7 @@ public class InsetsStateTest {
     @Test
     public void testParcelUnparcel() {
         mState.getSource(ITYPE_IME).setFrame(new Rect(0, 0, 100, 100));
+        mState.getSource(ITYPE_IME).setVisibleFrame(new Rect(0, 0, 50, 10));
         mState.getSource(ITYPE_IME).setVisible(true);
         mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
         Parcel p = Parcel.obtain();
@@ -220,6 +221,16 @@ public class InsetsStateTest {
         p.setDataPosition(0);
         mState2.readFromParcel(p);
         p.recycle();
+        assertEquals(mState, mState2);
+    }
+
+    @Test
+    public void testCopy() {
+        mState.getSource(ITYPE_IME).setFrame(new Rect(0, 0, 100, 100));
+        mState.getSource(ITYPE_IME).setVisibleFrame(new Rect(0, 0, 50, 10));
+        mState.getSource(ITYPE_IME).setVisible(true);
+        mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+        mState2.set(mState, true);
         assertEquals(mState, mState2);
     }
 
