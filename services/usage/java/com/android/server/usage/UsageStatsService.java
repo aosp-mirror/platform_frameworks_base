@@ -60,6 +60,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
@@ -156,6 +157,8 @@ public class UsageStatsService extends SystemService implements
     PackageManagerInternal mPackageManagerInternal;
     // Do not use directly. Call getDpmInternal() instead
     DevicePolicyManagerInternal mDpmInternal;
+    // Do not use directly. Call getShortcutServiceInternal() instead
+    ShortcutServiceInternal mShortcutServiceInternal;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
     private final SparseBooleanArray mUserUnlockedStates = new SparseBooleanArray();
@@ -267,6 +270,8 @@ public class UsageStatsService extends SystemService implements
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             // initialize mDpmInternal
             getDpmInternal();
+            // initialize mShortcutServiceInternal
+            getShortcutServiceInternal();
 
             if (ENABLE_KERNEL_UPDATES && KERNEL_COUNTER_FILE.exists()) {
                 try {
@@ -400,6 +405,13 @@ public class UsageStatsService extends SystemService implements
         return mDpmInternal;
     }
 
+    private ShortcutServiceInternal getShortcutServiceInternal() {
+        if (mShortcutServiceInternal == null) {
+            mShortcutServiceInternal = LocalServices.getService(ShortcutServiceInternal.class);
+        }
+        return mShortcutServiceInternal;
+    }
+
     private void readUsageSourceSetting() {
         synchronized (mLock) {
             mUsageSource = Settings.Global.getInt(getContext().getContentResolver(),
@@ -467,6 +479,16 @@ public class UsageStatsService extends SystemService implements
 
     private boolean shouldObfuscateInstantAppsForCaller(int callingUid, int userId) {
         return !mPackageManagerInternal.canAccessInstantApps(callingUid, userId);
+    }
+
+    private boolean shouldHideShortcutInvocationEvents(int userId, String callingPackage,
+            int callingPid, int callingUid) {
+        final ShortcutServiceInternal shortcutServiceInternal = getShortcutServiceInternal();
+        if (shortcutServiceInternal != null) {
+            return !shortcutServiceInternal.hasShortcutHostPermission(userId, callingPackage,
+                    callingPid, callingUid);
+        }
+        return true; // hide by default if we can't verify visibility
     }
 
     private static void deleteRecursively(File f) {
@@ -1008,7 +1030,7 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime,
-            boolean shouldObfuscateInstantApps) {
+            boolean shouldObfuscateInstantApps, boolean shouldHideShortcutInvocationEvents) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.get(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
@@ -1019,7 +1041,8 @@ public class UsageStatsService extends SystemService implements
             if (service == null) {
                 return null; // user was stopped or removed
             }
-            return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps);
+            return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps,
+                    shouldHideShortcutInvocationEvents);
         }
     }
 
@@ -1418,14 +1441,18 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    Binder.getCallingUid(), UserHandle.getCallingUserId());
-
             final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
+                    callingUid, userId);
+
             final long token = Binder.clearCallingIdentity();
             try {
+                final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
+                        userId, callingPackage, callingPid, callingUid);
                 return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
-                        obfuscateInstantApps);
+                        obfuscateInstantApps, hideShortcutInvocationEvents);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1456,19 +1483,24 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            if (userId != UserHandle.getCallingUserId()) {
+            final int callingUserId = UserHandle.getCallingUserId();
+            if (userId != callingUserId) {
                 getContext().enforceCallingPermission(
                         Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                         "No permission to query usage stats for this user");
             }
 
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    Binder.getCallingUid(), UserHandle.getCallingUserId());
+                    callingUid, callingUserId);
 
             final long token = Binder.clearCallingIdentity();
             try {
+                final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
+                        userId, callingPackage, callingPid, callingUid);
                 return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
-                        obfuscateInstantApps);
+                        obfuscateInstantApps, hideShortcutInvocationEvents);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2087,7 +2119,7 @@ public class UsageStatsService extends SystemService implements
         public UsageEvents queryEventsForUser(int userId, long beginTime, long endTime,
                 boolean shouldObfuscateInstantApps) {
             return UsageStatsService.this.queryEvents(
-                    userId, beginTime, endTime, shouldObfuscateInstantApps);
+                    userId, beginTime, endTime, shouldObfuscateInstantApps, false);
         }
 
         @Override

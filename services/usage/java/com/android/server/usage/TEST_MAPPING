@@ -28,6 +28,14 @@
           "include-filter": "android.app.usage.cts.UsageStatsTest"
         }
       ]
+    },
+    {
+      "name": "CtsShortcutManagerTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.pm.cts.shortcutmanager.ShortcutManagerUsageTest"
+        }
+      ]
     }
   ]
 }
