@@ -2758,7 +2758,8 @@ public class DisplayPolicy {
                 mDisplayContent.getDisplayId(),
                 null /* overrideConfig */,
                 uiContext.getResources().getCompatibilityInfo(),
-                null /* classLoader */);
+                null /* classLoader */,
+                null /* loaders */);
     }
 
     @VisibleForTesting

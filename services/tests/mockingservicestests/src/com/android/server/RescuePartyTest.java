@@ -375,6 +375,35 @@ public class RescuePartyTest {
     }
 
     @Test
+    public void testBootLoopLevels() {
+        RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
+
+        /*
+         Ensure that the returned user impact corresponds with the user impact of the next available
+         rescue level, not the current one.
+         */
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_NONE));
+        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_LOW);
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS));
+        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_LOW);
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES));
+        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                RescueParty.LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS));
+        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+
+        SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(
+                LEVEL_FACTORY_RESET));
+        assertEquals(observer.onBootLoop(), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+    }
+
+    @Test
     public void testRescueLevelIncrementsWhenExecuted() {
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
         SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL, Integer.toString(

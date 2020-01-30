@@ -18,25 +18,16 @@ package android.content.res.loader.test
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.content.res.Configuration
 import android.content.res.Resources
-import android.content.res.loader.ResourceLoader
+import android.content.res.loader.AssetsProvider
 import android.content.res.loader.ResourcesProvider
 import android.os.ParcelFileDescriptor
-import android.util.TypedValue
-import androidx.annotation.DimenRes
-import androidx.annotation.DrawableRes
-import androidx.annotation.LayoutRes
-import androidx.annotation.StringRes
 import androidx.test.InstrumentationRegistry
 import org.junit.After
 import org.junit.Before
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.argThat
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import java.io.Closeable
 
@@ -60,7 +51,8 @@ abstract class ResourceLoaderTestBase {
 
     @After
     fun removeAllLoaders() {
-        resources.setLoaders(null)
+        resources.clearLoaders()
+        context.applicationContext.resources.clearLoaders()
         openedObjects.forEach {
             try {
                 it.close()
@@ -69,147 +61,71 @@ abstract class ResourceLoaderTestBase {
         }
     }
 
-    protected fun getString(@StringRes stringRes: Int, debugLog: Boolean = false) =
-            logResolution(debugLog) { getString(stringRes) }
-
-    protected fun getDrawable(@DrawableRes drawableRes: Int, debugLog: Boolean = false) =
-            logResolution(debugLog) { getDrawable(drawableRes) }
-
-    protected fun getLayout(@LayoutRes layoutRes: Int, debugLog: Boolean = false) =
-            logResolution(debugLog) { getLayout(layoutRes) }
-
-    protected fun getDimensionPixelSize(@DimenRes dimenRes: Int, debugLog: Boolean = false) =
-            logResolution(debugLog) { getDimensionPixelSize(dimenRes) }
-
-    private fun <T> logResolution(debugLog: Boolean = false, block: Resources.() -> T): T {
-        if (debugLog) {
-            resources.assets.setResourceResolutionLoggingEnabled(true)
-        }
-
-        var thrown = false
-
-        try {
-            return resources.block()
-        } catch (t: Throwable) {
-            // No good way to log to test output other than throwing an exception
-            if (debugLog) {
-                thrown = true
-                throw IllegalStateException(resources.assets.lastResourceResolution, t)
-            } else {
-                throw t
-            }
-        } finally {
-            if (!thrown && debugLog) {
-                throw IllegalStateException(resources.assets.lastResourceResolution)
-            }
-        }
-    }
-
-    protected fun updateConfiguration(block: Configuration.() -> Unit) {
-        val configuration = Configuration().apply {
-            setTo(resources.configuration)
-            block()
-        }
-
-        resources.updateConfiguration(configuration, resources.displayMetrics)
-    }
-
-    protected fun String.openLoader(
+    protected fun String.openProvider(
         dataType: DataType = this@ResourceLoaderTestBase.dataType
-    ): Pair<ResourceLoader, ResourcesProvider> = when (dataType) {
+    ): ResourcesProvider = when (dataType) {
         DataType.APK -> {
-            mock(ResourceLoader::class.java) to context.copiedRawFile("${this}Apk").use {
-                ResourcesProvider.loadFromApk(it)
+            context.copiedRawFile("${this}Apk").use {
+                ResourcesProvider.loadFromApk(it, mock(AssetsProvider::class.java))
             }.also { openedObjects += it }
         }
         DataType.ARSC -> {
-            mock(ResourceLoader::class.java) to openArsc(this)
+            openArsc(this, mock(AssetsProvider::class.java))
         }
         DataType.SPLIT -> {
-            mock(ResourceLoader::class.java) to ResourcesProvider.loadFromSplit(context, this)
+            ResourcesProvider.loadFromSplit(context, this)
         }
-        DataType.ASSET -> mockLoader {
-            doAnswer { byteInputStream() }.`when`(it)
+        DataType.ASSET -> {
+            val assetsProvider = mock(AssetsProvider::class.java)
+            doAnswer { byteInputStream() }.`when`(assetsProvider)
                     .loadAsset(eq("assets/Asset.txt"), anyInt())
+            ResourcesProvider.empty(assetsProvider)
         }
-        DataType.ASSET_FD -> mockLoader {
+        DataType.ASSET_FD -> {
+            val assetsProvider = mock(AssetsProvider::class.java)
             doAnswer {
                 val file = context.filesDir.resolve("Asset.txt")
                 file.writeText(this)
                 ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-            }.`when`(it).loadAssetFd("assets/Asset.txt")
+            }.`when`(assetsProvider).loadAssetParcelFd("assets/Asset.txt")
+            ResourcesProvider.empty(assetsProvider)
         }
-        DataType.NON_ASSET -> mockLoader {
+        DataType.NON_ASSET -> {
+            val assetsProvider = mock(AssetsProvider::class.java)
             doAnswer {
                 val file = context.filesDir.resolve("NonAsset.txt")
                 file.writeText(this)
                 ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-            }.`when`(it).loadAssetFd("NonAsset.txt")
+            }.`when`(assetsProvider).loadAssetParcelFd("NonAsset.txt")
+            ResourcesProvider.empty(assetsProvider)
         }
-        DataType.NON_ASSET_DRAWABLE -> mockLoader(openArsc(this)) {
-            doReturn(null).`when`(it).loadDrawable(argThat { value ->
-                value.type == TypedValue.TYPE_STRING &&
-                        value.resourceId == 0x7f010001 &&
-                        value.string == "res/drawable-nodpi-v4/non_asset_drawable.xml"
-            }, eq(0x7f010001), anyInt(), ArgumentMatchers.any())
-
-            doAnswer { context.copiedRawFile(this) }.`when`(it)
-                    .loadAssetFd("res/drawable-nodpi-v4/non_asset_drawable.xml")
+        DataType.NON_ASSET_DRAWABLE -> {
+            val assetsProvider = mock(AssetsProvider::class.java)
+            doAnswer { context.copiedRawFile(this) }.`when`(assetsProvider)
+                    .loadAssetParcelFd("res/drawable-nodpi-v4/non_asset_drawable.xml")
+            openArsc(this, assetsProvider)
         }
-        DataType.NON_ASSET_BITMAP -> mockLoader(openArsc(this)) {
-            doReturn(null).`when`(it).loadDrawable(argThat { value ->
-                value.type == TypedValue.TYPE_STRING &&
-                        value.resourceId == 0x7f010000 &&
-                        value.string == "res/drawable-nodpi-v4/non_asset_bitmap.png"
-            }, eq(0x7f010000), anyInt(), ArgumentMatchers.any())
-
-            doAnswer { resources.openRawResourceFd(rawFile(this)).createInputStream() }
-                    .`when`(it)
+        DataType.NON_ASSET_BITMAP -> {
+            val assetsProvider = mock(AssetsProvider::class.java)
+            doAnswer { resources.openRawResource(rawFile(this)) }
+                    .`when`(assetsProvider)
                     .loadAsset(eq("res/drawable-nodpi-v4/non_asset_bitmap.png"), anyInt())
+            openArsc(this, assetsProvider)
         }
-        DataType.NON_ASSET_LAYOUT -> mockLoader(openArsc(this)) {
-            doReturn(null).`when`(it)
-                    .loadXmlResourceParser("res/layout/layout.xml", 0x7f020000)
-
-            doAnswer { context.copiedRawFile(this) }.`when`(it)
-                    .loadAssetFd("res/layout/layout.xml")
+        DataType.NON_ASSET_LAYOUT -> {
+            val assetsProvider = mock(AssetsProvider::class.java)
+            doAnswer { resources.openRawResource(rawFile(this)) }.`when`(assetsProvider)
+                    .loadAsset(eq("res/layout/layout.xml"), anyInt())
+            doAnswer { context.copiedRawFile(this) }.`when`(assetsProvider)
+                    .loadAssetParcelFd("res/layout/layout.xml")
+            openArsc(this, assetsProvider)
         }
     }
 
-    protected fun mockLoader(
-        provider: ResourcesProvider = ResourcesProvider.empty(),
-        block: (ResourceLoader) -> Unit = {}
-    ): Pair<ResourceLoader, ResourcesProvider> {
-        return mock(ResourceLoader::class.java, Utils.ANSWER_THROWS)
-                .apply(block) to provider
-    }
-
-    protected fun openArsc(rawName: String): ResourcesProvider {
+    protected fun openArsc(rawName: String, assetsProvider: AssetsProvider): ResourcesProvider {
         return context.copiedRawFile("${rawName}Arsc")
-                .use { ResourcesProvider.loadFromArsc(it) }
+                .use { ResourcesProvider.loadFromTable(it, assetsProvider) }
                 .also { openedObjects += it }
-    }
-
-    // This specifically uses addLoader so both behaviors are tested
-    protected fun addLoader(vararg pairs: Pair<out ResourceLoader, ResourcesProvider>) {
-        pairs.forEach { resources.addLoader(it.first, it.second) }
-    }
-
-    protected fun setLoaders(vararg pairs: Pair<out ResourceLoader, ResourcesProvider>) {
-        resources.setLoaders(pairs.map { android.util.Pair(it.first, it.second) })
-    }
-
-    protected fun addLoader(pair: Pair<out ResourceLoader, ResourcesProvider>, index: Int) {
-        resources.addLoader(pair.first, pair.second, index)
-    }
-
-    protected fun removeLoader(vararg pairs: Pair<out ResourceLoader, ResourcesProvider>) {
-        pairs.forEach { resources.removeLoader(it.first) }
-    }
-
-    protected fun getLoaders(): MutableList<Pair<ResourceLoader, ResourcesProvider>> {
-        // Cast instead of toMutableList to maintain the same object
-        return resources.getLoaders() as MutableList<Pair<ResourceLoader, ResourcesProvider>>
     }
 
     enum class DataType {

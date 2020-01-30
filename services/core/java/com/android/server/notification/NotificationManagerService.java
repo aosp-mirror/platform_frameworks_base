@@ -2710,6 +2710,7 @@ public class NotificationManagerService extends SystemService {
 
             if (callback != null && !appIsForeground && !isSystemToast) {
                 boolean block;
+                long id = Binder.clearCallingIdentity();
                 try {
                     block = mPlatformCompat.isChangeEnabledByPackageName(
                             CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK, pkg,
@@ -2719,6 +2720,8 @@ public class NotificationManagerService extends SystemService {
                     Slog.e(TAG, "Unexpected exception while checking block background custom toasts"
                             + " change", e);
                     block = false;
+                } finally {
+                    Binder.restoreCallingIdentity(id);
                 }
                 if (block) {
                     // TODO(b/144152069): Remove informative toast

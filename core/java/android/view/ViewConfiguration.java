@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.util.TypedValue;
 
 /**
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
@@ -313,6 +314,7 @@ public class ViewConfiguration {
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
     private final int mWindowTouchSlop;
+    private final float mAmbiguousGestureMultiplier;
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
@@ -351,6 +353,7 @@ public class ViewConfiguration {
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
+        mAmbiguousGestureMultiplier = AMBIGUOUS_GESTURE_MULTIPLIER;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
         mOverscrollDistance = OVERSCROLL_DISTANCE;
@@ -396,6 +399,13 @@ public class ViewConfiguration {
                 com.android.internal.R.dimen.config_scrollbarSize);
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
+
+        final TypedValue multiplierValue = new TypedValue();
+        res.getValue(
+                com.android.internal.R.dimen.config_ambiguousGestureMultiplier,
+                multiplierValue,
+                true /*resolveRefs*/);
+        mAmbiguousGestureMultiplier = multiplierValue.getFloat();
 
         // Size of the screen in bytes, in ARGB_8888 format
         final WindowManager win = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
@@ -951,19 +961,32 @@ public class ViewConfiguration {
     }
 
     /**
-     * If a MotionEvent has {@link android.view.MotionEvent#CLASSIFICATION_AMBIGUOUS_GESTURE} set,
-     * then certain actions, such as scrolling, will be inhibited.
-     * However, to account for the possibility of incorrect classification,
-     * the default scrolling will only be inhibited if the pointer travels less than
-     * (getScaledTouchSlop() * this factor).
-     * Likewise, the default long press timeout will be increased by this factor for some situations
-     * where the default behaviour is to cancel it.
+     * The multiplication factor for inhibiting default gestures.
      *
-     * @return The multiplication factor for inhibiting default gestures.
+     * If a MotionEvent has {@link android.view.MotionEvent#CLASSIFICATION_AMBIGUOUS_GESTURE} set,
+     * then certain actions, such as scrolling, will be inhibited. However, to account for the
+     * possibility of an incorrect classification, existing gesture thresholds (e.g. scrolling
+     * touch slop and the long-press timeout) should be scaled by this factor and remain in effect.
+     *
+     * @deprecated Use {@link #getScaledAmbiguousGestureMultiplier()}.
      */
+    @Deprecated
     @FloatRange(from = 1.0)
     public static float getAmbiguousGestureMultiplier() {
         return AMBIGUOUS_GESTURE_MULTIPLIER;
+    }
+
+    /**
+     * The multiplication factor for inhibiting default gestures.
+     *
+     * If a MotionEvent has {@link android.view.MotionEvent#CLASSIFICATION_AMBIGUOUS_GESTURE} set,
+     * then certain actions, such as scrolling, will be inhibited. However, to account for the
+     * possibility of an incorrect classification, existing gesture thresholds (e.g. scrolling
+     * touch slop and the long-press timeout) should be scaled by this factor and remain in effect.
+     */
+    @FloatRange(from = 1.0)
+    public float getScaledAmbiguousGestureMultiplier() {
+        return mAmbiguousGestureMultiplier;
     }
 
     /**

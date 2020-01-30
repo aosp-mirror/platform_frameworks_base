@@ -25,6 +25,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.Annotation.NetworkType;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -214,6 +215,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
     @Nullable
     private DataSpecificRegistrationInfo mDataSpecificInfo;
 
+    @NonNull
+    private String mRplmn;
+
     /**
      * @param domain Network domain. Must be a {@link Domain}. For transport type
      * {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, this must set to {@link #DOMAIN_PS}.
@@ -234,13 +238,14 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @param availableServices The list of the supported services.
      * @param cellIdentity The identity representing a unique cell or wifi AP. Set to null if the
      * information is not available.
+     * @param rplmn the registered plmn or the last plmn for attempted registration if reg failed.
      */
     private NetworkRegistrationInfo(@Domain int domain, @TransportType int transportType,
                                    @RegistrationState int registrationState,
                                    @NetworkType int accessNetworkTechnology, int rejectCause,
                                    boolean emergencyOnly,
                                    @Nullable @ServiceType List<Integer> availableServices,
-                                   @Nullable CellIdentity cellIdentity) {
+                                   @Nullable CellIdentity cellIdentity, @Nullable String rplmn) {
         mDomain = domain;
         mTransportType = transportType;
         mRegistrationState = registrationState;
@@ -253,6 +258,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mCellIdentity = cellIdentity;
         mEmergencyOnly = emergencyOnly;
         mNrState = NR_STATE_NONE;
+        mRplmn = (rplmn == null) ? "" : rplmn;
     }
 
     /**
@@ -263,11 +269,11 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    int registrationState, int accessNetworkTechnology,
                                    int rejectCause, boolean emergencyOnly,
                                    @Nullable List<Integer> availableServices,
-                                   @Nullable CellIdentity cellIdentity, boolean cssSupported,
-                                   int roamingIndicator, int systemIsInPrl,
+                                   @Nullable CellIdentity cellIdentity, @Nullable String rplmn,
+                                   boolean cssSupported, int roamingIndicator, int systemIsInPrl,
                                    int defaultRoamingIndicator) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
-                emergencyOnly, availableServices, cellIdentity);
+                emergencyOnly, availableServices, cellIdentity, rplmn);
 
         mVoiceSpecificInfo = new VoiceSpecificRegistrationInfo(cssSupported, roamingIndicator,
                 systemIsInPrl, defaultRoamingIndicator);
@@ -281,13 +287,13 @@ public final class NetworkRegistrationInfo implements Parcelable {
                                    int registrationState, int accessNetworkTechnology,
                                    int rejectCause, boolean emergencyOnly,
                                    @Nullable List<Integer> availableServices,
-                                   @Nullable CellIdentity cellIdentity, int maxDataCalls,
-                                   boolean isDcNrRestricted, boolean isNrAvailable,
-                                   boolean isEndcAvailable,
+                                   @Nullable CellIdentity cellIdentity, @Nullable String rplmn,
+                                   int maxDataCalls, boolean isDcNrRestricted,
+                                   boolean isNrAvailable, boolean isEndcAvailable,
                                    LteVopsSupportInfo lteVopsSupportInfo,
                                    boolean isUsingCarrierAggregation) {
         this(domain, transportType, registrationState, accessNetworkTechnology, rejectCause,
-                emergencyOnly, availableServices, cellIdentity);
+                emergencyOnly, availableServices, cellIdentity, rplmn);
         mDataSpecificInfo = new DataSpecificRegistrationInfo(
                 maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable, lteVopsSupportInfo,
                 isUsingCarrierAggregation);
@@ -310,6 +316,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mDataSpecificInfo = source.readParcelable(
                 DataSpecificRegistrationInfo.class.getClassLoader());
         mNrState = source.readInt();
+        mRplmn = source.readString();
     }
 
     /**
@@ -343,6 +350,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
             mDataSpecificInfo = new DataSpecificRegistrationInfo(nri.mDataSpecificInfo);
         }
         mNrState = nri.mNrState;
+        mRplmn = nri.mRplmn;
     }
 
     /**
@@ -392,6 +400,22 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     public boolean isSearching() {
         return mRegistrationState == REGISTRATION_STATE_NOT_REGISTERED_SEARCHING;
+    }
+
+    /**
+     * Get the PLMN-ID for this Network Registration, also known as the RPLMN.
+     *
+     * <p>If the device is registered, this will return the registered PLMN-ID. If registration
+     * has failed, then this will return the PLMN ID of the last attempted registration. If the
+     * device is not registered, or if is registered to a non-3GPP radio technology, then this
+     * will return an empty string.
+     *
+     * <p>See 3GPP TS 23.122 for further information about the Registered PLMN.
+     *
+     * @return the registered PLMN-ID or an empty string.
+     */
+    @NonNull public String getRegisteredPlmn() {
+        return mRplmn;
     }
 
     /**
@@ -590,6 +614,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 .append(" voiceSpecificInfo=").append(mVoiceSpecificInfo)
                 .append(" dataSpecificInfo=").append(mDataSpecificInfo)
                 .append(" nrState=").append(nrStateToString(mNrState))
+                .append(" rRplmn=").append(mRplmn)
                 .append("}").toString();
     }
 
@@ -597,7 +622,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     public int hashCode() {
         return Objects.hash(mDomain, mTransportType, mRegistrationState, mRoamingType,
                 mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
-                mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState);
+                mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState, mRplmn);
     }
 
     @Override
@@ -620,6 +645,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 && Objects.equals(mCellIdentity, other.mCellIdentity)
                 && Objects.equals(mVoiceSpecificInfo, other.mVoiceSpecificInfo)
                 && Objects.equals(mDataSpecificInfo, other.mDataSpecificInfo)
+                && TextUtils.equals(mRplmn, other.mRplmn)
                 && mNrState == other.mNrState;
     }
 
@@ -641,6 +667,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         dest.writeParcelable(mVoiceSpecificInfo, 0);
         dest.writeParcelable(mDataSpecificInfo, 0);
         dest.writeInt(mNrState);
+        dest.writeString(mRplmn);
     }
 
     /**
@@ -740,6 +767,9 @@ public final class NetworkRegistrationInfo implements Parcelable {
 
         @Nullable
         private CellIdentity mCellIdentity;
+
+        @NonNull
+        private String mRplmn = "";
 
         /**
          * Default constructor for Builder.
@@ -855,6 +885,18 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
 
         /**
+         * Set the registered PLMN.
+         *
+         * @param rplmn the registered plmn.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setRegisteredPlmn(@Nullable String rplmn) {
+            mRplmn = (rplmn == null) ? "" : rplmn;
+            return this;
+        }
+
+        /**
          * Build the NetworkRegistrationInfo.
          * @return the NetworkRegistrationInfo object.
          * @hide
@@ -863,7 +905,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         public @NonNull NetworkRegistrationInfo build() {
             return new NetworkRegistrationInfo(mDomain, mTransportType, mRegistrationState,
                     mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
-                    mCellIdentity);
+                    mCellIdentity, mRplmn);
         }
     }
 }

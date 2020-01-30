@@ -94,7 +94,8 @@ public class ShadeListBuilder implements Dumpable {
             new ArrayList<>();
     @Nullable private OnRenderListListener mOnRenderListListener;
 
-    private final List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
+    private List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
+    private List<ListEntry> mReadOnlyNewNotifList = Collections.unmodifiableList(mNewNotifList);
 
     @Inject
     public ShadeListBuilder(
@@ -253,17 +254,6 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     /**
-     * Points mNotifList to the list stored in mNewNotifList.
-     * Reuses the (emptied) mNotifList as mNewNotifList.
-     */
-    private void applyNewNotifList() {
-        mNotifList.clear();
-        List<ListEntry> emptyList = mNotifList;
-        mNotifList = mNewNotifList;
-        mNewNotifList = emptyList;
-    }
-
-    /**
      * The core algorithm of the pipeline. See the top comment in {@link NotifPipeline} for
      * details on our contracts with other code.
      *
@@ -331,6 +321,23 @@ public class ShadeListBuilder implements Dumpable {
         mLogger.logEndBuildList(mIterationCount);
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
+    }
+
+    /**
+     * Points mNotifList to the list stored in mNewNotifList.
+     * Reuses the (emptied) mNotifList as mNewNotifList.
+     *
+     * Accordingly, updates the ReadOnlyNotifList pointers.
+     */
+    private void applyNewNotifList() {
+        mNotifList.clear();
+        List<ListEntry> emptyList = mNotifList;
+        mNotifList = mNewNotifList;
+        mNewNotifList = emptyList;
+
+        List<ListEntry> readOnlyNotifList = mReadOnlyNotifList;
+        mReadOnlyNotifList = mReadOnlyNewNotifList;
+        mReadOnlyNewNotifList = readOnlyNotifList;
     }
 
     private void resetNotifs() {

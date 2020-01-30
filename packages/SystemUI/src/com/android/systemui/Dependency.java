@@ -117,14 +117,15 @@ import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tuner.TunablePadding.TunablePaddingService;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.wm.DisplayController;
 import com.android.systemui.wm.DisplayImeController;
-import com.android.systemui.wm.DisplayWindowController;
 import com.android.systemui.wm.SystemWindows;
 
 import java.io.FileDescriptor;
@@ -323,10 +324,11 @@ public class Dependency {
     @Inject Lazy<CommandQueue> mCommandQueue;
     @Inject Lazy<Recents> mRecents;
     @Inject Lazy<StatusBar> mStatusBar;
-    @Inject Lazy<DisplayWindowController> mDisplayWindowController;
+    @Inject Lazy<DisplayController> mDisplayController;
     @Inject Lazy<SystemWindows> mSystemWindows;
     @Inject Lazy<DisplayImeController> mDisplayImeController;
     @Inject Lazy<RecordingController> mRecordingController;
+    @Inject Lazy<ProtoTracer> mProtoTracer;
 
     @Inject
     public Dependency() {
@@ -516,9 +518,10 @@ public class Dependency {
         mProviders.put(CommandQueue.class, mCommandQueue::get);
         mProviders.put(Recents.class, mRecents::get);
         mProviders.put(StatusBar.class, mStatusBar::get);
-        mProviders.put(DisplayWindowController.class, mDisplayWindowController::get);
+        mProviders.put(DisplayController.class, mDisplayController::get);
         mProviders.put(SystemWindows.class, mSystemWindows::get);
         mProviders.put(DisplayImeController.class, mDisplayImeController::get);
+        mProviders.put(ProtoTracer.class, mProtoTracer::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

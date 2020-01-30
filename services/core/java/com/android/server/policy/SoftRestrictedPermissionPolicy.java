@@ -18,12 +18,14 @@ package com.android.server.policy;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static java.lang.Integer.min;
 
@@ -114,6 +116,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                 boolean shouldApplyRestriction;
                 final int targetSDK;
                 final boolean hasRequestedLegacyExternalStorage;
+                final boolean hasWriteMediaStorageGrantedForUid;
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
@@ -123,11 +126,14 @@ public abstract class SoftRestrictedPermissionPolicy {
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
                     hasRequestedLegacyExternalStorage = hasUidRequestedLegacyExternalStorage(
                             appInfo.uid, context);
+                    hasWriteMediaStorageGrantedForUid = hasWriteMediaStorageGrantedForUid(
+                            appInfo.uid, context);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
                     targetSDK = 0;
                     hasRequestedLegacyExternalStorage = false;
+                    hasWriteMediaStorageGrantedForUid = false;
                 }
 
                 // We have a check in PermissionPolicyService.PermissionToOpSynchroniser.setUidMode
@@ -145,8 +151,9 @@ public abstract class SoftRestrictedPermissionPolicy {
                     }
                     @Override
                     public boolean mayAllowExtraAppOp() {
-                        return !shouldApplyRestriction && hasRequestedLegacyExternalStorage
-                                && targetSDK <= Build.VERSION_CODES.Q;
+                        return !shouldApplyRestriction && targetSDK <= Build.VERSION_CODES.Q
+                                && (hasRequestedLegacyExternalStorage
+                                        || hasWriteMediaStorageGrantedForUid);
                     }
                     @Override
                     public boolean mayDenyExtraAppOpIfGranted() {
@@ -195,6 +202,22 @@ public abstract class SoftRestrictedPermissionPolicy {
                 continue;
             }
             if (applicationInfo.hasRequestedLegacyExternalStorage()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasWriteMediaStorageGrantedForUid(int uid, @NonNull Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        String[] packageNames = packageManager.getPackagesForUid(uid);
+        if (packageNames == null) {
+            return false;
+        }
+
+        for (String packageName : packageNames) {
+            if (packageManager.checkPermission(WRITE_MEDIA_STORAGE, packageName)
+                    == PERMISSION_GRANTED) {
                 return true;
             }
         }

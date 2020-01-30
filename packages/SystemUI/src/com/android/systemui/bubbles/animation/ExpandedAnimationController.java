@@ -31,6 +31,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleExperimentConfig;
 
 import com.google.android.collect.Sets;
 
@@ -67,13 +68,13 @@ public class ExpandedAnimationController
     private float mBubblePaddingTop;
     /** Size of each bubble. */
     private float mBubbleSizePx;
-    /** Width of the overflow button. */
-    private float mOverflowBtnWidth;
+    /** Space between bubbles in row above expanded view. */
+    private float mSpaceBetweenBubbles;
     /** Height of the status bar. */
     private float mStatusBarHeight;
     /** Size of display. */
     private Point mDisplaySize;
-    /** Max number of bubbles shown in row above expanded view.*/
+    /** Max number of bubbles shown in row above expanded view. */
     private int mBubblesMaxRendered;
     /** What the current screen orientation is. */
     private int mScreenOrientation;
@@ -99,7 +100,6 @@ public class ExpandedAnimationController
     private boolean mSpringingBubbleToTouch = false;
 
     private int mExpandedViewPadding;
-    private boolean mShowOverflowBtn;
 
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
             int orientation) {
@@ -151,14 +151,6 @@ public class ExpandedAnimationController
             mStatusBarHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_height);
         }
-    }
-
-    public void setShowOverflowBtn(boolean showBtn) {
-        mShowOverflowBtn = showBtn;
-    }
-
-    public boolean getShowOverflowBtn() {
-        return mShowOverflowBtn;
     }
 
     /**
@@ -369,10 +361,10 @@ public class ExpandedAnimationController
         }
         final WindowInsets insets = mLayout.getRootWindowInsets();
         return mBubblePaddingTop + Math.max(
-            mStatusBarHeight,
-            insets.getDisplayCutout() != null
-                ? insets.getDisplayCutout().getSafeInsetTop()
-                : 0);
+                mStatusBarHeight,
+                insets.getDisplayCutout() != null
+                        ? insets.getDisplayCutout().getSafeInsetTop()
+                        : 0);
     }
 
     /** Description of current animation controller state. */
@@ -391,10 +383,14 @@ public class ExpandedAnimationController
         mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mOverflowBtnWidth = mBubbleSizePx;
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
+
+        // Includes overflow button.
+        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
+                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
+        mSpaceBetweenBubbles = totalGapWidth / mBubblesMaxRendered;
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
         // in.
@@ -506,16 +502,8 @@ public class ExpandedAnimationController
      * @return Bubble left x from left edge of screen.
      */
     public float getBubbleLeft(int index) {
-        final float bubbleFromRowLeft = index * (mBubbleSizePx + getSpaceBetweenBubbles());
+        final float bubbleFromRowLeft = index * (mBubbleSizePx + mSpaceBetweenBubbles);
         return getRowLeft() + bubbleFromRowLeft;
-    }
-
-    public float getOverflowBtnLeft() {
-        if (mLayout == null || mLayout.getChildCount() == 0) {
-            return 0;
-        }
-        return getBubbleLeft(mLayout.getChildCount() - 1) + mBubbleSizePx
-                + getSpaceBetweenBubbles();
     }
 
     /**
@@ -539,7 +527,7 @@ public class ExpandedAnimationController
      * Determines the available screen width without the cutout.
      *
      * @param subtractStableInsets Whether or not stable insets should also be removed from the
-     *                            returned width.
+     *                             returned width.
      * @return the total screen width available accounting for cutouts and insets,
      * iff {@param includeStableInsets} is true.
      */
@@ -566,38 +554,13 @@ public class ExpandedAnimationController
         if (mLayout == null) {
             return 0;
         }
-
-        int bubbleCount = mLayout.getChildCount();
-
-        final float totalBubbleWidth = bubbleCount * mBubbleSizePx;
-        final float totalGapWidth = (bubbleCount - 1) * getSpaceBetweenBubbles();
-        float rowWidth = totalGapWidth + totalBubbleWidth;
-        if (mShowOverflowBtn) {
-            rowWidth += getSpaceBetweenBubbles();
-            rowWidth += mOverflowBtnWidth;
-        }
+        float rowWidth = (mLayout.getChildCount() * mBubbleSizePx)
+                + ((mLayout.getChildCount() - 1) * mSpaceBetweenBubbles);
 
         // This display size we're using includes the size of the insets, we want the true
         // center of the display minus the notch here, which means we should include the
         // stable insets (e.g. status bar, nav bar) in this calculation.
         final float trueCenter = getAvailableScreenWidth(false /* subtractStableInsets */) / 2f;
-        final float halfRow = rowWidth / 2f;
-        final float rowLeft = trueCenter - halfRow;
-        return rowLeft;
-    }
-
-    /**
-     * @return Space between bubbles in row above expanded view.
-     */
-    private float getSpaceBetweenBubbles() {
-        final float totalBubbleWidth = mBubblesMaxRendered * mBubbleSizePx;
-        final float rowMargins = mExpandedViewPadding * 2;
-        float totalGapWidth = getWidthForDisplayingBubbles() - rowMargins - totalBubbleWidth;
-        if (mShowOverflowBtn) {
-            totalGapWidth -= mBubbleSizePx;
-        }
-        final int gapCount = mBubblesMaxRendered - 1;
-        final float gapWidth = totalGapWidth / gapCount;
-        return gapWidth;
+        return trueCenter - (rowWidth / 2f);
     }
 }

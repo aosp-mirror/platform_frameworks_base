@@ -58,6 +58,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_CONTENT_PROVIDER_RETAIN_TIME = "content_provider_retain_time";
     private static final String KEY_GC_TIMEOUT = "gc_timeout";
     private static final String KEY_GC_MIN_INTERVAL = "gc_min_interval";
+    private static final String KEY_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS =
+            "force_bg_check_on_restricted";
     private static final String KEY_FULL_PSS_MIN_INTERVAL = "full_pss_min_interval";
     private static final String KEY_FULL_PSS_LOWERED_INTERVAL = "full_pss_lowered_interval";
     private static final String KEY_POWER_CHECK_INTERVAL = "power_check_interval";
@@ -96,6 +98,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_GC_TIMEOUT = 5*1000;
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
     private static final long DEFAULT_FULL_PSS_MIN_INTERVAL = 20*60*1000;
+    private static final boolean DEFAULT_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS = true;
     private static final long DEFAULT_FULL_PSS_LOWERED_INTERVAL = 5*60*1000;
     private static final long DEFAULT_POWER_CHECK_INTERVAL = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_1 = 25;
@@ -176,6 +179,14 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // The minimum amount of time between successive GC requests for a process.
     long GC_MIN_INTERVAL = DEFAULT_GC_MIN_INTERVAL;
+
+    /**
+     * Whether or not Background Check should be forced on any apps in the
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket,
+     * regardless of target SDK version.
+     */
+    boolean FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS =
+            DEFAULT_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS;
 
     // The minimum amount of time between successive PSS requests for a process.
     long FULL_PSS_MIN_INTERVAL = DEFAULT_FULL_PSS_MIN_INTERVAL;
@@ -380,6 +391,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES:
                                 updateImperceptibleKillExemptions();
                                 break;
+                            case KEY_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS:
+                                updateForceRestrictedBackgroundCheck();
+                                break;
                             default:
                                 break;
                         }
@@ -427,6 +441,7 @@ final class ActivityManagerConstants extends ContentObserver {
         updateMaxCachedProcesses();
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStarts();
+        updateForceRestrictedBackgroundCheck();
         updateForegroundServiceStartsLoggingEnabled();
         updateBackgroundFgsStartsRestriction();
         updateOomAdjUpdatePolicy();
@@ -571,6 +586,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 == OOMADJ_UPDATE_POLICY_QUICK;
     }
 
+    private void updateForceRestrictedBackgroundCheck() {
+        FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS,
+                DEFAULT_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS);
+    }
+
     private void updateImperceptibleKillExemptions() {
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.clear();
         IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
@@ -658,6 +680,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(GC_TIMEOUT);
         pw.print("  "); pw.print(KEY_GC_MIN_INTERVAL); pw.print("=");
         pw.println(GC_MIN_INTERVAL);
+        pw.print("  "); pw.print(KEY_FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS); pw.print("=");
+        pw.println(FORCE_BACKGROUND_CHECK_ON_RESTRICTED_APPS);
         pw.print("  "); pw.print(KEY_FULL_PSS_MIN_INTERVAL); pw.print("=");
         pw.println(FULL_PSS_MIN_INTERVAL);
         pw.print("  "); pw.print(KEY_FULL_PSS_LOWERED_INTERVAL); pw.print("=");

@@ -303,8 +303,13 @@ interface IActivityManager {
     boolean isTopActivityImmersive();
     void crashApplication(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force);
-    @UnsupportedAppUsage
+    /** @deprecated -- use getProviderMimeTypeAsync */
+    @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
+            "Use {@link android.content.ContentResolver#getType} public API instead.")
     String getProviderMimeType(in Uri uri, int userId);
+
+    oneway void getProviderMimeTypeAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
+
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
             boolean runGc, in String path, in ParcelFileDescriptor fd,

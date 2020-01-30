@@ -92,9 +92,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 outline.setRect(left, top, right, bottom);
             } else {
                 Path clipPath = getClipPath(false /* ignoreTranslation */);
-                if (clipPath != null && clipPath.isConvex()) {
-                    // The path might not be convex in border cases where the view is small and
-                    // clipped
+                if (clipPath != null) {
                     outline.setConvexPath(clipPath);
                 }
             }

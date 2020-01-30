@@ -1315,6 +1315,17 @@
                 android:process=":RedactingProvider">
         </provider>
 
+        <provider
+            android:name="android.content.FakeProviderLocal"
+            android:authorities="android.content.FakeProviderLocal">
+        </provider>
+
+        <provider
+            android:name="android.content.FakeProviderRemote"
+            android:authorities="android.content.FakeProviderRemote"
+            android:process=":FakeProvider">
+        </provider>
+
         <!-- Application components used for os tests -->
 
         <service android:name="android.os.MessengerService"

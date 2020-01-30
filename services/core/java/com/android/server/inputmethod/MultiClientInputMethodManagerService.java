@@ -207,6 +207,12 @@ public final class MultiClientInputMethodManagerService {
                             reportNotSupported();
                             return false;
                         }
+
+                        @Override
+                        public void registerInputMethodListListener(
+                                InputMethodListListener listener) {
+                            reportNotSupported();
+                        }
                     });
         }
 

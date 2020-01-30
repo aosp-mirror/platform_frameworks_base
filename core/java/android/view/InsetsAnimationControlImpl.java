@@ -272,8 +272,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             if (leash != null) {
                 // TODO: use a better interpolation for fade.
                 alpha = mFade ? ((float) maxInset / inset * 0.3f + 0.7f) : alpha;
-                surfaceParams.add(new SurfaceParams(leash, alpha, mTmpMatrix,
-                        null /* windowCrop */, 0 /* layer */, 0f /* cornerRadius*/,
+                surfaceParams.add(new SurfaceParams(leash, side == ISIDE_FLOATING ? 1 : alpha,
+                        mTmpMatrix, null /* windowCrop */, 0 /* layer */, 0f /* cornerRadius*/,
                         side == ISIDE_FLOATING ? state.getSource(source.getType()).isVisible()
                                 : inset != 0 /* visible */));
             }

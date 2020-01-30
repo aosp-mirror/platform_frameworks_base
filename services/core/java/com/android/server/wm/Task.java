@@ -90,7 +90,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
+import static com.android.server.wm.TaskProto.ACTIVITY;
 import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
@@ -3171,7 +3171,7 @@ class Task extends WindowContainer<WindowContainer> {
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(TaskProto.ID, mTaskId);
         forAllActivities((r) -> {
-            r.dumpDebug(proto, APP_WINDOW_TOKENS, logLevel);
+            r.dumpDebug(proto, ACTIVITY);
         });
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().dumpDebug(proto, TaskProto.BOUNDS);

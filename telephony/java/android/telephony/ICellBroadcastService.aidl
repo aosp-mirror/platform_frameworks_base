@@ -36,4 +36,7 @@ interface ICellBroadcastService {
     /** @see android.telephony.CellBroadcastService#onCdmaScpMessage */
     oneway void handleCdmaScpMessage(int slotId, in List<CdmaSmsCbProgramData> programData,
             String originatingAddress, in RemoteCallback callback);
+
+    /** @see android.telephony.CellBroadcastService#getCellBroadcastAreaInfo */
+    CharSequence getCellBroadcastAreaInfo(int slotIndex);
 }

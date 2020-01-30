@@ -2123,6 +2123,33 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
+    public void removeLongLivedShortcuts(String packageName, List shortcutIds,
+            @UserIdInt int userId) {
+        verifyCaller(packageName, userId);
+        Objects.requireNonNull(shortcutIds, "shortcutIds must be provided");
+
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
+
+            ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds,
+                    /*ignoreInvisible=*/ true);
+
+            for (int i = shortcutIds.size() - 1; i >= 0; i--) {
+                final String id = Preconditions.checkStringNotEmpty((String) shortcutIds.get(i));
+                ps.deleteLongLivedWithId(id, /*ignoreInvisible=*/ true);
+            }
+
+            // We may have removed dynamic shortcuts which may have left a gap, so adjust the ranks.
+            ps.adjustRanks();
+        }
+        packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
+    }
+
+    @Override
     public ParceledListSlice<ShortcutInfo> getDynamicShortcuts(String packageName,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
@@ -2161,6 +2188,31 @@ public class ShortcutService extends IShortcutService.Stub {
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
                     ShortcutInfo::isPinnedVisible);
+        }
+    }
+
+    @Override
+    public ParceledListSlice<ShortcutInfo> getShortcuts(String packageName,
+            @ShortcutManager.ShortcutMatchFlags int matchFlags, @UserIdInt int userId) {
+        verifyCaller(packageName, userId);
+
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            final boolean matchDynamic = (matchFlags & ShortcutManager.FLAG_MATCH_DYNAMIC) != 0;
+            final boolean matchPinned = (matchFlags & ShortcutManager.FLAG_MATCH_PINNED) != 0;
+            final boolean matchManifest = (matchFlags & ShortcutManager.FLAG_MATCH_MANIFEST) != 0;
+            final boolean matchCached = (matchFlags & ShortcutManager.FLAG_MATCH_CACHED) != 0;
+
+            final int shortcutFlags = (matchDynamic ? ShortcutInfo.FLAG_DYNAMIC : 0)
+                    | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
+                    | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
+                    | (matchCached ? ShortcutInfo.FLAG_CACHED : 0);
+
+            return getShortcutsWithQueryLocked(
+                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
+                    (ShortcutInfo si) ->
+                            si.isVisibleToPublisher() && (si.getFlags() & shortcutFlags) != 0);
         }
     }
 
@@ -2628,6 +2680,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final boolean matchDynamic = (queryFlags & ShortcutQuery.FLAG_MATCH_DYNAMIC) != 0;
             final boolean matchPinned = (queryFlags & ShortcutQuery.FLAG_MATCH_PINNED) != 0;
             final boolean matchManifest = (queryFlags & ShortcutQuery.FLAG_MATCH_MANIFEST) != 0;
+            final boolean matchCached = (queryFlags & ShortcutQuery.FLAG_MATCH_CACHED) != 0;
 
             final boolean canAccessAllShortcuts =
                     canSeeAnyPinnedShortcut(callingPackage, launcherUserId, callingPid, callingUid);
@@ -2657,6 +2710,9 @@ public class ShortcutService extends IShortcutService.Stub {
                             return true;
                         }
                         if (matchManifest && si.isDeclaredInManifest()) {
+                            return true;
+                        }
+                        if (matchCached && si.isCached()) {
                             return true;
                         }
                         return false;

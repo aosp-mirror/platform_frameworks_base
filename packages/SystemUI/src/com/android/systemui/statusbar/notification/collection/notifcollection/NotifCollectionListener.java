@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection;
 
+import android.service.notification.NotificationListenerService;
+
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -46,5 +48,12 @@ public interface NotifCollectionListener {
             NotificationEntry entry,
             @CancellationReason int reason,
             boolean removedByUser) {
+    }
+
+    /**
+     * Called whenever the RankingMap is updated by system server. By the time this listener is
+     * called, the Rankings of all entries will have been updated.
+     */
+    default void onRankingUpdate(NotificationListenerService.RankingMap rankingMap) {
     }
 }

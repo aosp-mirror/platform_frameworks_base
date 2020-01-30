@@ -46,7 +46,7 @@ interface ImportsProvider {
     val Parcelling: String get() { return classRef("com.android.internal.util.Parcelling") }
     val Parcelable: String get() { return classRef("android.os.Parcelable") }
     val Parcel: String get() { return classRef("android.os.Parcel") }
-    val UnsupportedAppUsage: String get() { return classRef("android.annotation.UnsupportedAppUsage") }
+    val UnsupportedAppUsage: String get() { return classRef("android.compat.annotation.UnsupportedAppUsage") }
 
     /**
      * Optionally shortens a class reference if there's a corresponding import present

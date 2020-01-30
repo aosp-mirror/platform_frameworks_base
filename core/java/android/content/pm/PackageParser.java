@@ -1584,7 +1584,8 @@ public class PackageParser {
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
-        int minSignatureScheme = SigningDetails.SignatureSchemeVersion.JAR;
+        int minSignatureScheme = ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                pkg.applicationInfo.targetSdkVersion);
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
             // must use v2 signing scheme
             minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2;
@@ -8521,7 +8522,8 @@ public class PackageParser {
                 Display.DEFAULT_DISPLAY,
                 null,
                 systemResources.getCompatibilityInfo(),
-                systemResources.getClassLoader());
+                systemResources.getClassLoader(),
+                null);
 
         sUseRoundIcon = overlayableRes.getBoolean(com.android.internal.R.bool.config_useRoundIcon);
     }

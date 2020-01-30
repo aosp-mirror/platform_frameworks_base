@@ -120,6 +120,9 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_LONG_LIVED = 1 << 13;
 
     /** @hide */
+    public static final int FLAG_CACHED = 1 << 14;
+
+    /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DYNAMIC,
             FLAG_PINNED,
@@ -135,6 +138,7 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_ICON_FILE_PENDING_SAVE,
             FLAG_SHADOW,
             FLAG_LONG_LIVED,
+            FLAG_CACHED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -1681,6 +1685,16 @@ public final class ShortcutInfo implements Parcelable {
         addFlags(FLAG_LONG_LIVED);
     }
 
+    /** @hide */
+    public void setCached() {
+        addFlags(FLAG_CACHED);
+    }
+
+    /** Return whether a shortcut is cached. */
+    public boolean isCached() {
+        return hasFlags(FLAG_CACHED);
+    }
+
     /** Return whether a shortcut is dynamic. */
     public boolean isDynamic() {
         return hasFlags(FLAG_DYNAMIC);
@@ -1765,7 +1779,8 @@ public final class ShortcutInfo implements Parcelable {
 
     /** @hide */
     public boolean isAlive() {
-        return hasFlags(FLAG_PINNED) || hasFlags(FLAG_DYNAMIC) || hasFlags(FLAG_MANIFEST);
+        return hasFlags(FLAG_PINNED) || hasFlags(FLAG_DYNAMIC) || hasFlags(FLAG_MANIFEST)
+                || hasFlags(FLAG_CACHED);
     }
 
     /** @hide */

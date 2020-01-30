@@ -2281,6 +2281,9 @@
          movement threshold under which hover is considered "stationary". -->
     <dimen name="config_viewConfigurationHoverSlop">4dp</dimen>
 
+    <!-- Multiplier for gesture thresholds when a MotionEvent classification is ambiguous. -->
+    <item name="config_ambiguousGestureMultiplier" format="float" type="dimen">2.0</item>
+
     <!-- Minimum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMinFlingVelocity">50dp</dimen>
 

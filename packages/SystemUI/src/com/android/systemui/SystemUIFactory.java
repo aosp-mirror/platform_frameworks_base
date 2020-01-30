@@ -35,6 +35,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -153,6 +154,7 @@ public class SystemUIFactory {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
                 wakeUpCoordinator, keyguardBypassController,
                 Dependency.get(NotificationMediaManager.class),
+                Dependency.get(NotificationListener.class),
                 Dependency.get(DozeParameters.class));
     }
 

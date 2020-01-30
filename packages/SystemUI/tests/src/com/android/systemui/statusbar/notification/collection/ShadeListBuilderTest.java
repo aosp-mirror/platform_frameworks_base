@@ -853,7 +853,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void testGroupTransformEntries() {
         // GIVEN a registered OnBeforeTransformGroupsListener
         RecordingOnBeforeTransformGroupsListener listener =
-                spy(new RecordingOnBeforeTransformGroupsListener());
+                new RecordingOnBeforeTransformGroupsListener();
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
         // GIVEN some new notifs
@@ -879,12 +879,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        verify(listener).onBeforeTransformGroups(
+        assertEquals(
                 Arrays.asList(
                         mEntrySet.get(0),
                         mBuiltList.get(1),
-                        mEntrySet.get(4)
-                )
+                        mEntrySet.get(4)),
+                listener.mEntriesReceived
         );
     }
 
@@ -925,13 +925,71 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         );
 
         // THEN all the new notifs, including the new GroupEntry, are passed to the listener
-        verify(listener).onBeforeTransformGroups(
+        assertEquals(
+                Arrays.asList(
+                        mEntrySet.get(0),
+                        mBuiltList.get(2),
+                        mEntrySet.get(7),
+                        mEntrySet.get(1)),
+                listener.mEntriesReceived
+        );
+    }
+
+    @Test
+    public void testDispatchListOnBeforeSort() {
+        // GIVEN a registered OnBeforeSortListener
+        RecordingOnBeforeSortListener listener =
+                new RecordingOnBeforeSortListener();
+        mListBuilder.addOnBeforeSortListener(listener);
+        mListBuilder.setComparators(Arrays.asList(new HypeComparator(PACKAGE_3)));
+
+        // GIVEN some new notifs out of order
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+
+        // WHEN we run the pipeline
+        dispatchBuild();
+
+        // THEN all the new notifs are passed to the listener out of order
+        assertEquals(
                 Arrays.asList(
                         mEntrySet.get(0),
                         mEntrySet.get(1),
-                        mBuiltList.get(2),
-                        mEntrySet.get(7)
-                )
+                        mEntrySet.get(2)),
+                listener.mEntriesReceived
+        );
+
+        // THEN the final list is in order
+        verifyBuiltList(
+                notif(2),
+                notif(0),
+                notif(1)
+        );
+    }
+
+    @Test
+    public void testDispatchListOnBeforeRender() {
+        // GIVEN a registered OnBeforeRenderList
+        RecordingOnBeforeRenderistener listener =
+                new RecordingOnBeforeRenderistener();
+        mListBuilder.addOnBeforeRenderListListener(listener);
+
+        // GIVEN some new notifs out of order
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+
+        // WHEN we run the pipeline
+        dispatchBuild();
+
+        // THEN all the new notifs are passed to the listener
+        assertEquals(
+                Arrays.asList(
+                        mEntrySet.get(0),
+                        mEntrySet.get(1),
+                        mEntrySet.get(2)),
+                listener.mEntriesReceived
         );
     }
 
@@ -1346,9 +1404,32 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     private static class RecordingOnBeforeTransformGroupsListener
             implements OnBeforeTransformGroupsListener {
+        List<ListEntry> mEntriesReceived;
 
         @Override
-        public void onBeforeTransformGroups(List<ListEntry> list) { }
+        public void onBeforeTransformGroups(List<ListEntry> list) {
+            mEntriesReceived = new ArrayList<>(list);
+        }
+    }
+
+    private static class RecordingOnBeforeSortListener
+            implements OnBeforeSortListener {
+        List<ListEntry> mEntriesReceived;
+
+        @Override
+        public void onBeforeSort(List<ListEntry> list) {
+            mEntriesReceived = new ArrayList<>(list);
+        }
+    }
+
+    private static class RecordingOnBeforeRenderistener
+            implements OnBeforeRenderListListener {
+        List<ListEntry> mEntriesReceived;
+
+        @Override
+        public void onBeforeRenderList(List<ListEntry> list) {
+            mEntriesReceived = new ArrayList<>(list);
+        }
     }
 
     private static final String PACKAGE_1 = "com.test1";

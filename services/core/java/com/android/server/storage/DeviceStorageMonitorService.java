@@ -425,6 +425,7 @@ public class DeviceStorageMonitorService extends SystemService {
     void dumpImpl(FileDescriptor fd, PrintWriter _pw, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(_pw, "  ");
         if (args == null || args.length == 0 || "-a".equals(args[0])) {
+            final StorageManager storage = getContext().getSystemService(StorageManager.class);
             pw.println("Known volumes:");
             pw.increaseIndent();
             for (int i = 0; i < mStates.size(); i++) {
@@ -439,6 +440,19 @@ public class DeviceStorageMonitorService extends SystemService {
                 pw.printPair("level", State.levelToString(state.level));
                 pw.printPair("lastUsableBytes", state.lastUsableBytes);
                 pw.println();
+                for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                    final File file = vol.getPath();
+                    final UUID innerUuid = StorageManager.convert(vol.getFsUuid());
+                    if (Objects.equals(uuid, innerUuid)) {
+                        pw.print("lowBytes=");
+                        pw.print(storage.getStorageLowBytes(file));
+                        pw.print(" fullBytes=");
+                        pw.println(storage.getStorageFullBytes(file));
+                        pw.print("path=");
+                        pw.println(file);
+                        break;
+                    }
+                }
                 pw.decreaseIndent();
             }
             pw.decreaseIndent();

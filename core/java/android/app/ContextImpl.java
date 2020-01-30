@@ -46,6 +46,7 @@ import android.content.res.CompatResources;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.loader.ResourcesLoader;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -100,6 +101,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -2217,7 +2219,8 @@ class ContextImpl extends Context {
     }
 
     private static Resources createResources(IBinder activityToken, LoadedApk pi, String splitName,
-            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo) {
+            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo,
+            List<ResourcesLoader> resourcesLoader) {
         final String[] splitResDirs;
         final ClassLoader classLoader;
         try {
@@ -2234,7 +2237,8 @@ class ContextImpl extends Context {
                 displayId,
                 overrideConfig,
                 compatInfo,
-                classLoader);
+                classLoader,
+                resourcesLoader);
     }
 
     @Override
@@ -2249,7 +2253,7 @@ class ContextImpl extends Context {
             final int displayId = getDisplayId();
 
             c.setResources(createResources(mToken, pi, null, displayId, null,
-                    getDisplayAdjustments(displayId).getCompatibilityInfo()));
+                    getDisplayAdjustments(displayId).getCompatibilityInfo(), null));
             if (c.mResources != null) {
                 return c;
             }
@@ -2284,7 +2288,7 @@ class ContextImpl extends Context {
             final int displayId = getDisplayId();
 
             c.setResources(createResources(mToken, pi, null, displayId, null,
-                    getDisplayAdjustments(displayId).getCompatibilityInfo()));
+                    getDisplayAdjustments(displayId).getCompatibilityInfo(), null));
             if (c.mResources != null) {
                 return c;
             }
@@ -2328,7 +2332,8 @@ class ContextImpl extends Context {
                 displayId,
                 null,
                 mPackageInfo.getCompatibilityInfo(),
-                classLoader));
+                classLoader,
+                mResources.getLoaders()));
         return context;
     }
 
@@ -2342,8 +2347,10 @@ class ContextImpl extends Context {
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
 
         final int displayId = getDisplayId();
+
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
-                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo()));
+                overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
+                mResources.getLoaders()));
         return context;
     }
 
@@ -2357,8 +2364,10 @@ class ContextImpl extends Context {
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
 
         final int displayId = display.getDisplayId();
+
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
-                null, getDisplayAdjustments(displayId).getCompatibilityInfo()));
+                null, getDisplayAdjustments(displayId).getCompatibilityInfo(),
+                mResources.getLoaders()));
         context.mDisplay = display;
         return context;
     }
@@ -2564,7 +2573,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, systemContext.mMainThread, packageInfo, null,
                 null, null, null, 0, null, null);
         context.setResources(createResources(null, packageInfo, null, displayId, null,
-                packageInfo.getCompatibilityInfo()));
+                packageInfo.getCompatibilityInfo(), null));
         context.updateDisplay(displayId);
         context.mIsSystemOrSystemUiContext = true;
         return context;
@@ -2637,7 +2646,8 @@ class ContextImpl extends Context {
                 displayId,
                 overrideConfiguration,
                 compatInfo,
-                classLoader));
+                classLoader,
+                packageInfo.getApplication().getResources().getLoaders()));
         context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
                 context.getResources());
         return context;

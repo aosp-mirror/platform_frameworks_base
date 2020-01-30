@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.InsetsState.ITYPE_IME;
 
+import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
 import android.text.TextUtils;
@@ -80,6 +81,14 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusLost() {
         super.onWindowFocusLost();
         getImm().unregisterImeConsumer(this);
+    }
+
+    @Override
+    public void setControl(@Nullable InsetsSourceControl control) {
+        super.setControl(control);
+        if (control == null) {
+            hide();
+        }
     }
 
     /**

@@ -96,7 +96,7 @@ public class ResourcesThemePerfTest {
 
         Resources destResources = resourcesManager.getResources(null, ai.sourceDir,
                 ai.splitSourceDirs, ai.resourceDirs, ai.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
-                c, mContext.getResources().getCompatibilityInfo(), null);
+                c, mContext.getResources().getCompatibilityInfo(), null, null);
         Assert.assertNotEquals(destResources.getAssets(), mContext.getAssets());
 
         Resources.Theme destTheme = destResources.newTheme();

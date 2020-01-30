@@ -79,7 +79,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     private final Context mContext;
 
-    private final WindowManagerService mWindowManager;
     private Handler mHandler = new Handler();
     private NotificationDelegate mNotificationDelegate;
     private volatile IStatusBar mBar;
@@ -93,6 +92,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final Object mLock = new Object();
     private final DeathRecipient mDeathRecipient = new DeathRecipient();
     private int mCurrentUserId;
+    private boolean mTracingEnabled;
 
     private SparseArray<UiState> mDisplayUiState = new SparseArray<>();
 
@@ -176,11 +176,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     /**
-     * Construct the service, add the status bar view to the window manager
+     * Construct the service
      */
-    public StatusBarManagerService(Context context, WindowManagerService windowManager) {
+    public StatusBarManagerService(Context context) {
         mContext = context;
-        mWindowManager = windowManager;
 
         LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
         LocalServices.addService(GlobalActionsProvider.class, mGlobalActionsProvider);
@@ -718,6 +717,31 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             } catch (RemoteException ex) {
             }
         }
+    }
+
+    @Override
+    public void startTracing() {
+        if (mBar != null) {
+            try {
+                mBar.startTracing();
+                mTracingEnabled = true;
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void stopTracing() {
+        if (mBar != null) {
+            try {
+                mTracingEnabled = false;
+                mBar.stopTracing();
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public boolean isTracing() {
+        return mTracingEnabled;
     }
 
     // TODO(b/117478341): make it aware of multi-display if needed.

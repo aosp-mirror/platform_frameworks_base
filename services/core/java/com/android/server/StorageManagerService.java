@@ -1701,15 +1701,8 @@ class StorageManagerService extends IStorageManager.Stub
         if (mIsFuseEnabled != settingsFuseFlag) {
             Slog.i(TAG, "Toggling persist.sys.fuse to " + settingsFuseFlag);
             SystemProperties.set(PROP_FUSE, Boolean.toString(settingsFuseFlag));
-
-            PowerManager powerManager = mContext.getSystemService(PowerManager.class);
-            if (powerManager.isRebootingUserspaceSupported()) {
-                // Perform userspace reboot to kick policy into place
-                powerManager.reboot(PowerManager.REBOOT_USERSPACE);
-            } else {
-                // Perform hard reboot to kick policy into place
-                powerManager.reboot("fuse_prop");
-            }
+            // Perform hard reboot to kick policy into place
+            mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
         }
     }
 
@@ -4329,6 +4322,19 @@ class StorageManagerService extends IStorageManager.Stub
 
         public void onAppOpsChanged(int code, int uid,
                 @Nullable String packageName, int mode) {
+            if (code == OP_REQUEST_INSTALL_PACKAGES && mIsFuseEnabled) {
+                // When using FUSE, we basically have no other choice but to kill the app
+                // after the app op is either granted or rejected.
+                final IActivityManager am = ActivityManager.getService();
+                try {
+                    am.killApplication(packageName,
+                            UserHandle.getAppId(uid),
+                            UserHandle.USER_ALL, AppOpsManager.opToName(code) + " changed.");
+                } catch (RemoteException e) {
+                }
+
+                return;
+            }
             if (mode == MODE_ALLOWED && (code == OP_READ_EXTERNAL_STORAGE
                     || code == OP_WRITE_EXTERNAL_STORAGE
                     || code == OP_REQUEST_INSTALL_PACKAGES)) {

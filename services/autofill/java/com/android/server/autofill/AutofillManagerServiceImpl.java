@@ -57,6 +57,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
+import android.service.autofill.InlineSuggestionRenderService;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.UserData;
 import android.util.ArrayMap;
@@ -117,6 +118,7 @@ final class AutofillManagerServiceImpl
     private final LocalLog mUiLatencyHistory;
     private final LocalLog mWtfHistory;
     private final FieldClassificationStrategy mFieldClassificationStrategy;
+    private RemoteInlineSuggestionRenderService mRemoteInlineSuggestionRenderService;
 
     /**
      * Apps disabled by the service; key is package name, value is when they will be enabled again.
@@ -212,6 +214,17 @@ final class AutofillManagerServiceImpl
             sendStateToClients(/* resetClient= */ false);
         }
         updateRemoteAugmentedAutofillService();
+
+        final ComponentName componentName = RemoteInlineSuggestionRenderService
+                .getServiceComponentName(getContext());
+        if (componentName != null) {
+            mRemoteInlineSuggestionRenderService = new RemoteInlineSuggestionRenderService(
+                    getContext(), componentName, InlineSuggestionRenderService.SERVICE_INTERFACE,
+                    mUserId, new InlineSuggestionRenderCallbacksImpl(),
+                    mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+        } else {
+            mRemoteInlineSuggestionRenderService = null;
+        }
         return enabledChanged;
     }
 
@@ -1540,6 +1553,21 @@ final class AutofillManagerServiceImpl
             }
         }
         return mFieldClassificationStrategy.getDefaultAlgorithm();
+    }
+
+    RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderService() {
+        return mRemoteInlineSuggestionRenderService;
+    }
+
+    private class InlineSuggestionRenderCallbacksImpl implements
+            RemoteInlineSuggestionRenderService.InlineSuggestionRenderCallbacks {
+
+        @Override // from InlineSuggestionRenderCallbacksImpl
+        public void onServiceDied(@NonNull RemoteInlineSuggestionRenderService service) {
+            // Don't do anything; eventually the system will bind to it again...
+            Slog.w(TAG, "remote service died: " + service);
+            mRemoteInlineSuggestionRenderService = null;
+        }
     }
 
     @Override

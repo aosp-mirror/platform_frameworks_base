@@ -55,6 +55,7 @@ import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -67,6 +68,7 @@ import android.util.Log;
 import android.util.Size;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.MimeIconUtils;
 
 import dalvik.system.CloseGuard;
@@ -695,6 +697,9 @@ public abstract class ContentResolver implements ContentInterface {
     private static final int SLOW_THRESHOLD_MILLIS = 500;
     private final Random mRandom = new Random();  // guarded by itself
 
+    /** @hide */
+    public static final String REMOTE_CALLBACK_RESULT = "result";
+
     public ContentResolver(@Nullable Context context) {
         this(context, null);
     }
@@ -807,7 +812,10 @@ public abstract class ContentResolver implements ContentInterface {
         IContentProvider provider = acquireExistingProvider(url);
         if (provider != null) {
             try {
-                return provider.getType(url);
+                final GetTypeResultListener resultListener = new GetTypeResultListener();
+                provider.getTypeAsync(url, new RemoteCallback(resultListener));
+                resultListener.waitForResult();
+                return resultListener.type;
             } catch (RemoteException e) {
                 // Arbitrary and not worth documenting, as Activity
                 // Manager will kill this process shortly anyway.
@@ -825,14 +833,50 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            String type = ActivityManager.getService().getProviderMimeType(
-                    ContentProvider.getUriWithoutUserId(url), resolveUserId(url));
-            return type;
+            GetTypeResultListener resultListener = new GetTypeResultListener();
+            ActivityManager.getService().getProviderMimeTypeAsync(
+                    ContentProvider.getUriWithoutUserId(url),
+                    resolveUserId(url),
+                    new RemoteCallback(resultListener));
+            resultListener.waitForResult();
+            return resultListener.type;
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            // We just failed to send a oneway request to the System Server. Nothing to do.
+            return null;
         } catch (java.lang.Exception e) {
             Log.w(TAG, "Failed to get type for: " + url + " (" + e.getMessage() + ")");
             return null;
+        }
+    }
+
+    private static final int GET_TYPE_TIMEOUT_MILLIS = 3000;
+
+    private static class GetTypeResultListener implements RemoteCallback.OnResultListener {
+        @GuardedBy("this")
+        public boolean done;
+
+        @GuardedBy("this")
+        public String type;
+
+        @Override
+        public void onResult(Bundle result) {
+            synchronized (this) {
+                type = result.getString(REMOTE_CALLBACK_RESULT);
+                done = true;
+                notifyAll();
+            }
+        }
+
+        public void waitForResult() {
+            synchronized (this) {
+                if (!done) {
+                    try {
+                        wait(GET_TYPE_TIMEOUT_MILLIS);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                }
+            }
         }
     }
 

@@ -5064,11 +5064,7 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.app.blob.BlobStoreManager
-     *
-     * TODO: make this public once BlobStoreManager is ready.
-     * @hide
      */
-    @TestApi
     public static final String BLOB_STORE_SERVICE = "blob_store";
 
     /**

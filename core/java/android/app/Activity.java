@@ -2873,7 +2873,13 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Called by the system when picture in picture mode should be entered if supported.
+     * This method is called by the system in various cases where picture in picture mode should be
+     * entered if supported.
+     *
+     * <p>It is up to the app developer to choose whether to call
+     * {@link #enterPictureInPictureMode(PictureInPictureParams)} at this time. For example, the
+     * system will call this method when the activity is being put into the background, so the app
+     * developer might want to switch an activity into PIP mode instead.</p>
      */
     public void onPictureInPictureRequested() {
         // Previous recommendation was for apps to enter picture-in-picture in onUserLeaveHint()

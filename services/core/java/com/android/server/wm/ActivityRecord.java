@@ -112,16 +112,36 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_UNSET;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 
-import static com.android.server.am.ActivityRecordProto.APP_WINDOW_TOKEN;
-import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
-import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
-import static com.android.server.am.ActivityRecordProto.PROC_ID;
-import static com.android.server.am.ActivityRecordProto.STATE;
-import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
-import static com.android.server.am.ActivityRecordProto.VISIBLE;
-import static com.android.server.am.ActivityRecordProto.VISIBLE_REQUESTED;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityRecordProto.ALL_DRAWN;
+import static com.android.server.wm.ActivityRecordProto.APP_STOPPED;
+import static com.android.server.wm.ActivityRecordProto.CLIENT_VISIBLE;
+import static com.android.server.wm.ActivityRecordProto.DEFER_HIDING_CLIENT;
+import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
+import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
+import static com.android.server.wm.ActivityRecordProto.FROZEN_BOUNDS;
+import static com.android.server.wm.ActivityRecordProto.IDENTIFIER;
+import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
+import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
+import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
+import static com.android.server.wm.ActivityRecordProto.LAST_SURFACE_SHOWING;
+import static com.android.server.wm.ActivityRecordProto.NAME;
+import static com.android.server.wm.ActivityRecordProto.NUM_DRAWN_WINDOWS;
+import static com.android.server.wm.ActivityRecordProto.NUM_INTERESTING_WINDOWS;
+import static com.android.server.wm.ActivityRecordProto.PROC_ID;
+import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
+import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
+import static com.android.server.wm.ActivityRecordProto.STARTING_DISPLAYED;
+import static com.android.server.wm.ActivityRecordProto.STARTING_MOVED;
+import static com.android.server.wm.ActivityRecordProto.STARTING_WINDOW;
+import static com.android.server.wm.ActivityRecordProto.STATE;
+import static com.android.server.wm.ActivityRecordProto.THUMBNAIL;
+import static com.android.server.wm.ActivityRecordProto.TRANSLUCENT;
+import static com.android.server.wm.ActivityRecordProto.VISIBLE;
+import static com.android.server.wm.ActivityRecordProto.VISIBLE_REQUESTED;
+import static com.android.server.wm.ActivityRecordProto.VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW;
+import static com.android.server.wm.ActivityRecordProto.WINDOW_TOKEN;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
@@ -167,27 +187,6 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_F
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutLocked;
-import static com.android.server.wm.AppWindowTokenProto.ALL_DRAWN;
-import static com.android.server.wm.AppWindowTokenProto.APP_STOPPED;
-import static com.android.server.wm.AppWindowTokenProto.CLIENT_VISIBLE;
-import static com.android.server.wm.AppWindowTokenProto.DEFER_HIDING_CLIENT;
-import static com.android.server.wm.AppWindowTokenProto.FILLS_PARENT;
-import static com.android.server.wm.AppWindowTokenProto.FROZEN_BOUNDS;
-import static com.android.server.wm.AppWindowTokenProto.IS_ANIMATING;
-import static com.android.server.wm.AppWindowTokenProto.IS_WAITING_FOR_TRANSITION_START;
-import static com.android.server.wm.AppWindowTokenProto.LAST_ALL_DRAWN;
-import static com.android.server.wm.AppWindowTokenProto.LAST_SURFACE_SHOWING;
-import static com.android.server.wm.AppWindowTokenProto.NAME;
-import static com.android.server.wm.AppWindowTokenProto.NUM_DRAWN_WINDOWS;
-import static com.android.server.wm.AppWindowTokenProto.NUM_INTERESTING_WINDOWS;
-import static com.android.server.wm.AppWindowTokenProto.REPORTED_DRAWN;
-import static com.android.server.wm.AppWindowTokenProto.REPORTED_VISIBLE;
-import static com.android.server.wm.AppWindowTokenProto.STARTING_DISPLAYED;
-import static com.android.server.wm.AppWindowTokenProto.STARTING_MOVED;
-import static com.android.server.wm.AppWindowTokenProto.STARTING_WINDOW;
-import static com.android.server.wm.AppWindowTokenProto.THUMBNAIL;
-import static com.android.server.wm.AppWindowTokenProto.VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW;
-import static com.android.server.wm.AppWindowTokenProto.WINDOW_TOKEN;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -1876,9 +1875,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
-            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
-                    : snapshotOrientationSameAsTask(snapshot) || fromRecents
-                            ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+            if (snapshotOrientationSameAsTask(snapshot) || (snapshot != null && fromRecents)) {
+                return STARTING_WINDOW_TYPE_SNAPSHOT;
+            }
+            if (!isActivityTypeHome()) {
+                return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
+            }
+            return STARTING_WINDOW_TYPE_NONE;
         } else {
             return STARTING_WINDOW_TYPE_NONE;
         }
@@ -7496,7 +7499,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
     void dumpDebug(ProtoOutputStream proto) {
-        dumpDebug(proto, APP_WINDOW_TOKEN, WindowTraceLogLevel.ALL);
+        writeNameToProto(proto, NAME);
+        super.dumpDebug(proto, WINDOW_TOKEN, WindowTraceLogLevel.ALL);
+        proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
+        proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
+        proto.write(IS_ANIMATING, isAnimating());
+        if (mThumbnail != null) {
+            mThumbnail.dumpDebug(proto, THUMBNAIL);
+        }
+        proto.write(FILLS_PARENT, mOccludesParent);
+        proto.write(APP_STOPPED, mAppStopped);
+        proto.write(VISIBLE_REQUESTED, mVisibleRequested);
+        proto.write(CLIENT_VISIBLE, mClientVisible);
+        proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
+        proto.write(REPORTED_DRAWN, reportedDrawn);
+        proto.write(REPORTED_VISIBLE, reportedVisible);
+        proto.write(NUM_INTERESTING_WINDOWS, mNumInterestingWindows);
+        proto.write(NUM_DRAWN_WINDOWS, mNumDrawnWindows);
+        proto.write(ALL_DRAWN, allDrawn);
+        proto.write(LAST_ALL_DRAWN, mLastAllDrawn);
+        if (startingWindow != null) {
+            startingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
+        }
+        proto.write(STARTING_DISPLAYED, startingDisplayed);
+        proto.write(STARTING_MOVED, startingMoved);
+        proto.write(VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW,
+                mVisibleSetFromTransferredStartingWindow);
+        for (Rect bounds : mFrozenBounds) {
+            bounds.dumpDebug(proto, FROZEN_BOUNDS);
+        }
+
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
         proto.write(VISIBLE_REQUESTED, mVisibleRequested);
@@ -7536,7 +7568,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         proto.write(FILLS_PARENT, mOccludesParent);
         proto.write(APP_STOPPED, mAppStopped);
-        proto.write(com.android.server.wm.AppWindowTokenProto.VISIBLE_REQUESTED, mVisibleRequested);
+        proto.write(VISIBLE_REQUESTED, mVisibleRequested);
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
         proto.write(REPORTED_DRAWN, reportedDrawn);
@@ -7555,7 +7587,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         for (Rect bounds : mFrozenBounds) {
             bounds.dumpDebug(proto, FROZEN_BOUNDS);
         }
-        proto.write(com.android.server.wm.AppWindowTokenProto.VISIBLE, mVisible);
+        proto.write(VISIBLE, mVisible);
         proto.end(token);
     }
 
