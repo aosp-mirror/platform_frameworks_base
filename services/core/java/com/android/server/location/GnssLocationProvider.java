@@ -408,7 +408,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Available only on GNSS HAL 2.0 implementations and later.
     private GnssVisibilityControl mGnssVisibilityControl;
 
-    // Handler for processing events
+    private final Context mContext;
     private Handler mHandler;
 
     private final GnssNetworkConnectivityHandler mNetworkConnectivityHandler;
@@ -625,10 +625,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     public GnssLocationProvider(Context context) {
-        super(context, FgThread.getExecutor());
+        super(FgThread.getExecutor(), context);
 
         ensureInitialized();
 
+        mContext = context;
         mLooper = FgThread.getHandler().getLooper();
 
         // Create a wake lock
@@ -1210,6 +1211,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    protected void onRequestSetAllowed(boolean allowed) {
+        // do nothing - the gnss provider is always allowed
     }
 
     private void deleteAidingData(Bundle extras) {

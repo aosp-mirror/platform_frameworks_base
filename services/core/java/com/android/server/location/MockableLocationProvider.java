@@ -16,8 +16,9 @@
 
 package com.android.server.location;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.annotation.Nullable;
-import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -68,10 +69,10 @@ public class MockableLocationProvider extends AbstractLocationProvider {
      * The client should expect that it may being to receive callbacks as soon as this constructor
      * is invoked.
      */
-    public MockableLocationProvider(Context context, Object ownerLock, Listener listener) {
+    public MockableLocationProvider(Object ownerLock, Listener listener) {
         // using a direct executor is acceptable because all inbound calls are delegated to the
         // actual provider implementations which will use their own executors
-        super(context, Runnable::run, Collections.emptySet());
+        super(DIRECT_EXECUTOR, Collections.emptySet());
         mOwnerLock = ownerLock;
         mRequest = ProviderRequest.EMPTY_REQUEST;
 
@@ -190,11 +191,6 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         }
     }
 
-    @Override
-    public State getState() {
-        return super.getState();
-    }
-
     /**
      * Returns the current location request.
      */
@@ -204,6 +200,7 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         }
     }
 
+    @Override
     protected void onSetRequest(ProviderRequest request) {
         synchronized (mOwnerLock) {
             if (request == mRequest) {
@@ -218,10 +215,20 @@ public class MockableLocationProvider extends AbstractLocationProvider {
         }
     }
 
+    @Override
     protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {
         synchronized (mOwnerLock) {
             if (mProvider != null) {
                 mProvider.sendExtraCommand(uid, pid, command, extras);
+            }
+        }
+    }
+
+    @Override
+    protected void onRequestSetAllowed(boolean allowed) {
+        synchronized (mOwnerLock) {
+            if (mProvider != null) {
+                mProvider.onRequestSetAllowed(allowed);
             }
         }
     }
