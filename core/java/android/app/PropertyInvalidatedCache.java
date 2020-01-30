@@ -297,9 +297,10 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             if (currentNonce == NONCE_DISABLED || currentNonce == NONCE_UNSET) {
                 if (DEBUG) {
                     Log.d(TAG,
-                            String.format("cache %s for %s",
+                            String.format("cache %s %s for %s",
+                                cacheName(),
                                 currentNonce == NONCE_DISABLED ? "disabled" : "unset",
-                                query));
+                                queryToString(query)));
                 }
                 return recompute(query);
             }
@@ -310,7 +311,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                 } else {
                     if (DEBUG) {
                         Log.d(TAG,
-                                String.format("clearing cache because nonce changed [%s] -> [%s]",
+                                String.format("clearing cache %s because nonce changed [%s] -> [%s]",
+                                        cacheName(),
                                         mLastSeenNonce, currentNonce));
                     }
                     mCache.clear();
@@ -328,13 +330,15 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                 final Result refreshedResult = refresh(cachedResult, query);
                 if (refreshedResult != cachedResult) {
                     if (DEBUG) {
-                        Log.d(TAG, "cache refresh for " + query);
+                        Log.d(TAG, "cache refresh for " + cacheName() + " " + queryToString(query));
                     }
                     final long afterRefreshNonce = getCurrentNonce();
                     if (currentNonce != afterRefreshNonce) {
                         currentNonce = afterRefreshNonce;
                         if (DEBUG) {
-                            Log.d(TAG, "restarting query because nonce changed in refresh");
+                            Log.d(TAG, String.format("restarting %s %s because nonce changed in refresh",
+                                                     cacheName(),
+                                                     queryToString(query)));
                         }
                         continue;
                     }
@@ -352,13 +356,13 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                     return maybeCheckConsistency(query, refreshedResult);
                 }
                 if (DEBUG) {
-                    Log.d(TAG, "cache hit for " + query);
+                    Log.d(TAG, "cache hit for " + cacheName() + " " + queryToString(query));
                 }
                 return maybeCheckConsistency(query, cachedResult);
             }
             // Cache miss: make the value from scratch.
             if (DEBUG) {
-                Log.d(TAG, "cache miss for " + query);
+                Log.d(TAG, "cache miss for " + cacheName() + " " + queryToString(query));
             }
             final Result result = recompute(query);
             synchronized (mLock) {
@@ -450,5 +454,21 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             }
         }
         return proposedResult;
+    }
+
+    /**
+     * Return the name of the cache, to be used in debug messages.  The
+     * method is public so clients can use it.
+     */
+    public String cacheName() {
+        return mPropertyName;
+    }
+
+    /**
+     * Return the query as a string, to be used in debug messages.  The
+     * method is public so clients can use it in external debug messages.
+     */
+    public String queryToString(Query query) {
+        return Objects.toString(query);
     }
 }
