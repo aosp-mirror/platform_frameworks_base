@@ -139,7 +139,7 @@ class MultiFingerSwipe extends GestureMatcher {
         final int actionIndex = getActionIndex(rawEvent);
         final int pointerId = rawEvent.getPointerId(actionIndex);
         int pointerIndex = rawEvent.getPointerCount() - 1;
-        if (pointerId < 0 || pointerId > rawEvent.getPointerCount() - 1) {
+        if (pointerId < 0) {
             // Nonsensical pointer id.
             cancelGesture(event, rawEvent, policyFlags);
             return;
@@ -185,7 +185,7 @@ class MultiFingerSwipe extends GestureMatcher {
         }
         final int actionIndex = getActionIndex(rawEvent);
         final int pointerId = rawEvent.getPointerId(actionIndex);
-        if (pointerId < 0 || pointerId > rawEvent.getPointerCount() - 1) {
+        if (pointerId < 0) {
             // Nonsensical pointer id.
             cancelGesture(event, rawEvent, policyFlags);
             return;
@@ -224,7 +224,7 @@ class MultiFingerSwipe extends GestureMatcher {
         mCurrentFingerCount -= 1;
         final int actionIndex = getActionIndex(event);
         final int pointerId = event.getPointerId(actionIndex);
-        if (pointerId < 0 || pointerId > rawEvent.getPointerCount() - 1) {
+        if (pointerId < 0) {
             // Nonsensical pointer id.
             cancelGesture(event, rawEvent, policyFlags);
             return;

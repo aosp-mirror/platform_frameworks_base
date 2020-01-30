@@ -30,6 +30,13 @@ import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_RIGHT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_TRIPLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_DOUBLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SINGLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SWIPE_DOWN;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SWIPE_LEFT;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SWIPE_RIGHT;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_SWIPE_UP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_4_FINGER_TRIPLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_SWIPE_DOWN;
@@ -133,6 +140,13 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 new MultiFingerMultiTap(mContext, 3, 2, GESTURE_3_FINGER_DOUBLE_TAP, this));
         mMultiFingerGestures.add(
                 new MultiFingerMultiTap(mContext, 3, 3, GESTURE_3_FINGER_TRIPLE_TAP, this));
+        // Four-finger taps.
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTap(mContext, 4, 1, GESTURE_4_FINGER_SINGLE_TAP, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTap(mContext, 4, 2, GESTURE_4_FINGER_DOUBLE_TAP, this));
+        mMultiFingerGestures.add(
+                new MultiFingerMultiTap(mContext, 4, 3, GESTURE_4_FINGER_TRIPLE_TAP, this));
         // Two-finger swipes.
         mMultiFingerGestures.add(
                 new MultiFingerSwipe(context, 2, DOWN, GESTURE_2_FINGER_SWIPE_DOWN, this));
@@ -151,6 +165,15 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 new MultiFingerSwipe(context, 3, RIGHT, GESTURE_3_FINGER_SWIPE_RIGHT, this));
         mMultiFingerGestures.add(
                 new MultiFingerSwipe(context, 3, UP, GESTURE_3_FINGER_SWIPE_UP, this));
+        // Four-finger swipes.
+        mMultiFingerGestures.add(
+                new MultiFingerSwipe(context, 4, DOWN, GESTURE_4_FINGER_SWIPE_DOWN, this));
+        mMultiFingerGestures.add(
+                new MultiFingerSwipe(context, 4, LEFT, GESTURE_4_FINGER_SWIPE_LEFT, this));
+        mMultiFingerGestures.add(
+                new MultiFingerSwipe(context, 4, RIGHT, GESTURE_4_FINGER_SWIPE_RIGHT, this));
+        mMultiFingerGestures.add(
+                new MultiFingerSwipe(context, 4, UP, GESTURE_4_FINGER_SWIPE_UP, this));
     }
 
     /**
