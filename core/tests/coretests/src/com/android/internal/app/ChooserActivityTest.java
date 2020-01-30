@@ -64,7 +64,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.chooser.ChooserTarget;
 
@@ -77,9 +76,6 @@ import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -482,8 +478,8 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
-        onView(withId(R.id.copy_button)).check(matches(isDisplayed()));
-        onView(withId(R.id.copy_button)).perform(click());
+        onView(withId(R.id.chooser_copy_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.chooser_copy_button)).perform(click());
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(
                 Context.CLIPBOARD_SERVICE);
         ClipData clipData = clipboard.getPrimaryClip();
@@ -510,8 +506,8 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
-        onView(withId(R.id.copy_button)).check(matches(isDisplayed()));
-        onView(withId(R.id.copy_button)).perform(click());
+        onView(withId(R.id.chooser_copy_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.chooser_copy_button)).perform(click());
 
         verify(mockLogger, atLeastOnce()).write(logMakerCaptor.capture());
         // First is  Activity shown, Second is "with preview"

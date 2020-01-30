@@ -194,6 +194,9 @@
   <!-- A tag used to save the index where the custom view is stored -->
   <item type="id" name="notification_custom_view_index_tag" />
 
+  <!-- Marks the "copy to clipboard" button in the ChooserActivity -->
+  <item type="id" name="chooser_copy_button" />
+
   <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_BACK}. -->
   <item type="id" name="accessibilitySystemActionBack" />
 
