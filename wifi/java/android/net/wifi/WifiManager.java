@@ -2802,29 +2802,6 @@ public class WifiManager {
     }
 
     /**
-     * Check if the device is dual mode capable i.e. supports concurrent STA + Soft AP.
-     *
-     * If the device is dual mode capable, it may require conversion of the user's Soft AP band
-     * selection {@link SoftApConfiguration#mBand} from {@link SoftApConfiguration#BAND_5GHZ} to
-     * include also {@link SoftApConfiguration#BAND_2GHZ}, since if the device is connected to a
-     * 5GHz DFS channel as a STA, it may be unable to honor a request to start Soft AP on the same
-     * DFS channel.
-     *
-     * @return {@code true} if dual mode STA + AP is supported by this device, {@code false}
-     * otherwise.
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public boolean isDualModeSupported() {
-        try {
-            return mService.needs5GHzToAnyApBandConversion();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information
