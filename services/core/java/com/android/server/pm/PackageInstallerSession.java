@@ -147,7 +147,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstallerSession";
@@ -736,22 +735,33 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             return result;
         }
-        return mFiles.stream().map(fileInfo -> fileInfo.name).toArray(String[]::new);
+
+        String[] result = new String[mFiles.size()];
+        for (int i = 0, size = mFiles.size(); i < size; ++i) {
+            result[i] = mFiles.get(i).name;
+        }
+        return result;
     }
 
-    private static File[] filterFiles(File parent, String[] names, FileFilter filter) {
-        return Arrays.stream(names).map(name -> new File(parent, name)).filter(
-                file -> filter.accept(file)).toArray(File[]::new);
+    private static ArrayList<File> filterFiles(File parent, String[] names, FileFilter filter) {
+        ArrayList<File> result = new ArrayList<>(names.length);
+        for (String name : names) {
+            File file = new File(parent, name);
+            if (filter.accept(file)) {
+                result.add(file);
+            }
+        }
+        return result;
     }
 
     @GuardedBy("mLock")
-    private File[] getAddedApksLocked() {
+    private List<File> getAddedApksLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sAddedApkFilter);
     }
 
     @GuardedBy("mLock")
-    private File[] getRemovedFilesLocked() {
+    private List<File> getRemovedFilesLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sRemovedFilter);
     }
@@ -1070,11 +1080,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private final class FileSystemConnector extends
             IPackageInstallerSessionFileSystemConnector.Stub {
-        final Set<String> mAddedFiles;
+        final Set<String> mAddedFiles = new ArraySet<>();
 
         FileSystemConnector(List<InstallationFile> addedFiles) {
-            mAddedFiles = addedFiles.stream().map(file -> file.getName()).collect(
-                    Collectors.toSet());
+            for (InstallationFile file : addedFiles) {
+                mAddedFiles.add(file.getName());
+            }
         }
 
         @Override
@@ -1741,8 +1752,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void validateApexInstallLocked()
             throws PackageManagerException {
-        final File[] addedFiles = getAddedApksLocked();
-        if (ArrayUtils.isEmpty(addedFiles)) {
+        final List<File> addedFiles = getAddedApksLocked();
+        if (addedFiles.isEmpty()) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
@@ -1751,7 +1762,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Too many files for apex install");
         }
 
-        File addedFile = addedFiles[0]; // there is only one file
+        File addedFile = addedFiles.get(0); // there is only one file
 
         // Ensure file name has proper suffix
         final String sourceName = addedFile.getName();
@@ -1818,9 +1829,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
                 && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath());
 
-        final File[] removedFiles = getRemovedFilesLocked();
+        final List<File> removedFiles = getRemovedFilesLocked();
         final List<String> removeSplitList = new ArrayList<>();
-        if (!ArrayUtils.isEmpty(removedFiles)) {
+        if (!removedFiles.isEmpty()) {
             for (File removedFile : removedFiles) {
                 final String fileName = removedFile.getName();
                 final String splitName = fileName.substring(
@@ -1829,8 +1840,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        final File[] addedFiles = getAddedApksLocked();
-        if (ArrayUtils.isEmpty(addedFiles) && removeSplitList.size() == 0) {
+        final List<File> addedFiles = getAddedApksLocked();
+        if (addedFiles.isEmpty() && removeSplitList.size() == 0) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
@@ -2449,16 +2460,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
 
-        final List<InstallationFile> addedFiles = mFiles.stream().filter(
-                file -> sAddedFilter.accept(new File(file.name))).map(
-                    file -> new InstallationFile(
-                        file.name, file.lengthBytes, file.metadata)).collect(
-                Collectors.toList());
-        final List<String> removedFiles = mFiles.stream().filter(
-                file -> sRemovedFilter.accept(new File(file.name))).map(
-                    file -> file.name.substring(
-                        0, file.name.length() - REMOVE_MARKER_EXTENSION.length())).collect(
-                Collectors.toList());
+        final List<InstallationFile> addedFiles = new ArrayList<>(mFiles.size());
+        for (FileInfo file : mFiles) {
+            if (sAddedFilter.accept(new File(this.stageDir, file.name))) {
+                addedFiles.add(new InstallationFile(
+                        file.name, file.lengthBytes, file.metadata));
+            }
+        }
+        final List<String> removedFiles = new ArrayList<>(mFiles.size());
+        for (FileInfo file : mFiles) {
+            if (sRemovedFilter.accept(new File(this.stageDir, file.name))) {
+                String name = file.name.substring(
+                        0, file.name.length() - REMOVE_MARKER_EXTENSION.length());
+                removedFiles.add(name);
+            }
+        }
 
         if (mIncrementalFileStorages != null) {
             for (InstallationFile file : addedFiles) {
@@ -3101,8 +3117,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (grantedRuntimePermissions.size() > 0) {
-            params.grantedRuntimePermissions = grantedRuntimePermissions
-                    .stream().toArray(String[]::new);
+            params.grantedRuntimePermissions = (String[]) grantedRuntimePermissions.toArray();
         }
 
         if (whitelistedRestrictedPermissions.size() > 0) {
@@ -3111,14 +3126,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         int[] childSessionIdsArray;
         if (childSessionIds.size() > 0) {
-            childSessionIdsArray = childSessionIds.stream().mapToInt(i -> i).toArray();
+            childSessionIdsArray = new int[childSessionIds.size()];
+            for (int i = 0, size = childSessionIds.size(); i < size; ++i) {
+                childSessionIdsArray[i] = childSessionIds.get(i);
+            }
         } else {
             childSessionIdsArray = EMPTY_CHILD_SESSION_ARRAY;
         }
 
         FileInfo[] fileInfosArray = null;
         if (!files.isEmpty()) {
-            fileInfosArray = files.stream().toArray(FileInfo[]::new);
+            fileInfosArray = (FileInfo[]) files.toArray();
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
