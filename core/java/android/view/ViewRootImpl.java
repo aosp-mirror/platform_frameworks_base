@@ -216,7 +216,7 @@ public final class ViewRootImpl implements ViewParent,
      * If set to 1, this will switch to a mode where we only use the new approach for IME, but not
      * for the status/navigation bar.
      */
-    private static final String USE_NEW_INSETS_PROPERTY = "persist.wm.new_insets";
+    private static final String USE_NEW_INSETS_PROPERTY = "persist.debug.new_insets";
 
     /**
      * @see #USE_NEW_INSETS_PROPERTY
