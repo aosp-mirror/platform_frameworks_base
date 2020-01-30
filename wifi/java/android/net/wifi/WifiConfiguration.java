@@ -373,6 +373,7 @@ public class WifiConfiguration implements Parcelable {
      * ECDHE_ECDSA
      * ECDHE_RSA
      * </pre>
+     * @hide
      */
     public static class SuiteBCipher {
         private SuiteBCipher() { }
@@ -715,8 +716,8 @@ public class WifiConfiguration implements Parcelable {
     public BitSet allowedGroupManagementCiphers;
     /**
      * The set of SuiteB ciphers supported by this configuration.
-     * To be used for WPA3-Enterprise mode.
-     * See {@link SuiteBCipher} for descriptions of the values.
+     * To be used for WPA3-Enterprise mode. Set automatically by the framework based on the
+     * certificate type that is used in this configuration.
      */
     @NonNull
     public BitSet allowedSuiteBCiphers;
