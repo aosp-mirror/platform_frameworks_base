@@ -1775,9 +1775,10 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the context user's user is of the given user type, such as
-     * {@link UserManager#USER_TYPE_FULL_GUEST}.
+     * Returns whether the context user is of the given user type.
      *
+     * @param userType the name of the user's user type, e.g.
+     *                 {@link UserManager#USER_TYPE_PROFILE_MANAGED}.
      * @return true if the user is of the given user type.
      * @hide
      */
@@ -1787,26 +1788,6 @@ public class UserManager {
     public boolean isUserOfType(@NonNull String userType) {
         try {
             return mService.isUserOfType(mUserId, userType);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns whether the given user is of the given user type, such as
-     * {@link UserManager#USER_TYPE_FULL_GUEST}.
-     *
-     * @param userHandle the user handle of the user whose type is being requested.
-     * @param userType the name of the user's user type, e.g.
-     *                 {@link UserManager#USER_TYPE_PROFILE_MANAGED}.
-     * @return true if the userHandle user is of type userType
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public boolean isUserOfType(@NonNull UserHandle userHandle, @NonNull String userType) {
-        try {
-            return mService.isUserOfType(userHandle.getIdentifier(), userType);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
