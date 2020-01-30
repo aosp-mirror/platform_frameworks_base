@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -34,12 +35,15 @@ import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.util.IntArray;
 import android.util.SparseLongArray;
 
+import com.android.server.pm.ApexManager;
 import com.android.server.pm.Installer;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -48,10 +52,17 @@ import java.util.ArrayList;
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
 
+    @Mock private ApexManager mApexManager;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+    }
+
     @Test
     public void testSnapshotAppData() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
 
         // All users are unlocked so we should snapshot data for them.
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
@@ -114,7 +125,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void testRestoreAppDataSnapshot_pendingBackupForUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
         IntArray pendingBackups = info.getPendingBackups();
@@ -139,7 +150,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void testRestoreAppDataSnapshot_availableBackupForLockedUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
@@ -163,7 +174,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void testRestoreAppDataSnapshot_availableBackupForUnlockedUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer));
+        AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
         doReturn(false).when(helper).isUserCredentialLocked(eq(10));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
@@ -184,7 +195,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void destroyAppData() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
+        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer, mApexManager);
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
         info.putCeSnapshotInode(11, 239L);
@@ -206,7 +217,7 @@ public class AppDataRollbackHelperTest {
     @Test
     public void commitPendingBackupAndRestoreForUser() throws Exception {
         Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
+        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer, mApexManager);
 
         when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(53L);
 

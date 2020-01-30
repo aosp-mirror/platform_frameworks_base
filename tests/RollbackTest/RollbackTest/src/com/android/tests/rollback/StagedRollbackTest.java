@@ -584,6 +584,25 @@ public class StagedRollbackTest {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
     }
 
+    @Test
+    public void testRollbackApexDataDirectories_Phase1() throws Exception {
+        int sessionId = Install.single(TEST_APEX_WITH_APK_V2).setStaged().setEnableRollback()
+                .commit();
+        InstallUtils.waitForSessionReady(sessionId);
+    }
+
+    @Test
+    public void testRollbackApexDataDirectories_Phase2() throws Exception {
+        RollbackInfo available = RollbackUtils.getAvailableRollback(APK_IN_APEX_TESTAPEX_NAME);
+
+        RollbackUtils.rollback(available.getRollbackId(), TEST_APEX_WITH_APK_V2);
+        RollbackInfo committed = RollbackUtils.getCommittedRollbackById(available.getRollbackId());
+
+        // Note: The app is not rolled back until after the rollback is staged
+        // and the device has been rebooted.
+        InstallUtils.waitForSessionReady(committed.getCommittedSessionId());
+    }
+
     private static void runShellCommand(String cmd) {
         ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .executeShellCommand(cmd);

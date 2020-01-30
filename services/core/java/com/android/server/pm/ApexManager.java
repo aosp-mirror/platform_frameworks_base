@@ -96,7 +96,7 @@ public abstract class ApexManager {
      * depending on whether this device supports APEX, i.e. {@link ApexProperties#updatable()}
      * evaluates to {@code true}.
      */
-    static ApexManager getInstance() {
+    public static ApexManager getInstance() {
         return sApexManagerSingleton.get();
     }
 
@@ -270,6 +270,21 @@ public abstract class ApexManager {
      */
     @Nullable
     public abstract String getApexModuleNameForPackageName(String apexPackageName);
+
+    /**
+     * Copies the CE apex data directory for the given {@code userId} to a backup location, for use
+     * in case of rollback.
+     *
+     * @return long inode for the snapshot directory if the snapshot was successful, or -1 if not
+     */
+    public abstract long snapshotCeData(int userId, int rollbackId, String apexPackageName);
+
+    /**
+     * Restores the snapshot of the CE apex data directory for the given {@code userId}.
+     *
+     * @return boolean true if the restore was successful
+     */
+    public abstract boolean restoreCeData(int userId, int rollbackId, String apexPackageName);
 
     /**
      * Dumps various state information to the provided {@link PrintWriter} object.
@@ -662,6 +677,45 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public long snapshotCeData(int userId, int rollbackId, String apexPackageName) {
+            populatePackageNameToApexModuleNameIfNeeded();
+            String apexModuleName;
+            synchronized (mLock) {
+                apexModuleName = mPackageNameToApexModuleName.get(apexPackageName);
+            }
+            if (apexModuleName == null) {
+                Slog.e(TAG, "Invalid apex package name: " + apexPackageName);
+                return -1;
+            }
+            try {
+                return mApexService.snapshotCeData(userId, rollbackId, apexModuleName);
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage(), e);
+                return -1;
+            }
+        }
+
+        @Override
+        public boolean restoreCeData(int userId, int rollbackId, String apexPackageName) {
+            populatePackageNameToApexModuleNameIfNeeded();
+            String apexModuleName;
+            synchronized (mLock) {
+                apexModuleName = mPackageNameToApexModuleName.get(apexPackageName);
+            }
+            if (apexModuleName == null) {
+                Slog.e(TAG, "Invalid apex package name: " + apexPackageName);
+                return false;
+            }
+            try {
+                mApexService.restoreCeData(userId, rollbackId, apexModuleName);
+                return true;
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -862,6 +916,16 @@ public abstract class ApexManager {
         @Nullable
         public String getApexModuleNameForPackageName(String apexPackageName) {
             return null;
+        }
+
+        @Override
+        public long snapshotCeData(int userId, int rollbackId, String apexPackageName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean restoreCeData(int userId, int rollbackId, String apexPackageName) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
