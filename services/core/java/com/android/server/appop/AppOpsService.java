@@ -3877,11 +3877,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (tagName.equals("op")) {
                 final int code = Integer.parseInt(parser.getAttributeValue(null, "n"));
                 final int mode = Integer.parseInt(parser.getAttributeValue(null, "m"));
-                UidState uidState = getUidStateLocked(uid, true);
-                if (uidState.opModes == null) {
-                    uidState.opModes = new SparseIntArray();
-                }
-                uidState.opModes.put(code, mode);
+                setUidMode(code, uid, mode);
             } else {
                 Slog.w(TAG, "Unknown element under <uid-ops>: "
                         + parser.getName());
