@@ -2309,6 +2309,121 @@ public class StorageManager {
     private static final String XATTR_CACHE_GROUP = "user.cache_group";
     private static final String XATTR_CACHE_TOMBSTONE = "user.cache_tombstone";
 
+
+   // Matches AID_MEDIA_RW in android_filesystem_config.h
+    private static final int QUOTA_PROJECT_ID_MEDIA_NONE = 1023;
+
+    // Matches AID_MEDIA_IMAGE in android_filesystem_config.h
+    private static final int QUOTA_PROJECT_ID_MEDIA_IMAGE = 1057;
+
+    // Matches AID_MEDIA_AUDIO in android_filesystem_config.h
+    private static final int QUOTA_PROJECT_ID_MEDIA_AUDIO = 1055;
+
+    // Matches AID_MEDIA_VIDEO in android_filesystem_config.h
+    private static final int QUOTA_PROJECT_ID_MEDIA_VIDEO = 1056;
+
+    /**
+     * Constant for use with
+     * {@link #updateExternalStorageFileQuotaType(String, int)} (String, int)}, to indicate the file
+     * is not a media file.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int QUOTA_TYPE_MEDIA_NONE = 0;
+
+    /**
+     * Constant for use with
+     * {@link #updateExternalStorageFileQuotaType(String, int)} (String, int)}, to indicate the file
+     * is an image file.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int QUOTA_TYPE_MEDIA_IMAGE = 1;
+
+    /**
+     * Constant for use with
+     * {@link #updateExternalStorageFileQuotaType(String, int)} (String, int)}, to indicate the file
+     * is an audio file.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int QUOTA_TYPE_MEDIA_AUDIO = 2;
+
+    /**
+     * Constant for use with
+     * {@link #updateExternalStorageFileQuotaType(String, int)} (String, int)}, to indicate the file
+     * is a video file.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int QUOTA_TYPE_MEDIA_VIDEO = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "QUOTA_TYPE_" }, value = {
+            QUOTA_TYPE_MEDIA_NONE,
+            QUOTA_TYPE_MEDIA_AUDIO,
+            QUOTA_TYPE_MEDIA_VIDEO,
+            QUOTA_TYPE_MEDIA_IMAGE,
+    })
+    public @interface QuotaType {}
+
+    private static native boolean setQuotaProjectId(String path, long projectId);
+
+    /**
+     * Let StorageManager know that the quota type for a file on external storage should
+     * be updated. Android tracks quotas for various media types. Consequently, this should be
+     * called on first creation of a new file on external storage, and whenever the
+     * media type of the file is updated later.
+     *
+     * This API doesn't require any special permissions, though typical implementations
+     * will require being called from an SELinux domain that allows setting file attributes
+     * related to quota (eg the GID or project ID).
+     *
+     * The default platform user of this API is the MediaProvider process, which is
+     * responsible for managing all of external storage.
+     *
+     * @param path the path to the file for which we should update the quota type
+     * @param quotaType the quota type of the file; this is based on the
+     *                  {@code QuotaType} constants, eg
+     *                  {@code StorageManager.QUOTA_TYPE_MEDIA_AUDIO}
+     *
+     * @throws IllegalArgumentException if {@code quotaType} does not correspond to a valid
+     *                                  quota type.
+     * @throws IOException              if the quota type could not be updated.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void updateExternalStorageFileQuotaType(@NonNull File path,
+            @QuotaType int quotaType) throws IOException {
+        long projectId;
+        final String filePath = path.getCanonicalPath();
+        switch (quotaType) {
+            case QUOTA_TYPE_MEDIA_NONE:
+                projectId = QUOTA_PROJECT_ID_MEDIA_NONE;
+                break;
+            case QUOTA_TYPE_MEDIA_AUDIO:
+                projectId = QUOTA_PROJECT_ID_MEDIA_AUDIO;
+                break;
+            case QUOTA_TYPE_MEDIA_VIDEO:
+                projectId = QUOTA_PROJECT_ID_MEDIA_VIDEO;
+                break;
+            case QUOTA_TYPE_MEDIA_IMAGE:
+                projectId = QUOTA_PROJECT_ID_MEDIA_IMAGE;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid quota type: " + quotaType);
+        }
+        if (!setQuotaProjectId(filePath, projectId)) {
+            throw new IOException("Failed to update quota type for " + filePath);
+        }
+    }
+
     /** {@hide} */
     private static void setCacheBehavior(File path, String name, boolean enabled)
             throws IOException {

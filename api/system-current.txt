@@ -9173,7 +9173,12 @@ package android.os.storage {
     method @WorkerThread public void allocateBytes(java.io.FileDescriptor, long, @RequiresPermission int) throws java.io.IOException;
     method @WorkerThread public long getAllocatableBytes(@NonNull java.util.UUID, @RequiresPermission int) throws java.io.IOException;
     method public static boolean hasIsolatedStorage();
+    method public void updateExternalStorageFileQuotaType(@NonNull java.io.File, int) throws java.io.IOException;
     field @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public static final int FLAG_ALLOCATE_AGGRESSIVE = 1; // 0x1
+    field public static final int QUOTA_TYPE_MEDIA_AUDIO = 2; // 0x2
+    field public static final int QUOTA_TYPE_MEDIA_IMAGE = 1; // 0x1
+    field public static final int QUOTA_TYPE_MEDIA_NONE = 0; // 0x0
+    field public static final int QUOTA_TYPE_MEDIA_VIDEO = 3; // 0x3
   }
 
   public final class StorageVolume implements android.os.Parcelable {
