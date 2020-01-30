@@ -2647,7 +2647,8 @@ class ContextImpl extends Context {
                 overrideConfiguration,
                 compatInfo,
                 classLoader,
-                packageInfo.getApplication().getResources().getLoaders()));
+                packageInfo.getApplication() == null ? null
+                        : packageInfo.getApplication().getResources().getLoaders()));
         context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
                 context.getResources());
         return context;
