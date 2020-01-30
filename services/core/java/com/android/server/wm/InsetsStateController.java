@@ -60,6 +60,8 @@ class InsetsStateController {
             w.notifyInsetsChanged();
         }
     };
+    private final InsetsControlTarget mEmptyImeControlTarget = () -> {
+    };
 
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -182,7 +184,10 @@ class InsetsStateController {
     }
 
     void onImeControlTargetChanged(@Nullable InsetsControlTarget imeTarget) {
-        onControlChanged(ITYPE_IME, imeTarget);
+
+        // Make sure that we always have a control target for the IME, even if the IME target is
+        // null. Otherwise there is no leash that will hide it and IME becomes "randomly" visible.
+        onControlChanged(ITYPE_IME, imeTarget != null ? imeTarget : mEmptyImeControlTarget);
         notifyPendingInsetsControlChanged();
     }
 
