@@ -226,12 +226,12 @@ message Atom {
         GnssNfwNotificationReported gnss_nfw_notification_reported = 131 [(module) = "framework"];
         GnssConfigurationReported gnss_configuration_reported = 132 [(module) = "framework"];
         UsbPortOverheatEvent usb_port_overheat_event_reported = 133;
-        NfcErrorOccurred nfc_error_occurred = 134;
-        NfcStateChanged nfc_state_changed = 135;
-        NfcBeamOccurred nfc_beam_occurred = 136;
-        NfcCardemulationOccurred nfc_cardemulation_occurred = 137;
-        NfcTagOccurred nfc_tag_occurred = 138;
-        NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139;
+        NfcErrorOccurred nfc_error_occurred = 134 [(module) = "nfc"];
+        NfcStateChanged nfc_state_changed = 135 [(module) = "nfc"];
+        NfcBeamOccurred nfc_beam_occurred = 136 [(module) = "nfc"];
+        NfcCardemulationOccurred nfc_cardemulation_occurred = 137 [(module) = "nfc"];
+        NfcTagOccurred nfc_tag_occurred = 138 [(module) = "nfc"];
+        NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139 [(module) = "nfc"];
         SeStateChanged se_state_changed = 140;
         SeOmapiReported se_omapi_reported = 141;
         BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported =
