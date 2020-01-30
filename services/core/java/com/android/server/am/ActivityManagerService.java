@@ -9763,15 +9763,21 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param crashInfo describing the context of the error
      * @return true if the process should exit immediately (WTF is fatal)
      */
+    @Override
     public boolean handleApplicationWtf(final IBinder app, final String tag, boolean system,
-            final ApplicationErrorReport.ParcelableCrashInfo crashInfo) {
+            final ApplicationErrorReport.ParcelableCrashInfo crashInfo, int immediateCallerPid) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
 
-        if (system) {
-            // If this is coming from the system, we could very well have low-level
-            // system locks held, so we want to do this all asynchronously.  And we
-            // never want this to become fatal, so there is that too.
+        // If this is coming from the system, we could very well have low-level
+        // system locks held, so we want to do this all asynchronously.  And we
+        // never want this to become fatal, so there is that too.
+        //
+        // Note: "callingPid == Process.myPid())" wouldn't be reliable because even if the caller
+        // is within the system server, if it calls Log.wtf() without clearning the calling
+        // identity, callingPid would still be of a remote caller. So we explicltly pass the
+        // process PID from the caller.
+        if (system || (immediateCallerPid == Process.myPid())) {
             mHandler.post(new Runnable() {
                 @Override public void run() {
                     handleApplicationWtfInner(callingUid, callingPid, app, tag, crashInfo);
