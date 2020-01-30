@@ -425,7 +425,7 @@ public class WindowStateTests extends WindowTestsBase {
         statusBar.mHasSurface = true;
         assertTrue(statusBar.isVisible());
         mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
-                .setWindow(statusBar, null /* frameProvider */);
+                .setWindow(statusBar, null /* frameProvider */, null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
         final InsetsSource source = new InsetsSource(ITYPE_STATUS_BAR);
