@@ -105,8 +105,15 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         }
         state.icon = mIcon;
         state.slash.isSlashed = !state.value;
-        state.label = mContext.getString(R.string.quick_settings_location_label);
-        state.contentDescription = state.label;
+        if (locationEnabled) {
+            state.label = mContext.getString(R.string.quick_settings_location_label);
+            state.contentDescription = mContext.getString(
+                    R.string.accessibility_quick_settings_location_on);
+        } else {
+            state.label = mContext.getString(R.string.quick_settings_location_label);
+            state.contentDescription = mContext.getString(
+                    R.string.accessibility_quick_settings_location_off);
+        }
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }

@@ -194,13 +194,17 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.secondaryLabel = r.getString(R.string.cell_data_off);
         }
 
-        state.contentDescription = state.label;
+
+        // TODO(b/77881974): Instead of switching out the description via a string check for
+        // we need to have two strings provided by the MobileIconGroup.
+        final CharSequence contentDescriptionSuffix;
         if (state.state == Tile.STATE_INACTIVE) {
-            // This information is appended later by converting the Tile.STATE_INACTIVE state.
-            state.stateDescription = "";
+            contentDescriptionSuffix = r.getString(R.string.cell_data_off_content_description);
         } else {
-            state.stateDescription = state.secondaryLabel;
+            contentDescriptionSuffix = state.secondaryLabel;
         }
+
+        state.contentDescription = state.label + ", " + contentDescriptionSuffix;
     }
 
     private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {

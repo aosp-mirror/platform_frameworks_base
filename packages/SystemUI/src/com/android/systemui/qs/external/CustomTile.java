@@ -191,7 +191,6 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile.setLabel(tile.getLabel());
         mTile.setSubtitle(tile.getSubtitle());
         mTile.setContentDescription(tile.getContentDescription());
-        mTile.setStateDescription(tile.getStateDescription());
         mTile.setState(tile.getState());
     }
 
@@ -344,12 +343,6 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             state.contentDescription = mTile.getContentDescription();
         } else {
             state.contentDescription = state.label;
-        }
-
-        if (mTile.getStateDescription() != null) {
-            state.stateDescription = mTile.getStateDescription();
-        } else {
-            state.stateDescription = null;
         }
 
         if (state instanceof BooleanState) {
