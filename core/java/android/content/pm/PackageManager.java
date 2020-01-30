@@ -2224,6 +2224,9 @@ public abstract class PackageManager {
      * <li>{@code VkPhysicalDeviceSamplerYcbcrConversionFeatures::samplerYcbcrConversion} is
      *     supported.</li>
      * </ul>
+     * A subset of devices that support Vulkan 1.1 do so via software emulation. For more
+     * information, see
+     * <a href="{@docRoot}ndk/guides/graphics/design-notes">Vulkan Design Guidelines</a>.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
