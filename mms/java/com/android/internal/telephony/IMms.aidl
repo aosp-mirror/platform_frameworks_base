@@ -37,9 +37,11 @@ interface IMms {
      *  sending the message. See {@link android.telephony.SmsManager} for the value names and types.
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
+     * @param messageId An id that uniquely identifies the message requested to be sent.
      */
     void sendMessage(int subId, String callingPkg, in Uri contentUri,
-            String locationUrl, in Bundle configOverrides, in PendingIntent sentIntent);
+            String locationUrl, in Bundle configOverrides, in PendingIntent sentIntent,
+            in long messageId);
 
     /**
      * Download an MMS message using known location and transaction id
@@ -54,10 +56,11 @@ interface IMms {
      *  types.
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
-     */
+     * @param messageId An id that uniquely identifies the message requested to be downloaded.
+    */
     void downloadMessage(int subId, String callingPkg, String locationUrl,
             in Uri contentUri, in Bundle configOverrides,
-            in PendingIntent downloadedIntent);
+            in PendingIntent downloadedIntent, in long messageId);
 
     /**
      * Import a text message into system's SMS store
