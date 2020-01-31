@@ -971,7 +971,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * The cancellation of summaries with children associated with bubbles are also handled in this
      * method. User-cancelled summaries are tracked by {@link BubbleData#addSummaryToSuppress}.
      *
-     * @return true if we want to intercept the dismissal of the entry, else false
+     * @return true if we want to intercept the dismissal of the entry, else false.
      */
     public boolean shouldInterceptDismissal(NotificationEntry entry, int dismissReason) {
         if (entry == null) {
@@ -1011,7 +1011,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         // The bubble notification sticks around in the data as long as the bubble is
         // not dismissed and the app hasn't cancelled the notification.
         Bubble bubble = mBubbleData.getBubbleWithKey(key);
-        boolean bubbleExtended = entry != null && entry.isBubble() && userRemovedNotif;
+        boolean bubbleExtended = entry != null && entry.isBubble()
+                && (userRemovedNotif || isUserCreatedBubble(bubble.getKey()));
         if (bubbleExtended) {
             bubble.setSuppressNotification(true);
             bubble.setShowDot(false /* show */, true /* animate */);
@@ -1020,8 +1021,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         + ".shouldInterceptDismissal");
             }
             return true;
-        } else if (!userRemovedNotif && entry != null
-                && !isUserCreatedBubble(bubble.getKey())) {
+        } else if (!userRemovedNotif && entry != null) {
             // This wasn't a user removal so we should remove the bubble as well
             mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
             return false;
