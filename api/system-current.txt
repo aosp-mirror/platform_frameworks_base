@@ -7514,6 +7514,7 @@ package android.net.wifi {
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getPrintableSsid();
     method @Deprecated @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
+    method @Deprecated public int getRecentFailureReason();
     method @Deprecated @Nullable public android.net.StaticIpConfiguration getStaticIpConfiguration();
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
@@ -7531,6 +7532,8 @@ package android.net.wifi {
     field @Deprecated public static final int METERED_OVERRIDE_NOT_METERED = 2; // 0x2
     field @Deprecated public static final int RANDOMIZATION_NONE = 0; // 0x0
     field @Deprecated public static final int RANDOMIZATION_PERSISTENT = 1; // 0x1
+    field @Deprecated public static final int RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA = 17; // 0x11
+    field @Deprecated public static final int RECENT_FAILURE_NONE = 0; // 0x0
     field @Deprecated public boolean allowAutojoin;
     field @Deprecated public int apBand;
     field @Deprecated public int carrierId;
@@ -7546,7 +7549,6 @@ package android.net.wifi {
     field @Deprecated public int numAssociation;
     field @Deprecated public int numScorerOverride;
     field @Deprecated public int numScorerOverrideAndSwitchedNetwork;
-    field @Deprecated @NonNull public final android.net.wifi.WifiConfiguration.RecentFailure recentFailure;
     field @Deprecated public boolean requirePMF;
     field @Deprecated @Nullable public String saePasswordId;
     field @Deprecated public boolean shared;
@@ -7590,12 +7592,6 @@ package android.net.wifi {
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus build();
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus.Builder setNetworkSelectionDisableReason(int);
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus.Builder setNetworkSelectionStatus(int);
-  }
-
-  @Deprecated public static class WifiConfiguration.RecentFailure {
-    method @Deprecated public int getAssociationStatus();
-    field @Deprecated public static final int NONE = 0; // 0x0
-    field @Deprecated public static final int STATUS_AP_UNABLE_TO_HANDLE_NEW_STA = 17; // 0x11
   }
 
   public class WifiEnterpriseConfig implements android.os.Parcelable {
