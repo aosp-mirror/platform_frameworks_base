@@ -18,6 +18,7 @@ android_test {
     name: "PlatformCompatGating",
     // Only compile source java files in this apk.
     srcs: ["src/**/*.java"],
+    certificate: "platform",
     libs: [
         "android.test.runner",
         "android.test.base",
