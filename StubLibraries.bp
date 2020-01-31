@@ -336,7 +336,7 @@ java_library_static {
 }
 
 java_library_static {
-    name: "framework_module_app_stubs_current",
+    name: "android_module_app_stubs_current",
     srcs: [
         ":module-app-api-stubs-docs",
     ],
@@ -351,7 +351,7 @@ java_library_static {
 }
 
 java_library_static {
-    name: "framework_module_lib_stubs_current",
+    name: "android_module_lib_stubs_current",
     srcs: [
         ":module-lib-api-stubs-docs",
     ],
