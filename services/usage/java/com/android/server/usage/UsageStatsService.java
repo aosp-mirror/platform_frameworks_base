@@ -2117,9 +2117,9 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public UsageEvents queryEventsForUser(int userId, long beginTime, long endTime,
-                boolean shouldObfuscateInstantApps) {
+                boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents) {
             return UsageStatsService.this.queryEvents(
-                    userId, beginTime, endTime, shouldObfuscateInstantApps, false);
+                    userId, beginTime, endTime, obfuscateInstantApps, hideShortcutInvocationEvents);
         }
 
         @Override

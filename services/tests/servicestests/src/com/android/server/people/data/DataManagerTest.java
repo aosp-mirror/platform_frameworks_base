@@ -332,7 +332,7 @@ public final class DataManagerTest {
         events.add(e);
         UsageEvents usageEvents = new UsageEvents(events, new String[]{});
         when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
-                anyBoolean())).thenReturn(usageEvents);
+                anyBoolean(), anyBoolean())).thenReturn(usageEvents);
 
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
 
