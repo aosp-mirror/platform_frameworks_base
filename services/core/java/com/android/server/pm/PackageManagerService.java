@@ -19706,9 +19706,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
-        if (getPackageInfo(packageName, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE
-                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_DISABLED_COMPONENTS,
-                UserHandle.getCallingUserId()) == null) {
+        if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
             return null;
         }
         return packageName;
