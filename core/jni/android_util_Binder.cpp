@@ -37,6 +37,7 @@
 #include <binder/Parcel.h>
 #include <binder/ProcessState.h>
 #include <binder/Stability.h>
+#include <binderthreadstate/CallerUtils.h>
 #include <cutils/atomic.h>
 #include <log/log.h>
 #include <utils/KeyedVector.h>
@@ -927,7 +928,7 @@ static jint android_os_Binder_getCallingUid()
 
 static jboolean android_os_Binder_isHandlingTransaction()
 {
-    return IPCThreadState::self()->isServingCall();
+    return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
 static jlong android_os_Binder_clearCallingIdentity()
