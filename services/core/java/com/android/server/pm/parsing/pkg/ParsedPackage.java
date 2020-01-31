@@ -47,8 +47,6 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setCodePath(String codePath);
 
-    ParsedPackage setCpuAbiOverride(String cpuAbiOverride);
-
     ParsedPackage setNativeLibraryDir(String nativeLibraryDir);
 
     ParsedPackage setNativeLibraryRootDir(String nativeLibraryRootDir);
@@ -119,7 +117,4 @@ public interface ParsedPackage extends AndroidPackage {
     ParsedPackage setDirectBootAware(boolean directBootAware);
 
     ParsedPackage setPersistent(boolean persistent);
-
-    @Deprecated
-    ParsedPackage setUpdatedSystemApp(boolean updatedSystemApp);
 }

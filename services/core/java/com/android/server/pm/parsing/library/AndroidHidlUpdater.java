@@ -27,17 +27,19 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
  * Updates a package to ensure that if it targets <= P that the android.hidl.base-V1.0-java
  * and android.hidl.manager-V1.0-java libraries are included by default.
  *
+ * TODO(b/135203078): See if this class can be removed, thus removing the isUpdatedSystemApp param
+ *
  * @hide
  */
 @VisibleForTesting
 public class AndroidHidlUpdater extends PackageSharedLibraryUpdater {
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
         // This was the default <= P and is maintained for backwards compatibility.
         boolean isLegacy = parsedPackage.getTargetSdkVersion() <= Build.VERSION_CODES.P;
         // Only system apps use these libraries
-        boolean isSystem = parsedPackage.isSystem() || parsedPackage.isUpdatedSystemApp();
+        boolean isSystem = parsedPackage.isSystem() || isUpdatedSystemApp;
 
         if (isLegacy && isSystem) {
             prefixRequiredLibrary(parsedPackage, ANDROID_HIDL_BASE);

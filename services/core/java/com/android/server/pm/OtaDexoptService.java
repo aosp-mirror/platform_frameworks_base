@@ -42,7 +42,9 @@ import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -119,31 +121,33 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (mDexoptCommands != null) {
             throw new IllegalStateException("already called prepare()");
         }
-        final List<AndroidPackage> important;
-        final List<AndroidPackage> others;
+        final List<PackageSetting> important;
+        final List<PackageSetting> others;
         synchronized (mPackageManagerService.mLock) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
-                    mPackageManagerService.mPackages.values(), mPackageManagerService,
+                    mPackageManagerService.mSettings.mPackages.values(), mPackageManagerService,
                     DEBUG_DEXOPT);
             // Others: we should optimize this with the (first-)boot compiler-reason.
-            others = new ArrayList<>(mPackageManagerService.mPackages.values());
+            others = new ArrayList<>(mPackageManagerService.mSettings.mPackages.values());
             others.removeAll(important);
+            others.removeIf(PackageManagerServiceUtils.REMOVE_IF_NULL_PKG);
 
             // Pre-size the array list by over-allocating by a factor of 1.5.
             mDexoptCommands = new ArrayList<>(3 * mPackageManagerService.mPackages.size() / 2);
         }
 
-        for (AndroidPackage p : important) {
-            mDexoptCommands.addAll(generatePackageDexopts(p, PackageManagerService.REASON_AB_OTA));
+        for (PackageSetting pkgSetting : important) {
+            mDexoptCommands.addAll(generatePackageDexopts(pkgSetting.pkg, pkgSetting,
+                    PackageManagerService.REASON_AB_OTA));
         }
-        for (AndroidPackage p : others) {
+        for (PackageSetting pkgSetting : others) {
             // We assume here that there are no core apps left.
-            if (p.isCoreApp()) {
+            if (pkgSetting.pkg.isCoreApp()) {
                 throw new IllegalStateException("Found a core app that's not important");
             }
-            mDexoptCommands.addAll(
-                    generatePackageDexopts(p, PackageManagerService.REASON_FIRST_BOOT));
+            mDexoptCommands.addAll(generatePackageDexopts(pkgSetting.pkg, pkgSetting,
+                            PackageManagerService.REASON_FIRST_BOOT));
         }
         completeSize = mDexoptCommands.size();
 
@@ -151,8 +155,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (spaceAvailable < BULK_DELETE_THRESHOLD) {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + PackageManagerServiceUtils.packagesToString(others));
-            for (AndroidPackage pkg : others) {
-                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.getPackageName());
+            for (PackageSetting pkg : others) {
+                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.name);
             }
         }
         long spaceAvailableNow = getAvailableSpace();
@@ -162,16 +166,18 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (DEBUG_DEXOPT) {
             try {
                 // Output some data about the packages.
-                AndroidPackage lastUsed = Collections.max(important,
-                        (pkg1, pkg2) -> Long.compare(
-                                pkg1.getLatestForegroundPackageUseTimeInMills(),
-                                pkg2.getLatestForegroundPackageUseTimeInMills()));
+                PackageSetting lastUsed = Collections.max(important,
+                        (pkgSetting1, pkgSetting2) -> Long.compare(
+                                pkgSetting1.getPkgState()
+                                        .getLatestForegroundPackageUseTimeInMills(),
+                                pkgSetting2.getPkgState()
+                                        .getLatestForegroundPackageUseTimeInMills()));
                 Log.d(TAG, "A/B OTA: lastUsed time = "
-                        + lastUsed.getLatestForegroundPackageUseTimeInMills());
+                        + lastUsed.getPkgState().getLatestForegroundPackageUseTimeInMills());
                 Log.d(TAG, "A/B OTA: deprioritized packages:");
-                for (AndroidPackage pkg : others) {
-                    Log.d(TAG, "  " + pkg.getPackageName() + " - "
-                            + pkg.getLatestForegroundPackageUseTimeInMills());
+                for (PackageSetting pkgSetting : others) {
+                    Log.d(TAG, "  " + pkgSetting.name + " - "
+                            + pkgSetting.getPkgState().getLatestForegroundPackageUseTimeInMills());
                 }
             } catch (Exception ignored) {
             }
@@ -264,7 +270,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
      * Generate all dexopt commands for the given package.
      */
     private synchronized List<String> generatePackageDexopts(AndroidPackage pkg,
-            int compilationReason) {
+            PackageSetting pkgSetting, int compilationReason) {
         // Intercept and collect dexopt requests
         final List<String> commands = new ArrayList<String>();
         final Installer collectingInstaller = new Installer(mContext, true) {
@@ -334,7 +340,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
-        optimizer.performDexOpt(pkg,
+        optimizer.performDexOpt(pkg, pkgSetting,
                 null /* ISAs */,
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().getPackageUseInfoOrDefault(
@@ -387,8 +393,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 continue;
             }
 
-            final String[] instructionSets = getAppDexInstructionSets(pkg.getPrimaryCpuAbi(),
-                    pkg.getSecondaryCpuAbi());
+            PackageSetting pkgSetting = mPackageManagerService.getPackageSetting(pkg.getPackageName());
+            final String[] instructionSets = getAppDexInstructionSets(
+                    AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting),
+                    AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting));
             final List<String> paths =
                     AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);
             final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);

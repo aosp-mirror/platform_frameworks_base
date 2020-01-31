@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.UserHandle;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -33,6 +35,8 @@ class ScanRequestBuilder {
     private int mScanFlags;
     private UserHandle mUser;
     private boolean mIsPlatformPackage;
+    @Nullable
+    private String mCpuAbiOverride;
 
     ScanRequestBuilder(ParsedPackage pkg) {
         this.mPkg = pkg;
@@ -98,10 +102,16 @@ class ScanRequestBuilder {
         return this;
     }
 
+    @NonNull
+    public ScanRequestBuilder setCpuAbiOverride(@Nullable String cpuAbiOverride) {
+        this.mCpuAbiOverride = cpuAbiOverride;
+        return this;
+    }
+
     PackageManagerService.ScanRequest build() {
         return new PackageManagerService.ScanRequest(
                 mPkg, mSharedUserSetting, mOldPkg, mPkgSetting, mDisabledPkgSetting,
                 mOriginalPkgSetting, mRealPkgName, mParseFlags, mScanFlags, mIsPlatformPackage,
-                mUser);
+                mUser, mCpuAbiOverride);
     }
 }

@@ -1169,12 +1169,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private static boolean isIncrementalInstallationAllowed(String packageName) {
         final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        final AndroidPackage existingPackage = pmi.getPackage(packageName);
-        if (existingPackage == null) {
+        final PackageSetting existingPkgSetting = pmi.getPackageSetting(packageName);
+        if (existingPkgSetting == null || existingPkgSetting.pkg == null) {
             return true;
         }
 
-        return !PackageManagerService.isSystemApp(existingPackage);
+        return !existingPkgSetting.pkg.isSystem()
+                && !existingPkgSetting.getPkgState().isUpdatedSystemApp();
     }
 
     /**

@@ -73,7 +73,7 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
     }
 
     @Override
-    public void updatePackage(ParsedPackage pkg) {
+    public void updatePackage(ParsedPackage pkg, boolean isUpdatedSystemApp) {
         // Packages targeted at <= Q expect the classes in the android.test.base library
         // to be accessible so this maintains backward compatibility by adding the
         // android.test.base library to those packages.

@@ -301,7 +301,7 @@ public class ComponentResolver {
                     continue;
                 }
                 final ProviderInfo info = PackageInfoUtils.generateProviderInfo(
-                        pkg, p, flags, ps.readUserState(userId), userId);
+                        pkg, p, flags, ps.readUserState(userId), userId, ps);
                 if (info == null) {
                     continue;
                 }
@@ -331,7 +331,7 @@ public class ComponentResolver {
                 return null;
             }
             return PackageInfoUtils.generateProviderInfo(pkg, p, flags,
-                    ps.readUserState(userId), userId);
+                    ps.readUserState(userId), userId, ps);
         }
     }
 
@@ -361,7 +361,7 @@ public class ComponentResolver {
                 }
                 final ProviderInfo info =
                         PackageInfoUtils.generateProviderInfo(pkg, p, 0,
-                                ps.readUserState(userId), userId);
+                                ps.readUserState(userId), userId, ps);
                 if (info == null) {
                     continue;
                 }
@@ -1396,7 +1396,7 @@ public class ComponentResolver {
             }
             final PackageUserState userState = ps.readUserState(userId);
             ActivityInfo ai = PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags,
-                    userState, userId);
+                    userState, userId, ps);
             if (ai == null) {
                 if (DEBUG) {
                     log("Failed to create ActivityInfo based on " + activity, info, match,
@@ -1707,7 +1707,7 @@ public class ComponentResolver {
                 return null;
             }
             ProviderInfo pi = PackageInfoUtils.generateProviderInfo(pkg, provider, mFlags,
-                    userState, userId);
+                    userState, userId, ps);
             if (pi == null) {
                 return null;
             }
@@ -1916,7 +1916,7 @@ public class ComponentResolver {
             }
             final PackageUserState userState = ps.readUserState(userId);
             ServiceInfo si = PackageInfoUtils.generateServiceInfo(pkg, service, mFlags,
-                    userState, userId);
+                    userState, userId, ps);
             if (si == null) {
                 return null;
             }

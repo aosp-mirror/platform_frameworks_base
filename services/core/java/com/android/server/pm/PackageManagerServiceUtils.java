@@ -94,6 +94,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 
@@ -104,6 +106,9 @@ import java.util.zip.GZIPInputStream;
  */
 public class PackageManagerServiceUtils {
     private final static long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
+
+    public final static Predicate<PackageSetting> REMOVE_IF_NULL_PKG =
+            pkgSetting -> pkgSetting.pkg == null;
 
     private static ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
         List<ResolveInfo> ris = null;
@@ -124,40 +129,43 @@ public class PackageManagerServiceUtils {
     // Sort a list of apps by their last usage, most recently used apps first. The order of
     // packages without usage data is undefined (but they will be sorted after the packages
     // that do have usage data).
-    public static void sortPackagesByUsageDate(List<AndroidPackage> pkgs,
+    public static void sortPackagesByUsageDate(List<PackageSetting> pkgSettings,
             PackageManagerService packageManagerService) {
         if (!packageManagerService.isHistoricalPackageUsageAvailable()) {
             return;
         }
 
-        Collections.sort(pkgs, (pkg1, pkg2) ->
-                Long.compare(pkg2.getLatestForegroundPackageUseTimeInMills(),
-                        pkg1.getLatestForegroundPackageUseTimeInMills()));
+        Collections.sort(pkgSettings, (pkgSetting1, pkgSetting2) ->
+                Long.compare(
+                        pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills(),
+                        pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills())
+        );
     }
 
     // Apply the given {@code filter} to all packages in {@code packages}. If tested positive, the
     // package will be removed from {@code packages} and added to {@code result} with its
     // dependencies. If usage data is available, the positive packages will be sorted by usage
     // data (with {@code sortTemp} as temporary storage).
-    private static void applyPackageFilter(Predicate<AndroidPackage> filter,
-            Collection<AndroidPackage> result,
-            Collection<AndroidPackage> packages,
-            @NonNull List<AndroidPackage> sortTemp,
+    private static void applyPackageFilter(
+            Predicate<PackageSetting> filter,
+            Collection<PackageSetting> result,
+            Collection<PackageSetting> packages,
+            @NonNull List<PackageSetting> sortTemp,
             PackageManagerService packageManagerService) {
-        for (AndroidPackage pkg : packages) {
-            if (filter.test(pkg)) {
-                sortTemp.add(pkg);
+        for (PackageSetting pkgSetting : packages) {
+            if (filter.test(pkgSetting)) {
+                sortTemp.add(pkgSetting);
             }
         }
 
         sortPackagesByUsageDate(sortTemp, packageManagerService);
         packages.removeAll(sortTemp);
 
-        for (AndroidPackage pkg : sortTemp) {
-            result.add(pkg);
+        for (PackageSetting pkgSetting : sortTemp) {
+            result.add(pkgSetting);
 
-            Collection<AndroidPackage> deps =
-                    packageManagerService.findSharedNonSystemLibraries(pkg);
+            List<PackageSetting> deps =
+                    packageManagerService.findSharedNonSystemLibraries(pkgSetting);
             if (!deps.isEmpty()) {
                 deps.removeAll(result);
                 result.addAll(deps);
@@ -170,74 +178,79 @@ public class PackageManagerServiceUtils {
 
     // Sort apps by importance for dexopt ordering. Important apps are given
     // more priority in case the device runs out of space.
-    public static List<AndroidPackage> getPackagesForDexopt(
-            Collection<AndroidPackage> packages,
+    public static List<PackageSetting> getPackagesForDexopt(
+            Collection<PackageSetting> packages,
             PackageManagerService packageManagerService) {
         return getPackagesForDexopt(packages, packageManagerService, DEBUG_DEXOPT);
     }
 
-    public static List<AndroidPackage> getPackagesForDexopt(
-            Collection<AndroidPackage> packages,
+    public static List<PackageSetting> getPackagesForDexopt(
+            Collection<PackageSetting> pkgSettings,
             PackageManagerService packageManagerService,
             boolean debug) {
-        ArrayList<AndroidPackage> remainingPkgs = new ArrayList<>(packages);
-        LinkedList<AndroidPackage> result = new LinkedList<>();
-        ArrayList<AndroidPackage> sortTemp = new ArrayList<>(remainingPkgs.size());
+        List<PackageSetting> result = new LinkedList<>();
+        ArrayList<PackageSetting> remainingPkgSettings = new ArrayList<>(pkgSettings);
+
+        // First, remove all settings without available packages
+        remainingPkgSettings.removeIf(REMOVE_IF_NULL_PKG);
+
+        ArrayList<PackageSetting> sortTemp = new ArrayList<>(remainingPkgSettings.size());
 
         // Give priority to core apps.
-        applyPackageFilter((pkg) -> pkg.isCoreApp(), result, remainingPkgs, sortTemp,
+        applyPackageFilter(pkgSetting -> pkgSetting.pkg.isCoreApp(), result, remainingPkgSettings, sortTemp,
                 packageManagerService);
 
         // Give priority to system apps that listen for pre boot complete.
         Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         final ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        applyPackageFilter((pkg) -> pkgNames.contains(pkg.getPackageName()), result, remainingPkgs,
-                sortTemp, packageManagerService);
+        applyPackageFilter(pkgSetting -> pkgNames.contains(pkgSetting.name), result,
+                remainingPkgSettings, sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
         DexManager dexManager = packageManagerService.getDexManager();
-        applyPackageFilter((pkg) ->
-                dexManager.getPackageUseInfoOrDefault(pkg.getPackageName())
+        applyPackageFilter(pkgSetting ->
+                dexManager.getPackageUseInfoOrDefault(pkgSetting.name)
                         .isAnyCodePathUsedByOtherApps(),
-                result, remainingPkgs, sortTemp, packageManagerService);
+                result, remainingPkgSettings, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
-        Predicate<AndroidPackage> remainingPredicate;
-        if (!remainingPkgs.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
+        Predicate<PackageSetting> remainingPredicate;
+        if (!remainingPkgSettings.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
             if (debug) {
                 Log.i(TAG, "Looking at historical package use");
             }
             // Get the package that was used last.
-            AndroidPackage lastUsed = Collections.max(remainingPkgs, (pkg1, pkg2) ->
-                    Long.compare(pkg1.getLatestForegroundPackageUseTimeInMills(),
-                            pkg2.getLatestForegroundPackageUseTimeInMills()));
+            PackageSetting lastUsed = Collections.max(remainingPkgSettings,
+                    (pkgSetting1, pkgSetting2) -> Long.compare(
+                            pkgSetting1.getPkgState().getLatestForegroundPackageUseTimeInMills(),
+                            pkgSetting2.getPkgState().getLatestForegroundPackageUseTimeInMills()));
             if (debug) {
-                Log.i(TAG, "Taking package " + lastUsed.getPackageName()
+                Log.i(TAG, "Taking package " + lastUsed.name
                         + " as reference in time use");
             }
-            long estimatedPreviousSystemUseTime =
-                    lastUsed.getLatestForegroundPackageUseTimeInMills();
+            long estimatedPreviousSystemUseTime = lastUsed.getPkgState()
+                    .getLatestForegroundPackageUseTimeInMills();
             // Be defensive if for some reason package usage has bogus data.
             if (estimatedPreviousSystemUseTime != 0) {
                 final long cutoffTime = estimatedPreviousSystemUseTime - SEVEN_DAYS_IN_MILLISECONDS;
-                remainingPredicate =
-                        (pkg) -> pkg.getLatestForegroundPackageUseTimeInMills() >= cutoffTime;
+                remainingPredicate = pkgSetting -> pkgSetting.getPkgState()
+                        .getLatestForegroundPackageUseTimeInMills() >= cutoffTime;
             } else {
                 // No meaningful historical info. Take all.
-                remainingPredicate = (pkg) -> true;
+                remainingPredicate = pkgSetting -> true;
             }
-            sortPackagesByUsageDate(remainingPkgs, packageManagerService);
+            sortPackagesByUsageDate(remainingPkgSettings, packageManagerService);
         } else {
             // No historical info. Take all.
-            remainingPredicate = (pkg) -> true;
+            remainingPredicate = pkgSetting -> true;
         }
-        applyPackageFilter(remainingPredicate, result, remainingPkgs, sortTemp,
+        applyPackageFilter(remainingPredicate, result, remainingPkgSettings, sortTemp,
                 packageManagerService);
 
         if (debug) {
             Log.i(TAG, "Packages to be dexopted: " + packagesToString(result));
-            Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgs));
+            Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgSettings));
         }
 
         return result;
@@ -290,13 +303,13 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    public static String packagesToString(Collection<AndroidPackage> c) {
+    public static String packagesToString(List<PackageSetting> pkgSettings) {
         StringBuilder sb = new StringBuilder();
-        for (AndroidPackage pkg : c) {
+        for (int index = 0; index < pkgSettings.size(); index++) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(pkg.getPackageName());
+            sb.append(pkgSettings.get(index).name);
         }
         return sb.toString();
     }
@@ -543,24 +556,16 @@ public class PackageManagerServiceUtils {
      */
     private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting) {
-        try {
-            disabledPkgSetting.pkg.mutate().setSigningDetails(
-                    ParsingPackageUtils.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */));
-            if (pkgSetting.signatures.mSigningDetails.checkCapability(
-                    disabledPkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
-                    || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
-                            pkgSetting.signatures.mSigningDetails,
-                            PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
-                return true;
-            } else {
-                logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
-                        pkgSetting.name);
-                return false;
-            }
-        } catch (PackageParserException e) {
-            logCriticalInfo(Log.ERROR, "Failed to collect cert for " + pkgSetting.name + ": " +
-                    e.getMessage());
+        if (pkgSetting.signatures.mSigningDetails.checkCapability(
+                disabledPkgSetting.signatures.mSigningDetails,
+                PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
+                pkgSetting.signatures.mSigningDetails,
+                PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
+            return true;
+        } else {
+            logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
+                    pkgSetting.name);
             return false;
         }
     }
@@ -643,8 +648,8 @@ public class PackageManagerServiceUtils {
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.sharedUser != null
-                && pkgSetting.sharedUser.signatures.mSigningDetails
+        if (pkgSetting.getSharedUser() != null
+                && pkgSetting.getSharedUser().signatures.mSigningDetails
                         != PackageParser.SigningDetails.UNKNOWN) {
 
             // Already existing package. Make sure signatures match.  In case of signing certificate
@@ -654,24 +659,24 @@ public class PackageManagerServiceUtils {
             // with being sharedUser with the existing signing cert.
             boolean match =
                     parsedSignatures.checkCapability(
-                            pkgSetting.sharedUser.signatures.mSigningDetails,
+                            pkgSetting.getSharedUser().signatures.mSigningDetails,
                             PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)
-                    || pkgSetting.sharedUser.signatures.mSigningDetails.checkCapability(
+                    || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
                             parsedSignatures,
                             PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
-                        packageName, pkgSetting.sharedUser.signatures, parsedSignatures);
+                        packageName, pkgSetting.getSharedUser().signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match =
                         matchSignaturesRecover(packageName,
-                                pkgSetting.sharedUser.signatures.mSigningDetails,
+                                pkgSetting.getSharedUser().signatures.mSigningDetails,
                                 parsedSignatures,
                                 PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)
                         || matchSignaturesRecover(packageName,
                                 parsedSignatures,
-                                pkgSetting.sharedUser.signatures.mSigningDetails,
+                                pkgSetting.getSharedUser().signatures.mSigningDetails,
                                 PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
                 compatMatch |= match;
             }
@@ -679,7 +684,7 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName
                         + " has no signatures that match those in shared user "
-                        + pkgSetting.sharedUser.name + "; ignoring!");
+                        + pkgSetting.getSharedUser().name + "; ignoring!");
             }
         }
         return compatMatch;
@@ -914,8 +919,8 @@ public class PackageManagerServiceUtils {
      */
     public static PermissionsState getPermissionsState(
             PackageManagerInternal packageManagerInternal, AndroidPackage pkg) {
-        final PackageSetting packageSetting =
-                (PackageSetting) packageManagerInternal.getPackageSetting(pkg.getPackageName());
+        final PackageSetting packageSetting = packageManagerInternal.getPackageSetting(
+                pkg.getPackageName());
         if (packageSetting == null) {
             return null;
         }

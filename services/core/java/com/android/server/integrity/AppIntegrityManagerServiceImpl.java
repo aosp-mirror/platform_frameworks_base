@@ -515,7 +515,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
             pkg.setSigningDetails(ParsingPackageUtils.collectCertificates(pkg, false));
             return PackageInfoUtils.generate(pkg, null, flags, 0, 0, null, new PackageUserState(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
         } catch (Exception e) {
             throw new IllegalArgumentException("Exception reading " + dataUri, e);
         }

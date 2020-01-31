@@ -31,10 +31,16 @@ import android.os.Debug
 import android.os.Environment
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.om.mockThrowOnUnmocked
+import com.android.server.om.whenever
 import com.android.server.pm.PackageManagerService
+import com.android.server.pm.PackageSetting
 import com.android.server.pm.parsing.pkg.AndroidPackage
+import com.android.server.pm.pkg.PackageStateUnserialized
 import org.junit.BeforeClass
 import org.mockito.Mockito
+import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.mock
 import java.io.File
 
 open class AndroidPackageParsingTestBase {
@@ -80,9 +86,9 @@ open class AndroidPackageParsingTestBase {
                             .toList()
                 }
 
-        private val dummyState = Mockito.mock(PackageUserState::class.java).apply {
+        private val dummyUserState = mock(PackageUserState::class.java).apply {
             installed = true
-            Mockito.`when`(isAvailable(Mockito.anyInt())).thenReturn(true)
+            Mockito.`when`(isAvailable(anyInt())).thenReturn(true)
         }
 
         lateinit var oldPackages: List<PackageParser.Package>
@@ -111,19 +117,27 @@ open class AndroidPackageParsingTestBase {
         }
 
         fun oldAppInfo(pkg: PackageParser.Package, flags: Int = 0): ApplicationInfo? {
-            return PackageParser.generateApplicationInfo(pkg, flags, dummyState, 0)
+            return PackageParser.generateApplicationInfo(pkg, flags, dummyUserState, 0)
         }
 
         fun newAppInfo(pkg: AndroidPackage, flags: Int = 0): ApplicationInfo? {
-            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyState, 0)
+            return PackageInfoUtils.generateApplicationInfo(pkg, flags, dummyUserState, 0,
+                    mockPkgSetting(pkg))
         }
 
         fun oldPackageInfo(pkg: PackageParser.Package, flags: Int = 0): PackageInfo? {
-            return PackageParser.generatePackageInfo(pkg, intArrayOf(), flags, 5, 6, emptySet(), dummyState)
+            return PackageParser.generatePackageInfo(pkg, intArrayOf(), flags, 5, 6, emptySet(),
+                    dummyUserState)
         }
 
         fun newPackageInfo(pkg: AndroidPackage, flags: Int = 0): PackageInfo? {
-            return PackageInfoUtils.generate(pkg, intArrayOf(), flags, 5, 6, emptySet(), dummyState, 0)
+            return PackageInfoUtils.generate(pkg, intArrayOf(), flags, 5, 6, emptySet(),
+                    dummyUserState, 0, mockPkgSetting(pkg))
+        }
+
+        private fun mockPkgSetting(aPkg: AndroidPackage) = mockThrowOnUnmocked<PackageSetting> {
+            this.pkg = aPkg
+            whenever(pkgState) { PackageStateUnserialized() }
         }
     }
 

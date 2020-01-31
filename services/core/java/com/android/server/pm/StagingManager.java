@@ -69,6 +69,7 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.File;
@@ -429,11 +430,10 @@ public class StagingManager {
                     + "for snapshotting/restoring user data.");
             return;
         }
-        final String seInfo = pkg.getSeInfo();
 
         int appId = -1;
         long ceDataInode = -1;
-        final PackageSetting ps = (PackageSetting) mPmi.getPackageSetting(packageName);
+        final PackageSetting ps = mPmi.getPackageSetting(packageName);
         if (ps != null) {
             appId = ps.appId;
             ceDataInode = ps.getCeDataInode(UserHandle.USER_SYSTEM);
@@ -441,6 +441,7 @@ public class StagingManager {
             // an update, and hence need to restore data for all installed users.
             final int[] installedUsers = ps.queryInstalledUsers(allUsers, true);
 
+            final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
             try {
                 rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
                         seInfo, 0 /*token*/);

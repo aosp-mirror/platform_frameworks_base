@@ -54,37 +54,56 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.PackageStateUnserialized;
 
 import libcore.util.EmptyArray;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** @hide **/
+
+/**
+ * Methods that use a {@link PackageSetting} use it to override information provided from the raw
+ * package, or to provide information that would otherwise be missing. Null can be passed if none
+ * of the state values should be applied.
+ *
+ * @hide
+ **/
 public class PackageInfoUtils {
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static PackageInfo generate(AndroidPackage pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
-            Set<String> grantedPermissions, PackageUserState state, int userId) {
-        PackageSetting pkgSetting = null;
+            Set<String> grantedPermissions, PackageUserState state, int userId,
+            @Nullable PackageSetting pkgSetting) {
         return generateWithComponents(pkg, gids, flags, firstInstallTime, lastUpdateTime,
                 grantedPermissions, state, userId, null, pkgSetting);
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static PackageInfo generate(AndroidPackage pkg, ApexInfo apexInfo, int flags,
-            PackageSetting pkgSetting) {
+            @Nullable PackageSetting pkgSetting) {
         return generateWithComponents(pkg, EmptyArray.INT, flags, 0, 0, Collections.emptySet(),
                 new PackageUserState(), UserHandle.getCallingUserId(), apexInfo, pkgSetting);
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     private static PackageInfo generateWithComponents(AndroidPackage pkg, int[] gids,
             @PackageManager.PackageInfoFlags int flags, long firstInstallTime, long lastUpdateTime,
             Set<String> grantedPermissions, PackageUserState state, int userId,
             @Nullable ApexInfo apexInfo, @Nullable PackageSetting pkgSetting) {
-        ApplicationInfo applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
+        ApplicationInfo applicationInfo = generateApplicationInfo(pkg, flags, state, userId,
+                pkgSetting);
         if (applicationInfo == null) {
             return null;
         }
@@ -174,7 +193,7 @@ public class PackageInfoUtils {
                 info.instrumentation = new InstrumentationInfo[N];
                 for (int i = 0; i < N; i++) {
                     info.instrumentation[i] = generateInstrumentationInfo(
-                            pkg.getInstrumentations().get(i), pkg, flags, userId);
+                            pkg.getInstrumentations().get(i), pkg, flags, userId, pkgSetting);
                 }
             }
         }
@@ -182,10 +201,13 @@ public class PackageInfoUtils {
         return info;
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static ApplicationInfo generateApplicationInfo(AndroidPackage pkg,
-            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId) {
-        PackageSetting pkgSetting = null;
+            @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId,
+            @Nullable PackageSetting pkgSetting) {
         // TODO(b/135203078): Consider cases where we don't have a PkgSetting
         if (pkg == null) {
             return null;
@@ -202,18 +224,35 @@ public class PackageInfoUtils {
             return null;
         }
 
+        if (pkgSetting != null) {
+            // TODO(b/135203078): Remove PackageParser1/toAppInfoWithoutState and clean all this up
+            PackageStateUnserialized pkgState = pkgSetting.getPkgState();
+            info.hiddenUntilInstalled = pkgState.isHiddenUntilInstalled();
+            List<String> usesLibraryFiles = pkgState.getUsesLibraryFiles();
+            List<SharedLibraryInfo> usesLibraryInfos = pkgState.getUsesLibraryInfos();
+            info.sharedLibraryFiles = usesLibraryFiles.isEmpty()
+                    ? null : usesLibraryFiles.toArray(new String[0]);
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+        }
+
         info.flags |= appInfoFlags(pkg, pkgSetting);
         info.privateFlags |= appInfoPrivateFlags(pkg, pkgSetting);
         return info;
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static ActivityInfo generateActivityInfo(AndroidPackage pkg, ParsedActivity a,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId) {
-        PackageSetting pkgSetting = null;
+            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId,
+            @Nullable PackageSetting pkgSetting) {
         return generateActivityInfo(pkg, a, flags, state, null, userId, pkgSetting);
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     private static ActivityInfo generateActivityInfo(AndroidPackage pkg, ParsedActivity a,
             @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
@@ -224,7 +263,7 @@ public class PackageInfoUtils {
             return null;
         }
         if (applicationInfo == null) {
-            applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
+            applicationInfo = generateApplicationInfo(pkg, flags, state, userId, pkgSetting);
         }
         ActivityInfo info = PackageInfoWithoutStateUtils.generateActivityInfo(pkg, a, flags, state,
                 applicationInfo, userId);
@@ -236,13 +275,19 @@ public class PackageInfoUtils {
         return info;
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static ServiceInfo generateServiceInfo(AndroidPackage pkg, ParsedService s,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId) {
-        PackageSetting pkgSetting = null;
+            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId,
+            @Nullable PackageSetting pkgSetting) {
         return generateServiceInfo(pkg, s, flags, state, null, userId, pkgSetting);
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     private static ServiceInfo generateServiceInfo(AndroidPackage pkg, ParsedService s,
             @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
@@ -253,7 +298,7 @@ public class PackageInfoUtils {
             return null;
         }
         if (applicationInfo == null) {
-            applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
+            applicationInfo = generateApplicationInfo(pkg, flags, state, userId, pkgSetting);
         }
         ServiceInfo info = PackageInfoWithoutStateUtils.generateServiceInfo(pkg, s, flags, state,
                 applicationInfo, userId);
@@ -265,13 +310,19 @@ public class PackageInfoUtils {
         return info;
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static ProviderInfo generateProviderInfo(AndroidPackage pkg, ParsedProvider p,
-            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId) {
-        PackageSetting pkgSetting = null;
+            @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId,
+            @Nullable PackageSetting pkgSetting) {
         return generateProviderInfo(pkg, p, flags, state, null, userId, pkgSetting);
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     private static ProviderInfo generateProviderInfo(AndroidPackage pkg, ParsedProvider p,
             @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
@@ -282,7 +333,7 @@ public class PackageInfoUtils {
             return null;
         }
         if (applicationInfo == null) {
-            applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
+            applicationInfo = generateApplicationInfo(pkg, flags, state, userId, pkgSetting);
         }
         ProviderInfo info = PackageInfoWithoutStateUtils.generateProviderInfo(pkg, p, flags, state,
                 applicationInfo, userId);
@@ -294,10 +345,13 @@ public class PackageInfoUtils {
         return info;
     }
 
+    /**
+     * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            AndroidPackage pkg, @PackageManager.ComponentInfoFlags int flags, int userId) {
-        PackageSetting pkgSetting = null;
+            AndroidPackage pkg, @PackageManager.ComponentInfoFlags int flags, int userId,
+            @Nullable PackageSetting pkgSetting) {
         if (i == null) return null;
 
         InstrumentationInfo info =
@@ -307,8 +361,8 @@ public class PackageInfoUtils {
         }
 
         // TODO(b/135203078): Add setting related state
-        info.primaryCpuAbi = pkg.getPrimaryCpuAbi();
-        info.secondaryCpuAbi = pkg.getSecondaryCpuAbi();
+        info.primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
+        info.secondaryCpuAbi = AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting);
         info.nativeLibraryDir = pkg.getNativeLibraryDir();
         info.secondaryNativeLibraryDir = pkg.getSecondaryNativeLibraryDir();
 
@@ -365,7 +419,8 @@ public class PackageInfoUtils {
         // Returns false if the package is hidden system app until installed.
         if ((flags & PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS) == 0
                 && !state.installed
-                && pkg.isHiddenUntilInstalled()) {
+                && pkgSetting != null
+                && pkgSetting.getPkgState().isHiddenUntilInstalled()) {
             return false;
         }
 
@@ -401,10 +456,13 @@ public class PackageInfoUtils {
     public static int appInfoFlags(AndroidPackage pkg, @Nullable PackageSetting pkgSetting) {
         // TODO(b/135203078): Add setting related state
         // @formatter:off
-        return PackageInfoWithoutStateUtils.appInfoFlags(pkg)
+        int flags = PackageInfoWithoutStateUtils.appInfoFlags(pkg)
                 | flag(pkg.isSystem(), ApplicationInfo.FLAG_SYSTEM)
-                | flag(pkg.isFactoryTest(), ApplicationInfo.FLAG_FACTORY_TEST)
-                | flag(pkg.isUpdatedSystemApp(), ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
+                | flag(pkg.isFactoryTest(), ApplicationInfo.FLAG_FACTORY_TEST);
+        if (pkgSetting != null) {
+            flags |= flag(pkgSetting.getPkgState().isUpdatedSystemApp(), ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
+        }
+        return flags;
         // @formatter:on
     }
 

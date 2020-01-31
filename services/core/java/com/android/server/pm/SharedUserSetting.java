@@ -160,19 +160,24 @@ public final class SharedUserSetting extends SettingBase {
      * restrictive selinux domain.
      */
     public void fixSeInfoLocked() {
-        final List<AndroidPackage> pkgList = getPackages();
-        if (pkgList == null || pkgList.size() == 0) {
+        if (packages == null || packages.size() == 0) {
             return;
         }
-
-        for (AndroidPackage pkg : pkgList) {
-            if (pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
-                seInfoTargetSdkVersion = pkg.getTargetSdkVersion();
+        for (PackageSetting ps : packages) {
+            if ((ps == null) || (ps.pkg == null)) {
+                continue;
+            }
+            if (ps.pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = ps.pkg.getTargetSdkVersion();
             }
         }
-        for (AndroidPackage pkg : pkgList) {
-            final boolean isPrivileged = isPrivileged() | pkg.isPrivileged();
-            pkg.mutate().setSeInfo(SELinuxMMAC.getSeInfo(pkg, isPrivileged,
+
+        for (PackageSetting ps : packages) {
+            if ((ps == null) || (ps.pkg == null)) {
+                continue;
+            }
+            final boolean isPrivileged = isPrivileged() | ps.pkg.isPrivileged();
+            ps.getPkgState().setOverrideSeInfo(SELinuxMMAC.getSeInfo(ps.pkg, isPrivileged,
                     seInfoTargetSdkVersion));
         }
     }

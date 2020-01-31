@@ -37,7 +37,7 @@ public class OrgApacheHttpLegacyUpdater extends PackageSharedLibraryUpdater {
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
         // Packages targeted at <= O_MR1 expect the classes in the org.apache.http.legacy library
         // to be accessible so this maintains backward compatibility by adding the
         // org.apache.http.legacy library to those packages.

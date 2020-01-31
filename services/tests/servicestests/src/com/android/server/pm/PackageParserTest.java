@@ -245,7 +245,7 @@ public class PackageParserTest {
         return new PackageSetting(pkg.getPackageName(), pkg.getRealPackage(),
                 new File(pkg.getCodePath()), new File(pkg.getCodePath()), null,
                 pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi(),
-                pkg.getCpuAbiOverride(), pkg.getVersionCode(),
+                null, pkg.getVersionCode(),
                 PackageInfoUtils.appInfoFlags(pkg, null),
                 PackageInfoUtils.appInfoPrivateFlags(pkg, null),
                 pkg.getSharedUserLabel(), null, null, null);
@@ -274,9 +274,9 @@ public class PackageParserTest {
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());
 
         PackageInfo aInfo = PackageInfoUtils.generate(a, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), new PackageUserState(), 0);
+                Collections.emptySet(), new PackageUserState(), 0, mockPkgSetting(a));
         PackageInfo bInfo = PackageInfoUtils.generate(b, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), new PackageUserState(), 0);
+                Collections.emptySet(), new PackageUserState(), 0, mockPkgSetting(b));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
 
         assertEquals(ArrayUtils.size(a.getPermissions()), ArrayUtils.size(b.getPermissions()));
@@ -340,7 +340,6 @@ public class PackageParserTest {
         assertEquals(a.getSigningDetails().publicKeys, b.getSigningDetails().publicKeys);
         assertEquals(a.getUpgradeKeySets(), b.getUpgradeKeySets());
         assertEquals(a.getKeySetMapping(), b.getKeySetMapping());
-        assertEquals(a.getCpuAbiOverride(), b.getCpuAbiOverride());
         assertArrayEquals(a.getRestrictUpdateHash(), b.getRestrictUpdateHash());
     }
 
@@ -416,10 +415,10 @@ public class PackageParserTest {
         assertComponentsEqual(a, b);
 
         // Sanity check for ServiceInfo.
-        ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0, new PackageUserState(),
-                0);
-        ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0, new PackageUserState(),
-                0);
+        ServiceInfo aInfo = PackageInfoUtils.generateServiceInfo(aPkg, a, 0,
+                new PackageUserState(), 0, mockPkgSetting(aPkg));
+        ServiceInfo bInfo = PackageInfoUtils.generateServiceInfo(bPkg, b, 0,
+                new PackageUserState(), 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -434,9 +433,9 @@ public class PackageParserTest {
 
         // Sanity check for ProviderInfo
         ProviderInfo aInfo = PackageInfoUtils.generateProviderInfo(aPkg, a, 0,
-                new PackageUserState(), 0);
+                new PackageUserState(), 0, mockPkgSetting(aPkg));
         ProviderInfo bInfo = PackageInfoUtils.generateProviderInfo(bPkg, b, 0,
-                new PackageUserState(), 0);
+                new PackageUserState(), 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -451,9 +450,9 @@ public class PackageParserTest {
 
         // Sanity check for ActivityInfo.
         ActivityInfo aInfo = PackageInfoUtils.generateActivityInfo(aPkg, a, 0,
-                new PackageUserState(), 0);
+                new PackageUserState(), 0, mockPkgSetting(aPkg));
         ActivityInfo bInfo = PackageInfoUtils.generateActivityInfo(bPkg, b, 0,
-                new PackageUserState(), 0);
+                new PackageUserState(), 0, mockPkgSetting(bPkg));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
         assertEquals(a.getName(), b.getName());
     }
@@ -583,7 +582,6 @@ public class PackageParserTest {
                 .setBaseCodePath("foo5")
                 .setCodePath("foo4")
                 .setVersionCode(100)
-                .setCpuAbiOverride("foo22")
                 .setRestrictUpdateHash(new byte[16])
                 .setVersionCodeMajor(100)
                 .setCoreApp(true)

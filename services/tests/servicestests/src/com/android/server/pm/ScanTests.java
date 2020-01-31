@@ -102,13 +102,13 @@ public class ScanTests {
     @Before
     public void setupDefaultAbiBehavior() throws Exception {
         when(mMockPackageAbiHelper.derivePackageAbi(
-                any(AndroidPackage.class), nullable(String.class), anyBoolean()))
+                any(AndroidPackage.class), anyBoolean(), nullable(String.class), anyBoolean()))
                 .thenReturn(new Pair<>(
                         new PackageAbiHelper.Abis("derivedPrimary", "derivedSecondary"),
                         new PackageAbiHelper.NativeLibraryPaths(
                                 "derivedRootDir", true, "derivedNativeDir", "derivedNativeDir2")));
         when(mMockPackageAbiHelper.getNativeLibraryPaths(
-                any(AndroidPackage.class), any(File.class)))
+                any(AndroidPackage.class), any(PackageSetting.class), any(File.class)))
                 .thenReturn(new PackageAbiHelper.NativeLibraryPaths(
                         "getRootDir", true, "getNativeDir", "getNativeDir2"
                 ));
@@ -324,8 +324,7 @@ public class ScanTests {
 
         final ParsedPackage basicPackage =
                 ((ParsedPackage) createBasicPackage(DUMMY_PACKAGE_NAME)
-                        .hideAsParsed())
-                        .setCpuAbiOverride("testOverride");
+                        .hideAsParsed());
 
 
         final PackageManagerService.ScanResult scanResult = executeScan(new ScanRequestBuilder(
@@ -523,7 +522,7 @@ public class ScanTests {
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0);
+                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0, pkgSetting);
         assertBasicApplicationInfo(scanResult, applicationInfo);
     }
 
@@ -558,7 +557,7 @@ public class ScanTests {
     private static void assertAbiAndPathssDerived(PackageManagerService.ScanResult scanResult) {
         PackageSetting pkgSetting = scanResult.pkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0);
+                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0, pkgSetting);
         assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
         assertThat(applicationInfo.secondaryCpuAbi, is("derivedSecondary"));
 
@@ -572,7 +571,7 @@ public class ScanTests {
     private static void assertPathsNotDerived(PackageManagerService.ScanResult scanResult) {
         PackageSetting pkgSetting = scanResult.pkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0);
+                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0, pkgSetting);
         assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));
         assertThat(pkgSetting.legacyNativeLibraryPathString, is("getRootDir"));
         assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));

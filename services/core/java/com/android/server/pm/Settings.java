@@ -101,6 +101,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionSettings;
 import com.android.server.pm.permission.PermissionsState;
@@ -484,10 +485,9 @@ public final class Settings {
         }
         final PackageSetting dp = mDisabledSysPackages.get(name);
         // always make sure the system package code and resource paths dont change
-        if (dp == null && p.pkg != null && p.pkg.isSystem() && !p.pkg.isUpdatedSystemApp()) {
-            if(p.pkg != null) {
-                p.pkg.mutate().setUpdatedSystemApp(true);
-            }
+        if (dp == null && p.pkg != null && p.pkg.isSystem()
+                && !p.getPkgState().isUpdatedSystemApp()) {
+            p.getPkgState().setUpdatedSystemApp(true);
             final PackageSetting disabled;
             if (replaced) {
                 // a little trick...  when we install the new package, we don't
@@ -511,10 +511,7 @@ public final class Settings {
             Log.w(PackageManagerService.TAG, "Package " + name + " is not disabled");
             return null;
         }
-        // Reset flag in ApplicationInfo object
-        if(p.pkg != null) {
-            p.pkg.mutate().setUpdatedSystemApp(false);
-        }
+        p.getPkgState().setUpdatedSystemApp(false);
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
@@ -2721,7 +2718,7 @@ public final class Settings {
                 sb.append(isDebug ? " 1 " : " 0 ");
                 sb.append(dataPath);
                 sb.append(" ");
-                sb.append(pkg.pkg.getSeInfo());
+                sb.append(AndroidPackageUtils.getSeInfo(pkg.pkg, pkg));
                 sb.append(" ");
                 if (gids != null && gids.length > 0) {
                     sb.append(gids[0]);
@@ -4138,7 +4135,7 @@ public final class Settings {
                 final boolean shouldInstall = ps.isSystem() &&
                         (skipPackageWhitelist || installablePackages.contains(ps.name)) &&
                         !ArrayUtils.contains(disallowedPackages, ps.name) &&
-                        !ps.pkg.isHiddenUntilInstalled();
+                        !ps.getPkgState().isHiddenUntilInstalled();
                 // Only system apps are initially installed.
                 ps.setInstalled(shouldInstall, userHandle);
                 if (!shouldInstall) {
@@ -4149,7 +4146,7 @@ public final class Settings {
                 volumeUuids[i] = ps.volumeUuid;
                 names[i] = ps.name;
                 appIds[i] = ps.appId;
-                seinfos[i] = ps.pkg.getSeInfo();
+                seinfos[i] = AndroidPackageUtils.getSeInfo(ps.pkg, ps);
                 targetSdkVersions[i] = ps.pkg.getTargetSdkVersion();
             }
         }
@@ -4708,12 +4705,11 @@ public final class Settings {
                 }
             }
 
-            final String[] usesLibraryFiles = pkg.getUsesLibraryFiles();
-            if (usesLibraryFiles != null
-                    && usesLibraryFiles.length > 0) {
+            List<String> usesLibraryFiles = ps.getPkgState().getUsesLibraryFiles();
+            if (usesLibraryFiles.size() > 0) {
                 pw.print(prefix); pw.println("  usesLibraryFiles:");
-                for (int i=0; i< usesLibraryFiles.length; i++) {
-                    pw.print(prefix); pw.print("    "); pw.println(usesLibraryFiles[i]);
+                for (int i=0; i< usesLibraryFiles.size(); i++) {
+                    pw.print(prefix); pw.print("    "); pw.println(usesLibraryFiles.get(i));
                 }
             }
             final Map<String, ParsedProcess> procs = pkg.getProcesses();

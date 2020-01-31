@@ -38,7 +38,7 @@ public abstract class PackageSharedLibraryUpdater {
      *
      * @param parsedPackage the package to update.
      */
-    public abstract void updatePackage(ParsedPackage parsedPackage);
+    public abstract void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp);
 
     static void removeLibrary(ParsedPackage parsedPackage, String libraryName) {
         parsedPackage.removeUsesLibrary(libraryName)

@@ -55,21 +55,6 @@ import java.util.UUID;
  */
 public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPackageRead, Parcelable {
 
-    //TODO(b/135203078): Move to PackageSetting
-    @Deprecated
-    @Nullable
-    String[] getUsesLibraryFiles();
-
-    //TODO(b/135203078): Move to PackageSetting
-    @Deprecated
-    List<SharedLibraryInfo> getUsesLibraryInfos();
-
-    /**
-     * This will eventually be removed. Avoid calling this at all costs.
-     */
-    @Deprecated
-    AndroidPackageWrite mutate();
-
     /**
      * The names of packages to adopt ownership of permissions from, parsed under
      * {@link PackageParser#TAG_ADOPT_PERMISSIONS}.
@@ -92,15 +77,6 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
      */
     @NonNull
     String getCodePath();
-
-    /**
-     * The install time abi override for this package, if any.
-     *
-     * TODO(b/135203078): This seems like a horrible place to put the abiOverride because
-     *  this isn't something the packageParser parsers.
-     */
-    @Nullable
-    String getCpuAbiOverride();
 
     /**
      * Permissions requested but not in the manifest. These may have been split or migrated from
@@ -299,7 +275,6 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
     /**
      * The install time abi override to choose 32bit abi's when multiple abi's
      * are present. This is only meaningfull for multiarch applications.
-     * The use32bitAbi attribute is ignored if cpuAbiOverride is also set.
      */
     boolean isUse32BitAbi();
 
@@ -333,19 +308,4 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
     @Deprecated
     @NonNull
     String toAppInfoToString();
-
-    @Deprecated
-    boolean isUpdatedSystemApp();
-
-    @Deprecated
-    boolean isHiddenUntilInstalled();
-
-    @Deprecated
-    long[] getLastPackageUsageTimeInMills();
-
-    @Deprecated
-    long getLatestForegroundPackageUseTimeInMills();
-
-    @Deprecated
-    long getLatestPackageUseTimeInMills();
 }

@@ -190,13 +190,14 @@ class UserSystemPackageInstaller {
         // Install/uninstall system packages per user.
         for (int userId : mUm.getUserIds()) {
             final Set<String> userWhitelist = getInstallablePackagesForUserId(userId);
-            pmInt.forEachPackage(pkg -> {
-                if (!pkg.isSystem()) {
+            pmInt.forEachPackageSetting(pkgSetting -> {
+                AndroidPackage pkg = pkgSetting.pkg;
+                if (pkg == null || !pkg.isSystem()) {
                     return;
                 }
                 final boolean install =
                         (userWhitelist == null || userWhitelist.contains(pkg.getPackageName()))
-                        && !pkg.isHiddenUntilInstalled();
+                                && !pkgSetting.getPkgState().isHiddenUntilInstalled();
                 if (isConsideredUpgrade && !isFirstBoot && !install) {
                     return; // To be careful, we don’t uninstall apps during OTAs
                 }

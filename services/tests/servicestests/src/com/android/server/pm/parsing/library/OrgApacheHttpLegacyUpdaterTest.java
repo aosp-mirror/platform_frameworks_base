@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 @Presubmit
 @SmallTest
 @RunWith(OptionalClassRunner.class)
-@OptionalClassRunner.OptionalClass("android.content.pm.parsing.library.OrgApacheHttpLegacyUpdater")
+@OptionalClassRunner.OptionalClass("com.android.server.pm.parsing.library.OrgApacheHttpLegacyUpdater")
 public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterTest {
 
     private static final String OTHER_LIBRARY = "other.library";

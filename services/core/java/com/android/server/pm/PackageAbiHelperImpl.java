@@ -27,7 +27,6 @@ import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 
 import android.annotation.Nullable;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
@@ -132,11 +131,11 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     }
 
     @Override
-    public NativeLibraryPaths getNativeLibraryPaths(
-            AndroidPackage pkg, File appLib32InstallDir) {
-        return getNativeLibraryPaths(new Abis(pkg), appLib32InstallDir, pkg.getCodePath(),
-                pkg.getBaseCodePath(), pkg.isSystem(),
-                pkg.isUpdatedSystemApp());
+    public NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, PackageSetting pkgSetting,
+            File appLib32InstallDir) {
+        return getNativeLibraryPaths(new Abis(pkg, pkgSetting), appLib32InstallDir,
+                pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+                pkgSetting.getPkgState().isUpdatedSystemApp());
     }
 
     private static NativeLibraryPaths getNativeLibraryPaths(final Abis abis,
@@ -294,18 +293,21 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     }
 
     @Override
-    public Pair<Abis, NativeLibraryPaths> derivePackageAbi(
-            AndroidPackage pkg, String cpuAbiOverride, boolean extractLibs)
+    public Pair<Abis, NativeLibraryPaths> derivePackageAbi(AndroidPackage pkg,
+            boolean isUpdatedSystemApp, String cpuAbiOverride, boolean extractLibs)
             throws PackageManagerException {
         // Give ourselves some initial paths; we'll come back for another
         // pass once we've determined ABI below.
-        final NativeLibraryPaths initialLibraryPaths = getNativeLibraryPaths(new Abis(pkg),
+        String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(pkg);
+        String pkgRawSecondaryCpuAbi = AndroidPackageUtils.getRawSecondaryCpuAbi(pkg);
+        final NativeLibraryPaths initialLibraryPaths = getNativeLibraryPaths(
+                new Abis(pkgRawPrimaryCpuAbi, pkgRawSecondaryCpuAbi),
                 PackageManagerService.sAppLib32InstallDir, pkg.getCodePath(),
                 pkg.getBaseCodePath(), pkg.isSystem(),
-                pkg.isUpdatedSystemApp());
+                isUpdatedSystemApp);
 
         // We shouldn't attempt to extract libs from system app when it was not updated.
-        if (pkg.isSystem() && !pkg.isUpdatedSystemApp()) {
+        if (pkg.isSystem() && !isUpdatedSystemApp) {
             extractLibs = false;
         }
 
@@ -331,16 +333,6 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             primaryCpuAbi = null;
             secondaryCpuAbi = null;
             if (pkg.isMultiArch()) {
-                // Warn if we've set an abiOverride for multi-lib packages..
-                // By definition, we need to copy both 32 and 64 bit libraries for
-                // such packages.
-                if (pkg.getCpuAbiOverride() != null
-                        && !NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(
-                        pkg.getCpuAbiOverride())) {
-                    Slog.w(PackageManagerService.TAG,
-                            "Ignoring abiOverride for multi arch application.");
-                }
-
                 int abi32 = PackageManager.NO_NATIVE_LIBRARIES;
                 int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
                 if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
@@ -462,8 +454,8 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         final Abis abis = new Abis(primaryCpuAbi, secondaryCpuAbi);
         return new Pair<>(abis,
                 getNativeLibraryPaths(abis, PackageManagerService.sAppLib32InstallDir,
-                        pkg.getCodePath(), pkg.getBaseCodePath(),
-                        pkg.isSystem(), pkg.isUpdatedSystemApp()));
+                        pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+                        isUpdatedSystemApp));
     }
 
     /**
@@ -484,9 +476,11 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     public String getAdjustedAbiForSharedUser(
             Set<PackageSetting> packagesForUser, AndroidPackage scannedPackage) {
         String requiredInstructionSet = null;
-        if (scannedPackage != null && scannedPackage.getPrimaryCpuAbi() != null) {
-            requiredInstructionSet = VMRuntime.getInstructionSet(
-                    scannedPackage.getPrimaryCpuAbi());
+        if (scannedPackage != null) {
+            String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(scannedPackage);
+            if (pkgRawPrimaryCpuAbi != null) {
+                requiredInstructionSet = VMRuntime.getInstructionSet(pkgRawPrimaryCpuAbi);
+            }
         }
 
         PackageSetting requirer = null;
@@ -533,7 +527,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         } else {
             // requirer == null implies that we're updating all ABIs in the set to
             // match scannedPackage.
-            adjustedAbi = scannedPackage.getPrimaryCpuAbi();
+            adjustedAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(scannedPackage);
         }
         return adjustedAbi;
     }

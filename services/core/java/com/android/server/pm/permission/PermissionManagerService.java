@@ -2453,7 +2453,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                 } else if (bp.isSignature()) {
                     // For all apps signature permissions are install time ones.
-                    allowedSig = grantSignaturePermission(perm, pkg, bp, origPermissions);
+                    allowedSig = grantSignaturePermission(perm, pkg, ps, bp, origPermissions);
                     if (allowedSig) {
                         grant = GRANT_INSTALL;
                     }
@@ -2789,7 +2789,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             if ((changedInstallPermission || replace) && !ps.areInstallPermissionsFixed() &&
-                    !ps.isSystem() || ps.isUpdatedSystem()) {
+                    !ps.isSystem() || !ps.getPkgState().isUpdatedSystemApp()) {
                 // This is the first that we have heard about this package, so the
                 // permissions we have now selected are fixed until explicitly
                 // changed.
@@ -3132,7 +3132,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private boolean grantSignaturePermission(String perm, AndroidPackage pkg,
-            BasePermission bp, PermissionsState origPermissions) {
+            PackageSetting pkgSetting, BasePermission bp, PermissionsState origPermissions) {
         boolean oemPermission = bp.isOEM();
         boolean vendorPrivilegedPermission = bp.isVendorPrivileged();
         boolean privilegedPermission = bp.isPrivileged() || bp.isVendorPrivileged();
@@ -3144,7 +3144,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 && !platformPackage && platformPermission) {
             if (!hasPrivappWhitelistEntry(perm, pkg)) {
                 // Only report violations for apps on system image
-                if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
+                if (!mSystemReady && !pkgSetting.getPkgState().isUpdatedSystemApp()) {
                     // it's only a reportable violation if the permission isn't explicitly denied
                     ArraySet<String> deniedPermissions = null;
                     if (pkg.isVendor()) {
@@ -3210,8 +3210,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (pkg.isSystem()) {
                 // For updated system applications, a privileged/oem permission
                 // is granted only if it had been defined by the original application.
-                if (pkg.isUpdatedSystemApp()) {
-                    final PackageSetting disabledPs = (PackageSetting) mPackageManagerInt
+                if (pkgSetting.getPkgState().isUpdatedSystemApp()) {
+                    final PackageSetting disabledPs = mPackageManagerInt
                             .getDisabledSystemPackage(pkg.getPackageName());
                     final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.pkg;
                     if (disabledPs != null

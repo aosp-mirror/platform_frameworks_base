@@ -37,7 +37,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
+class PackageUsage extends AbstractStatsBase<Map<String, PackageSetting>> {
 
     private static final String USAGE_FILE_MAGIC = "PACKAGE_USAGE__VERSION_";
     private static final String USAGE_FILE_MAGIC_VERSION_1 = USAGE_FILE_MAGIC + "1";
@@ -53,7 +53,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
     }
 
     @Override
-    protected void writeInternal(Map<String, AndroidPackage> packages) {
+    protected void writeInternal(Map<String, PackageSetting> pkgSettings) {
         AtomicFile file = getFile();
         FileOutputStream f = null;
         try {
@@ -67,13 +67,14 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             sb.append('\n');
             out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
 
-            for (AndroidPackage pkg : packages.values()) {
-                if (pkg.getLatestPackageUseTimeInMills() == 0L) {
+            for (PackageSetting pkgSetting : pkgSettings.values()) {
+                if (pkgSetting.getPkgState().getLatestPackageUseTimeInMills() == 0L) {
                     continue;
                 }
                 sb.setLength(0);
-                sb.append(pkg.getPackageName());
-                for (long usageTimeInMillis : pkg.getLastPackageUsageTimeInMills()) {
+                sb.append(pkgSetting.name);
+                for (long usageTimeInMillis : pkgSetting.getPkgState()
+                        .getLastPackageUsageTimeInMills()) {
                     sb.append(' ');
                     sb.append(usageTimeInMillis);
                 }
@@ -91,7 +92,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
     }
 
     @Override
-    protected void readInternal(Map<String, AndroidPackage> packages) {
+    protected void readInternal(Map<String, PackageSetting> pkgSettings) {
         AtomicFile file = getFile();
         BufferedInputStream in = null;
         try {
@@ -102,9 +103,9 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             if (firstLine == null) {
                 // Empty file. Do nothing.
             } else if (USAGE_FILE_MAGIC_VERSION_1.equals(firstLine)) {
-                readVersion1LP(packages, in, sb);
+                readVersion1LP(pkgSettings, in, sb);
             } else {
-                readVersion0LP(packages, in, sb, firstLine);
+                readVersion0LP(pkgSettings, in, sb, firstLine);
             }
         } catch (FileNotFoundException expected) {
             mIsHistoricalPackageUsageAvailable = false;
@@ -115,7 +116,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
         }
     }
 
-    private void readVersion0LP(Map<String, AndroidPackage> packages, InputStream in,
+    private void readVersion0LP(Map<String, PackageSetting> pkgSettings, InputStream in,
             StringBuffer sb, String firstLine)
             throws IOException {
         // Initial version of the file had no version number and stored one
@@ -129,8 +130,8 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             }
 
             String packageName = tokens[0];
-            AndroidPackage pkg = packages.get(packageName);
-            if (pkg == null) {
+            PackageSetting pkgSetting = pkgSettings.get(packageName);
+            if (pkgSetting == null) {
                 continue;
             }
 
@@ -138,12 +139,12 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             for (int reason = 0;
                     reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
                     reason++) {
-                pkg.mutate().setLastPackageUsageTimeInMills(reason, timestamp);
+                pkgSetting.getPkgState().setLastPackageUsageTimeInMills(reason, timestamp);
             }
         }
     }
 
-    private void readVersion1LP(Map<String, AndroidPackage> packages, InputStream in,
+    private void readVersion1LP(Map<String, PackageSetting> pkgSettings, InputStream in,
             StringBuffer sb) throws IOException {
         // Version 1 of the file started with the corresponding version
         // number and then stored a package name and eight timestamps per line.
@@ -155,15 +156,15 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             }
 
             String packageName = tokens[0];
-            AndroidPackage pkg = packages.get(packageName);
-            if (pkg == null) {
+            PackageSetting pkgSetting = pkgSettings.get(packageName);
+            if (pkgSetting == null) {
                 continue;
             }
 
             for (int reason = 0;
                     reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
                     reason++) {
-                pkg.mutate().setLastPackageUsageTimeInMills(reason,
+                pkgSetting.getPkgState().setLastPackageUsageTimeInMills(reason,
                         parseAsLong(tokens[reason + 1]));
             }
         }

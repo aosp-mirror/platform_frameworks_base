@@ -32,7 +32,7 @@ abstract class PackageSharedLibraryUpdaterTest {
 
     static void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
             Supplier<PackageSharedLibraryUpdater> updaterSupplier) {
-        updaterSupplier.get().updatePackage(before);
+        updaterSupplier.get().updatePackage(before, false);
         check(before.hideAsFinal(), after);
     }
 

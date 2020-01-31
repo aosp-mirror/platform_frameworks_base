@@ -22,6 +22,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 
 import dalvik.system.VMRuntime;
 
@@ -110,13 +111,4 @@ public class InstructionSets {
 
         return VMRuntime.getInstructionSet(abis.primary);
     }
-
-    public static String getPrimaryInstructionSet(AndroidPackage pkg) {
-        if (pkg.getPrimaryCpuAbi() == null) {
-            return getPreferredInstructionSet();
-        }
-
-        return VMRuntime.getInstructionSet(pkg.getPrimaryCpuAbi());
-    }
-
 }

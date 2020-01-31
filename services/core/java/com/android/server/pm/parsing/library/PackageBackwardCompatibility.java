@@ -113,14 +113,15 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
      * @param parsedPackage the {@link ParsedPackage} to modify.
      */
     @VisibleForTesting
-    public static void modifySharedLibraries(ParsedPackage parsedPackage) {
-        INSTANCE.updatePackage(parsedPackage);
+    public static void modifySharedLibraries(ParsedPackage parsedPackage,
+            boolean isUpdatedSystemApp) {
+        INSTANCE.updatePackage(parsedPackage, isUpdatedSystemApp);
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
         for (PackageSharedLibraryUpdater packageUpdater : mPackageUpdaters) {
-            packageUpdater.updatePackage(parsedPackage);
+            packageUpdater.updatePackage(parsedPackage, isUpdatedSystemApp);
         }
     }
 
@@ -145,7 +146,7 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     public static class AndroidTestRunnerSplitUpdater extends PackageSharedLibraryUpdater {
 
         @Override
-        public void updatePackage(ParsedPackage parsedPackage) {
+        public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
             // android.test.runner has a dependency on android.test.mock so if android.test.runner
             // is present but android.test.mock is not then add android.test.mock.
             prefixImplicitDependency(parsedPackage, ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK);
@@ -161,7 +162,7 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
             extends PackageSharedLibraryUpdater {
 
         @Override
-        public void updatePackage(ParsedPackage parsedPackage) {
+        public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
             removeLibrary(parsedPackage, ORG_APACHE_HTTP_LEGACY);
         }
 
@@ -176,7 +177,7 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
             extends PackageSharedLibraryUpdater {
 
         @Override
-        public void updatePackage(ParsedPackage parsedPackage) {
+        public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
             removeLibrary(parsedPackage, ANDROID_TEST_BASE);
         }
     }
