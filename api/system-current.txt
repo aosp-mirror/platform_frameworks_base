@@ -7782,7 +7782,7 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.ScoreChangeCallback {
-    method public void onStatusChange(int, boolean);
+    method public void onScoreChange(int, @NonNull android.net.NetworkScore);
     method public void onTriggerUpdateOfWifiUsabilityStats(int);
   }
 

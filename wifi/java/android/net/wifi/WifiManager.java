@@ -38,6 +38,7 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.MacAddress;
 import android.net.Network;
+import android.net.NetworkScore;
 import android.net.NetworkStack;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
@@ -5948,10 +5949,11 @@ public class WifiManager {
          *
          * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
          *                  {@link WifiConnectedNetworkScorer#start(int)}.
-         * @param isUsable The bit to indicate whether current Wi-Fi network is usable or not.
-         *                 Populated by connected network scorer in applications.
+         * @param score The {@link android.net.NetworkScore} object representing the
+         *              characteristics of current Wi-Fi network. Populated by connected network
+         *              scorer in applications.
          */
-        void onStatusChange(int sessionId, boolean isUsable);
+        void onScoreChange(int sessionId, @NonNull NetworkScore score);
 
         /**
          * Called by applications to trigger an update of {@link WifiUsabilityStatsEntry}.
@@ -5977,9 +5979,9 @@ public class WifiManager {
         }
 
         @Override
-        public void onStatusChange(int sessionId, boolean isUsable) {
+        public void onScoreChange(int sessionId, @NonNull NetworkScore score) {
             try {
-                mScoreChangeCallback.onStatusChange(sessionId, isUsable);
+                mScoreChangeCallback.onScoreChange(sessionId, score);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
