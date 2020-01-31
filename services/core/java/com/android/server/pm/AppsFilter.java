@@ -613,6 +613,7 @@ public class AppsFilter {
             } finally {
                 Trace.endSection();
             }
+
             if (callingPkgSetting != null) {
                 if (callingPkgInstruments(callingPkgSetting, targetPkgSetting, targetName)) {
                     return false;
@@ -626,27 +627,33 @@ public class AppsFilter {
                 }
             }
 
-            if (callingSharedPkgSettings != null) {
-                int size = callingSharedPkgSettings.size();
-                for (int index = 0; index < size; index++) {
-                    PackageSetting pkgSetting = callingSharedPkgSettings.valueAt(index);
-                    if (mOverlayReferenceMapper.isValidActor(targetName, pkgSetting.name)) {
+            try {
+                Trace.beginSection("mOverlayReferenceMapper");
+                if (callingSharedPkgSettings != null) {
+                    int size = callingSharedPkgSettings.size();
+                    for (int index = 0; index < size; index++) {
+                        PackageSetting pkgSetting = callingSharedPkgSettings.valueAt(index);
+                        if (mOverlayReferenceMapper.isValidActor(targetName, pkgSetting.name)) {
+                            if (DEBUG_LOGGING) {
+                                log(callingPkgSetting, targetPkgSetting,
+                                        "matches shared user of package that acts on target of "
+                                                + "overlay");
+                            }
+                            return false;
+                        }
+                    }
+                } else {
+                    if (mOverlayReferenceMapper.isValidActor(targetName, callingPkgSetting.name)) {
                         if (DEBUG_LOGGING) {
-                            log(callingPkgSetting, targetPkgSetting,
-                                    "matches shared user of package that acts on target of "
-                                            + "overlay");
+                            log(callingPkgSetting, targetPkgSetting, "acts on target of overlay");
                         }
                         return false;
                     }
                 }
-            } else {
-                if (mOverlayReferenceMapper.isValidActor(targetName, callingPkgSetting.name)) {
-                    if (DEBUG_LOGGING) {
-                        log(callingPkgSetting, targetPkgSetting, "acts on target of overlay");
-                    }
-                    return false;
-                }
+            } finally {
+                Trace.endSection();
             }
+
 
             return true;
         } finally {
