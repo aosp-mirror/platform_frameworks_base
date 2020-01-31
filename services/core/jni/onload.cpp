@@ -59,6 +59,7 @@ int register_android_server_am_LowMemDetector(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(
         JNIEnv* env);
 int register_android_server_incremental_IncrementalManagerService(JNIEnv* env);
+int register_android_server_stats_pull_StatsPullAtomService(JNIEnv* env);
 };
 
 using namespace android;
@@ -111,5 +112,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(
             env);
     register_android_server_incremental_IncrementalManagerService(env);
+    register_android_server_stats_pull_StatsPullAtomService(env);
     return JNI_VERSION_1_4;
 }

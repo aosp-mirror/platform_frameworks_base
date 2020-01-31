@@ -66,7 +66,6 @@ cc_defaults {
         "src/config/ConfigManager.cpp",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
-        "src/external/PowerStatsPuller.cpp",
         "src/external/PullResultReceiver.cpp",
         "src/external/puller_util.cpp",
         "src/external/StatsCallbackPuller.cpp",

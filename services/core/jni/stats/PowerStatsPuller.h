@@ -16,23 +16,22 @@
 
 #pragma once
 
-#include "StatsPuller.h"
+#include <stats_event.h>
+#include <stats_pull_atom_callback.h>
 
 namespace android {
-namespace os {
-namespace statsd {
+namespace server {
+namespace stats {
 
 /**
  * Reads hal for power.stats
  */
-class PowerStatsPuller : public StatsPuller {
+class PowerStatsPuller {
 public:
     PowerStatsPuller();
-
-private:
-    bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
+    status_pull_atom_return_t Pull(int32_t atomTag, pulled_stats_event_list* data);
 };
 
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
+} // namespace stats
+} // namespace server
+} // namespace android
