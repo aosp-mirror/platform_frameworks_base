@@ -61,19 +61,21 @@ public class DejankUtils {
                         || !isMainThread() || sTemporarilyIgnoreStrictMode) {
                     return null;
                 }
+            }
 
-                try {
-                    String description = binder.getInterfaceDescriptor();
+            try {
+                String description = binder.getInterfaceDescriptor();
+                synchronized (sLock) {
                     if (sWhitelistedFrameworkClasses.contains(description)) {
                         return null;
                     }
-                } catch (RemoteException e) {
-                    e.printStackTrace();
                 }
-
-                StrictMode.noteSlowCall("IPC detected on critical path: " + sBlockingIpcs.peek());
-                return null;
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
+
+            StrictMode.noteSlowCall("IPC detected on critical path: " + sBlockingIpcs.peek());
+            return null;
         }
 
         @Override
@@ -126,9 +128,11 @@ public class DejankUtils {
         if (STRICT_MODE_ENABLED && sBlockingIpcs.empty()) {
             synchronized (sLock) {
                 sBlockingIpcs.push("detectBlockingIpcs");
-                try {
-                    runnable.run();
-                } finally {
+            }
+            try {
+                runnable.run();
+            } finally {
+                synchronized (sLock) {
                     sBlockingIpcs.pop();
                 }
             }
@@ -177,9 +181,11 @@ public class DejankUtils {
         if (STRICT_MODE_ENABLED && !sTemporarilyIgnoreStrictMode) {
             synchronized (sLock) {
                 sTemporarilyIgnoreStrictMode = true;
-                try {
-                    runnable.run();
-                } finally {
+            }
+            try {
+                runnable.run();
+            } finally {
+                synchronized (sLock) {
                     sTemporarilyIgnoreStrictMode = false;
                 }
             }
@@ -196,14 +202,16 @@ public class DejankUtils {
         if (STRICT_MODE_ENABLED && !sTemporarilyIgnoreStrictMode) {
             synchronized (sLock) {
                 sTemporarilyIgnoreStrictMode = true;
-                final T val;
-                try {
-                    val = supplier.get();
-                } finally {
+            }
+            final T val;
+            try {
+                val = supplier.get();
+            } finally {
+                synchronized (sLock) {
                     sTemporarilyIgnoreStrictMode = false;
                 }
-                return val;
             }
+            return val;
         } else {
             return supplier.get();
         }
