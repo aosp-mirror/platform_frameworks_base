@@ -46,7 +46,6 @@ android_test {
         "service-appsearch",
         "service-jobscheduler",
         "service-permission",
-        "service-blobstore",
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
