@@ -34,7 +34,6 @@
 #include "../statscompanion_util.h"
 #include "GpuStatsPuller.h"
 #include "PowerStatsPuller.h"
-#include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
 #include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
@@ -61,22 +60,6 @@ StatsPullerManager::StatsPullerManager()
 
               // on_device_power_measurement
               {{.atomTag = android::util::ON_DEVICE_POWER_MEASUREMENT}, new PowerStatsPuller()},
-
-              // remaining_battery_capacity
-              {{.atomTag = android::util::REMAINING_BATTERY_CAPACITY},
-               new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)},
-
-              // full_battery_capacity
-              {{.atomTag = android::util::FULL_BATTERY_CAPACITY},
-               new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)},
-
-              // battery_voltage
-              {{.atomTag = android::util::BATTERY_VOLTAGE},
-               new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)},
-
-              // battery_cycle_count
-              {{.atomTag = android::util::BATTERY_CYCLE_COUNT},
-               new ResourceHealthManagerPuller(android::util::BATTERY_CYCLE_COUNT)},
 
               // TrainInfo.
               {{.atomTag = android::util::TRAIN_INFO}, new TrainInfoPuller()},

@@ -378,7 +378,11 @@ public class StatsPullAtomService extends SystemService {
                 case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED:
                     return pullDangerousPermissionState(atomTag, data);
                 case FrameworkStatsLog.BATTERY_LEVEL:
-                    return pullBatteryLevel(atomTag, data);
+                case FrameworkStatsLog.REMAINING_BATTERY_CAPACITY:
+                case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
+                case FrameworkStatsLog.BATTERY_VOLTAGE:
+                case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
+                    return pullHealthHal(atomTag, data);
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
@@ -534,6 +538,10 @@ public class StatsPullAtomService extends SystemService {
         registerDangerousPermissionState();
         registerDangerousPermissionStateSampled();
         registerBatteryLevel();
+        registerRemainingBatteryCapacity();
+        registerFullBatteryCapacity();
+        registerBatteryVoltage();
+        registerBatteryCycleCount();
     }
 
     private INetworkStatsService getINetworkStatsService() {
@@ -2986,20 +2994,81 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
-    int pullBatteryLevel(int atomTag, List<StatsEvent> pulledData) {
+    private void registerRemainingBatteryCapacity() {
+        int tagId = FrameworkStatsLog.REMAINING_BATTERY_CAPACITY;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerFullBatteryCapacity() {
+        int tagId = FrameworkStatsLog.FULL_BATTERY_CAPACITY;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerBatteryVoltage() {
+        int tagId = FrameworkStatsLog.BATTERY_VOLTAGE;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerBatteryCycleCount() {
+        int tagId = FrameworkStatsLog.BATTERY_CYCLE_COUNT;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullHealthHal(int atomTag, List<StatsEvent> pulledData) {
         IHealth healthService = mHealthService.getLastService();
         if (healthService == null) {
             return StatsManager.PULL_SKIP;
         }
         try {
             healthService.getHealthInfo((result, value) -> {
+                int pulledValue;
+                switch(atomTag) {
+                    case FrameworkStatsLog.BATTERY_LEVEL:
+                        pulledValue = value.legacy.batteryLevel;
+                        break;
+                    case FrameworkStatsLog.REMAINING_BATTERY_CAPACITY:
+                        pulledValue = value.legacy.batteryChargeCounter;
+                        break;
+                    case FrameworkStatsLog.FULL_BATTERY_CAPACITY:
+                        pulledValue = value.legacy.batteryFullCharge;
+                        break;
+                    case FrameworkStatsLog.BATTERY_VOLTAGE:
+                        pulledValue = value.legacy.batteryVoltage;
+                        break;
+                    case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
+                        pulledValue = value.legacy.batteryCycleCount;
+                        break;
+                    default:
+                        throw new IllegalStateException("Invalid atomTag in healthHal puller: "
+                                + atomTag);
+                }
                 StatsEvent e = StatsEvent.newBuilder()
                         .setAtomId(atomTag)
-                        .writeInt(value.legacy.batteryLevel)
+                        .writeInt(pulledValue)
                         .build();
                 pulledData.add(e);
             });
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalStateException e) {
             return StatsManager.PULL_SKIP;
         }
         return StatsManager.PULL_SUCCESS;
