@@ -81,7 +81,7 @@ public class TimeUtils {
         }
         CountryTimeZones.OffsetResult offsetResult = countryTimeZones.lookupByOffsetWithBias(
                 offsetMillis, isDst, null /* dstOffsetMillis */, whenMillis, bias);
-        return offsetResult != null ? offsetResult.mTimeZone : null;
+        return offsetResult != null ? offsetResult.getTimeZone() : null;
     }
 
     /**
@@ -109,8 +109,8 @@ public class TimeUtils {
 
         List<String> timeZoneIds = new ArrayList<>();
         for (TimeZoneMapping timeZoneMapping : countryTimeZones.getTimeZoneMappings()) {
-            if (timeZoneMapping.showInPicker) {
-                timeZoneIds.add(timeZoneMapping.timeZoneId);
+            if (timeZoneMapping.isShownInPicker()) {
+                timeZoneIds.add(timeZoneMapping.getTimeZoneId());
             }
         }
         return Collections.unmodifiableList(timeZoneIds);
