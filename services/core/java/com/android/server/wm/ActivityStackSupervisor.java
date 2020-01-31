@@ -1711,6 +1711,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
              * invisible as well and added to the stopping list.  After which we process the
              * stopping list by handling the idle.
              */
+            stack.cancelAnimation();
             stack.mForceHidden = true;
             stack.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
             stack.mForceHidden = false;
