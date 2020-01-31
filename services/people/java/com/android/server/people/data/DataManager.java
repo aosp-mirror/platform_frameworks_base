@@ -59,7 +59,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.telephony.SmsApplication;
 import com.android.server.LocalServices;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -199,6 +198,13 @@ public class DataManager {
         }
     }
 
+    /** Gets the {@link PackageData} for the given package and user. */
+    @Nullable
+    public PackageData getPackage(@NonNull String packageName, @UserIdInt int userId) {
+        UserData userData = getUnlockedUserData(userId);
+        return userData != null ? userData.getPackageData(packageName) : null;
+    }
+
     /** Gets the {@link ShortcutInfo} for the given shortcut ID. */
     @Nullable
     public ShortcutInfo getShortcut(@NonNull String packageName, @UserIdInt int userId,
@@ -212,20 +218,11 @@ public class DataManager {
     }
 
     /**
-     * Gets the conversation {@link ShareShortcutInfo}s from all packages owned by the calling user
-     * that match the specified {@link IntentFilter}.
+     * Gets the {@link ShareShortcutInfo}s from all packages owned by the calling user that match
+     * the specified {@link IntentFilter}.
      */
-    public List<ShareShortcutInfo> getConversationShareTargets(
-            @NonNull IntentFilter intentFilter) {
-        List<ShareShortcutInfo> shareShortcuts = mShortcutManager.getShareTargets(intentFilter);
-        List<ShareShortcutInfo> result = new ArrayList<>();
-        for (ShareShortcutInfo shareShortcut : shareShortcuts) {
-            ShortcutInfo si = shareShortcut.getShortcutInfo();
-            if (getConversationInfo(si.getPackage(), si.getUserId(), si.getId()) != null) {
-                result.add(shareShortcut);
-            }
-        }
-        return result;
+    public List<ShareShortcutInfo> getShareShortcuts(@NonNull IntentFilter intentFilter) {
+        return mShortcutManager.getShareTargets(intentFilter);
     }
 
     /** Reports the {@link AppTargetEvent} from App Prediction Manager. */
@@ -236,7 +233,7 @@ public class DataManager {
         if (shortcutInfo == null || event.getAction() != AppTargetEvent.ACTION_LAUNCH) {
             return;
         }
-        PackageData packageData = getPackageData(appTarget.getPackageName(),
+        PackageData packageData = getPackage(appTarget.getPackageName(),
                 appTarget.getUser().getIdentifier());
         if (packageData == null) {
             return;
@@ -283,20 +280,6 @@ public class DataManager {
         return userData != null && userData.isUnlocked() ? userData : null;
     }
 
-    @Nullable
-    private PackageData getPackageData(@NonNull String packageName, int userId) {
-        UserData userData = getUnlockedUserData(userId);
-        return userData != null ? userData.getPackageData(packageName) : null;
-    }
-
-    @Nullable
-    private ConversationInfo getConversationInfo(@NonNull String packageName, @UserIdInt int userId,
-            @NonNull String shortcutId) {
-        PackageData packageData = getPackageData(packageName, userId);
-        return packageData != null ? packageData.getConversationStore().getConversation(shortcutId)
-                : null;
-    }
-
     private void updateDefaultDialer(@NonNull UserData userData) {
         TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
         String defaultDialer = telecomManager != null
@@ -318,7 +301,7 @@ public class DataManager {
         if (shortcutId == null) {
             return null;
         }
-        PackageData packageData = getPackageData(sbn.getPackageName(),
+        PackageData packageData = getPackage(sbn.getPackageName(),
                 sbn.getUser().getIdentifier());
         if (packageData == null
                 || packageData.getConversationStore().getConversation(shortcutId) == null) {
@@ -382,7 +365,7 @@ public class DataManager {
             usageEvents.getNextEvent(e);
 
             String packageName = e.getPackageName();
-            PackageData packageData = getPackageData(packageName, userId);
+            PackageData packageData = getPackage(packageName, userId);
             if (packageData == null) {
                 continue;
             }

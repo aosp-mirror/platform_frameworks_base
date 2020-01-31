@@ -17,6 +17,7 @@
 package com.android.server.people.data;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.LocusId;
 import android.text.TextUtils;
@@ -65,6 +66,15 @@ public class PackageData {
     @NonNull
     public EventHistory getPackageLevelEventHistory() {
         return getEventStore().getPackageEventHistory();
+    }
+
+    /**
+     * Gets the {@link ConversationInfo} for a given shortcut ID. Returns null if such as {@link
+     * ConversationInfo} does not exist.
+     */
+    @Nullable
+    public ConversationInfo getConversationInfo(@NonNull String shortcutId) {
+        return getConversationStore().getConversation(shortcutId);
     }
 
     /**
