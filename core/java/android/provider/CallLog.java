@@ -232,6 +232,9 @@ public class CallLog {
         /** Call was on RTT at some point */
         public static final int FEATURES_RTT = 1 << 5;
 
+        /** Call was VoLTE */
+        public static final int FEATURES_VOLTE = 1 << 6;
+
         /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
