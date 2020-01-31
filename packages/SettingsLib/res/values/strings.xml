@@ -129,7 +129,7 @@
     <string name="certinstaller_package" translatable="false">com.android.certinstaller</string>
 
     <!-- Summary for Connected wifi network without internet -->
-    <string name="wifi_connected_no_internet">Connected, no internet</string>
+    <string name="wifi_connected_no_internet">No internet</string>
 
     <!-- Summary for connected network without internet due to private dns validation failed [CHAR LIMIT=NONE] -->
     <string name="private_dns_broken">Private DNS server cannot be accessed</string>
