@@ -1387,6 +1387,10 @@ package android.media {
     method public int getMaxMacroBlocks();
   }
 
+  public final class MediaRoute2Info implements android.os.Parcelable {
+    method @NonNull public String getOriginalId();
+  }
+
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
