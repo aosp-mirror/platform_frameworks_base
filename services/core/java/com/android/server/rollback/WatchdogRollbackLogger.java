@@ -69,20 +69,27 @@ public final class WatchdogRollbackLogger {
         }
     }
 
+    /**
+     * Returns the logging parent of a given package if it exists, {@code null} otherwise.
+     *
+     * The logging parent is defined by the {@code android.content.pm.LOGGING_PARENT} field in the
+     * metadata of a package's AndroidManifest.xml.
+     */
     @VisibleForTesting
+    @Nullable
     static VersionedPackage getLogPackage(Context context,
             @NonNull VersionedPackage failingPackage) {
         String logPackageName;
         VersionedPackage loggingParent;
         logPackageName = getLoggingParentName(context, failingPackage.getPackageName());
         if (logPackageName == null) {
-            return failingPackage;
+            return null;
         }
         try {
             loggingParent = new VersionedPackage(logPackageName, context.getPackageManager()
                     .getPackageInfo(logPackageName, 0 /* flags */).getLongVersionCode());
         } catch (PackageManager.NameNotFoundException e) {
-            return failingPackage;
+            return null;
         }
         return loggingParent;
     }
@@ -104,18 +111,14 @@ public final class WatchdogRollbackLogger {
             return;
         }
 
-        // Identify the logging parent for this rollback. When all configurations are correct, each
-        // package in the rollback refers to the same logging parent, except for the logging parent
-        // itself. If a logging parent is missing for a package, we use the package itself for
-        // logging. This might result in over-logging, but we prefer this over no logging.
+        // Identify the logging parent for this rollback. When all configurations are correct,
+        // each package in the rollback has a logging parent set in metadata.
         final Set<String> loggingPackageNames = new ArraySet<>();
         for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
             final String loggingParentName = getLoggingParentName(context,
                     packageRollback.getPackageName());
             if (loggingParentName != null) {
                 loggingPackageNames.add(loggingParentName);
-            } else {
-                loggingPackageNames.add(packageRollback.getPackageName());
             }
         }
 
@@ -165,6 +168,10 @@ public final class WatchdogRollbackLogger {
         if (logPackage != null) {
             StatsLog.logWatchdogRollbackOccurred(type, logPackage.getPackageName(),
                     logPackage.getVersionCode(), rollbackReason, failingPackageName);
+        } else {
+            // In the case that the log package is null, still log an empty string as an
+            // indication that retrieving the logging parent failed.
+            StatsLog.logWatchdogRollbackOccurred(type, "", 0, rollbackReason, failingPackageName);
         }
     }
 

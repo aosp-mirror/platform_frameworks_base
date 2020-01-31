@@ -60,18 +60,18 @@ public class WatchdogRollbackLoggerTest {
     }
 
     /**
-     * Ensures that the original package is returned if the application info has no metadata.
+     * Ensures that null is returned if the application info has no metadata.
      */
     @Test
     public void testLogPackageHasNoMetadata() throws Exception {
         when(mMockPm.getApplicationInfo(anyString(), anyInt())).thenReturn(mApplicationInfo);
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
-        assertThat(logPackage).isEqualTo(sTestPackageV1);
+        assertThat(logPackage).isNull();
     }
 
     /**
-     * Ensures the original package is returned if the application info does not contain a logging
+     * Ensures that null is returned if the application info does not contain a logging
      * parent key.
      */
     @Test
@@ -81,7 +81,7 @@ public class WatchdogRollbackLoggerTest {
         bundle.putString(LOGGING_PARENT_KEY, null);
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
-        assertThat(logPackage).isEqualTo(sTestPackageV1);
+        assertThat(logPackage).isNull();
     }
 
     /**
@@ -102,8 +102,7 @@ public class WatchdogRollbackLoggerTest {
     }
 
     /**
-     * Ensures that the original package is returned if Package Manager does not know about the
-     * logging parent.
+     * Ensures that null is returned if Package Manager does not know about the logging parent.
      */
     @Test
     public void testLogPackageNameNotFound() throws Exception {
@@ -114,6 +113,6 @@ public class WatchdogRollbackLoggerTest {
                 new PackageManager.NameNotFoundException());
         VersionedPackage logPackage = WatchdogRollbackLogger.getLogPackage(mMockContext,
                 sTestPackageV1);
-        assertThat(logPackage).isEqualTo(sTestPackageV1);
+        assertThat(logPackage).isNull();
     }
 }
