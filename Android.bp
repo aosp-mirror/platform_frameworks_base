@@ -270,7 +270,8 @@ filegroup {
 
         // etc.
         ":framework-javastream-protos",
-        ":framework-statslog-gen",
+        ":framework-statslog-gen", // StatsLogInternal.java
+        ":statslog-framework-java-gen", // FrameworkStatsLog.java
     ],
 }
 
@@ -553,6 +554,14 @@ genrule {
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --worksource",
     out: ["android/util/StatsLogInternal.java"],
+}
+
+genrule {
+    name: "statslog-framework-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module framework" +
+         " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
+    out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
 gensrcs {
