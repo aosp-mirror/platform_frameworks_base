@@ -18,7 +18,6 @@ package android.app;
 
 import android.compat.Compatibility;
 import android.os.Process;
-import android.util.StatsLog;
 
 import com.android.internal.compat.ChangeReporter;
 
@@ -46,20 +45,20 @@ public final class AppCompatCallbacks extends Compatibility.Callbacks {
         mDisabledChanges = Arrays.copyOf(disabledChanges, disabledChanges.length);
         Arrays.sort(mDisabledChanges);
         mChangeReporter = new ChangeReporter(
-                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS);
+                ChangeReporter.SOURCE_APP_PROCESS);
     }
 
     protected void reportChange(long changeId) {
-        reportChange(changeId, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
+        reportChange(changeId, ChangeReporter.STATE_LOGGED);
     }
 
     protected boolean isChangeEnabled(long changeId) {
         if (Arrays.binarySearch(mDisabledChanges, changeId) < 0) {
             // Not present in the disabled array
-            reportChange(changeId, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED);
+            reportChange(changeId, ChangeReporter.STATE_ENABLED);
             return true;
         }
-        reportChange(changeId, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED);
+        reportChange(changeId, ChangeReporter.STATE_DISABLED);
         return false;
     }
 
