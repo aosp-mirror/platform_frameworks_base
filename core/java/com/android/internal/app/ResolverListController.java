@@ -111,6 +111,15 @@ public class ResolverListController {
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
             List<Intent> intents) {
+        return getResolversForIntentAsUser(shouldGetResolvedFilter, shouldGetActivityMetadata,
+                intents, mUserHandle);
+    }
+
+    public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntentAsUser(
+            boolean shouldGetResolvedFilter,
+            boolean shouldGetActivityMetadata,
+            List<Intent> intents,
+            UserHandle userHandle) {
         List<ResolverActivity.ResolvedComponentInfo> resolvedComponents = null;
         for (int i = 0, N = intents.size(); i < N; i++) {
             final Intent intent = intents.get(i);
@@ -122,7 +131,7 @@ public class ResolverListController {
                 flags |= PackageManager.MATCH_INSTANT;
             }
             final List<ResolveInfo> infos = mpm.queryIntentActivitiesAsUser(intent, flags,
-                    mUserHandle);
+                    userHandle);
             if (infos != null) {
                 if (resolvedComponents == null) {
                     resolvedComponents = new ArrayList<>();

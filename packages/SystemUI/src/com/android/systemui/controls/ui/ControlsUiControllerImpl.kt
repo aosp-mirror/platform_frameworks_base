@@ -29,6 +29,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.Space
 import android.widget.TextView
 
 import com.android.systemui.controls.controller.ControlsController
@@ -144,10 +146,17 @@ class ControlsUiControllerImpl @Inject constructor (
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
         val textView = parent.requireViewById(R.id.controls_title) as TextView
-        textView.setOnClickListener {
+        textView.setOnClickListener(launchSelectorActivityListener(context))
+    }
+
+    private fun launchSelectorActivityListener(context: Context): (View) -> Unit {
+        return { _ ->
+            val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+            context.sendBroadcast(closeDialog)
+
             val i = Intent()
             i.setComponent(ComponentName(context, ControlsProviderSelectorActivity::class.java))
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(i)
         }
     }
@@ -171,13 +180,12 @@ class ControlsUiControllerImpl @Inject constructor (
             controlViewsById.put(it.controlId, cvh)
         }
 
-        val moreImageView = parent.requireViewById(R.id.controls_more) as View
-        moreImageView.setOnClickListener {
-            val i = Intent()
-            i.setComponent(ComponentName(context, ControlsProviderSelectorActivity::class.java))
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            context.startActivity(i)
+        if ((controlInfos.size % 2) == 1) {
+            lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
         }
+
+        val moreImageView = parent.requireViewById(R.id.controls_more) as View
+        moreImageView.setOnClickListener(launchSelectorActivityListener(context))
     }
 
     override fun hide() {

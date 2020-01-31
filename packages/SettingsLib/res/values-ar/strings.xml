@@ -124,7 +124,7 @@
     <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"سماعة رأس"</string>
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"هاتف"</string>
     <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"تصوير"</string>
-    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"سماعة أذن"</string>
+    <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"السمّاعة"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"جهاز إدخال طرفي"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"بلوتوث"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"جارٍ إقران سماعة الأذن الطبية اليسرى…"</string>
@@ -157,7 +157,7 @@
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"تحويل النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"معدل سرعة الكلام"</string>
-    <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة نطق الكلام"</string>
+    <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة قول الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"درجة الصوت"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"للتأثير في نبرة الكلام المُرَكَّب"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"اللغة"</string>
@@ -181,7 +181,7 @@
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"المحرّك المفضّل"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"عامة"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"إعادة ضبط طبقة صوت الكلام"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"إعادة ضبط طبقة الصوت التي يتم نطق النص بها على الإعداد التلقائي."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"إعادة ضبط طبقة الصوت التي يتم قول النص بها على الإعداد التلقائي."</string>
   <string-array name="tts_rate_entries">
     <item msgid="9004239613505400644">"بطيء جدًا"</item>
     <item msgid="1815382991399815061">"بطيء"</item>
@@ -353,7 +353,7 @@
   <string-array name="color_mode_names">
     <item msgid="3836559907767149216">"نابض بالحياة (تلقائي)"</item>
     <item msgid="9112200311983078311">"طبيعي"</item>
-    <item msgid="6564241960833766170">"قياسي"</item>
+    <item msgid="6564241960833766170">"عادي"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"ألوان محسَّنة"</item>

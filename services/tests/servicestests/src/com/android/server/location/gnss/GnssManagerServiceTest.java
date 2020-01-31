@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -46,13 +46,15 @@ import android.location.IGnssNavigationMessageListener;
 import android.location.IGnssStatusListener;
 import android.location.INetInitiatedListener;
 import android.location.Location;
+import android.location.LocationManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Message;
 import android.os.RemoteException;
 
-import com.android.server.LocationManagerService;
+import com.android.server.LocalServices;
+import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssCapabilitiesProvider;
 import com.android.server.location.GnssLocationProvider;
@@ -63,7 +65,9 @@ import com.android.server.location.GnssNavigationMessageProvider;
 import com.android.server.location.GnssNavigationMessageProvider.GnssNavigationMessageProviderNative;
 import com.android.server.location.GnssStatusListenerHelper;
 import com.android.server.location.LocationUsageLogger;
+import com.android.server.location.SettingsHelper;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
@@ -93,18 +97,20 @@ public class GnssManagerServiceTest {
     @Mock
     private GnssMeasurementCorrectionsProvider mMockGnssMeasurementCorrectionsProvider;
     @Mock
-    private INetInitiatedListener mMockNetInitiatedListener;
+    private INetInitiatedListener mNetInitiatedListener;
     private GnssMeasurementsProvider mTestGnssMeasurementsProvider;
     private GnssStatusListenerHelper mTestGnssStatusProvider;
     private GnssNavigationMessageProvider mTestGnssNavigationMessageProvider;
 
     // Managers and services
     @Mock
-    private AppOpsManager mMockAppOpsManager;
+    private AppOpsManager mAppOpsManager;
     @Mock
-    private ActivityManager mMockActivityManager;
+    private SettingsHelper mSettingsHelper;
     @Mock
-    private LocationManagerService mMockLocationManagerService;
+    private AppForegroundHelper mAppForegroundHelper;
+    @Mock
+    private LocationManagerInternal mLocationManagerInternal;
 
     // Context and handler
     @Mock
@@ -113,24 +119,22 @@ public class GnssManagerServiceTest {
     private Context mMockContext;
 
     // Class under test
-    private com.android.server.location.gnss.GnssManagerService mGnssManagerService;
+    private GnssManagerService mGnssManagerService;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         GnssLocationProvider.setIsSupportedForTest(true);
 
-        // Set up mock context
         when(mMockContext.getSystemServiceName(AppOpsManager.class)).thenReturn(
                 Context.APP_OPS_SERVICE);
-        when(mMockContext.getSystemServiceName(ActivityManager.class)).thenReturn(
-                Context.ACTIVITY_SERVICE);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(
-                mMockAppOpsManager);
-        when(mMockContext.getSystemService(
-                eq(Context.ACTIVITY_SERVICE))).thenReturn(
-                mMockActivityManager);
+                mAppOpsManager);
         enableLocationPermissions();
+
+        when(mAppForegroundHelper.isAppForeground(anyInt())).thenReturn(true);
+
+        LocalServices.addService(LocationManagerInternal.class, mLocationManagerInternal);
 
         // Mock Handler will execute posted runnables immediately
         when(mMockHandler.sendMessageAtTime(any(Message.class), anyLong())).thenAnswer(
@@ -164,15 +168,22 @@ public class GnssManagerServiceTest {
         when(mMockGnssLocationProvider.getGnssNavigationMessageProvider()).thenReturn(
                 mTestGnssNavigationMessageProvider);
         when(mMockGnssLocationProvider.getNetInitiatedListener()).thenReturn(
-                mMockNetInitiatedListener);
+                mNetInitiatedListener);
 
         // Setup GnssBatching provider
         when(mMockGnssBatchingProvider.start(anyLong(), anyBoolean())).thenReturn(true);
         when(mMockGnssBatchingProvider.stop()).thenReturn(true);
 
         // Create GnssManagerService
-        mGnssManagerService = new GnssManagerService(mMockLocationManagerService, mMockContext,
-                mMockGnssLocationProvider, new LocationUsageLogger());
+        mGnssManagerService = new GnssManagerService(mMockContext, mSettingsHelper,
+                mAppForegroundHelper, new LocationUsageLogger(),
+                mMockGnssLocationProvider);
+        mGnssManagerService.onSystemReady();
+    }
+
+    @After
+    public void tearDown() {
+        LocalServices.removeServiceForTest(LocationManagerInternal.class);
     }
 
     private void overrideAsBinder(IInterface mockListener) {
@@ -225,7 +236,7 @@ public class GnssManagerServiceTest {
                 PackageManager.PERMISSION_GRANTED);
 
         // AppOpsManager will return true if OP_FINE_LOCATION is checked
-        when(mMockAppOpsManager.checkOp(anyInt(), anyInt(), anyString())).thenAnswer(
+        when(mAppOpsManager.checkOp(anyInt(), anyInt(), anyString())).thenAnswer(
                 (InvocationOnMock invocation) -> {
                     int code = (int) (invocation.getArguments()[0]);
                     if (code == AppOpsManager.OP_FINE_LOCATION) {
@@ -237,11 +248,11 @@ public class GnssManagerServiceTest {
 
     private void disableLocationPermissions() {
         Mockito.doThrow(new SecurityException()).when(
-                mMockContext).enforceCallingPermission(anyString(), anyString());
+                mMockContext).enforceCallingPermission(anyString(), nullable(String.class));
         Mockito.doThrow(new SecurityException()).when(
                 mMockContext).checkPermission(anyString(), anyInt(), anyInt());
 
-        when(mMockAppOpsManager.checkOp(anyInt(), anyInt(),
+        when(mAppOpsManager.checkOp(anyInt(), anyInt(),
                 anyString())).thenReturn(AppOpsManager.MODE_ERRORED);
     }
 
@@ -733,14 +744,12 @@ public class GnssManagerServiceTest {
 
     @Test
     public void sendNiResponseWithPermissionsTest() throws RemoteException {
-        when(mMockNetInitiatedListener.sendNiResponse(anyInt(), anyInt())).thenReturn(true);
-
         int notifId = 0;
         int userResponse = 0;
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.sendNiResponse(notifId, userResponse)).isEqualTo(true);
+        mGnssManagerService.sendNiResponse(notifId, userResponse);
 
-        verify(mMockNetInitiatedListener, times(1)).sendNiResponse(notifId, userResponse);
+        verify(mNetInitiatedListener, times(1)).sendNiResponse(notifId, userResponse);
     }
 }

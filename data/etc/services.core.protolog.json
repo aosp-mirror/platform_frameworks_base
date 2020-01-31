@@ -331,6 +331,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "-1410260105": {
+      "message": "Schedule IME show for %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "-1391944764": {
       "message": "SURFACE DESTROY: %s. %s",
       "level": "INFO",
@@ -733,12 +739,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
-    "-554834595": {
-      "message": "Display id=%d is frozen, return %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-549028919": {
       "message": "enableScreenIfNeededLocked: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b. %s",
       "level": "INFO",
@@ -1063,6 +1063,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
+    "140319294": {
+      "message": "IME target changed within ActivityRecord",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "146871307": {
       "message": "Tried to remove starting window but startingWindow was null: %s",
       "level": "VERBOSE",
@@ -1267,6 +1273,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "438102669": {
+      "message": "call showInsets(ime) on %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "457951957": {
       "message": "\tNot visible=%s",
       "level": "DEBUG",
@@ -1386,6 +1398,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "632168013": {
+      "message": "dcTarget: %s mImeTargetFromIme: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
     "633654009": {
       "message": "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s",
@@ -1693,6 +1711,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1373000889": {
+      "message": "abortShowImePostLayout",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "1401700824": {
       "message": "Window drawn win=%s",
       "level": "DEBUG",
@@ -1987,6 +2011,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "1928325128": {
+      "message": "Run showImeRunner",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "1947239194": {
       "message": "Deferring rotation, still finishing previous rotation",
       "level": "VERBOSE",
@@ -2137,6 +2167,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_FOCUS_LIGHT": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_IME": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_KEEP_SCREEN_ON": {

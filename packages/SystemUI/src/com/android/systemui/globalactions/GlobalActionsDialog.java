@@ -40,6 +40,7 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
@@ -100,7 +101,6 @@ import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EmergencyDialerConstants;
@@ -459,12 +459,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 mKeyguardManager.isDeviceLocked())
                         : null;
 
-        boolean showControls = !mKeyguardManager.isDeviceLocked() && isControlsEnabled(mContext);
-
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController,
                 mBlurUtils, mSysuiColorExtractor, mStatusBarService,
                 mNotificationShadeWindowController,
-                showControls ? mControlsUiController : null);
+                shouldShowControls() ? mControlsUiController : null);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -538,7 +536,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean shouldBeSeparated() {
-            return !isControlsEnabled(mContext);
+            return !shouldShowControls();
         }
 
         @Override
@@ -1135,7 +1133,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      * A single press action maintains no state, just responds to a press
      * and takes an action.
      */
-    private static abstract class SinglePressAction implements Action {
+
+    private abstract class SinglePressAction implements Action {
         private final int mIconResId;
         private final Drawable mIcon;
         private final int mMessageResId;
@@ -1174,7 +1173,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         protected int getActionLayoutId(Context context) {
-            if (isControlsEnabled(context)) {
+            if (shouldShowControls()) {
                 return com.android.systemui.R.layout.global_actions_grid_item_v2;
             }
             return com.android.systemui.R.layout.global_actions_grid_item;
@@ -1640,8 +1639,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 FrameLayout.LayoutParams.MATCH_PARENT,
                                 FrameLayout.LayoutParams.MATCH_PARENT);
                 panelContainer.addView(mPanelController.getPanelContent(), panelParams);
-                mBackgroundDrawable = mPanelController.getBackgroundDrawable();
-                mScrimAlpha = 1f;
             }
         }
 
@@ -1669,7 +1666,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             if (mBackgroundDrawable == null) {
                 mBackgroundDrawable = new ScrimDrawable();
-                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
+                mScrimAlpha = 0.8f;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
@@ -1728,7 +1725,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (!(mBackgroundDrawable instanceof ScrimDrawable)) {
                 return;
             }
-            ((ScrimDrawable) mBackgroundDrawable).setColor(colors.getMainColor(), animate);
+            ((ScrimDrawable) mBackgroundDrawable).setColor(Color.BLACK, animate);
             View decorView = getWindow().getDecorView();
             if (colors.supportsDarkText()) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
@@ -1900,8 +1897,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return true;
     }
 
-    private static boolean isControlsEnabled(Context context) {
-        return Settings.Secure.getInt(
-                context.getContentResolver(), "systemui.controls_available", 0) == 1;
+    private boolean shouldShowControls() {
+        return isCurrentUserOwner()
+                && !mKeyguardManager.isDeviceLocked()
+                && Settings.Secure.getInt(mContext.getContentResolver(),
+                        "systemui.controls_available", 0) == 1;
     }
 }

@@ -972,7 +972,6 @@
 
     <!-- Global actions power menu -->
     <dimen name="global_actions_top_margin">12dp</dimen>
-    <dimen name="global_actions_plugin_offset">-145dp</dimen>
 
     <dimen name="global_actions_panel_width">120dp</dimen>
     <dimen name="global_actions_padding">12dp</dimen>
@@ -1182,7 +1181,7 @@
     <dimen name="magnifier_up_down_controls_height">40dp</dimen>
 
     <!-- Home Controls -->
-    <dimen name="control_spacing">5dp</dimen>
+    <dimen name="control_spacing">4dp</dimen>
     <dimen name="control_corner_radius">15dp</dimen>
     <dimen name="control_height">100dp</dimen>
     <dimen name="control_padding">15dp</dimen>

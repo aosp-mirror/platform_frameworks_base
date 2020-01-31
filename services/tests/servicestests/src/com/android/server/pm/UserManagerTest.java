@@ -336,9 +336,6 @@ public final class UserManagerTest {
         assertThat(userInfo).isNotNull();
         final int userId = userInfo.id;
 
-        UserManager userManagerForUser = (UserManager) mContext.createPackageContextAsUser(
-                "android", 0, asHandle(userId)).getSystemService(Context.USER_SERVICE);
-
         assertThat(mUserManager.hasBadge(userId)).isEqualTo(userTypeDetails.hasBadge());
         assertThat(mUserManager.getUserIconBadgeResId(userId))
                 .isEqualTo(userTypeDetails.getIconBadge());
@@ -346,17 +343,18 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgePlain());
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
-        assertThat(mUserManager.isUserOfType(asHandle(userId), userTypeDetails.getName()))
-                .isTrue();
-        assertThat(userManagerForUser.isProfile()).isEqualTo(userTypeDetails.isProfile());
-        assertThat(userManagerForUser.isUserOfType(asHandle(userId), userTypeDetails.getName()))
-                .isTrue();
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
                 Resources.getSystem().getColor(userTypeDetails.getBadgeColor(badgeIndex), null));
         assertThat(mUserManager.getBadgedLabelForUser("Test", asHandle(userId))).isEqualTo(
                 Resources.getSystem().getString(userTypeDetails.getBadgeLabel(badgeIndex), "Test"));
+
+        // Test @UserHandleAware methods
+        final UserManager userManagerForUser = UserManager.get(mContext.createPackageContextAsUser(
+                "android", 0, asHandle(userId)));
+        assertThat(userManagerForUser.isUserOfType(userTypeDetails.getName())).isTrue();
+        assertThat(userManagerForUser.isProfile()).isEqualTo(userTypeDetails.isProfile());
     }
 
     // Make sure only max managed profiles can be created

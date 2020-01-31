@@ -30,6 +30,7 @@ android_test {
         "services.usage",
         "guava",
         "androidx.test.core",
+        "androidx.test.ext.truth",
         "androidx.test.runner",
         "androidx.test.rules",
         "mockito-target-minus-junit4",

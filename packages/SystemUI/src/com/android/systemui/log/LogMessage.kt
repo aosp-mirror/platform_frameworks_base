@@ -43,5 +43,10 @@ interface LogMessage {
     var int1: Int
     var int2: Int
     var long1: Long
+    var long2: Long
     var double1: Double
+    var bool1: Boolean
+    var bool2: Boolean
+    var bool3: Boolean
+    var bool4: Boolean
 }

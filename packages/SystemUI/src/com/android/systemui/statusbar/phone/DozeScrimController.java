@@ -22,7 +22,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
-import com.android.systemui.doze.DozeEvent;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -53,7 +52,7 @@ public class DozeScrimController implements StateListener {
         public void onDisplayBlanked() {
             if (DEBUG) {
                 Log.d(TAG, "Pulse in, mDozing=" + mDozing + " mPulseReason="
-                        + DozeEvent.reasonToString(mPulseReason));
+                        + DozeLog.reasonToString(mPulseReason));
             }
             if (!mDozing) {
                 return;
@@ -74,8 +73,8 @@ public class DozeScrimController implements StateListener {
             // Notifications should time out on their own.  Pulses due to notifications should
             // instead be managed externally based off the notification's lifetime.
             // Dock also controls the time out by self.
-            if (mPulseReason != DozeEvent.PULSE_REASON_NOTIFICATION
-                    && mPulseReason != DozeEvent.PULSE_REASON_DOCKING) {
+            if (mPulseReason != DozeLog.PULSE_REASON_NOTIFICATION
+                    && mPulseReason != DozeLog.PULSE_REASON_DOCKING) {
                 mHandler.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
                 mHandler.postDelayed(mPulseOutExtended,
                         mDozeParameters.getPulseVisibleDurationExtended());

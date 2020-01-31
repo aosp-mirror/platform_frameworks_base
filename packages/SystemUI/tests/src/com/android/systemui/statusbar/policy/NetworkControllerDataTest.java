@@ -187,7 +187,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_LTE);
         updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
         mPhoneStateListener.onServiceStateChanged(ss);
 
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, TelephonyIcons.ICON_5G,
@@ -202,7 +202,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyManager.NETWORK_TYPE_LTE);
         updateDataActivity(TelephonyManager.DATA_ACTIVITY_DORMANT);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
         mPhoneStateListener.onServiceStateChanged(ss);
 
         verifyDataIndicators(TelephonyIcons.ICON_5G);
@@ -215,7 +215,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onServiceStateChanged(ss);
 
@@ -229,7 +229,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_MMWAVE).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onServiceStateChanged(ss);
 
@@ -243,7 +243,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_RESTRICTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_RESTRICTED);
         mPhoneStateListener.onServiceStateChanged(mServiceState);
 
         verifyDataIndicators(TelephonyIcons.ICON_LTE);
@@ -259,7 +259,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         ServiceState ss = Mockito.mock(ServiceState.class);
         // While nrIconDisplayGracePeriodMs > 0 & is Nr5G, mIsShowingIconGracefully should be true
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -278,7 +278,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         assertTrue(mConfig.nrIconDisplayGracePeriodMs == 0);
 
         // While nrIconDisplayGracePeriodMs <= 0, mIsShowingIconGracefully should be false
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(mServiceState).getNrState();
+        setNrState(mServiceState, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(mServiceState).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -295,7 +295,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mPhoneStateListener.onServiceStateChanged(mServiceState);
 
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss).getNrState();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -305,7 +305,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         // Enabled timer Nr5G switch to None Nr5G, showing 5G icon gracefully
         ServiceState ssLte = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(ssLte).getNrState();
+        setNrState(ssLte, NetworkRegistrationInfo.NR_STATE_NONE);
         doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(ssLte).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -321,14 +321,14 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setupDefaultSignal();
         mNetworkController.handleConfigurationChanged();
 
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(mServiceState).getNrState();
+        setNrState(mServiceState, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(mServiceState).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
         verifyDataIndicators(TelephonyIcons.ICON_5G);
 
-        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(mServiceState).getNrState();
+        setNrState(mServiceState, NetworkRegistrationInfo.NR_STATE_NONE);
         doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(mServiceState).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -342,7 +342,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds();
         setupDefaultSignal();
         mNetworkController.handleConfigurationChanged();
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(mServiceState).getNrState();
+        setNrState(mServiceState, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(mServiceState).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -352,7 +352,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // Disabled timer, when out of service, reset timer to display latest state
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(mServiceState).getNrState();
+        setNrState(mServiceState, NetworkRegistrationInfo.NR_STATE_NONE);
         doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(mServiceState).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_DISCONNECTED,
                 TelephonyManager.NETWORK_TYPE_UMTS);
@@ -369,7 +369,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mPhoneStateListener.onServiceStateChanged(mServiceState);
 
         ServiceState ss5G = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss5G).getNrState();
+        setNrState(ss5G, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss5G).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -379,7 +379,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         // When timeout enabled, 5G/5G+ switching should be updated immediately
         ServiceState ss5GPlus = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss5GPlus).getNrState();
+        setNrState(ss5GPlus, NetworkRegistrationInfo.NR_STATE_CONNECTED);
         doReturn(ServiceState.FREQUENCY_RANGE_MMWAVE).when(ss5GPlus).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
@@ -396,22 +396,21 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mNetworkController.handleConfigurationChanged();
         mPhoneStateListener.onServiceStateChanged(mServiceState);
 
-        ServiceState ss5G = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_CONNECTED).when(ss5G).getNrState();
-        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss5G).getNrFrequencyRange();
+        ServiceState ss = Mockito.mock(ServiceState.class);
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        mPhoneStateListener.onServiceStateChanged(ss5G);
+        mPhoneStateListener.onServiceStateChanged(ss);
 
         verifyDataIndicators(TelephonyIcons.ICON_5G);
 
         // State from NR_5G to NONE NR_5G with timeout, should show previous 5G icon
-        ServiceState ssLte = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationInfo.NR_STATE_NONE).when(ssLte).getNrState();
-        doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(ssLte).getNrFrequencyRange();
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_NONE);
+        doReturn(ServiceState.FREQUENCY_RANGE_UNKNOWN).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
-        mPhoneStateListener.onServiceStateChanged(ssLte);
+        mPhoneStateListener.onServiceStateChanged(ss);
 
         verifyDataIndicators(TelephonyIcons.ICON_5G);
 
@@ -420,14 +419,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         mNetworkController.handleConfigurationChanged();
 
         // State from NR_5G to NONE NR_STATE_RESTRICTED, showing corresponding icon
-        doReturn(NetworkRegistrationInfo.NR_STATE_RESTRICTED).when(mServiceState).getNrState();
-        NetworkRegistrationInfo fakeRegInfo = new NetworkRegistrationInfo.Builder()
-                .setTransportType(TRANSPORT_TYPE_WWAN)
-                .setDomain(DOMAIN_PS)
-                .setAccessNetworkTechnology(TelephonyManager.NETWORK_TYPE_LTE)
-                .build();
-        doReturn(fakeRegInfo).when(mServiceState)
-                .getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
+        setNrState(ss, NetworkRegistrationInfo.NR_STATE_RESTRICTED);
         mPhoneStateListener.onDataConnectionStateChanged(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
@@ -530,5 +522,11 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, dataIcon,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, dataIcon, false,
                 false);
+    }
+
+    private void setNrState(ServiceState ss, int nrState) {
+        mFakeRegInfo.setNrState(nrState);
+        doReturn(mFakeRegInfo).when(ss)
+                .getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
     }
 }

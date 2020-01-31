@@ -43,7 +43,6 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -64,7 +63,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -75,7 +73,9 @@ import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DeviceIdleInternal;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
@@ -408,7 +408,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // Available only on GNSS HAL 2.0 implementations and later.
     private GnssVisibilityControl mGnssVisibilityControl;
 
-    // Handler for processing events
+    private final Context mContext;
     private Handler mHandler;
 
     private final GnssNetworkConnectivityHandler mNetworkConnectivityHandler;
@@ -624,12 +624,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    public GnssLocationProvider(Context context, Handler handler) {
-        super(context, new HandlerExecutor(handler));
+    public GnssLocationProvider(Context context) {
+        super(FgThread.getExecutor(), context);
 
         ensureInitialized();
 
-        mLooper = handler.getLooper();
+        mContext = context;
+        mLooper = FgThread.getHandler().getLooper();
 
         // Create a wake lock
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -1210,6 +1211,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    protected void onRequestSetAllowed(boolean allowed) {
+        // do nothing - the gnss provider is always allowed
     }
 
     private void deleteAidingData(Bundle extras) {
@@ -1825,8 +1831,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
             native_send_ni_response(notificationId, userResponse);
 
-            StatsLog.write(StatsLog.GNSS_NI_EVENT_REPORTED,
-                    StatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_RESPONSE,
+            FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NI_EVENT_REPORTED,
+                    FrameworkStatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_RESPONSE,
                     notificationId,
                     /* niType= */ 0,
                     /* needNotify= */ false,
@@ -1891,8 +1897,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         notification.textEncoding = textEncoding;
 
         mNIHandler.handleNiNotification(notification);
-        StatsLog.write(StatsLog.GNSS_NI_EVENT_REPORTED,
-                StatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_REQUEST,
+        FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NI_EVENT_REPORTED,
+                FrameworkStatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_REQUEST,
                 notification.notificationId,
                 notification.niType,
                 notification.needNotify,

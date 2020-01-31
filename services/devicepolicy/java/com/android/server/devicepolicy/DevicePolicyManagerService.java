@@ -9553,9 +9553,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setDefaultSmsApplication(ComponentName admin, String packageName) {
+    public void setDefaultSmsApplication(ComponentName admin, String packageName, boolean parent) {
         Objects.requireNonNull(admin, "ComponentName is null");
-        enforceDeviceOwner(admin);
+
+        if (parent) {
+            ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
+            enforceProfileOwnerOfOrganizationOwnedDevice(ap);
+            mInjector.binderWithCleanCallingIdentity(() -> enforcePackageIsSystemPackage(
+                    packageName, getProfileParentId(mInjector.userHandleGetCallingUserId())));
+        } else {
+            enforceDeviceOwner(admin);
+        }
+
         mInjector.binderWithCleanCallingIdentity(() ->
                 SmsApplication.setDefaultApplication(packageName, mContext));
     }
@@ -10778,7 +10788,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // API cannot be used to leak if certain non-system package exists in the person
                 // profile.
                 mInjector.binderWithCleanCallingIdentity(() ->
-                        enforcePackageIsSystemPackage(packageName, hidden, userId));
+                        enforcePackageIsSystemPackage(packageName, userId));
             }
 
             result = mInjector.binderWithCleanCallingIdentity(() -> mIPackageManager
@@ -10811,7 +10821,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
                 // Ensure the package provided is a system package.
                 mInjector.binderWithCleanCallingIdentity(() ->
-                        enforcePackageIsSystemPackage(packageName, false, userId));
+                        enforcePackageIsSystemPackage(packageName, userId));
             }
 
             return mInjector.binderWithCleanCallingIdentity(
@@ -10819,16 +10829,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void enforcePackageIsSystemPackage(String packageName, boolean hidden, int userId)
+    private void enforcePackageIsSystemPackage(String packageName, int userId)
             throws RemoteException {
-        int flags = PackageManager.MATCH_SYSTEM_ONLY;
-        // If the package is currently hidden then it is considered uninstalled and
-        // the MATCH_UNINSTALLED_PACKAGES flag has to be added.
-        if (!hidden) {
-            flags |= PackageManager.MATCH_UNINSTALLED_PACKAGES;
-        }
-        PackageInfo packageInfo = mIPackageManager.getPackageInfo(packageName, flags, userId);
-        if (packageInfo == null || !packageInfo.applicationInfo.isSystemApp()) {
+        if (!isSystemApp(mIPackageManager, packageName, userId)) {
             throw new IllegalArgumentException(
                     "The provided package is not a system package");
         }

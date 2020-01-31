@@ -26,6 +26,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -105,4 +106,9 @@ public interface SystemUIRootComponent {
      * Member injection into the supplied argument.
      */
     void inject(ContentProvider contentProvider);
+
+    /**
+     * Member injection into the supplied argument.
+     */
+    void inject(KeyguardSliceProvider keyguardSliceProvider);
 }

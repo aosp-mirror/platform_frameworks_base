@@ -1244,6 +1244,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayRotation;
     }
 
+    void setInsetProvider(@InternalInsetsType int type, WindowState win,
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider){
+        setInsetProvider(type, win, frameProvider, null /* imeFrameProvider */);
+    }
+
     /**
      * Marks a window as providing insets for the rest of the windows in the system.
      *
@@ -1251,10 +1256,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param win The window.
      * @param frameProvider Function to compute the frame, or {@code null} if the just the frame of
      *                      the window should be taken.
+     * @param imeFrameProvider Function to compute the frame when dispatching insets to the IME, or
+     *                         {@code null} if the normal frame should be taken.
      */
     void setInsetProvider(@InternalInsetsType int type, WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
-        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider);
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider,
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> imeFrameProvider) {
+        mInsetsStateController.getSourceProvider(type).setWindow(win, frameProvider,
+                imeFrameProvider);
     }
 
     InsetsStateController getInsetsStateController() {
@@ -3283,7 +3292,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         computeImeTarget(true /* updateImeTarget */);
         mInsetsStateController.getSourceProvider(ITYPE_IME).setWindow(win,
-                null /* frameProvider */);
+                null /* frameProvider */, null /* imeFrameProvider */);
     }
 
     /**
@@ -3407,6 +3416,57 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 && mInputMethodTarget.mActivityRecord.matchParentBounds());
     }
 
+    /**
+     * Get IME target that should host IME when this display that is reparented to another
+     * WindowState.
+     * IME is never displayed in a child display.
+     * Use {@link WindowState#getImeControlTarget()} when IME target window
+     * which originally called
+     * {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} is known.
+     *
+     * @return {@link WindowState} of host that controls IME.
+     *         {@code null} when {@param dc} is not a virtual display.
+     * @see DisplayContent#reparent
+     */
+    @Nullable
+    WindowState getImeControlTarget() {
+        WindowState imeTarget = mInputMethodTarget;
+        if (imeTarget != null) {
+            return imeTarget.getImeControlTarget();
+        }
+
+        return getInsetsStateController().getImeSourceProvider().getControlTarget().getWindow();
+    }
+
+    /**
+     * Finds the window which can host IME if IME target cannot host it.
+     * e.g. IME target cannot host IME when it's display has a parent display OR when display
+     * doesn't support IME/system decorations.
+     *
+     * @param target current IME target.
+     * @return {@link WindowState} that can host IME.
+     * @see DisplayContent#getImeControlTarget()
+     */
+    WindowState getImeHostOrFallback(WindowState target) {
+        if (target != null && target.getDisplayContent().canShowIme()) {
+            return target;
+        }
+
+        // host is in non-default display that doesn't support system decor, default to
+        // default display's StatusBar to control IME.
+        // TODO: (b/148234093)find a better host OR control IME animation/visibility directly
+        //  because it won't work when statusbar isn't available.
+        return mWmService.getDefaultDisplayContentLocked().getDisplayPolicy().getStatusBar();
+    }
+
+    boolean canShowIme() {
+        if (isUntrustedVirtualDisplay()) {
+            return false;
+        }
+        return mWmService.mDisplayWindowSettings.shouldShowImeLocked(this)
+                || mWmService.mForceDesktopModeOnExternalDisplays;
+    }
+
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
@@ -3416,8 +3476,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
         mInputMethodControlTarget = computeImeControlTarget();
-        mInsetsStateController.onImeTargetChanged(mInputMethodControlTarget);
+        mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
         updateImeParent();
+    }
+
+    /**
+     * IME control target is the window that controls the IME visibility and animation.
+     * This window is same as the window on which startInput is called.
+     * @param target the window that receives IME control.
+     *
+     * @see #getImeControlTarget()
+     */
+    void updateImeControlTarget(WindowState target) {
+        mInputMethodControlTarget = target;
+        mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 
     private void updateImeParent() {

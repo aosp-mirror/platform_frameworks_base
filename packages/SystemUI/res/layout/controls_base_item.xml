@@ -23,8 +23,8 @@
     android:padding="@dimen/control_padding"
     android:clickable="true"
     android:focusable="true"
-    android:layout_marginLeft="3dp"
-    android:layout_marginRight="3dp"
+    android:layout_marginLeft="2dp"
+    android:layout_marginRight="2dp"
     android:background="@drawable/control_background">
 
     <ImageView
@@ -60,9 +60,9 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:textSize="14sp"
         android:textColor="?android:attr/textColorPrimary"
-        android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         app:layout_constraintBottom_toTopOf="@+id/subtitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/icon" />
@@ -71,9 +71,9 @@
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
+        android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
-        android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

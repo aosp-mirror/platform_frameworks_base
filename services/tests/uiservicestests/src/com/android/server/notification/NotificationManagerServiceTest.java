@@ -148,6 +148,8 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.LocalServices;
@@ -257,7 +259,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     NotificationHistoryManager mHistoryManager;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
-
+    private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
+            1 << 30);
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -267,8 +270,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         @Nullable
         NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
 
-        TestableNotificationManagerService(Context context, NotificationRecordLogger logger) {
-            super(context, logger);
+        TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
+                InstanceIdSequence notificationInstanceIdSequence) {
+            super(context, logger, notificationInstanceIdSequence);
         }
 
         @Override
@@ -355,7 +359,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
-        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger);
+        mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
+                mNotificationInstanceIdSequence);
 
         // Use this testable looper.
         mTestableLooper = TestableLooper.get(this);
@@ -1135,6 +1140,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(PKG, call.r.sbn.getPackageName());
         assertEquals(0, call.r.sbn.getId());
         assertEquals(tag, call.r.sbn.getTag());
+        assertNotNull(call.r.sbn.getInstanceId());
+        assertEquals(0, call.r.sbn.getInstanceId().getId());
     }
 
     @Test
@@ -1151,14 +1158,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0, update, 0);
         waitForIdle();
         assertEquals(2, mNotificationRecordLogger.getCalls().size());
+
         assertTrue(mNotificationRecordLogger.get(0).shouldLog());
         assertEquals(
                 NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
                 mNotificationRecordLogger.get(0).getUiEvent());
+        assertEquals(0, mNotificationRecordLogger.get(0).r.sbn.getInstanceId().getId());
+
+        assertTrue(mNotificationRecordLogger.get(1).shouldLog());
         assertEquals(
                 NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_UPDATED,
                 mNotificationRecordLogger.get(1).getUiEvent());
-        assertTrue(mNotificationRecordLogger.get(1).shouldLog());
+        // Instance ID doesn't change on update of an active notification
+        assertEquals(0, mNotificationRecordLogger.get(1).r.sbn.getInstanceId().getId());
     }
 
     @Test
@@ -1172,6 +1184,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(2, mNotificationRecordLogger.getCalls().size());
         assertTrue(mNotificationRecordLogger.get(0).shouldLog());
         assertFalse(mNotificationRecordLogger.get(1).shouldLog());
+    }
+
+    @Test
+    public void testEnqueueNotificationWithTag_LogsAgainAfterCancel() throws Exception {
+        final String tag = "testEnqueueNotificationWithTag_LogsAgainAfterCancel";
+        Notification notification = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0, notification, 0);
+        waitForIdle();
+        mBinderService.cancelNotificationWithTag(PKG, PKG, tag, 0, 0);
+        waitForIdle();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0, notification, 0);
+        waitForIdle();
+        assertEquals(2, mNotificationRecordLogger.getCalls().size());
+
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog());
+        assertEquals(
+                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
+                mNotificationRecordLogger.get(0).getUiEvent());
+        assertEquals(0, mNotificationRecordLogger.get(0).r.sbn.getInstanceId().getId());
+
+        assertTrue(mNotificationRecordLogger.get(1).shouldLog());
+        assertEquals(
+                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
+                mNotificationRecordLogger.get(1).getUiEvent());
+        // New instance ID because notification was canceled before re-post
+        assertEquals(1, mNotificationRecordLogger.get(1).r.sbn.getInstanceId().getId());
     }
 
     @Test
@@ -2309,7 +2349,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testHasCompanionDevice_noService() {
-        mService = new TestableNotificationManagerService(mContext,  mNotificationRecordLogger);
+        mService = new TestableNotificationManagerService(mContext,  mNotificationRecordLogger,
+                mNotificationInstanceIdSequence);
 
         assertFalse(mService.hasCompanionDevice(mListener));
     }
@@ -4679,8 +4720,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         // cross user, with permission, no problem
-        TestablePermissions perms = mContext.getTestablePermissions();
-        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        enableInteractAcrossUsers();
         mBinderService.canNotifyAsPackage("src", "target", mContext.getUserId() + 1);
     }
 
@@ -4698,8 +4738,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         // cross user, with permission, no problem
-        TestablePermissions perms = mContext.getTestablePermissions();
-        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        enableInteractAcrossUsers();
         mBinderService.getNotificationChannels("src", "target", mContext.getUserId() + 1);
     }
 
@@ -5317,8 +5356,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         // cross user, with permission, no problem
-        TestablePermissions perms = mContext.getTestablePermissions();
-        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        enableInteractAcrossUsers();
         mBinderService.areNotificationsEnabledForPackage(mContext.getPackageName(),
                 mUid + UserHandle.PER_USER_RANGE);
     }
@@ -5334,10 +5372,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         // cross user, with permission, no problem
-        TestablePermissions perms = mContext.getTestablePermissions();
-        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        enableInteractAcrossUsers();
         mBinderService.areBubblesAllowedForPackage(mContext.getPackageName(),
                 mUid + UserHandle.PER_USER_RANGE);
+    }
+
+    private void enableInteractAcrossUsers() {
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
     }
 
     @Test

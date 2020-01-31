@@ -196,7 +196,6 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -227,6 +226,7 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
@@ -3154,7 +3154,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int requested = mLastRequestedExclusionHeight[side];
         final int granted = mLastGrantedExclusionHeight[side];
 
-        StatsLog.write(StatsLog.EXCLUSION_RECT_STATE_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.EXCLUSION_RECT_STATE_CHANGED,
                 mAttrs.packageName, requested, requested - granted /* rejected */,
                 side + 1 /* Sides are 1-indexed in atoms.proto */,
                 (getConfiguration().orientation == ORIENTATION_LANDSCAPE),
@@ -3515,6 +3515,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change", e);
         }
+    }
+
+    @Override
+    public WindowState getWindow() {
+        return this;
     }
 
     @Override
@@ -5332,6 +5337,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return inTokenWithAndAboveImeTarget;
         }
         return false;
+    }
+
+    /**
+     * Get IME target that should host IME when this window's display has a parent.
+     * Note: IME is never hosted by a display that has a parent.
+     * When window calling
+     * {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} is unknown,
+     * use {@link DisplayContent#getImeControlTarget()} instead.
+     *
+     * @return {@link WindowState} of host that controls the IME.
+     *         When window is doesn't have a parent, it is returned as-is.
+     */
+    WindowState getImeControlTarget() {
+        final DisplayContent dc = getDisplayContent();
+        final WindowState parentWindow = dc.getParentWindow();
+
+        // If target's display has a parent, IME is displayed in the parent display.
+        return dc.getImeHostOrFallback(parentWindow != null ? parentWindow : this);
     }
 
     @Override

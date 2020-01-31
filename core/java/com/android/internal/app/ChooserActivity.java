@@ -53,6 +53,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -81,6 +82,7 @@ import android.provider.DeviceConfig;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
 import android.service.chooser.IChooserTargetResult;
@@ -101,6 +103,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
@@ -131,6 +134,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URISyntaxException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -165,6 +169,9 @@ public class ChooserActivity extends ResolverActivity implements
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
+
+    private static final String CHIP_LABEL_METADATA_KEY = "android.service.chooser.chip_label";
+    private static final String CHIP_ICON_METADATA_KEY = "android.service.chooser.chip_icon";
 
     private static final boolean DEBUG = true;
 
@@ -527,6 +534,15 @@ public class ChooserActivity extends ResolverActivity implements
         mIsSuccessfullySelected = false;
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+        if (targetParcelable instanceof Uri) {
+            try {
+                targetParcelable = Intent.parseUri(targetParcelable.toString(),
+                        Intent.URI_INTENT_SCHEME);
+            } catch (URISyntaxException ex) {
+                // doesn't parse as an intent; let the next test fail and error out
+            }
+        }
+
         if (!(targetParcelable instanceof Intent)) {
             Log.w("ChooserActivity", "Target is not an intent: " + targetParcelable);
             finish();
@@ -777,7 +793,9 @@ public class ChooserActivity extends ResolverActivity implements
                 /* userHandle */ UserHandle.of(UserHandle.myUserId()));
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
-                adapter);
+                adapter,
+                getPersonalProfileUserHandle(),
+                /* workProfileUserHandle= */ null);
     }
 
     private ChooserMultiProfilePagerAdapter createChooserMultiProfilePagerAdapterForTwoProfiles(
@@ -804,7 +822,9 @@ public class ChooserActivity extends ResolverActivity implements
                 /* context */ this,
                 personalAdapter,
                 workAdapter,
-                /* defaultProfile */ getCurrentProfile());
+                /* defaultProfile */ getCurrentProfile(),
+                getPersonalProfileUserHandle(),
+                getWorkProfileUserHandle());
     }
 
     @Override
@@ -856,11 +876,11 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    protected PackageMonitor createPackageMonitor() {
+    protected PackageMonitor createPackageMonitor(ResolverListAdapter listAdapter) {
         return new PackageMonitor() {
             @Override
             public void onSomePackagesChanged() {
-                handlePackagesChanged();
+                handlePackagesChanged(listAdapter);
             }
         };
     }
@@ -869,9 +889,19 @@ public class ChooserActivity extends ResolverActivity implements
      * Update UI to reflect changes in data.
      */
     public void handlePackagesChanged() {
-        // TODO(arangelov): Dispatch this to all adapters when we have the helper methods
-        // in a follow-up CL
-        mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        handlePackagesChanged(/* listAdapter */ null);
+    }
+
+    /**
+     * Update UI to reflect changes in data.
+     * <p>If {@code listAdapter} is {@code null}, both profile list adapters are updated.
+     */
+    private void handlePackagesChanged(@Nullable ResolverListAdapter listAdapter) {
+        if (listAdapter == null) {
+            mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        } else {
+            listAdapter.handlePackagesChanged();
+        }
         updateProfileViewButton();
     }
 
@@ -965,6 +995,108 @@ public class ChooserActivity extends ResolverActivity implements
         return displayContentPreview(previewType, targetIntent, getLayoutInflater(), parent);
     }
 
+    private ComponentName getNearbySharingComponent() {
+        String nearbyComponent = Settings.Secure.getString(
+                getContentResolver(),
+                Settings.Secure.NEARBY_SHARING_COMPONENT);
+        if (TextUtils.isEmpty(nearbyComponent)) {
+            nearbyComponent = getString(R.string.config_defaultNearbySharingComponent);
+        }
+        if (TextUtils.isEmpty(nearbyComponent)) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(nearbyComponent);
+    }
+
+    private TargetInfo getNearbySharingTarget(Intent originalIntent) {
+        final ComponentName cn = getNearbySharingComponent();
+        if (cn == null) return null;
+
+        final Intent resolveIntent = new Intent();
+        resolveIntent.setComponent(cn);
+        final ResolveInfo ri = getPackageManager().resolveActivity(
+                resolveIntent, PackageManager.GET_META_DATA);
+        if (ri == null || ri.activityInfo == null) {
+            Log.e(TAG, "Device-specified nearby sharing component (" + cn
+                    + ") not available");
+            return null;
+        }
+
+        // Allow the nearby sharing component to provide a more appropriate icon and label
+        // for the chip.
+        CharSequence name = null;
+        Drawable icon = null;
+        final Bundle metaData = ri.activityInfo.metaData;
+        if (metaData != null) {
+            try {
+                final Resources pkgRes = getPackageManager().getResourcesForActivity(cn);
+                final int nameResId = metaData.getInt(CHIP_LABEL_METADATA_KEY);
+                name = pkgRes.getString(nameResId);
+                final int resId = metaData.getInt(CHIP_ICON_METADATA_KEY);
+                icon = pkgRes.getDrawable(resId);
+            } catch (Resources.NotFoundException ex) {
+            } catch (NameNotFoundException ex) {
+            }
+        }
+        if (TextUtils.isEmpty(name)) {
+            name = ri.loadLabel(getPackageManager());
+        }
+        if (icon == null) {
+            icon = ri.loadIcon(getPackageManager());
+        }
+
+        final DisplayResolveInfo dri = new DisplayResolveInfo(
+                originalIntent, ri, name, "", resolveIntent, null);
+        dri.setDisplayIcon(icon);
+        return dri;
+    }
+
+    private Button createActionButton(Drawable icon, CharSequence title, View.OnClickListener r) {
+        Button b = (Button) LayoutInflater.from(this).inflate(R.layout.chooser_action_button, null);
+        if (icon != null) {
+            final int size = getResources()
+                    .getDimensionPixelSize(R.dimen.chooser_action_button_icon_size);
+            icon.setBounds(0, 0, size, size);
+            b.setCompoundDrawablesRelative(icon, null, null, null);
+        }
+        b.setText(title);
+        b.setOnClickListener(r);
+        return b;
+    }
+
+    private Button createCopyButton() {
+        final Button b = createActionButton(
+                getDrawable(R.drawable.ic_menu_copy_material),
+                getString(R.string.copy), this::onCopyButtonClicked);
+        b.setId(R.id.chooser_copy_button);
+        return b;
+    }
+
+    private @Nullable Button createNearbyButton(Intent originalIntent) {
+        final TargetInfo ti = getNearbySharingTarget(originalIntent);
+        if (ti == null) return null;
+
+        return createActionButton(
+                ti.getDisplayIcon(this),
+                ti.getDisplayLabel(),
+                (View unused) -> {
+                    safelyStartActivity(ti);
+                    finish();
+                }
+        );
+    }
+
+    private void addActionButton(ViewGroup parent, Button b) {
+        if (b == null) return;
+        final ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.WRAP_CONTENT
+                );
+        final int gap = getResources().getDimensionPixelSize(R.dimen.resolver_icon_margin) / 2;
+        lp.setMarginsRelative(gap, 0, gap, 0);
+        parent.addView(b, lp);
+    }
+
     private ViewGroup displayContentPreview(@ContentPreviewType int previewType,
             Intent targetIntent, LayoutInflater layoutInflater, ViewGroup parent) {
         ViewGroup layout = null;
@@ -995,8 +1127,10 @@ public class ChooserActivity extends ResolverActivity implements
         ViewGroup contentPreviewLayout = (ViewGroup) layoutInflater.inflate(
                 R.layout.chooser_grid_preview_text, parent, false);
 
-        contentPreviewLayout.findViewById(R.id.copy_button).setOnClickListener(
-                this::onCopyButtonClicked);
+        final ViewGroup actionRow =
+                (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
+        addActionButton(actionRow, createCopyButton());
+        addActionButton(actionRow, createNearbyButton(targetIntent));
 
         CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
         if (sharingText == null) {
@@ -1154,7 +1288,8 @@ public class ChooserActivity extends ResolverActivity implements
 
         // TODO(b/120417119): Disable file copy until after moving to sysui,
         // due to permissions issues
-        contentPreviewLayout.findViewById(R.id.file_copy_button).setVisibility(View.GONE);
+        //((ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row))
+        //        .addView(createCopyButton());
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
@@ -1680,7 +1815,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
             return intentFilter;
         } catch (Exception e) {
-            Log.e(TAG, "failed to get target intent filter " + e);
+            Log.e(TAG, "failed to get target intent filter", e);
             return null;
         }
     }
@@ -2337,10 +2472,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override // ResolverListCommunicator
-    public void onHandlePackagesChanged() {
+    public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
         mServicesRequested.clear();
         mChooserMultiProfilePagerAdapter.getActiveListAdapter().notifyDataSetChanged();
-        super.onHandlePackagesChanged();
+        super.onHandlePackagesChanged(listAdapter);
     }
 
     @Override // SelectableTargetInfoCommunicator

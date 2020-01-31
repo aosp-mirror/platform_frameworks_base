@@ -17,8 +17,6 @@
 package com.android.server;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -91,12 +89,8 @@ public class LocationManagerServiceUtils {
 
         /**
          * Link listener (i.e. callback) to a binder, so that it will be called upon binder's death.
-         *
-         * @param binder that calls listener upon death
-         * @return true if listener is successfully linked to binder, false otherwise
          */
-        public boolean linkToListenerDeathNotificationLocked(
-                IBinder binder) {
+        public boolean linkToListenerDeathNotificationLocked(IBinder binder) {
             try {
                 binder.linkToDeath(this, 0 /* flags */);
                 return true;
@@ -110,54 +104,13 @@ public class LocationManagerServiceUtils {
 
         /**
          * Unlink death listener (i.e. callback) from binder.
-         *
-         * @param binder that calls listener upon death
-         * @return true if binder is successfully unlinked from binder, false otherwise
          */
-        public boolean unlinkFromListenerDeathNotificationLocked(
-                IBinder binder) {
+        public void unlinkFromListenerDeathNotificationLocked(IBinder binder) {
             try {
                 binder.unlinkToDeath(this, 0 /* flags */);
-                return true;
             } catch (NoSuchElementException e) {
-                // if the death callback isn't connected (it should be...), log error,
-                // swallow the exception and return
                 Log.w(TAG, "Could not unlink " + mListenerName + " death callback.", e);
-                return false;
             }
         }
-
-    }
-
-    /**
-     * Convert boolean foreground into "foreground" or "background" string.
-     *
-     * @param foreground boolean indicating foreground
-     * @return "foreground" string if true, false otherwise
-     */
-    public static String foregroundAsString(boolean foreground) {
-        return foreground ? "foreground" : "background";
-    }
-
-
-    /**
-     * Classifies importance level as foreground or not.
-     *
-     * @param importance level as int
-     * @return boolean indicating if importance level is foreground or greater
-     */
-    public static boolean isImportanceForeground(int importance) {
-        return importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
-    }
-
-    /**
-     * Get package importance level.
-     *
-     * @param packageName package name
-     * @return package importance level as int
-     */
-    public static int getPackageImportance(String packageName, Context context) {
-        return ((ActivityManager) context.getSystemService(
-                Context.ACTIVITY_SERVICE)).getPackageImportance(packageName);
     }
 }

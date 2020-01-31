@@ -123,8 +123,6 @@ interface IWifiManager
 
     boolean isWifiStandardSupported(int standard);
 
-    boolean needs5GHzToAnyApBandConversion();
-
     DhcpInfo getDhcpInfo();
 
     boolean isScanAlwaysAvailable();

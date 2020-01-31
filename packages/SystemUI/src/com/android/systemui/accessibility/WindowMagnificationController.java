@@ -86,6 +86,8 @@ public class WindowMagnificationController implements View.OnClickListener,
     private SurfaceView mMirrorSurfaceView;
     private View mControlsView;
     private View mOverlayView;
+    // The boundary of magnification frame.
+    private final Rect mMagnificationFrameBoundary = new Rect();
 
     private MoveMirrorRunnable mMoveMirrorRunnable = new MoveMirrorRunnable();
 
@@ -93,7 +95,7 @@ public class WindowMagnificationController implements View.OnClickListener,
         mContext = context;
         mHandler = handler;
         Display display = mContext.getDisplay();
-        display.getSize(mDisplaySize);
+        display.getRealSize(mDisplaySize);
         mDisplayId = mContext.getDisplayId();
 
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -114,6 +116,7 @@ public class WindowMagnificationController implements View.OnClickListener,
             return;
         }
         setInitialStartBounds();
+        setMagnificationFrameBoundary();
         createOverlayWindow();
     }
 
@@ -330,7 +333,7 @@ public class WindowMagnificationController implements View.OnClickListener,
     @Override
     public void onClick(View v) {
         setMoveOffset(v, mMoveFrameAmountShort);
-        moveMirrorFromControls();
+        moveMirrorWindow(mMoveWindowOffset.x, mMoveWindowOffset.y);
     }
 
     @Override
@@ -370,10 +373,8 @@ public class WindowMagnificationController implements View.OnClickListener,
             case MotionEvent.ACTION_MOVE:
                 int xDiff = (int) (event.getRawX() - mLastDrag.x);
                 int yDiff = (int) (event.getRawY() - mLastDrag.y);
-                mMagnificationFrame.offset(xDiff, yDiff);
+                moveMirrorWindow(xDiff, yDiff);
                 mLastDrag.set(event.getRawX(), event.getRawY());
-                modifyWindowMagnification(mTransaction);
-                mTransaction.apply();
                 return true;
         }
         return false;
@@ -393,11 +394,11 @@ public class WindowMagnificationController implements View.OnClickListener,
         }
     }
 
-    private void moveMirrorFromControls() {
-        mMagnificationFrame.offset(mMoveWindowOffset.x, mMoveWindowOffset.y);
-
-        modifyWindowMagnification(mTransaction);
-        mTransaction.apply();
+    private void moveMirrorWindow(int xOffset, int yOffset) {
+        if (updateMagnificationFramePosition(xOffset, yOffset)) {
+            modifyWindowMagnification(mTransaction);
+            mTransaction.apply();
+        }
     }
 
     /**
@@ -414,6 +415,52 @@ public class WindowMagnificationController implements View.OnClickListener,
         return new Rect(left, top, right, bottom);
     }
 
+    private void setMagnificationFrameBoundary() {
+        // Calculates width and height for magnification frame could exceed out the screen.
+        // TODO : re-calculating again when scale is changed.
+        // The half width of magnification frame.
+        final int halfWidth = mMagnificationFrame.width() / 2;
+        // The half height of magnification frame.
+        final int halfHeight = mMagnificationFrame.height() / 2;
+        // The scaled half width of magnified region.
+        final int scaledWidth = (int) (halfWidth / mScale);
+        // The scaled half height of magnified region.
+        final int scaledHeight = (int) (halfHeight / mScale);
+        final int exceededWidth = halfWidth - scaledWidth;
+        final int exceededHeight = halfHeight - scaledHeight;
+
+        mMagnificationFrameBoundary.set(-exceededWidth, -exceededHeight,
+                mDisplaySize.x + exceededWidth, mDisplaySize.y + exceededHeight);
+    }
+
+    /**
+     * Calculates and sets the real position of magnification frame based on the magnified region
+     * should be limited by the region of the display.
+     */
+    private boolean updateMagnificationFramePosition(int xOffset, int yOffset) {
+        mTmpRect.set(mMagnificationFrame);
+        mTmpRect.offset(xOffset, yOffset);
+
+        if (mTmpRect.left < mMagnificationFrameBoundary.left) {
+            mTmpRect.offsetTo(mMagnificationFrameBoundary.left, mTmpRect.top);
+        } else if (mTmpRect.right > mMagnificationFrameBoundary.right) {
+            final int leftOffset = mMagnificationFrameBoundary.right - mMagnificationFrame.width();
+            mTmpRect.offsetTo(leftOffset, mTmpRect.top);
+        }
+
+        if (mTmpRect.top < mMagnificationFrameBoundary.top) {
+            mTmpRect.offsetTo(mTmpRect.left, mMagnificationFrameBoundary.top);
+        } else if (mTmpRect.bottom > mMagnificationFrameBoundary.bottom) {
+            final int topOffset = mMagnificationFrameBoundary.bottom - mMagnificationFrame.height();
+            mTmpRect.offsetTo(mTmpRect.left, topOffset);
+        }
+
+        if (!mTmpRect.equals(mMagnificationFrame)) {
+            mMagnificationFrame.set(mTmpRect);
+            return true;
+        }
+        return false;
+    }
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         createMirror();
@@ -431,7 +478,7 @@ public class WindowMagnificationController implements View.OnClickListener,
         @Override
         public void run() {
             if (mIsPressedDown) {
-                moveMirrorFromControls();
+                moveMirrorWindow(mMoveWindowOffset.x, mMoveWindowOffset.y);
                 mHandler.postDelayed(mMoveMirrorRunnable, 100);
             }
         }

@@ -16,6 +16,8 @@
 
 package com.android.test.taskembed;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.Service;
@@ -38,48 +40,11 @@ public class TaskOrganizerPipTest extends Service {
     static final int PIP_WIDTH  = 640;
     static final int PIP_HEIGHT = 360;
 
-    class PipOrgView extends SurfaceView implements SurfaceHolder.Callback {
-        PipOrgView(Context c) {
-            super(c);
-            getHolder().addCallback(this);
-            setZOrderOnTop(true);
-        }
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            try {
-                ActivityTaskManager.getService().registerTaskOrganizer(mOrganizer,
-                        WindowConfiguration.WINDOWING_MODE_PINNED);
-            } catch (Exception e) {
-            }
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-        }
-
-        void reparentTask(IWindowContainer wc) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            SurfaceControl leash = null;
-            try {
-                leash = wc.getLeash();
-            } catch (Exception e) {
-                // System server died.. oh well
-            }
-            t.reparent(leash, getSurfaceControl())
-                .setPosition(leash, 0, 0)
-                .apply();
-        }
-    }
-
-    PipOrgView mPipView;
+    TaskView mTaskView;
 
     class Organizer extends ITaskOrganizer.Stub {
         public void taskAppeared(IWindowContainer wc, ActivityManager.RunningTaskInfo ti) {
-            mPipView.reparentTask(wc);
+            mTaskView.reparentTask(wc);
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.scheduleFinishEnterPip(wc, new Rect(0, 0, PIP_WIDTH, PIP_HEIGHT));
@@ -113,8 +78,8 @@ public class TaskOrganizerPipTest extends Service {
         FrameLayout layout = new FrameLayout(this);
         ViewGroup.LayoutParams lp =
             new ViewGroup.LayoutParams(PIP_WIDTH, PIP_HEIGHT);
-        mPipView = new PipOrgView(this);
-        layout.addView(mPipView, lp);
+        mTaskView = new TaskView(this, mOrganizer, WINDOWING_MODE_PINNED);
+        layout.addView(mTaskView, lp);
 
         WindowManager wm = getSystemService(WindowManager.class);
         wm.addView(layout, wlp);

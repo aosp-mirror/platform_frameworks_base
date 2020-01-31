@@ -113,7 +113,7 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     public void handlePackagesChanged() {
-        mResolverListCommunicator.onHandlePackagesChanged();
+        mResolverListCommunicator.onHandlePackagesChanged(this);
     }
 
     public void setPlaceholderCount(int count) {
@@ -176,9 +176,14 @@ public class ResolverListAdapter extends BaseAdapter {
      * Rebuild the list of resolvers. In some cases some parts will need some asynchronous work
      * to complete.
      *
+     * The {@code doPostProcessing } parameter is used to specify whether to update the UI and
+     * load additional targets (e.g. direct share) after the list has been rebuilt. This is used
+     * in the case where we want to load the inactive profile's resolved apps to know the
+     * number of targets.
+     *
      * @return Whether or not the list building is completed.
      */
-    protected boolean rebuildList() {
+    protected boolean rebuildList(boolean doPostProcessing) {
         List<ResolvedComponentInfo> currentResolveList = null;
         // Clear the value of mOtherProfile from previous call.
         mOtherProfile = null;
@@ -186,6 +191,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mLastChosenPosition = -1;
         mAllTargetsAreBrowsers = false;
         mDisplayList.clear();
+
         if (mBaseResolveList != null) {
             currentResolveList = mUnfilteredResolveList = new ArrayList<>();
             mResolverListController.addResolveListDedupe(currentResolveList,
@@ -198,7 +204,7 @@ public class ResolverListAdapter extends BaseAdapter {
                             mResolverListCommunicator.shouldGetActivityMetadata(),
                             mIntents);
             if (currentResolveList == null) {
-                processSortedList(currentResolveList);
+                processSortedList(currentResolveList, doPostProcessing);
                 return true;
             }
             List<ResolvedComponentInfo> originalList =
@@ -256,22 +262,22 @@ public class ResolverListAdapter extends BaseAdapter {
                     --placeholderCount;
                 }
                 setPlaceholderCount(placeholderCount);
-                createSortingTask().execute(currentResolveList);
-                postListReadyRunnable();
+                createSortingTask(doPostProcessing).execute(currentResolveList);
+                postListReadyRunnable(doPostProcessing);
                 return false;
             } else {
-                processSortedList(currentResolveList);
+                processSortedList(currentResolveList, doPostProcessing);
                 return true;
             }
         } else {
-            processSortedList(currentResolveList);
+            processSortedList(currentResolveList, doPostProcessing);
             return true;
         }
     }
 
     AsyncTask<List<ResolvedComponentInfo>,
             Void,
-            List<ResolvedComponentInfo>> createSortingTask() {
+            List<ResolvedComponentInfo>> createSortingTask(boolean doPostProcessing) {
         return new AsyncTask<List<ResolvedComponentInfo>,
                 Void,
                 List<ResolvedComponentInfo>>() {
@@ -283,15 +289,17 @@ public class ResolverListAdapter extends BaseAdapter {
             }
             @Override
             protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
-                processSortedList(sortedComponents);
-                mResolverListCommunicator.updateProfileViewButton();
+                processSortedList(sortedComponents, doPostProcessing);
                 notifyDataSetChanged();
+                if (doPostProcessing) {
+                    mResolverListCommunicator.updateProfileViewButton();
+                }
             }
         };
     }
 
-
-    protected void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
+    protected void processSortedList(List<ResolvedComponentInfo> sortedComponents,
+            boolean doPostProcessing) {
         int n;
         if (sortedComponents != null && (n = sortedComponents.size()) != 0) {
             mAllTargetsAreBrowsers = mUseLayoutForBrowsables;
@@ -343,20 +351,23 @@ public class ResolverListAdapter extends BaseAdapter {
         }
 
         mResolverListCommunicator.sendVoiceChoicesIfNeeded();
-        postListReadyRunnable();
+        postListReadyRunnable(doPostProcessing);
     }
 
     /**
      * Some necessary methods for creating the list are initiated in onCreate and will also
      * determine the layout known. We therefore can't update the UI inline and post to the
      * handler thread to update after the current task is finished.
+     * @param doPostProcessing Whether to update the UI and load additional direct share targets
+     *                         after the list has been rebuilt
      */
-    void postListReadyRunnable() {
+    void postListReadyRunnable(boolean doPostProcessing) {
         if (mPostListReadyRunnable == null) {
             mPostListReadyRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    mResolverListCommunicator.onPostListReady(ResolverListAdapter.this);
+                    mResolverListCommunicator.onPostListReady(ResolverListAdapter.this,
+                            doPostProcessing);
                     mPostListReadyRunnable = null;
                 }
             };
@@ -590,6 +601,12 @@ public class ResolverListAdapter extends BaseAdapter {
         return mResolverListController.getUserHandle();
     }
 
+    protected List<ResolvedComponentInfo> getResolversForUser(UserHandle userHandle) {
+        return mResolverListController.getResolversForIntentAsUser(true,
+                mResolverListCommunicator.shouldGetActivityMetadata(),
+                mIntents, userHandle);
+    }
+
     /**
      * Necessary methods to communicate between {@link ResolverListAdapter}
      * and {@link ResolverActivity}.
@@ -600,7 +617,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
         Intent getReplacementIntent(ActivityInfo activityInfo, Intent defIntent);
 
-        void onPostListReady(ResolverListAdapter listAdapter);
+        void onPostListReady(ResolverListAdapter listAdapter, boolean updateUi);
 
         void sendVoiceChoicesIfNeeded();
 
@@ -612,7 +629,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
         Intent getTargetIntent();
 
-        void onHandlePackagesChanged();
+        void onHandlePackagesChanged(ResolverListAdapter listAdapter);
     }
 
     static class ViewHolder {

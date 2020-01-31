@@ -21,6 +21,7 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
+import android.util.ArraySet;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -120,7 +121,8 @@ public abstract class AbstractLocationProvider {
             if (providerPackageNames.equals(this.providerPackageNames)) {
                 return this;
             } else {
-                return new State(allowed, properties, providerPackageNames);
+                return new State(allowed, properties,
+                        Collections.unmodifiableSet(new ArraySet<>(providerPackageNames)));
             }
         }
 
@@ -175,7 +177,6 @@ public abstract class AbstractLocationProvider {
         }
     }
 
-    protected final Context mContext;
     protected final Executor mExecutor;
 
     // we use a lock-free implementation to update state to ensure atomicity between updating the
@@ -184,13 +185,11 @@ public abstract class AbstractLocationProvider {
     // before it was set, and should not miss any updates that occur after it was set).
     private final AtomicReference<InternalState> mInternalState;
 
-    protected AbstractLocationProvider(Context context, Executor executor) {
-        this(context, executor, Collections.singleton(context.getPackageName()));
+    protected AbstractLocationProvider(Executor executor, Context context) {
+        this(executor, Collections.singleton(context.getPackageName()));
     }
 
-    protected AbstractLocationProvider(Context context, Executor executor,
-            Set<String> packageNames) {
-        mContext = context;
+    protected AbstractLocationProvider(Executor executor, Set<String> packageNames) {
         mExecutor = executor;
         mInternalState = new AtomicReference<>(
                 new InternalState(null, State.EMPTY_STATE.withProviderPackageNames(packageNames)));
@@ -200,7 +199,7 @@ public abstract class AbstractLocationProvider {
      * Sets the listener and returns the state at the moment the listener was set. The listener can
      * expect to receive all state updates from after this point.
      */
-    State setListener(@Nullable Listener listener) {
+    protected State setListener(@Nullable Listener listener) {
         return mInternalState.updateAndGet(
                 internalState -> internalState.withListener(listener)).state;
     }
@@ -208,14 +207,14 @@ public abstract class AbstractLocationProvider {
     /**
      * Retrieves the state of the provider.
      */
-    State getState() {
+    public State getState() {
         return mInternalState.get().state;
     }
 
     /**
      * Sets the state of the provider to the new state.
      */
-    void setState(State newState) {
+    protected void setState(State newState) {
         InternalState oldInternalState = mInternalState.getAndUpdate(
                 internalState -> internalState.withState(newState));
         if (newState.equals(oldInternalState.state)) {
@@ -355,7 +354,7 @@ public abstract class AbstractLocationProvider {
     /**
      * Always invoked on the provider executor.
      */
-    protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
+    protected abstract void onExtraCommand(int uid, int pid, String command, Bundle extras);
 
     /**
      * Requests a provider to enable itself for the given user id.
@@ -368,7 +367,7 @@ public abstract class AbstractLocationProvider {
     /**
      * Always invoked on the provider executor.
      */
-    protected void onRequestSetAllowed(boolean allowed) {}
+    protected abstract void onRequestSetAllowed(boolean allowed);
 
     /**
      * Dumps debug or log information. May be invoked from any thread.

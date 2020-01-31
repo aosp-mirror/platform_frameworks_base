@@ -19,7 +19,6 @@ package com.android.internal.app;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictor;
 import android.content.ComponentName;
@@ -176,7 +175,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Log.d(TAG, "clearing queryTargets on package change");
         }
         createPlaceHolders();
-        mChooserListCommunicator.onHandlePackagesChanged();
+        mChooserListCommunicator.onHandlePackagesChanged(this);
 
     }
 
@@ -541,7 +540,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     @Override
     AsyncTask<List<ResolvedComponentInfo>,
                 Void,
-                List<ResolvedComponentInfo>> createSortingTask() {
+                List<ResolvedComponentInfo>> createSortingTask(boolean doPostProcessing) {
         return new AsyncTask<List<ResolvedComponentInfo>,
                 Void,
                 List<ResolvedComponentInfo>>() {
@@ -554,9 +553,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
             }
             @Override
             protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
-                processSortedList(sortedComponents);
-                mChooserListCommunicator.updateProfileViewButton();
-                notifyDataSetChanged();
+                processSortedList(sortedComponents, doPostProcessing);
+                if (doPostProcessing) {
+                    mChooserListCommunicator.updateProfileViewButton();
+                    notifyDataSetChanged();
+                }
             }
         };
     }

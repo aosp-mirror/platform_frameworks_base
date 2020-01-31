@@ -77,7 +77,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private final AppOpsManager mAppOps;
     private final PowerManager.WakeLock mWakeLock;
 
-    private final LocationSettingsStore mSettingsStore;
+    private final SettingsHelper mSettingsStore;
 
     private final Object mLock = new Object();
 
@@ -111,7 +111,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     private boolean mPendingUpdate;
 
-    public GeofenceManager(Context context, LocationSettingsStore settingsStore) {
+    public GeofenceManager(Context context, SettingsHelper settingsStore) {
         mContext = context;
         mHandler = new GeofenceHandler(FgThread.getHandler().getLooper());
 

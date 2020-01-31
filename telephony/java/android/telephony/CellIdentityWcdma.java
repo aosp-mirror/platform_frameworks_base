@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -83,34 +84,38 @@ public final class CellIdentityWcdma extends CellIdentity {
      *
      * @hide
      */
-    public CellIdentityWcdma (int lac, int cid, int psc, int uarfcn,
-                              String mccStr, String mncStr, String alphal, String alphas,
-                              @NonNull List<String> additionalPlmns,
-                              @Nullable ClosedSubscriberGroupInfo csgInfo) {
+    public CellIdentityWcdma(int lac, int cid, int psc, int uarfcn, @Nullable String mccStr,
+            @Nullable String mncStr, @Nullable String alphal, @Nullable String alphas,
+            @NonNull List<String> additionalPlmns, @Nullable ClosedSubscriberGroupInfo csgInfo) {
         super(TAG, CellInfo.TYPE_WCDMA, mccStr, mncStr, alphal, alphas);
         mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
         mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
         mPsc = inRangeOrUnavailable(psc, 0, MAX_PSC);
         mUarfcn = inRangeOrUnavailable(uarfcn, 0, MAX_UARFCN);
-        mAdditionalPlmns = additionalPlmns;
+        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        for (String plmn : additionalPlmns) {
+            if (isValidPlmn(plmn)) {
+                mAdditionalPlmns.add(plmn);
+            }
+        }
         mCsgInfo = csgInfo;
     }
 
     /** @hide */
-    public CellIdentityWcdma(android.hardware.radio.V1_0.CellIdentityWcdma cid) {
+    public CellIdentityWcdma(@NonNull android.hardware.radio.V1_0.CellIdentityWcdma cid) {
         this(cid.lac, cid.cid, cid.psc, cid.uarfcn, cid.mcc, cid.mnc, "", "",
                 Collections.emptyList(), null);
     }
 
     /** @hide */
-    public CellIdentityWcdma(android.hardware.radio.V1_2.CellIdentityWcdma cid) {
+    public CellIdentityWcdma(@NonNull android.hardware.radio.V1_2.CellIdentityWcdma cid) {
         this(cid.base.lac, cid.base.cid, cid.base.psc, cid.base.uarfcn,
                 cid.base.mcc, cid.base.mnc, cid.operatorNames.alphaLong,
                 cid.operatorNames.alphaShort, Collections.emptyList(), null);
     }
 
     /** @hide */
-    public CellIdentityWcdma(android.hardware.radio.V1_5.CellIdentityWcdma cid) {
+    public CellIdentityWcdma(@NonNull android.hardware.radio.V1_5.CellIdentityWcdma cid) {
         this(cid.base.base.lac, cid.base.base.cid, cid.base.base.psc, cid.base.base.uarfcn,
                 cid.base.base.mcc, cid.base.base.mnc, cid.base.operatorNames.alphaLong,
                 cid.base.operatorNames.alphaShort, cid.additionalPlmns,
@@ -118,7 +123,7 @@ public final class CellIdentityWcdma extends CellIdentity {
                         ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo()) : null);
     }
 
-    private CellIdentityWcdma(CellIdentityWcdma cid) {
+    private CellIdentityWcdma(@NonNull CellIdentityWcdma cid) {
         this(cid.mLac, cid.mCid, cid.mPsc, cid.mUarfcn, cid.mMccStr,
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort, cid.mAdditionalPlmns, cid.mCsgInfo);
     }
@@ -131,7 +136,7 @@ public final class CellIdentityWcdma extends CellIdentity {
                 mAlphaLong, mAlphaShort, mAdditionalPlmns, null);
     }
 
-    CellIdentityWcdma copy() {
+    @NonNull CellIdentityWcdma copy() {
         return new CellIdentityWcdma(this);
     }
 

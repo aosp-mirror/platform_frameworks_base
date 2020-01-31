@@ -409,15 +409,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mAudioManager.dispatchMediaKeyEvent(keyEvent);
     }
 
-    @Override
-    public void dispatchSystemUiVisibilityChanged(int visibility) {
-        super.dispatchSystemUiVisibilityChanged(visibility);
-
-        if (!(mContext instanceof Activity)) {
-            setSystemUiVisibility(STATUS_BAR_DISABLE_BACK);
-        }
-    }
-
     /**
      * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
      * some cases where we wish to disable it, notably when the menu button placement or technology

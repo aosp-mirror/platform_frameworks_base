@@ -96,18 +96,18 @@
         app:layout_constraintTop_toBottomOf="@id/global_actions_view">
 
       <FrameLayout
-          android:translationY="@dimen/global_actions_plugin_offset"
           android:id="@+id/global_actions_panel_container"
           android:layout_width="match_parent"
           android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
-        android:translationY="@dimen/global_actions_plugin_offset"
         android:id="@+id/global_actions_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_marginRight="@dimen/global_actions_grid_horizontal_padding"
+        android:layout_marginLeft="@dimen/global_actions_grid_horizontal_padding"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/global_actions_panel">

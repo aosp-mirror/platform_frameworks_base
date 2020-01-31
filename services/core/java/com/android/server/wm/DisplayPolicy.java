@@ -1026,7 +1026,12 @@ public class DisplayPolicy {
                                         - getNavigationBarHeight(displayFrames.mRotation,
                                                 mDisplayContent.getConfiguration().uiMode);
                             }
-                        });
+                        },
+
+                        // For IME we use regular frame.
+                        (displayFrames, windowState, inOutFrame) ->
+                                inOutFrame.set(windowState.getFrameLw()));
+
                 mDisplayContent.setInsetProvider(ITYPE_BOTTOM_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
                             inOutFrame.top -= mBottomGestureAdditionalInset;
@@ -3068,7 +3073,9 @@ public class DisplayPolicy {
                 }
                 final InsetsControlTarget controlTarget =
                         swipeTarget.getControllableInsetProvider().getControlTarget();
-                if (controlTarget == null) {
+
+                // No transient mode on lockscreen (in notification shade window).
+                if (controlTarget == null || controlTarget == getNotificationShade()) {
                     return;
                 }
                 if (controlTarget.canShowTransient()) {

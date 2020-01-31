@@ -24,9 +24,9 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.time.Instant;
 
@@ -61,8 +61,8 @@ public class LocationUsageLogger {
             boolean isLocationRequestNull = locationRequest == null;
             boolean isGeofenceNull = geofence == null;
 
-            StatsLog.write(StatsLog.LOCATION_MANAGER_API_USAGE_REPORTED, usageType,
-                    apiInUse, packageName,
+            FrameworkStatsLog.write(FrameworkStatsLog.LOCATION_MANAGER_API_USAGE_REPORTED,
+                    usageType, apiInUse, packageName,
                     isLocationRequestNull
                         ? LocationStatsEnums.PROVIDER_UNKNOWN
                         : bucketizeProvider(locationRequest.getProvider()),
@@ -101,7 +101,8 @@ public class LocationUsageLogger {
                 return;
             }
 
-            StatsLog.write(StatsLog.LOCATION_MANAGER_API_USAGE_REPORTED, usageType, apiInUse,
+            FrameworkStatsLog.write(FrameworkStatsLog.LOCATION_MANAGER_API_USAGE_REPORTED,
+                    usageType, apiInUse,
                     /* package_name= */ null,
                     bucketizeProvider(providerName),
                     LocationStatsEnums.QUALITY_UNKNOWN,

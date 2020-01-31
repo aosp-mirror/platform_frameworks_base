@@ -34,6 +34,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
@@ -61,6 +62,8 @@ class InsetsSourceProvider {
 
     private @Nullable ControlAdapter mAdapter;
     private TriConsumer<DisplayFrames, WindowState, Rect> mFrameProvider;
+    private TriConsumer<DisplayFrames, WindowState, Rect> mImeFrameProvider;
+    private final Rect mImeOverrideFrame = new Rect();
 
     /** The visibility override from the current controlling window. */
     private boolean mClientVisible;
@@ -111,9 +114,12 @@ class InsetsSourceProvider {
      * @param win The window that links to this source.
      * @param frameProvider Based on display frame state and the window, calculates the resulting
      *                      frame that should be reported to clients.
+     * @param imeFrameProvider Based on display frame state and the window, calculates the resulting
+     *                         frame that should be reported to IME.
      */
     void setWindow(@Nullable WindowState win,
-            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider) {
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> frameProvider,
+            @Nullable TriConsumer<DisplayFrames, WindowState, Rect> imeFrameProvider) {
         if (mWin != null) {
             if (mControllable) {
                 mWin.setControllableInsetProvider(null);
@@ -126,6 +132,7 @@ class InsetsSourceProvider {
         }
         mWin = win;
         mFrameProvider = frameProvider;
+        mImeFrameProvider = imeFrameProvider;
         if (win == null) {
             setServerVisible(false);
             mSource.setFrame(new Rect());
@@ -161,6 +168,12 @@ class InsetsSourceProvider {
             mTmpRect.inset(mWin.mGivenContentInsets);
         }
         mSource.setFrame(mTmpRect);
+
+        if (mImeFrameProvider != null) {
+            mImeOverrideFrame.set(mWin.getFrameLw());
+            mImeFrameProvider.accept(mWin.getDisplayContent().mDisplayFrames, mWin,
+                    mImeOverrideFrame);
+        }
 
         if (mWin.mGivenVisibleInsets.left != 0 || mWin.mGivenVisibleInsets.top != 0
                 || mWin.mGivenVisibleInsets.right != 0 || mWin.mGivenVisibleInsets.bottom != 0) {
@@ -209,6 +222,12 @@ class InsetsSourceProvider {
             // to control the window for now.
             return;
         }
+        if (target != null && target.getWindow() != null) {
+            // ime control target could be a different window.
+            // Refer WindowState#getImeControlTarget().
+            target = target.getWindow().getImeControlTarget();
+        }
+
         if (mWin == null) {
             mControlTarget = target;
             return;
@@ -301,6 +320,21 @@ class InsetsSourceProvider {
 
     boolean isClientVisible() {
         return sNewInsetsMode == NEW_INSETS_MODE_NONE || mClientVisible;
+    }
+
+    /**
+     * @return Whether this provider uses a different frame to dispatch to the IME.
+     */
+    boolean overridesImeFrame() {
+        return mImeFrameProvider != null;
+    }
+
+    /**
+     * @return Rect to dispatch to the IME as frame. Only valid if {@link #overridesImeFrame()}
+     *         returns {@code true}.
+     */
+    Rect getImeOverrideFrame() {
+        return mImeOverrideFrame;
     }
 
     private class ControlAdapter implements AnimationAdapter {

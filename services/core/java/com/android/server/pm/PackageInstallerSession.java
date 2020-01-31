@@ -147,17 +147,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG = "PackageInstallerSession";
     private static final boolean LOGD = true;
     private static final String REMOVE_MARKER_EXTENSION = ".removed";
 
-    private static final int MSG_COMMIT = 1;
-    private static final int MSG_ON_PACKAGE_INSTALLED = 2;
-    private static final int MSG_SEAL = 3;
-    private static final int MSG_STREAM_AND_VALIDATE = 4;
+    private static final int MSG_STREAM_VALIDATE_AND_COMMIT = 1;
+    private static final int MSG_INSTALL = 2;
+    private static final int MSG_ON_PACKAGE_INSTALLED = 3;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -415,14 +413,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SEAL:
-                    handleSeal((IntentSender) msg.obj);
+                case MSG_STREAM_VALIDATE_AND_COMMIT:
+                    handleStreamValidateAndCommit();
                     break;
-                case MSG_STREAM_AND_VALIDATE:
-                    handleStreamAndValidate();
-                    break;
-                case MSG_COMMIT:
-                    handleCommit();
+                case MSG_INSTALL:
+                    handleInstall();
                     break;
                 case MSG_ON_PACKAGE_INSTALLED:
                     final SomeArgs args = (SomeArgs) msg.obj;
@@ -740,22 +735,33 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             return result;
         }
-        return mFiles.stream().map(fileInfo -> fileInfo.name).toArray(String[]::new);
+
+        String[] result = new String[mFiles.size()];
+        for (int i = 0, size = mFiles.size(); i < size; ++i) {
+            result[i] = mFiles.get(i).name;
+        }
+        return result;
     }
 
-    private static File[] filterFiles(File parent, String[] names, FileFilter filter) {
-        return Arrays.stream(names).map(name -> new File(parent, name)).filter(
-                file -> filter.accept(file)).toArray(File[]::new);
+    private static ArrayList<File> filterFiles(File parent, String[] names, FileFilter filter) {
+        ArrayList<File> result = new ArrayList<>(names.length);
+        for (String name : names) {
+            File file = new File(parent, name);
+            if (filter.accept(file)) {
+                result.add(file);
+            }
+        }
+        return result;
     }
 
     @GuardedBy("mLock")
-    private File[] getAddedApksLocked() {
+    private List<File> getAddedApksLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sAddedApkFilter);
     }
 
     @GuardedBy("mLock")
-    private File[] getRemovedFilesLocked() {
+    private List<File> getRemovedFilesLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sRemovedFilter);
     }
@@ -1011,24 +1017,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             + mParentSessionId +  " and may not be committed directly.");
         }
 
-        assertCanBeCommitted(forTransfer);
-
-        if (isMultiPackage()) {
-            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
-                final int childSessionId = mChildSessionIds.keyAt(i);
-                mSessionProvider.getSession(childSessionId).assertCanBeCommitted(forTransfer);
-            }
-        }
-
-        if (mIncrementalFileStorages != null) {
-            mIncrementalFileStorages.finishSetUp();
-        }
-
-        mHandler.obtainMessage(MSG_SEAL, statusReceiver).sendToTarget();
-    }
-
-    private void handleSeal(@NonNull IntentSender statusReceiver) {
-        if (!markAsSealed(statusReceiver)) {
+        if (!markAsSealed(statusReceiver, forTransfer)) {
             return;
         }
         if (isMultiPackage()) {
@@ -1042,7 +1031,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // seal all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
                 if (!mSessionProvider.getSession(childSessionId)
-                        .markAsSealed(childIntentSender)) {
+                        .markAsSealed(childIntentSender, forTransfer)) {
                     sealFailed = true;
                 }
             }
@@ -1051,20 +1040,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        dispatchStreamAndValidate();
+        if (mIncrementalFileStorages != null) {
+            mIncrementalFileStorages.finishSetUp();
+        }
+
+        dispatchStreamValidateAndCommit();
     }
 
-    private void dispatchStreamAndValidate() {
-        mHandler.obtainMessage(MSG_STREAM_AND_VALIDATE).sendToTarget();
+    private void dispatchStreamValidateAndCommit() {
+        mHandler.obtainMessage(MSG_STREAM_VALIDATE_AND_COMMIT).sendToTarget();
     }
 
-    private void handleStreamAndValidate() {
+    private void handleStreamValidateAndCommit() {
         // TODO(b/136132412): update with new APIs
         if (mIncrementalFileStorages != null) {
             mIncrementalFileStorages.startLoading();
         }
 
-        boolean commitFailed = !markAsCommitted();
+        boolean success = streamValidateAndCommit();
 
         if (isMultiPackage()) {
             for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
@@ -1072,26 +1065,27 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // commit all children, regardless if any of them fail; we'll throw/return
                 // as appropriate once all children have been processed
                 if (!mSessionProvider.getSession(childSessionId)
-                        .markAsCommitted()) {
-                    commitFailed = true;
+                        .streamValidateAndCommit()) {
+                    success = false;
                 }
             }
         }
 
-        if (commitFailed) {
+        if (!success) {
             return;
         }
 
-        mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+        mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
     }
 
     private final class FileSystemConnector extends
             IPackageInstallerSessionFileSystemConnector.Stub {
-        final Set<String> mAddedFiles;
+        final Set<String> mAddedFiles = new ArraySet<>();
 
         FileSystemConnector(List<InstallationFile> addedFiles) {
-            mAddedFiles = addedFiles.stream().map(file -> file.getName()).collect(
-                    Collectors.toSet());
+            for (InstallationFile file : addedFiles) {
+                mAddedFiles.add(file.getName());
+            }
         }
 
         @Override
@@ -1201,9 +1195,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * Sanity checks to make sure it's ok to commit the session.
+     * If this was not already called, the session will be sealed.
+     *
+     * This method may be called multiple times to update the status receiver validate caller
+     * permissions.
      */
-    private void assertCanBeCommitted(boolean forTransfer) {
+    private boolean markAsSealed(@NonNull IntentSender statusReceiver, boolean forTransfer) {
+        Objects.requireNonNull(statusReceiver);
+
+        List<PackageInstallerSession> childSessions = getChildSessions();
+
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotDestroyedLocked("commit");
@@ -1226,21 +1227,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new IllegalArgumentException("Session has been transferred");
                 }
             }
-        }
-    }
 
-    /**
-     * If this was not already called, the session will be sealed.
-     *
-     * This method may be called multiple times to update the status receiver validate caller
-     * permissions.
-     */
-    private boolean markAsSealed(@NonNull IntentSender statusReceiver) {
-        Objects.requireNonNull(statusReceiver);
-
-        List<PackageInstallerSession> childSessions = getChildSessions();
-
-        synchronized (mLock) {
             mRemoteStatusReceiver = statusReceiver;
 
             // After updating the observer, we can skip re-sealing.
@@ -1263,10 +1250,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return true;
     }
 
-    private boolean markAsCommitted() {
+    private boolean streamValidateAndCommit() {
         synchronized (mLock) {
-            Objects.requireNonNull(mRemoteStatusReceiver);
-
             if (mCommitted) {
                 return true;
             }
@@ -1519,7 +1504,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionSealedBlocking(this);
     }
 
-    private void handleCommit() {
+    private void handleInstall() {
         if (isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked()) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
@@ -1548,7 +1533,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         try {
             synchronized (mLock) {
-                commitNonStagedLocked(childSessions);
+                installNonStagedLocked(childSessions);
             }
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
@@ -1559,25 +1544,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void commitNonStagedLocked(List<PackageInstallerSession> childSessions)
+    private void installNonStagedLocked(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
-        final PackageManagerService.ActiveInstallSession committingSession =
+        final PackageManagerService.ActiveInstallSession installingSession =
                 makeSessionActiveLocked();
-        if (committingSession == null) {
+        if (installingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            List<PackageManagerService.ActiveInstallSession> activeChildSessions =
+            List<PackageManagerService.ActiveInstallSession> installingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.ActiveInstallSession activeSession =
+                    final PackageManagerService.ActiveInstallSession installingChildSession =
                             session.makeSessionActiveLocked();
-                    if (activeSession != null) {
-                        activeChildSessions.add(activeSession);
+                    if (installingChildSession != null) {
+                        installingChildSessions.add(installingChildSession);
                     }
                 } catch (PackageManagerException e) {
                     failure = e;
@@ -1591,9 +1576,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
-            mPm.installStage(activeChildSessions);
+            mPm.installStage(installingChildSessions);
         } else {
-            mPm.installStage(committingSession);
+            mPm.installStage(installingSession);
         }
     }
 
@@ -1767,8 +1752,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void validateApexInstallLocked()
             throws PackageManagerException {
-        final File[] addedFiles = getAddedApksLocked();
-        if (ArrayUtils.isEmpty(addedFiles)) {
+        final List<File> addedFiles = getAddedApksLocked();
+        if (addedFiles.isEmpty()) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
@@ -1777,7 +1762,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Too many files for apex install");
         }
 
-        File addedFile = addedFiles[0]; // there is only one file
+        File addedFile = addedFiles.get(0); // there is only one file
 
         // Ensure file name has proper suffix
         final String sourceName = addedFile.getName();
@@ -1844,9 +1829,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && params.mode == SessionParams.MODE_INHERIT_EXISTING
                 && VerityUtils.hasFsverity(pkgInfo.applicationInfo.getBaseCodePath());
 
-        final File[] removedFiles = getRemovedFilesLocked();
+        final List<File> removedFiles = getRemovedFilesLocked();
         final List<String> removeSplitList = new ArrayList<>();
-        if (!ArrayUtils.isEmpty(removedFiles)) {
+        if (!removedFiles.isEmpty()) {
             for (File removedFile : removedFiles) {
                 final String fileName = removedFile.getName();
                 final String splitName = fileName.substring(
@@ -1855,8 +1840,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        final File[] addedFiles = getAddedApksLocked();
-        if (ArrayUtils.isEmpty(addedFiles) && removeSplitList.size() == 0) {
+        final List<File> addedFiles = getAddedApksLocked();
+        if (addedFiles.isEmpty() && removeSplitList.size() == 0) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, "No packages staged");
         }
 
@@ -2306,7 +2291,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Mark and kick off another install pass
             synchronized (mLock) {
                 mPermissionsManuallyAccepted = true;
-                mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+                mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
             }
         } else {
             destroyInternal();
@@ -2475,16 +2460,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
 
-        final List<InstallationFile> addedFiles = mFiles.stream().filter(
-                file -> sAddedFilter.accept(new File(file.name))).map(
-                    file -> new InstallationFile(
-                        file.name, file.lengthBytes, file.metadata)).collect(
-                Collectors.toList());
-        final List<String> removedFiles = mFiles.stream().filter(
-                file -> sRemovedFilter.accept(new File(file.name))).map(
-                    file -> file.name.substring(
-                        0, file.name.length() - REMOVE_MARKER_EXTENSION.length())).collect(
-                Collectors.toList());
+        final List<InstallationFile> addedFiles = new ArrayList<>(mFiles.size());
+        for (FileInfo file : mFiles) {
+            if (sAddedFilter.accept(new File(this.stageDir, file.name))) {
+                addedFiles.add(new InstallationFile(
+                        file.name, file.lengthBytes, file.metadata));
+            }
+        }
+        final List<String> removedFiles = new ArrayList<>(mFiles.size());
+        for (FileInfo file : mFiles) {
+            if (sRemovedFilter.accept(new File(this.stageDir, file.name))) {
+                String name = file.name.substring(
+                        0, file.name.length() - REMOVE_MARKER_EXTENSION.length());
+                removedFiles.add(name);
+            }
+        }
 
         if (mIncrementalFileStorages != null) {
             for (InstallationFile file : addedFiles) {
@@ -2536,9 +2526,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             mDataLoaderFinished = true;
                             if (hasParentSessionId()) {
                                 mSessionProvider.getSession(
-                                        mParentSessionId).dispatchStreamAndValidate();
+                                        mParentSessionId).dispatchStreamValidateAndCommit();
                             } else {
-                                dispatchStreamAndValidate();
+                                dispatchStreamValidateAndCommit();
                             }
                             dataLoader.destroy();
                             break;
@@ -3127,8 +3117,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (grantedRuntimePermissions.size() > 0) {
-            params.grantedRuntimePermissions = grantedRuntimePermissions
-                    .stream().toArray(String[]::new);
+            params.grantedRuntimePermissions = (String[]) grantedRuntimePermissions.toArray();
         }
 
         if (whitelistedRestrictedPermissions.size() > 0) {
@@ -3137,14 +3126,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         int[] childSessionIdsArray;
         if (childSessionIds.size() > 0) {
-            childSessionIdsArray = childSessionIds.stream().mapToInt(i -> i).toArray();
+            childSessionIdsArray = new int[childSessionIds.size()];
+            for (int i = 0, size = childSessionIds.size(); i < size; ++i) {
+                childSessionIdsArray[i] = childSessionIds.get(i);
+            }
         } else {
             childSessionIdsArray = EMPTY_CHILD_SESSION_ARRAY;
         }
 
         FileInfo[] fileInfosArray = null;
         if (!files.isEmpty()) {
-            fileInfosArray = files.stream().toArray(FileInfo[]::new);
+            fileInfosArray = (FileInfo[]) files.toArray();
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,

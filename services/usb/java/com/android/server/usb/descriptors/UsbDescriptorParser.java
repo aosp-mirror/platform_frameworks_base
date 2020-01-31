@@ -292,9 +292,27 @@ public final class UsbDescriptorParser {
                     // Clean up
                     descriptor.postParse(stream);
                 } catch (Exception ex) {
-                    Log.e(TAG, "Exception parsing USB descriptors.", ex);
+                    // Clean up, compute error status
+                    descriptor.postParse(stream);
 
-                    // Clean up
+                    // Report
+                    Log.w(TAG, "Exception parsing USB descriptors. type:0x" + descriptor.getType()
+                            + " status:" + descriptor.getStatus());
+                    if (DEBUG) {
+                        // Show full stack trace if debugging
+                        Log.e(TAG, "Exception parsing USB descriptors.", ex);
+                    }
+                    StackTraceElement[] stackElems = ex.getStackTrace();
+                    if (stackElems.length > 0) {
+                        Log.i(TAG, "  class:" + stackElems[0].getClassName()
+                                    + " @ " + stackElems[0].getLineNumber());
+                    }
+                    if (stackElems.length > 1) {
+                        Log.i(TAG, "  class:" + stackElems[1].getClassName()
+                                + " @ " + stackElems[1].getLineNumber());
+                    }
+
+                    // Finish up
                     descriptor.setStatus(UsbDescriptor.STATUS_PARSE_EXCEPTION);
                 } finally {
                     mDescriptors.add(descriptor);

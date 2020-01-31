@@ -36,11 +36,11 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -650,7 +650,7 @@ class GnssVisibilityControl {
     }
 
     private void logEvent(NfwNotification notification, boolean isPermissionMismatched) {
-        StatsLog.write(StatsLog.GNSS_NFW_NOTIFICATION_REPORTED,
+        FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NFW_NOTIFICATION_REPORTED,
                 notification.mProxyAppPackageName,
                 notification.mProtocolStack,
                 notification.mOtherProtocolStackName,

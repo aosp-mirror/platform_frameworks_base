@@ -134,6 +134,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
     // also used to synchronized any state changes (setEnabled, setProperties, setState, etc)
     private final Object mLock = new Object();
 
+    private final Context mContext;
     private final ServiceWatcher mServiceWatcher;
 
     @GuardedBy("mLock")
@@ -143,10 +144,11 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     private LocationProviderProxy(Context context, String action, int enableOverlayResId,
             int nonOverlayPackageResId) {
-        // safe to use direct executor since none of our callbacks call back into any code above
-        // this provider - they simply forward to the proxy service
-        super(context, DIRECT_EXECUTOR);
+        // safe to use direct executor even though this class has internal locks - all of our
+        // callbacks go to oneway binder transactions which cannot possibly be re-entrant
+        super(DIRECT_EXECUTOR, Collections.emptySet());
 
+        mContext = context;
         mServiceWatcher = new ServiceWatcher(context, FgThread.getHandler(), action, this::onBind,
                 this::onUnbind, enableOverlayResId, nonOverlayPackageResId);
 

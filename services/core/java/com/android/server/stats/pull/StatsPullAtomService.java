@@ -54,6 +54,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.health.V2_0.IHealth;
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.Network;
@@ -95,7 +96,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsEvent;
-import android.util.StatsLog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -119,6 +119,8 @@ import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.BatteryService;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -239,6 +241,8 @@ public class StatsPullAtomService extends SystemService {
 
     private File mBaseDir;
 
+    private BatteryService.HealthServiceWrapper mHealthService;
+
     @Nullable
     private KernelCpuThreadReaderDiff mKernelCpuThreadReader;
 
@@ -263,116 +267,118 @@ public class StatsPullAtomService extends SystemService {
         @Override
         public int onPullAtom(int atomTag, List<StatsEvent> data) {
             switch(atomTag) {
-                case StatsLog.WIFI_BYTES_TRANSFER:
+                case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
                     return pullWifiBytesTransfer(atomTag, data);
-                case StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
+                case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
                     return pullWifiBytesTransferBackground(atomTag, data);
-                case StatsLog.MOBILE_BYTES_TRANSFER:
+                case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
                     return pullMobileBytesTransfer(atomTag, data);
-                case StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
+                case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
                     return pullMobileBytesTransferBackground(atomTag, data);
-                case StatsLog.BLUETOOTH_BYTES_TRANSFER:
+                case FrameworkStatsLog.BLUETOOTH_BYTES_TRANSFER:
                     return pullBluetoothBytesTransfer(atomTag, data);
-                case StatsLog.KERNEL_WAKELOCK:
+                case FrameworkStatsLog.KERNEL_WAKELOCK:
                     return pullKernelWakelock(atomTag, data);
-                case StatsLog.CPU_TIME_PER_FREQ:
+                case FrameworkStatsLog.CPU_TIME_PER_FREQ:
                     return pullCpuTimePerFreq(atomTag, data);
-                case StatsLog.CPU_TIME_PER_UID:
+                case FrameworkStatsLog.CPU_TIME_PER_UID:
                     return pullCpuTimePerUid(atomTag, data);
-                case StatsLog.CPU_TIME_PER_UID_FREQ:
+                case FrameworkStatsLog.CPU_TIME_PER_UID_FREQ:
                     return pullCpuTimeperUidFreq(atomTag, data);
-                case StatsLog.CPU_ACTIVE_TIME:
+                case FrameworkStatsLog.CPU_ACTIVE_TIME:
                     return pullCpuActiveTime(atomTag, data);
-                case StatsLog.CPU_CLUSTER_TIME:
+                case FrameworkStatsLog.CPU_CLUSTER_TIME:
                     return pullCpuClusterTime(atomTag, data);
-                case StatsLog.WIFI_ACTIVITY_INFO:
+                case FrameworkStatsLog.WIFI_ACTIVITY_INFO:
                     return pullWifiActivityInfo(atomTag, data);
-                case StatsLog.MODEM_ACTIVITY_INFO:
+                case FrameworkStatsLog.MODEM_ACTIVITY_INFO:
                     return pullModemActivityInfo(atomTag, data);
-                case StatsLog.BLUETOOTH_ACTIVITY_INFO:
+                case FrameworkStatsLog.BLUETOOTH_ACTIVITY_INFO:
                     return pullBluetoothActivityInfo(atomTag, data);
-                case StatsLog.SYSTEM_ELAPSED_REALTIME:
+                case FrameworkStatsLog.SYSTEM_ELAPSED_REALTIME:
                     return pullSystemElapsedRealtime(atomTag, data);
-                case StatsLog.SYSTEM_UPTIME:
+                case FrameworkStatsLog.SYSTEM_UPTIME:
                     return pullSystemUptime(atomTag, data);
-                case StatsLog.PROCESS_MEMORY_STATE:
+                case FrameworkStatsLog.PROCESS_MEMORY_STATE:
                     return pullProcessMemoryState(atomTag, data);
-                case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK:
+                case FrameworkStatsLog.PROCESS_MEMORY_HIGH_WATER_MARK:
                     return pullProcessMemoryHighWaterMark(atomTag, data);
-                case StatsLog.PROCESS_MEMORY_SNAPSHOT:
+                case FrameworkStatsLog.PROCESS_MEMORY_SNAPSHOT:
                     return pullProcessMemorySnapshot(atomTag, data);
-                case StatsLog.SYSTEM_ION_HEAP_SIZE:
+                case FrameworkStatsLog.SYSTEM_ION_HEAP_SIZE:
                     return pullSystemIonHeapSize(atomTag, data);
-                case StatsLog.ION_HEAP_SIZE:
+                case FrameworkStatsLog.ION_HEAP_SIZE:
                     return pullIonHeapSize(atomTag, data);
-                case StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE:
+                case FrameworkStatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE:
                     return pullProcessSystemIonHeapSize(atomTag, data);
-                case StatsLog.TEMPERATURE:
+                case FrameworkStatsLog.TEMPERATURE:
                     return pullTemperature(atomTag, data);
-                case StatsLog.COOLING_DEVICE:
+                case FrameworkStatsLog.COOLING_DEVICE:
                     return pullCooldownDevice(atomTag, data);
-                case StatsLog.BINDER_CALLS:
+                case FrameworkStatsLog.BINDER_CALLS:
                     return pullBinderCallsStats(atomTag, data);
-                case StatsLog.BINDER_CALLS_EXCEPTIONS:
+                case FrameworkStatsLog.BINDER_CALLS_EXCEPTIONS:
                     return pullBinderCallsStatsExceptions(atomTag, data);
-                case StatsLog.LOOPER_STATS:
+                case FrameworkStatsLog.LOOPER_STATS:
                     return pullLooperStats(atomTag, data);
-                case StatsLog.DISK_STATS:
+                case FrameworkStatsLog.DISK_STATS:
                     return pullDiskStats(atomTag, data);
-                case StatsLog.DIRECTORY_USAGE:
+                case FrameworkStatsLog.DIRECTORY_USAGE:
                     return pullDirectoryUsage(atomTag, data);
-                case StatsLog.APP_SIZE:
+                case FrameworkStatsLog.APP_SIZE:
                     return pullAppSize(atomTag, data);
-                case StatsLog.CATEGORY_SIZE:
+                case FrameworkStatsLog.CATEGORY_SIZE:
                     return pullCategorySize(atomTag, data);
-                case StatsLog.NUM_FINGERPRINTS_ENROLLED:
+                case FrameworkStatsLog.NUM_FINGERPRINTS_ENROLLED:
                     return pullNumBiometricsEnrolled(
                             BiometricsProtoEnums.MODALITY_FINGERPRINT, atomTag, data);
-                case StatsLog.NUM_FACES_ENROLLED:
+                case FrameworkStatsLog.NUM_FACES_ENROLLED:
                     return pullNumBiometricsEnrolled(
                             BiometricsProtoEnums.MODALITY_FACE, atomTag, data);
-                case StatsLog.PROC_STATS:
+                case FrameworkStatsLog.PROC_STATS:
                     return pullProcStats(ProcessStats.REPORT_ALL, atomTag, data);
-                case StatsLog.PROC_STATS_PKG_PROC:
+                case FrameworkStatsLog.PROC_STATS_PKG_PROC:
                     return pullProcStats(ProcessStats.REPORT_PKG_PROC_STATS, atomTag, data);
-                case StatsLog.DISK_IO:
+                case FrameworkStatsLog.DISK_IO:
                     return pullDiskIO(atomTag, data);
-                case StatsLog.POWER_PROFILE:
+                case FrameworkStatsLog.POWER_PROFILE:
                     return pullPowerProfile(atomTag, data);
-                case StatsLog.PROCESS_CPU_TIME:
+                case FrameworkStatsLog.PROCESS_CPU_TIME:
                     return pullProcessCpuTime(atomTag, data);
-                case StatsLog.CPU_TIME_PER_THREAD_FREQ:
+                case FrameworkStatsLog.CPU_TIME_PER_THREAD_FREQ:
                     return pullCpuTimePerThreadFreq(atomTag, data);
-                case StatsLog.DEVICE_CALCULATED_POWER_USE:
+                case FrameworkStatsLog.DEVICE_CALCULATED_POWER_USE:
                     return pullDeviceCalculatedPowerUse(atomTag, data);
-                case StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID:
+                case FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_UID:
                     return pullDeviceCalculatedPowerBlameUid(atomTag, data);
-                case StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER:
+                case FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER:
                     return pullDeviceCalculatedPowerBlameOther(atomTag, data);
-                case StatsLog.DEBUG_ELAPSED_CLOCK:
+                case FrameworkStatsLog.DEBUG_ELAPSED_CLOCK:
                     return pullDebugElapsedClock(atomTag, data);
-                case StatsLog.DEBUG_FAILING_ELAPSED_CLOCK:
+                case FrameworkStatsLog.DEBUG_FAILING_ELAPSED_CLOCK:
                     return pullDebugFailingElapsedClock(atomTag, data);
-                case StatsLog.BUILD_INFORMATION:
+                case FrameworkStatsLog.BUILD_INFORMATION:
                     return pullBuildInformation(atomTag, data);
-                case StatsLog.ROLE_HOLDER:
+                case FrameworkStatsLog.ROLE_HOLDER:
                     return pullRoleHolder(atomTag, data);
-                case StatsLog.DANGEROUS_PERMISSION_STATE:
+                case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE:
                     return pullDangerousPermissionState(atomTag, data);
-                case StatsLog.TIME_ZONE_DATA_INFO:
+                case FrameworkStatsLog.TIME_ZONE_DATA_INFO:
                     return pullTimeZoneDataInfo(atomTag, data);
-                case StatsLog.EXTERNAL_STORAGE_INFO:
+                case FrameworkStatsLog.EXTERNAL_STORAGE_INFO:
                     return pullExternalStorageInfo(atomTag, data);
-                case StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO:
+                case FrameworkStatsLog.APPS_ON_EXTERNAL_STORAGE_INFO:
                     return pullAppsOnExternalStorageInfo(atomTag, data);
-                case StatsLog.FACE_SETTINGS:
+                case FrameworkStatsLog.FACE_SETTINGS:
                     return pullFaceSettings(atomTag, data);
-                case StatsLog.APP_OPS:
+                case FrameworkStatsLog.APP_OPS:
                     return pullAppOps(atomTag, data);
-                case StatsLog.NOTIFICATION_REMOTE_VIEWS:
+                case FrameworkStatsLog.NOTIFICATION_REMOTE_VIEWS:
                     return pullNotificationRemoteViews(atomTag, data);
-                case StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED:
+                case FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED:
                     return pullDangerousPermissionState(atomTag, data);
+                case FrameworkStatsLog.BATTERY_LEVEL:
+                    return pullBatteryLevel(atomTag, data);
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
             }
@@ -438,6 +444,14 @@ public class StatsPullAtomService extends SystemService {
 
         // Used by PROC_STATS and PROC_STATS_PKG_PROC atoms
         mBaseDir.mkdirs();
+
+        // Initialize HealthService
+        mHealthService = new BatteryService.HealthServiceWrapper();
+        try {
+            mHealthService.init();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "failed to initialize healthHalWrapper");
+        }
     }
 
     void registerEventListeners() {
@@ -519,6 +533,7 @@ public class StatsPullAtomService extends SystemService {
         registerNotificationRemoteViews();
         registerDangerousPermissionState();
         registerDangerousPermissionStateSampled();
+        registerBatteryLevel();
     }
 
     private INetworkStatsService getINetworkStatsService() {
@@ -633,7 +648,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerWifiBytesTransfer() {
-        int tagId = StatsLog.WIFI_BYTES_TRANSFER;
+        int tagId = FrameworkStatsLog.WIFI_BYTES_TRANSFER;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
                 .build();
@@ -725,7 +740,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerWifiBytesTransferBackground() {
-        int tagId = StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG;
+        int tagId = FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3, 4, 5, 6})
                 .build();
@@ -763,7 +778,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerMobileBytesTransfer() {
-        int tagId = StatsLog.MOBILE_BYTES_TRANSFER;
+        int tagId = FrameworkStatsLog.MOBILE_BYTES_TRANSFER;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5})
                 .build();
@@ -801,7 +816,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerMobileBytesTransferBackground() {
-        int tagId = StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG;
+        int tagId = FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3, 4, 5, 6})
                 .build();
@@ -839,7 +854,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBluetoothBytesTransfer() {
-        int tagId = StatsLog.BLUETOOTH_BYTES_TRANSFER;
+        int tagId = FrameworkStatsLog.BLUETOOTH_BYTES_TRANSFER;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3})
                 .build();
@@ -912,7 +927,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerKernelWakelock() {
-        int tagId = StatsLog.KERNEL_WAKELOCK;
+        int tagId = FrameworkStatsLog.KERNEL_WAKELOCK;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
@@ -940,7 +955,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuTimePerFreq() {
-        int tagId = StatsLog.CPU_TIME_PER_FREQ;
+        int tagId = FrameworkStatsLog.CPU_TIME_PER_FREQ;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3})
                 .build();
@@ -971,7 +986,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuTimePerUid() {
-        int tagId = StatsLog.CPU_TIME_PER_UID;
+        int tagId = FrameworkStatsLog.CPU_TIME_PER_UID;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3})
                 .build();
@@ -1000,7 +1015,7 @@ public class StatsPullAtomService extends SystemService {
     private void registerCpuTimePerUidFreq() {
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        int tagId = StatsLog.CPU_TIME_PER_UID_FREQ;
+        int tagId = FrameworkStatsLog.CPU_TIME_PER_UID_FREQ;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4})
                 .build();
@@ -1032,7 +1047,7 @@ public class StatsPullAtomService extends SystemService {
     private void registerCpuActiveTime() {
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        int tagId = StatsLog.CPU_ACTIVE_TIME;
+        int tagId = FrameworkStatsLog.CPU_ACTIVE_TIME;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2})
                 .build();
@@ -1059,7 +1074,7 @@ public class StatsPullAtomService extends SystemService {
     private void registerCpuClusterTime() {
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
-        int tagId = StatsLog.CPU_CLUSTER_TIME;
+        int tagId = FrameworkStatsLog.CPU_CLUSTER_TIME;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {3})
                 .build();
@@ -1087,7 +1102,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerWifiActivityInfo() {
-        int tagId = StatsLog.WIFI_ACTIVITY_INFO;
+        int tagId = FrameworkStatsLog.WIFI_ACTIVITY_INFO;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1139,7 +1154,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerModemActivityInfo() {
-        int tagId = StatsLog.MODEM_ACTIVITY_INFO;
+        int tagId = FrameworkStatsLog.MODEM_ACTIVITY_INFO;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1177,7 +1192,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBluetoothActivityInfo() {
-        int tagId = StatsLog.BLUETOOTH_ACTIVITY_INFO;
+        int tagId = FrameworkStatsLog.BLUETOOTH_ACTIVITY_INFO;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* metadata */ null,
@@ -1205,7 +1220,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerSystemElapsedRealtime() {
-        int tagId = StatsLog.SYSTEM_ELAPSED_REALTIME;
+        int tagId = FrameworkStatsLog.SYSTEM_ELAPSED_REALTIME;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setCoolDownNs(NS_PER_SEC)
                 .setTimeoutNs(NS_PER_SEC / 2)
@@ -1228,7 +1243,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerSystemUptime() {
-        int tagId = StatsLog.SYSTEM_UPTIME;
+        int tagId = FrameworkStatsLog.SYSTEM_UPTIME;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1247,7 +1262,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessMemoryState() {
-        int tagId = StatsLog.PROCESS_MEMORY_STATE;
+        int tagId = FrameworkStatsLog.PROCESS_MEMORY_STATE;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4, 5, 6, 7, 8})
                 .build();
@@ -1293,7 +1308,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessMemoryHighWaterMark() {
-        int tagId = StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK;
+        int tagId = FrameworkStatsLog.PROCESS_MEMORY_HIGH_WATER_MARK;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1346,7 +1361,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessMemorySnapshot() {
-        int tagId = StatsLog.PROCESS_MEMORY_SNAPSHOT;
+        int tagId = FrameworkStatsLog.PROCESS_MEMORY_SNAPSHOT;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1406,7 +1421,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerSystemIonHeapSize() {
-        int tagId = StatsLog.SYSTEM_ION_HEAP_SIZE;
+        int tagId = FrameworkStatsLog.SYSTEM_ION_HEAP_SIZE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1426,7 +1441,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerIonHeapSize() {
-        int tagId = StatsLog.ION_HEAP_SIZE;
+        int tagId = FrameworkStatsLog.ION_HEAP_SIZE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
@@ -1446,7 +1461,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessSystemIonHeapSize() {
-        int tagId = StatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE;
+        int tagId = FrameworkStatsLog.PROCESS_SYSTEM_ION_HEAP_SIZE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1472,7 +1487,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerTemperature() {
-        int tagId = StatsLog.TEMPERATURE;
+        int tagId = FrameworkStatsLog.TEMPERATURE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1510,7 +1525,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCoolingDevice() {
-        int tagId = StatsLog.COOLING_DEVICE;
+        int tagId = FrameworkStatsLog.COOLING_DEVICE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1547,7 +1562,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBinderCallsStats() {
-        int tagId = StatsLog.BINDER_CALLS;
+        int tagId = FrameworkStatsLog.BINDER_CALLS;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {4, 5, 6, 8, 12})
                 .build();
@@ -1593,7 +1608,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBinderCallsStatsExceptions() {
-        int tagId = StatsLog.BINDER_CALLS_EXCEPTIONS;
+        int tagId = FrameworkStatsLog.BINDER_CALLS_EXCEPTIONS;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1625,7 +1640,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerLooperStats() {
-        int tagId = StatsLog.LOOPER_STATS;
+        int tagId = FrameworkStatsLog.LOOPER_STATS;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {5, 6, 7, 8, 9})
                 .build();
@@ -1670,7 +1685,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDiskStats() {
-        int tagId = StatsLog.DISK_STATS;
+        int tagId = FrameworkStatsLog.DISK_STATS;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1736,7 +1751,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDirectoryUsage() {
-        int tagId = StatsLog.DIRECTORY_USAGE;
+        int tagId = FrameworkStatsLog.DIRECTORY_USAGE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1752,7 +1767,7 @@ public class StatsPullAtomService extends SystemService {
 
         StatsEvent e = StatsEvent.newBuilder()
                 .setAtomId(atomTag)
-                .writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__DATA)
+                .writeInt(FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__DATA)
                 .writeLong(statFsData.getAvailableBytes())
                 .writeLong(statFsData.getTotalBytes())
                 .build();
@@ -1760,7 +1775,7 @@ public class StatsPullAtomService extends SystemService {
 
         e = StatsEvent.newBuilder()
                 .setAtomId(atomTag)
-                .writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__CACHE)
+                .writeInt(FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__CACHE)
                 .writeLong(statFsCache.getAvailableBytes())
                 .writeLong(statFsCache.getTotalBytes())
                 .build();
@@ -1768,7 +1783,7 @@ public class StatsPullAtomService extends SystemService {
 
         e = StatsEvent.newBuilder()
                 .setAtomId(atomTag)
-                .writeInt(StatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM)
+                .writeInt(FrameworkStatsLog.DIRECTORY_USAGE__DIRECTORY__SYSTEM)
                 .writeLong(statFsSystem.getAvailableBytes())
                 .writeLong(statFsSystem.getTotalBytes())
                 .build();
@@ -1777,7 +1792,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerAppSize() {
-        int tagId = StatsLog.APP_SIZE;
+        int tagId = FrameworkStatsLog.APP_SIZE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1821,7 +1836,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCategorySize() {
-        int tagId = StatsLog.CATEGORY_SIZE;
+        int tagId = FrameworkStatsLog.CATEGORY_SIZE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1839,7 +1854,7 @@ public class StatsPullAtomService extends SystemService {
 
             StatsEvent e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_SIZE)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__APP_SIZE)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.APP_SIZE_AGG_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1848,7 +1863,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_DATA_SIZE)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__APP_DATA_SIZE)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1857,7 +1872,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__APP_CACHE_SIZE)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__APP_CACHE_SIZE)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.APP_CACHE_AGG_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1866,7 +1881,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__PHOTOS)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__PHOTOS)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.PHOTOS_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1875,7 +1890,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__VIDEOS)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__VIDEOS)
                     .writeLong(
                             json.optLong(DiskStatsFileLogger.VIDEOS_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1884,7 +1899,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__AUDIO)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__AUDIO)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.AUDIO_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1893,7 +1908,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__DOWNLOADS)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__DOWNLOADS)
                     .writeLong(
                             json.optLong(DiskStatsFileLogger.DOWNLOADS_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1901,7 +1916,8 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(e);
 
             e = StatsEvent.newBuilder()
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM)
+                    .setAtomId(atomTag)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__SYSTEM)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.SYSTEM_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1910,7 +1926,7 @@ public class StatsPullAtomService extends SystemService {
 
             e = StatsEvent.newBuilder()
                     .setAtomId(atomTag)
-                    .writeInt(StatsLog.CATEGORY_SIZE__CATEGORY__OTHER)
+                    .writeInt(FrameworkStatsLog.CATEGORY_SIZE__CATEGORY__OTHER)
                     .writeLong(json.optLong(
                             DiskStatsFileLogger.MISC_KEY, /* fallback */ -1L))
                     .writeLong(cacheTime)
@@ -1924,7 +1940,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerNumFingerprintsEnrolled() {
-        int tagId = StatsLog.NUM_FINGERPRINTS_ENROLLED;
+        int tagId = FrameworkStatsLog.NUM_FINGERPRINTS_ENROLLED;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1934,7 +1950,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerNumFacesEnrolled() {
-        int tagId = StatsLog.NUM_FACES_ENROLLED;
+        int tagId = FrameworkStatsLog.NUM_FACES_ENROLLED;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -1992,7 +2008,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcStats() {
-        int tagId = StatsLog.PROC_STATS;
+        int tagId = FrameworkStatsLog.PROC_STATS;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2002,7 +2018,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcStatsPkgProc() {
-        int tagId = StatsLog.PROC_STATS_PKG_PROC;
+        int tagId = FrameworkStatsLog.PROC_STATS_PKG_PROC;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2071,7 +2087,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDiskIO() {
-        int tagId = StatsLog.DISK_IO;
+        int tagId = FrameworkStatsLog.DISK_IO;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {2, 3, 4, 5, 6, 7, 8, 9, 10, 11})
                 .setCoolDownNs(3 * NS_PER_SEC)
@@ -2108,7 +2124,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerPowerProfile() {
-        int tagId = StatsLog.POWER_PROFILE;
+        int tagId = FrameworkStatsLog.POWER_PROFILE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
@@ -2131,7 +2147,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerProcessCpuTime() {
-        int tagId = StatsLog.PROCESS_CPU_TIME;
+        int tagId = FrameworkStatsLog.PROCESS_CPU_TIME;
         // Min cool-down is 5 sec, in line with what ActivityManagerService uses.
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setCoolDownNs(5 * NS_PER_SEC)
@@ -2167,7 +2183,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerCpuTimePerThreadFreq() {
-        int tagId = StatsLog.CPU_TIME_PER_THREAD_FREQ;
+        int tagId = FrameworkStatsLog.CPU_TIME_PER_THREAD_FREQ;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {7, 9, 11, 13, 15, 17, 19, 21})
                 .build();
@@ -2263,7 +2279,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDeviceCalculatedPowerUse() {
-        int tagId = StatsLog.DEVICE_CALCULATED_POWER_USE;
+        int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_USE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2283,7 +2299,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDeviceCalculatedPowerBlameUid() {
-        int tagId = StatsLog.DEVICE_CALCULATED_POWER_BLAME_UID;
+        int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_UID;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2313,7 +2329,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDeviceCalculatedPowerBlameOther() {
-        int tagId = StatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER;
+        int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2346,7 +2362,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDebugElapsedClock() {
-        int tagId = StatsLog.DEBUG_ELAPSED_CLOCK;
+        int tagId = FrameworkStatsLog.DEBUG_ELAPSED_CLOCK;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {1, 2, 3, 4})
                 .build();
@@ -2397,7 +2413,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDebugFailingElapsedClock() {
-        int tagId = StatsLog.DEBUG_FAILING_ELAPSED_CLOCK;
+        int tagId = FrameworkStatsLog.DEBUG_FAILING_ELAPSED_CLOCK;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
                 .setAdditiveFields(new int[] {1, 2, 3, 4})
                 .build();
@@ -2438,7 +2454,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerBuildInformation() {
-        int tagId = StatsLog.BUILD_INFORMATION;
+        int tagId = FrameworkStatsLog.BUILD_INFORMATION;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2465,7 +2481,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerRoleHolder() {
-        int tagId = StatsLog.ROLE_HOLDER;
+        int tagId = FrameworkStatsLog.ROLE_HOLDER;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2523,7 +2539,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDangerousPermissionState() {
-        int tagId = StatsLog.DANGEROUS_PERMISSION_STATE;
+        int tagId = FrameworkStatsLog.DANGEROUS_PERMISSION_STATE;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2561,7 +2577,7 @@ public class StatsPullAtomService extends SystemService {
                     }
                     reportedUids.add(pkg.applicationInfo.uid);
 
-                    if (atomTag == StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
+                    if (atomTag == FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED
                             && ThreadLocalRandom.current().nextFloat() > 0.01f) {
                         continue;
                     }
@@ -2588,7 +2604,7 @@ public class StatsPullAtomService extends SystemService {
                         e.setAtomId(atomTag);
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
-                        if (atomTag == StatsLog.DANGEROUS_PERMISSION_STATE) {
+                        if (atomTag == FrameworkStatsLog.DANGEROUS_PERMISSION_STATE) {
                             e.writeString("");
                         }
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
@@ -2609,7 +2625,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerTimeZoneDataInfo() {
-        int tagId = StatsLog.TIME_ZONE_DATA_INFO;
+        int tagId = FrameworkStatsLog.TIME_ZONE_DATA_INFO;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2636,7 +2652,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerExternalStorageInfo() {
-        int tagId = StatsLog.EXTERNAL_STORAGE_INFO;
+        int tagId = FrameworkStatsLog.EXTERNAL_STORAGE_INFO;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2656,11 +2672,11 @@ public class StatsPullAtomService extends SystemService {
             final DiskInfo diskInfo = vol.getDisk();
             if (diskInfo != null && envState.equals(Environment.MEDIA_MOUNTED)) {
                 // Get the type of the volume, if it is adoptable or portable.
-                int volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
+                int volumeType = FrameworkStatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
                 if (vol.getType() == TYPE_PUBLIC) {
-                    volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
+                    volumeType = FrameworkStatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
                 } else if (vol.getType() == TYPE_PRIVATE) {
-                    volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
+                    volumeType = FrameworkStatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
                 }
 
                 // Get the type of external storage inserted in the device (sd cards, usb, etc.)
@@ -2686,7 +2702,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerAppsOnExternalStorageInfo() {
-        int tagId = StatsLog.APPS_ON_EXTERNAL_STORAGE_INFO;
+        int tagId = FrameworkStatsLog.APPS_ON_EXTERNAL_STORAGE_INFO;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2742,7 +2758,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerFaceSettings() {
-        int tagId = StatsLog.FACE_SETTINGS;
+        int tagId = FrameworkStatsLog.FACE_SETTINGS;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2796,7 +2812,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerAppOps() {
-        int tagId = StatsLog.APP_OPS;
+        int tagId = FrameworkStatsLog.APP_OPS;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2907,7 +2923,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerNotificationRemoteViews() {
-        int tagId = StatsLog.NOTIFICATION_REMOTE_VIEWS;
+        int tagId = FrameworkStatsLog.NOTIFICATION_REMOTE_VIEWS;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2951,7 +2967,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private void registerDangerousPermissionStateSampled() {
-        int tagId = StatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED;
+        int tagId = FrameworkStatsLog.DANGEROUS_PERMISSION_STATE_SAMPLED;
         mStatsManager.registerPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2960,13 +2976,41 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private void registerBatteryLevel() {
+        int tagId = FrameworkStatsLog.BATTERY_LEVEL;
+        mStatsManager.registerPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullBatteryLevel(int atomTag, List<StatsEvent> pulledData) {
+        IHealth healthService = mHealthService.getLastService();
+        if (healthService == null) {
+            return StatsManager.PULL_SKIP;
+        }
+        try {
+            healthService.getHealthInfo((result, value) -> {
+                StatsEvent e = StatsEvent.newBuilder()
+                        .setAtomId(atomTag)
+                        .writeInt(value.legacy.batteryLevel)
+                        .build();
+                pulledData.add(e);
+            });
+        } catch (RemoteException e) {
+            return StatsManager.PULL_SKIP;
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
 
     // Thermal event received from vendor thermal management subsystem
     private static final class ThermalEventListener extends IThermalEventListener.Stub {
         @Override
         public void notifyThrottling(Temperature temp) {
-            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
-                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
+            FrameworkStatsLog.write(FrameworkStatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED,
+                    temp.getType(), temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
         }
     }
 
@@ -2974,14 +3018,14 @@ public class StatsPullAtomService extends SystemService {
             ConnectivityManager.NetworkCallback {
         @Override
         public void onAvailable(Network network) {
-            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
-                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
+            FrameworkStatsLog.write(FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
         }
 
         @Override
         public void onLost(Network network) {
-            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
-                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
+            FrameworkStatsLog.write(FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
 }

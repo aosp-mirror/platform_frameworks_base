@@ -16,20 +16,33 @@
 
 package com.android.internal.logging;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * An opaque identifier used to disambiguate which logs refer to a particular instance of some
  * UI element. Useful when there might be multiple instances simultaneously active.
- * Obtain from InstanceIdSequence.
+ * Obtain from InstanceIdSequence.  Clipped to range [0, INSTANCE_ID_MAX].
  */
-public class InstanceId {
-    private int mId;
-    protected InstanceId(int id) {
-        mId = id;
+public final class InstanceId implements Parcelable {
+    // At most 20 bits: ~1m possibilities, ~0.5% probability of collision in 100 values
+    static final int INSTANCE_ID_MAX = 1 << 20;
+
+    private final int mId;
+    InstanceId(int id) {
+        mId = min(max(0, id), INSTANCE_ID_MAX);
     }
+
+    private InstanceId(Parcel in) {
+        this(in.readInt());
+    }
+
     @VisibleForTesting
     public int getId() {
         return mId;
@@ -47,4 +60,28 @@ public class InstanceId {
         }
         return mId == ((InstanceId) obj).mId;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mId);
+    }
+
+    public static final Parcelable.Creator<InstanceId> CREATOR =
+            new Parcelable.Creator<InstanceId>() {
+        @Override
+        public InstanceId createFromParcel(Parcel in) {
+            return new InstanceId(in);
+        }
+
+        @Override
+        public InstanceId[] newArray(int size) {
+            return new InstanceId[size];
+        }
+    };
+
 }

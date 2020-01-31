@@ -69,8 +69,6 @@ interface ILocationManager
         double upperRightLatitude, double upperRightLongitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
 
-    boolean sendNiResponse(int notifId, int userResponse);
-
     boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener,
              String packageName, String featureId, String listenerIdentifier);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,

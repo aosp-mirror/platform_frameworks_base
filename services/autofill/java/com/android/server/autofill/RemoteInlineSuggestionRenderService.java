@@ -20,6 +20,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -86,7 +87,7 @@ final class RemoteInlineSuggestionRenderService extends
     }
 
     @Nullable
-    private static ServiceInfo getServiceInfo(Context context) {
+    private static ServiceInfo getServiceInfo(Context context, int userId) {
         final String packageName =
                 context.getPackageManager().getServicesSystemSharedLibraryPackageName();
         if (packageName == null) {
@@ -96,8 +97,8 @@ final class RemoteInlineSuggestionRenderService extends
 
         final Intent intent = new Intent(InlineSuggestionRenderService.SERVICE_INTERFACE);
         intent.setPackage(packageName);
-        final ResolveInfo resolveInfo = context.getPackageManager().resolveService(intent,
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+        final ResolveInfo resolveInfo = context.getPackageManager().resolveServiceAsUser(intent,
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA, userId);
         final ServiceInfo serviceInfo = resolveInfo == null ? null : resolveInfo.serviceInfo;
         if (resolveInfo == null || serviceInfo == null) {
             Slog.w(TAG, "No valid components found.");
@@ -115,8 +116,8 @@ final class RemoteInlineSuggestionRenderService extends
     }
 
     @Nullable
-    public static ComponentName getServiceComponentName(Context context) {
-        final ServiceInfo serviceInfo = getServiceInfo(context);
+    public static ComponentName getServiceComponentName(Context context, @UserIdInt int userId) {
+        final ServiceInfo serviceInfo = getServiceInfo(context, userId);
         if (serviceInfo == null) return null;
 
         final ComponentName componentName = new ComponentName(serviceInfo.packageName,

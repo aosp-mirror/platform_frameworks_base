@@ -31,7 +31,6 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
-import android.util.StatsLog;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +40,7 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -122,7 +122,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private void handleClick() {
         showDeviceMonitoringDialog();
         DevicePolicyEventLogger
-                .createEvent(StatsLog.DEVICE_POLICY_EVENT__EVENT_ID__DO_USER_INFO_CLICKED)
+                .createEvent(FrameworkStatsLog.DEVICE_POLICY_EVENT__EVENT_ID__DO_USER_INFO_CLICKED)
                 .write();
     }
 

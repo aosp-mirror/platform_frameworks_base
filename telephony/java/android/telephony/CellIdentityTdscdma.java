@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -82,39 +83,44 @@ public final class CellIdentityTdscdma extends CellIdentity {
      *
      * @hide
      */
-    public CellIdentityTdscdma(String mcc, String mnc, int lac, int cid, int cpid, int uarfcn,
-            String alphal, String alphas, @NonNull List<String> additionalPlmns,
-            ClosedSubscriberGroupInfo csgInfo) {
+    public CellIdentityTdscdma(@Nullable String mcc, @Nullable String mnc, int lac, int cid,
+            int cpid, int uarfcn, @Nullable String alphal, @Nullable String alphas,
+            @NonNull List<String> additionalPlmns, @Nullable ClosedSubscriberGroupInfo csgInfo) {
         super(TAG, CellInfo.TYPE_TDSCDMA, mcc, mnc, alphal, alphas);
         mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
         mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
         mCpid = inRangeOrUnavailable(cpid, 0, MAX_CPID);
         mUarfcn = inRangeOrUnavailable(uarfcn, 0, MAX_UARFCN);
-        mAdditionalPlmns = additionalPlmns;
+        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        for (String plmn : additionalPlmns) {
+            if (isValidPlmn(plmn)) {
+                mAdditionalPlmns.add(plmn);
+            }
+        }
         mCsgInfo = csgInfo;
     }
 
-    private CellIdentityTdscdma(CellIdentityTdscdma cid) {
+    private CellIdentityTdscdma(@NonNull CellIdentityTdscdma cid) {
         this(cid.mMccStr, cid.mMncStr, cid.mLac, cid.mCid,
                 cid.mCpid, cid.mUarfcn, cid.mAlphaLong,
                 cid.mAlphaShort, cid.mAdditionalPlmns, cid.mCsgInfo);
     }
 
     /** @hide */
-    public CellIdentityTdscdma(android.hardware.radio.V1_0.CellIdentityTdscdma cid) {
+    public CellIdentityTdscdma(@NonNull android.hardware.radio.V1_0.CellIdentityTdscdma cid) {
         this(cid.mcc, cid.mnc, cid.lac, cid.cid, cid.cpid, CellInfo.UNAVAILABLE, "", "",
                 Collections.emptyList(), null);
     }
 
     /** @hide */
-    public CellIdentityTdscdma(android.hardware.radio.V1_2.CellIdentityTdscdma cid) {
+    public CellIdentityTdscdma(@NonNull android.hardware.radio.V1_2.CellIdentityTdscdma cid) {
         this(cid.base.mcc, cid.base.mnc, cid.base.lac, cid.base.cid, cid.base.cpid,
                 cid.uarfcn, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
                 Collections.emptyList(), null);
     }
 
     /** @hide */
-    public CellIdentityTdscdma(android.hardware.radio.V1_5.CellIdentityTdscdma cid) {
+    public CellIdentityTdscdma(@NonNull android.hardware.radio.V1_5.CellIdentityTdscdma cid) {
         this(cid.base.base.mcc, cid.base.base.mnc, cid.base.base.lac, cid.base.base.cid,
                 cid.base.base.cpid, cid.base.uarfcn, cid.base.operatorNames.alphaLong,
                 cid.base.operatorNames.alphaShort,
@@ -130,7 +136,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
                 mAdditionalPlmns, null);
     }
 
-    CellIdentityTdscdma copy() {
+    @NonNull CellIdentityTdscdma copy() {
         return new CellIdentityTdscdma(this);
     }
 

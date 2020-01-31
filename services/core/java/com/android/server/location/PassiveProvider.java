@@ -16,9 +16,12 @@
 
 package com.android.server.location;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
+import android.os.Bundle;
 
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -49,9 +52,8 @@ public class PassiveProvider extends AbstractLocationProvider {
     private volatile boolean mReportLocation;
 
     public PassiveProvider(Context context) {
-        // using a direct executor is only acceptable because this class is so simple it is trivial
-        // to verify that it does not acquire any locks or re-enter LMS from callbacks
-        super(context, Runnable::run);
+        // using a direct executor is ok because this class has no locks that could deadlock
+        super(DIRECT_EXECUTOR, context);
 
         mReportLocation = false;
 
@@ -59,15 +61,26 @@ public class PassiveProvider extends AbstractLocationProvider {
         setAllowed(true);
     }
 
+    /**
+     * Pass a location into the passive provider.
+     */
+    public void updateLocation(Location location) {
+        if (mReportLocation) {
+            reportLocation(location);
+        }
+    }
+
     @Override
     public void onSetRequest(ProviderRequest request) {
         mReportLocation = request.reportLocation;
     }
 
-    public void updateLocation(Location location) {
-        if (mReportLocation) {
-            reportLocation(location);
-        }
+    @Override
+    protected void onExtraCommand(int uid, int pid, String command, Bundle extras) {}
+
+    @Override
+    protected void onRequestSetAllowed(boolean allowed) {
+        // do nothing - the passive provider is always allowed
     }
 
     @Override

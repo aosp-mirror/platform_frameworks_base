@@ -2397,21 +2397,6 @@ public class LocationManager {
         }
     }
 
-    /**
-     * Used by NetInitiatedActivity to report user response
-     * for network initiated GPS fix requests.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public boolean sendNiResponse(int notifId, int userResponse) {
-        try {
-            return mService.sendNiResponse(notifId, userResponse);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     private void checkPendingIntent(PendingIntent pendingIntent) {
         Preconditions.checkArgument(pendingIntent != null, "invalid null pending intent");
         if (!pendingIntent.isTargetedToPackage()) {

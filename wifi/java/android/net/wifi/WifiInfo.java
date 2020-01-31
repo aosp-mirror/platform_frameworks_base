@@ -889,6 +889,13 @@ public class WifiInfo implements Parcelable {
      */
     @Nullable
     @SystemApi
+    public static String sanitizeSsid(@Nullable String string) {
+        return removeDoubleQuotes(string);
+    }
+
+    /** @hide */
+    @UnsupportedAppUsage
+    @Nullable
     public static String removeDoubleQuotes(@Nullable String string) {
         if (string == null) return null;
         final int length = string.length();
