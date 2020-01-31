@@ -16,8 +16,6 @@
 
 package android.provider;
 
-import static android.annotation.SystemApi.Client.MODULE_APPS;
-
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 
@@ -955,7 +953,7 @@ public final class DocumentsContract {
      *
      * @hide
      */
-    @SystemApi(client = MODULE_APPS)
+    @SystemApi
     @NonNull
     public static Uri buildDocumentUriAsUser(
             @NonNull String authority, @NonNull String documentId, @NonNull UserHandle user) {
