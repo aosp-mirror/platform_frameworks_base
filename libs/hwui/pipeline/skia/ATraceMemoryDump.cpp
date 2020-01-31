@@ -39,14 +39,13 @@ namespace skiapipeline {
  * ATraceMemoryDump calculates memory category first by looking at the "type" string passed to
  * dumpStringValue and then by looking at "backingType" passed to setMemoryBacking.
  * Only GPU Texture memory is tracked separately and everything else is grouped as one
- * "GPU Memory" category.
+ * "Misc Memory" category.
  */
 static std::unordered_map<const char*, const char*> sResourceMap = {
         {"malloc", "HWUI CPU Memory"},          // taken from setMemoryBacking(backingType)
         {"gl_texture", "HWUI Texture Memory"},  // taken from setMemoryBacking(backingType)
-        {"Texture",
-         "HWUI Texture Memory"},  // taken from dumpStringValue(value, valueName="type")
-        // Uncomment categories below to split "GPU Memory" into more brackets for debugging.
+        {"Texture", "HWUI Texture Memory"},  // taken from dumpStringValue(value, valueName="type")
+        // Uncomment categories below to split "Misc Memory" into more brackets for debugging.
         /*{"vk_buffer", "vk_buffer"},
         {"gl_renderbuffer", "gl_renderbuffer"},
         {"gl_buffer", "gl_buffer"},
@@ -169,8 +168,8 @@ void ATraceMemoryDump::resetCurrentCounter(const char* dumpName) {
     mLastDumpValue = 0;
     mLastPurgeableDumpValue = INVALID_MEMORY_SIZE;
     mLastDumpName = dumpName;
-    // Categories not listed in sResourceMap are reported as "GPU memory"
-    mCategory = "HWUI GPU Memory";
+    // Categories not listed in sResourceMap are reported as "Misc Memory"
+    mCategory = "HWUI Misc Memory";
 }
 
 } /* namespace skiapipeline */
