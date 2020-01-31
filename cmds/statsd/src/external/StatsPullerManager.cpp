@@ -34,7 +34,6 @@
 #include "../statscompanion_util.h"
 #include "GpuStatsPuller.h"
 #include "StatsCallbackPuller.h"
-#include "SubsystemSleepStatePuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"
 
@@ -54,9 +53,6 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
 StatsPullerManager::StatsPullerManager()
     : kAllPullAtomInfo({
-              // subsystem_sleep_state
-              {{.atomTag = android::util::SUBSYSTEM_SLEEP_STATE}, new SubsystemSleepStatePuller()},
-
               // TrainInfo.
               {{.atomTag = android::util::TRAIN_INFO}, new TrainInfoPuller()},
 
