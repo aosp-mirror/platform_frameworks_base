@@ -1709,7 +1709,10 @@ public class WifiConfiguration implements Parcelable {
             return mStatus;
         }
 
-        /** True if the current network is enabled to join network selection, false otherwise. */
+        /**
+         * True if the current network is enabled to join network selection, false otherwise.
+         * @hide
+         */
         public boolean isNetworkEnabled() {
             return mStatus == NETWORK_SELECTION_ENABLED;
         }
@@ -1722,7 +1725,10 @@ public class WifiConfiguration implements Parcelable {
             return mStatus == NETWORK_SELECTION_TEMPORARY_DISABLED;
         }
 
-        /** True if the current network is permanently disabled, false otherwise. */
+        /**
+         * True if the current network is permanently disabled, false otherwise.
+         * @hide
+         */
         public boolean isNetworkPermanentlyDisabled() {
             return mStatus == NETWORK_SELECTION_PERMANENTLY_DISABLED;
         }

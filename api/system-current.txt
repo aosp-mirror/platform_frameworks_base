@@ -7564,8 +7564,6 @@ package android.net.wifi {
     method @Deprecated public int getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getNetworkStatusString();
     method @Deprecated public boolean hasEverConnected();
-    method @Deprecated public boolean isNetworkEnabled();
-    method @Deprecated public boolean isNetworkPermanentlyDisabled();
     field @Deprecated public static final int DISABLED_ASSOCIATION_REJECTION = 1; // 0x1
     field @Deprecated public static final int DISABLED_AUTHENTICATION_FAILURE = 2; // 0x2
     field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 5; // 0x5

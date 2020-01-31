@@ -16,6 +16,8 @@
 
 package com.android.settingslib.wifi;
 
+import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLED;
+
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -41,7 +43,9 @@ public class WifiUtils {
             summary.append(" f=" + Integer.toString(info.getFrequency()));
         }
         summary.append(" " + getVisibilityStatus(accessPoint));
-        if (config != null && !config.getNetworkSelectionStatus().isNetworkEnabled()) {
+        if (config != null
+                && (config.getNetworkSelectionStatus().getNetworkSelectionStatus()
+                        != NETWORK_SELECTION_ENABLED)) {
             summary.append(" (" + config.getNetworkSelectionStatus().getNetworkStatusString());
             if (config.getNetworkSelectionStatus().getDisableTime() > 0) {
                 long now = System.currentTimeMillis();
