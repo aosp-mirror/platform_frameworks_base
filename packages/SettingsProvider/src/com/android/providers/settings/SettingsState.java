@@ -41,13 +41,13 @@ import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 
 import libcore.io.IoUtils;
 
@@ -429,8 +429,9 @@ final class SettingsState {
             mSettings.put(name, newState);
         }
 
-        StatsLog.write(StatsLog.SETTING_CHANGED, name, value, newState.value, oldValue, tag,
-            makeDefault, getUserIdFromKey(mKey), StatsLog.SETTING_CHANGED__REASON__UPDATED);
+        FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, name, value, newState.value,
+                oldValue, tag, makeDefault, getUserIdFromKey(mKey),
+                FrameworkStatsLog.SETTING_CHANGED__REASON__UPDATED);
 
         addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, newState);
 
@@ -489,9 +490,9 @@ final class SettingsState {
             if (key.startsWith(prefix) && !keyValues.containsKey(key)) {
                 Setting oldState = mSettings.remove(key);
 
-                StatsLog.write(StatsLog.SETTING_CHANGED, key, /* value= */ "", /* newValue= */ "",
-                        oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
-                        StatsLog.SETTING_CHANGED__REASON__DELETED);
+                FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key,
+                        /* value= */ "", /* newValue= */ "", oldState.value, /* tag */ "", false,
+                        getUserIdFromKey(mKey), FrameworkStatsLog.SETTING_CHANGED__REASON__DELETED);
                 addHistoricalOperationLocked(HISTORICAL_OPERATION_DELETE, oldState);
                 changedKeys.add(key); // key was removed
             }
@@ -516,9 +517,9 @@ final class SettingsState {
                 continue;
             }
 
-            StatsLog.write(StatsLog.SETTING_CHANGED, key, value, state.value, oldValue,
-                    /* tag */ null, /* make default */ false,
-                    getUserIdFromKey(mKey), StatsLog.SETTING_CHANGED__REASON__UPDATED);
+            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key, value, state.value,
+                    oldValue, /* tag */ null, /* make default */ false,
+                    getUserIdFromKey(mKey), FrameworkStatsLog.SETTING_CHANGED__REASON__UPDATED);
             addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, state);
         }
 
@@ -544,9 +545,9 @@ final class SettingsState {
 
         Setting oldState = mSettings.remove(name);
 
-        StatsLog.write(StatsLog.SETTING_CHANGED, name, /* value= */ "", /* newValue= */ "",
-            oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
-            StatsLog.SETTING_CHANGED__REASON__DELETED);
+        FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, name, /* value= */ "",
+                /* newValue= */ "", oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
+                FrameworkStatsLog.SETTING_CHANGED__REASON__DELETED);
 
         updateMemoryUsagePerPackageLocked(oldState.packageName, oldState.value,
                 null, oldState.defaultValue, null);
