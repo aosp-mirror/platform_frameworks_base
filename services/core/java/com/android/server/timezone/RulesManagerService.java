@@ -198,7 +198,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     Slog.w(TAG, "Failed to read staged distro.", e);
                 }
             }
-            return new RulesState(baseVersion.rulesVersion, DISTRO_FORMAT_VERSION_SUPPORTED,
+            return new RulesState(baseVersion.getRulesVersion(), DISTRO_FORMAT_VERSION_SUPPORTED,
                     operationInProgress, stagedOperationStatus, stagedDistroRulesVersion,
                     distroStatus, installedDistroRulesVersion);
         }
