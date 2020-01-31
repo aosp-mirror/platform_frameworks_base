@@ -149,7 +149,7 @@ public class WorkSource implements Parcelable {
     }
 
     /**
-     * Returns the size of this work source.
+     * Returns the number of uids in this work source.
      * @hide
      */
     @TestApi
