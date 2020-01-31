@@ -482,6 +482,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * once per notification as the packageInfo can't technically change for a notification row.
      */
     private void cacheIsSystemNotification() {
+        //TODO: This probably shouldn't be in ExpandableNotificationRow
         if (mEntry != null && mEntry.mIsSystemNotification == null) {
             if (mSystemNotificationAsyncTask.getStatus() == AsyncTask.Status.PENDING) {
                 // Run async task once, only if it hasn't already been executed. Note this is
