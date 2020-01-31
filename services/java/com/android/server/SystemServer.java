@@ -72,7 +72,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.StatsLog;
-import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureManager;
 
 import com.android.internal.R;
@@ -2083,8 +2082,7 @@ public final class SystemServer {
         // propagate to it.
         final Configuration config = wm.computeNewConfiguration(DEFAULT_DISPLAY);
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        w.getDefaultDisplay().getMetrics(metrics);
+        context.getDisplay().getMetrics(metrics);
         context.getResources().updateConfiguration(config, metrics);
 
         // The system context's theme may be configuration-dependent.

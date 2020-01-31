@@ -65,7 +65,8 @@ public class AdjacentListsWithAdjacentISVsInside extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final int desiredHeight = (int) (0.8 * getWindowManager().getDefaultDisplay().getHeight());
+        final int desiredHeight =
+                (int) (0.8 * getWindowManager().getCurrentWindowMetrics().getSize().getHeight());
 
         mLeftListView = new ListView(this);
         mLeftListView.setAdapter(new AdjacentISVAdapter(desiredHeight));

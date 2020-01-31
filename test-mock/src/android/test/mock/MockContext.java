@@ -812,7 +812,7 @@ public class MockContext extends Context {
     }
 
     @Override
-    public @NonNull Context createWindowContext(int type) {
+    public @NonNull Context createWindowContext(int type, Bundle options) {
         throw new UnsupportedOperationException();
     }
 

@@ -120,12 +120,14 @@ interface IWindowManager
      *
      * @param token Token to be registered.
      * @param type Window type to be used with this token.
+     * @param options A bundle used to pass window-related options.
      * @param displayId The ID of the display where this token should be added.
      * @param packageName The name of package to request to add window token.
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the addition was successful, an error code
      *         otherwise.
      */
-    int addWindowContextToken(IBinder token, int type, int displayId, String packageName);
+    int addWindowTokenWithOptions(IBinder token, int type, int displayId, in Bundle options,
+            String packageName);
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);

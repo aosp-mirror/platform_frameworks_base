@@ -316,6 +316,7 @@ public final class CameraManager {
         CameraManagerGlobal.get().unregisterTorchCallback(callback);
     }
 
+    // TODO(b/147726300): Investigate how to support foldables/multi-display devices.
     private Size getDisplaySize() {
         Size ret = new Size(0, 0);
 

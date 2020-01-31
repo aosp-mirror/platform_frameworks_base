@@ -5728,14 +5728,13 @@ public abstract class Context {
      * shared, however common state (ClassLoader, other Resources for the
      * same configuration) may be so the Context itself can be fairly lightweight.
      *
-     * The returned display Context provides a {@link WindowManager}
-     * (see {@link #getSystemService(String)}) that is configured to show windows
-     * on the given display.  The WindowManager's {@link WindowManager#getDefaultDisplay}
-     * method can be used to retrieve the Display from the returned Context.
+     * To obtain an instance of a {@link WindowManager} (see {@link #getSystemService(String)}) that
+     * is configured to show windows on the given display call
+     * {@link #createWindowContext(int, Bundle)} on the returned display Context or use an
+     * {@link android.app.Activity}.
      *
-     * @param display A {@link Display} object specifying the display
-     * for whose metrics the Context's resources should be tailored and upon which
-     * new windows should be shown.
+     * @param display A {@link Display} object specifying the display for whose metrics the
+     * Context's resources should be tailored.
      *
      * @return A {@link Context} for the display.
      */
@@ -5763,7 +5762,7 @@ public abstract class Context {
      * final DisplayManager dm = anyContext.getSystemService(DisplayManager.class);
      * final Display primaryDisplay = dm.getDisplay(DEFAULT_DISPLAY);
      * final Context windowContext = anyContext.createDisplayContext(primaryDisplay)
-     *         .createWindowContext(TYPE_APPLICATION_OVERLAY);
+     *         .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
      * final View overlayView = Inflater.from(windowContext).inflate(someLayoutXml, null);
      *
      * // WindowManager.LayoutParams initialization
@@ -5783,6 +5782,7 @@ public abstract class Context {
      * </p>
      *
      * @param type Window type in {@link WindowManager.LayoutParams}
+     * @param options Bundle used to pass window-related options.
      * @return A {@link Context} that can be used to create windows.
      * @throws UnsupportedOperationException if this is called on a non-UI context, such as
      *         {@link android.app.Application Application} or {@link android.app.Service Service}.
@@ -5794,7 +5794,7 @@ public abstract class Context {
      * @see #WALLPAPER_SERVICE
      * @throws IllegalArgumentException if token is invalid
      */
-    public @NonNull Context createWindowContext(int type)  {
+    public @NonNull Context createWindowContext(int type, @Nullable Bundle options)  {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

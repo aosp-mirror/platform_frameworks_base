@@ -361,7 +361,7 @@ final class AccessibilityController {
         private final Region mTempRegion3 = new Region();
         private final Region mTempRegion4 = new Region();
 
-        private final Context mContext;
+        private final Context mDisplayContext;
         private final WindowManagerService mService;
         private final MagnifiedViewport mMagnifedViewport;
         private final Handler mHandler;
@@ -378,14 +378,14 @@ final class AccessibilityController {
                 DisplayContent displayContent,
                 Display display,
                 MagnificationCallbacks callbacks) {
-            mContext = windowManagerService.mContext;
+            mDisplayContext = windowManagerService.mContext.createDisplayContext(display);
             mService = windowManagerService;
             mCallbacks = callbacks;
             mDisplayContent = displayContent;
             mDisplay = display;
             mHandler = new MyHandler(mService.mH.getLooper());
             mMagnifedViewport = new MagnifiedViewport();
-            mLongAnimationDuration = mContext.getResources().getInteger(
+            mLongAnimationDuration = mDisplayContext.getResources().getInteger(
                     com.android.internal.R.integer.config_longAnimTime);
         }
 
@@ -568,8 +568,6 @@ final class AccessibilityController {
 
             private final MagnificationSpec mMagnificationSpec = MagnificationSpec.obtain();
 
-            private final WindowManager mWindowManager;
-
             private final float mBorderWidth;
             private final int mHalfBorderWidth;
             private final int mDrawBorderInset;
@@ -580,14 +578,13 @@ final class AccessibilityController {
             private int mTempLayer = 0;
 
             public MagnifiedViewport() {
-                mWindowManager = (WindowManager) mContext.getSystemService(Service.WINDOW_SERVICE);
-                mBorderWidth = mContext.getResources().getDimension(
+                mBorderWidth = mDisplayContext.getResources().getDimension(
                         com.android.internal.R.dimen.accessibility_magnification_indicator_width);
                 mHalfBorderWidth = (int) Math.ceil(mBorderWidth / 2);
                 mDrawBorderInset = (int) mBorderWidth / 2;
-                mWindow = new ViewportWindow(mContext);
+                mWindow = new ViewportWindow(mDisplayContext);
 
-                if (mContext.getResources().getConfiguration().isScreenRound()) {
+                if (mDisplayContext.getResources().getConfiguration().isScreenRound()) {
                     mCircularPath = new Path();
                     mDisplay.getRealSize(mTempPoint);
                     final int centerXY = mTempPoint.x / 2;
@@ -916,7 +913,7 @@ final class AccessibilityController {
 
                 public void updateSize(SurfaceControl.Transaction t) {
                     synchronized (mService.mGlobalLock) {
-                        mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
+                        mDisplay.getRealSize(mTempPoint);
                         t.setBufferSize(mSurfaceControl, mTempPoint.x, mTempPoint.y);
                         invalidate(mDirtyRect);
                     }

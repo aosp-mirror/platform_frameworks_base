@@ -23,7 +23,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -531,8 +530,7 @@ public class SurfaceCompositionMeasuringActivity extends Activity implements OnC
     }
 
     private void detectRefreshRate() {
-        WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
-        mRefreshRate = wm.getDefaultDisplay().getRefreshRate();
+        mRefreshRate = getDisplay().getRefreshRate();
         if (mRefreshRate < MIN_REFRESH_RATE_SUPPORTED)
             throw new RuntimeException("Unsupported display refresh rate: " + mRefreshRate);
         mTargetFPS = mRefreshRate - 2.0f;

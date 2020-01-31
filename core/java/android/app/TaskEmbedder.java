@@ -48,7 +48,6 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
 
@@ -131,6 +130,7 @@ public class TaskEmbedder {
     private TaskStackListener mTaskStackListener;
     private Listener mListener;
     private boolean mOpened; // Protected by mGuard.
+    private DisplayMetrics mTmpDisplayMetrics;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -594,10 +594,11 @@ public class TaskEmbedder {
 
     /** Get density of the hosting display. */
     private int getBaseDisplayDensity() {
-        final WindowManager wm = mContext.getSystemService(WindowManager.class);
-        final DisplayMetrics metrics = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(metrics);
-        return metrics.densityDpi;
+        if (mTmpDisplayMetrics == null) {
+            mTmpDisplayMetrics = new DisplayMetrics();
+        }
+        mContext.getDisplay().getMetrics(mTmpDisplayMetrics);
+        return mTmpDisplayMetrics.densityDpi;
     }
 
     /**

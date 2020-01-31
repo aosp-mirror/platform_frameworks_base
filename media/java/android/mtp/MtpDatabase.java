@@ -722,6 +722,7 @@ public class MtpDatabase implements AutoCloseable {
                 return MtpConstants.RESPONSE_OK;
             case MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE:
                 // use screen size as max image size
+                // TODO(b/147721765): Add support for foldables/multi-display devices.
                 Display display = ((WindowManager) mContext.getSystemService(
                         Context.WINDOW_SERVICE)).getDefaultDisplay();
                 int width = display.getMaximumSizeDimension();

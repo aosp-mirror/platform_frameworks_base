@@ -978,8 +978,8 @@ public class ContextWrapper extends Context {
 
     @Override
     @NonNull
-    public Context createWindowContext(int type) {
-        return mBase.createWindowContext(type);
+    public Context createWindowContext(int type, @Nullable Bundle options) {
+        return mBase.createWindowContext(type, options);
     }
 
     @Override

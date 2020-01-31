@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.util.Log;
-import android.view.WindowManager;
 
 /**
  * Base class for a test that performs bisection to determine maximum
@@ -55,9 +54,7 @@ public abstract class BaseTest  {
 
     public BaseTest(@NonNull GamePerformanceActivity activity) {
         mActivity = activity;
-        final WindowManager windowManager =
-                (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
-        mRefreshRate = windowManager.getDefaultDisplay().getRefreshRate();
+        mRefreshRate = activity.getDisplay().getRefreshRate();
     }
 
     @NonNull

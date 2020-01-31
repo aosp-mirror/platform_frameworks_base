@@ -222,7 +222,8 @@ public class TouchUtils {
      */
     public static void dragViewToBottom(InstrumentationTestCase test, Activity activity, View v,
             int stepCount) {
-        int screenHeight = activity.getWindowManager().getDefaultDisplay().getHeight();
+        int screenHeight =
+                activity.getWindowManager().getCurrentWindowMetrics().getSize().getHeight();
 
         int[] xy = new int[2];
         v.getLocationOnScreen(xy);
