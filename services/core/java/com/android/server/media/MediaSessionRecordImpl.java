@@ -154,4 +154,9 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      */
     @Override
     void close();
+
+    /**
+     * Returns whether {@link #close()} is called before.
+     */
+    boolean isClosed();
 }

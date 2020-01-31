@@ -52,6 +52,8 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     private boolean mIsConnected;
     @GuardedBy("mLock")
     private int mPolicies;
+    @GuardedBy("mLock")
+    private boolean mIsClosed;
 
     public MediaSession2Record(Session2Token sessionToken, MediaSessionService service,
             Looper handlerLooper, int policies) {
@@ -119,9 +121,17 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     @Override
     public void close() {
         synchronized (mLock) {
+            mIsClosed = true;
             // Call close regardless of the mIsAvailable. This may be called when it's not yet
             // connected.
             mController.close();
+        }
+    }
+
+    @Override
+    public boolean isClosed() {
+        synchronized (mLock) {
+            return mIsClosed;
         }
     }
 
