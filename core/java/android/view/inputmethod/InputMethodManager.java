@@ -671,6 +671,11 @@ public final class InputMethodManager {
                 mWindowFocusGainFuture = null;
             }
             synchronized (mH) {
+                if (mCurRootView != null) {
+                    // Reset the last served view and restart window focus state of the root view.
+                    mCurRootView.getImeFocusController().setServedView(null);
+                    mRestartOnNextWindowFocus = true;
+                }
                 mCurRootView = rootView;
             }
         }
