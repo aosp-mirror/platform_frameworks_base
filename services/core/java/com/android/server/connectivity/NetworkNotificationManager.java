@@ -188,14 +188,14 @@ public class NetworkNotificationManager {
         int icon = getIcon(transportType, notifyType);
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.PRIVATE_DNS_BROKEN) {
             if (transportType == TRANSPORT_CELLULAR) {
                 title = r.getString(R.string.mobile_no_internet);
             } else if (transportType == TRANSPORT_WIFI) {
                 title = r.getString(R.string.wifi_no_internet,
-                        WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                        WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             } else {
                 title = r.getString(R.string.other_networks_no_internet);
             }
@@ -203,19 +203,19 @@ public class NetworkNotificationManager {
         } else if (notifyType == NotificationType.PARTIAL_CONNECTIVITY
                 && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.network_partial_connectivity,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.network_partial_connectivity_detailed);
         } else if (notifyType == NotificationType.LOST_INTERNET &&
                 transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.SIGN_IN) {
             switch (transportType) {
                 case TRANSPORT_WIFI:
                     title = r.getString(R.string.wifi_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
-                            WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                            WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
                     break;
                 case TRANSPORT_CELLULAR:
                     title = r.getString(R.string.network_available_sign_in, 0);
@@ -236,7 +236,7 @@ public class NetworkNotificationManager {
                     break;
             }
         } else if (notifyType == NotificationType.LOGGED_IN) {
-            title = WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID());
+            title = WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID());
             details = r.getString(R.string.captive_portal_logged_in_detailed);
         } else if (notifyType == NotificationType.NETWORK_SWITCH) {
             String fromTransport = getTransportName(transportType);
