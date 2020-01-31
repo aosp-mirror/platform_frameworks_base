@@ -1506,6 +1506,15 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_WRONG_INSTALLED_VERSION = -121;
 
+    /**
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package failed because it contains a request to use a process that was not
+     * explicitly defined as part of its &lt;processes&gt; tag.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_PROCESS_NOT_DEFINED = -122;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -7237,6 +7246,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_MISSING_SPLIT: return "INSTALL_FAILED_MISSING_SPLIT";
             case INSTALL_FAILED_BAD_SIGNATURE: return "INSTALL_FAILED_BAD_SIGNATURE";
             case INSTALL_FAILED_WRONG_INSTALLED_VERSION: return "INSTALL_FAILED_WRONG_INSTALLED_VERSION";
+            case INSTALL_FAILED_PROCESS_NOT_DEFINED: return "INSTALL_FAILED_PROCESS_NOT_DEFINED";
             default: return Integer.toString(status);
         }
     }

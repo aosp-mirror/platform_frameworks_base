@@ -3414,16 +3414,12 @@ public class ComponentParseUtils {
             proc.name = sa.getNonConfigurationString(
                     R.styleable.AndroidManifestProcess_process,0);
             proc.name = PackageParser.buildProcessName(parsingPackage.getPackageName(),
-                    null, proc.name, flags, separateProcesses, outError);
-
-            if (proc.name == null || proc.name.length() <= 0) {
-                outError[0] = "<process> does not specify android:process";
+                    parsingPackage.getPackageName(), proc.name, flags, separateProcesses, outError);
+            if (outError[0] != null) {
                 return null;
             }
-            proc.name = PackageParser.buildProcessName(parsingPackage.getPackageName(),
-                    parsingPackage.getPackageName(), proc.name,
-                    flags, separateProcesses, outError);
-            if (outError[0] != null) {
+            if (proc.name == null || proc.name.length() <= 0) {
+                outError[0] = "<process> does not specify android:process";
                 return null;
             }
         } finally {

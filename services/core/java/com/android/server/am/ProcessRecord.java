@@ -615,13 +615,20 @@ class ProcessRecord implements WindowProcessListener {
             int _uid) {
         mService = _service;
         info = _info;
+        ProcessInfo procInfo = null;
         if (_service.mPackageManagerInt != null) {
             ArrayMap<String, ProcessInfo> processes =
                     _service.mPackageManagerInt.getProcessesForUid(_uid);
-            processInfo = processes != null ? processes.get(_processName) : null;
-        } else {
-            processInfo = null;
+            if (processes != null) {
+                procInfo = processes.get(_processName);
+                if (procInfo != null && procInfo.deniedPermissions == null) {
+                    // If this process hasn't asked for permissions to be denied, then
+                    // we don't care about it.
+                    procInfo = null;
+                }
+            }
         }
+        processInfo = procInfo;
         isolated = _info.uid != _uid;
         appZygote = (UserHandle.getAppId(_uid) >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
                 && UserHandle.getAppId(_uid) <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);

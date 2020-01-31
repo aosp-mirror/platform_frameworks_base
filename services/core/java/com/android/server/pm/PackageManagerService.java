@@ -55,6 +55,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_PROCESS_NOT_DEFINED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
@@ -205,6 +206,7 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ApkParseUtils;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
@@ -11246,6 +11248,26 @@ public class PackageManagerService extends IPackageManager.Stub
         return object;
     }
 
+    private <T extends ComponentParseUtils.ParsedMainComponent>
+            void assertPackageProcesses(AndroidPackage pkg, List<T> components,
+            ArrayMap<String, ComponentParseUtils.ParsedProcess> procs, String compName)
+            throws PackageManagerException {
+        if (components == null) {
+            return;
+        }
+        for (int i = components.size() - 1; i >= 0; i--) {
+            final ComponentParseUtils.ParsedMainComponent<?> component = components.get(i);
+            if (!procs.containsKey(component.getProcessName())) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_PROCESS_NOT_DEFINED,
+                        "Can't install because " + compName + " " + component.className
+                                + "'s process attribute " + component.getProcessName()
+                                + " (in package " + pkg.getPackageName()
+                                + ") is not included in the <processes> list");
+            }
+        }
+    }
+
     /**
      * Asserts the parsed package is valid according to the given policy. If the
      * package is invalid, for whatever reason, throws {@link PackageManagerException}.
@@ -11473,6 +11495,24 @@ public class PackageManagerService extends IPackageManager.Stub
             // things that are installed.
             if ((scanFlags & SCAN_NEW_INSTALL) != 0) {
                 mComponentResolver.assertProvidersNotDefined(pkg);
+            }
+
+            // If this package has defined explicit processes, then ensure that these are
+            // the only processes used by its components.
+            final ArrayMap<String, ComponentParseUtils.ParsedProcess> procs = pkg.getProcesses();
+            if (procs != null) {
+                if (!procs.containsKey(pkg.getProcessName())) {
+                    throw new PackageManagerException(
+                            INSTALL_FAILED_PROCESS_NOT_DEFINED,
+                            "Can't install because application tag's process attribute "
+                                    + pkg.getProcessName()
+                                    + " (in package " + pkg.getPackageName()
+                                    + ") is not included in the <processes> list");
+                }
+                assertPackageProcesses(pkg, pkg.getActivities(), procs, "activity");
+                assertPackageProcesses(pkg, pkg.getServices(), procs, "service");
+                assertPackageProcesses(pkg, pkg.getReceivers(), procs, "receiver");
+                assertPackageProcesses(pkg, pkg.getProviders(), procs, "provider");
             }
 
             // Verify that packages sharing a user with a privileged app are marked as privileged.
