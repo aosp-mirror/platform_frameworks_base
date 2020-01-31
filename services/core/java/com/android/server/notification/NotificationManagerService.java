@@ -7428,13 +7428,15 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason,
+    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete,
+            @NotificationListenerService.NotificationCancelReason int reason,
             boolean wasPosted, String listenerName) {
         cancelNotificationLocked(r, sendDelete, reason, -1, -1, wasPosted, listenerName);
     }
 
     @GuardedBy("mNotificationLock")
-    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete, int reason,
+    private void cancelNotificationLocked(NotificationRecord r, boolean sendDelete,
+            @NotificationListenerService.NotificationCancelReason int reason,
             int rank, int count, boolean wasPosted, String listenerName) {
         final String canceledKey = r.getKey();
 
@@ -7552,6 +7554,10 @@ public class NotificationManagerService extends SystemService {
         EventLogTags.writeNotificationCanceled(canceledKey, reason,
                 r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
                 rank, count, listenerName);
+        if (wasPosted) {
+            mNotificationRecordLogger.logNotificationCancelled(r, reason,
+                    r.getStats().getDismissalSurface());
+        }
     }
 
     @VisibleForTesting

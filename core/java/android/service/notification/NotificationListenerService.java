@@ -214,6 +214,32 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_TIMEOUT = 19;
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = "REASON_", value = {
+            REASON_CLICK,
+            REASON_CANCEL,
+            REASON_CANCEL_ALL,
+            REASON_ERROR,
+            REASON_PACKAGE_CHANGED,
+            REASON_USER_STOPPED,
+            REASON_PACKAGE_BANNED,
+            REASON_APP_CANCEL,
+            REASON_APP_CANCEL_ALL,
+            REASON_LISTENER_CANCEL,
+            REASON_LISTENER_CANCEL_ALL,
+            REASON_GROUP_SUMMARY_CANCELED,
+            REASON_GROUP_OPTIMIZATION,
+            REASON_PACKAGE_SUSPENDED,
+            REASON_PROFILE_TURNED_OFF,
+            REASON_UNAUTOBUNDLED,
+            REASON_CHANNEL_BANNED,
+            REASON_SNOOZED,
+            REASON_TIMEOUT
+    })
+    public @interface NotificationCancelReason{};
+
+    /**
      * The full trim of the StatusBarNotification including all its features.
      *
      * @hide
