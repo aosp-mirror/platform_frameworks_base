@@ -483,7 +483,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
         }
 
-        int score = mNetworkScore.getIntExtension(NetworkScore.LEGACY_SCORE);
+        int score = mNetworkScore.getLegacyScore();
         if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
             score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }

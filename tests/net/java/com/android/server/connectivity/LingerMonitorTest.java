@@ -353,8 +353,7 @@ public class LingerMonitorTest {
         NetworkCapabilities caps = new NetworkCapabilities();
         caps.addCapability(0);
         caps.addTransportType(transport);
-        NetworkScore ns = new NetworkScore();
-        ns.putIntExtension(NetworkScore.LEGACY_SCORE, 50);
+        NetworkScore ns = new NetworkScore.Builder().setLegacyScore(50).build();
         NetworkAgentInfo nai = new NetworkAgentInfo(null, null, new Network(netId), info, null,
                 caps, ns, mCtx, null, null /* config */, mConnService, mNetd, mDnsResolver, mNMS,
                 NetworkProvider.ID_NONE);
