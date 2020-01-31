@@ -2206,8 +2206,9 @@ public final class ViewRootImpl implements ViewParent,
         return insets;
     }
 
-    void dispatchApplyInsets(View host) {
+    public void dispatchApplyInsets(View host) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchApplyInsets");
+        mApplyInsetsRequested = false;
         WindowInsets insets = getWindowInsets(true /* forceConstruct */);
         final boolean dispatchCutout = (mWindowAttributes.layoutInDisplayCutoutMode
                 == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
@@ -2444,7 +2445,6 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mApplyInsetsRequested) {
-            mApplyInsetsRequested = false;
             updateVisibleInsets();
             dispatchApplyInsets(host);
             if (mLayoutRequested) {
@@ -2621,7 +2621,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
                         mAttachInfo.mSystemUiVisibility || mApplyInsetsRequested) {
                     mLastSystemUiVisibility = mAttachInfo.mSystemUiVisibility;
-                    mApplyInsetsRequested = false;
                     dispatchApplyInsets(host);
                     // We applied insets so force contentInsetsChanged to ensure the
                     // hierarchy is measured below.
