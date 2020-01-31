@@ -6876,6 +6876,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
+            ProcessRecord dyingProc = null;
             if (cpr != null && cpr.proc != null) {
                 providerRunning = !cpr.proc.killed;
 
@@ -6885,14 +6886,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
                 // how to test this case.)
                 if (cpr.proc.killed && cpr.proc.killedByAm) {
-                    final long iden = Binder.clearCallingIdentity();
-                    try {
-                        mProcessList.killProcAndWaitIfNecessaryLocked(cpr.proc, false,
-                                cpr.uid == cpr.proc.uid || cpr.proc.isolated,
-                                "getContentProviderImpl: %s (killedByAm)", startTime);
-                    } finally {
-                        Binder.restoreCallingIdentity(iden);
-                    }
+                    Slog.wtf(TAG, cpr.proc.toString() + " was killed by AM but isn't really dead");
+                    // Now we are going to wait for the death before starting the new process.
+                    dyingProc = cpr.proc;
                 }
             }
 
@@ -6993,18 +6989,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // has been killed on us.  We need to wait for a new
                     // process to be started, and make sure its death
                     // doesn't kill our process.
-                    Slog.i(TAG, "Existing provider " + cpr.name.flattenToShortString()
+                    Slog.wtf(TAG, "Existing provider " + cpr.name.flattenToShortString()
                             + " is crashing; detaching " + r);
                     boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                    mProcessList.killProcAndWaitIfNecessaryLocked(cpr.proc,
-                            false, true, "getContentProviderImpl: %s", startTime);
                     if (!lastRef) {
                         // This wasn't the last ref our process had on
-                        // the provider...  we have now been killed, bail.
+                        // the provider...  we will be killed during cleaning up, bail.
                         return null;
                     }
+                    // We'll just start a new process to host the content provider
                     providerRunning = false;
                     conn = null;
+                    dyingProc = cpr.proc;
                 } else {
                     cpr.proc.verifiedAdj = cpr.proc.setAdj;
                 }
@@ -7080,7 +7076,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 checkTime(startTime, "getContentProviderImpl: before getProviderByClass");
                 cpr = mProviderMap.getProviderByClass(comp, userId);
                 checkTime(startTime, "getContentProviderImpl: after getProviderByClass");
-                final boolean firstClass = cpr == null;
+                boolean firstClass = cpr == null;
                 if (firstClass) {
                     final long ident = Binder.clearCallingIdentity();
 
@@ -7111,6 +7107,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
+                } else if (dyingProc == cpr.proc) {
+                    // The old stable connection's client should be killed during proc cleaning up,
+                    // so do not re-use the old ContentProviderRecord, otherwise the new clients
+                    // could get killed unexpectedly.
+                    cpr = new ContentProviderRecord(cpr);
+                    // This is sort of "firstClass"
+                    firstClass = true;
                 }
 
                 checkTime(startTime, "getContentProviderImpl: now have ContentProviderRecord");
@@ -14270,10 +14273,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 cpr.launchingApp = null;
                 cpr.notifyAll();
             }
-            mProviderMap.removeProviderByClass(cpr.name, UserHandle.getUserId(cpr.uid));
+            final int userId = UserHandle.getUserId(cpr.uid);
+            // Don't remove from provider map if it doesn't match
+            // could be a new content provider is starting
+            if (mProviderMap.getProviderByClass(cpr.name, userId) == cpr) {
+                mProviderMap.removeProviderByClass(cpr.name, userId);
+            }
             String names[] = cpr.info.authority.split(";");
             for (int j = 0; j < names.length; j++) {
-                mProviderMap.removeProviderByName(names[j], UserHandle.getUserId(cpr.uid));
+                // Don't remove from provider map if it doesn't match
+                // could be a new content provider is starting
+                if (mProviderMap.getProviderByName(names[j], userId) == cpr) {
+                    mProviderMap.removeProviderByName(names[j], userId);
+                }
             }
         }
 
@@ -14368,6 +14380,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Remove published content providers.
         for (int i = app.pubProviders.size() - 1; i >= 0; i--) {
             ContentProviderRecord cpr = app.pubProviders.valueAt(i);
+            if (cpr.proc != app) {
+                // If the hosting process record isn't really us, bail out
+                continue;
+            }
             final boolean alwaysRemove = app.bad || !allowRestart;
             final boolean inLaunching = removeDyingProviderLocked(app, cpr, alwaysRemove);
             if (!alwaysRemove && inLaunching && cpr.hasConnectionOrHandle()) {
@@ -14453,6 +14469,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiHandler.obtainMessage(DISPATCH_PROCESS_DIED_UI_MSG, app.pid, app.info.uid,
                 null).sendToTarget();
 
+        // If this is a precede instance of another process instance
+        allowRestart = true;
+        synchronized (app) {
+            if (app.mSuccessor != null) {
+                // We don't allow restart with this ProcessRecord now,
+                // because we have created a new one already.
+                allowRestart = false;
+                // If it's persistent, add the successor to mPersistentStartingProcesses
+                if (app.isPersistent() && !app.removed) {
+                    if (mPersistentStartingProcesses.indexOf(app.mSuccessor) < 0) {
+                        mPersistentStartingProcesses.add(app.mSuccessor);
+                    }
+                }
+                // clean up the field so the successor's proc starter could proceed.
+                app.mSuccessor.mPrecedence = null;
+                app.mSuccessor = null;
+                // Notify if anyone is waiting for it.
+                app.notifyAll();
+            }
+        }
+
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
         if (restarting) {
@@ -14482,7 +14519,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal.onCleanUpApplicationRecord(app.getWindowProcessController());
         mProcessList.noteProcessDiedLocked(app);
 
-        if (restart && !app.isolated) {
+        if (restart && allowRestart && !app.isolated) {
             // We have components that still need to be running in the
             // process, so re-launch it.
             if (index < 0) {

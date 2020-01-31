@@ -320,6 +320,14 @@ class ProcessRecord implements WindowProcessListener {
     // set of disabled compat changes for the process (all others are enabled)
     long[] mDisabledCompatChanges;
 
+    // The precede instance of the process, which would exist when the previous process is killed
+    // but not fully dead yet; in this case, the new instance of the process should be held until
+    // this precede instance is fully dead.
+    volatile ProcessRecord mPrecedence;
+    // The succeeding instance of the process, which is going to be started after this process
+    // is killed successfully.
+    volatile ProcessRecord mSuccessor;
+
     // Cached task info for OomAdjuster
     private static final int VALUE_INVALID = -1;
     private static final int VALUE_FALSE = 0;
