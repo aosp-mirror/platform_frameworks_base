@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -25,6 +27,7 @@ import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.IWindowContainer;
 
 /**
  * Stores information about a particular Task.
@@ -138,6 +141,19 @@ public class TaskInfo {
     @UnsupportedAppUsage
     public final Configuration configuration = new Configuration();
 
+    /**
+     * Used as an opaque identifier for this task.
+     * @hide
+     */
+    @NonNull
+    public IWindowContainer token;
+
+    /**
+     * The activity type of the top activity in this task.
+     * @hide
+     */
+    public @WindowConfiguration.ActivityType int topActivityType;
+
     TaskInfo() {
         // Do nothing
     }
@@ -158,6 +174,11 @@ public class TaskInfo {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;
         }
+    }
+
+    /** @hide */
+    public boolean isResizable() {
+        return resizeMode != RESIZE_MODE_UNRESIZEABLE;
     }
 
     /**
@@ -186,6 +207,8 @@ public class TaskInfo {
         supportsSplitScreenMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
+        token = IWindowContainer.Stub.asInterface(source.readStrongBinder());
+        topActivityType = source.readInt();
     }
 
     /**
@@ -221,6 +244,8 @@ public class TaskInfo {
         dest.writeBoolean(supportsSplitScreenMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
+        dest.writeStrongInterface(token);
+        dest.writeInt(topActivityType);
     }
 
     @Override
@@ -234,6 +259,8 @@ public class TaskInfo {
                 + " numActivities=" + numActivities
                 + " lastActiveTime=" + lastActiveTime
                 + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
-                + " resizeMode=" + resizeMode;
+                + " resizeMode=" + resizeMode
+                + " token=" + token
+                + " topActivityType=" + topActivityType;
     }
 }

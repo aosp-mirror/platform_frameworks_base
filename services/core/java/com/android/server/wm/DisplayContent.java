@@ -207,6 +207,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.ISystemGestureExclusionListener;
+import android.view.ITaskOrganizer;
 import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -663,6 +664,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final RootWindowContainer.FindTaskResult
             mTmpFindTaskResult = new RootWindowContainer.FindTaskResult();
+
+    // When non-null, new stacks get put into this tile.
+    TaskTile mLaunchTile = null;
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -4275,8 +4279,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @VisibleForTesting
         ActivityStack getTopStack() {
-            return mTaskContainers.getChildCount() > 0
-                    ? mTaskContainers.getChildAt(mTaskContainers.getChildCount() - 1) : null;
+            // TODO(task-hierarchy): Just grab index -1 once tiles are in hierarchy.
+            for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack child = mTaskContainers.getChildAt(i);
+                if (child instanceof TaskTile) {
+                    continue;
+                }
+                return child;
+            }
+            return null;
         }
 
         int getIndexOf(ActivityStack stack) {
@@ -4318,6 +4329,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         private void addStackReferenceIfNeeded(ActivityStack stack) {
+            // TODO(task-hierarchy): Remove when tiles are in hierarchy.
+            if (stack instanceof TaskTile) {
+                return;
+            }
             if (stack.isActivityTypeHome()) {
                 if (mRootHomeTask != null) {
                     if (!stack.isDescendantOf(mRootHomeTask)) {
@@ -4734,6 +4749,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mHomeAppAnimationLayer = null;
                 mSplitScreenDividerAnchor = null;
             }
+        }
+
+        @Override
+        void onChildPositionChanged(WindowContainer child) {
+            // TODO(task-hierarchy): Move functionality to TaskTile when it's a proper parent.
+            TaskTile tile = ((ActivityStack) child).getTile();
+            if (tile == null) {
+                return;
+            }
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                    tile, false /* force */);
         }
     }
 
@@ -6271,6 +6297,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean isTopNotPinnedStack(ActivityStack stack) {
+        // TODO(task-hierarchy): Remove when tiles are in hierarchy.
+        if (stack instanceof TaskTile) {
+            return false;
+        }
         for (int i = getStackCount() - 1; i >= 0; --i) {
             final ActivityStack current = getStackAt(i);
             if (!current.inPinnedWindowingMode()) {
@@ -6683,6 +6713,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Nullable
     ActivityRecord getHomeActivity() {
         return getHomeActivityForUser(mRootWindowContainer.mCurrentUser);
+    }
+
+    // TODO(task-hierarchy): Remove when tiles are in hierarchy.
+    void addTile(TaskTile tile) {
+        mTaskContainers.addChild(tile, POSITION_BOTTOM);
+        ITaskOrganizer organizer = mAtmService.mTaskOrganizerController.getTaskOrganizer(
+                tile.getWindowingMode());
+        tile.setTaskOrganizer(organizer);
+    }
+
+    // TODO(task-hierarchy): Remove when tiles are in hierarchy.
+    void removeTile(TaskTile tile) {
+        mTaskContainers.removeChild(tile);
     }
 
     @Nullable

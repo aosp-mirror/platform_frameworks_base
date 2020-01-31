@@ -341,6 +341,9 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     private static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
 
+    // TODO(task-hierarchy): remove when tiles can be actual parents
+    TaskTile mTile = null;
+
     private final Handler mHandler;
 
     private class ActivityStackHandler extends Handler {
@@ -638,11 +641,20 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
     }
 
     @Override
+    public void resolveOverrideConfiguration(Configuration newParentConfig) {
+        super.resolveOverrideConfiguration(newParentConfig);
+        if (mTile != null) {
+            // If this is a virtual child of a tile, simulate the parent-child relationship
+            mTile.updateResolvedConfig(getResolvedOverrideConfiguration());
+        }
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         // Calling Task#onConfigurationChanged() for leaf task since the ops in this method are
         // particularly for ActivityStack, like preventing bounds changes when inheriting certain
         // windowing mode.
-        if (!isRootTask()) {
+        if (!isRootTask() || this instanceof TaskTile) {
             super.onConfigurationChanged(newParentConfig);
             return;
         }
@@ -3944,7 +3956,6 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 ? ((WindowContainer) newParent).getDisplayContent() : null;
         final DisplayContent oldDisplay = oldParent != null
                 ? ((WindowContainer) oldParent).getDisplayContent() : null;
-
         super.onParentChanged(newParent, oldParent);
 
         if (display != null && inSplitScreenPrimaryWindowingMode()
@@ -3962,6 +3973,11 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         // the prevous display.
         if (oldDisplay != null && oldDisplay.isRemoving()) {
             postReparent();
+        }
+        if (mTile != null && getSurfaceControl() != null) {
+            // by now, the TaskStack should already have been reparented, so we can reparent its
+            // surface here
+            reparentSurfaceControl(getPendingTransaction(), mTile.getSurfaceControl());
         }
     }
 
@@ -4000,7 +4016,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     @Override
     void getRelativeDisplayedPosition(Point outPos) {
-        super.getRelativeDisplayedPosition(outPos);
+        // check for tile which is "virtually" a parent.
+        if (mTile != null) {
+            final Rect dispBounds = getDisplayedBounds();
+            outPos.set(dispBounds.left, dispBounds.top);
+            final Rect parentBounds = mTile.getBounds();
+            outPos.offset(-parentBounds.left, -parentBounds.top);
+        } else {
+            super.getRelativeDisplayedPosition(outPos);
+        }
+
         final int outset = getStackOutset();
         outPos.x -= outset;
         outPos.y -= outset;
@@ -4008,6 +4033,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     private void updateSurfaceSize(SurfaceControl.Transaction transaction) {
         if (mSurfaceControl == null) {
+            return;
+        }
+        if (mTile != null) {
+            // Tile controls crop, so the app needs to be able to draw its background outside of
+            // the stack bounds for when the tile crop gets bigger than the stack.
+            if (mLastSurfaceSize.equals(0, 0)) {
+                return;
+            }
+            transaction.setWindowCrop(mSurfaceControl, null);
+            mLastSurfaceSize.set(0, 0);
             return;
         }
 
@@ -4033,6 +4068,9 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
+        if (mTile != null && dc != mTile.getDisplay()) {
+            mTile.removeChild(this);
+        }
         super.onDisplayChanged(dc);
         if (isRootTask()) {
             updateSurfaceBounds();
@@ -4846,6 +4884,42 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     boolean shouldSleepOrShutDownActivities() {
         return shouldSleepActivities() || mAtmService.mShuttingDown;
+    }
+
+    TaskTile getTile() {
+        return mTile;
+    }
+
+    /**
+     * Don't call this directly. instead use {@link TaskTile#addChild} or
+     * {@link TaskTile#removeChild}.
+     */
+    void setTile(TaskTile tile) {
+        TaskTile origTile = mTile;
+        mTile = tile;
+        final ConfigurationContainer parent = getParent();
+        if (parent != null) {
+            onConfigurationChanged(parent.getConfiguration());
+        }
+
+        // Reparent to tile surface or back to original parent
+        if (getSurfaceControl() == null) {
+            return;
+        }
+        if (mTile != null) {
+            reparentSurfaceControl(getPendingTransaction(), mTile.getSurfaceControl());
+        } else if (mTile == null && origTile != null) {
+            reparentSurfaceControl(getPendingTransaction(), getParentSurfaceControl());
+        }
+    }
+
+    @Override
+    void removeImmediately() {
+        // TODO(task-hierarchy): remove this override when tiles are in hierarchy
+        if (mTile != null) {
+            mTile.removeChild(this);
+        }
+        super.removeImmediately();
     }
 
     @Override

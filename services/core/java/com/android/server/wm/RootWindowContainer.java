@@ -1012,6 +1012,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         mWmService.scheduleAnimationLocked();
 
+        // Send any pending task-info changes that were queued-up during a layout deferment
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
+
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
                 "performSurfacePlacementInner exit: animating="
                         + mWmService.mAnimator.isAnimating());
@@ -2958,6 +2961,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             case ACTIVITY_TYPE_HOME: return r.isActivityTypeHome();
             case ACTIVITY_TYPE_RECENTS: return r.isActivityTypeRecents();
             case ACTIVITY_TYPE_ASSISTANT: return r.isActivityTypeAssistant();
+        }
+        // TODO(task-hierarchy): Find another way to differentiate tile from normal stack once it is
+        //                       part of the hierarchy
+        if (stack instanceof TaskTile) {
+            // Don't launch directly into tiles.
+            return false;
         }
         // There is a 1-to-1 relationship between stack and task when not in
         // primary split-windowing mode.

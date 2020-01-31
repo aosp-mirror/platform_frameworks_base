@@ -86,6 +86,17 @@ public class WindowContainerTransaction implements Parcelable {
         return this;
     }
 
+    /**
+     * Set the smallestScreenWidth of a container.
+     */
+    public WindowContainerTransaction setSmallestScreenWidthDp(IWindowContainer container,
+            int widthDp) {
+        Change cfg = getOrCreateChange(container.asBinder());
+        cfg.mConfiguration.smallestScreenWidthDp = widthDp;
+        cfg.mConfigSetMask |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+        return this;
+    }
+
     public Map<IBinder, Change> getChanges() {
         return mChanges;
     }

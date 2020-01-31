@@ -144,6 +144,7 @@ import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.INotificationManager;
 import android.app.IRequestFinishCallback;
+import android.app.ITaskOrganizerController;
 import android.app.ITaskStackListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -225,10 +226,8 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
-import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
-import android.view.WindowContainerTransaction;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -292,7 +291,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -343,10 +341,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
     /** This activity is being relaunched due to a free-resize operation. */
     public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
-
-    /** Flag indicating that an applied transaction may have effected lifecycle */
-    private static final int TRANSACT_EFFECTS_CLIENT_CONFIG = 1;
-    private static final int TRANSACT_EFFECTS_LIFECYCLE = 1 << 1;
 
     Context mContext;
 
@@ -669,8 +663,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /**
      * Stores the registration and state of TaskOrganizers in use.
      */
-    TaskOrganizerController mTaskOrganizerController =
-        new TaskOrganizerController(this, mGlobalLock);
+    TaskOrganizerController mTaskOrganizerController = new TaskOrganizerController(this);
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
@@ -1283,15 +1276,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setActivityOptions(bOptions)
                 .setUserId(userId)
                 .execute();
-    }
-
-    @Override
-    public final void registerTaskOrganizer(ITaskOrganizer organizer, int windowingMode) {
-        enforceCallerIsRecentsOrHasPermission(
-                MANAGE_ACTIVITY_STACKS, "registerTaskOrganizer()");
-        synchronized (mGlobalLock) {
-            mTaskOrganizerController.registerTaskOrganizer(organizer, windowingMode);
-        }
     }
 
     @Override
@@ -3304,116 +3288,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private int sanitizeAndApplyChange(WindowContainer container,
-            WindowContainerTransaction.Change change) {
-        if (!(container instanceof Task || container instanceof ActivityStack)) {
-            throw new RuntimeException("Invalid token in task transaction");
-        }
-        // The "client"-facing API should prevent bad changes; however, just in case, sanitize
-        // masks here.
-        int configMask = change.getConfigSetMask();
-        int windowMask = change.getWindowSetMask();
-        configMask &= ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-        windowMask &= WindowConfiguration.WINDOW_CONFIG_BOUNDS;
-        int effects = 0;
-        if (configMask != 0) {
-            Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
-            c.setTo(change.getConfiguration(), configMask, windowMask);
-            container.onRequestedOverrideConfigurationChanged(c);
-            // TODO(b/145675353): remove the following once we could apply new bounds to the
-            // pinned stack together with its children.
-            resizePinnedStackIfNeeded(container, configMask, windowMask, c);
-            effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
-        }
-        if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_FOCUSABLE) != 0) {
-            if (container.setFocusable(change.getFocusable())) {
-                effects |= TRANSACT_EFFECTS_LIFECYCLE;
-            }
-        }
-        return effects;
-    }
-
-    private void resizePinnedStackIfNeeded(ConfigurationContainer container, int configMask,
-            int windowMask, Configuration config) {
-        if ((container instanceof ActivityStack)
-                && ((configMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0)
-                && ((windowMask & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)) {
-            final ActivityStack stack = (ActivityStack) container;
-            if (stack.inPinnedWindowingMode()) {
-                stack.resize(config.windowConfiguration.getBounds(),
-                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        PRESERVE_WINDOWS, true /* deferResume */);
-            }
-        }
-    }
-
-    private int applyWindowContainerChange(WindowContainer wc,
-            WindowContainerTransaction.Change c) {
-        int effects = sanitizeAndApplyChange(wc, c);
-
-        Rect enterPipBounds = c.getEnterPipBounds();
-        if (enterPipBounds != null) {
-            Task tr = (Task) wc;
-            mStackSupervisor.updatePictureInPictureMode(tr,
-                    enterPipBounds, true);
-        }
-        return effects;
-    }
-
-    @Override
-    public void applyContainerTransaction(WindowContainerTransaction t) {
-        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "applyContainerTransaction()");
-        if (t == null) {
-            return;
-        }
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                int effects = 0;
-                deferWindowLayout();
-                try {
-                    ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
-                    Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
-                            t.getChanges().entrySet().iterator();
-                    while (entries.hasNext()) {
-                        final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
-                                entries.next();
-                        final WindowContainer wc = WindowContainer.RemoteToken.fromBinder(
-                                entry.getKey()).getContainer();
-                        int containerEffect = applyWindowContainerChange(wc, entry.getValue());
-                        effects |= containerEffect;
-                        // Lifecycle changes will trigger ensureConfig for everything.
-                        if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
-                                && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
-                            haveConfigChanges.add(wc);
-                        }
-                    }
-                    if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
-                        // Already calls ensureActivityConfig
-                        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
-                    } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
-                        final PooledConsumer f = PooledLambda.obtainConsumer(
-                                ActivityRecord::ensureActivityConfiguration,
-                                PooledLambda.__(ActivityRecord.class), 0,
-                                false /* preserveWindow */);
-                        try {
-                            for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
-                                haveConfigChanges.valueAt(i).forAllActivities(f);
-                            }
-                        } finally {
-                            f.recycle();
-                        }
-                    }
-                } finally {
-                    continueWindowLayout();
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     @Override
     public boolean releaseActivityInstance(IBinder token) {
         synchronized (mGlobalLock) {
@@ -4440,6 +4314,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public ITaskOrganizerController getTaskOrganizerController() {
+        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS,
+                "getTaskOrganizerController()");
+        return mTaskOrganizerController;
     }
 
     /**

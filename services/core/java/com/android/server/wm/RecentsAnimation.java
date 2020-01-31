@@ -388,11 +388,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     // surfaces needs to be done immediately.
                     mWindowManager.executeAppTransition();
 
-                    // After reordering the stacks, reset the minimized state. At this point, either
-                    // the target activity is now top-most and we will stay minimized (if in
-                    // split-screen), or we will have returned to the app, and the minimized state
-                    // should be reset
-                    mWindowManager.checkSplitScreenMinimizedChanged(true /* animate */);
+                    if (targetStack.getTile() != null) {
+                        // Client state may have changed during the recents animation, so force
+                        // send task info so the client can synchronize its state.
+                        mService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                                targetStack.mTile, true /* force */);
+                    }
                 } catch (Exception e) {
                     Slog.e(TAG, "Failed to clean up recents activity", e);
                     throw e;
