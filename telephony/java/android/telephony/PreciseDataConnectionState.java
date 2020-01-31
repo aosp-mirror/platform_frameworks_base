@@ -135,11 +135,12 @@ public final class PreciseDataConnectionState implements Parcelable {
     }
 
     /**
-     * To check the SDK version for {@link PreciseDataConnectionState#getDataConnectionState}.
+     * Used for checking if the SDK version for
+     * {@code PreciseDataConnectionState#getDataConnectionState} is above Q.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long GET_DATA_CONNECTION_STATE_CODE_CHANGE = 147600208L;
+    private static final long GET_DATA_CONNECTION_STATE_R_VERSION = 148535736L;
 
     /**
      * Returns the state of data connection that supported the apn types returned by
@@ -152,7 +153,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     @SystemApi
     public @DataState int getDataConnectionState() {
         if (mState == TelephonyManager.DATA_DISCONNECTING
-                && !Compatibility.isChangeEnabled(GET_DATA_CONNECTION_STATE_CODE_CHANGE)) {
+                && !Compatibility.isChangeEnabled(GET_DATA_CONNECTION_STATE_R_VERSION)) {
             return TelephonyManager.DATA_CONNECTED;
         }
 
