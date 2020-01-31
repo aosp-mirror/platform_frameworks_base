@@ -21030,7 +21030,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
-                mContext.getContentResolver(), UserHandle.USER_SYSTEM);
+                UserHandle.USER_SYSTEM, mContext);
 
         disableSkuSpecificApps();
 

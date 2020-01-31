@@ -18,16 +18,18 @@ package com.android.internal.telephony;
 
 import android.annotation.Nullable;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Log;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -75,7 +77,7 @@ public final class CarrierAppUtils {
      */
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
             IPackageManager packageManager, TelephonyManager telephonyManager,
-            ContentResolver contentResolver, int userId) {
+            int userId, Context context) {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
@@ -84,6 +86,7 @@ public final class CarrierAppUtils {
                 config.getDisabledUntilUsedPreinstalledCarrierApps();
         ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
                 config.getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+        ContentResolver contentResolver = getContentResolverForUser(context, userId);
         disableCarrierAppsUntilPrivileged(callingPackage, packageManager, telephonyManager,
                 contentResolver, userId, systemCarrierAppsDisabledUntilUsed,
                 systemCarrierAssociatedAppsDisabledUntilUsed);
@@ -101,7 +104,7 @@ public final class CarrierAppUtils {
      * Manager can kill it, and this can lead to crashes as the app is in an unexpected state.
      */
     public static synchronized void disableCarrierAppsUntilPrivileged(String callingPackage,
-            IPackageManager packageManager, ContentResolver contentResolver, int userId) {
+            IPackageManager packageManager, int userId, Context context) {
         if (DEBUG) {
             Log.d(TAG, "disableCarrierAppsUntilPrivileged");
         }
@@ -112,15 +115,23 @@ public final class CarrierAppUtils {
 
         ArrayMap<String, List<String>> systemCarrierAssociatedAppsDisabledUntilUsed =
                 config.getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+        ContentResolver contentResolver = getContentResolverForUser(context, userId);
         disableCarrierAppsUntilPrivileged(callingPackage, packageManager,
                 null /* telephonyManager */, contentResolver, userId,
                 systemCarrierAppsDisabledUntilUsed, systemCarrierAssociatedAppsDisabledUntilUsed);
+    }
+
+    private static ContentResolver getContentResolverForUser(Context context, int userId) {
+        Context userContext = context.createContextAsUser(UserHandle.getUserHandleForUid(userId),
+                0);
+        return userContext.getContentResolver();
     }
 
     /**
      * Disable carrier apps until they are privileged
      * Must be public b/c framework unit tests can't access package-private methods.
      */
+    // Must be public b/c framework unit tests can't access package-private methods.
     @VisibleForTesting
     public static void disableCarrierAppsUntilPrivileged(String callingPackage,
             IPackageManager packageManager, @Nullable TelephonyManager telephonyManager,
@@ -139,9 +150,8 @@ public final class CarrierAppUtils {
                 systemCarrierAssociatedAppsDisabledUntilUsed);
 
         List<String> enabledCarrierPackages = new ArrayList<>();
-
-        boolean hasRunOnce = Settings.Secure.getIntForUser(
-                contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 0, userId) == 1;
+        boolean hasRunOnce = Settings.Secure.getInt(contentResolver,
+                Settings.Secure.CARRIER_APPS_HANDLED, 0) == 1;
 
         try {
             for (ApplicationInfo ai : candidates) {
@@ -256,8 +266,7 @@ public final class CarrierAppUtils {
 
             // Mark the execution so we do not disable apps again.
             if (!hasRunOnce) {
-                Settings.Secure.putIntForUser(
-                        contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 1, userId);
+                Settings.Secure.putInt(contentResolver, Settings.Secure.CARRIER_APPS_HANDLED, 1);
             }
 
             if (!enabledCarrierPackages.isEmpty()) {
