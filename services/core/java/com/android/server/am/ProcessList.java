@@ -1572,8 +1572,11 @@ public final class ProcessList {
         if (userGid != UserHandle.ERR_GID) {
             gidList.add(userGid);
         }
-        if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE
+                || mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
             // For DownloadProviders and MTP: To grant access to /sdcard/Android/
+            // And a special case for the FUSE daemon since it runs an MTP server and should have
+            // access to Android/
             gidList.add(UserHandle.getUid(UserHandle.getUserId(uid), Process.SDCARD_RW_GID));
         }
         if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
