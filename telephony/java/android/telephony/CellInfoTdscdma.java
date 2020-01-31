@@ -16,11 +16,11 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.telephony.Rlog;
 
 import java.util.Objects;
 

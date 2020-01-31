@@ -16,14 +16,13 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.IntDef;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
