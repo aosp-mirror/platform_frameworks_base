@@ -421,6 +421,7 @@ public class BiometricServiceTest {
     public void testAuthenticate_noBiometrics_credentialAllowed() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
                 true /* requireConfirmation */,
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
@@ -464,6 +465,22 @@ public class BiometricServiceTest {
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
         verify(mReceiver1).onAuthenticationSucceeded(
                 BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
+    }
+
+    @Test
+    public void testAuthenticate_no_Biometrics_noCredential() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                true /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_STRONG);
+        waitForIdle();
+
+        verify(mReceiver1).onError(anyInt() /* modality */,
+                eq(BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS)/* error */,
+                eq(0) /* vendorCode */);
     }
 
     @Test
@@ -1216,7 +1233,8 @@ public class BiometricServiceTest {
         when(mDevicePolicyManager
                 .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
                 .thenReturn(~DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
-        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1,
+                Authenticators.BIOMETRIC_STRONG);
         waitForIdle();
         assertEquals(mBiometricService.mPendingAuthSession.mState,
                 BiometricService.STATE_AUTH_CALLED);
@@ -1233,7 +1251,8 @@ public class BiometricServiceTest {
         when(mDevicePolicyManager
                 .getKeyguardDisabledFeatures(any() /* admin*/, anyInt() /* userHandle */))
                 .thenReturn(~DevicePolicyManager.KEYGUARD_DISABLE_FACE);
-        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1,
+                Authenticators.BIOMETRIC_STRONG);
         waitForIdle();
         assertEquals(mBiometricService.mPendingAuthSession.mState,
                 BiometricService.STATE_AUTH_CALLED);
@@ -1247,27 +1266,24 @@ public class BiometricServiceTest {
     public void testWorkAuthentication_fingerprintFailsIfDisabledByDevicePolicyManager()
             throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
         when(mDevicePolicyManager
                 .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
-        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
-        waitForIdle();
-        assertNotNull(mBiometricService.mCurrentAuthSession);
-        assertEquals(mBiometricService.mCurrentAuthSession.mState,
-                BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL);
-    }
 
-    @Test
-    public void testWorkAuthentication_faceFailsIfDisabledByDevicePolicyManager() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
-        when(mDevicePolicyManager
-                .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
-                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FACE);
-        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1,
+                Authenticators.BIOMETRIC_STRONG);
+        waitForIdle();
+        verify(mReceiver1).onError(eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE), eq(0) /* vendorCode */);
+
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver2,
+                Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL);
         waitForIdle();
         assertNotNull(mBiometricService.mCurrentAuthSession);
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL);
+        verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
     }
 
     // Helper methods
@@ -1376,32 +1392,34 @@ public class BiometricServiceTest {
                 0 /* userId */,
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
-                createTestBiometricPromptBundle(requireConfirmation, authenticators));
+                createTestBiometricPromptBundle(requireConfirmation, authenticators,
+                        false /* checkDevicePolicy */));
     }
 
     private static void invokeAuthenticateForWorkApp(IBiometricService.Stub service,
-            IBiometricServiceReceiver receiver) throws Exception {
-        final Bundle bundle = new Bundle();
-        bundle.putBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, true);
-        bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true);
-        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
+            IBiometricServiceReceiver receiver, Integer authenticators) throws Exception {
         service.authenticate(
                 new Binder() /* token */,
                 0 /* sessionId */,
                 0 /* userId */,
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
-                bundle);
+                createTestBiometricPromptBundle(false /* requireConfirmation */, authenticators,
+                        true /* checkDevicePolicy */));
     }
 
     private static Bundle createTestBiometricPromptBundle(
             boolean requireConfirmation,
-            Integer authenticators) {
+            Integer authenticators,
+            boolean checkDevicePolicy) {
         final Bundle bundle = new Bundle();
         bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, requireConfirmation);
 
         if (authenticators != null) {
             bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+        }
+        if (checkDevicePolicy) {
+            bundle.putBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, true);
         }
         return bundle;
     }

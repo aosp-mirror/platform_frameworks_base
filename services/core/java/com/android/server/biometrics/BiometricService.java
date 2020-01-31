@@ -707,7 +707,6 @@ public class BiometricService extends SystemService {
                 checkPermission();
             }
 
-
             if (!Utils.isValidAuthenticatorConfig(authenticators)) {
                 throw new SecurityException("Invalid authenticator configuration");
             }
@@ -720,19 +719,6 @@ public class BiometricService extends SystemService {
             try {
                 biometricConstantsResult = checkAndGetAuthenticators(userId, bundle, opPackageName,
                         false /* checkDevicePolicyManager */).second;
-                if (biometricConstantsResult != BiometricConstants.BIOMETRIC_SUCCESS
-                        && Utils.isDeviceCredentialAllowed(bundle)) {
-                    // If there's an issue with biometrics, but device credential is allowed and
-                    // set up, return SUCCESS. If device credential isn't set up either, return
-                    // ERROR_NO_DEVICE_CREDENTIAL.
-                    if (mTrustManager.isDeviceSecure(userId)) {
-                        biometricConstantsResult = BiometricConstants.BIOMETRIC_SUCCESS;
-                    } else {
-                        biometricConstantsResult =
-                                BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL;
-                    }
-                }
-
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             } finally {
@@ -1022,9 +1008,8 @@ public class BiometricService extends SystemService {
     }
 
     /**
-     * Checks if there are any available biometrics, and returns the modality. This method also
-     * returns errors through the callback (no biometric feature, hardware not detected, no
-     * templates enrolled, etc). This service must not start authentication if errors are sent.
+     * Depending on the requested authentication (credential/biometric combination), checks their
+     * availability.
      *
      * @param userId the user to check for
      * @param bundle passed from {@link BiometricPrompt}
@@ -1037,24 +1022,27 @@ public class BiometricService extends SystemService {
      * {@link BiometricAuthenticator#TYPE_FACE}
      * and the error containing one of the {@link BiometricConstants} errors.
      *
-     * TODO(kchyn): Update this to handle DEVICE_CREDENTIAL better, reduce duplicate code in callers
+     * TODO(kchyn) should return Pair<Integer, Integer> with `first` being an actual bitfield
+     * taking BiometricAuthenticator#TYPE_CREDENTIAL as well.
+     *
      */
     private Pair<Integer, Integer> checkAndGetAuthenticators(int userId, Bundle bundle,
             String opPackageName, boolean checkDevicePolicyManager) throws RemoteException {
-        if (!Utils.isBiometricAllowed(bundle)
-                && Utils.isDeviceCredentialAllowed(bundle)
-                && !mTrustManager.isDeviceSecure(userId)) {
-            // If only device credential is being checked, and the user doesn't have one set up
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL);
-        }
 
-        // Assuming that authenticators are listed in priority-order, the rest of this function
-        // will attempt to find the first authenticator that's as strong or stronger than the
-        // requested strength, available, enrolled, and enabled. The tricky part is returning the
-        // correct error. Error strings that are modality-specific should also respect the
+        final boolean biometricRequested = Utils.isBiometricAllowed(bundle);
+        final boolean credentialRequested = Utils.isDeviceCredentialAllowed(bundle);
+
+        final boolean biometricOk;
+        final boolean credentialOk = mTrustManager.isDeviceSecure(userId);
+
+        // Assuming that biometric authenticators are listed in priority-order, the rest of this
+        // function will attempt to find the first authenticator that's as strong or stronger than
+        // the requested strength, available, enrolled, and enabled. The tricky part is returning
+        // the correct error. Error strings that are modality-specific should also respect the
         // priority-order.
 
-        // Find first authenticator that's strong enough, detected, enrolled, and enabled.
+        // Find first biometric authenticator that's strong enough, detected, enrolled, and enabled.
+        boolean disabledByDevicePolicy = false;
         boolean hasSufficientStrength = false;
         boolean isHardwareDetected = false;
         boolean hasTemplatesEnrolled = false;
@@ -1065,52 +1053,96 @@ public class BiometricService extends SystemService {
         for (AuthenticatorWrapper authenticator : mAuthenticators) {
             final int actualStrength = authenticator.getActualStrength();
             final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
-            if (Utils.isAtLeastStrength(actualStrength, requestedStrength)) {
-                hasSufficientStrength = true;
-                modality = authenticator.modality;
-                if (authenticator.impl.isHardwareDetected(opPackageName)) {
-                    isHardwareDetected = true;
-                    if (firstHwAvailable == TYPE_NONE) {
-                        // Store the first one since we want to return the error in correct
-                        // priority order.
-                        firstHwAvailable = modality;
-                    }
-                    if (authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
-                        hasTemplatesEnrolled = true;
-                        // If the device policy manager disables a specific biometric, skip it.
-                        if (checkDevicePolicyManager &&
-                                isBiometricDisabledByDevicePolicy(modality, userId)) {
-                            continue;
-                        }
-                        if (isEnabledForApp(modality, userId)) {
-                            enabledForApps = true;
-                            break;
-                        }
-                    }
-                }
+
+            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
+                disabledByDevicePolicy = true;
+                continue;
             }
+            disabledByDevicePolicy = false;
+
+            if (!Utils.isAtLeastStrength(actualStrength, requestedStrength)) {
+                continue;
+            }
+            hasSufficientStrength = true;
+
+            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
+                continue;
+            }
+            isHardwareDetected = true;
+
+            if (firstHwAvailable == TYPE_NONE) {
+                // Store the first one since we want to return the error in correct
+                // priority order.
+                firstHwAvailable = authenticator.modality;
+            }
+
+            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
+                continue;
+            }
+            hasTemplatesEnrolled = true;
+
+            if (!isEnabledForApp(authenticator.modality, userId)) {
+                continue;
+            }
+            enabledForApps = true;
+            modality = authenticator.modality;
+            break;
         }
+
+        biometricOk = !disabledByDevicePolicy
+                && hasSufficientStrength && isHardwareDetected
+                && hasTemplatesEnrolled && enabledForApps;
 
         Slog.d(TAG, "checkAndGetAuthenticators: user=" + userId
                 + " checkDevicePolicyManager=" + checkDevicePolicyManager
                 + " isHardwareDetected=" + isHardwareDetected
                 + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
-                + " enabledForApps=" + enabledForApps);
+                + " enabledForApps=" + enabledForApps
+                + " disabledByDevicePolicy=" + disabledByDevicePolicy);
 
-        // Check error conditions
-        if (!hasSufficientStrength) {
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
-        } else if (!isHardwareDetected) {
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
-        } else if (!hasTemplatesEnrolled) {
-            // Return the modality here so the correct error string can be sent. This error is
-            // preferred over !enabledForApps
-            return new Pair<>(firstHwAvailable, BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
-        } else if (!enabledForApps) {
+        if (biometricRequested && credentialRequested) {
+            if (credentialOk || biometricOk) {
+                if (!biometricOk) {
+                    // If there's a problem with biometrics but device credential is
+                    // allowed, only show credential UI.
+                    bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                            Authenticators.DEVICE_CREDENTIAL);
+                }
+                return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
+            } else {
+                return new Pair<>(firstHwAvailable,
+                        BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
+            }
+        } else if (biometricRequested) {
+            if (biometricOk) {
+                return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
+            } else if (disabledByDevicePolicy) {
+                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            } else if (!hasSufficientStrength) {
+                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
+            } else if (!isHardwareDetected) {
+                return new Pair<>(firstHwAvailable,
+                        BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            } else if (!hasTemplatesEnrolled) {
+                return new Pair<>(firstHwAvailable,
+                        BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
+            } else if (!enabledForApps) {
+                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            } else {
+                Slog.e(TAG, "Unexpected case");
+                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            }
+        } else if (credentialRequested) {
+            if (credentialOk) {
+                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_SUCCESS);
+            } else {
+                return new Pair<>(TYPE_NONE,
+                        BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL);
+            }
+        } else {
+            Slog.e(TAG, "No authenticators requested");
             return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
         }
-
-        return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
     }
 
     private boolean isEnabledForApp(int modality, int userId) {
@@ -1549,41 +1581,19 @@ public class BiometricService extends SystemService {
             int callingUid, int callingPid, int callingUserId) {
 
         mHandler.post(() -> {
-            int modality = TYPE_NONE;
-            int result;
-
             try {
                 final boolean checkDevicePolicyManager = bundle.getBoolean(
                         BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, false);
                 final Pair<Integer, Integer> pair = checkAndGetAuthenticators(userId, bundle,
                         opPackageName, checkDevicePolicyManager);
-                modality = pair.first;
-                result = pair.second;
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-                result = BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
-            }
+                final int modality = pair.first;
+                final int result = pair.second;
 
-            try {
-                if (result == BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL) {
-                    // If the app allowed device credential but the user hasn't set it up yet,
-                    // return this error.
-                    receiver.onError(modality, result, 0 /* vendorCode */);
-                } else if (result != BiometricConstants.BIOMETRIC_SUCCESS) {
-                    if (Utils.isDeviceCredentialAllowed(bundle)) {
-                        // If there's a problem with biometrics but device credential is allowed,
-                        // only show credential UI.
-                        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                                Authenticators.DEVICE_CREDENTIAL);
-                        authenticateInternal(token, sessionId, userId, receiver, opPackageName,
-                                bundle, callingUid, callingPid, callingUserId, modality);
-                    } else {
-                        receiver.onError(modality, result, 0 /* vendorCode */);
-                    }
+                if (result == BiometricConstants.BIOMETRIC_SUCCESS) {
+                    authenticateInternal(token, sessionId, userId, receiver, opPackageName,
+                            bundle, callingUid, callingPid, callingUserId, modality);
                 } else {
-                    // BIOMETRIC_SUCCESS, proceed to authentication
-                    authenticateInternal(token, sessionId, userId, receiver, opPackageName, bundle,
-                            callingUid, callingPid, callingUserId, modality);
+                    receiver.onError(modality, result, 0 /* vendorCode */);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
