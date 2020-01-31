@@ -79,7 +79,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
@@ -139,7 +138,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private RowInflaterTask mAsyncInflationTask;
-    @Mock private NotifLog mNotifLog;
+    @Mock private NotificationEntryManagerLogger mLogger;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private LeakDetector mLeakDetector;
     @Mock private ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -234,14 +233,14 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(false);
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
         mEntryManager = new TestableNotificationEntryManager(
-                mNotifLog,
+                mLogger,
                 mGroupManager,
                 new NotificationRankingManager(
                         () -> mock(NotificationMediaManager.class),
                         mGroupManager,
                         mHeadsUpManager,
                         mock(NotificationFilter.class),
-                        mNotifLog,
+                        mLogger,
                         mock(NotificationSectionsFeatureManager.class),
                         mock(PeopleNotificationIdentifier.class),
                         mock(HighPriorityProvider.class)),
