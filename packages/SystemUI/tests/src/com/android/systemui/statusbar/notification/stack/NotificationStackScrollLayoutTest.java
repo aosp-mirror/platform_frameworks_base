@@ -54,6 +54,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -130,6 +131,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private ZenModeController mZenModeController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
+    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    private UserChangedListener mUserChangedListener;
     private TestableNotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
 
@@ -156,6 +159,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectMockDependency(ShadeController.class);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
+        ArgumentCaptor<UserChangedListener> userChangedCaptor = ArgumentCaptor
+                .forClass(UserChangedListener.class);
         mEntryManager = new TestableNotificationEntryManager(
                 mock(NotifLog.class),
                 mock(NotificationGroupManager.class),
@@ -195,10 +200,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mKeyguardBypassController,
                 new FalsingManagerFake(),
-                mock(NotificationLockscreenUserManager.class),
+                mLockscreenUserManager,
                 mock(NotificationGutsManager.class),
                 mZenModeController,
                 mNotificationSectionsManager);
+        verify(mLockscreenUserManager).addUserChangedListener(userChangedCaptor.capture());
+        mUserChangedListener = userChangedCaptor.getValue();
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);
@@ -276,6 +283,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         mStackScroller.setExpandedHeight(100f);
         verify(mBlockingHelperManager).setNotificationShadeExpanded(100f);
+    }
+
+    @Test
+    public void testOnStatePostChange_verifyIfProfileIsPublic() {
+        mUserChangedListener.onUserChanged(0);
+        verify(mLockscreenUserManager).isAnyProfilePublicMode();
     }
 
     @Test
