@@ -1899,6 +1899,8 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get the network registration state for the transport type and network domain.
+     * If multiple domains are in the input bitmask, only the first one from
+     * networkRegistrationInfo.getDomain() will be returned.
      *
      * @param domain The network {@link NetworkRegistrationInfo.Domain domain}
      * @param transportType The transport type
