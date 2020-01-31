@@ -71,7 +71,9 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.CallForwardingReason;
 import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.CallWaitingStatus;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
@@ -12197,6 +12199,191 @@ public class TelephonyManager {
             if (!isSystemProcess()) {
                 ex.rethrowAsRuntimeException();
             }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the voice call forwarding info {@link CallForwardingInfo}, given the call forward
+     * reason.
+     *
+     * @param callForwardingReason the call forwarding reasons
+     *
+     * @throws IllegalArgumentException if callForwardingReason is not any of
+     * {@link CallForwardingInfo.REASON_UNCONDITIONAL}, {@link CallForwardingInfo.REASON_BUSY},
+     * {@link CallForwardingInfo.REASON_NO_REPLY}, {@link CallForwardingInfo.REASON_NOT_REACHABLE},
+     * {@link CallForwardingInfo.REASON_ALL}, {@link CallForwardingInfo.REASON_ALL_CONDITIONAL}
+     *
+     * @return {@link CallForwardingInfo} with the status {@link CallForwardingInfo#STATUS_ACTIVE}
+     * or {@link CallForwardingInfo#STATUS_INACTIVE} and the target phone number to forward calls
+     * to, if it's available. Otherwise, it will return a {@link CallForwardingInfo} with status
+     * {@link CallForwardingInfo#STATUS_UNKNOWN_ERROR},
+     * {@link CallForwardingInfo#STATUS_NOT_SUPPORTED},
+     * or {@link CallForwardingInfo#STATUS_FDN_CHECK_FAILURE} depending on the situation.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public CallForwardingInfo getCallForwarding(@CallForwardingReason int callForwardingReason) {
+        if (callForwardingReason < CallForwardingInfo.REASON_UNCONDITIONAL
+                || callForwardingReason > CallForwardingInfo.REASON_ALL_CONDITIONAL) {
+            throw new IllegalArgumentException("callForwardingReason is out of range");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCallForwarding(getSubId(), callForwardingReason);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCallForwarding RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCallForwarding NPE", ex);
+        }
+        return new CallForwardingInfo(
+                CallForwardingInfo.STATUS_UNKNOWN_ERROR, 0 /* reason */, null /* number */,
+                        0 /* timeout */);
+    }
+
+    /**
+     * Sets the voice call forwarding info including status (enable/disable), call forwarding
+     * reason, the number to forward, and the timeout before the forwarding is attempted.
+     *
+     * @param callForwardingInfo {@link CallForwardingInfo} to setup the call forwarding.
+     * Enabling if {@link CallForwardingInfo#getStatus()} returns
+     * {@link CallForwardingInfo#STATUS_ACTIVE}; Disabling if
+     * {@link CallForwardingInfo#getStatus()} returns {@link CallForwardingInfo#STATUS_INACTIVE}.
+     *
+     * @throws IllegalArgumentException if any of the following for parameter callForwardingInfo:
+     * 0) it is {@code null}.
+     * 1) {@link CallForwardingInfo#getStatus()} returns neither
+     * {@link CallForwardingInfo#STATUS_ACTIVE} nor {@link CallForwardingInfo#STATUS_INACTIVE}.
+     * 2) {@link CallForwardingInfo#getReason()} is not any of
+     * {@link CallForwardingInfo.REASON_UNCONDITIONAL}, {@link CallForwardingInfo.REASON_BUSY},
+     * {@link CallForwardingInfo.REASON_NO_REPLY}, {@link CallForwardingInfo.REASON_NOT_REACHABLE},
+     * {@link CallForwardingInfo.REASON_ALL}, {@link CallForwardingInfo.REASON_ALL_CONDITIONAL}
+     * 3) {@link CallForwardingInfo#getNumber()} returns {@code null}.
+     * 4) {@link CallForwardingInfo#getTimeoutSeconds()} doesn't return a positive value.
+     *
+     * @return {@code true} to indicate it was set successfully; {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setCallForwarding(@NonNull CallForwardingInfo callForwardingInfo) {
+        if (callForwardingInfo == null) {
+            throw new IllegalArgumentException("callForwardingInfo is null");
+        }
+        int callForwardingStatus = callForwardingInfo.getStatus();
+        if (callForwardingStatus != CallForwardingInfo.STATUS_ACTIVE
+                && callForwardingStatus != CallForwardingInfo.STATUS_INACTIVE) {
+            throw new IllegalArgumentException(
+                    "callForwardingStatus is neither active nor inactive");
+        }
+        int callForwardingReason = callForwardingInfo.getReason();
+        if (callForwardingReason < CallForwardingInfo.REASON_UNCONDITIONAL
+                || callForwardingReason > CallForwardingInfo.REASON_ALL_CONDITIONAL) {
+            throw new IllegalArgumentException("callForwardingReason is out of range");
+        }
+        if (callForwardingInfo.getNumber() == null) {
+            throw new IllegalArgumentException("callForwarding number is null");
+        }
+        if (callForwardingInfo.getTimeoutSeconds() <= 0) {
+            throw new IllegalArgumentException("callForwarding timeout isn't positive");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setCallForwarding(getSubId(), callForwardingInfo);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setCallForwarding RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setCallForwarding NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Indicates the call waiting status is active.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_ACTIVE = 1;
+
+    /**
+     * Indicates the call waiting status is inactive.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_INACTIVE = 2;
+
+    /**
+     * Indicates the call waiting status is with an unknown error.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3;
+
+    /**
+     * Indicates the call waiting is not supported (e.g. called via CDMA).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4;
+
+    /**
+     * Gets the status of voice call waiting function. Call waiting function enables the waiting
+     * for the incoming call when it reaches the user who is busy to make another call and allows
+     * users to decide whether to switch to the incoming call.
+     *
+     * @return the status of call waiting function.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @CallWaitingStatus int getCallWaitingStatus() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCallWaitingStatus(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCallWaitingStatus RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCallWaitingStatus NPE", ex);
+        }
+        return CALL_WAITING_STATUS_UNKNOWN_ERROR;
+    }
+
+    /**
+     * Sets the status for voice call waiting function. Call waiting function enables the waiting
+     * for the incoming call when it reaches the user who is busy to make another call and allows
+     * users to decide whether to switch to the incoming call.
+     *
+     * @param isEnable {@code true} to enable; {@code false} to disable.
+     * @return {@code true} to indicate it was set successfully; {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setCallWaitingStatus(boolean isEnable) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setCallWaitingStatus(getSubId(), isEnable);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setCallWaitingStatus RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setCallWaitingStatus NPE", ex);
         }
         return false;
     }
