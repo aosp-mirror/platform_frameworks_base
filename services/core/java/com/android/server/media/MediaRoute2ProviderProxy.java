@@ -25,6 +25,7 @@ import android.media.IMediaRoute2Provider;
 import android.media.IMediaRoute2ProviderClient;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -88,6 +89,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     public void releaseSession(String sessionId) {
         if (mConnectionReady) {
             mActiveConnection.releaseSession(sessionId);
+            updateBinding();
+        }
+    }
+
+    @Override
+    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+        if (mConnectionReady) {
+            mActiveConnection.updateDiscoveryPreference(discoveryPreference);
             updateBinding();
         }
     }
@@ -458,6 +467,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                 mProvider.releaseSession(sessionId);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to release a session.", ex);
+            }
+        }
+
+        public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+            try {
+                mProvider.updateDiscoveryPreference(discoveryPreference);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "updateDiscoveryPreference(): Failed to deliver request.");
             }
         }
 

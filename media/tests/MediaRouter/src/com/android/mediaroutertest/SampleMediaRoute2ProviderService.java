@@ -155,7 +155,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
 
     @Override
     public void onUpdateVolume(String routeId, int delta) {
-        android.util.Log.d(TAG, "onUpdateVolume routeId= " + routeId + "delta=" + delta);
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null) {
             return;

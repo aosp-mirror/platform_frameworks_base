@@ -598,6 +598,9 @@ class MediaRouter2ServiceImpl {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::updateClientUsage,
                             clientRecord.mUserRecord.mHandler, clientRecord));
+            clientRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::updateDiscoveryPreference,
+                            clientRecord.mUserRecord.mHandler));
         }
     }
 
@@ -856,6 +859,7 @@ class MediaRouter2ServiceImpl {
         //TODO: make records private for thread-safety
         final ArrayList<Client2Record> mClientRecords = new ArrayList<>();
         final ArrayList<ManagerRecord> mManagerRecords = new ArrayList<>();
+        RouteDiscoveryPreference mCompositeDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
         final UserHandler mHandler;
 
         UserRecord(int userId) {
@@ -885,8 +889,6 @@ class MediaRouter2ServiceImpl {
         public final int mClientId;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
-        public boolean mIsManagerSelecting;
-        public MediaRoute2Info mSelectingRoute;
         public MediaRoute2Info mSelectedRoute;
 
         Client2Record(UserRecord userRecord, IMediaRouter2Client client,
@@ -1003,6 +1005,7 @@ class MediaRouter2ServiceImpl {
         public void onAddProvider(MediaRoute2ProviderProxy provider) {
             provider.setCallback(this);
             mMediaProviders.add(provider);
+            provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
         }
 
         @Override
@@ -1639,6 +1642,25 @@ class MediaRouter2ServiceImpl {
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to update client usage. Manager probably died.", ex);
                 }
+            }
+        }
+
+        private void updateDiscoveryPreference() {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return;
+            }
+            List<RouteDiscoveryPreference> discoveryPreferences = new ArrayList<>();
+            synchronized (service.mLock) {
+                for (Client2Record clientRecord : mUserRecord.mClientRecords) {
+                    discoveryPreferences.add(clientRecord.mDiscoveryPreference);
+                }
+                mUserRecord.mCompositeDiscoveryPreference =
+                        new RouteDiscoveryPreference.Builder(discoveryPreferences)
+                        .build();
+            }
+            for (MediaRoute2Provider provider : mMediaProviders) {
+                provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
             }
         }
 
