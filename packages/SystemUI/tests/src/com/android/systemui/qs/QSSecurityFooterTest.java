@@ -16,8 +16,11 @@ package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -445,6 +448,21 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.configSubtitleVisibility(false, false, false, true, view);
         assertEquals(View.GONE,
                 view.findViewById(R.id.vpn_subtitle).getVisibility());
+    }
+
+    @Test
+    public void testNoClickWhenGone() {
+        QSTileHost mockHost = mock(QSTileHost.class);
+        mFooter.setHostEnvironment(mockHost);
+        mFooter.refreshState();
+
+        TestableLooper.get(this).processAllMessages();
+
+        assertFalse(mFooter.hasFooter());
+        mFooter.onClick(mFooter.getView());
+
+        // Proxy for dialog being created
+        verify(mockHost, never()).collapsePanels();
     }
 
     private CharSequence addLink(CharSequence description) {

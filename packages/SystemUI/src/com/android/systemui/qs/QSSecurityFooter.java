@@ -116,6 +116,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
     @Override
     public void onClick(View v) {
+        if (!hasFooter()) return;
         mHandler.sendEmptyMessage(H.CLICK);
     }
 
