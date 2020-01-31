@@ -2162,6 +2162,33 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Fetches a list of the most recently connected bluetooth devices ordered by how recently they
+     * were connected with most recently first and least recently last
+     *
+     * @return {@link List} of bonded {@link BluetoothDevice} ordered by how recently they were
+     * connected
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public @NonNull List<BluetoothDevice> getMostRecentlyConnectedDevices() {
+        if (getState() != STATE_ON) {
+            return new ArrayList<>();
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.getMostRecentlyConnectedDevices();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
      * Return the set of {@link BluetoothDevice} objects that are bonded
      * (paired) to the local adapter.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
