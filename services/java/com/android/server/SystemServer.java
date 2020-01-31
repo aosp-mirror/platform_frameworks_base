@@ -353,6 +353,12 @@ public final class SystemServer {
      */
     private static native void initZygoteChildHeapProfiling();
 
+
+    /**
+     * Spawn a thread that monitors for fd leaks.
+     */
+    private static native void spawnFdLeakCheckThread();
+
     /**
      * The main entry point from zygote.
      */
@@ -482,6 +488,11 @@ public final class SystemServer {
             // Debug builds - allow heap profiling.
             if (Build.IS_DEBUGGABLE) {
                 initZygoteChildHeapProfiling();
+            }
+
+            // Debug builds - spawn a thread to monitor for fd leaks.
+            if (Build.IS_DEBUGGABLE) {
+                spawnFdLeakCheckThread();
             }
 
             // Check whether we failed to shut down last time we tried.
