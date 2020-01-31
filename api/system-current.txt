@@ -7562,11 +7562,11 @@ package android.net.wifi {
   @Deprecated public static class WifiConfiguration.NetworkSelectionStatus {
     method @Deprecated public int getDisableReasonCounter(int);
     method @Deprecated public long getDisableTime();
-    method @Deprecated public boolean getHasEverConnected();
     method @Deprecated @Nullable public static String getNetworkDisableReasonString(int);
     method @Deprecated public int getNetworkSelectionDisableReason();
     method @Deprecated public int getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getNetworkStatusString();
+    method @Deprecated public boolean hasEverConnected();
     method @Deprecated public boolean isNetworkEnabled();
     method @Deprecated public boolean isNetworkPermanentlyDisabled();
     field @Deprecated public static final int DISABLED_ASSOCIATION_REJECTION = 1; // 0x1

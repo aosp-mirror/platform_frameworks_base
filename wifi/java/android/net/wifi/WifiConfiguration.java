@@ -1609,7 +1609,7 @@ public class WifiConfiguration implements Parcelable {
         }
 
         /** True if the device has ever connected to this network, false otherwise. */
-        public boolean getHasEverConnected() {
+        public boolean hasEverConnected() {
             return mHasEverConnected;
         }
 
@@ -1881,7 +1881,7 @@ public class WifiConfiguration implements Parcelable {
             setCandidate(source.getCandidate());
             setCandidateScore(source.getCandidateScore());
             setConnectChoice(source.getConnectChoice());
-            setHasEverConnected(source.getHasEverConnected());
+            setHasEverConnected(source.hasEverConnected());
         }
 
         /** @hide */
@@ -1900,7 +1900,7 @@ public class WifiConfiguration implements Parcelable {
             } else {
                 dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
             }
-            dest.writeInt(getHasEverConnected() ? 1 : 0);
+            dest.writeInt(hasEverConnected() ? 1 : 0);
         }
 
         /** @hide */
@@ -2142,7 +2142,7 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
         }
         sbuf.append(" hasEverConnected: ")
-                .append(mNetworkSelectionStatus.getHasEverConnected()).append("\n");
+                .append(mNetworkSelectionStatus.hasEverConnected()).append("\n");
 
         if (this.numAssociation > 0) {
             sbuf.append(" numAssociation ").append(this.numAssociation).append("\n");
