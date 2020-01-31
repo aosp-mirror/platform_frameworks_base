@@ -56,7 +56,7 @@ public final class CountryTimeZones {
          */
         @NonNull
         public String getTimeZoneId() {
-            return mDelegate.timeZoneId;
+            return mDelegate.getTimeZoneId();
         }
 
         /**
@@ -187,7 +187,7 @@ public final class CountryTimeZones {
      * would be a good choice <em>generally</em> when there's no other information available.
      */
     public boolean isDefaultTimeZoneBoosted() {
-        return mDelegate.getDefaultTimeZoneBoost();
+        return mDelegate.isDefaultTimeZoneBoosted();
     }
 
     /**
@@ -220,7 +220,8 @@ public final class CountryTimeZones {
                 mDelegate.lookupByOffsetWithBias(
                         totalOffsetMillis, isDst, dstOffsetMillis, whenMillis, bias);
         return delegateOffsetResult == null ? null :
-                new OffsetResult(delegateOffsetResult.mTimeZone, delegateOffsetResult.mOneMatch);
+                new OffsetResult(
+                        delegateOffsetResult.getTimeZone(), delegateOffsetResult.isOnlyMatch());
     }
 
     /**
