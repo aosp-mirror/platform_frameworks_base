@@ -1691,7 +1691,7 @@ public final class ViewRootImpl implements ViewParent,
                     .build();
             setBoundsLayerCrop();
             mTransaction.show(mBoundsLayer).apply();
-        } 
+        }
        return mBoundsLayer;
     }
 
@@ -1699,7 +1699,9 @@ public final class ViewRootImpl implements ViewParent,
         if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
             return null;
         }
-        if ((mBlastBufferQueue != null) && mBlastSurfaceControl.isValid()) {
+        if ((mBlastSurfaceControl != null)
+                && (mBlastBufferQueue == null)
+                && mBlastSurfaceControl.isValid()) {
             mBlastBufferQueue = new BLASTBufferQueue(
                 mBlastSurfaceControl, width, height);
         }
