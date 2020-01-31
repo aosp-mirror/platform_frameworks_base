@@ -30,17 +30,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -59,6 +59,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
+    private final BlurUtils mBlurUtils;
     private GlobalActionsPanelPlugin mPlugin;
     private final CommandQueue mCommandQueue;
     private GlobalActionsDialog mGlobalActionsDialog;
@@ -68,13 +69,14 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
-            Lazy<GlobalActionsDialog> globalActionsDialogLazy) {
+            Lazy<GlobalActionsDialog> globalActionsDialogLazy, BlurUtils blurUtils) {
         mContext = context;
         mGlobalActionsDialogLazy = globalActionsDialogLazy;
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mPluginManager = Dependency.get(PluginManager.class);
         mCommandQueue = commandQueue;
+        mBlurUtils = blurUtils;
         mCommandQueue.addCallback(this);
         mPanelExtension = Dependency.get(ExtensionController.class)
                 .newExtension(GlobalActionsPanelPlugin.class)
@@ -110,7 +112,6 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
     @Override
     public void showShutdownUi(boolean isReboot, String reason) {
         ScrimDrawable background = new ScrimDrawable();
-        background.setAlpha((int) (SHUTDOWN_SCRIM_ALPHA * 255));
 
         Dialog d = new Dialog(mContext,
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
@@ -160,8 +161,13 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
             reasonView.setText(rebootReasonMessage);
         }
 
-        GradientColors colors = Dependency.get(SysuiColorExtractor.class).getNeutralColors();
-        background.setColor(colors.getMainColor(), false);
+        if (mBlurUtils.supportsBlursOnWindows()) {
+            background.setAlpha((int) (ScrimController.GRADIENT_SCRIM_ALPHA_BUSY * 255));
+            mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
+                        mBlurUtils.radiusForRatio(1));
+        } else {
+            background.setAlpha((int) (SHUTDOWN_SCRIM_ALPHA * 255));
+        }
 
         d.show();
     }
