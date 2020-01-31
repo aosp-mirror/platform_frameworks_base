@@ -1165,10 +1165,12 @@
     <dimen name="new_qs_vertical_margin">8dp</dimen>
 
     <!-- Size of media cards in the QSPanel carousel -->
-    <dimen name="qs_media_height">150dp</dimen>
     <dimen name="qs_media_width">350dp</dimen>
     <dimen name="qs_media_padding">8dp</dimen>
     <dimen name="qs_media_corner_radius">10dp</dimen>
+    <dimen name="qs_media_album_size">72dp</dimen>
+    <dimen name="qs_seamless_icon_size">20dp</dimen>
+    <dimen name="qqs_media_spacing">8dp</dimen>
 
     <dimen name="magnification_border_size">5dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>

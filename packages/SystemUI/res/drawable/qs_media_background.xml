@@ -14,22 +14,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
-<!-- Carousel for media controls -->
-<HorizontalScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/qs_media_padding"
-    android:scrollbars="none"
-    android:visibility="gone"
-    >
-    <LinearLayout
-        android:id="@+id/media_carousel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <!-- QSMediaPlayers will be added here dynamically -->
-    </LinearLayout>
-</HorizontalScrollView>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?android:attr/colorBackgroundFloating" />
+    <corners
+        android:bottomLeftRadius="@dimen/qs_media_corner_radius"
+        android:topLeftRadius="@dimen/qs_media_corner_radius"
+        android:bottomRightRadius="@dimen/qs_media_corner_radius"
+        android:topRightRadius="@dimen/qs_media_corner_radius"
+    />
+</shape>

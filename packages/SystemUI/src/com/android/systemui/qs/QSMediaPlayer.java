@@ -36,7 +36,6 @@ import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -45,7 +44,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
@@ -72,8 +70,6 @@ public class QSMediaPlayer {
     private View mSeamless;
     private MediaSession.Token mToken;
     private MediaController mController;
-    private int mWidth;
-    private int mHeight;
     private int mForegroundColor;
     private int mBackgroundColor;
     private ComponentName mRecvComponent;
@@ -158,16 +154,11 @@ public class QSMediaPlayer {
      *
      * @param context
      * @param parent
-     * @param width
-     * @param height
      */
-    public QSMediaPlayer(Context context, ViewGroup parent, int width, int height) {
+    public QSMediaPlayer(Context context, ViewGroup parent) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(R.layout.qs_media_panel, parent, false);
-
-        mWidth = width;
-        mHeight = height;
     }
 
     public View getView() {
@@ -217,27 +208,18 @@ public class QSMediaPlayer {
         Notification.Builder builder = Notification.Builder.recoverBuilder(mContext, notif);
 
         // Album art
-        addAlbumArtBackground(mMediaMetadata, bgColor, mWidth, mHeight);
+        addAlbumArt(mMediaMetadata, bgColor);
 
-        // Reuse notification header instead of reimplementing everything
-        RemoteViews headerRemoteView = builder.makeNotificationHeader();
         LinearLayout headerView = mMediaNotifView.findViewById(R.id.header);
-        View result = headerRemoteView.apply(mContext, headerView);
-        result.setPadding(0, 0, 0, 0);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, 75);
-        result.setLayoutParams(lp);
-        headerView.removeAllViews();
-        headerView.addView(result);
 
         // App icon
-        ImageView appIcon = headerView.findViewById(com.android.internal.R.id.icon);
+        ImageView appIcon = headerView.findViewById(R.id.icon);
         Drawable iconDrawable = icon.loadDrawable(mContext);
         iconDrawable.setTint(iconColor);
         appIcon.setImageDrawable(iconDrawable);
 
         // App title
-        TextView appName = headerView.findViewById(com.android.internal.R.id.app_name_text);
+        TextView appName = headerView.findViewById(R.id.app_name);
         String appNameString = builder.loadHeaderAppName();
         appName.setText(appNameString);
         appName.setTextColor(iconColor);
@@ -254,25 +236,8 @@ public class QSMediaPlayer {
             }
         });
 
-        // Separator
-        TextView separator = headerView.findViewById(com.android.internal.R.id.header_text_divider);
-        separator.setTextColor(iconColor);
-
-        // Album name
-        TextView albumName = headerView.findViewById(com.android.internal.R.id.header_text);
-        String albumString = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        if (TextUtils.isEmpty(albumString)) {
-            albumName.setVisibility(View.GONE);
-            separator.setVisibility(View.GONE);
-        } else {
-            albumName.setText(albumString);
-            albumName.setTextColor(iconColor);
-            albumName.setVisibility(View.VISIBLE);
-            separator.setVisibility(View.VISIBLE);
-        }
-
         // Transfer chip
-        mSeamless = headerView.findViewById(com.android.internal.R.id.media_seamless);
+        mSeamless = headerView.findViewById(R.id.media_seamless);
         mSeamless.setVisibility(View.VISIBLE);
         updateChip(device);
         ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
@@ -284,13 +249,13 @@ public class QSMediaPlayer {
         });
 
         // Artist name
-        TextView artistText = mMediaNotifView.findViewById(R.id.header_title);
+        TextView artistText = headerView.findViewById(R.id.header_artist);
         String artistName = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
         artistText.setText(artistName);
         artistText.setTextColor(iconColor);
 
         // Song name
-        TextView titleText = mMediaNotifView.findViewById(R.id.header_text);
+        TextView titleText = headerView.findViewById(R.id.header_text);
         String songName = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
         titleText.setText(songName);
         titleText.setTextColor(iconColor);
@@ -363,34 +328,25 @@ public class QSMediaPlayer {
         return (state.getState() == PlaybackState.STATE_PLAYING);
     }
 
-    private void addAlbumArtBackground(MediaMetadata metadata, int bgColor, int width, int height) {
+    private void addAlbumArt(MediaMetadata metadata, int bgColor) {
         Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
         float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
+        ImageView albumView = mMediaNotifView.findViewById(R.id.album_art);
         if (albumArt != null) {
             Log.d(TAG, "updating album art");
             Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
-            Bitmap scaled = scaleBitmap(original, width, height);
-            Canvas canvas = new Canvas(scaled);
-
-            // Add translucent layer over album art to improve contrast
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(bgColor);
-            p.setAlpha(200);
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), p);
-
+            int albumSize = (int) mContext.getResources().getDimension(R.dimen.qs_media_album_size);
+            Bitmap scaled = scaleBitmap(original, albumSize, albumSize);
             RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(
                     mContext.getResources(), scaled);
             roundedDrawable.setCornerRadius(radius);
-
-            mMediaNotifView.setBackground(roundedDrawable);
+            albumView.setImageDrawable(roundedDrawable);
         } else {
             Log.e(TAG, "No album art available");
-            GradientDrawable rect = new GradientDrawable();
-            rect.setCornerRadius(radius);
-            rect.setColor(bgColor);
-            mMediaNotifView.setBackground(rect);
+            albumView.setImageDrawable(null);
         }
+
+        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(bgColor));
     }
 
     private Bitmap scaleBitmap(Bitmap original, int width, int height) {
@@ -423,8 +379,8 @@ public class QSMediaPlayer {
         rect.setStroke(2, mForegroundColor);
         rect.setColor(mBackgroundColor);
 
-        ImageView iconView = mSeamless.findViewById(com.android.internal.R.id.media_seamless_image);
-        TextView deviceName = mSeamless.findViewById(com.android.internal.R.id.media_seamless_text);
+        ImageView iconView = mSeamless.findViewById(R.id.media_seamless_image);
+        TextView deviceName = mSeamless.findViewById(R.id.media_seamless_text);
         deviceName.setTextColor(fgTintList);
 
         if (device != null) {

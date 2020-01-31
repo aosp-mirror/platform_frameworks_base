@@ -97,6 +97,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final ArrayList<QSMediaPlayer> mMediaPlayers = new ArrayList<>();
     private LocalMediaManager mLocalMediaManager;
     private MediaDevice mDevice;
+    private boolean mUpdateCarousel = false;
 
     protected boolean mExpanded;
     protected boolean mListening;
@@ -187,7 +188,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             HorizontalScrollView mediaScrollView = (HorizontalScrollView) LayoutInflater.from(
                     mContext).inflate(R.layout.media_carousel, this, false);
             mMediaCarousel = mediaScrollView.findViewById(R.id.media_carousel);
-            addView(mediaScrollView);
+            addView(mediaScrollView, 0);
         } else {
             mMediaCarousel = null;
         }
@@ -209,6 +210,23 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mNPVPluginManager = new NPVPluginManager(mPluginFrame, mPluginManager);
         }
 
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        if (!isVisible && mUpdateCarousel) {
+            for (QSMediaPlayer player : mMediaPlayers) {
+                if (player.isPlaying()) {
+                    LayoutParams lp = (LayoutParams) player.getView().getLayoutParams();
+                    mMediaCarousel.removeView(player.getView());
+                    mMediaCarousel.addView(player.getView(), 0, lp);
+                    ((HorizontalScrollView) mMediaCarousel.getParent()).fullScroll(View.FOCUS_LEFT);
+                    mUpdateCarousel = false;
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -248,7 +266,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             }
         }
 
-        int playerHeight = (int) getResources().getDimension(R.dimen.qs_media_height);
         int playerWidth = (int) getResources().getDimension(R.dimen.qs_media_width);
         int padding = (int) getResources().getDimension(R.dimen.qs_media_padding);
         LayoutParams lp = new LayoutParams(playerWidth, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -257,8 +274,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         if (player == null) {
             Log.d(TAG, "creating new player");
-
-            player = new QSMediaPlayer(mContext, this, playerWidth, playerHeight);
+            player = new QSMediaPlayer(mContext, this);
 
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front
@@ -267,9 +283,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             }
             mMediaPlayers.add(player);
         } else if (player.isPlaying()) {
-            // move it to the front
-            mMediaCarousel.removeView(player.getView());
-            mMediaCarousel.addView(player.getView(), 0, lp);
+            mUpdateCarousel = true;
         }
 
         Log.d(TAG, "setting player session");
