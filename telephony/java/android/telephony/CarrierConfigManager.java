@@ -2987,6 +2987,12 @@ public class CarrierConfigManager {
             "ping_test_before_data_switch_bool";
 
     /**
+     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
+     * @hide
+     */
+    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
+            "5g_watchdog_time_long";
+    /**
      * Controls whether to switch data to primary from opportunistic subscription
      * if primary is out of service. This control only affects system or 1st party app
      * initiated data switch, but will not override data switch initiated by privileged carrier apps
@@ -3033,13 +3039,6 @@ public class CarrierConfigManager {
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG =
             "opportunistic_network_max_backoff_time_long";
-
-    /**
-     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
-     * @hide
-     */
-    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
-            "5g_watchdog_time_long";
 
     /**
      * Indicates zero or more emergency number prefix(es), because some carrier requires
@@ -3862,6 +3861,8 @@ public class CarrierConfigManager {
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
+        /* Default value is 1 hour. */
+        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG, 60000);
@@ -3869,8 +3870,6 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is 1 hour. */
-        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {
