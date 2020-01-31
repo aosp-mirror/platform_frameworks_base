@@ -222,7 +222,6 @@ package android {
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String SYSTEM_CAMERA = "android.permission.SYSTEM_CAMERA";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
-    field public static final String TUNER_RESOURCE_ACCESS = "android.permission.TUNER_RESOURCE_ACCESS";
     field public static final String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
@@ -4685,7 +4684,6 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
-    method @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS) public int getClientPid(@NonNull String);
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
@@ -4697,7 +4695,6 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public void releaseTvInputHardware(int, android.media.tv.TvInputManager.Hardware);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void removeBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void setParentalControlsEnabled(boolean);
-    field public static final int UNKNOWN_CLIENT_PID = -1; // 0xffffffff
   }
 
   public static final class TvInputManager.Hardware {
