@@ -739,7 +739,7 @@ public final class ProcessList {
                         mSystemServerSocketForZygote.getFileDescriptor(),
                         EVENT_INPUT, this::handleZygoteMessages);
             }
-            mAppExitInfoTracker.init(mService, sKillThread.getLooper());
+            mAppExitInfoTracker.init(mService);
             mImperceptibleKillRunner = new ImperceptibleKillRunner(sKillThread.getLooper());
         }
     }
