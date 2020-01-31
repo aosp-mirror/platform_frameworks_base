@@ -28,12 +28,13 @@ import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
-import com.android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

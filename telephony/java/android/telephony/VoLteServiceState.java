@@ -17,11 +17,12 @@
 package android.telephony;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import com.android.telephony.Rlog;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.telephony.Rlog;
 
 /**
  * Contains LTE network state related information.

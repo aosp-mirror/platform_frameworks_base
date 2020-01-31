@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import static android.net.NetworkPolicyManager.OVERRIDE_CONGESTED;
 import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
 
@@ -67,6 +65,7 @@ import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.util.HandlerExecutor;
 import com.android.internal.util.Preconditions;
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
