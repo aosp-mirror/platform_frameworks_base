@@ -1604,7 +1604,7 @@ package android.bluetooth {
   }
 
   public final class BluetoothHidDevice implements android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
   }
 
   public final class BluetoothHidHost implements android.bluetooth.BluetoothProfile {
