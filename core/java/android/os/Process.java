@@ -99,6 +99,12 @@ public class Process {
     public static final int KEYSTORE_UID = 1017;
 
     /**
+     * Defines the UID/GID for credstore.
+     * @hide
+     */
+    public static final int CREDSTORE_UID = 1076;
+
+    /**
      * Defines the UID/GID for the NFC service process.
      * @hide
      */
