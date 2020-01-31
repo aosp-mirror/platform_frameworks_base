@@ -1801,6 +1801,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         void dismissImmediately() {
             mShowing = false;
+            if (mControlsUiController != null) mControlsUiController.hide();
             dismissPanel();
             resetOrientation();
             completeDismiss();

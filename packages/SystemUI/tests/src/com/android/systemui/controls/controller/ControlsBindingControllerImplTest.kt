@@ -103,7 +103,7 @@ class ControlsBindingControllerTest : SysuiTestCase() {
         assertEquals(setOf(TEST_COMPONENT_NAME_1, TEST_COMPONENT_NAME_2),
                 providers.map { it.componentName }.toSet())
         providers.forEach {
-            verify(it).bindPermanently()
+            verify(it).bindService()
         }
     }
 

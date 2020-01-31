@@ -170,7 +170,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     override fun bindServices(components: List<ComponentName>) {
         components.forEach {
             val provider = retrieveLifecycleManager(it)
-            backgroundExecutor.execute { provider.bindPermanently() }
+            backgroundExecutor.execute { provider.bindService() }
         }
     }
 
@@ -233,7 +233,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
             provider.lastLoadCallback?.invoke(list) ?: run {
                 Log.w(TAG, "Null callback")
             }
-            provider.maybeUnbindAndRemoveCallback()
+            provider.unbindService()
         }
     }
 
