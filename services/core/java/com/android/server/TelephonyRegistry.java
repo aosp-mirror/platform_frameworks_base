@@ -897,6 +897,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
                             != 0) {
                         updateReportSignalStrengthDecision(r.subId);
+                        try {
+                            if (mSignalStrength[phoneId] != null) {
+                                r.callback.onSignalStrengthsChanged(mSignalStrength[phoneId]);
+                            }
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
                     }
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO)) {
                         try {
@@ -1326,9 +1333,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         log("notifySignalStrengthForPhoneId: r=" + r + " subId=" + subId
                                 + " phoneId=" + phoneId + " ss=" + signalStrength);
                     }
-                    if (r.matchPhoneStateListenerEvent(
-                                PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) &&
-                            idMatch(r.subId, subId, phoneId)) {
+                    if ((r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_SIGNAL_STRENGTHS)
+                            || r.matchPhoneStateListenerEvent(
+                                    PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH))
+                            && idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG) {
                                 log("notifySignalStrengthForPhoneId: callback.onSsS r=" + r
@@ -1341,7 +1349,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     }
                     if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_SIGNAL_STRENGTH) &&
-                            idMatch(r.subId, subId, phoneId)){
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
                             int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
@@ -2542,6 +2550,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION, null);
         }
 
+        if ((events & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH, null);
+        }
+
         if ((events & READ_PRIVILEGED_PHONE_STATE_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
@@ -2657,7 +2670,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
-        if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) {
+        if ((events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0
+                || (events & PhoneStateListener.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) != 0) {
             try {
                 if (mSignalStrength[phoneId] != null) {
                     SignalStrength signalStrength = mSignalStrength[phoneId];
