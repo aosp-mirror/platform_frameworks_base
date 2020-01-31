@@ -7576,10 +7576,10 @@ package android.net.wifi {
     field @Deprecated public static final int DISABLED_BY_WIFI_MANAGER = 7; // 0x7
     field @Deprecated public static final int DISABLED_BY_WRONG_PASSWORD = 8; // 0x8
     field @Deprecated public static final int DISABLED_DHCP_FAILURE = 3; // 0x3
+    field @Deprecated public static final int DISABLED_NONE = 0; // 0x0
     field @Deprecated public static final int DISABLED_NO_INTERNET_PERMANENT = 6; // 0x6
     field @Deprecated public static final int DISABLED_NO_INTERNET_TEMPORARY = 4; // 0x4
     field @Deprecated public static final int NETWORK_SELECTION_DISABLED_MAX = 10; // 0xa
-    field @Deprecated public static final int NETWORK_SELECTION_ENABLE = 0; // 0x0
     field @Deprecated public static final int NETWORK_SELECTION_ENABLED = 0; // 0x0
     field @Deprecated public static final int NETWORK_SELECTION_PERMANENTLY_DISABLED = 2; // 0x2
     field @Deprecated public static final int NETWORK_SELECTION_TEMPORARY_DISABLED = 1; // 0x1

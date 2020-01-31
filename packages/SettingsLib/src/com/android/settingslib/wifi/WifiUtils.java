@@ -60,7 +60,7 @@ public class WifiUtils {
         if (config != null) {
             WifiConfiguration.NetworkSelectionStatus networkStatus =
                     config.getNetworkSelectionStatus();
-            for (int index = WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLE;
+            for (int index = WifiConfiguration.NetworkSelectionStatus.DISABLED_NONE;
                     index < WifiConfiguration.NetworkSelectionStatus
                             .NETWORK_SELECTION_DISABLED_MAX; index++) {
                 if (networkStatus.getDisableReasonCounter(index) != 0) {
