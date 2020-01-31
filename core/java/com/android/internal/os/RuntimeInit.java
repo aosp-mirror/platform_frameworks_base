@@ -67,9 +67,10 @@ public class RuntimeInit {
 
     private static volatile boolean mCrashing = false;
 
-    /*
+    /**
      * Native heap allocations will now have a non-zero tag in the most significant byte.
-     * See {@linktourl https://source.android.com/devices/tech/debug/tagged-pointers}.
+     * See
+     * <a href="https://source.android.com/devices/tech/debug/tagged-pointers">https://source.android.com/devices/tech/debug/tagged-pointers</a>.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = VersionCodes.Q)
