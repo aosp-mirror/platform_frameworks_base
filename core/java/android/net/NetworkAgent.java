@@ -570,7 +570,7 @@ public abstract class NetworkAgent {
      * Called when the system determines the usefulness of this network.
      *
      * The system attempts to validate Internet connectivity on networks that provide the
-     * {@NetworkCapabilities#NET_CAPABILITY_INTERNET} capability.
+     * {@link NetworkCapabilities#NET_CAPABILITY_INTERNET} capability.
      *
      * Currently there are two possible values:
      * {@code VALIDATION_STATUS_VALID} if Internet connectivity was validated,
