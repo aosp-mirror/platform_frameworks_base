@@ -2125,8 +2125,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return new Pair<>(Insets.NONE, insets);
             }
 
-            boolean includeIme = (getAttributes().softInputMode & SOFT_INPUT_MASK_ADJUST)
-                    == SOFT_INPUT_ADJUST_RESIZE;
+            boolean includeIme =
+                    (getViewRootImpl().mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
+                            == SOFT_INPUT_ADJUST_RESIZE;
             Insets insetsToApply;
             if (ViewRootImpl.sNewInsetsMode == 0) {
                 insetsToApply = insets.getSystemWindowInsets();
