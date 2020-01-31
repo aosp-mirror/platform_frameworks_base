@@ -847,7 +847,12 @@ public class AppOpsService extends IAppOpsService.Stub {
          */
         public void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState)
                 throws RemoteException {
-            if (!parent.isRunning()) {
+            started(clientId, uidState, true);
+        }
+
+        private void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState,
+                boolean triggerCallbackIfNeeded) throws RemoteException {
+            if (triggerCallbackIfNeeded && !parent.isRunning()) {
                 scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, true);
             }
@@ -966,8 +971,16 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 if (event.getUidState() != newState) {
                     try {
+                        // Remove all but one unfinished start count and then call finished() to
+                        // remove start event object
+                        int numPreviousUnfinishedStarts = event.numUnfinishedStarts;
+                        event.numUnfinishedStarts = 1;
                         finished(event.getClientId(), false);
-                        started(event.getClientId(), newState);
+
+                        // Call started() to add a new start event object and then add the
+                        // previously removed unfinished start counts back
+                        started(event.getClientId(), newState, false);
+                        event.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
                     }
