@@ -115,13 +115,15 @@ void SubscriberReporter::sendBroadcastLocked(const sp<IPendingIntentRef>& pir,
                                              const vector<String16>& cookies,
                                              const MetricDimensionKey& dimKey) const {
     VLOG("SubscriberReporter::sendBroadcastLocked called.");
+    // TODO (b/148604617): convert MetricDimensionKey to StatsDimensiosnValueParcel
+    StatsDimensionsValueParcel parcel;
     pir->sendSubscriberBroadcast(
             configKey.GetUid(),
             configKey.GetId(),
             subscription.id(),
             subscription.rule_id(),
             cookies,
-            getStatsDimensionsValue(dimKey.getDimensionKeyInWhat()));
+            parcel);
 }
 
 sp<IPendingIntentRef> SubscriberReporter::getBroadcastSubscriber(const ConfigKey& configKey,

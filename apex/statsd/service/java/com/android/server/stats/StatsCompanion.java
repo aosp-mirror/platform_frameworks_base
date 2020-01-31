@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.IPendingIntentRef;
 import android.os.Process;
 import android.os.StatsDimensionsValue;
+import android.os.StatsDimensionsValueParcel;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -145,8 +146,9 @@ public class StatsCompanion {
 
         @Override
         public void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
-                long subscriptionRuleId, String[] cookies, StatsDimensionsValue dimensionsValue) {
-            enforceStatsdCallingUid();
+                long subscriptionRuleId, String[] cookies,
+                StatsDimensionsValueParcel dimensionsValue) {
+            enforceStatsCompanionPermission(mContext);
             Intent intent =
                     new Intent()
                             .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
@@ -167,6 +169,8 @@ public class StatsCompanion {
                                 "Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
                                 configUid, configId, subscriptionId, subscriptionRuleId,
                                 Arrays.toString(cookies),
+                                // TODO (b/148604617): convert StatsDimensionsValueParcel into
+                                // StatsDimensionsValue
                                 dimensionsValue));
             }
             try {
