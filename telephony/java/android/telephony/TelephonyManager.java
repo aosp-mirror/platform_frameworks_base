@@ -5209,11 +5209,11 @@ public class TelephonyManager {
     public static final int DATA_DISCONNECTING = 4;
 
     /**
-     * To check the SDK version for {@link TelephonyManager#getDataState}.
+     * Used for checking if the SDK version for {@link TelephonyManager#getDataState} is above Q.
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long GET_DATA_STATE_CODE_CHANGE = 147600208L;
+    private static final long GET_DATA_STATE_R_VERSION = 148534348L;
 
     /**
      * Returns a constant indicating the current data connection state
@@ -5233,7 +5233,7 @@ public class TelephonyManager {
             int state = telephony.getDataStateForSubId(
                     getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
             if (state == TelephonyManager.DATA_DISCONNECTING
-                    && !Compatibility.isChangeEnabled(GET_DATA_STATE_CODE_CHANGE)) {
+                    && !Compatibility.isChangeEnabled(GET_DATA_STATE_R_VERSION)) {
                 return TelephonyManager.DATA_CONNECTED;
             }
 
