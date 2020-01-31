@@ -32,11 +32,14 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.service.appprediction.AppPredictionService;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -48,9 +51,13 @@ public class AppPredictionPerUserService extends
 
     private static final String TAG = AppPredictionPerUserService.class.getSimpleName();
 
-    @Nullable
+    /**
+     * A lookup of remote services in respect to their {@link ComponentName}.
+     */
+    @NonNull
     @GuardedBy("mLock")
-    private RemoteAppPredictionService mRemoteService;
+    private final ArrayMap<ComponentName, RemoteAppPredictionService> mRemoteServices =
+            new ArrayMap<>();
 
     /**
      * When {@code true}, remote service died but service state is kept so it's restored after
@@ -92,7 +99,7 @@ public class AppPredictionPerUserService extends
         if (enabledChanged) {
             if (!isEnabledLocked()) {
                 // Clear the remote service for the next call
-                mRemoteService = null;
+                mRemoteServices.clear();
             }
         }
         return enabledChanged;
@@ -104,14 +111,14 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void onCreatePredictionSessionLocked(@NonNull AppPredictionContext context,
             @NonNull AppPredictionSessionId sessionId) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        if (!mSessionInfos.containsKey(sessionId)) {
+            mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context,
+                    resolveComponentName(context), this::removeAppPredictionSessionInfo));
+        }
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.onCreatePredictionSession(context, sessionId);
-
-            if (!mSessionInfos.containsKey(sessionId)) {
-                mSessionInfos.put(sessionId, new AppPredictionSessionInfo(sessionId, context,
-                        this::removeAppPredictionSessionInfo));
-            }
         }
     }
 
@@ -121,7 +128,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void notifyAppTargetEventLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull AppTargetEvent event) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.notifyAppTargetEvent(sessionId, event);
         }
@@ -133,7 +141,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void notifyLaunchLocationShownLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.notifyLaunchLocationShown(sessionId, launchLocation, targetIds);
         }
@@ -145,7 +154,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void sortAppTargetsLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull ParceledListSlice targets, @NonNull IPredictionCallback callback) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.sortAppTargets(sessionId, targets, callback);
         }
@@ -157,7 +167,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void registerPredictionUpdatesLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull IPredictionCallback callback) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.registerPredictionUpdates(sessionId, callback);
 
@@ -174,7 +185,8 @@ public class AppPredictionPerUserService extends
     @GuardedBy("mLock")
     public void unregisterPredictionUpdatesLocked(@NonNull AppPredictionSessionId sessionId,
             @NonNull IPredictionCallback callback) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.unregisterPredictionUpdates(sessionId, callback);
 
@@ -190,7 +202,8 @@ public class AppPredictionPerUserService extends
      */
     @GuardedBy("mLock")
     public void requestPredictionUpdateLocked(@NonNull AppPredictionSessionId sessionId) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.requestPredictionUpdate(sessionId);
         }
@@ -201,7 +214,8 @@ public class AppPredictionPerUserService extends
      */
     @GuardedBy("mLock")
     public void onDestroyPredictionSessionLocked(@NonNull AppPredictionSessionId sessionId) {
-        final RemoteAppPredictionService service = getRemoteServiceLocked();
+        final RemoteAppPredictionService service = getRemoteServiceLocked(
+                getComponentName(sessionId));
         if (service != null) {
             service.onDestroyPredictionSession(sessionId);
 
@@ -229,7 +243,7 @@ public class AppPredictionPerUserService extends
             synchronized (mLock) {
                 if (mZombie) {
                     // Sanity check - shouldn't happen
-                    if (mRemoteService == null) {
+                    if (mRemoteServices.isEmpty()) {
                         Slog.w(TAG, "Cannot resurrect sessions because remote service is null");
                         return;
                     }
@@ -266,22 +280,30 @@ public class AppPredictionPerUserService extends
     }
 
     private void destroyAndRebindRemoteService() {
-        if (mRemoteService == null) {
+        if (mRemoteServices.isEmpty()) {
             return;
         }
 
         if (isDebug()) {
             Slog.d(TAG, "Destroying the old remote service.");
         }
-        mRemoteService.destroy();
-        mRemoteService = null;
+        final Set<Map.Entry<ComponentName, RemoteAppPredictionService>> services =
+                new ArraySet<>(mRemoteServices.entrySet());
+        mRemoteServices.clear();
+        services.stream().forEach(entry -> destroyAndRebindRemoteService(
+                entry.getKey(), entry.getValue()));
+    }
 
-        mRemoteService = getRemoteServiceLocked();
-        if (mRemoteService != null) {
+    private void destroyAndRebindRemoteService(
+            @NonNull final ComponentName component,
+            @NonNull final RemoteAppPredictionService service) {
+        service.destroy();
+        final RemoteAppPredictionService newService = getRemoteServiceLocked(component);
+        if (newService != null) {
             if (isDebug()) {
                 Slog.d(TAG, "Rebinding to the new remote service.");
             }
-            mRemoteService.reconnect();
+            newService.reconnect();
         }
     }
 
@@ -292,7 +314,7 @@ public class AppPredictionPerUserService extends
     private void resurrectSessionsLocked() {
         final int numSessions = mSessionInfos.size();
         if (isDebug()) {
-            Slog.d(TAG, "Resurrecting remote service (" + mRemoteService + ") on "
+            Slog.d(TAG, "Resurrecting remote service (" + mRemoteServices + ") on "
                     + numSessions + " sessions.");
         }
 
@@ -310,32 +332,49 @@ public class AppPredictionPerUserService extends
         }
     }
 
+    @Nullable
+    private ComponentName resolveComponentName(@NonNull final AppPredictionContext context) {
+        // TODO: add logic to determine serviceName based on context
+        final String serviceName = getComponentNameLocked();
+        if (serviceName == null) {
+            if (mMaster.verbose) {
+                Slog.v(TAG, "getRemoteServiceLocked(): not set, context = " + context);
+            }
+            return null;
+        }
+        return ComponentName.unflattenFromString(serviceName);
+    }
+
+    @Nullable
+    private ComponentName getComponentName(@NonNull final AppPredictionSessionId sessionId) {
+        AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        return sessionInfo == null ? null : sessionInfo.mComponentName;
+    }
+
     @GuardedBy("mLock")
     @Nullable
-    private RemoteAppPredictionService getRemoteServiceLocked() {
-        if (mRemoteService == null) {
-            final String serviceName = getComponentNameLocked();
-            if (serviceName == null) {
-                if (mMaster.verbose) {
-                    Slog.v(TAG, "getRemoteServiceLocked(): not set");
-                }
-                return null;
-            }
-            ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
-
-            mRemoteService = new RemoteAppPredictionService(getContext(),
+    private RemoteAppPredictionService getRemoteServiceLocked(
+            @Nullable final ComponentName serviceComponent) {
+        if (serviceComponent == null) return null;
+        if (!mRemoteServices.containsKey(serviceComponent)) {
+            mRemoteServices.put(serviceComponent, new RemoteAppPredictionService(getContext(),
                     AppPredictionService.SERVICE_INTERFACE, serviceComponent, mUserId, this,
-                    mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+                    mMaster.isBindInstantServiceAllowed(), mMaster.verbose));
         }
 
-        return mRemoteService;
+        return mRemoteServices.get(serviceComponent);
     }
 
     private static final class AppPredictionSessionInfo {
         private static final boolean DEBUG = false;  // Do not submit with true
 
+        @NonNull
         private final AppPredictionSessionId mSessionId;
+        @NonNull
         private final AppPredictionContext mPredictionContext;
+        @Nullable
+        private final ComponentName mComponentName;
+        @NonNull
         private final Consumer<AppPredictionSessionId> mRemoveSessionInfoAction;
 
         private final RemoteCallbackList<IPredictionCallback> mCallbacks =
@@ -352,13 +391,17 @@ public class AppPredictionPerUserService extends
                     }
                 };
 
-        AppPredictionSessionInfo(AppPredictionSessionId id, AppPredictionContext predictionContext,
-                Consumer<AppPredictionSessionId> removeSessionInfoAction) {
+        AppPredictionSessionInfo(
+                @NonNull final AppPredictionSessionId id,
+                @NonNull final AppPredictionContext predictionContext,
+                @Nullable final ComponentName componentName,
+                @NonNull final Consumer<AppPredictionSessionId> removeSessionInfoAction) {
             if (DEBUG) {
                 Slog.d(TAG, "Creating AppPredictionSessionInfo for session Id=" + id);
             }
             mSessionId = id;
             mPredictionContext = predictionContext;
+            mComponentName = componentName;
             mRemoveSessionInfoAction = removeSessionInfoAction;
         }
 
@@ -390,8 +433,8 @@ public class AppPredictionPerUserService extends
         void resurrectSessionLocked(AppPredictionPerUserService service) {
             int callbackCount = mCallbacks.getRegisteredCallbackCount();
             if (DEBUG) {
-                Slog.d(TAG, "Resurrecting remote service (" + service.getRemoteServiceLocked()
-                        + ") for session Id=" + mSessionId + " and "
+                Slog.d(TAG, "Resurrecting remote service (" + service.getRemoteServiceLocked(
+                        mComponentName) + ") for session Id=" + mSessionId + " and "
                         + callbackCount + " callbacks.");
             }
             service.onCreatePredictionSessionLocked(mPredictionContext, mSessionId);
