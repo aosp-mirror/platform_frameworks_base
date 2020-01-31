@@ -85,8 +85,8 @@ message Atom {
         ScreenBrightnessChanged screen_brightness_changed = 9;
         WakelockStateChanged wakelock_state_changed = 10;
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
-        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
-        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
+        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12 [(log_from_module) = "framework"];
+        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13 [(log_from_module) = "framework"];
         ActivityManagerSleepStateChanged activity_manager_sleep_state_changed = 14;
         MemoryFactorStateChanged memory_factor_state_changed = 15;
         ExcessiveCpuUsageReported excessive_cpu_usage_reported = 16;
@@ -117,7 +117,7 @@ message Atom {
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
-        PacketWakeupOccurred packet_wakeup_occurred = 44;
+        PacketWakeupOccurred packet_wakeup_occurred = 44 [(log_from_module) = "framework"];
         WallClockTimeShifted wall_clock_time_shifted = 45;
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported = 47 [(allow_from_any_uid) = true];
