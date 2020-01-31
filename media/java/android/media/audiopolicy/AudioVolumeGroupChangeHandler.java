@@ -157,9 +157,7 @@ public class AudioVolumeGroupChangeHandler {
             Handler handler = eventHandler.handler();
             if (handler != null) {
                 Message m = handler.obtainMessage(what, arg1, arg2, obj);
-                if (what != AUDIOVOLUMEGROUP_EVENT_NEW_LISTENER) {
-                    handler.removeMessages(what);
-                }
+                // Do not remove previous messages, as we would lose notification of group changes
                 handler.sendMessage(m);
             }
         }
