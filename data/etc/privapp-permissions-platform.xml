@@ -27,6 +27,10 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS" />
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.angle">
+        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.apps.tag">
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
