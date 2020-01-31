@@ -142,16 +142,16 @@ static int write_java_methods(
                 fprintf(out,
                         "%s        final int count = valueMap.size();\n", indent.c_str());
                 fprintf(out,
-                        "%s        final SparseIntArray intMap = new SparseIntArray();\n",
+                        "%s        SparseIntArray intMap = null;\n",
                         indent.c_str());
                 fprintf(out,
-                        "%s        final SparseLongArray longMap = new SparseLongArray();\n",
+                        "%s        SparseLongArray longMap = null;\n",
                         indent.c_str());
                 fprintf(out,
-                        "%s        final SparseArray<String> stringMap = new SparseArray<>();\n",
+                        "%s        SparseArray<String> stringMap = null;\n",
                         indent.c_str());
                 fprintf(out,
-                        "%s        final SparseArray<Float> floatMap = new SparseArray<>();\n",
+                        "%s        SparseArray<Float> floatMap = null;\n",
                         indent.c_str());
                 fprintf(out,
                         "%s        for (int i = 0; i < count; i++) {\n", indent.c_str());
@@ -163,17 +163,41 @@ static int write_java_methods(
                 fprintf(out,
                         "%s            if (value instanceof Integer) {\n", indent.c_str());
                 fprintf(out,
+                        "%s                if (null == intMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    intMap = new SparseIntArray();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
+                fprintf(out,
                         "%s                intMap.put(key, (Integer) value);\n", indent.c_str());
                 fprintf(out,
                         "%s            } else if (value instanceof Long) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                if (null == longMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    longMap = new SparseLongArray();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
                 fprintf(out,
                         "%s                longMap.put(key, (Long) value);\n", indent.c_str());
                 fprintf(out,
                         "%s            } else if (value instanceof String) {\n", indent.c_str());
                 fprintf(out,
+                        "%s                if (null == stringMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    stringMap = new SparseArray<>();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
+                fprintf(out,
                         "%s                stringMap.put(key, (String) value);\n", indent.c_str());
                 fprintf(out,
                         "%s            } else if (value instanceof Float) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                if (null == floatMap) {\n", indent.c_str());
+                fprintf(out,
+                        "%s                    floatMap = new SparseArray<>();\n", indent.c_str());
+                fprintf(out,
+                        "%s                }\n", indent.c_str());
                 fprintf(out,
                         "%s                floatMap.put(key, (Float) value);\n", indent.c_str());
                 fprintf(out,
