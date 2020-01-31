@@ -27,7 +27,10 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -828,20 +831,39 @@ public final class UiAutomation {
     }
 
     /**
-     * Takes a screenshot of the default display and returns it by {@link Bitmap.Config#HARDWARE}
-     * format.
+     * Takes a screenshot.
      *
      * @return The screenshot bitmap on success, null otherwise.
      */
     public Bitmap takeScreenshot() {
-        final int connectionId;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
-            connectionId = mConnectionId;
         }
-        // Calling out without a lock held.
-        return AccessibilityInteractionClient.getInstance()
-                .takeScreenshot(connectionId, Display.DEFAULT_DISPLAY);
+        Display display = DisplayManagerGlobal.getInstance()
+                .getRealDisplay(Display.DEFAULT_DISPLAY);
+        Point displaySize = new Point();
+        display.getRealSize(displaySize);
+
+        int rotation = display.getRotation();
+
+        // Take the screenshot
+        Bitmap screenShot = null;
+        try {
+            // Calling out without a lock held.
+            screenShot = mUiAutomationConnection.takeScreenshot(
+                    new Rect(0, 0, displaySize.x, displaySize.y), rotation);
+            if (screenShot == null) {
+                return null;
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while taking screnshot!", re);
+            return null;
+        }
+
+        // Optimization
+        screenShot.setHasAlpha(false);
+
+        return screenShot;
     }
 
     /**

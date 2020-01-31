@@ -21,6 +21,8 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -175,6 +177,23 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             Binder.restoreCallingIdentity(identity);
         }
         return false;
+    }
+
+    @Override
+    public Bitmap takeScreenshot(Rect crop, int rotation) {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            int width = crop.width();
+            int height = crop.height();
+            return SurfaceControl.screenshot(crop, width, height, rotation);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
@@ -430,8 +449,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
-                | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS
-                | AccessibilityServiceInfo.CAPABILITY_CAN_TAKE_SCREENSHOT);
+                | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS);
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
