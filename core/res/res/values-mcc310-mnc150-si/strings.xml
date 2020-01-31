@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_illegal_me" msgid="5207603948149789531">"දුරකථනය MM#6 ඉඩ නොදේ"</string>
+    <string name="mmcc_illegal_me" msgid="8004509200390992737">"දුරකථනය MM#6 ඉඩ නොදේ"</string>
 </resources>

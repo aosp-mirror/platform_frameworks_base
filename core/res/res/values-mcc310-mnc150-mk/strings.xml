@@ -20,5 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_illegal_me" msgid="5207603948149789531">"Телефонот не е дозволен MM#6"</string>
+    <string name="mmcc_illegal_me" msgid="8004509200390992737">"Телефонот не е дозволен MM#6"</string>
 </resources>
