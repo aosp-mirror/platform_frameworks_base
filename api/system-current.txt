@@ -14066,6 +14066,10 @@ package android.view.contentcapture {
     method public boolean isContentCaptureFeatureEnabled();
   }
 
+  public abstract class ContentCaptureSession implements java.lang.AutoCloseable {
+    field public static final int NO_SESSION_ID = 0; // 0x0
+  }
+
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
     method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
   }
