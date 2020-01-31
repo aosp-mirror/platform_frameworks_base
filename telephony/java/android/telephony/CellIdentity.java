@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,8 +69,8 @@ public abstract class CellIdentity implements Parcelable {
     protected String mAlphaShort;
 
     /** @hide */
-    protected CellIdentity(String tag, int type, String mcc, String mnc, String alphal,
-                           String alphas) {
+    protected CellIdentity(@Nullable String tag, int type, @Nullable String mcc,
+            @Nullable String mnc, @Nullable String alphal, @Nullable String alphas) {
         mTag = tag;
         mType = type;
 
