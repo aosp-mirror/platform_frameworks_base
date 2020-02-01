@@ -41,6 +41,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -167,6 +168,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private FlingAnimationUtils mFlingAnimationUtils;
     private SwitchToGuestTimer mSwitchToGuestTimer;
     private NotificationDataManager mNotificationDataManager;
+    private CarNotificationListener mCarNotificationListener;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private ScreenLifecycle mScreenLifecycle;
     private CarAudioManager mCarAudioManager;
@@ -643,7 +645,17 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     }
                 });
 
-        CarNotificationListener carNotificationListener = new CarNotificationListener();
+        if (mCarNotificationListener != null) {
+            try {
+                // If we already had a notification listener we need to unreigster is before
+                // making a new one
+                mCarNotificationListener.unregisterAsSystemService();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error unregistering notification listener.");
+            }
+        }
+
+        mCarNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
 
         mNotificationDataManager = new NotificationDataManager();
@@ -660,7 +672,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                         mNotificationClickHandlerFactory, mNotificationDataManager);
         mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
-        carNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
+        mCarNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
                 carHeadsUpNotificationManager, mNotificationDataManager);
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
@@ -769,7 +781,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     mNotificationViewController = new NotificationViewController(
                             mNotificationView,
                             PreprocessingManager.getInstance(mContext),
-                            carNotificationListener,
+                            mCarNotificationListener,
                             mCarUxRestrictionManagerWrapper,
                             mNotificationDataManager);
                     mNotificationViewController.enable();
@@ -1343,6 +1355,19 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     public void onLocaleListChanged() {
+        // When locale changes we need to reload the notification panel with the new language
+        if (mNotificationView == null) {
+            return;
+        }
+
+        LayoutParams params = mNotificationView.getLayoutParams();
+        int index = mStatusBarWindow.indexOfChild(mNotificationView);
+
+        mStatusBarWindow.removeView(mNotificationView);
+
+        View v = View.inflate(mContext, R.layout.notification_center_activity, null);
+        mStatusBarWindow.addView(v, index, params);
+
         restartNavBars();
         connectNotificationsUI();
     }
