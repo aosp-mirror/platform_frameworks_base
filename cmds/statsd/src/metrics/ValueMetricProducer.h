@@ -17,8 +17,6 @@
 #pragma once
 
 #include <gtest/gtest_prod.h>
-#include <utils/threads.h>
-#include <list>
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionTimer.h"
 #include "condition/ConditionTracker.h"

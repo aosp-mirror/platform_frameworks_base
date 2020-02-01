@@ -18,7 +18,6 @@
 #define METRIC_PRODUCER_H
 
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
-#include <log/logprint.h>
 #include <utils/RefBase.h>
 
 #include <unordered_map>

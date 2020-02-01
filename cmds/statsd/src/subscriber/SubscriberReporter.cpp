@@ -20,7 +20,6 @@
 #include "SubscriberReporter.h"
 
 using std::lock_guard;
-using std::unordered_map;
 
 namespace android {
 namespace os {

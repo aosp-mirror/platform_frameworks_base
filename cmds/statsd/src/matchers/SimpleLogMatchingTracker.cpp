@@ -23,8 +23,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::string;
-using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 

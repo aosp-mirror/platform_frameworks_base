@@ -127,7 +127,6 @@ cc_defaults {
         "libbase",
         "libcutils",
         "liblog",
-        "libplatformprotos",
         "libprotoutil",
         "libstatslog",
         "libstatssocket",

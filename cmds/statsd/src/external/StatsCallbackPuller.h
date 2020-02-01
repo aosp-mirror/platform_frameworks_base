@@ -17,7 +17,6 @@
 #pragma once
 
 #include <android/os/IPullAtomCallback.h>
-#include <utils/String16.h>
 
 #include "StatsPuller.h"
 
