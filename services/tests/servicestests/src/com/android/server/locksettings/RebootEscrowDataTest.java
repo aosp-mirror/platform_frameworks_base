@@ -21,16 +21,22 @@ import static org.junit.Assert.assertThat;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * atest FrameworksServicesTests:RebootEscrowDataTest
  */
 @RunWith(AndroidJUnit4.class)
 public class RebootEscrowDataTest {
+    private RebootEscrowKey mKey;
+
+    @Before
+    public void generateKey() throws Exception {
+        mKey = RebootEscrowKey.generate();
+    }
+
     private static byte[] getTestSp() {
         byte[] testSp = new byte[10];
         for (int i = 0; i < testSp.length; i++) {
@@ -41,30 +47,30 @@ public class RebootEscrowDataTest {
 
     @Test(expected = NullPointerException.class)
     public void fromEntries_failsOnNull() throws Exception {
-        RebootEscrowData.fromSyntheticPassword((byte) 2, null);
+        RebootEscrowData.fromSyntheticPassword(mKey, (byte) 2, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void fromEncryptedData_failsOnNullData() throws Exception {
         byte[] testSp = getTestSp();
-        RebootEscrowData expected = RebootEscrowData.fromSyntheticPassword((byte) 2, testSp);
-        SecretKeySpec key = RebootEscrowData.fromKeyBytes(expected.getKey());
+        RebootEscrowData expected = RebootEscrowData.fromSyntheticPassword(mKey, (byte) 2, testSp);
+        RebootEscrowKey key = RebootEscrowKey.fromKeyBytes(expected.getKey().getKeyBytes());
         RebootEscrowData.fromEncryptedData(key, null);
     }
 
     @Test(expected = NullPointerException.class)
     public void fromEncryptedData_failsOnNullKey() throws Exception {
         byte[] testSp = getTestSp();
-        RebootEscrowData expected = RebootEscrowData.fromSyntheticPassword((byte) 2, testSp);
+        RebootEscrowData expected = RebootEscrowData.fromSyntheticPassword(mKey, (byte) 2, testSp);
         RebootEscrowData.fromEncryptedData(null, expected.getBlob());
     }
 
     @Test
     public void fromEntries_loopback_success() throws Exception {
         byte[] testSp = getTestSp();
-        RebootEscrowData expected = RebootEscrowData.fromSyntheticPassword((byte) 2, testSp);
+        RebootEscrowData expected = RebootEscrowData.fromSyntheticPassword(mKey, (byte) 2, testSp);
 
-        SecretKeySpec key = RebootEscrowData.fromKeyBytes(expected.getKey());
+        RebootEscrowKey key = RebootEscrowKey.fromKeyBytes(expected.getKey().getKeyBytes());
         RebootEscrowData actual = RebootEscrowData.fromEncryptedData(key, expected.getBlob());
 
         assertThat(actual.getSpVersion(), is(expected.getSpVersion()));

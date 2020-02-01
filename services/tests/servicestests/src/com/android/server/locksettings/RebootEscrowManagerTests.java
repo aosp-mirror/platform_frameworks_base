@@ -18,6 +18,7 @@ package com.android.server.locksettings;
 
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
+import static android.content.pm.UserInfo.FLAG_PROFILE;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -56,7 +58,9 @@ import java.util.ArrayList;
 @RunWith(AndroidJUnit4.class)
 public class RebootEscrowManagerTests {
     protected static final int PRIMARY_USER_ID = 0;
-    protected static final int NONSECURE_USER_ID = 10;
+    protected static final int WORK_PROFILE_USER_ID = 10;
+    protected static final int NONSECURE_SECONDARY_USER_ID = 20;
+    protected static final int SECURE_SECONDARY_USER_ID = 21;
     private static final byte FAKE_SP_VERSION = 1;
     private static final byte[] FAKE_AUTH_TOKEN = new byte[] {
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -107,10 +111,14 @@ public class RebootEscrowManagerTests {
 
         ArrayList<UserInfo> users = new ArrayList<>();
         users.add(new UserInfo(PRIMARY_USER_ID, "primary", FLAG_PRIMARY));
-        users.add(new UserInfo(NONSECURE_USER_ID, "non-secure", FLAG_FULL));
+        users.add(new UserInfo(WORK_PROFILE_USER_ID, "work", FLAG_PROFILE));
+        users.add(new UserInfo(NONSECURE_SECONDARY_USER_ID, "non-secure", FLAG_FULL));
+        users.add(new UserInfo(SECURE_SECONDARY_USER_ID, "secure", FLAG_FULL));
         when(mUserManager.getUsers()).thenReturn(users);
         when(mCallbacks.isUserSecure(PRIMARY_USER_ID)).thenReturn(true);
-        when(mCallbacks.isUserSecure(NONSECURE_USER_ID)).thenReturn(false);
+        when(mCallbacks.isUserSecure(WORK_PROFILE_USER_ID)).thenReturn(true);
+        when(mCallbacks.isUserSecure(NONSECURE_SECONDARY_USER_ID)).thenReturn(false);
+        when(mCallbacks.isUserSecure(SECURE_SECONDARY_USER_ID)).thenReturn(true);
         mService = new RebootEscrowManager(new MockInjector(mContext, mUserManager, mRebootEscrow),
                 mCallbacks, mStorage);
     }
@@ -154,6 +162,30 @@ public class RebootEscrowManagerTests {
 
         assertTrue(mService.armRebootEscrowIfNeeded());
         verify(mRebootEscrow).storeKey(any());
+
+        assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
+        assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
+    }
+
+    @Test
+    public void armService_MultipleUsers_Success() throws Exception {
+        RebootEscrowListener mockListener = mock(RebootEscrowListener.class);
+        mService.setRebootEscrowListener(mockListener);
+        mService.prepareRebootEscrow();
+
+        clearInvocations(mRebootEscrow);
+        mService.callToRebootEscrowIfNeeded(PRIMARY_USER_ID, FAKE_SP_VERSION, FAKE_AUTH_TOKEN);
+        verify(mockListener).onPreparedForReboot(eq(true));
+        mService.callToRebootEscrowIfNeeded(SECURE_SECONDARY_USER_ID, FAKE_SP_VERSION,
+                FAKE_AUTH_TOKEN);
+        verify(mRebootEscrow, never()).storeKey(any());
+
+        assertTrue(mService.armRebootEscrowIfNeeded());
+        verify(mRebootEscrow, times(1)).storeKey(any());
+
+        assertTrue(mStorage.hasRebootEscrow(PRIMARY_USER_ID));
+        assertTrue(mStorage.hasRebootEscrow(SECURE_SECONDARY_USER_ID));
+        assertFalse(mStorage.hasRebootEscrow(NONSECURE_SECONDARY_USER_ID));
     }
 
     @Test
