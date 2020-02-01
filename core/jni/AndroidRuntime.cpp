@@ -664,6 +664,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char jitprithreadweightOptBuf[sizeof("-Xjitprithreadweight:")-1 + PROPERTY_VALUE_MAX];
     char jittransitionweightOptBuf[sizeof("-Xjittransitionweight:")-1 + PROPERTY_VALUE_MAX];
     char hotstartupsamplesOptsBuf[sizeof("-Xps-hot-startup-method-samples:")-1 + PROPERTY_VALUE_MAX];
+    char saveResolvedClassesDelayMsOptsBuf[
+            sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
     char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char backgroundgcOptsBuf[sizeof("-XX:BackgroundGC=")-1 + PROPERTY_VALUE_MAX];
@@ -858,6 +860,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
      */
     parseRuntimeOption("dalvik.vm.hot-startup-method-samples", hotstartupsamplesOptsBuf,
             "-Xps-hot-startup-method-samples:");
+
+    parseRuntimeOption("dalvik.vm.ps-resolved-classes-delay-ms", saveResolvedClassesDelayMsOptsBuf,
+            "-Xps-save-resolved-classes-delay-ms:");
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
