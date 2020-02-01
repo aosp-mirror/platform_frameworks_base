@@ -1766,6 +1766,45 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Removes the active device for the grouping of @ActiveDeviceUse specified
+     *
+     * @param profiles represents the purpose for which we are setting this as the active device.
+     *                 Possible values are:
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_AUDIO},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_PHONE_CALL},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_ALL}
+     * @return false on immediate error, true otherwise
+     * @throws IllegalArgumentException if device is null or profiles is not one of
+     * {@link ActiveDeviceUse}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean removeActiveDevice(@ActiveDeviceUse int profiles) {
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            Log.e(TAG, "Invalid profiles param value in removeActiveDevice");
+            throw new IllegalArgumentException("Profiles must be one of "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_AUDIO, "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL, or "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_ALL");
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.removeActiveDevice(profiles);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets device as the active devices for the profiles passed into the function
      *
      * @param device is the remote bluetooth device
      * @param profiles represents the purpose for which we are setting this as the active device.
@@ -1774,18 +1813,26 @@ public final class BluetoothAdapter {
      *                 {@link BluetoothAdapter#ACTIVE_DEVICE_PHONE_CALL},
      *                 {@link BluetoothAdapter#ACTIVE_DEVICE_ALL}
      * @return false on immediate error, true otherwise
+     * @throws IllegalArgumentException if device is null or profiles is not one of
+     * {@link ActiveDeviceUse}
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setActiveDevice(@Nullable BluetoothDevice device,
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setActiveDevice(@NonNull BluetoothDevice device,
             @ActiveDeviceUse int profiles) {
+        if (device == null) {
+            Log.e(TAG, "setActiveDevice: Null device passed as parameter");
+            throw new IllegalArgumentException("device cannot be null");
+        }
         if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
                 && profiles != ACTIVE_DEVICE_ALL) {
             Log.e(TAG, "Invalid profiles param value in setActiveDevice");
-            return false;
+            throw new IllegalArgumentException("Profiles must be one of "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_AUDIO, "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL, or "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_ALL");
         }
-
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
