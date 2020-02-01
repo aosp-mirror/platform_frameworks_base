@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-#define DEBUG false  // STOPSHIP if true
-#include "Log.h"
+#define DEBUG false // STOPSHIP if true
+#define LOG_TAG "PowerStatsPuller"
 
 #include <android/hardware/power/stats/1.0/IPowerStats.h>
+#include <log/log.h>
+#include <statslog.h>
 
 #include <vector>
 
 #include "PowerStatsPuller.h"
-#include "statslog.h"
-#include "stats_log_util.h"
 
 using android::hardware::hidl_vec;
-using android::hardware::power::stats::V1_0::IPowerStats;
-using android::hardware::power::stats::V1_0::EnergyData;
-using android::hardware::power::stats::V1_0::RailInfo;
-using android::hardware::power::stats::V1_0::Status;
 using android::hardware::Return;
 using android::hardware::Void;
-
-using std::make_shared;
-using std::shared_ptr;
+using android::hardware::power::stats::V1_0::EnergyData;
+using android::hardware::power::stats::V1_0::IPowerStats;
+using android::hardware::power::stats::V1_0::RailInfo;
+using android::hardware::power::stats::V1_0::Status;
 
 namespace android {
-namespace os {
-namespace statsd {
+namespace server {
+namespace stats {
 
 static sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHal = nullptr;
 static std::mutex gPowerStatsHalMutex;
@@ -47,7 +44,7 @@ static std::vector<RailInfo> gRailInfo;
 
 struct PowerStatsPullerDeathRecipient : virtual public hardware::hidl_death_recipient {
     virtual void serviceDied(uint64_t cookie,
-            const wp<android::hidl::base::V1_0::IBase>& who) override {
+                             const wp<android::hidl::base::V1_0::IBase>& who) override {
         // The HAL just died. Reset all handles to HAL services.
         std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
         gPowerStatsHal = nullptr;
@@ -67,7 +64,7 @@ static bool getPowerStatsHalLocked() {
             hardware::Return<bool> linked = gPowerStatsHal->linkToDeath(gDeathRecipient, 0);
             if (!linked.isOk()) {
                 ALOGE("Transaction error in linking to power.stats HAL death: %s",
-                        linked.description().c_str());
+                      linked.description().c_str());
                 gPowerStatsHal = nullptr;
                 return false;
             } else if (!linked) {
@@ -79,29 +76,22 @@ static bool getPowerStatsHalLocked() {
     return gPowerStatsHal != nullptr;
 }
 
-PowerStatsPuller::PowerStatsPuller() : StatsPuller(android::util::ON_DEVICE_POWER_MEASUREMENT) {
-}
+PowerStatsPuller::PowerStatsPuller() {}
 
-bool PowerStatsPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
+status_pull_atom_return_t PowerStatsPuller::Pull(int32_t atomTag, pulled_stats_event_list* data) {
     std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
 
     if (!getPowerStatsHalLocked()) {
-        return false;
+        return STATS_PULL_SKIP;
     }
-
-    int64_t wallClockTimestampNs = getWallClockNs();
-    int64_t elapsedTimestampNs = getElapsedRealtimeNs();
-
-    data->clear();
 
     // Pull getRailInfo if necessary
     if (gRailInfo.empty()) {
         bool resultSuccess = true;
         Return<void> ret = gPowerStatsHal->getRailInfo(
-                [&resultSuccess](const hidl_vec<RailInfo> &list, Status status) {
+                [&resultSuccess](const hidl_vec<RailInfo>& list, Status status) {
                     resultSuccess = (status == Status::SUCCESS || status == Status::NOT_SUPPORTED);
                     if (status != Status::SUCCESS) return;
-
                     gRailInfo.reserve(list.size());
                     for (size_t i = 0; i < list.size(); ++i) {
                         gRailInfo.push_back(list[i]);
@@ -110,61 +100,64 @@ bool PowerStatsPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
         if (!resultSuccess || !ret.isOk()) {
             ALOGE("power.stats getRailInfo() failed. Description: %s", ret.description().c_str());
             gPowerStatsHal = nullptr;
-            return false;
+            return STATS_PULL_SKIP;
         }
         // If SUCCESS but empty, or if NOT_SUPPORTED, then never try again.
         if (gRailInfo.empty()) {
             ALOGE("power.stats has no rail information");
             gPowerStatsExist = false; // No rail info, so never try again.
             gPowerStatsHal = nullptr;
-            return false;
+            return STATS_PULL_SKIP;
         }
     }
 
     // Pull getEnergyData and write the data out
     const hidl_vec<uint32_t> desiredRailIndices; // Empty vector indicates we want all.
     bool resultSuccess = true;
-    Return<void> ret = gPowerStatsHal->getEnergyData(desiredRailIndices,
-                [&data, wallClockTimestampNs, elapsedTimestampNs, &resultSuccess]
-                (hidl_vec<EnergyData> energyDataList, Status status) {
-                    resultSuccess = (status == Status::SUCCESS);
-                    if (!resultSuccess) return;
+    Return<void> ret =
+            gPowerStatsHal
+                    ->getEnergyData(desiredRailIndices,
+                                    [&data, &resultSuccess](hidl_vec<EnergyData> energyDataList,
+                                                            Status status) {
+                                        resultSuccess = (status == Status::SUCCESS);
+                                        if (!resultSuccess) return;
 
-                    for (size_t i = 0; i < energyDataList.size(); i++) {
-                        const EnergyData& energyData = energyDataList[i];
+                                        for (size_t i = 0; i < energyDataList.size(); i++) {
+                                            const EnergyData& energyData = energyDataList[i];
 
-                        if (energyData.index >= gRailInfo.size()) {
-                            ALOGE("power.stats getEnergyData() returned an invalid rail index %u.",
-                                    energyData.index);
-                            resultSuccess = false;
-                            return;
-                        }
-                        const RailInfo& rail = gRailInfo[energyData.index];
+                                            if (energyData.index >= gRailInfo.size()) {
+                                                ALOGE("power.stats getEnergyData() returned an "
+                                                      "invalid rail index %u.",
+                                                      energyData.index);
+                                                resultSuccess = false;
+                                                return;
+                                            }
+                                            const RailInfo& rail = gRailInfo[energyData.index];
 
-                        auto ptr = make_shared<LogEvent>(android::util::ON_DEVICE_POWER_MEASUREMENT,
-                              wallClockTimestampNs, elapsedTimestampNs);
-                        ptr->write(rail.subsysName);
-                        ptr->write(rail.railName);
-                        ptr->write(energyData.timestamp);
-                        ptr->write(energyData.energy);
-                        ptr->init();
-                        data->push_back(ptr);
+                                            stats_event* event = add_stats_event_to_pull_data(data);
+                                            stats_event_set_atom_id(event,
+                                                                    android::util::ON_DEVICE_POWER_MEASUREMENT);
+                                            stats_event_write_string8(event,
+                                                                      rail.subsysName.c_str());
+                                            stats_event_write_string8(event, rail.railName.c_str());
+                                            stats_event_write_int64(event, energyData.timestamp);
+                                            stats_event_write_int64(event, energyData.energy);
+                                            stats_event_build(event);
 
-                        VLOG("power.stat: %s.%s: %llu, %llu",
-                             rail.subsysName.c_str(),
-                             rail.railName.c_str(),
-                             (unsigned long long)energyData.timestamp,
-                             (unsigned long long)energyData.energy);
-                    }
-                });
+                                            ALOGV("power.stat: %s.%s: %llu, %llu",
+                                                  rail.subsysName.c_str(), rail.railName.c_str(),
+                                                  (unsigned long long)energyData.timestamp,
+                                                  (unsigned long long)energyData.energy);
+                                        }
+                                    });
     if (!resultSuccess || !ret.isOk()) {
         ALOGE("power.stats getEnergyData() failed. Description: %s", ret.description().c_str());
         gPowerStatsHal = nullptr;
-        return false;
+        return STATS_PULL_SKIP;
     }
-    return true;
+    return STATS_PULL_SUCCESS;
 }
 
-}  // namespace statsd
-}  // namespace os
-}  // namespace android
+} // namespace stats
+} // namespace server
+} // namespace android
