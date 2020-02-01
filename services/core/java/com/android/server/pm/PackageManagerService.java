@@ -21231,6 +21231,11 @@ public class PackageManagerService extends IPackageManager.Stub
         long token = Binder.clearCallingIdentity();
         try {
             if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
+                PackageInfo packageInfo = getPackageInfo(packageName, 0, UserHandle.USER_SYSTEM);
+                if (packageInfo != null) {
+                    EventLog.writeEvent(0x534e4554, "145981139", packageInfo.applicationInfo.uid,
+                            "");
+                }
                 return null;
             }
         } finally {
