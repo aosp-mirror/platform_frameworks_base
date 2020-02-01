@@ -36,6 +36,7 @@ import android.content.res.Configuration;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
@@ -138,6 +139,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final int orientation = Configuration.ORIENTATION_PORTRAIT;
         final float scaleFraction = 0.25f;
         final Rect contentInsets = new Rect(1, 2, 3, 4);
+        final Point taskSize = new Point(5, 6);
 
         try {
             ActivityManager.TaskSnapshot.Builder builder =
@@ -151,10 +153,10 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             builder.setOrientation(orientation);
             builder.setContentInsets(contentInsets);
             builder.setIsTranslucent(true);
-            builder.setScaleFraction(0.25f);
             builder.setSnapshot(buffer);
             builder.setIsRealSnapshot(true);
             builder.setPixelFormat(pixelFormat);
+            builder.setTaskSize(taskSize);
 
             // Not part of TaskSnapshot itself, used in screenshot process
             assertEquals(pixelFormat, builder.getPixelFormat());
@@ -166,12 +168,13 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             assertEquals(windowingMode, snapshot.getWindowingMode());
             assertEquals(sRGB, snapshot.getColorSpace());
             assertTrue(snapshot.isLowResolution());
+            assertTrue(builder.isLowResolution());
             assertEquals(orientation, snapshot.getOrientation());
             assertEquals(contentInsets, snapshot.getContentInsets());
             assertTrue(snapshot.isTranslucent());
-            assertEquals(scaleFraction, builder.getScaleFraction(), 0.001f);
             assertSame(buffer, snapshot.getSnapshot());
             assertTrue(snapshot.isRealSnapshot());
+            assertEquals(taskSize, snapshot.getTaskSize());
         } finally {
             if (buffer != null) {
                 buffer.destroy();
@@ -188,11 +191,9 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
         final ActivityManager.TaskSnapshot.Builder builder =
                 new ActivityManager.TaskSnapshot.Builder();
-        final float scaleFraction = 0.8f;
         mWm.mTaskSnapshotController.prepareTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
-                scaleFraction, PixelFormat.UNKNOWN, builder);
+                PixelFormat.UNKNOWN, builder);
 
-        assertEquals(scaleFraction, builder.getScaleFraction(), 0 /* delta */);
         // The pixel format should be selected automatically.
         assertNotEquals(PixelFormat.UNKNOWN, builder.getPixelFormat());
     }

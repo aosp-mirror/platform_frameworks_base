@@ -343,6 +343,8 @@ class TaskSnapshotPersister {
             final TaskSnapshotProto proto = new TaskSnapshotProto();
             proto.orientation = mSnapshot.getOrientation();
             proto.rotation = mSnapshot.getRotation();
+            proto.taskWidth = mSnapshot.getTaskSize().x;
+            proto.taskHeight = mSnapshot.getTaskSize().y;
             proto.insetLeft = mSnapshot.getContentInsets().left;
             proto.insetTop = mSnapshot.getContentInsets().top;
             proto.insetRight = mSnapshot.getContentInsets().right;
@@ -352,7 +354,6 @@ class TaskSnapshotPersister {
             proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
             proto.isTranslucent = mSnapshot.isTranslucent();
             proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
-            proto.scale = mSnapshot.getScale();
             proto.id = mSnapshot.getId();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = getProtoFile(mTaskId, mUserId);

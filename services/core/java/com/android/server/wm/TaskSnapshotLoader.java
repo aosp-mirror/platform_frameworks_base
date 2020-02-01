@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
@@ -26,6 +27,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.GraphicBuffer;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Slog;
 
@@ -45,6 +47,9 @@ import java.nio.file.Files;
 class TaskSnapshotLoader {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotLoader" : TAG_WM;
+
+    private static final float LEGACY_REDUCED_SCALE =
+            ActivityManager.isLowRamDeviceStatic() ? 0.6f : 0.5f;
 
     private final TaskSnapshotPersister mPersister;
 
@@ -99,13 +104,25 @@ class TaskSnapshotLoader {
 
             final ComponentName topActivityComponent = ComponentName.unflattenFromString(
                     proto.topActivityComponent);
+
             // For legacy snapshots, restore the scale based on the reduced resolution state
-            final float legacyScale = isLowResolution ? mPersister.getLowResScale() : 1f;
-            final float scale = Float.compare(proto.scale, 0f) != 0 ? proto.scale : legacyScale;
+            Point taskSize;
+            if (proto.taskWidth == 0) {
+                // For legacy snapshots, restore the scale based on the reduced resolution state
+                final float preQLegacyScale = isLowResolution ? LEGACY_REDUCED_SCALE : 1f;
+                final float scale = Float.compare(proto.legacyScale, 0f) != 0
+                        ? proto.legacyScale : preQLegacyScale;
+                int taskWidth = (int) ((float) hwBitmap.getWidth() / scale);
+                int taskHeight = (int) ((float) hwBitmap.getHeight() / scale);
+                taskSize = new Point(taskWidth, taskHeight);
+            } else {
+                taskSize = new Point(proto.taskWidth, proto.taskHeight);
+            }
+
             return new TaskSnapshot(proto.id, topActivityComponent, buffer, hwBitmap.getColorSpace(),
-                    proto.orientation, proto.rotation,
+                    proto.orientation, proto.rotation, taskSize,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
-                    isLowResolution, scale, proto.isRealSnapshot, proto.windowingMode,
+                    isLowResolution, proto.isRealSnapshot, proto.windowingMode,
                     proto.systemUiVisibility, proto.isTranslucent);
         } catch (IOException e) {
             Slog.w(TAG, "Unable to load task snapshot data for taskId=" + taskId);

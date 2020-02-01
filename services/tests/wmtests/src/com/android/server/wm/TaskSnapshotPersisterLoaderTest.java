@@ -150,7 +150,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testLowResolutionPersistAndLoadSnapshot() {
         TaskSnapshot a = new TaskSnapshotBuilder()
-                .setScale(0.5f)
+                .setScaleFraction(0.5f)
                 .setIsLowResolution(true)
                 .build();
         assertTrue(a.isLowResolution());
@@ -271,13 +271,11 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testScalePersistAndLoadSnapshot() {
         TaskSnapshot a = new TaskSnapshotBuilder()
-                .setScale(0.25f)
+                .setScaleFraction(0.25f)
                 .build();
         TaskSnapshot b = new TaskSnapshotBuilder()
-                .setScale(0.75f)
+                .setScaleFraction(0.75f)
                 .build();
-        assertEquals(0.25f, a.getScale(), 1E-5);
-        assertEquals(0.75f, b.getScale(), 1E-5);
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
         mPersister.waitForQueueEmpty();
@@ -287,8 +285,6 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 false /* isLowResolution */);
         assertNotNull(snapshotA);
         assertNotNull(snapshotB);
-        assertEquals(0.25f, snapshotA.getScale(), 1E-5);
-        assertEquals(0.75f, snapshotB.getScale(), 1E-5);
     }
 
     @Test
