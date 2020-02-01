@@ -86,9 +86,9 @@ public interface WindowInsetsAnimationCallback {
      * following:
      * <p>
      * <ul>
-     *     <li>Application calls {@link WindowInsetsController#hideInputMethod()},
-     *     {@link WindowInsetsController#showInputMethod()},
-     *     {@link WindowInsetsController#controlInputMethodAnimation}</li>
+     *     <li>Application calls {@link WindowInsetsController#hide(int)},
+     *     {@link WindowInsetsController#show(int)},
+     *     {@link WindowInsetsController#controlWindowInsetsAnimation}</li>
      *     <li>onPrepare is called on the view hierarchy listeners</li>
      *     <li>{@link View#onApplyWindowInsets} will be called with the end state of the
      *     animation</li>
@@ -106,12 +106,12 @@ public interface WindowInsetsAnimationCallback {
      * related methods.
      * <p>
      * Note: If the animation is application controlled by using
-     * {@link WindowInsetsController#controlInputMethodAnimation}, the end state of the animation
+     * {@link WindowInsetsController#controlWindowInsetsAnimation}, the end state of the animation
      * is undefined as the application may decide on the end state only by passing in the
      * {@code shown} parameter when calling {@link WindowInsetsAnimationController#finish}. In this
      * situation, the system will dispatch the insets in the opposite visibility state before the
      * animation starts. Example: When controlling the input method with
-     * {@link WindowInsetsController#controlInputMethodAnimation} and the input method is currently
+     * {@link WindowInsetsController#controlWindowInsetsAnimation} and the input method is currently
      * showing, {@link View#onApplyWindowInsets} will receive a {@link WindowInsets} instance for
      * which {@link WindowInsets#isVisible} will return {@code false} for {@link Type#ime}.
      *
@@ -246,7 +246,7 @@ public interface WindowInsetsAnimationCallback {
          * be the same as the application passed into
          * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)},
          * interpolated with the interpolator passed into
-         * {@link WindowInsetsController#controlInputMethodAnimation}.
+         * {@link WindowInsetsController#controlWindowInsetsAnimation}.
          * </p>
          * <p>
          * Note: For system-initiated animations, this will always return a valid value between 0
