@@ -305,11 +305,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         public void onOpChanged(int op, String packageName) {
                             // onOpChanged invoked on ui thread, move to our thread to reduce risk
                             // of blocking ui thread
-                            mHandler.post(() -> {
-                                synchronized (mLock) {
-                                    onAppOpChangedLocked();
-                                }
-                            });
+                            mHandler.post(() -> onAppOpChanged(packageName));
                         }
                     });
             mPackageManager.addOnPermissionsChangeListener(
@@ -392,13 +388,26 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    @GuardedBy("mLock")
-    private void onAppOpChangedLocked() {
-        for (Receiver receiver : mReceivers.values()) {
-            receiver.updateMonitoring(true);
-        }
-        for (LocationProviderManager manager : mProviderManagers) {
-            applyRequirementsLocked(manager);
+    private void onAppOpChanged(String packageName) {
+        synchronized (mLock) {
+            for (Receiver receiver : mReceivers.values()) {
+                if (receiver.mCallerIdentity.mPackageName.equals(packageName)) {
+                    receiver.updateMonitoring(true);
+                }
+            }
+
+            HashSet<String> affectedProviders = new HashSet<>(mRecordsByProvider.size());
+            for (Entry<String, ArrayList<UpdateRecord>> entry : mRecordsByProvider.entrySet()) {
+                String provider = entry.getKey();
+                for (UpdateRecord record : entry.getValue()) {
+                    if (record.mReceiver.mCallerIdentity.mPackageName.equals(packageName)) {
+                        affectedProviders.add(provider);
+                    }
+                }
+            }
+            for (String provider : affectedProviders) {
+                applyRequirementsLocked(provider);
+            }
         }
     }
 
