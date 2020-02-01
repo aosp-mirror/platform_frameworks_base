@@ -210,6 +210,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mListener.onCancelled();
     }
 
+    public boolean isCancelled() {
+        return mCancelled;
+    }
+
     InsetsAnimation getAnimation() {
         return mAnimation;
     }

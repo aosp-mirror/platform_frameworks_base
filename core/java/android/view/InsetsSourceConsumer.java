@@ -17,11 +17,14 @@
 package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
+import static android.view.InsetsState.toPublicType;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.util.MutableShort;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -71,18 +74,48 @@ public class InsetsSourceConsumer {
         mRequestedVisible = InsetsState.getDefaultVisibility(type);
     }
 
-    public void setControl(@Nullable InsetsSourceControl control) {
+    /**
+     * Updates the control delivered from the server.
+
+     * @param showTypes An integer array with a single entry that determines which types a show
+     *                  animation should be run after setting the control.
+     * @param hideTypes An integer array with a single entry that determines which types a hide
+     *                  animation should be run after setting the control.
+     */
+    public void setControl(@Nullable InsetsSourceControl control,
+            @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
         if (mSourceControl == control) {
             return;
         }
         mSourceControl = control;
-        applyHiddenToControl();
+
+        // We are loosing control
+        if (mSourceControl == null) {
+            mController.notifyControlRevoked(this);
+
+            // Restore server visibility.
+            mState.getSource(getType()).setVisible(
+                    mController.getLastDispatchedState().getSource(getType()).isVisible());
+            applyLocalVisibilityOverride();
+            return;
+        }
+
+        // We are gaining control, and need to run an animation since previous state didn't match
+        if (mRequestedVisible != mState.getSource(mType).isVisible()) {
+            if (mRequestedVisible) {
+                showTypes[0] |= toPublicType(getType());
+            } else {
+                hideTypes[0] |= toPublicType(getType());
+            }
+            return;
+        }
+
+        // We are gaining control, but don't need to run an animation. However make sure that the
+        // leash visibility is still up to date.
         if (applyLocalVisibilityOverride()) {
             mController.notifyVisibilityChanged();
         }
-        if (mSourceControl == null) {
-            mController.notifyControlRevoked(this);
-        }
+        applyHiddenToControl();
     }
 
     @VisibleForTesting
@@ -95,7 +128,7 @@ public class InsetsSourceConsumer {
     }
 
     @VisibleForTesting
-    public void show() {
+    public void show(boolean fromIme) {
         setRequestedVisible(true);
     }
 
@@ -172,17 +205,13 @@ public class InsetsSourceConsumer {
      * the moment.
      */
     private void setRequestedVisible(boolean requestedVisible) {
-        if (mRequestedVisible == requestedVisible) {
-            return;
-        }
         mRequestedVisible = requestedVisible;
-        applyLocalVisibilityOverride();
-        mController.notifyVisibilityChanged();
+        if (applyLocalVisibilityOverride()) {
+            mController.notifyVisibilityChanged();
+        }
     }
 
     private void applyHiddenToControl() {
-
-        // TODO: Handle case properly when animation is running already (it shouldn't!)
         if (mSourceControl == null || mSourceControl.getLeash() == null) {
             return;
         }
