@@ -68,6 +68,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -114,20 +115,32 @@ public class BlobStoreManagerService extends SystemService {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final Injector mInjector;
     private final SessionStateChangeListener mSessionStateChangeListener =
             new SessionStateChangeListener();
 
     private PackageManagerInternal mPackageManagerInternal;
 
     public BlobStoreManagerService(Context context) {
-        super(context);
-        mContext = context;
+        this(context, new Injector());
+    }
 
+    @VisibleForTesting
+    BlobStoreManagerService(Context context, Injector injector) {
+        super(context);
+
+        mContext = context;
+        mInjector = injector;
+        mHandler = mInjector.initializeMessageHandler();
+    }
+
+    private static Handler initializeMessageHandler() {
         final HandlerThread handlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
         handlerThread.start();
-        mHandler = new Handler(handlerThread.getLooper());
-        Watchdog.getInstance().addThread(mHandler);
+        final Handler handler = new Handler(handlerThread.getLooper());
+        Watchdog.getInstance().addThread(handler);
+        return handler;
     }
 
     @Override
@@ -181,6 +194,20 @@ public class BlobStoreManagerService extends SystemService {
             mBlobsMap.put(userId, userBlobs);
         }
         return userBlobs;
+    }
+
+    @VisibleForTesting
+    void addUserSessionsForTest(LongSparseArray<BlobStoreSession> userSessions, int userId) {
+        synchronized (mBlobsLock) {
+            mSessions.put(userId, userSessions);
+        }
+    }
+
+    @VisibleForTesting
+    void addUserBlobsForTest(ArrayMap<BlobHandle, BlobMetadata> userBlobs, int userId) {
+        synchronized (mBlobsLock) {
+            mBlobsMap.put(userId, userBlobs);
+        }
     }
 
     private long createSessionInternal(BlobHandle blobHandle,
@@ -295,23 +322,23 @@ public class BlobStoreManagerService extends SystemService {
                 case STATE_ABANDONED:
                 case STATE_VERIFIED_INVALID:
                     session.getSessionFile().delete();
-                    getUserSessionsLocked(UserHandle.getUserId(session.ownerUid))
-                            .remove(session.sessionId);
+                    getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
+                            .remove(session.getSessionId());
                     break;
                 case STATE_COMMITTED:
                     session.verifyBlobData();
                     break;
                 case STATE_VERIFIED_VALID:
-                    final int userId = UserHandle.getUserId(session.ownerUid);
+                    final int userId = UserHandle.getUserId(session.getOwnerUid());
                     final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(userId);
-                    BlobMetadata blob = userBlobs.get(session.blobHandle);
+                    BlobMetadata blob = userBlobs.get(session.getBlobHandle());
                     if (blob == null) {
                         blob = new BlobMetadata(mContext,
-                                session.sessionId, session.blobHandle, userId);
-                        userBlobs.put(session.blobHandle, blob);
+                                session.getSessionId(), session.getBlobHandle(), userId);
+                        userBlobs.put(session.getBlobHandle(), blob);
                     }
-                    final Committer newCommitter = new Committer(session.ownerPackageName,
-                            session.ownerUid, session.getBlobAccessMode());
+                    final Committer newCommitter = new Committer(session.getOwnerPackageName(),
+                            session.getOwnerUid(), session.getBlobAccessMode());
                     final Committer existingCommitter = blob.getExistingCommitter(newCommitter);
                     blob.addCommitter(newCommitter);
                     try {
@@ -321,8 +348,8 @@ public class BlobStoreManagerService extends SystemService {
                         blob.addCommitter(existingCommitter);
                         session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
                     }
-                    getUserSessionsLocked(UserHandle.getUserId(session.ownerUid))
-                            .remove(session.sessionId);
+                    getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
+                            .remove(session.getSessionId());
                     break;
                 default:
                     Slog.wtf(TAG, "Invalid session state: "
@@ -401,17 +428,17 @@ public class BlobStoreManagerService extends SystemService {
                         continue;
                     }
                     final SparseArray<String> userPackages = allPackages.get(
-                            UserHandle.getUserId(session.ownerUid));
+                            UserHandle.getUserId(session.getOwnerUid()));
                     if (userPackages != null
-                            && session.ownerPackageName.equals(
-                                    userPackages.get(session.ownerUid))) {
-                        getUserSessionsLocked(UserHandle.getUserId(session.ownerUid)).put(
-                                session.sessionId, session);
+                            && session.getOwnerPackageName().equals(
+                                    userPackages.get(session.getOwnerUid()))) {
+                        getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid())).put(
+                                session.getSessionId(), session);
                     } else {
                         // Unknown package or the session data does not belong to this package.
                         session.getSessionFile().delete();
                     }
-                    mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, session.sessionId);
+                    mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, session.getSessionId());
                 }
             }
         } catch (Exception e) {
@@ -570,7 +597,7 @@ public class BlobStoreManagerService extends SystemService {
         return new AtomicFile(file, "blobs_index" /* commitLogTag */);
     }
 
-    private void handlePackageRemoved(String packageName, int uid) {
+    void handlePackageRemoved(String packageName, int uid) {
         synchronized (mBlobsLock) {
             // Clean up any pending sessions
             final LongSparseArray<BlobStoreSession> userSessions =
@@ -578,25 +605,35 @@ public class BlobStoreManagerService extends SystemService {
             final ArrayList<Integer> indicesToRemove = new ArrayList<>();
             for (int i = 0, count = userSessions.size(); i < count; ++i) {
                 final BlobStoreSession session = userSessions.valueAt(i);
-                if (session.ownerUid == uid
-                        && session.ownerPackageName.equals(packageName)) {
+                if (session.getOwnerUid() == uid
+                        && session.getOwnerPackageName().equals(packageName)) {
                     session.getSessionFile().delete();
                     indicesToRemove.add(i);
                 }
             }
             for (int i = 0, count = indicesToRemove.size(); i < count; ++i) {
-                userSessions.removeAt(i);
+                userSessions.removeAt(indicesToRemove.get(i));
             }
+            writeBlobSessionsAsync();
 
             // Remove the package from the committer and leasee list
             final ArrayMap<BlobHandle, BlobMetadata> userBlobs =
                     getUserBlobsLocked(UserHandle.getUserId(uid));
+            indicesToRemove.clear();
             for (int i = 0, count = userBlobs.size(); i < count; ++i) {
                 final BlobMetadata blobMetadata = userBlobs.valueAt(i);
                 blobMetadata.removeCommitter(packageName, uid);
                 blobMetadata.removeLeasee(packageName, uid);
+                // Delete the blob if it doesn't have any active leases.
+                if (!blobMetadata.hasLeases()) {
+                    blobMetadata.getBlobFile().delete();
+                    indicesToRemove.add(i);
+                }
             }
-            // TODO: clean-up blobs which doesn't have any active leases.
+            for (int i = 0, count = indicesToRemove.size(); i < count; ++i) {
+                userBlobs.removeAt(indicesToRemove.get(i));
+            }
+            writeBlobsInfoAsync();
         }
     }
 
@@ -812,6 +849,13 @@ public class BlobStoreManagerService extends SystemService {
                     fout.decreaseIndent();
                 }
             }
+        }
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        public Handler initializeMessageHandler() {
+            return BlobStoreManagerService.initializeMessageHandler();
         }
     }
 }

@@ -156,6 +156,12 @@ class BlobMetadata {
         }
     }
 
+    boolean hasLeases() {
+        synchronized (mMetadataLock) {
+            return mLeasees.isEmpty();
+        }
+    }
+
     boolean isAccessAllowedForCaller(String callingPackage, int callingUid) {
         // TODO: verify blob is still valid (expiryTime is not elapsed)
         synchronized (mMetadataLock) {
