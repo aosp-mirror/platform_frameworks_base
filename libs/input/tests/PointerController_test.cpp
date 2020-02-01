@@ -39,8 +39,8 @@ enum TestCursorType {
 
 using ::testing::AllOf;
 using ::testing::Field;
-using ::testing::NiceMock;
 using ::testing::Mock;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::Test;
 
@@ -57,12 +57,20 @@ public:
     virtual int32_t getDefaultPointerIconId() override;
     virtual int32_t getCustomPointerIconId() override;
 
+    bool allResourcesAreLoaded();
+    bool noResourcesAreLoaded();
+
 private:
     void loadPointerIconForType(SpriteIcon* icon, int32_t cursorType);
+
+    bool pointerIconLoaded{false};
+    bool pointerResourcesLoaded{false};
+    bool additionalMouseResourcesLoaded{false};
 };
 
 void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, int32_t) {
     loadPointerIconForType(icon, CURSOR_TYPE_DEFAULT);
+    pointerIconLoaded = true;
 }
 
 void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources* outResources,
@@ -70,6 +78,7 @@ void MockPointerControllerPolicyInterface::loadPointerResources(PointerResources
     loadPointerIconForType(&outResources->spotHover, CURSOR_TYPE_HOVER);
     loadPointerIconForType(&outResources->spotTouch, CURSOR_TYPE_TOUCH);
     loadPointerIconForType(&outResources->spotAnchor, CURSOR_TYPE_ANCHOR);
+    pointerResourcesLoaded = true;
 }
 
 void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
@@ -91,6 +100,8 @@ void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
     anim.durationPerFrame = 10;
     (*outResources)[cursorType] = icon;
     (*outAnimationResources)[cursorType] = anim;
+
+    additionalMouseResourcesLoaded = true;
 }
 
 int32_t MockPointerControllerPolicyInterface::getDefaultPointerIconId() {
@@ -101,17 +112,26 @@ int32_t MockPointerControllerPolicyInterface::getCustomPointerIconId() {
     return CURSOR_TYPE_CUSTOM;
 }
 
+bool MockPointerControllerPolicyInterface::allResourcesAreLoaded() {
+    return pointerIconLoaded && pointerResourcesLoaded && additionalMouseResourcesLoaded;
+}
+
+bool MockPointerControllerPolicyInterface::noResourcesAreLoaded() {
+    return !(pointerIconLoaded || pointerResourcesLoaded || additionalMouseResourcesLoaded);
+}
+
 void MockPointerControllerPolicyInterface::loadPointerIconForType(SpriteIcon* icon, int32_t type) {
     icon->style = type;
     std::pair<float, float> hotSpot = getHotSpotCoordinatesForType(type);
     icon->hotSpotX = hotSpot.first;
     icon->hotSpotY = hotSpot.second;
 }
-
 class PointerControllerTest : public Test {
 protected:
     PointerControllerTest();
     ~PointerControllerTest();
+
+    void ensureDisplayViewportIsSet();
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
@@ -141,7 +161,14 @@ PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<Moc
             .WillOnce(Return(mPointerSprite));
 
     mPointerController = new PointerController(mPolicy, mLooper, mSpriteController);
+}
 
+PointerControllerTest::~PointerControllerTest() {
+    mRunning.store(false, std::memory_order_relaxed);
+    mThread.join();
+}
+
+void PointerControllerTest::ensureDisplayViewportIsSet() {
     DisplayViewport viewport;
     viewport.displayId = ADISPLAY_ID_DEFAULT;
     viewport.logicalRight = 1600;
@@ -151,11 +178,9 @@ PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<Moc
     viewport.deviceWidth = 400;
     viewport.deviceHeight = 300;
     mPointerController->setDisplayViewport(viewport);
-}
 
-PointerControllerTest::~PointerControllerTest() {
-    mRunning.store(false, std::memory_order_relaxed);
-    mThread.join();
+    // The first call to setDisplayViewport should trigger the loading of the necessary resources.
+    EXPECT_TRUE(mPolicy->allResourcesAreLoaded());
 }
 
 void PointerControllerTest::loopThread() {
@@ -167,6 +192,7 @@ void PointerControllerTest::loopThread() {
 }
 
 TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
+    ensureDisplayViewportIsSet();
     mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
 
     std::pair<float, float> hotspot = getHotSpotCoordinatesForType(CURSOR_TYPE_DEFAULT);
@@ -181,6 +207,7 @@ TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
 }
 
 TEST_F(PointerControllerTest, updatePointerIcon) {
+    ensureDisplayViewportIsSet();
     mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
 
     int32_t type = CURSOR_TYPE_ADDITIONAL;
@@ -196,6 +223,7 @@ TEST_F(PointerControllerTest, updatePointerIcon) {
 }
 
 TEST_F(PointerControllerTest, setCustomPointerIcon) {
+    ensureDisplayViewportIsSet();
     mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
 
     int32_t style = CURSOR_TYPE_CUSTOM;
@@ -215,6 +243,20 @@ TEST_F(PointerControllerTest, setCustomPointerIcon) {
                     Field(&SpriteIcon::hotSpotX, hotSpotX),
                     Field(&SpriteIcon::hotSpotY, hotSpotY))));
     mPointerController->setCustomPointerIcon(icon);
+}
+
+TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
+    mPointerController->setPresentation(PointerController::PRESENTATION_POINTER);
+    mPointerController->setSpots(nullptr, nullptr, BitSet32(), -1);
+    mPointerController->clearSpots();
+    mPointerController->setPosition(1.0f, 1.0f);
+    mPointerController->move(1.0f, 1.0f);
+    mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
+    mPointerController->fade(PointerController::TRANSITION_IMMEDIATE);
+
+    EXPECT_TRUE(mPolicy->noResourcesAreLoaded());
+
+    ensureDisplayViewportIsSet();
 }
 
 }  // namespace android

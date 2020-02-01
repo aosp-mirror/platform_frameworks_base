@@ -257,19 +257,24 @@ void PointerController::unfade(Transition transition) {
 void PointerController::setPresentation(Presentation presentation) {
     AutoMutex _l(mLock);
 
-    if (presentation == PRESENTATION_POINTER && mLocked.additionalMouseResources.empty()) {
-        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
-                &mLocked.animationResources, mLocked.viewport.displayId);
+    if (mLocked.presentation == presentation) {
+        return;
     }
 
-    if (mLocked.presentation != presentation) {
-        mLocked.presentation = presentation;
-        mLocked.presentationChanged = true;
+    mLocked.presentation = presentation;
+    mLocked.presentationChanged = true;
 
-        if (presentation != PRESENTATION_SPOT) {
-            fadeOutAndReleaseAllSpotsLocked();
+    if (!mLocked.viewport.isValid()) {
+        return;
+    }
+
+    if (presentation == PRESENTATION_POINTER) {
+        if (mLocked.additionalMouseResources.empty()) {
+            mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
+                                                  &mLocked.animationResources,
+                                                  mLocked.viewport.displayId);
         }
-
+        fadeOutAndReleaseAllSpotsLocked();
         updatePointerLocked();
     }
 }
@@ -291,6 +296,9 @@ void PointerController::setSpots(const PointerCoords* spotCoords,
 #endif
 
     AutoMutex _l(mLock);
+    if (!mLocked.viewport.isValid()) {
+        return;
+    }
 
     std::vector<Spot*> newSpots;
     std::map<int32_t, std::vector<Spot*>>::const_iterator iter =
@@ -337,6 +345,9 @@ void PointerController::clearSpots() {
 #endif
 
     AutoMutex _l(mLock);
+    if (!mLocked.viewport.isValid()) {
+        return;
+    }
 
     fadeOutAndReleaseAllSpotsLocked();
 }
@@ -758,6 +769,10 @@ void PointerController::fadeOutAndReleaseAllSpotsLocked() {
 }
 
 void PointerController::loadResourcesLocked() REQUIRES(mLock) {
+    if (!mLocked.viewport.isValid()) {
+        return;
+    }
+
     mPolicy->loadPointerResources(&mResources, mLocked.viewport.displayId);
     mPolicy->loadPointerIcon(&mLocked.pointerIcon, mLocked.viewport.displayId);
 
