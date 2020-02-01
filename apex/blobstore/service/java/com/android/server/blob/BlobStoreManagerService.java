@@ -40,6 +40,7 @@ import android.annotation.IdRes;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.blob.BlobHandle;
 import android.app.blob.IBlobStoreManager;
 import android.app.blob.IBlobStoreSession;
@@ -69,6 +70,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -120,6 +122,9 @@ public class BlobStoreManagerService extends SystemService {
             new SessionStateChangeListener();
 
     private PackageManagerInternal mPackageManagerInternal;
+
+    private final Runnable mSaveBlobsInfoRunnable = this::writeBlobsInfo;
+    private final Runnable mSaveSessionsRunnable = this::writeBlobSessions;
 
     public BlobStoreManagerService(Context context) {
         this(context, new Injector());
@@ -533,9 +538,9 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private void writeBlobsInfoAsync() {
-        mHandler.post(PooledLambda.obtainRunnable(
-                BlobStoreManagerService::writeBlobsInfo,
-                BlobStoreManagerService.this).recycleOnUse());
+        if (!mHandler.hasCallbacks(mSaveBlobsInfoRunnable)) {
+            mHandler.post(mSaveBlobsInfoRunnable);
+        }
     }
 
     private void writeBlobSessions() {
@@ -549,9 +554,9 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private void writeBlobSessionsAsync() {
-        mHandler.post(PooledLambda.obtainRunnable(
-                BlobStoreManagerService::writeBlobSessions,
-                BlobStoreManagerService.this).recycleOnUse());
+        if (!mHandler.hasCallbacks(mSaveSessionsRunnable)) {
+            mHandler.post(mSaveSessionsRunnable);
+        }
     }
 
     private int getPackageUid(String packageName, int userId) {
@@ -597,6 +602,7 @@ public class BlobStoreManagerService extends SystemService {
         return new AtomicFile(file, "blobs_index" /* commitLogTag */);
     }
 
+    @VisibleForTesting
     void handlePackageRemoved(String packageName, int uid) {
         synchronized (mBlobsLock) {
             // Clean up any pending sessions
@@ -656,6 +662,80 @@ public class BlobStoreManagerService extends SystemService {
                     blobMetadata.getBlobFile().delete();
                 }
             }
+        }
+    }
+
+    void runClearAllSessions(@UserIdInt int userId) {
+        synchronized (mBlobsLock) {
+            if (userId == UserHandle.USER_ALL) {
+                mSessions.clear();
+            } else {
+                mSessions.remove(userId);
+            }
+            writeBlobSessionsAsync();
+        }
+    }
+
+    void runClearAllBlobs(@UserIdInt int userId) {
+        synchronized (mBlobsLock) {
+            if (userId == UserHandle.USER_ALL) {
+                mBlobsMap.clear();
+            } else {
+                mBlobsMap.remove(userId);
+            }
+            writeBlobsInfoAsync();
+        }
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void dumpSessionsLocked(IndentingPrintWriter fout, DumpArgs dumpArgs) {
+        for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
+            final int userId = mSessions.keyAt(i);
+            if (!dumpArgs.shouldDumpUser(userId)) {
+                continue;
+            }
+            final LongSparseArray<BlobStoreSession> userSessions = mSessions.valueAt(i);
+            fout.println("List of sessions in user #"
+                    + userId + " (" + userSessions.size() + "):");
+            fout.increaseIndent();
+            for (int j = 0, sessionsCount = userSessions.size(); j < sessionsCount; ++j) {
+                final long sessionId = userSessions.keyAt(j);
+                final BlobStoreSession session = userSessions.valueAt(j);
+                if (!dumpArgs.shouldDumpSession(session.getOwnerPackageName(),
+                        session.getOwnerUid(), session.getSessionId())) {
+                    continue;
+                }
+                fout.println("Session #" + sessionId);
+                fout.increaseIndent();
+                session.dump(fout, dumpArgs);
+                fout.decreaseIndent();
+            }
+            fout.decreaseIndent();
+        }
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void dumpBlobsLocked(IndentingPrintWriter fout, DumpArgs dumpArgs) {
+        for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
+            final int userId = mBlobsMap.keyAt(i);
+            if (!dumpArgs.shouldDumpUser(userId)) {
+                continue;
+            }
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
+            fout.println("List of blobs in user #"
+                    + userId + " (" + userBlobs.size() + "):");
+            fout.increaseIndent();
+            for (int j = 0, blobsCount = userBlobs.size(); j < blobsCount; ++j) {
+                final BlobMetadata blobMetadata = userBlobs.valueAt(j);
+                if (!dumpArgs.shouldDumpBlob(blobMetadata.blobId)) {
+                    continue;
+                }
+                fout.println("Blob #" + blobMetadata.blobId);
+                fout.increaseIndent();
+                blobMetadata.dump(fout, dumpArgs);
+                fout.decreaseIndent();
+            }
+            fout.decreaseIndent();
         }
     }
 
@@ -808,47 +888,157 @@ public class BlobStoreManagerService extends SystemService {
         public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
                 @Nullable String[] args) {
             // TODO: add proto-based version of this.
-            if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, writer)) return;
+
+            final DumpArgs dumpArgs = DumpArgs.parse(args);
 
             final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "    ");
             synchronized (mBlobsLock) {
                 fout.println("mCurrentMaxSessionId: " + mCurrentMaxSessionId);
                 fout.println();
-                for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
-                    final int userId = mSessions.keyAt(i);
-                    final LongSparseArray<BlobStoreSession> userSessions = mSessions.valueAt(i);
-                    fout.println("List of sessions in user #"
-                            + userId + " (" + userSessions.size() + "):");
-                    fout.increaseIndent();
-                    for (int j = 0, sessionsCount = userSessions.size(); j < sessionsCount; ++j) {
-                        final long sessionId = userSessions.keyAt(j);
-                        final BlobStoreSession session = userSessions.valueAt(j);
-                        fout.println("Session #" + sessionId);
-                        fout.increaseIndent();
-                        session.dump(fout);
-                        fout.decreaseIndent();
-                    }
-                    fout.decreaseIndent();
+
+                if (dumpArgs.shouldDumpSessions()) {
+                    dumpSessionsLocked(fout, dumpArgs);
+                    fout.println();
                 }
-
-                fout.print("\n\n");
-
-                for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
-                    final int userId = mBlobsMap.keyAt(i);
-                    final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
-                    fout.println("List of blobs in user #"
-                            + userId + " (" + userBlobs.size() + "):");
-                    fout.increaseIndent();
-                    for (int j = 0, blobsCount = userBlobs.size(); j < blobsCount; ++j) {
-                        final BlobMetadata blobMetadata = userBlobs.valueAt(j);
-                        fout.println("Blob #" + blobMetadata.blobId);
-                        fout.increaseIndent();
-                        blobMetadata.dump(fout);
-                        fout.decreaseIndent();
-                    }
-                    fout.decreaseIndent();
+                if (dumpArgs.shouldDumpBlobs()) {
+                    dumpBlobsLocked(fout, dumpArgs);
+                    fout.println();
                 }
             }
+        }
+
+        @Override
+        public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+                @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+                @NonNull String[] args) {
+            return (new BlobStoreManagerShellCommand(BlobStoreManagerService.this)).exec(this,
+                    in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
+        }
+    }
+
+    static final class DumpArgs {
+        private boolean mDumpFull;
+        private final ArrayList<String> mDumpPackages = new ArrayList<>();
+        private final ArrayList<Integer> mDumpUids = new ArrayList<>();
+        private final ArrayList<Integer> mDumpUserIds = new ArrayList<>();
+        private final ArrayList<Long> mDumpBlobIds = new ArrayList<>();
+        private boolean mDumpOnlySelectedSections;
+        private boolean mDumpSessions;
+        private boolean mDumpBlobs;
+
+        public boolean shouldDumpSession(String packageName, int uid, long blobId) {
+            if (!CollectionUtils.isEmpty(mDumpPackages)
+                    && mDumpPackages.indexOf(packageName) < 0) {
+                return false;
+            }
+            if (!CollectionUtils.isEmpty(mDumpUids)
+                    && mDumpUids.indexOf(uid) < 0) {
+                return false;
+            }
+            if (!CollectionUtils.isEmpty(mDumpBlobIds)
+                    && mDumpBlobIds.indexOf(blobId) < 0) {
+                return false;
+            }
+            return true;
+        }
+
+        public boolean shouldDumpSessions() {
+            if (!mDumpOnlySelectedSections) {
+                return true;
+            }
+            return mDumpSessions;
+        }
+
+        public boolean shouldDumpBlobs() {
+            if (!mDumpOnlySelectedSections) {
+                return true;
+            }
+            return mDumpBlobs;
+        }
+
+        public boolean shouldDumpBlob(long blobId) {
+            return CollectionUtils.isEmpty(mDumpBlobIds)
+                    || mDumpBlobIds.indexOf(blobId) >= 0;
+        }
+
+        public boolean shouldDumpFull() {
+            return mDumpFull;
+        }
+
+        public boolean shouldDumpUser(int userId) {
+            return CollectionUtils.isEmpty(mDumpUserIds)
+                    || mDumpUserIds.indexOf(userId) >= 0;
+        }
+
+        private DumpArgs() {}
+
+        public static DumpArgs parse(String[] args) {
+            final DumpArgs dumpArgs = new DumpArgs();
+            if (args == null) {
+                return dumpArgs;
+            }
+
+            for (int i = 0; i < args.length; ++i) {
+                final String opt = args[i];
+                if ("--full".equals(opt) || "-f".equals(opt)) {
+                    final int callingUid = Binder.getCallingUid();
+                    if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+                        dumpArgs.mDumpFull = true;
+                    }
+                } else if ("--sessions".equals(opt)) {
+                    dumpArgs.mDumpOnlySelectedSections = true;
+                    dumpArgs.mDumpSessions = true;
+                } else if ("--blobs".equals(opt)) {
+                    dumpArgs.mDumpOnlySelectedSections = true;
+                    dumpArgs.mDumpBlobs = true;
+                } else if ("--package".equals(opt) || "-p".equals(opt)) {
+                    dumpArgs.mDumpPackages.add(getStringArgRequired(args, ++i, "packageName"));
+                } else if ("--uid".equals(opt) || "-u".equals(opt)) {
+                    dumpArgs.mDumpUids.add(getIntArgRequired(args, ++i, "uid"));
+                } else if ("--user".equals(opt)) {
+                    dumpArgs.mDumpUserIds.add(getIntArgRequired(args, ++i, "userId"));
+                } else if ("--blob".equals(opt) || "-b".equals(opt)) {
+                    dumpArgs.mDumpBlobIds.add(getLongArgRequired(args, ++i, "blobId"));
+                } else {
+                    // Everything else is assumed to be blob ids.
+                    dumpArgs.mDumpBlobIds.add(getLongArgRequired(args, i, "blobId"));
+                }
+            }
+            return dumpArgs;
+        }
+
+        private static String getStringArgRequired(String[] args, int index, String argName) {
+            if (index >= args.length) {
+                throw new IllegalArgumentException("Missing " + argName);
+            }
+            return args[index];
+        }
+
+        private static int getIntArgRequired(String[] args, int index, String argName) {
+            if (index >= args.length) {
+                throw new IllegalArgumentException("Missing " + argName);
+            }
+            final int value;
+            try {
+                value = Integer.parseInt(args[index]);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid " + argName + ": " + args[index]);
+            }
+            return value;
+        }
+
+        private static long getLongArgRequired(String[] args, int index, String argName) {
+            if (index >= args.length) {
+                throw new IllegalArgumentException("Missing " + argName);
+            }
+            final long value;
+            try {
+                value = Long.parseLong(args[index]);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid " + argName + ": " + args[index]);
+            }
+            return value;
         }
     }
 
