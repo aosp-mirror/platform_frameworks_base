@@ -22,15 +22,6 @@ namespace android {
 namespace stats_log_api_gen {
 
 #if !defined(STATS_SCHEMA_LEGACY)
-static void write_native_key_value_pairs_for_type(FILE* out, const int argIndex,
-        const int typeIndex, const string& type, const string& valueFieldName) {
-    fprintf(out, "    for (const auto& it : arg%d_%d) {\n", argIndex, typeIndex);
-    fprintf(out, "        pairs.push_back("
-            "{ .key = it.first, .valueType = %s, .%s = it.second });\n",
-            type.c_str(), valueFieldName.c_str());
-    fprintf(out, "    }\n");
-
-}
 
 static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
         const AtomDecl& attributionDecl, const string& moduleName, const bool supportQ) {
@@ -41,7 +32,10 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
             continue;
         }
         vector<java_type_t> signature = signature_to_modules_it->first;
-
+        // Key value pairs not supported in native.
+        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+            continue;
+        }
         write_native_method_signature(out, "int stats_write", signature,
                 attributionDecl, " {");
 
@@ -59,11 +53,6 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                                 uidName, uidName, tagName);
                         break;
                     }
-                    case JAVA_TYPE_KEY_VALUE_PAIR:
-                        fprintf(out, "    event.writeKeyValuePairs("
-                                "arg%d_1, arg%d_2, arg%d_3, arg%d_4);\n",
-                                argIndex, argIndex, argIndex, argIndex);
-                        break;
                     case JAVA_TYPE_BYTE_ARRAY:
                         fprintf(out, "    event.writeByteArray(arg%d.arg, arg%d.arg_length);\n",
                                 argIndex, argIndex);
@@ -85,7 +74,7 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                         fprintf(out, "    event.writeString(arg%d);\n", argIndex);
                         break;
                     default:
-                        // Unsupported types: OBJECT, DOUBLE.
+                        // Unsupported types: OBJECT, DOUBLE, KEY_VALUE_PAIRS.
                         fprintf(stderr, "Encountered unsupported type.");
                         return 1;
                 }
@@ -93,8 +82,8 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
             }
             fprintf(out, "    return event.writeToSocket();\n");
         } else {
-            fprintf(out, "    struct stats_event* event = stats_event_obtain();\n");
-            fprintf(out, "    stats_event_set_atom_id(event, code);\n");
+            fprintf(out, "    AStatsEvent* event = AStatsEvent_obtain();\n");
+            fprintf(out, "    AStatsEvent_setAtomId(event, code);\n");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
                     arg != signature.end(); arg++) {
                 switch (*arg) {
@@ -102,57 +91,43 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                         const char* uidName = attributionDecl.fields.front().name.c_str();
                         const char* tagName = attributionDecl.fields.back().name.c_str();
                         fprintf(out,
-                                "    stats_event_write_attribution_chain(event, "
+                                "    AStatsEvent_writeAttributionChain(event, "
                                 "reinterpret_cast<const uint32_t*>(%s), %s.data(), "
                                 "static_cast<uint8_t>(%s_length));\n",
                                 uidName, tagName, uidName);
                         break;
                     }
-                    case JAVA_TYPE_KEY_VALUE_PAIR:
-                        fprintf(out, "    std::vector<key_value_pair> pairs;\n");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 1, "INT32_TYPE", "int32Value");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 2, "INT64_TYPE", "int64Value");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 3, "STRING_TYPE", "stringValue");
-                        write_native_key_value_pairs_for_type(
-                                out, argIndex, 4, "FLOAT_TYPE", "floatValue");
-                        fprintf(out,
-                                "    stats_event_write_key_value_pairs(event, pairs.data(), "
-                                "static_cast<uint8_t>(pairs.size()));\n");
-                        break;
                     case JAVA_TYPE_BYTE_ARRAY:
                         fprintf(out,
-                                "    stats_event_write_byte_array(event, "
+                                "    AStatsEvent_writeByteArray(event, "
                                 "reinterpret_cast<const uint8_t*>(arg%d.arg), arg%d.arg_length);\n",
                                 argIndex, argIndex);
                         break;
                     case JAVA_TYPE_BOOLEAN:
-                        fprintf(out, "    stats_event_write_bool(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeBool(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_INT: // Fall through.
                     case JAVA_TYPE_ENUM:
-                        fprintf(out, "    stats_event_write_int32(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeInt32(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_FLOAT:
-                        fprintf(out, "    stats_event_write_float(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeFloat(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_LONG:
-                        fprintf(out, "    stats_event_write_int64(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeInt64(event, arg%d);\n", argIndex);
                         break;
                     case JAVA_TYPE_STRING:
-                        fprintf(out, "    stats_event_write_string8(event, arg%d);\n", argIndex);
+                        fprintf(out, "    AStatsEvent_writeString(event, arg%d);\n", argIndex);
                         break;
                     default:
-                        // Unsupported types: OBJECT, DOUBLE.
+                        // Unsupported types: OBJECT, DOUBLE, KEY_VALUE_PAIRS
                         fprintf(stderr, "Encountered unsupported type.");
                         return 1;
                 }
                 argIndex++;
             }
-            fprintf(out, "    const int ret = stats_event_write(event);\n");
-            fprintf(out, "    stats_event_release(event);\n");
+            fprintf(out, "    const int ret = AStatsEvent_write(event);\n");
+            fprintf(out, "    AStatsEvent_release(event);\n");
             fprintf(out, "    return ret;\n");
         }
         fprintf(out, "}\n\n");
@@ -169,6 +144,10 @@ static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms&
             continue;
         }
         vector<java_type_t> signature = signature_it->first;
+        // Key value pairs not supported in native.
+        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+            continue;
+        }
 
         write_native_method_signature(out, "int stats_write_non_chained", signature,
                 attributionDecl, " {");
@@ -210,8 +189,14 @@ static void write_native_method_header(
         if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
             continue;
         }
-
         vector<java_type_t> signature = signature_to_modules_it->first;
+
+#if !defined(STATS_SCHEMA_LEGACY)
+        // Key value pairs not supported in native.
+        if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
+            continue;
+        }
+#endif
         write_native_method_signature(out, methodName, signature, attributionDecl, ";");
     }
 }
