@@ -213,7 +213,7 @@ public final class SurfaceControl implements Parcelable {
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
 
     private static native void nativeSetFrameRate(
-            long transactionObj, long nativeObject, float frameRate);
+            long transactionObj, long nativeObject, float frameRate, int compatibility);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -2735,13 +2735,17 @@ public final class SurfaceControl implements Parcelable {
          *                  isn't called. The frameRate param does *not* need to be a valid refresh
          *                  rate for this device's display - e.g., it's fine to pass 30fps to a
          *                  device that can only run the display at 60fps.
+         * @param compatibility The frame rate compatibility of this surface. The compatibility
+         *                      value may influence the system's choice of display frame rate. See
+         *                      the Surface.FRAME_RATE_COMPATIBILITY_* values for more info.
          * @return This transaction object.
          */
         @NonNull
-        public Transaction setFrameRate(
-                @NonNull SurfaceControl sc, @FloatRange(from = 0.0) float frameRate) {
+        public Transaction setFrameRate(@NonNull SurfaceControl sc,
+                @FloatRange(from = 0.0) float frameRate,
+                @Surface.FrameRateCompatibility int compatibility) {
             checkPreconditions(sc);
-            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate);
+            nativeSetFrameRate(mNativeObject, sc.mNativeObject, frameRate, compatibility);
             return this;
         }
 
