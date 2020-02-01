@@ -41,8 +41,6 @@ public:
 
     int reserveNext();
 
-    void allocateBuffers() { mSurface->allocateBuffers(); }
-
     int query(int what, int* value) const { return mSurface->query(what, value); }
 
     uint64_t getNextFrameNumber() const { return mSurface->getNextFrameNumber(); }

@@ -205,7 +205,8 @@ void CanvasContext::setStopped(bool stopped) {
 
 void CanvasContext::allocateBuffers() {
     if (mNativeSurface) {
-        mNativeSurface->allocateBuffers();
+        ANativeWindow* anw = mNativeSurface->getNativeWindow();
+        ANativeWindow_allocateBuffers(anw);
     }
 }
 
