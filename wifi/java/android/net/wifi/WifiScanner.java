@@ -836,6 +836,8 @@ public class WifiScanner {
      * Enable/Disable wifi scanning.
      *
      * @param enable set to true to enable scanning, set to false to disable all types of scanning.
+     *
+     * @see WifiManager#ACTION_WIFI_SCAN_AVAILABLE
      * {@hide}
      */
     @SystemApi
