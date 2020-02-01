@@ -31,17 +31,10 @@ package android.os.incremental;
  * @throws IllegalStateException the session is not an Incremental installation session.
  */
 
-import static dalvik.system.VMRuntime.getInstructionSet;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.InstallationFile;
-import android.os.IVold;
-import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import java.io.File;
@@ -58,26 +51,14 @@ import java.util.Random;
 public final class IncrementalFileStorages {
     private static final String TAG = "IncrementalFileStorages";
     private @Nullable IncrementalStorage mDefaultStorage;
-    private @Nullable IncrementalStorage mApkStorage;
-    private @Nullable IncrementalStorage mObbStorage;
     private @Nullable String mDefaultDir;
-    private @Nullable String mObbDir;
     private @NonNull IncrementalManager mIncrementalManager;
-    private @Nullable ArraySet<String> mLibDirs;
-    private @NonNull String mPackageName;
     private @NonNull File mStageDir;
 
     /**
-     * Set up files and directories used in an installation session.
-     * Currently only used by Incremental Installation.
-     * For Incremental installation, the expected outcome of this function is:
-     * 0) All the files are in defaultStorage
-     * 1) All APK files are in the same directory, bound to mApkStorage, and bound to the
-     * InstallerSession's stage dir. The files are linked from mApkStorage to defaultStorage.
-     * 2) All lib files are in the sub directories as their names suggest, and in the same parent
-     * directory as the APK files. The files are linked from mApkStorage to defaultStorage.
-     * 3) OBB files are in another directory that is different from APK files and lib files, bound
-     * to mObbStorage. The files are linked from mObbStorage to defaultStorage.
+     * Set up files and directories used in an installation session. Only used by Incremental.
+     * All the files will be created in defaultStorage.
+     * TODO(b/133435829): code clean up
      *
      * @throws IllegalStateException the session is not an Incremental installation session.
      */
@@ -85,7 +66,6 @@ public final class IncrementalFileStorages {
             @NonNull File stageDir,
             @NonNull IncrementalManager incrementalManager,
             @NonNull DataLoaderParams dataLoaderParams) {
-        mPackageName = packageName;
         mStageDir = stageDir;
         mIncrementalManager = incrementalManager;
         if (dataLoaderParams.getComponentName().getPackageName().equals("local")) {
@@ -114,83 +94,23 @@ public final class IncrementalFileStorages {
         }
         if (file.getFileType() == InstallationFile.FILE_TYPE_APK) {
             addApkFile(file);
-        } else if (file.getFileType() == InstallationFile.FILE_TYPE_OBB) {
-            addObbFile(file);
-        } else if (file.getFileType() == InstallationFile.FILE_TYPE_LIB) {
-            addLibFile(file);
         } else {
             throw new IOException("Unknown file type: " + file.getFileType());
         }
     }
 
     private void addApkFile(@NonNull InstallationFile apk) throws IOException {
-        // Create a storage for APK files and lib files
         final String stageDirPath = mStageDir.getAbsolutePath();
-        if (mApkStorage == null) {
-            mApkStorage = mIncrementalManager.createStorage(stageDirPath, mDefaultStorage,
-                    IncrementalManager.CREATE_MODE_CREATE
-                            | IncrementalManager.CREATE_MODE_TEMPORARY_BIND);
-            mApkStorage.bind(stageDirPath);
-        }
-
-        if (!new File(mDefaultDir, apk.getName()).exists()) {
-            mDefaultStorage.makeFile(apk.getName(), apk.getSize(), null,
+        mDefaultStorage.bind(stageDirPath);
+        String apkName = apk.getName();
+        File targetFile = Paths.get(stageDirPath, apkName).toFile();
+        if (!targetFile.exists()) {
+            mDefaultStorage.makeFile(apkName, apk.getSize(), null,
                     apk.getMetadata(), 0, null, null, null);
         }
-        // Assuming APK files are already named properly, e.g., "base.apk"
-        mDefaultStorage.makeLink(apk.getName(), mApkStorage, apk.getName());
-    }
-
-    private void addLibFile(@NonNull InstallationFile lib) throws IOException {
-        // TODO(b/136132412): remove this after we have incfs support for lib file mapping
-        if (mApkStorage == null) {
-            throw new IOException("Cannot add lib file without adding an apk file first");
+        if (targetFile.exists()) {
+            Slog.i(TAG, "!!! created: " + targetFile.getAbsolutePath());
         }
-        if (mLibDirs == null) {
-            mLibDirs = new ArraySet<>();
-        }
-        String current = "";
-        final Path libDirPath = Paths.get(lib.getName()).getParent();
-        final int numDirComponents = libDirPath.getNameCount();
-        for (int i = 0; i < numDirComponents; i++) {
-            String dirName = libDirPath.getName(i).toString();
-            try {
-                dirName = getInstructionSet(dirName);
-            } catch (IllegalArgumentException ignored) {
-            }
-            current += dirName;
-            if (!mLibDirs.contains(current)) {
-                mDefaultStorage.makeDirectory(current);
-                mApkStorage.makeDirectory(current);
-                mLibDirs.add(current);
-            }
-            current += '/';
-        }
-        String libFilePath = current + Paths.get(lib.getName()).getFileName();
-        mDefaultStorage.makeFile(libFilePath, lib.getSize(), null, lib.getMetadata(), 0, null, null,
-                                 null);
-        mDefaultStorage.makeLink(libFilePath, mApkStorage, libFilePath);
-    }
-
-    private void addObbFile(@NonNull InstallationFile obb) throws IOException {
-        if (mObbStorage == null) {
-            // Create a storage for OBB files
-            mObbDir = getTempDir();
-            if (mObbDir == null) {
-                throw new IOException("Failed to create obb storage directory.");
-            }
-            mObbStorage = mIncrementalManager.createStorage(
-                    mObbDir, mDefaultStorage,
-                    IncrementalManager.CREATE_MODE_CREATE
-                            | IncrementalManager.CREATE_MODE_TEMPORARY_BIND);
-        }
-        mDefaultStorage.makeFile(obb.getName(), obb.getSize(), null, obb.getMetadata(), 0, null,
-                                 null, null);
-        mDefaultStorage.makeLink(obb.getName(), mObbStorage, obb.getName());
-    }
-
-    private boolean hasObb() {
-        return (mObbStorage != null && mObbDir != null);
     }
 
     /**
@@ -208,35 +128,6 @@ public final class IncrementalFileStorages {
      * Sets up obb storage directory and create bindings.
      */
     public void finishSetUp() {
-        if (!hasObb()) {
-            return;
-        }
-        final String obbDir = "/storage/emulated/0/Android/obb";
-        final String packageObbDir = String.format("%s/%s", obbDir, mPackageName);
-        final String packageObbDirRoot =
-                String.format("/mnt/runtime/%s/emulated/0/Android/obb/", mPackageName);
-        final String[] obbDirs = {
-                packageObbDirRoot + "read",
-                packageObbDirRoot + "write",
-                packageObbDirRoot + "full",
-                packageObbDirRoot + "default",
-                String.format("/data/media/0/Android/obb/%s", mPackageName),
-                packageObbDir,
-        };
-        try {
-            Slog.i(TAG, "Creating obb directory '" + packageObbDir + "'");
-            final IVold vold = IVold.Stub.asInterface(ServiceManager.getServiceOrThrow("vold"));
-            vold.setupAppDir(packageObbDir, obbDir, Process.ROOT_UID);
-            for (String d : obbDirs) {
-                mObbStorage.bindPermanent(d);
-            }
-        } catch (ServiceManager.ServiceNotFoundException ex) {
-            Slog.e(TAG, "vold service is not found.");
-            cleanUp();
-        } catch (IOException | RemoteException ex) {
-            Slog.e(TAG, "Failed to create obb dir at: " + packageObbDir, ex);
-            cleanUp();
-        }
     }
 
     /**
@@ -247,25 +138,11 @@ public final class IncrementalFileStorages {
         if (mDefaultStorage != null && mDefaultDir != null) {
             try {
                 mDefaultStorage.unBind(mDefaultDir);
+                mDefaultStorage.unBind(mStageDir.getAbsolutePath());
             } catch (IOException ignored) {
             }
             mDefaultDir = null;
             mDefaultStorage = null;
-        }
-        if (mApkStorage != null && mStageDir != null) {
-            try {
-                mApkStorage.unBind(mStageDir.getAbsolutePath());
-            } catch (IOException ignored) {
-            }
-            mApkStorage = null;
-        }
-        if (mObbStorage != null && mObbDir != null) {
-            try {
-                mObbStorage.unBind(mObbDir);
-            } catch (IOException ignored) {
-            }
-            mObbDir = null;
-            mObbStorage = null;
         }
     }
 
