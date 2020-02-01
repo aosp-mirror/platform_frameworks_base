@@ -1977,10 +1977,15 @@ public class ShortcutService extends IShortcutService.Stub {
      * After validating the caller, it passes the request to {@link #mShortcutRequestPinProcessor}.
      * Either {@param shortcut} or {@param appWidget} should be non-null.
      */
-    private boolean requestPinItem(String packageName, int userId, ShortcutInfo shortcut,
+    private boolean requestPinItem(String callingPackage, int userId, ShortcutInfo shortcut,
             AppWidgetProviderInfo appWidget, Bundle extras, IntentSender resultIntent) {
-        verifyCaller(packageName, userId);
-        verifyShortcutInfoPackage(packageName, shortcut);
+        verifyCaller(callingPackage, userId);
+        if (shortcut == null || !injectHasAccessShortcutsPermission(
+                injectBinderCallingPid(), injectBinderCallingUid())) {
+            // Verify if caller is the shortcut owner, only if caller doesn't have ACCESS_SHORTCUTS.
+            verifyShortcutInfoPackage(callingPackage, shortcut);
+        }
+        final String shortcutPackage = shortcut.getPackage();
 
         final boolean ret;
         synchronized (mLock) {
@@ -1995,13 +2000,13 @@ public class ShortcutService extends IShortcutService.Stub {
             // and then proceed the rest of the process.
             if (shortcut != null) {
                 final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(
-                        packageName, userId);
+                        shortcutPackage, userId);
                 final String id = shortcut.getId();
                 if (ps.isShortcutExistsAndInvisibleToPublisher(id)) {
 
                     ps.updateInvisibleShortcutForPinRequestWith(shortcut);
 
-                    packageShortcutsChanged(packageName, userId);
+                    packageShortcutsChanged(shortcutPackage, userId);
                 }
             }
 
