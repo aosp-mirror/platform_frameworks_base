@@ -5144,14 +5144,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {
-            // todo: Yikes!  What should we do?  For now we will try to
-            // start another process, but that could easily get us in
-            // an infinite loop of restarting processes...
+            // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
-
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
-            mProcessList.startProcessLocked(app, new HostingRecord("bind-fail", processName));
+            app.kill("error during bind", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE, true);
+            handleAppDiedLocked(app, false, true);
             return false;
         }
 
