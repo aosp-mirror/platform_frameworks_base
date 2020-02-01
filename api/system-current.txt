@@ -6961,76 +6961,6 @@ package android.provider {
     field @NonNull public static final String ENABLE_TEST_ALERT_PREF = "enable_test_alerts";
   }
 
-  public static final class Telephony.SimInfo {
-    field public static final String ACCESS_RULES = "access_rules";
-    field public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS = "access_rules_from_carrier_configs";
-    field public static final String ALLOWED_NETWORK_TYPES = "allowed_network_types";
-    field public static final String CARD_ID = "card_id";
-    field public static final String CARRIER_ID = "carrier_id";
-    field public static final String CARRIER_NAME = "carrier_name";
-    field public static final String CB_ALERT_REMINDER_INTERVAL = "alert_reminder_interval";
-    field public static final String CB_ALERT_SOUND_DURATION = "alert_sound_duration";
-    field public static final String CB_ALERT_SPEECH = "enable_alert_speech";
-    field public static final String CB_ALERT_VIBRATE = "enable_alert_vibrate";
-    field public static final String CB_AMBER_ALERT = "enable_cmas_amber_alerts";
-    field public static final String CB_CHANNEL_50_ALERT = "enable_channel_50_alerts";
-    field public static final String CB_CMAS_TEST_ALERT = "enable_cmas_test_alerts";
-    field public static final String CB_EMERGENCY_ALERT = "enable_emergency_alerts";
-    field public static final String CB_ETWS_TEST_ALERT = "enable_etws_test_alerts";
-    field public static final String CB_EXTREME_THREAT_ALERT = "enable_cmas_extreme_threat_alerts";
-    field public static final String CB_OPT_OUT_DIALOG = "show_cmas_opt_out_dialog";
-    field public static final String CB_SEVERE_THREAT_ALERT = "enable_cmas_severe_threat_alerts";
-    field public static final String COLOR = "color";
-    field @NonNull public static final android.net.Uri CONTENT_URI;
-    field public static final String DATA_ENABLED_OVERRIDE_RULES = "data_enabled_override_rules";
-    field public static final String DATA_ROAMING = "data_roaming";
-    field public static final int DATA_ROAMING_DEFAULT = 0; // 0x0
-    field public static final int DATA_ROAMING_DISABLE = 0; // 0x0
-    field public static final int DATA_ROAMING_ENABLE = 1; // 0x1
-    field public static final String DISPLAY_NAME = "display_name";
-    field public static final String EHPLMNS = "ehplmns";
-    field public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
-    field public static final String GROUP_OWNER = "group_owner";
-    field public static final String GROUP_UUID = "group_uuid";
-    field public static final String HPLMNS = "hplmns";
-    field public static final String ICC_ID = "icc_id";
-    field public static final String IMSI = "imsi";
-    field public static final String IMS_RCS_UCE_ENABLED = "ims_rcs_uce_enabled";
-    field public static final String ISO_COUNTRY_CODE = "iso_country_code";
-    field public static final String IS_EMBEDDED = "is_embedded";
-    field public static final String IS_OPPORTUNISTIC = "is_opportunistic";
-    field public static final String IS_REMOVABLE = "is_removable";
-    field public static final String MCC = "mcc";
-    field public static final String MCC_STRING = "mcc_string";
-    field public static final String MNC = "mnc";
-    field public static final String MNC_STRING = "mnc_string";
-    field public static final String NAME_SOURCE = "name_source";
-    field public static final int NAME_SOURCE_CARRIER = 3; // 0x3
-    field public static final int NAME_SOURCE_DEFAULT = 0; // 0x0
-    field public static final int NAME_SOURCE_SIM_PNN = 4; // 0x4
-    field public static final int NAME_SOURCE_SIM_SPN = 1; // 0x1
-    field public static final int NAME_SOURCE_USER_INPUT = 2; // 0x2
-    field public static final String NUMBER = "number";
-    field public static final String PROFILE_CLASS = "profile_class";
-    field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
-    field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
-    field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
-    field public static final int PROFILE_CLASS_TESTING = 0; // 0x0
-    field public static final int PROFILE_CLASS_UNSET = -1; // 0xffffffff
-    field public static final int SIM_NOT_INSERTED = -1; // 0xffffffff
-    field public static final String SIM_SLOT_INDEX = "sim_id";
-    field public static final String SUBSCRIPTION_TYPE = "subscription_type";
-    field public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0; // 0x0
-    field public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1; // 0x1
-    field public static final String UICC_APPLICATIONS_ENABLED = "uicc_applications_enabled";
-    field public static final String UNIQUE_KEY_SUBSCRIPTION_ID = "_id";
-    field public static final String VT_IMS_ENABLED = "vt_ims_enabled";
-    field public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
-    field public static final String WFC_IMS_MODE = "wfc_ims_mode";
-    field public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
-    field public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
-  }
-
   public static final class Telephony.Sms.Intents {
     field public static final String ACTION_SMS_EMERGENCY_CB_RECEIVED = "android.provider.action.SMS_EMERGENCY_CB_RECEIVED";
   }
@@ -9206,7 +9136,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(int, boolean);
     field @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS) public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
-    field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
+    field @Deprecated public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
     field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
     field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
     field public static final int PROFILE_CLASS_TESTING = 0; // 0x0

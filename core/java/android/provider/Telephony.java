@@ -4939,7 +4939,6 @@ public final class Telephony {
      * Contains SIM Information
      * @hide
      */
-    @SystemApi
     public static final class SimInfo {
         /**
          * Not instantiable.
@@ -4949,6 +4948,7 @@ public final class Telephony {
 
         /**
          * The {@code content://} style URI for this provider.
+         * @hide
          */
         @NonNull
         public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
@@ -4956,25 +4956,32 @@ public final class Telephony {
         /**
          * TelephonyProvider unique key column name is the subscription id.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String UNIQUE_KEY_SUBSCRIPTION_ID = "_id";
+        public static final String COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID = "_id";
 
         /**
          * TelephonyProvider column name for a unique identifier for the subscription within the
          * specific subscription type. For example, it contains SIM ICC Identifier subscriptions
          * on Local SIMs. and Mac-address for Remote-SIM Subscriptions for Bluetooth devices.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String ICC_ID = "icc_id";
+        public static final String COLUMN_ICC_ID = "icc_id";
 
         /**
          * TelephonyProvider column name for user SIM_SlOT_INDEX
          * <P>Type: INTEGER (int)</P>
+         *
+         * @hide
          */
-        public static final String SIM_SLOT_INDEX = "sim_id";
+        public static final String COLUMN_SIM_SLOT_INDEX = "sim_id";
 
         /**
          * SIM is not inserted
+         * @hide
          */
         public static final int SIM_NOT_INSERTED = -1;
 
@@ -4983,14 +4990,18 @@ public final class Telephony {
          * <P>Type: INTEGER (int)</P> {@link #SUBSCRIPTION_TYPE_LOCAL_SIM} for Local-SIM
          * Subscriptions, {@link #SUBSCRIPTION_TYPE_REMOTE_SIM} for Remote-SIM Subscriptions.
          * Default value is 0.
+         *
+         * @hide
          */
-        public static final String SUBSCRIPTION_TYPE = "subscription_type";
+        public static final String COLUMN_SUBSCRIPTION_TYPE = "subscription_type";
 
         /**
          * This constant is to designate a subscription as a Local-SIM Subscription.
          * <p> A Local-SIM can be a physical SIM inserted into a sim-slot in the device, or eSIM on
          * the device.
          * </p>
+         *
+         * @hide
          */
         public static final int SUBSCRIPTION_TYPE_LOCAL_SIM = 0;
 
@@ -5017,6 +5028,8 @@ public final class Telephony {
          * phone; i.e., new Remote-SIM subscription treats the reconnected phone as a Remote-SIM
          * that was never seen before.
          * </p>
+         *
+         * @hide
          */
         public static final int SUBSCRIPTION_TYPE_REMOTE_SIM = 1;
 
@@ -5029,71 +5042,89 @@ public final class Telephony {
          * subscription and while is in voice call.
          *
          * Default value is empty string.
+         *
+         * @hide
          */
-        public static final String DATA_ENABLED_OVERRIDE_RULES = "data_enabled_override_rules";
+        public static final String COLUMN_DATA_ENABLED_OVERRIDE_RULES =
+                "data_enabled_override_rules";
 
         /**
          * TelephonyProvider column name for user displayed name.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String DISPLAY_NAME = "display_name";
+        public static final String COLUMN_DISPLAY_NAME = "display_name";
 
         /**
          * TelephonyProvider column name for the service provider name for the SIM.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String CARRIER_NAME = "carrier_name";
+        public static final String COLUMN_CARRIER_NAME = "carrier_name";
 
         /**
          * TelephonyProvider column name for source of the user displayed name.
          * <P>Type: INT (int)</P> with one of the NAME_SOURCE_XXXX values below
+         *
+         * @hide
          */
-        public static final String NAME_SOURCE = "name_source";
+        public static final String COLUMN_NAME_SOURCE = "name_source";
 
-        /** The name_source is the default, which is from the carrier id. */
-        public static final int NAME_SOURCE_DEFAULT = 0;
+        /** The name_source is from the carrier id. {@hide} */
+        public static final int NAME_SOURCE_CARRIER_ID = 0;
 
         /**
          * The name_source is from SIM EF_SPN.
+         * @hide
          */
         public static final int NAME_SOURCE_SIM_SPN = 1;
 
         /**
          * The name_source is from user input
+         * @hide
          */
         public static final int NAME_SOURCE_USER_INPUT = 2;
 
         /**
          * The name_source is carrier (carrier app, carrier config, etc.)
+         * @hide
          */
         public static final int NAME_SOURCE_CARRIER = 3;
 
         /**
          * The name_source is from SIM EF_PNN.
+         * @hide
          */
         public static final int NAME_SOURCE_SIM_PNN = 4;
 
         /**
          * TelephonyProvider column name for the color of a SIM.
          * <P>Type: INTEGER (int)</P>
+         *
+         * @hide
          */
-        public static final String COLOR = "color";
+        public static final String COLUMN_COLOR = "color";
 
-        /** TelephonyProvider column name for the default color of a SIM {@hide} */
+        /** The default color of a SIM {@hide} */
         public static final int COLOR_DEFAULT = 0;
 
         /**
          * TelephonyProvider column name for the phone number of a SIM.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String NUMBER = "number";
+        public static final String COLUMN_NUMBER = "number";
 
         /**
          * TelephonyProvider column name for the number display format of a SIM.
          * <P>Type: INTEGER (int)</P>
+         *
          * @hide
          */
-        public static final String DISPLAY_NUMBER_FORMAT = "display_number_format";
+        public static final String COLUMN_DISPLAY_NUMBER_FORMAT = "display_number_format";
 
         /**
          * TelephonyProvider column name for the default display format of a SIM
@@ -5104,73 +5135,89 @@ public final class Telephony {
         /**
          * TelephonyProvider column name for whether data roaming is enabled.
          * <P>Type: INTEGER (int)</P>
+         *
+         * @hide
          */
-        public static final String DATA_ROAMING = "data_roaming";
+        public static final String COLUMN_DATA_ROAMING = "data_roaming";
 
-        /** Indicates that data roaming is enabled for a subscription */
+        /** Indicates that data roaming is enabled for a subscription {@hide} */
         public static final int DATA_ROAMING_ENABLE = 1;
 
-        /** Indicates that data roaming is disabled for a subscription */
+        /** Indicates that data roaming is disabled for a subscription {@hide} */
         public static final int DATA_ROAMING_DISABLE = 0;
-
-        /** TelephonyProvider column name for default data roaming setting: disable */
-        public static final int DATA_ROAMING_DEFAULT = DATA_ROAMING_DISABLE;
 
         /**
          * TelephonyProvider column name for subscription carrier id.
          * @see TelephonyManager#getSimCarrierId()
          * <p>Type: INTEGER (int) </p>
+         *
+         * @hide
          */
-        public static final String CARRIER_ID = "carrier_id";
+        public static final String COLUMN_CARRIER_ID = "carrier_id";
 
         /**
          * A comma-separated list of EHPLMNs associated with the subscription
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String EHPLMNS = "ehplmns";
+        public static final String COLUMN_EHPLMNS = "ehplmns";
 
         /**
          * A comma-separated list of HPLMNs associated with the subscription
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String HPLMNS = "hplmns";
+        public static final String COLUMN_HPLMNS = "hplmns";
 
         /**
          * TelephonyProvider column name for the MCC associated with a SIM, stored as a string.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String MCC_STRING = "mcc_string";
+        public static final String COLUMN_MCC_STRING = "mcc_string";
 
         /**
          * TelephonyProvider column name for the MNC associated with a SIM, stored as a string.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String MNC_STRING = "mnc_string";
+        public static final String COLUMN_MNC_STRING = "mnc_string";
 
         /**
          * TelephonyProvider column name for the MCC associated with a SIM.
          * <P>Type: INTEGER (int)</P>
+         *
+         * @hide
          */
-        public static final String MCC = "mcc";
+        public static final String COLUMN_MCC = "mcc";
 
         /**
          * TelephonyProvider column name for the MNC associated with a SIM.
          * <P>Type: INTEGER (int)</P>
+         *
+         * @hide
          */
-        public static final String MNC = "mnc";
+        public static final String COLUMN_MNC = "mnc";
 
         /**
          * TelephonyProvider column name for the iso country code associated with a SIM.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String ISO_COUNTRY_CODE = "iso_country_code";
+        public static final String COLUMN_ISO_COUNTRY_CODE = "iso_country_code";
 
         /**
          * TelephonyProvider column name for the sim provisioning status associated with a SIM.
          * <P>Type: INTEGER (int)</P>
+         *
          * @hide
          */
-        public static final String SIM_PROVISIONING_STATUS = "sim_provisioning_status";
+        public static final String COLUMN_SIM_PROVISIONING_STATUS = "sim_provisioning_status";
 
         /** The sim is provisioned {@hide} */
         public static final int SIM_PROVISIONED = 0;
@@ -5179,147 +5226,174 @@ public final class Telephony {
          * TelephonyProvider column name for whether a subscription is embedded (that is, present on
          * an eSIM).
          * <p>Type: INTEGER (int), 1 for embedded or 0 for non-embedded.
+         *
+         * @hide
          */
-        public static final String IS_EMBEDDED = "is_embedded";
+        public static final String COLUMN_IS_EMBEDDED = "is_embedded";
 
         /**
          * TelephonyProvider column name for SIM card identifier. For UICC card it is the ICCID of
          * the current enabled profile on the card, while for eUICC card it is the EID of the card.
          * <P>Type: TEXT (String)</P>
+         *
+         * @hide
          */
-        public static final String CARD_ID = "card_id";
+        public static final String COLUMN_CARD_ID = "card_id";
 
         /**
          * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
-         * {@link UiccAccessRule#encodeRules}. Only present if {@link #IS_EMBEDDED} is 1.
+         * {@link UiccAccessRule#encodeRules}. Only present if {@link #COLUMN_IS_EMBEDDED} is 1.
          * <p>TYPE: BLOB
+         *
+         * @hide
          */
-        public static final String ACCESS_RULES = "access_rules";
+        public static final String COLUMN_ACCESS_RULES = "access_rules";
 
         /**
          * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
          * {@link UiccAccessRule#encodeRules} but for the rules that come from CarrierConfigs.
          * Only present if there are access rules in CarrierConfigs
          * <p>TYPE: BLOB
+         *
+         * @hide
          */
-        public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS =
+        public static final String COLUMN_ACCESS_RULES_FROM_CARRIER_CONFIGS =
                 "access_rules_from_carrier_configs";
 
         /**
          * TelephonyProvider column name identifying whether an embedded subscription is on a
          * removable card. Such subscriptions are marked inaccessible as soon as the current card
          * is removed. Otherwise, they will remain accessible unless explicitly deleted. Only
-         * present if {@link #IS_EMBEDDED} is 1.
+         * present if {@link #COLUMN_IS_EMBEDDED} is 1.
          * <p>TYPE: INTEGER (int), 1 for removable or 0 for non-removable.
+         *
+         * @hide
          */
-        public static final String IS_REMOVABLE = "is_removable";
+        public static final String COLUMN_IS_REMOVABLE = "is_removable";
 
-        /** TelephonyProvider column name for extreme threat in CB settings */
-        public static final String CB_EXTREME_THREAT_ALERT = "enable_cmas_extreme_threat_alerts";
+        /** TelephonyProvider column name for extreme threat in CB settings {@hide} */
+        public static final String COLUMN_CB_EXTREME_THREAT_ALERT =
+                "enable_cmas_extreme_threat_alerts";
 
-        /** TelephonyProvider column name for severe threat in CB settings */
-        public static final String CB_SEVERE_THREAT_ALERT = "enable_cmas_severe_threat_alerts";
+        /** TelephonyProvider column name for severe threat in CB settings {@hide} */
+        public static final String COLUMN_CB_SEVERE_THREAT_ALERT =
+                "enable_cmas_severe_threat_alerts";
 
-        /** TelephonyProvider column name for amber alert in CB settings */
-        public static final String CB_AMBER_ALERT = "enable_cmas_amber_alerts";
+        /** TelephonyProvider column name for amber alert in CB settings {@hide} */
+        public static final String COLUMN_CB_AMBER_ALERT = "enable_cmas_amber_alerts";
 
-        /** TelephonyProvider column name for emergency alert in CB settings */
-        public static final String CB_EMERGENCY_ALERT = "enable_emergency_alerts";
+        /** TelephonyProvider column name for emergency alert in CB settings {@hide} */
+        public static final String COLUMN_CB_EMERGENCY_ALERT = "enable_emergency_alerts";
 
-        /** TelephonyProvider column name for alert sound duration in CB settings */
-        public static final String CB_ALERT_SOUND_DURATION = "alert_sound_duration";
+        /** TelephonyProvider column name for alert sound duration in CB settings {@hide} */
+        public static final String COLUMN_CB_ALERT_SOUND_DURATION = "alert_sound_duration";
 
-        /** TelephonyProvider column name for alert reminder interval in CB settings */
-        public static final String CB_ALERT_REMINDER_INTERVAL = "alert_reminder_interval";
+        /** TelephonyProvider column name for alert reminder interval in CB settings {@hide} */
+        public static final String COLUMN_CB_ALERT_REMINDER_INTERVAL = "alert_reminder_interval";
 
-        /** TelephonyProvider column name for enabling vibrate in CB settings */
-        public static final String CB_ALERT_VIBRATE = "enable_alert_vibrate";
+        /** TelephonyProvider column name for enabling vibrate in CB settings {@hide} */
+        public static final String COLUMN_CB_ALERT_VIBRATE = "enable_alert_vibrate";
 
-        /** TelephonyProvider column name for enabling alert speech in CB settings */
-        public static final String CB_ALERT_SPEECH = "enable_alert_speech";
+        /** TelephonyProvider column name for enabling alert speech in CB settings {@hide} */
+        public static final String COLUMN_CB_ALERT_SPEECH = "enable_alert_speech";
 
-        /** TelephonyProvider column name for ETWS test alert in CB settings */
-        public static final String CB_ETWS_TEST_ALERT = "enable_etws_test_alerts";
+        /** TelephonyProvider column name for ETWS test alert in CB settings {@hide} */
+        public static final String COLUMN_CB_ETWS_TEST_ALERT = "enable_etws_test_alerts";
 
-        /** TelephonyProvider column name for enable channel50 alert in CB settings */
-        public static final String CB_CHANNEL_50_ALERT = "enable_channel_50_alerts";
+        /** TelephonyProvider column name for enable channel50 alert in CB settings {@hide} */
+        public static final String COLUMN_CB_CHANNEL_50_ALERT = "enable_channel_50_alerts";
 
-        /** TelephonyProvider column name for CMAS test alert in CB settings */
-        public static final String CB_CMAS_TEST_ALERT = "enable_cmas_test_alerts";
+        /** TelephonyProvider column name for CMAS test alert in CB settings {@hide} */
+        public static final String COLUMN_CB_CMAS_TEST_ALERT = "enable_cmas_test_alerts";
 
-        /** TelephonyProvider column name for Opt out dialog in CB settings */
-        public static final String CB_OPT_OUT_DIALOG = "show_cmas_opt_out_dialog";
+        /** TelephonyProvider column name for Opt out dialog in CB settings {@hide} */
+        public static final String COLUMN_CB_OPT_OUT_DIALOG = "show_cmas_opt_out_dialog";
 
         /**
          * TelephonyProvider column name for enable Volte.
          *
          * If this setting is not initialized (set to -1)  then we use the Carrier Config value
          * {@link CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL}.
+         *
+         * @hide
          */
-        public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
+        public static final String COLUMN_ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
 
-        /** TelephonyProvider column name for enable VT (Video Telephony over IMS) */
-        public static final String VT_IMS_ENABLED = "vt_ims_enabled";
+        /** TelephonyProvider column name for enable VT (Video Telephony over IMS) {@hide} */
+        public static final String COLUMN_VT_IMS_ENABLED = "vt_ims_enabled";
 
-        /** TelephonyProvider column name for enable Wifi calling */
-        public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
+        /** TelephonyProvider column name for enable Wifi calling {@hide} */
+        public static final String COLUMN_WFC_IMS_ENABLED = "wfc_ims_enabled";
 
-        /** TelephonyProvider column name for Wifi calling mode */
-        public static final String WFC_IMS_MODE = "wfc_ims_mode";
+        /** TelephonyProvider column name for Wifi calling mode {@hide} */
+        public static final String COLUMN_WFC_IMS_MODE = "wfc_ims_mode";
 
-        /** TelephonyProvider column name for Wifi calling mode in roaming */
-        public static final String WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
+        /** TelephonyProvider column name for Wifi calling mode in roaming {@hide} */
+        public static final String COLUMN_WFC_IMS_ROAMING_MODE = "wfc_ims_roaming_mode";
 
-        /** TelephonyProvider column name for enable Wifi calling in roaming */
-        public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
+        /** TelephonyProvider column name for enable Wifi calling in roaming {@hide} */
+        public static final String COLUMN_WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
 
         /**
-         * Determines if the user has enabled IMS RCS User Capability Exchange (UCE) for this
-         * subscription.
+         * TelephonyProvider column name for determining if the user has enabled IMS RCS User
+         * Capability Exchange (UCE) for this subscription.
+         *
+         * @hide
          */
-        public static final String IMS_RCS_UCE_ENABLED = "ims_rcs_uce_enabled";
+        public static final String COLUMN_IMS_RCS_UCE_ENABLED = "ims_rcs_uce_enabled";
 
         /**
          * TelephonyProvider column name for whether a subscription is opportunistic, that is,
          * whether the network it connects to is limited in functionality or coverage.
          * For example, CBRS.
          * <p>Type: INTEGER (int), 1 for opportunistic or 0 for non-opportunistic.
+         *
+         * @hide
          */
-        public static final String IS_OPPORTUNISTIC = "is_opportunistic";
+        public static final String COLUMN_IS_OPPORTUNISTIC = "is_opportunistic";
 
         /**
          * TelephonyProvider column name for group ID. Subscriptions with same group ID
          * are considered bundled together, and should behave as a single subscription at
          * certain scenarios.
+         *
+         * @hide
          */
-        public static final String GROUP_UUID = "group_uuid";
+        public static final String COLUMN_GROUP_UUID = "group_uuid";
 
         /**
          * TelephonyProvider column name for group owner. It's the package name who created
          * the subscription group.
+         *
+         * @hide
          */
-        public static final String GROUP_OWNER = "group_owner";
+        public static final String COLUMN_GROUP_OWNER = "group_owner";
 
         /**
          * TelephonyProvider column name for whether a subscription is metered or not, that is,
          * whether the network it connects to charges for subscription or not. For example, paid
          * CBRS or unpaid.
+         *
          * @hide
          */
-        public static final String IS_METERED = "is_metered";
+        public static final String COLUMN_IS_METERED = "is_metered";
 
         /**
          * TelephonyProvider column name for the profile class of a subscription
-         * Only present if {@link #IS_EMBEDDED} is 1.
+         * Only present if {@link #COLUMN_IS_EMBEDDED} is 1.
          * <P>Type: INTEGER (int)</P>
+         *
+         * @hide
          */
-        public static final String PROFILE_CLASS = "profile_class";
+        public static final String COLUMN_PROFILE_CLASS = "profile_class";
 
         /**
          * A testing profile can be pre-loaded or downloaded onto
          * the eUICC and provides connectivity to test equipment
          * for the purpose of testing the device and the eUICC. It
          * is not intended to store any operator credentials.
+         *
+         * @hide
          */
         public static final int PROFILE_CLASS_TESTING = 0;
 
@@ -5327,6 +5401,8 @@ public final class Telephony {
          * A provisioning profile is pre-loaded onto the eUICC and
          * provides connectivity to a mobile network solely for the
          * purpose of provisioning profiles.
+         *
+         * @hide
          */
         public static final int PROFILE_CLASS_PROVISIONING = 1;
 
@@ -5334,6 +5410,8 @@ public final class Telephony {
          * An operational profile can be pre-loaded or downloaded
          * onto the eUICC and provides services provided by the
          * operator.
+         *
+         * @hide
          */
         public static final int PROFILE_CLASS_OPERATIONAL = 2;
 
@@ -5341,25 +5419,32 @@ public final class Telephony {
          * The profile class is unset. This occurs when profile class
          * info is not available. The subscription either has no profile
          * metadata or the profile metadata did not encode profile class.
+         *
+         * @hide
          */
         public static final int PROFILE_CLASS_UNSET = -1;
-
-        /** Default profile class */
-        public static final int PROFILE_CLASS_DEFAULT = PROFILE_CLASS_UNSET;
 
         /**
          * IMSI (International Mobile Subscriber Identity).
          * <P>Type: TEXT </P>
+         *
+         * @hide
          */
-        public static final String IMSI = "imsi";
+        public static final String COLUMN_IMSI = "imsi";
 
-        /** Whether uicc applications is set to be enabled or disabled. By default it's enabled. */
-        public static final String UICC_APPLICATIONS_ENABLED = "uicc_applications_enabled";
+        /**
+         * Whether uicc applications is set to be enabled or disabled. By default it's enabled.
+         * @hide
+         */
+        public static final String COLUMN_UICC_APPLICATIONS_ENABLED = "uicc_applications_enabled";
 
         /**
          * TelephonyProvider column name for allowed network types. Indicate which network types
          * are allowed. Default is -1.
+         * <P>Type: BIGINT (long) </P>
+         *
+         * @hide
          */
-        public static final String ALLOWED_NETWORK_TYPES = "allowed_network_types";
+        public static final String COLUMN_ALLOWED_NETWORK_TYPES = "allowed_network_types";
     }
 }
