@@ -38,14 +38,8 @@
 #include "TrainInfoPuller.h"
 #include "statslog.h"
 
-#include <iostream>
-
-using std::make_shared;
-using std::map;
 using std::shared_ptr;
-using std::string;
 using std::vector;
-using std::list;
 
 namespace android {
 namespace os {

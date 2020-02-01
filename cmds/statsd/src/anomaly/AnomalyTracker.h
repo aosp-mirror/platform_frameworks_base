@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <memory>  // unique_ptr
-
 #include <stdlib.h>
 
 #include <gtest/gtest_prod.h>

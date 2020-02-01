@@ -15,8 +15,10 @@
  */
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
+
 #include "MetricsManager.h"
-#include "statslog.h"
+
+#include <private/android_filesystem_config.h>
 
 #include "CountMetricProducer.h"
 #include "atoms_info.h"
@@ -28,10 +30,9 @@
 #include "metrics_manager_util.h"
 #include "stats_util.h"
 #include "stats_log_util.h"
+#include "statslog.h"
 
-#include <log/logprint.h>
 #include <private/android_filesystem_config.h>
-#include <utils/SystemClock.h>
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_INT32;
@@ -40,10 +41,8 @@ using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 
-using std::make_unique;
 using std::set;
 using std::string;
-using std::unordered_map;
 using std::vector;
 
 namespace android {
