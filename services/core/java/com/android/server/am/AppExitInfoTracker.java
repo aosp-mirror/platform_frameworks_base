@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.procStateToImportance;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -52,6 +53,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
 import com.android.server.IoThread;
+import com.android.server.ServiceThread;
 import com.android.server.SystemServiceManager;
 
 import java.io.File;
@@ -179,9 +181,12 @@ public final class AppExitInfoTracker {
         mRawRecordsPool = new SynchronizedPool<ApplicationExitInfo>(APP_EXIT_RAW_INFO_POOL_SIZE);
     }
 
-    void init(ActivityManagerService service, Looper looper) {
+    void init(ActivityManagerService service) {
         mService = service;
-        mKillHandler = new KillHandler(looper);
+        ServiceThread thread = new ServiceThread(TAG + ":killHandler",
+                THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
+        thread.start();
+        mKillHandler = new KillHandler(thread.getLooper());
         mProcExitInfoFile = new File(SystemServiceManager.ensureSystemDir(), APP_EXIT_INFO_FILE);
 
         mAppExitInfoHistoryListSize = service.mContext.getResources().getInteger(
