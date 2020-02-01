@@ -431,6 +431,8 @@ public class AppTransitionController {
         while (!candidates.isEmpty()) {
             final WindowContainer current = candidates.removeFirst();
             final WindowContainer parent = current.getParent();
+            siblings.clear();
+            siblings.add(current);
             boolean canPromote = true;
 
             if (parent == null) {
@@ -468,12 +470,11 @@ public class AppTransitionController {
                 //
                 // [Task] +- [ActivityRecord1] (visible, in opening apps)
                 //        +- [ActivityRecord2] (visible, not in opening apps)
-                siblings.clear();
                 for (int j = 0; j < parent.getChildCount(); ++j) {
                     final WindowContainer sibling = parent.getChildAt(j);
-                    if (sibling == current || candidates.remove(sibling)) {
+                    if (candidates.remove(sibling)) {
                         siblings.add(sibling);
-                    } else if (sibling.isVisible()) {
+                    } else if (sibling != current && sibling.isVisible()) {
                         canPromote = false;
                     }
                 }

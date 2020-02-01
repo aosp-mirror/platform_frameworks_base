@@ -35,6 +35,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -56,6 +57,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
@@ -99,6 +101,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -326,6 +329,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mChildrenUpdateRequested = false;
             getViewTreeObserver().removeOnPreDrawListener(this);
             return true;
+        }
+    };
+    private final UserChangedListener mLockscreenUserChangeListener = new UserChangedListener() {
+        @Override
+        public void onUserChanged(int userId) {
+            updateSensitiveness(false /* animated */);
         }
     };
     private StatusBar mStatusBar;
@@ -561,6 +570,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
         addOnExpandedHeightChangedListener(mRoundnessManager::setExpanded);
+        mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
         setOutlineProvider(mOutlineProvider);
 
         // Blocking helper manager wants to know the expanded state, update as well.
@@ -4611,7 +4621,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void setHideSensitive(boolean hideSensitive, boolean animate) {
+    private void updateSensitiveness(boolean animate) {
+        boolean hideSensitive = mLockscreenUserManager.isAnyProfilePublicMode();
         if (hideSensitive != mAmbientState.isHideSensitive()) {
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -5306,7 +5317,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private void onStatePostChange() {
         boolean onKeyguard = onKeyguard();
-        boolean publicMode = mLockscreenUserManager.isAnyProfilePublicMode();
 
         if (mHeadsUpAppearanceController != null) {
             mHeadsUpAppearanceController.onStateChanged();
@@ -5314,7 +5324,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         SysuiStatusBarStateController state = (SysuiStatusBarStateController)
                 Dependency.get(StatusBarStateController.class);
-        setHideSensitive(publicMode, state.goingToFullShade() /* animate */);
+        updateSensitiveness(state.goingToFullShade() /* animate */);
         setDimmed(onKeyguard, state.fromShadeLocked() /* animate */);
         setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = getActivatedChild();

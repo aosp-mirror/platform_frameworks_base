@@ -282,7 +282,8 @@ public class NotificationLockscreenUserManagerImpl implements
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
+                null /* executor */, UserHandle.ALL);
 
         IntentFilter internalFilter = new IntentFilter();
         internalFilter.addAction(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);

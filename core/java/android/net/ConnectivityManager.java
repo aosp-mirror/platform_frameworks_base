@@ -3322,15 +3322,19 @@ public class ConnectivityManager {
     // of dependent changes that would conflict throughout the automerger graph. Having this
     // temporarily helps with the process of going through with all these dependent changes across
     // the entire tree.
+    // STOPSHIP (b/148055573) : remove this before R is released.
     /**
      * @hide
      * Register a NetworkAgent with ConnectivityService.
      * @return Network corresponding to NetworkAgent.
+     * @deprecated use the version that takes a NetworkScore and a provider ID.
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
+    @Deprecated
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkAgentConfig config) {
-        return registerNetworkAgent(messenger, ni, lp, nc, score, config, NetworkProvider.ID_NONE);
+        final NetworkScore ns = new NetworkScore.Builder().setLegacyScore(score).build();
+        return registerNetworkAgent(messenger, ni, lp, nc, ns, config, NetworkProvider.ID_NONE);
     }
 
     /**
@@ -3340,7 +3344,7 @@ public class ConnectivityManager {
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
-            NetworkCapabilities nc, int score, NetworkAgentConfig config, int providerId) {
+            NetworkCapabilities nc, NetworkScore score, NetworkAgentConfig config, int providerId) {
         try {
             return mService.registerNetworkAgent(messenger, ni, lp, nc, score, config, providerId);
         } catch (RemoteException e) {

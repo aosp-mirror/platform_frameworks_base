@@ -168,8 +168,10 @@ public class PhoneStateListener {
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
     /**
-     * Listen for always reported changes of the network signal strengths (cellular),
+     * Listen for changes of the network signal strengths (cellular) always reported from modem,
      * even in some situations such as the screen of the device is off.
+     *
+     * @see #onSignalStrengthsChanged
      *
      * @hide
      */

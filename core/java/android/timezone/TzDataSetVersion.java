@@ -111,23 +111,23 @@ public final class TzDataSetVersion {
 
     /** Returns the major version number. See {@link TzDataSetVersion}. */
     public int getFormatMajorVersion() {
-        return mDelegate.formatMajorVersion;
+        return mDelegate.getFormatMajorVersion();
     }
 
     /** Returns the minor version number. See {@link TzDataSetVersion}. */
     public int getFormatMinorVersion() {
-        return mDelegate.formatMinorVersion;
+        return mDelegate.getFormatMinorVersion();
     }
 
     /** Returns the tzdb version string. See {@link TzDataSetVersion}. */
     @NonNull
     public String getRulesVersion() {
-        return mDelegate.rulesVersion;
+        return mDelegate.getRulesVersion();
     }
 
     /** Returns the Android revision. See {@link TzDataSetVersion}. */
     public int getRevision() {
-        return mDelegate.revision;
+        return mDelegate.getRevision();
     }
 
     @Override

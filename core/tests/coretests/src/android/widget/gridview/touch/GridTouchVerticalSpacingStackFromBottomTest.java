@@ -106,9 +106,10 @@ public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrum
 
         int firstTop = firstChild.getTop();
 
+        int windowHeight = mActivity.getWindowManager().getCurrentWindowMetrics().getSize()
+                .getHeight();
         int distance = TouchUtils.dragViewBy(this, firstChild, 
-                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 
-                (int) (mActivity.getWindowManager().getDefaultDisplay().getHeight() * 0.75f));
+                Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, (int) (windowHeight * 0.75f));
         
         assertEquals("View scrolled to wrong position", firstTop
                 + (distance - mViewConfig.getScaledTouchSlop() - 1), firstChild.getTop());

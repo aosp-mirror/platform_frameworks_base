@@ -40,6 +40,7 @@ import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkProvider;
+import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
@@ -155,9 +156,13 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         }
     }
 
+    private NetworkScore makeNetworkScore(final int legacyScore) {
+        return new NetworkScore.Builder().setLegacyScore(legacyScore).build();
+    }
+
     public void adjustScore(int change) {
         mScore += change;
-        mNetworkAgent.sendNetworkScore(mScore);
+        mNetworkAgent.sendNetworkScore(makeNetworkScore(mScore));
     }
 
     public int getScore() {

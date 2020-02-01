@@ -49,6 +49,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.ResourceId;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -91,6 +92,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service responsible for maintaining and facilitating access to data blobs published by apps.
@@ -658,10 +660,9 @@ public class BlobStoreManagerService extends SystemService {
         @IntRange(from = 1)
         public long createSession(@NonNull BlobHandle blobHandle,
                 @NonNull String packageName) {
-            Preconditions.checkNotNull(blobHandle, "blobHandle must not be null");
-            Preconditions.checkNotNull(packageName, "packageName must not be null");
-            // TODO: verify blobHandle.algorithm is sha-256
-            // TODO: assert blobHandle is valid.
+            Objects.requireNonNull(blobHandle, "blobHandle must not be null");
+            blobHandle.assertIsValid();
+            Objects.requireNonNull(packageName, "packageName must not be null");
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
@@ -682,7 +683,7 @@ public class BlobStoreManagerService extends SystemService {
                 @NonNull String packageName) {
             Preconditions.checkArgumentPositive(sessionId,
                     "sessionId must be positive: " + sessionId);
-            Preconditions.checkNotNull(packageName, "packageName must not be null");
+            Objects.requireNonNull(packageName, "packageName must not be null");
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
@@ -695,7 +696,7 @@ public class BlobStoreManagerService extends SystemService {
                 @NonNull String packageName) {
             Preconditions.checkArgumentPositive(sessionId,
                     "sessionId must be positive: " + sessionId);
-            Preconditions.checkNotNull(packageName, "packageName must not be null");
+            Objects.requireNonNull(packageName, "packageName must not be null");
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
@@ -706,8 +707,9 @@ public class BlobStoreManagerService extends SystemService {
         @Override
         public ParcelFileDescriptor openBlob(@NonNull BlobHandle blobHandle,
                 @NonNull String packageName) {
-            Preconditions.checkNotNull(blobHandle, "blobHandle must not be null");
-            Preconditions.checkNotNull(packageName, "packageName must not be null");
+            Objects.requireNonNull(blobHandle, "blobHandle must not be null");
+            blobHandle.assertIsValid();
+            Objects.requireNonNull(packageName, "packageName must not be null");
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
@@ -727,24 +729,27 @@ public class BlobStoreManagerService extends SystemService {
 
         @Override
         public void acquireLease(@NonNull BlobHandle blobHandle, @IdRes int descriptionResId,
-                @CurrentTimeSecondsLong long leaseTimeoutSecs, @NonNull String packageName) {
-            Preconditions.checkNotNull(blobHandle, "blobHandle must not be null");
-            Preconditions.checkNotNull(packageName, "packageName must not be null");
-            Preconditions.checkArgumentPositive(descriptionResId,
-                    "descriptionResId must be positive; value=" + descriptionResId);
+                @CurrentTimeSecondsLong long leaseExpiryTimeMillis, @NonNull String packageName) {
+            Objects.requireNonNull(blobHandle, "blobHandle must not be null");
+            blobHandle.assertIsValid();
+            Preconditions.checkArgument(ResourceId.isValid(descriptionResId),
+                    "descriptionResId is not valid");
+            Preconditions.checkArgumentNonnegative(leaseExpiryTimeMillis,
+                    "leaseExpiryTimeMillis must not be negative");
+            Objects.requireNonNull(packageName, "packageName must not be null");
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
-            acquireLeaseInternal(blobHandle, descriptionResId, leaseTimeoutSecs,
+            acquireLeaseInternal(blobHandle, descriptionResId, leaseExpiryTimeMillis,
                     callingUid, packageName);
         }
 
         @Override
         public void releaseLease(@NonNull BlobHandle blobHandle, @NonNull String packageName) {
-            Preconditions.checkNotNull(blobHandle, "blobHandle must not be null");
-            Preconditions.checkNotNull(packageName, "packageName must not be null");
-
+            Objects.requireNonNull(blobHandle, "blobHandle must not be null");
+            blobHandle.assertIsValid();
+            Objects.requireNonNull(packageName, "packageName must not be null");
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
@@ -754,7 +759,7 @@ public class BlobStoreManagerService extends SystemService {
 
         @Override
         public void waitForIdle(@NonNull RemoteCallback remoteCallback) {
-            Preconditions.checkNotNull(remoteCallback, "remoteCallback must not be null");
+            Objects.requireNonNull(remoteCallback, "remoteCallback must not be null");
 
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP,
                     "Caller is not allowed to call this; caller=" + Binder.getCallingUid());

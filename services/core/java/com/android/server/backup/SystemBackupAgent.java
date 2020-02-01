@@ -113,6 +113,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
             throws IOException {
         // Slot in a restore helper for the older wallpaper backup schema to support restore
         // from devices still generating data in that format.
+        //TODO(b/147732386): Add multi-display support for wallpaper backup.
         addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE_KEY}));
 

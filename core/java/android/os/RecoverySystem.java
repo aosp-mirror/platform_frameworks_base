@@ -41,7 +41,6 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
-import android.view.WindowManager;
 
 import libcore.io.Streams;
 
@@ -615,8 +614,7 @@ public class RecoverySystem {
 
             // On TV, reboot quiescently if the screen is off
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                if (wm.getDefaultDisplay().getState() != Display.STATE_ON) {
+                if (context.getDisplay().getState() != Display.STATE_ON) {
                     reason += ",quiescent";
                 }
             }

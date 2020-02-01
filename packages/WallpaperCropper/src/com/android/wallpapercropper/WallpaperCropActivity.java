@@ -37,9 +37,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.android.gallery3d.common.Utils;
@@ -231,18 +231,18 @@ public class WallpaperCropActivity extends Activity {
         return x * aspectRatio + y;
     }
 
-    static protected Point getDefaultWallpaperSize(Resources res, WindowManager windowManager) {
+    static protected Point getDefaultWallpaperSize(Resources res, Display display) {
         if (sDefaultWallpaperSize == null) {
             Point minDims = new Point();
             Point maxDims = new Point();
-            windowManager.getDefaultDisplay().getCurrentSizeRange(minDims, maxDims);
+            display.getCurrentSizeRange(minDims, maxDims);
 
             int maxDim = Math.max(maxDims.x, maxDims.y);
             int minDim = Math.max(minDims.x, minDims.y);
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 Point realSize = new Point();
-                windowManager.getDefaultDisplay().getRealSize(realSize);
+                display.getRealSize(realSize);
                 maxDim = Math.max(realSize.x, realSize.y);
                 minDim = Math.min(realSize.x, realSize.y);
             }
@@ -331,8 +331,7 @@ public class WallpaperCropActivity extends Activity {
         // this device
         int rotation = getRotationFromExif(res, resId);
         Point inSize = mCropView.getSourceDimensions();
-        Point outSize = getDefaultWallpaperSize(getResources(),
-                getWindowManager());
+        Point outSize = getDefaultWallpaperSize(getResources(), getDisplay());
         RectF crop = getMaxCropRect(
                 inSize.x, inSize.y, outSize.x, outSize.y, false);
         Runnable onEndCrop = new Runnable() {
@@ -359,14 +358,11 @@ public class WallpaperCropActivity extends Activity {
         // Get the crop
         boolean ltr = mCropView.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
 
-        Display d = getWindowManager().getDefaultDisplay();
-
-        Point displaySize = new Point();
-        d.getSize(displaySize);
-        boolean isPortrait = displaySize.x < displaySize.y;
+        Size windowSize = getWindowManager().getCurrentWindowMetrics().getSize();
+        boolean isPortrait = windowSize.getWidth() < windowSize.getHeight();
 
         Point defaultWallpaperSize = getDefaultWallpaperSize(getResources(),
-                getWindowManager());
+                getDisplay());
         // Get the crop
         RectF cropRect = mCropView.getCrop();
 

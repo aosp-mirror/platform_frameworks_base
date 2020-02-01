@@ -76,8 +76,6 @@ public final class ImeFocusController {
             return;
         }
         mHasImeFocus = hasImeFocus;
-        // Keep View#hasImeFocus up-to-dated when performing layout traversal.
-        mViewRootImpl.mAttachInfo.mHasImeFocus = mHasImeFocus;
         if (mHasImeFocus) {
             onPreWindowFocus(true /* hasWindowFocus */, windowAttribute);
             onPostWindowFocus(mViewRootImpl.mView.findFocus(), true /* hasWindowFocus */,

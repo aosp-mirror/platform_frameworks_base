@@ -288,7 +288,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.Xml;
 import android.util.apk.ApkSignatureVerifier;
@@ -310,6 +309,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.AttributeCache;
@@ -2163,7 +2163,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 getPackageExternalStorageType(volume, isExternal(res.pkg));
                         // If the package was installed externally, log it.
                         if (packageExternalStorageType != StorageEnums.UNKNOWN) {
-                            StatsLog.write(StatsLog.APP_INSTALL_ON_EXTERNAL_STORAGE_REPORTED,
+                            FrameworkStatsLog.write(
+                                    FrameworkStatsLog.APP_INSTALL_ON_EXTERNAL_STORAGE_REPORTED,
                                     packageExternalStorageType, res.pkg.getPackageName());
                         }
                     }
@@ -19706,9 +19707,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
-        if (getPackageInfo(packageName, MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE
-                        | MATCH_DIRECT_BOOT_UNAWARE | MATCH_DISABLED_COMPONENTS,
-                UserHandle.getCallingUserId()) == null) {
+        if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
             return null;
         }
         return packageName;
@@ -22179,13 +22178,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (!isPreviousLocationExternal && isExternal(pkg)) {
             // Move from internal to external storage.
-            StatsLog.write(StatsLog.APP_MOVED_STORAGE_REPORTED, packageExternalStorageType,
-                    StatsLog.APP_MOVED_STORAGE_REPORTED__MOVE_TYPE__TO_EXTERNAL,
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_MOVED_STORAGE_REPORTED,
+                    packageExternalStorageType,
+                    FrameworkStatsLog.APP_MOVED_STORAGE_REPORTED__MOVE_TYPE__TO_EXTERNAL,
                     packageName);
         } else if (isPreviousLocationExternal && !isExternal(pkg)) {
             // Move from external to internal storage.
-            StatsLog.write(StatsLog.APP_MOVED_STORAGE_REPORTED, packageExternalStorageType,
-                    StatsLog.APP_MOVED_STORAGE_REPORTED__MOVE_TYPE__TO_INTERNAL,
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_MOVED_STORAGE_REPORTED,
+                    packageExternalStorageType,
+                    FrameworkStatsLog.APP_MOVED_STORAGE_REPORTED__MOVE_TYPE__TO_INTERNAL,
                     packageName);
         }
     }

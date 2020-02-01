@@ -20,7 +20,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.sysprop.TelephonyProperties;
 import android.telephony.PhoneNumberUtils;
-import com.android.telephony.Rlog;
 import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
 import android.telephony.cdma.CdmaSmsCbProgramData;
@@ -41,6 +40,7 @@ import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.HexDump;
+import com.android.telephony.Rlog;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;

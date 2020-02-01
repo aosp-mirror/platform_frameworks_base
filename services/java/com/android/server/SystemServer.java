@@ -72,7 +72,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.StatsLog;
-import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureManager;
 
 import com.android.internal.R;
@@ -366,6 +365,12 @@ public final class SystemServer {
      */
     private static native void initZygoteChildHeapProfiling();
 
+
+    /**
+     * Spawn a thread that monitors for fd leaks.
+     */
+    private static native void spawnFdLeakCheckThread();
+
     /**
      * The main entry point from zygote.
      */
@@ -498,6 +503,11 @@ public final class SystemServer {
             // Debug builds - allow heap profiling.
             if (Build.IS_DEBUGGABLE) {
                 initZygoteChildHeapProfiling();
+            }
+
+            // Debug builds - spawn a thread to monitor for fd leaks.
+            if (Build.IS_DEBUGGABLE) {
+                spawnFdLeakCheckThread();
             }
 
             // Check whether we failed to shut down last time we tried.
@@ -2083,8 +2093,7 @@ public final class SystemServer {
         // propagate to it.
         final Configuration config = wm.computeNewConfiguration(DEFAULT_DISPLAY);
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager w = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        w.getDefaultDisplay().getMetrics(metrics);
+        context.getDisplay().getMetrics(metrics);
         context.getResources().updateConfiguration(config, metrics);
 
         // The system context's theme may be configuration-dependent.

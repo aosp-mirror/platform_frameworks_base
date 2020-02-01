@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import com.android.telephony.Rlog;
-
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
@@ -33,6 +31,7 @@ import android.os.RemoteException;
 import android.util.SparseArray;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.telephony.Rlog;
 
 import java.util.Arrays;
 import java.util.List;

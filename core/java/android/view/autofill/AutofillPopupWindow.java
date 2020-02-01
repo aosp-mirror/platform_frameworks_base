@@ -19,13 +19,13 @@ package android.view.autofill;
 import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.transition.Transition;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
@@ -127,11 +127,12 @@ public class AutofillPopupWindow extends PopupWindow {
             // If it is not fullscreen height, put window at bottom. Computes absolute position.
             // Note that we cannot easily change default gravity from Gravity.TOP to
             // Gravity.BOTTOM because PopupWindow base class does not expose computeGravity().
-            final Point outPoint = new Point();
-            anchor.getContext().getDisplay().getSize(outPoint);
-            width = outPoint.x;
+            final WindowManager windowManager = anchor.getContext()
+                    .getSystemService(WindowManager.class);
+            final Size windowSize = windowManager.getCurrentWindowMetrics().getSize();
+            width = windowSize.getWidth();
             if (height != LayoutParams.MATCH_PARENT) {
-                offsetY = outPoint.y - height;
+                offsetY = windowSize.getHeight() - height;
             }
             actualAnchor = anchor;
         } else if (virtualBounds != null) {

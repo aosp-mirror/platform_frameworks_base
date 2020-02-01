@@ -45,6 +45,10 @@ import java.util.Objects;
 public final class BlobHandle implements Parcelable {
     private static final String ALGO_SHA_256 = "SHA-256";
 
+    private static final String[] SUPPORTED_ALGOS = {
+            ALGO_SHA_256
+    };
+
     private static final int LIMIT_BLOB_TAG_LENGTH = 128; // characters
 
     /**
@@ -104,14 +108,9 @@ public final class BlobHandle implements Parcelable {
     public static @NonNull BlobHandle create(@NonNull String algorithm, @NonNull byte[] digest,
             @NonNull CharSequence label, @CurrentTimeMillisLong long expiryTimeMillis,
             @NonNull String tag) {
-        Preconditions.checkNotNull(algorithm, "algorithm must not be null");
-        Preconditions.checkNotNull(digest, "digest must not be null");
-        Preconditions.checkNotNull(label, "label must not be null");
-        Preconditions.checkArgumentNonnegative(expiryTimeMillis,
-                "expiryTimeMillis must not be negative");
-        Preconditions.checkNotNull(tag, "tag must not be null");
-        Preconditions.checkArgument(tag.length() <= LIMIT_BLOB_TAG_LENGTH, "tag too long");
-        return new BlobHandle(algorithm, digest, label, expiryTimeMillis, tag);
+        final BlobHandle handle = new BlobHandle(algorithm, digest, label, expiryTimeMillis, tag);
+        handle.assertIsValid();
+        return handle;
     }
 
     /**
@@ -221,6 +220,17 @@ public final class BlobHandle implements Parcelable {
         fout.println("label: " + label);
         fout.println("expiryMs: " + expiryTimeMillis);
         fout.println("tag: " + tag);
+    }
+
+    /** @hide */
+    public void assertIsValid() {
+        Preconditions.checkArgumentIsSupported(SUPPORTED_ALGOS, algorithm);
+        Preconditions.checkByteArrayNotEmpty(digest, "digest");
+        Preconditions.checkStringNotEmpty(label, "label must not be null");
+        Preconditions.checkArgumentNonnegative(expiryTimeMillis,
+                "expiryTimeMillis must not be negative");
+        Preconditions.checkStringNotEmpty(tag, "tag must not be null");
+        Preconditions.checkArgument(tag.length() <= LIMIT_BLOB_TAG_LENGTH, "tag too long");
     }
 
     public static final @NonNull Creator<BlobHandle> CREATOR = new Creator<BlobHandle>() {

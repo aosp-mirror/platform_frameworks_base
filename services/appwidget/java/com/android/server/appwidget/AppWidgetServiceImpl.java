@@ -98,7 +98,6 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -282,8 +281,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void computeMaximumWidgetBitmapMemory() {
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
+        Display display = mContext.getDisplay();
         Point size = new Point();
         display.getRealSize(size);
         // Cap memory usage at 1.5 times the size of the display

@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
@@ -52,7 +51,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
@@ -64,6 +62,7 @@ import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.Size;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -560,12 +559,10 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void updateInputMethodDisplay(int displayId) {
             // Update display for adding IME window to the right display.
-            if (displayId != DEFAULT_DISPLAY) {
-                // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
-                // for update resources & configuration correctly when show soft input
-                // in non-default display.
-                updateDisplay(displayId);
-            }
+            // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
+            // for update resources & configuration correctly when show soft input
+            // in non-default display.
+            updateDisplay(displayId);
         }
 
         /**
@@ -1466,8 +1463,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * screen orientation changes.
      */
     public int getMaxWidth() {
-        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        return wm.getDefaultDisplay().getWidth();
+        final WindowManager windowManager = getSystemService(WindowManager.class);
+        final Size windowSize = windowManager.getCurrentWindowMetrics().getSize();
+        return windowSize.getWidth();
     }
     
     /**

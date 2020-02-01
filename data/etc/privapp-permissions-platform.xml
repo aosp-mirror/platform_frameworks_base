@@ -369,6 +369,8 @@ applications that come with the platform
         <permission name="android.permission.WRITE_DREAM_STATE" />
         <!-- Permission required to test lights control APIs. -->
         <permission name="android.permission.CONTROL_DEVICE_LIGHTS" />
+        <!-- Permission required for ShortcutManagerUsageTest CTS test. -->
+        <permission name="android.permission.ACCESS_SHORTCUTS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

@@ -36,9 +36,9 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
 import com.android.server.pm.dex.DexManager;
@@ -444,7 +444,7 @@ public class BackgroundDexOptService extends JobService {
         }
 
         if (dex_opt_performed) {
-            StatsLog.write(StatsLog.APP_DOWNGRADED, pkg, package_size_before,
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_DOWNGRADED, pkg, package_size_before,
                     getPackageSize(pm, pkg), /*aggressive=*/ false);
         }
         return dex_opt_performed;

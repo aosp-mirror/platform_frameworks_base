@@ -36,7 +36,9 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -70,7 +72,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
-import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
@@ -82,6 +83,7 @@ import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -93,6 +95,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
@@ -137,8 +140,8 @@ public final class OomAdjuster {
     /**
      * In targetSdkVersion R and above, foreground service has camera and microphone while-in-use
      * capability only when the {@link android.R.attr#foregroundServiceType} is configured as
-     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_CAMERA} and
-     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} respectively in the
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_CAMERA} and
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MICROPHONE} respectively in the
      * manifest file.
      * In targetSdkVersion below R, foreground service automatically have camera and microphone
      * capabilities.
@@ -210,6 +213,8 @@ public final class OomAdjuster {
     private ActiveUids mTmpUidRecords;
     private ArrayDeque<ProcessRecord> mTmpQueue;
 
+    private final IPlatformCompat mPlatformCompat;
+
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
         this(service, processList, activeUids, createAdjusterThread());
     }
@@ -256,6 +261,8 @@ public final class OomAdjuster {
         mTmpQueue = new ArrayDeque<ProcessRecord>(mConstants.CUR_MAX_CACHED_PROCESSES << 1);
         mNumSlots = ((ProcessList.CACHED_APP_MAX_ADJ - ProcessList.CACHED_APP_MIN_ADJ + 1) >> 1)
                 / ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+        IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+        mPlatformCompat = IPlatformCompat.Stub.asInterface(b);
     }
 
     void initSettings() {
@@ -1492,8 +1499,23 @@ public final class OomAdjuster {
                                     != 0 ? TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
                 }
                 if (s.mAllowWhileInUsePermissionInFgs) {
-                    capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                            | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                    boolean enabled = false;
+                    try {
+                        enabled = mPlatformCompat.isChangeEnabled(
+                                CAMERA_MICROPHONE_CAPABILITY_CHANGE_ID, s.appInfo);
+                    } catch (RemoteException e) {
+                    }
+                    if (enabled) {
+                        capabilityFromFGS |=
+                                (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA : 0;
+                        capabilityFromFGS |=
+                                (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE : 0;
+                    } else {
+                        capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                    }
                 }
             }
 
@@ -1667,7 +1689,13 @@ public final class OomAdjuster {
                                 // Go at most to BOUND_TOP, unless requested to elevate
                                 // to client's state.
                                 clientProcState = PROCESS_STATE_BOUND_TOP;
-                                if (Compatibility.isChangeEnabled(PROCESS_CAPABILITY_CHANGE_ID)) {
+                                boolean enabled = false;
+                                try {
+                                    enabled = mPlatformCompat.isChangeEnabled(
+                                            PROCESS_CAPABILITY_CHANGE_ID, client.info);
+                                } catch (RemoteException e) {
+                                }
+                                if (enabled) {
                                     if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                                         // TOP process passes all capabilities to the service.
                                         capability = PROCESS_CAPABILITY_ALL;

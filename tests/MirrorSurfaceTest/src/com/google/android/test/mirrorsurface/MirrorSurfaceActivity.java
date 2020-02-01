@@ -16,6 +16,7 @@
 
 package com.google.android.test.mirrorsurface;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import android.app.Activity;
 import android.graphics.Canvas;
@@ -26,7 +27,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.DisplayMetrics;
+import android.util.Size;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
@@ -48,6 +49,8 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
     private static final int MOVE_FRAME_AMOUNT = 20;
 
     private IWindowManager mIWm;
+    // An instance of WindowManager that is adjusted for adding windows with type
+    // TYPE_APPLICATION_OVERLAY.
     private WindowManager mWm;
 
     private SurfaceControl mSurfaceControl = new SurfaceControl();
@@ -57,7 +60,7 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
     private View mOverlayView;
     private View mArrowOverlay;
 
-    private Rect mDisplayBounds = new Rect();
+    private Rect mWindowBounds = new Rect();
 
     private EditText mScaleText;
     private EditText mDisplayFrameText;
@@ -83,21 +86,21 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_mirror_surface);
-        mWm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        mWm = createWindowContext(TYPE_APPLICATION_OVERLAY, null /* options */)
+                .getSystemService(WindowManager.class);
         mIWm = WindowManagerGlobal.getWindowManagerService();
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        mDisplayBounds.set(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        Size windowSize = mWm.getCurrentWindowMetrics().getSize();
+        mWindowBounds.set(0, 0, windowSize.getWidth(), windowSize.getHeight());
 
         mScaleText = findViewById(R.id.scale);
         mDisplayFrameText = findViewById(R.id.displayFrame);
         mSourcePositionText = findViewById(R.id.sourcePosition);
 
-        mCurrFrame.set(0, 0, mDisplayBounds.width() / 2, mDisplayBounds.height() / 2);
+        mCurrFrame.set(0, 0, mWindowBounds.width() / 2, mWindowBounds.height() / 2);
         mCurrScale = DEFAULT_SCALE;
 
-        mDisplayId = getWindowManager().getDefaultDisplay().getDisplayId();
+        mDisplayId = getDisplay().getDisplayId();
         updateEditTexts();
 
         findViewById(R.id.mirror_button).setOnClickListener(view -> {
@@ -194,8 +197,8 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
 
     private void createMirrorOverlay() {
         mOverlayView = new LinearLayout(this);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(mDisplayBounds.width(),
-                mDisplayBounds.height(),
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(mWindowBounds.width(),
+                mWindowBounds.height(),
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -290,7 +293,7 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
 
     private void updateMirror(Rect displayFrame, float scale) {
         if (displayFrame.isEmpty()) {
-            Rect bounds = mDisplayBounds;
+            Rect bounds = mWindowBounds;
             int defaultCropW = Math.round(bounds.width() / 2);
             int defaultCropH = Math.round(bounds.height() / 2);
             displayFrame.set(0, 0, defaultCropW, defaultCropH);

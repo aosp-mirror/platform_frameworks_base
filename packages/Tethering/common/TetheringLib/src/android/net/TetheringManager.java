@@ -30,6 +30,9 @@ import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * This class provides the APIs to control the tethering service.
@@ -50,17 +54,23 @@ import java.util.concurrent.Executor;
 public class TetheringManager {
     private static final String TAG = TetheringManager.class.getSimpleName();
     private static final int DEFAULT_TIMEOUT_MS = 60_000;
+    private static final long CONNECTOR_POLL_INTERVAL_MILLIS = 200L;
 
-    private static TetheringManager sInstance;
+    @GuardedBy("mConnectorWaitQueue")
+    @Nullable
+    private ITetheringConnector mConnector;
+    @GuardedBy("mConnectorWaitQueue")
+    @NonNull
+    private final List<ConnectorConsumer> mConnectorWaitQueue = new ArrayList<>();
+    private final Supplier<IBinder> mConnectorSupplier;
 
-    private final ITetheringConnector mConnector;
     private final TetheringCallbackInternal mCallback;
     private final Context mContext;
     private final ArrayMap<TetheringEventCallback, ITetheringEventCallback>
             mTetheringEventCallbacks = new ArrayMap<>();
 
-    private TetheringConfigurationParcel mTetheringConfiguration;
-    private TetherStatesParcel mTetherStatesParcel;
+    private volatile TetheringConfigurationParcel mTetheringConfiguration;
+    private volatile TetherStatesParcel mTetherStatesParcel;
 
     /**
      * Broadcast Action: A tetherable connection has come or gone.
@@ -162,29 +172,139 @@ public class TetheringManager {
     /**
      * Create a TetheringManager object for interacting with the tethering service.
      *
+     * @param context Context for the manager.
+     * @param connectorSupplier Supplier for the manager connector; may return null while the
+     *                          service is not connected.
      * {@hide}
      */
-    public TetheringManager(@NonNull final Context context, @NonNull final IBinder service) {
+    public TetheringManager(@NonNull final Context context,
+            @NonNull Supplier<IBinder> connectorSupplier) {
         mContext = context;
-        mConnector = ITetheringConnector.Stub.asInterface(service);
         mCallback = new TetheringCallbackInternal();
+        mConnectorSupplier = connectorSupplier;
 
         final String pkgName = mContext.getOpPackageName();
+
+        final IBinder connector = mConnectorSupplier.get();
+        // If the connector is available on start, do not start a polling thread. This introduces
+        // differences in the thread that sends the oneway binder calls to the service between the
+        // first few seconds after boot and later, but it avoids always having differences between
+        // the first usage of TetheringManager from a process and subsequent usages (so the
+        // difference is only on boot). On boot binder calls may be queued until the service comes
+        // up and be sent from a worker thread; later, they are always sent from the caller thread.
+        // Considering that it's just oneway binder calls, and ordering is preserved, this seems
+        // better than inconsistent behavior persisting after boot.
+        if (connector != null) {
+            mConnector = ITetheringConnector.Stub.asInterface(connector);
+        } else {
+            startPollingForConnector();
+        }
+
         Log.i(TAG, "registerTetheringEventCallback:" + pkgName);
+        getConnector(c -> c.registerTetheringEventCallback(mCallback, pkgName));
+    }
+
+    private void startPollingForConnector() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    // Not much to do here, the system needs to wait for the connector
+                }
+
+                final IBinder connector = mConnectorSupplier.get();
+                if (connector != null) {
+                    onTetheringConnected(ITetheringConnector.Stub.asInterface(connector));
+                    return;
+                }
+            }
+        }).start();
+    }
+
+    private interface ConnectorConsumer {
+        void onConnectorAvailable(ITetheringConnector connector) throws RemoteException;
+    }
+
+    private void onTetheringConnected(ITetheringConnector connector) {
+        // Process the connector wait queue in order, including any items that are added
+        // while processing.
+        //
+        // 1. Copy the queue to a local variable under lock.
+        // 2. Drain the local queue with the lock released (otherwise, enqueuing future commands
+        //    would block on the lock).
+        // 3. Acquire the lock again. If any new tasks were queued during step 2, goto 1.
+        //    If not, set mConnector to non-null so future tasks are run immediately, not queued.
+        //
+        // For this to work, all calls to the tethering service must use getConnector(), which
+        // ensures that tasks are added to the queue with the lock held.
+        //
+        // Once mConnector is set to non-null, it will never be null again. If the network stack
+        // process crashes, no recovery is possible.
+        // TODO: evaluate whether it is possible to recover from network stack process crashes
+        // (though in most cases the system will have crashed when the network stack process
+        // crashes).
+        do {
+            final List<ConnectorConsumer> localWaitQueue;
+            synchronized (mConnectorWaitQueue) {
+                localWaitQueue = new ArrayList<>(mConnectorWaitQueue);
+                mConnectorWaitQueue.clear();
+            }
+
+            // Allow more tasks to be added at the end without blocking while draining the queue.
+            for (ConnectorConsumer task : localWaitQueue) {
+                try {
+                    task.onConnectorAvailable(connector);
+                } catch (RemoteException e) {
+                    // Most likely the network stack process crashed, which is likely to crash the
+                    // system. Keep processing other requests but report the error loudly.
+                    Log.wtf(TAG, "Error processing request for the tethering connector", e);
+                }
+            }
+
+            synchronized (mConnectorWaitQueue) {
+                if (mConnectorWaitQueue.size() == 0) {
+                    mConnector = connector;
+                    return;
+                }
+            }
+        } while (true);
+    }
+
+    /**
+     * Asynchronously get the ITetheringConnector to execute some operation.
+     *
+     * <p>If the connector is already available, the operation will be executed on the caller's
+     * thread. Otherwise it will be queued and executed on a worker thread. The operation should be
+     * limited to performing oneway binder calls to minimize differences due to threading.
+     */
+    private void getConnector(ConnectorConsumer consumer) {
+        final ITetheringConnector connector;
+        synchronized (mConnectorWaitQueue) {
+            connector = mConnector;
+            if (connector == null) {
+                mConnectorWaitQueue.add(consumer);
+                return;
+            }
+        }
+
         try {
-            mConnector.registerTetheringEventCallback(mCallback, pkgName);
+            consumer.onConnectorAvailable(connector);
         } catch (RemoteException e) {
             throw new IllegalStateException(e);
         }
     }
 
     private interface RequestHelper {
-        void runRequest(IIntResultListener listener);
+        void runRequest(ITetheringConnector connector, IIntResultListener listener);
     }
 
+    // Used to dispatch legacy ConnectivityManager methods that expect tethering to be able to
+    // return results and perform operations synchronously.
+    // TODO: remove once there are no callers of these legacy methods.
     private class RequestDispatcher {
         private final ConditionVariable mWaiting;
-        public int mRemoteResult;
+        public volatile int mRemoteResult;
 
         private final IIntResultListener mListener = new IIntResultListener.Stub() {
                 @Override
@@ -199,7 +319,7 @@ public class TetheringManager {
         }
 
         int waitForResult(final RequestHelper request) {
-            request.runRequest(mListener);
+            getConnector(c -> request.runRequest(c, mListener));
             if (!mWaiting.block(DEFAULT_TIMEOUT_MS)) {
                 throw new IllegalStateException("Callback timeout");
             }
@@ -222,7 +342,7 @@ public class TetheringManager {
     }
 
     private class TetheringCallbackInternal extends ITetheringEventCallback.Stub {
-        private int mError = TETHER_ERROR_NO_ERROR;
+        private volatile int mError = TETHER_ERROR_NO_ERROR;
         private final ConditionVariable mWaitForCallback = new ConditionVariable();
 
         @Override
@@ -280,9 +400,9 @@ public class TetheringManager {
         Log.i(TAG, "tether caller:" + callerPkg);
         final RequestDispatcher dispatcher = new RequestDispatcher();
 
-        return dispatcher.waitForResult(listener -> {
+        return dispatcher.waitForResult((connector, listener) -> {
             try {
-                mConnector.tether(iface, callerPkg, listener);
+                connector.tether(iface, callerPkg, listener);
             } catch (RemoteException e) {
                 throw new IllegalStateException(e);
             }
@@ -304,9 +424,9 @@ public class TetheringManager {
 
         final RequestDispatcher dispatcher = new RequestDispatcher();
 
-        return dispatcher.waitForResult(listener -> {
+        return dispatcher.waitForResult((connector, listener) -> {
             try {
-                mConnector.untether(iface, callerPkg, listener);
+                connector.untether(iface, callerPkg, listener);
             } catch (RemoteException e) {
                 throw new IllegalStateException(e);
             }
@@ -330,9 +450,9 @@ public class TetheringManager {
 
         final RequestDispatcher dispatcher = new RequestDispatcher();
 
-        return dispatcher.waitForResult(listener -> {
+        return dispatcher.waitForResult((connector, listener) -> {
             try {
-                mConnector.setUsbTethering(enable, callerPkg, listener);
+                connector.setUsbTethering(enable, callerPkg, listener);
             } catch (RemoteException e) {
                 throw new IllegalStateException(e);
             }
@@ -467,11 +587,7 @@ public class TetheringManager {
                 });
             }
         };
-        try {
-            mConnector.startTethering(request.getParcel(), callerPkg, listener);
-        } catch (RemoteException e) {
-            throw new IllegalStateException(e);
-        }
+        getConnector(c -> c.startTethering(request.getParcel(), callerPkg, listener));
     }
 
     /**
@@ -509,15 +625,15 @@ public class TetheringManager {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "stopTethering caller:" + callerPkg);
 
-        final RequestDispatcher dispatcher = new RequestDispatcher();
-
-        dispatcher.waitForResult(listener -> {
-            try {
-                mConnector.stopTethering(type, callerPkg, listener);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(e);
+        getConnector(c -> c.stopTethering(type, callerPkg, new IIntResultListener.Stub() {
+            @Override
+            public void onResult(int resultCode) {
+                // TODO: provide an API to obtain result
+                // This has never been possible as stopTethering has always been void and never
+                // taken a callback object. The only indication that callers have is if the call
+                // results in a TETHER_STATE_CHANGE broadcast.
             }
-        });
+        }));
     }
 
     /**
@@ -591,12 +707,8 @@ public class TetheringManager {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "getLatestTetheringEntitlementResult caller:" + callerPkg);
 
-        try {
-            mConnector.requestLatestTetheringEntitlementResult(type, receiver, showEntitlementUi,
-                    callerPkg);
-        } catch (RemoteException e) {
-            throw new IllegalStateException(e);
-        }
+        getConnector(c -> c.requestLatestTetheringEntitlementResult(
+                type, receiver, showEntitlementUi, callerPkg));
     }
 
     /**
@@ -832,11 +944,7 @@ public class TetheringManager {
                     });
                 }
             };
-            try {
-                mConnector.registerTetheringEventCallback(remoteCallback, callerPkg);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(e);
-            }
+            getConnector(c -> c.registerTetheringEventCallback(remoteCallback, callerPkg));
             mTetheringEventCallbacks.put(callback, remoteCallback);
         }
     }
@@ -860,11 +968,8 @@ public class TetheringManager {
             if (remoteCallback == null) {
                 throw new IllegalArgumentException("callback was not registered.");
             }
-            try {
-                mConnector.unregisterTetheringEventCallback(remoteCallback, callerPkg);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(e);
-            }
+
+            getConnector(c -> c.unregisterTetheringEventCallback(remoteCallback, callerPkg));
         }
     }
 
@@ -1002,9 +1107,9 @@ public class TetheringManager {
         final String callerPkg = mContext.getOpPackageName();
 
         final RequestDispatcher dispatcher = new RequestDispatcher();
-        final int ret = dispatcher.waitForResult(listener -> {
+        final int ret = dispatcher.waitForResult((connector, listener) -> {
             try {
-                mConnector.isTetheringSupported(callerPkg, listener);
+                connector.isTetheringSupported(callerPkg, listener);
             } catch (RemoteException e) {
                 throw new IllegalStateException(e);
             }
@@ -1027,13 +1132,14 @@ public class TetheringManager {
         final String callerPkg = mContext.getOpPackageName();
         Log.i(TAG, "stopAllTethering caller:" + callerPkg);
 
-        final RequestDispatcher dispatcher = new RequestDispatcher();
-        dispatcher.waitForResult(listener -> {
-            try {
-                mConnector.stopAllTethering(callerPkg, listener);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(e);
+        getConnector(c -> c.stopAllTethering(callerPkg, new IIntResultListener.Stub() {
+            @Override
+            public void onResult(int resultCode) {
+                // TODO: add an API parameter to send result to caller.
+                // This has never been possible as stopAllTethering has always been void and never
+                // taken a callback object. The only indication that callers have is if the call
+                // results in a TETHER_STATE_CHANGE broadcast.
             }
-        });
+        }));
     }
 }

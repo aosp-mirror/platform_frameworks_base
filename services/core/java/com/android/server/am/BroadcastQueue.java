@@ -47,9 +47,10 @@ import android.permission.IPermissionManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1255,8 +1256,8 @@ public final class BroadcastQueue {
             r.dispatchClockTime = System.currentTimeMillis();
 
             if (mLogLatencyMetrics) {
-                StatsLog.write(
-                        StatsLog.BROADCAST_DISPATCH_LATENCY_REPORTED,
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.BROADCAST_DISPATCH_LATENCY_REPORTED,
                         r.dispatchClockTime - r.enqueueClockTime);
             }
 

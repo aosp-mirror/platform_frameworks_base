@@ -25,18 +25,16 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.drawable.AnimationDrawable;
-import android.util.Log;
-import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 
 /**
  * View that holds requested number of UI controls as ImageView with an infinite animation.
  */
 public class CustomControlView extends AbsoluteLayout {
-    private final static int CONTROL_DIMENTION = 48;
+    private final static int CONTROL_DIMENSION = 48;
 
     private final int mPerRowControlCount;
     private List<Long> mFrameTimes = new ArrayList<>();
@@ -44,8 +42,9 @@ public class CustomControlView extends AbsoluteLayout {
     public CustomControlView(@NonNull Context context) {
         super(context);
 
-        final WindowManager windowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        mPerRowControlCount = windowManager.getDefaultDisplay().getWidth() / CONTROL_DIMENTION;
+        final Point size = new Point();
+        context.getDisplay().getSize(size);
+        mPerRowControlCount = size.x / CONTROL_DIMENSION;
     }
 
     /**
@@ -76,11 +75,11 @@ public class CustomControlView extends AbsoluteLayout {
                     for (int i = 0; i < controlCount; ++i) {
                         final ImageView image = (i == 0) ?
                                 new ReferenceImageView(activity) : new ImageView(activity);
-                        final int x = (i % mPerRowControlCount) * CONTROL_DIMENTION;
-                        final int y = (i / mPerRowControlCount) * CONTROL_DIMENTION;
+                        final int x = (i % mPerRowControlCount) * CONTROL_DIMENSION;
+                        final int y = (i / mPerRowControlCount) * CONTROL_DIMENSION;
                         final AbsoluteLayout.LayoutParams layoutParams =
                                 new AbsoluteLayout.LayoutParams(
-                                        CONTROL_DIMENTION, CONTROL_DIMENTION, x, y);
+                                        CONTROL_DIMENSION, CONTROL_DIMENSION, x, y);
                         image.setLayoutParams(layoutParams);
                         image.setBackgroundResource(R.drawable.animation);
                         final AnimationDrawable animation =

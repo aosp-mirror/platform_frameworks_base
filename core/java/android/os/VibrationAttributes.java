@@ -391,9 +391,21 @@ public final class VibrationAttributes implements Parcelable {
          * Replaces flags
          * @param flags any combination of flags.
          * @return the same Builder instance.
+         * @hide
          */
         public @NonNull Builder replaceFlags(int flags) {
             mFlags = flags;
+            return this;
+        }
+
+        /**
+         * Set flags
+         * @param flags combination of flags to be set.
+         * @param mask Bit range that should be changed.
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setFlags(int flags, int mask) {
+            mFlags = (mFlags & ~mask) | (flags & mask);
             return this;
         }
     }

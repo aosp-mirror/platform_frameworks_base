@@ -54,6 +54,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
@@ -2088,11 +2089,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case TYPE_VOICE_INTERACTION:
                 case TYPE_ACCESSIBILITY_OVERLAY:
                 case TYPE_QS_DIALOG:
+                case TYPE_NAVIGATION_BAR_PANEL:
                     // The window manager will check these.
                     return ADD_OKAY;
             }
-            return mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
-                    == PERMISSION_GRANTED ? ADD_OKAY : ADD_PERMISSION_DENIED;
+
+            return (mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
+                    == PERMISSION_GRANTED) ? ADD_OKAY : ADD_PERMISSION_DENIED;
         }
 
         // Things get a little more interesting for alert windows...

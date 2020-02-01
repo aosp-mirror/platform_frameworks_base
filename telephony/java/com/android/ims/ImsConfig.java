@@ -19,13 +19,13 @@ package com.android.ims;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import com.android.telephony.Rlog;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
 
 import com.android.internal.telephony.util.HandlerExecutor;
+import com.android.telephony.Rlog;
 
 import java.util.concurrent.Executor;
 

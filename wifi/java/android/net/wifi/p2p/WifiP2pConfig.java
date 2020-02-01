@@ -137,12 +137,12 @@ public class WifiP2pConfig implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage
-    public int netId = WifiP2pGroup.PERSISTENT_NET_ID;
+    public int netId = WifiP2pGroup.NETWORK_ID_PERSISTENT;
 
     /**
      * Get the network ID of this P2P configuration.
-     * @return either a non-negative network ID, or one of {@link WifiP2pGroup#PERSISTENT_NET_ID} or
-     * {@link WifiP2pGroup#TEMPORARY_NET_ID}.
+     * @return either a non-negative network ID, or one of
+     * {@link WifiP2pGroup#NETWORK_ID_PERSISTENT} or {@link WifiP2pGroup#NETWORK_ID_TEMPORARY}.
      */
     public int getNetworkId() {
         return netId;
@@ -280,7 +280,7 @@ public class WifiP2pConfig implements Parcelable {
         private String mPassphrase = "";
         private int mGroupOperatingBand = GROUP_OWNER_BAND_AUTO;
         private int mGroupOperatingFrequency = GROUP_OWNER_BAND_AUTO;
-        private int mNetId = WifiP2pGroup.TEMPORARY_NET_ID;
+        private int mNetId = WifiP2pGroup.NETWORK_ID_TEMPORARY;
 
         /**
          * Specify the peer's MAC address. If not set, the device will
@@ -460,9 +460,9 @@ public class WifiP2pConfig implements Parcelable {
          */
         public @NonNull Builder enablePersistentMode(boolean persistent) {
             if (persistent) {
-                mNetId = WifiP2pGroup.PERSISTENT_NET_ID;
+                mNetId = WifiP2pGroup.NETWORK_ID_PERSISTENT;
             } else {
-                mNetId = WifiP2pGroup.TEMPORARY_NET_ID;
+                mNetId = WifiP2pGroup.NETWORK_ID_TEMPORARY;
             }
             return this;
         }

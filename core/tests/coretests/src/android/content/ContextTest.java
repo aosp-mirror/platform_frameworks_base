@@ -48,6 +48,7 @@ public class ContextTest {
         assertEquals(testContext.getDisplay().getDisplayId(), testContext.getDisplayId());
     }
 
+    // TODO(b/128338354): Re-visit this test after introducing WindowContext
     @Test
     public void testDisplayIdForDefaultDisplayContext() {
         final Context testContext =

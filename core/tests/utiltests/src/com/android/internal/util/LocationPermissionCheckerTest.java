@@ -15,6 +15,7 @@
  */
 package com.android.internal.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -121,6 +122,7 @@ public class LocationPermissionCheckerTest {
     private void setupTestCase() throws Exception {
         setupMocks();
         setupMockInterface();
+        mChecker = new LocationPermissionChecker(mMockContext);
     }
 
     private void initTestVars() {
@@ -136,7 +138,6 @@ public class LocationPermissionCheckerTest {
         mFineLocationPermission = PackageManager.PERMISSION_DENIED;
         mAllowCoarseLocationApps = AppOpsManager.MODE_ERRORED;
         mAllowFineLocationApps = AppOpsManager.MODE_ERRORED;
-        mChecker = new LocationPermissionChecker(mMockContext);
     }
 
     private void setupMockInterface() {
@@ -180,7 +181,11 @@ public class LocationPermissionCheckerTest {
         mWifiScanAllowApps = AppOpsManager.MODE_ALLOWED;
         mUid = mCurrentUser;
         setupTestCase();
-        mChecker.enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+
+        final int result =
+                mChecker.checkLocationPermissionWithDetailInfo(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        assertEquals(LocationPermissionChecker.SUCCEEDED, result);
     }
 
     @Test
@@ -193,7 +198,11 @@ public class LocationPermissionCheckerTest {
         mAllowFineLocationApps = AppOpsManager.MODE_ALLOWED;
         mWifiScanAllowApps = AppOpsManager.MODE_ALLOWED;
         setupTestCase();
-        mChecker.enforceLocationPermission(TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+
+        final int result =
+                mChecker.checkLocationPermissionWithDetailInfo(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        assertEquals(LocationPermissionChecker.SUCCEEDED, result);
     }
 
     @Test
@@ -206,7 +215,7 @@ public class LocationPermissionCheckerTest {
         setupTestCase();
 
         assertThrows(SecurityException.class,
-                () -> mChecker.enforceLocationPermission(
+                () -> mChecker.checkLocationPermissionWithDetailInfo(
                         TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
     }
 
@@ -215,9 +224,11 @@ public class LocationPermissionCheckerTest {
         mThrowSecurityException = false;
         mIsLocationEnabled = true;
         setupTestCase();
-        assertThrows(SecurityException.class,
-                () -> mChecker.enforceLocationPermission(
-                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+
+        final int result =
+                mChecker.checkLocationPermissionWithDetailInfo(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        assertEquals(LocationPermissionChecker.ERROR_LOCATION_PERMISSION_MISSING, result);
     }
 
     @Test
@@ -230,9 +241,10 @@ public class LocationPermissionCheckerTest {
         mUid = MANAGED_PROFILE_UID;
         setupTestCase();
 
-        assertThrows(SecurityException.class,
-                () -> mChecker.enforceLocationPermission(
-                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+        final int result =
+                mChecker.checkLocationPermissionWithDetailInfo(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        assertEquals(LocationPermissionChecker.ERROR_LOCATION_PERMISSION_MISSING, result);
         verify(mMockAppOps, never()).noteOp(anyInt(), anyInt(), anyString());
     }
 
@@ -246,9 +258,10 @@ public class LocationPermissionCheckerTest {
 
         setupTestCase();
 
-        assertThrows(SecurityException.class,
-                () -> mChecker.enforceLocationPermission(
-                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null));
+        final int result =
+                mChecker.checkLocationPermissionWithDetailInfo(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        assertEquals(LocationPermissionChecker.ERROR_LOCATION_MODE_OFF, result);
     }
 
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {

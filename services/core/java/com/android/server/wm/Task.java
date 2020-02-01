@@ -3918,8 +3918,6 @@ class Task extends WindowContainer<WindowContainer> {
     public void updateSurfacePosition() {
         // Avoid fighting with the TaskOrganizer over Surface position.
         if (isControlledByTaskOrganizer()) {
-            getPendingTransaction().setPosition(mSurfaceControl, 0, 0);
-            scheduleAnimation();
             return;
         } else {
             super.updateSurfacePosition();

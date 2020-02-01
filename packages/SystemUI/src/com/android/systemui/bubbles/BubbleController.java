@@ -414,7 +414,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mNotificationEntryManager.addNotificationEntryListener(
                 new NotificationEntryListener() {
                     @Override
-                    public void onNotificationAdded(NotificationEntry entry) {
+                    public void onPendingEntryAdded(NotificationEntry entry) {
                         onEntryAdded(entry);
                     }
 

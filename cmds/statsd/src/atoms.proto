@@ -232,8 +232,8 @@ message Atom {
         NfcCardemulationOccurred nfc_cardemulation_occurred = 137 [(module) = "nfc"];
         NfcTagOccurred nfc_tag_occurred = 138 [(module) = "nfc"];
         NfcHceTransactionOccurred nfc_hce_transaction_occurred = 139 [(module) = "nfc"];
-        SeStateChanged se_state_changed = 140;
-        SeOmapiReported se_omapi_reported = 141;
+        SeStateChanged se_state_changed = 140 [(module) = "secure_element"];
+        SeOmapiReported se_omapi_reported = 141 [(module) = "secure_element"];
         BroadcastDispatchLatencyReported broadcast_dispatch_latency_reported =
                 142 [(module) = "framework"];
         AttentionManagerServiceResultReported attention_manager_service_result_reported =
@@ -387,6 +387,9 @@ message Atom {
             249 [(module) = "cellbroadcast"];
         CellBroadcastMessageError cb_message_error =
             250 [(module) = "cellbroadcast"];
+        WifiHealthStatReported wifi_health_stat_reported = 251 [(module) = "wifi"];
+        WifiFailureStatReported wifi_failure_stat_reported = 252 [(module) = "wifi"];
+        WifiConnectionResultReported wifi_connection_result_reported = 253 [(module) = "wifi"];
     }
 
     // Pulled events will start at field 10000.
@@ -411,8 +414,8 @@ message Atom {
         CpuActiveTime cpu_active_time = 10016 [(module) = "framework"];
         CpuClusterTime cpu_cluster_time = 10017 [(module) = "framework"];
         DiskSpace disk_space = 10018 [deprecated=true];
-        RemainingBatteryCapacity remaining_battery_capacity = 10019;
-        FullBatteryCapacity full_battery_capacity = 10020;
+        RemainingBatteryCapacity remaining_battery_capacity = 10019 [(module) = "framework"];
+        FullBatteryCapacity full_battery_capacity = 10020 [(module) = "framework"];
         Temperature temperature = 10021 [(module) = "framework"];
         BinderCalls binder_calls = 10022 [(module) = "framework"];
         BinderCallsExceptions binder_calls_exceptions = 10023 [(module) = "framework"];
@@ -422,7 +425,7 @@ message Atom {
         AppSize app_size = 10027 [(module) = "framework"];
         CategorySize category_size = 10028 [(module) = "framework"];
         ProcStats proc_stats = 10029 [(module) = "framework"];
-        BatteryVoltage battery_voltage = 10030;
+        BatteryVoltage battery_voltage = 10030 [(module) = "framework"];
         NumFingerprintsEnrolled num_fingerprints_enrolled = 10031 [(module) = "framework"];
         DiskIo disk_io = 10032 [(module) = "framework"];
         PowerProfile power_profile = 10033 [(module) = "framework"];
@@ -438,7 +441,7 @@ message Atom {
         ProcessMemoryHighWaterMark process_memory_high_water_mark = 10042 [(module) = "framework"];
         BatteryLevel battery_level = 10043 [(module) = "framework"];
         BuildInformation build_information = 10044 [(module) = "framework"];
-        BatteryCycleCount battery_cycle_count = 10045;
+        BatteryCycleCount battery_cycle_count = 10045 [(module) = "framework"];
         DebugElapsedClock debug_elapsed_clock = 10046 [(module) = "framework"];
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047 [(module) = "framework"];
         NumFacesEnrolled num_faces_enrolled = 10048 [(module) = "framework"];
@@ -655,6 +658,81 @@ message CachedKillReported {
     // TODO: remove this when validation is done
     optional int64 version = 5;
     optional int64 pss = 4;
+}
+
+/**
+ * Logs the change in wifi health.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiDataStall.java
+ */
+message WifiHealthStatReported {
+    // duration this stat is obtained over in milliseconds
+    optional int32 duration_millis = 1;
+    // whether wifi is classified as sufficient for the user's data traffic, determined
+    // by whether the calculated throughput exceeds the average demand within |duration_millis|
+    optional bool is_sufficient = 2;
+    // whether the calculated throughput is exceeds the minimum required for typical usage
+    optional bool is_throughput_good = 3;
+    // whether cellular data is available
+    optional bool is_cell_data_available = 4;
+    // the WLAN channel the connected network is on (ie. 2412)
+    optional int32 frequency = 5;
+}
+
+/**
+ * Logged when wifi detects a significant change in connection failure rate.
+ *
+ * Logged from: frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiHealthMonitor.java
+ *
+ */
+message WifiFailureStatReported {
+    enum AbnormalityType {
+        UNKNOWN = 0;
+        SIGNIFICANT_INCREASE = 1;
+        SIGNIFICANT_DECREASE = 2;
+        SIMPLY_HIGH = 3;
+    }
+    enum FailureType {
+        FAILURE_UNKNOWN = 0;
+        FAILURE_CONNECTION = 1;
+        FAILURE_ASSOCIATION_REJECTION = 2;
+        FAILURE_ASSOCIATION_TIMEOUT = 3;
+        FAILURE_AUTHENTICATION = 4;
+        FAILURE_NON_LOCAL_DISCONNECTION = 5;
+        FAILURE_SHORT_CONNECTION_DUE_TO_NON_LOCAL_DISCONNECTION = 6;
+    }
+    // Reason for uploading this stat
+    optional AbnormalityType abnormality_type = 1;
+    // The particular type of failure
+    optional FailureType failure_type = 2;
+    // How many times we have encountered this combination of AbnormalityType and FailureType
+    optional int32 failure_count = 3;
+}
+
+/**
+ * Logs whether a wifi connection is successful and reasons for failure if it isn't.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/ClientModeImpl.java
+ */
+message WifiConnectionResultReported {
+    enum FailureCode {
+        FAILURE_UNKNOWN = 0;
+        FAILURE_ASSOCIATION_TIMEOUT = 1;
+        FAILURE_ASSOCIATION_REJECTION = 2;
+        FAILURE_AUTHENTICATION_GENERAL = 3;
+        FAILURE_AUTHENTICATION_EAP = 4;
+        FAILURE_DHCP = 5;
+        FAILURE_NETWORK_DISCONNECTION = 6;
+        FAILURE_ROAM_TIMEOUT = 7;
+    }
+    // true represents a successful connection
+    optional bool connection_result = 1;
+    // reason for the connection failure
+    optional FailureCode failure_code = 2;
+    // scan rssi before the connection attempt
+    optional int32 rssi = 3;
 }
 
 /**

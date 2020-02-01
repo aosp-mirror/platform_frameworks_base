@@ -106,7 +106,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         // Initialize screenshot notification smart actions provider.
         mSmartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS, false);
+                SystemUiDeviceConfigFlags.ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS, true);
         if (mSmartActionsEnabled) {
             mSmartActionsProvider =
                     SystemUIFactory.getInstance()

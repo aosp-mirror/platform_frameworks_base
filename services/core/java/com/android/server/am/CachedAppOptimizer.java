@@ -36,10 +36,10 @@ import android.provider.DeviceConfig.Properties;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ServiceThread;
 
 import java.io.FileOutputStream;
@@ -849,11 +849,11 @@ public final class CachedAppOptimizer {
                         // on every single compaction for a flag that will seldom change and the
                         // impact of reading the wrong value here is low.
                         if (mRandom.nextFloat() < mCompactStatsdSampleRate) {
-                            StatsLog.write(StatsLog.APP_COMPACTED, pid, name, pendingAction,
-                                    rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
-                                    rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
-                                    lastCompactAction, lastCompactTime, lastOomAdj,
-                                    ActivityManager.processStateAmToProto(procState),
+                            FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPACTED, pid, name,
+                                    pendingAction, rssBefore[0], rssBefore[1], rssBefore[2],
+                                    rssBefore[3], rssAfter[0], rssAfter[1], rssAfter[2],
+                                    rssAfter[3], time, lastCompactAction, lastCompactTime,
+                                    lastOomAdj, ActivityManager.processStateAmToProto(procState),
                                     zramFreeKbBefore, zramFreeKbAfter);
                         }
 

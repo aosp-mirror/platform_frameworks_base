@@ -16,11 +16,13 @@
 
 package android.view.inputmethod;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
-import android.view.WindowManager;
+import android.hardware.display.DisplayManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -43,9 +45,9 @@ public class InputMethodManagerTest {
         final Context testContext = InstrumentationRegistry.getInstrumentation()
                 .getTargetContext();
 
-        final WindowManager wm = testContext.getSystemService(WindowManager.class);
+        final DisplayManager dm = testContext.getSystemService(DisplayManager.class);
         final Context defaultDisplayContext =
-                testContext.createDisplayContext(wm.getDefaultDisplay());
+                testContext.createDisplayContext(dm.getDisplay(DEFAULT_DISPLAY));
         final InputMethodManager imm =
                 defaultDisplayContext.getSystemService(InputMethodManager.class);
         assertEquals("InputMethodManager.getInstance() always returns the instance for the default"

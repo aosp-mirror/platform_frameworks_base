@@ -147,7 +147,6 @@ cc_library_shared {
                 "android_service_DataLoaderService.cpp",
                 "android_util_AssetManager.cpp",
                 "android_util_Binder.cpp",
-                "android_util_StatsLog.cpp",
                 "android_util_MemoryIntArray.cpp",
                 "android_util_Process.cpp",
                 "android_util_StringBlock.cpp",

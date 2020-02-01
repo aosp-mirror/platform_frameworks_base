@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -26,10 +27,12 @@ import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 
 /**
@@ -41,17 +44,27 @@ public class LocationPermissionChecker {
 
     private static final String TAG = "LocationPermissionChecker";
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LOCATION_PERMISSION_CHECK_STATUS_"}, value = {
+        SUCCEEDED,
+        ERROR_LOCATION_MODE_OFF,
+        ERROR_LOCATION_PERMISSION_MISSING,
+    })
+    public @interface LocationPermissionCheckStatus{}
+
+    // The location permission check succeeded.
+    public static final int SUCCEEDED = 0;
+    // The location mode turns off for the caller.
+    public static final int ERROR_LOCATION_MODE_OFF = 1;
+    // The location permission isn't granted for the caller.
+    public static final int ERROR_LOCATION_PERMISSION_MISSING = 2;
+
     private final Context mContext;
     private final AppOpsManager mAppOpsManager;
-    private final UserManager mUserManager;
-    private final LocationManager mLocationManager;
 
     public LocationPermissionChecker(Context context) {
         mContext = context;
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mLocationManager =
-            (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
     /**
@@ -71,12 +84,38 @@ public class LocationPermissionChecker {
      */
     public boolean checkLocationPermission(String pkgName, @Nullable String featureId,
             int uid, @Nullable String message) {
-        try {
-            enforceLocationPermission(pkgName, featureId, uid, message);
-            return true;
-        } catch (SecurityException e) {
-            return false;
+        return checkLocationPermissionInternal(pkgName, featureId, uid, message) == SUCCEEDED;
+    }
+
+    /**
+     * Check location permission granted by the caller.
+     *
+     * This API check if the location mode enabled for the caller and the caller has
+     * ACCESS_COARSE_LOCATION permission is targetSDK<29, otherwise, has ACCESS_FINE_LOCATION.
+     * Compared with {@link #checkLocationPermission(String, String, int, String)}, this API returns
+     * the detail information about the checking result, including the reason why it's failed and
+     * logs the error for the caller.
+     *
+     * @param pkgName package name of the application requesting access
+     * @param featureId The feature in the package
+     * @param uid The uid of the package
+     * @param message A message describing why the permission was checked. Only needed if this is
+     *                not inside of a two-way binder call from the data receiver
+     *
+     * @return {@link LocationPermissionCheckStatus} the result of the location permission check.
+     */
+    public @LocationPermissionCheckStatus int checkLocationPermissionWithDetailInfo(
+            String pkgName, @Nullable String featureId, int uid, @Nullable String message) {
+        final int result = checkLocationPermissionInternal(pkgName, featureId, uid, message);
+        switch (result) {
+            case ERROR_LOCATION_MODE_OFF:
+                Log.e(TAG, "Location mode is disabled for the device");
+                break;
+            case ERROR_LOCATION_PERMISSION_MISSING:
+                Log.e(TAG, "UID " + uid + " has no location permission");
+                break;
         }
+        return result;
     }
 
     /**
@@ -94,20 +133,32 @@ public class LocationPermissionChecker {
      */
     public void enforceLocationPermission(String pkgName, @Nullable String featureId, int uid,
             @Nullable String message) throws SecurityException {
+        final int result = checkLocationPermissionInternal(pkgName, featureId, uid, message);
 
+        switch (result) {
+            case ERROR_LOCATION_MODE_OFF:
+                throw new SecurityException("Location mode is disabled for the device");
+            case ERROR_LOCATION_PERMISSION_MISSING:
+                throw new SecurityException("UID " + uid + " has no location permission");
+        }
+    }
+
+    private int checkLocationPermissionInternal(String pkgName, @Nullable String featureId,
+            int uid, @Nullable String message) {
         checkPackage(uid, pkgName);
 
         // Location mode must be enabled
         if (!isLocationModeEnabled()) {
-            throw new SecurityException("Location mode is disabled for the device");
+            return ERROR_LOCATION_MODE_OFF;
         }
 
         // LocationAccess by App: caller must have Coarse/Fine Location permission to have access to
         // location information.
-        if (!checkCallersLocationPermission(pkgName, featureId,
-                uid, /* coarseForTargetSdkLessThanQ */ true, message)) {
-            throw new SecurityException("UID " + uid + " has no location permission");
+        if (!checkCallersLocationPermission(pkgName, featureId, uid,
+                true /* coarseForTargetSdkLessThanQ */, message)) {
+            return ERROR_LOCATION_PERMISSION_MISSING;
         }
+        return SUCCEEDED;
     }
 
     /**
@@ -155,8 +206,10 @@ public class LocationPermissionChecker {
      * Retrieves a handle to LocationManager (if not already done) and check if location is enabled.
      */
     public boolean isLocationModeEnabled() {
+        final LocationManager LocationManager =
+                (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         try {
-            return mLocationManager.isLocationEnabledForUser(UserHandle.of(
+            return LocationManager.isLocationEnabledForUser(UserHandle.of(
                     getCurrentUser()));
         } catch (Exception e) {
             Log.e(TAG, "Failure to get location mode via API, falling back to settings", e);
