@@ -57,9 +57,11 @@ TEST(LogEventTest, TestPrimitiveParsing) {
     size_t size;
     uint8_t* buf = stats_event_get_buffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
     EXPECT_TRUE(logEvent.isValid());
     EXPECT_EQ(100, logEvent.GetTagId());
+    EXPECT_EQ(1000, logEvent.GetUid());
+    EXPECT_EQ(1001, logEvent.GetPid());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(4, values.size());
@@ -103,9 +105,11 @@ TEST(LogEventTest, TestStringAndByteArrayParsing) {
     size_t size;
     uint8_t* buf = stats_event_get_buffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
     EXPECT_TRUE(logEvent.isValid());
     EXPECT_EQ(100, logEvent.GetTagId());
+    EXPECT_EQ(1000, logEvent.GetUid());
+    EXPECT_EQ(1001, logEvent.GetPid());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(2, values.size());
@@ -136,9 +140,11 @@ TEST(LogEventTest, TestEmptyString) {
     size_t size;
     uint8_t* buf = stats_event_get_buffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
     EXPECT_TRUE(logEvent.isValid());
     EXPECT_EQ(100, logEvent.GetTagId());
+    EXPECT_EQ(1000, logEvent.GetUid());
+    EXPECT_EQ(1001, logEvent.GetPid());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(1, values.size());
@@ -162,9 +168,11 @@ TEST(LogEventTest, TestByteArrayWithNullCharacter) {
     size_t size;
     uint8_t* buf = stats_event_get_buffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
     EXPECT_TRUE(logEvent.isValid());
     EXPECT_EQ(100, logEvent.GetTagId());
+    EXPECT_EQ(1000, logEvent.GetUid());
+    EXPECT_EQ(1001, logEvent.GetPid());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(1, values.size());
@@ -196,9 +204,11 @@ TEST(LogEventTest, TestKeyValuePairs) {
     size_t size;
     uint8_t* buf = stats_event_get_buffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
     EXPECT_TRUE(logEvent.isValid());
     EXPECT_EQ(100, logEvent.GetTagId());
+    EXPECT_EQ(1000, logEvent.GetUid());
+    EXPECT_EQ(1001, logEvent.GetPid());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(8, values.size()); // 2 FieldValues per key-value pair
@@ -260,9 +270,11 @@ TEST(LogEventTest, TestAttributionChain) {
     size_t size;
     uint8_t* buf = stats_event_get_buffer(event, &size);
 
-    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    LogEvent logEvent(buf, size, /*uid=*/ 1000, /*pid=*/ 1001);
     EXPECT_TRUE(logEvent.isValid());
     EXPECT_EQ(100, logEvent.GetTagId());
+    EXPECT_EQ(1000, logEvent.GetUid());
+    EXPECT_EQ(1001, logEvent.GetPid());
 
     const vector<FieldValue>& values = logEvent.getValues();
     EXPECT_EQ(4, values.size()); // 2 per attribution node

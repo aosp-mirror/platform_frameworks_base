@@ -37,11 +37,12 @@ using std::vector;
 
 // Msg is expected to begin at the start of the serialized atom -- it should not
 // include the android_log_header_t or the StatsEventTag.
-LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid)
+LogEvent::LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid)
     : mBuf(msg),
       mRemainingLen(len),
       mLogdTimestampNs(time(nullptr)),
-      mLogUid(uid)
+      mLogUid(uid),
+      mLogPid(pid)
 {
 #ifdef NEW_ENCODING_SCHEME
     initNew();
@@ -52,8 +53,13 @@ LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid)
 #endif
 }
 
-LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid, bool useNewSchema)
-    : mBuf(msg), mRemainingLen(len), mLogdTimestampNs(time(nullptr)), mLogUid(uid) {
+LogEvent::LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid, bool useNewSchema)
+    : mBuf(msg),
+      mRemainingLen(len),
+      mLogdTimestampNs(time(nullptr)),
+      mLogUid(uid),
+      mLogPid(pid)
+{
     if (useNewSchema) {
         initNew();
     } else {
@@ -66,6 +72,7 @@ LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid, bool useNewSchema)
 LogEvent::LogEvent(const LogEvent& event) {
     mTagId = event.mTagId;
     mLogUid = event.mLogUid;
+    mLogPid = event.mLogPid;
     mElapsedTimestampNs = event.mElapsedTimestampNs;
     mLogdTimestampNs = event.mLogdTimestampNs;
     mValues = event.mValues;
@@ -146,6 +153,7 @@ LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requi
     mElapsedTimestampNs = getElapsedRealtimeNs();
     mTagId = android::util::BINARY_PUSH_STATE_CHANGED;
     mLogUid = android::IPCThreadState::self()->getCallingUid();
+    mLogPid = android::IPCThreadState::self()->getCallingPid();
 
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)), Value(trainName)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainVersionCode)));
