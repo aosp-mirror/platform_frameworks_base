@@ -371,6 +371,7 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_DEVICE_LIGHTS" />
         <!-- Permission required for ShortcutManagerUsageTest CTS test. -->
         <permission name="android.permission.ACCESS_SHORTCUTS"/>
+        <permission name="android.permission.REBOOT"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
