@@ -24,10 +24,12 @@
 #include <statslog.h>
 
 #include "stats/PowerStatsPuller.h"
+#include "stats/SubsystemSleepStatePuller.h"
 
 namespace android {
 
 static server::stats::PowerStatsPuller gPowerStatsPuller;
+static server::stats::SubsystemSleepStatePuller gSubsystemSleepStatePuller;
 
 static status_pull_atom_return_t onDevicePowerMeasurementCallback(int32_t atom_tag,
                                                                   pulled_stats_event_list* data,
@@ -35,11 +37,24 @@ static status_pull_atom_return_t onDevicePowerMeasurementCallback(int32_t atom_t
     return gPowerStatsPuller.Pull(atom_tag, data);
 }
 
+static status_pull_atom_return_t subsystemSleepStateCallback(int32_t atom_tag,
+                                                             pulled_stats_event_list* data,
+                                                             void* cookie) {
+    return gSubsystemSleepStatePuller.Pull(atom_tag, data);
+}
+
 static void nativeInit(JNIEnv* env, jobject javaObject) {
     // on device power measurement
     gPowerStatsPuller = server::stats::PowerStatsPuller();
     register_stats_pull_atom_callback(android::util::ON_DEVICE_POWER_MEASUREMENT,
                                       onDevicePowerMeasurementCallback,
+                                      /* metadata= */ nullptr,
+                                      /* cookie= */ nullptr);
+
+    // subsystem sleep state
+    gSubsystemSleepStatePuller = server::stats::SubsystemSleepStatePuller();
+    register_stats_pull_atom_callback(android::util::SUBSYSTEM_SLEEP_STATE,
+                                      subsystemSleepStateCallback,
                                       /* metadata= */ nullptr,
                                       /* cookie= */ nullptr);
 }
