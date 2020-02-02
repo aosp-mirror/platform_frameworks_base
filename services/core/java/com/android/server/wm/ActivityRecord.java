@@ -3034,6 +3034,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Throw away any services that have been bound by this activity.
         mServiceConnectionsHolder.disconnectActivityFromServices();
+        // This activity record is removing, make sure not to disconnect twice.
+        mServiceConnectionsHolder = null;
     }
 
     @Override
