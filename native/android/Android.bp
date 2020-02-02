@@ -64,7 +64,6 @@ cc_library_shared {
         "libgui",
         "libharfbuzz_ng",  // Only for including hb.h via minikin
         "libsensor",
-        "libstats_jni",
         "libandroid_runtime",
         "libminikin",
         "libnetd_client",
