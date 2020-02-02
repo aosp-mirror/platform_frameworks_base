@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Forbundet via <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Tilgængelig via %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Tryk for at registrere dig"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"Tilsluttet – intet internet"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"Der er ikke adgang til den private DNS-server"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Begrænset forbindelse"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Intet internet"</string>

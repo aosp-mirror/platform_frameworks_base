@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Wifi conectada a través de <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Dispoñible a través de %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Toca para rexistrarte"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"Conexión sen Internet"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"Non se puido acceder ao servidor DNS privado"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Pouca conexión"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Non hai conexión a Internet"</string>
@@ -316,7 +317,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desactivar encamiñamento audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desactiva o encamiñamento automático a periféricos de audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Mostrar límites de deseño"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes, etc."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forzar dirección do deseño RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forza a dirección de pantalla a RTL (dereita a esquerda) para todas as configuración rexionais"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forzar MSAA 4x"</string>

@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> மூலம் இணைக்கப்பட்டது"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s வழியாகக் கிடைக்கிறது"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"பதிவு செய்யத் தட்டவும்"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"இணைக்கப்பட்டுள்ளது, ஆனால் இண்டர்நெட் இல்லை"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"தனிப்பட்ட DNS சேவையகத்தை அணுக இயலாது"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"வரம்பிற்கு உட்பட்ட இணைப்பு"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"இணைய இணைப்பு இல்லை"</string>

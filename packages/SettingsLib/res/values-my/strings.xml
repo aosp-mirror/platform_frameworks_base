@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s မှတစ်ဆင့်ရနိုင်သည်"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"အကောင့်ဖွင့်ရန် တို့ပါ"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"ချိတ်ဆက်ထားသည်၊ အင်တာနက်မရှိ"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"သီးသန့် ဒီအန်အက်စ် (DNS) ဆာဗာကို သုံး၍မရပါ။"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"ချိတ်ဆက်မှု ကန့်သတ်ထားသည်"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"အင်တာနက် မရှိပါ"</string>
