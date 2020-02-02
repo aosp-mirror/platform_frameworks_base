@@ -51,6 +51,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.server.blob.BlobStoreManagerService.DumpArgs;
 import com.android.server.blob.BlobStoreManagerService.SessionStateChangeListener;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -453,7 +454,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         }
     }
 
-    void dump(IndentingPrintWriter fout) {
+    void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
         synchronized (mSessionLock) {
             fout.println("state: " + stateToString(mState));
             fout.println("ownerUid: " + mOwnerUid);
@@ -461,7 +462,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
 
             fout.println("blobHandle:");
             fout.increaseIndent();
-            mBlobHandle.dump(fout);
+            mBlobHandle.dump(fout, dumpArgs.shouldDumpFull());
             fout.decreaseIndent();
 
             fout.println("accessMode:");

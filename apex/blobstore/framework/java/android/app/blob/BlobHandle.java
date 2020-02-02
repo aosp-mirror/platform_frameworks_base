@@ -214,12 +214,16 @@ public final class BlobHandle implements Parcelable {
     }
 
     /** @hide */
-    public void dump(IndentingPrintWriter fout) {
-        fout.println("algo: " + algorithm);
-        fout.println("digest: " + Base64.encodeToString(digest, Base64.NO_WRAP));
-        fout.println("label: " + label);
-        fout.println("expiryMs: " + expiryTimeMillis);
-        fout.println("tag: " + tag);
+    public void dump(IndentingPrintWriter fout, boolean dumpFull) {
+        if (dumpFull) {
+            fout.println("algo: " + algorithm);
+            fout.println("digest: " + (dumpFull ? encodeDigest() : safeDigest()));
+            fout.println("label: " + label);
+            fout.println("expiryMs: " + expiryTimeMillis);
+            fout.println("tag: " + tag);
+        } else {
+            fout.println(toString());
+        }
     }
 
     /** @hide */
@@ -231,6 +235,26 @@ public final class BlobHandle implements Parcelable {
                 "expiryTimeMillis must not be negative");
         Preconditions.checkStringNotEmpty(tag, "tag must not be null");
         Preconditions.checkArgument(tag.length() <= LIMIT_BLOB_TAG_LENGTH, "tag too long");
+    }
+
+    @Override
+    public String toString() {
+        return "BlobHandle {"
+                + "algo:" + algorithm + ","
+                + "digest:" + safeDigest() + ","
+                + "label:" + label + ","
+                + "expiryMs:" + expiryTimeMillis + ","
+                + "tag:" + tag
+                + "}";
+    }
+
+    private String safeDigest() {
+        final String digestStr = encodeDigest();
+        return digestStr.substring(0, 2) + ".." + digestStr.substring(digestStr.length() - 2);
+    }
+
+    private String encodeDigest() {
+        return Base64.encodeToString(digest, Base64.NO_WRAP);
     }
 
     public static final @NonNull Creator<BlobHandle> CREATOR = new Creator<BlobHandle>() {
