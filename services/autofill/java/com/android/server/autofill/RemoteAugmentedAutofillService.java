@@ -69,6 +69,7 @@ final class RemoteAugmentedAutofillService
     private final int mIdleUnbindTimeoutMs;
     private final int mRequestTimeoutMs;
     private final ComponentName mComponentName;
+    private final RemoteAugmentedAutofillServiceCallbacks mCallbacks;
 
     RemoteAugmentedAutofillService(Context context, ComponentName serviceName,
             int userId, RemoteAugmentedAutofillServiceCallbacks callbacks,
@@ -81,6 +82,7 @@ final class RemoteAugmentedAutofillService
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
         mRequestTimeoutMs = requestTimeoutMs;
         mComponentName = serviceName;
+        mCallbacks = callbacks;
 
         // Bind right away.
         connect();
@@ -159,9 +161,12 @@ final class RemoteAugmentedAutofillService
                             focusedId, focusedValue, requestTime, inlineSuggestionsRequest,
                             new IFillCallback.Stub() {
                                 @Override
-                                public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
-                                    maybeHandleInlineSuggestions(sessionId, inlineSuggestionsData,
-                                            focusedId, inlineSuggestionsCallback, client);
+                                public void onSuccess(@Nullable Dataset[] inlineSuggestionsData,
+                                        @Nullable Bundle clientState) {
+                                    mCallbacks.resetLastResponse();
+                                    maybeRequestShowInlineSuggestions(sessionId,
+                                            inlineSuggestionsData, focusedId,
+                                            inlineSuggestionsCallback, client, clientState);
                                     requestAutofill.complete(null);
                                 }
 
@@ -223,20 +228,32 @@ final class RemoteAugmentedAutofillService
         });
     }
 
-    private void maybeHandleInlineSuggestions(int sessionId,
+    private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable Dataset[] inlineSuggestionsData, @NonNull AutofillId focusedId,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
-            @NonNull IAutoFillManagerClient client) {
+            @NonNull IAutoFillManagerClient client, @Nullable Bundle clientState) {
         if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null) {
             return;
         }
+        mCallbacks.setLastResponse(sessionId);
         try {
             inlineSuggestionsCallback.onInlineSuggestionsResponse(
-                    InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(sessionId,
-                            inlineSuggestionsData, focusedId, mContext, client));
+                    InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
+                            inlineSuggestionsData, focusedId, mContext,
+                            dataset -> {
+                                mCallbacks.logAugmentedAutofillSelected(sessionId,
+                                        dataset.getId(), clientState);
+                                try {
+                                    client.autofill(sessionId, dataset.getFieldIds(),
+                                            dataset.getFieldValues());
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Encounter exception autofilling the values");
+                                }
+                            }));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
         }
+        mCallbacks.logAugmentedAutofillShown(sessionId, clientState);
     }
 
     @Override
@@ -254,8 +271,13 @@ final class RemoteAugmentedAutofillService
 
     public interface RemoteAugmentedAutofillServiceCallbacks
             extends AbstractRemoteService.VultureCallback<RemoteAugmentedAutofillService> {
-        // NOTE: so far we don't need to notify the callback implementation (an inner class on
-        // AutofillManagerServiceImpl) of the request results (success, timeouts, etc..), so this
-        // callback interface is empty.
+        void resetLastResponse();
+
+        void setLastResponse(int sessionId);
+
+        void logAugmentedAutofillShown(int sessionId, @Nullable Bundle clientState);
+
+        void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
+                @Nullable Bundle clientState);
     }
 }

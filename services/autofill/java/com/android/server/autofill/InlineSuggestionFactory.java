@@ -28,7 +28,6 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.autofill.AutofillId;
-import android.view.autofill.IAutoFillManagerClient;
 import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionInfo;
 import android.view.inputmethod.InlineSuggestionsResponse;
@@ -49,15 +48,24 @@ public final class InlineSuggestionFactory {
     private static final String TAG = "InlineSuggestionFactory";
 
     /**
+     * Callback from the inline suggestion Ui.
+     */
+    public interface InlineSuggestionUiCallback {
+        /**
+         * Callback to autofill a dataset to the client app.
+         */
+        void autofill(@NonNull Dataset dataset);
+    }
+
+    /**
      * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by
      * augmented autofill service.
      */
     public static InlineSuggestionsResponse createAugmentedInlineSuggestionsResponse(
-            int sessionId,
             @NonNull Dataset[] datasets,
             @NonNull AutofillId autofillId,
             @NonNull Context context,
-            @NonNull IAutoFillManagerClient client) {
+            @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback) {
         if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
 
         final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
@@ -74,8 +82,8 @@ public final class InlineSuggestionFactory {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
                 return null;
             }
-            InlineSuggestion inlineSuggestion = createAugmentedInlineSuggestion(sessionId, dataset,
-                    inlinePresentation, inlineSuggestionUi, client);
+            InlineSuggestion inlineSuggestion = createAugmentedInlineSuggestion(dataset,
+                    inlinePresentation, inlineSuggestionUi, inlineSuggestionUiCallback);
             inlineSuggestions.add(inlineSuggestion);
         }
         return new InlineSuggestionsResponse(inlineSuggestions);
@@ -114,22 +122,17 @@ public final class InlineSuggestionFactory {
         return new InlineSuggestionsResponse(inlineSuggestions);
     }
 
-    private static InlineSuggestion createAugmentedInlineSuggestion(int sessionId,
-            @NonNull Dataset dataset,
+    private static InlineSuggestion createAugmentedInlineSuggestion(@NonNull Dataset dataset,
             @NonNull InlinePresentation inlinePresentation,
             @NonNull InlineSuggestionUi inlineSuggestionUi,
-            @NonNull IAutoFillManagerClient client) {
+            @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback) {
         // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
                 InlineSuggestionInfo.SOURCE_PLATFORM, new String[]{""},
                 InlineSuggestionInfo.TYPE_SUGGESTION);
         final View.OnClickListener onClickListener = v -> {
-            try {
-                client.autofill(sessionId, dataset.getFieldIds(), dataset.getFieldValues());
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Encounter exception autofilling the values");
-            }
+            inlineSuggestionUiCallback.autofill(dataset);
         };
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
