@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> मार्फत जडान गरिएको"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s मार्फत उपलब्ध"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"साइन अप गर्न ट्याप गर्नुहोस्"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"जडान गरियो तर इन्टरनेट छैन"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"निजी DNS सर्भरमाथि पहुँच प्राप्त गर्न सकिँदैन"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"सीमित जडान"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"इन्टरनेटमाथिको पहुँच छैन"</string>
