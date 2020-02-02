@@ -3215,7 +3215,9 @@ class Task extends WindowContainer<WindowContainer> {
         info.displayId = getDisplayId();
         info.isRunning = getTopNonFinishingActivity() != null;
         final Intent baseIntent = getBaseIntent();
-        info.baseIntent = baseIntent == null ? new Intent() : baseIntent;
+        // Make a copy of base intent because this is like a snapshot info.
+        // Besides, {@link RecentTasks#getRecentTasksImpl} may modify it.
+        info.baseIntent = baseIntent == null ? new Intent() : new Intent(baseIntent);
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()
                 : null;
