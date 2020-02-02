@@ -39,6 +39,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
 import android.util.SparseArray;
+import android.view.InputDevice.MotionRange;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
@@ -273,7 +274,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final String TAG = "InsetsControllerImpl";
 
     private final InsetsState mState = new InsetsState();
-    private final InsetsState mTmpState = new InsetsState();
+    private final InsetsState mLastDispachedState = new InsetsState();
 
     private final Rect mFrame = new Rect();
     private final BiFunction<InsetsController, Integer, InsetsSourceConsumer> mConsumerCreator;
@@ -367,15 +368,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return mState;
     }
 
-    boolean onStateChanged(InsetsState state) {
-        if (mState.equals(state)) {
+    public InsetsState getLastDispatchedState() {
+        return mLastDispachedState;
+    }
+
+    @VisibleForTesting
+    public boolean onStateChanged(InsetsState state) {
+        if (mState.equals(state) && mLastDispachedState.equals(state)) {
             return false;
         }
         mState.set(state);
-        mTmpState.set(state, true /* copySources */);
+        mLastDispachedState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
         mViewRoot.notifyInsetsChanged();
-        if (!mState.equals(mTmpState)) {
+        if (!mState.equals(mLastDispachedState)) {
             sendStateToWindowManager();
         }
         return true;
@@ -419,6 +425,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
+        int[] showTypes = new int[1];
+        int[] hideTypes = new int[1];
+
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
@@ -426,15 +435,23 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
             // control may be null, but we still need to update the control to null if it got
             // revoked.
-            consumer.setControl(control);
+            consumer.setControl(control, showTypes, hideTypes);
         }
 
         // Ensure to create source consumers if not available yet.
         for (int i = mTmpControlArray.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = mTmpControlArray.valueAt(i);
-            getSourceConsumer(control.getType()).setControl(control);
+            InsetsSourceConsumer consumer = getSourceConsumer(control.getType());
+            consumer.setControl(control, showTypes, hideTypes);
+
         }
         mTmpControlArray.clear();
+        if (showTypes[0] != 0) {
+            applyAnimation(showTypes[0], true /* show */, false /* fromIme */);
+        }
+        if (hideTypes[0] != 0) {
+            applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
+        }
     }
 
     @Override
@@ -465,7 +482,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @InternalInsetsType int internalType = internalTypes.valueAt(i);
             @AnimationType int animationType = getAnimationType(internalType);
             InsetsSourceConsumer consumer = getSourceConsumer(internalType);
-            if (mState.getSource(internalType).isVisible() && animationType == ANIMATION_TYPE_NONE
+            if (consumer.isRequestedVisible() && animationType == ANIMATION_TYPE_NONE
                     || animationType == ANIMATION_TYPE_SHOW) {
                 // no-op: already shown or animating in (because window visibility is
                 // applied before starting animation).
@@ -488,7 +505,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @InternalInsetsType int internalType = internalTypes.valueAt(i);
             @AnimationType int animationType = getAnimationType(internalType);
             InsetsSourceConsumer consumer = getSourceConsumer(internalType);
-            if (!mState.getSource(internalType).isVisible() && animationType == ANIMATION_TYPE_NONE
+            if (!consumer.isRequestedVisible() && animationType == ANIMATION_TYPE_NONE
                     || animationType == ANIMATION_TYPE_HIDE) {
                 // no-op: already hidden or animating out.
                 continue;
@@ -535,7 +552,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
 
         Pair<Integer, Boolean> typesReadyPair = collectSourceControls(
-                fromIme, internalTypes, controls);
+                fromIme, internalTypes, controls, animationType);
         int typesReady = typesReadyPair.first;
         boolean imeReady = typesReadyPair.second;
         if (!imeReady) {
@@ -562,17 +579,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * @return Pair of (types ready to animate, IME ready to animate).
      */
     private Pair<Integer, Boolean> collectSourceControls(boolean fromIme,
-            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceControl> controls) {
+            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceControl> controls,
+            @AnimationType int animationType) {
         int typesReady = 0;
         boolean imeReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
-            boolean setVisible = !consumer.isRequestedVisible();
-            if (setVisible) {
+            boolean show = animationType == ANIMATION_TYPE_SHOW
+                    || animationType == ANIMATION_TYPE_USER;
+            boolean canRun = false;
+            if (show) {
                 // Show request
                 switch(consumer.requestShow(fromIme)) {
                     case ShowResult.SHOW_IMMEDIATELY:
-                        typesReady |= InsetsState.toPublicType(consumer.getType());
+                        canRun = true;
                         break;
                     case ShowResult.IME_SHOW_DELAYED:
                         imeReady = false;
@@ -589,11 +609,22 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 if (!fromIme) {
                     consumer.notifyHidden();
                 }
-                typesReady |= InsetsState.toPublicType(consumer.getType());
+                canRun = true;
+            }
+            if (!canRun) {
+                continue;
             }
             final InsetsSourceControl control = consumer.getControl();
             if (control != null) {
                 controls.put(consumer.getType(), control);
+                typesReady |= toPublicType(consumer.getType());
+            } else if (animationType == ANIMATION_TYPE_SHOW) {
+
+                // We don't have a control at the moment. However, we still want to update requested
+                // visibility state such that in case we get control, we can apply show animation.
+                consumer.show(fromIme);
+            } else if (animationType == ANIMATION_TYPE_HIDE) {
+                consumer.hide();
             }
         }
         return new Pair<>(typesReady, imeReady);
@@ -808,7 +839,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private void showDirectly(@InsetsType int types) {
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            getSourceConsumer(internalTypes.valueAt(i)).show();
+            getSourceConsumer(internalTypes.valueAt(i)).show(false /* fromIme */);
         }
     }
 
@@ -840,6 +871,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @Override
             public boolean onPreDraw() {
                 mViewRoot.mView.getViewTreeObserver().removeOnPreDrawListener(this);
+                if (controller.isCancelled()) {
+                    return true;
+                }
                 mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
                 listener.onReady(controller, types);
                 return true;

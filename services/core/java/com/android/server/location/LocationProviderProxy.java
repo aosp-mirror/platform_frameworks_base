@@ -139,13 +139,13 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     @GuardedBy("mLock")
     private boolean mBound;
-    @GuardedBy("mLock")
-    private ProviderRequest mRequest;
+
+    private volatile ProviderRequest mRequest;
 
     private LocationProviderProxy(Context context, String action, int enableOverlayResId,
             int nonOverlayPackageResId) {
-        // safe to use direct executor even though this class has internal locks - all of our
-        // callbacks go to oneway binder transactions which cannot possibly be re-entrant
+        // safe to use direct executor since our locks are not acquired in a code path invoked by
+        // our owning provider
         super(DIRECT_EXECUTOR, Collections.emptySet());
 
         mContext = context;
@@ -167,8 +167,10 @@ public class LocationProviderProxy extends AbstractLocationProvider {
             mBound = true;
 
             provider.setLocationProviderManager(mManager);
-            if (!mRequest.equals(ProviderRequest.EMPTY_REQUEST)) {
-                provider.setRequest(mRequest, mRequest.workSource);
+
+            ProviderRequest request = mRequest;
+            if (!request.equals(ProviderRequest.EMPTY_REQUEST)) {
+                provider.setRequest(request, request.workSource);
             }
 
             ComponentName service = mServiceWatcher.getBoundService().component;
@@ -187,10 +189,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     @Override
     public void onSetRequest(ProviderRequest request) {
-        synchronized (mLock) {
-            mRequest = request;
-        }
-
+        mRequest = request;
         mServiceWatcher.runOnBinder(binder -> {
             ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
             service.setRequest(request, request.workSource);
@@ -215,9 +214,6 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("service=" + mServiceWatcher);
-        synchronized (mLock) {
-            pw.println("bound=" + mBound);
-        }
+        mServiceWatcher.dump(fd, pw, args);
     }
 }

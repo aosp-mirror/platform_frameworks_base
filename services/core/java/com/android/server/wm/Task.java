@@ -1257,7 +1257,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (affinityIntent != null) return affinityIntent;
         // Probably a task that contains other tasks, so return the intent for the top task?
         final Task topTask = getTopMostTask();
-        return topTask != null ? topTask.getBaseIntent() : null;
+        return (topTask != this && topTask != null) ? topTask.getBaseIntent() : null;
     }
 
     /** Returns the first non-finishing activity from the bottom. */
@@ -3214,7 +3214,8 @@ class Task extends WindowContainer<WindowContainer> {
         info.taskId = mTaskId;
         info.displayId = getDisplayId();
         info.isRunning = getTopNonFinishingActivity() != null;
-        info.baseIntent = new Intent(getBaseIntent());
+        final Intent baseIntent = getBaseIntent();
+        info.baseIntent = baseIntent == null ? new Intent() : baseIntent;
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()
                 : null;
@@ -3229,6 +3230,10 @@ class Task extends WindowContainer<WindowContainer> {
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.resizeMode = mResizeMode;
         info.configuration.setTo(getConfiguration());
+        info.token = mRemoteToken;
+        // Get's the first non-undefined activity type among this and children. Can't use
+        // configuration.windowConfiguration because that would only be this level.
+        info.topActivityType = getActivityType();
     }
 
     /**
@@ -3375,7 +3380,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (affinity != null) {
             sb.append(" A=");
             sb.append(affinity);
-        } else if (intent != null) {
+        } else if (intent != null && intent.getComponent() != null) {
             sb.append(" I=");
             sb.append(intent.getComponent().flattenToShortString());
         } else if (affinityIntent != null && affinityIntent.getComponent() != null) {
@@ -3865,7 +3870,12 @@ class Task extends WindowContainer<WindowContainer> {
 
     boolean isControlledByTaskOrganizer() {
         final Task rootTask = getRootTask();
-        return rootTask == this && rootTask.mTaskOrganizer != null;
+        return rootTask == this && rootTask.mTaskOrganizer != null
+                // TODO(task-hierarchy): Figure out how to control nested tasks.
+                // For now, if this is in a tile let WM drive.
+                && !(rootTask instanceof TaskTile)
+                && !(rootTask instanceof ActivityStack
+                        && ((ActivityStack) rootTask).getTile() != null);
     }
 
     @Override
@@ -3893,6 +3903,9 @@ class Task extends WindowContainer<WindowContainer> {
    }
 
     void setTaskOrganizer(ITaskOrganizer organizer) {
+        if (mTaskOrganizer == organizer) {
+            return;
+        }
         // Let the old organizer know it has lost control.
         if (mTaskOrganizer != null) {
             sendTaskVanished();

@@ -3654,8 +3654,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
      * {@link Type#navigationBars()}. For non-floating windows that fill the screen, call
-     * {@link Window#setOnContentApplyWindowInsetsListener} with {@code null} or a listener that
-     * doesn't fit the navigation bar on the window content level.
+     * {@link Window#setDecorFitsSystemWindows(boolean)} with {@code false}.
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
 
@@ -3683,8 +3682,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @deprecated For floating windows, use {@link LayoutParams#setFitInsetsTypes(int)} with
      * {@link Type#statusBars()} ()}. For non-floating windows that fill the screen, call
-     * {@link Window#setOnContentApplyWindowInsetsListener} with {@code null} or a listener that
-     * doesn't fit the status bar on the window content level.
+     * {@link Window#setDecorFitsSystemWindows(boolean)} with {@code false}.
      */
     @Deprecated
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
@@ -4673,7 +4671,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         private ArrayList<OnUnhandledKeyEventListener> mUnhandledKeyListeners;
 
-        private WindowInsetsAnimationCallback mWindowInsetsAnimationCallback;
+        WindowInsetsAnimationCallback mWindowInsetsAnimationCallback;
 
         /**
          * This lives here since it's only valid for interactive views.
@@ -11537,11 +11535,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @see #PFLAG4_OPTIONAL_FITS_SYSTEM_WINDOWS
+     * @see #PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS
      * @hide
      */
     public void makeFrameworkOptionalFitsSystemWindows() {
         mPrivateFlags4 |= PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isFrameworkOptionalFitsSystemWindows() {
+        return (mPrivateFlags4 & PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS) != 0;
     }
 
     /**

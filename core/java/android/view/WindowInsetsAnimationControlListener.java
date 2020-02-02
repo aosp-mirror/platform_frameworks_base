@@ -39,7 +39,7 @@ public interface WindowInsetsAnimationControlListener {
      * @param controller The controller to control the inset animation.
      * @param types The {@link InsetsType}s it was able to gain control over. Note that this may be
      *              different than the types passed into
-     *              {@link WindowInsetsController#controlInputMethodAnimation} in case the window
+     *              {@link WindowInsetsController#controlWindowInsetsAnimation} in case the window
      *              wasn't able to gain the controls because it wasn't the IME target or not
      *              currently the window that's controlling the system bars.
      */

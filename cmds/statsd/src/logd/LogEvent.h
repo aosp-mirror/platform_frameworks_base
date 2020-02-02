@@ -71,12 +71,12 @@ public:
     /**
      * Read a LogEvent from the socket
      */
-    explicit LogEvent(uint8_t* msg, uint32_t len, uint32_t uid);
+    explicit LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid);
 
     /**
      * Temp constructor to use for pulled atoms until we flip the socket schema.
      */
-    explicit LogEvent(uint8_t* msg, uint32_t len, uint32_t uid, bool useNewSchema);
+    explicit LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid, bool useNewSchema);
 
     /**
      * Constructs a LogEvent with synthetic data for testing. Must call init() before reading.
@@ -123,9 +123,17 @@ public:
      */
     inline int GetTagId() const { return mTagId; }
 
-    inline uint32_t GetUid() const {
-        return mLogUid;
-    }
+    /**
+     * Get the uid of the logging client.
+     * Returns -1 if the uid is unknown/has not been set.
+     */
+    inline int32_t GetUid() const { return mLogUid; }
+
+    /**
+     * Get the pid of the logging client.
+     * Returns -1 if the pid is unknown/has not been set.
+     */
+    inline int32_t GetPid() const { return mLogPid; }
 
     /**
      * Get the nth value, starting at 1.
@@ -305,9 +313,14 @@ private:
     // The elapsed timestamp set by statsd log writer.
     int64_t mElapsedTimestampNs;
 
+    // The atom tag of the event.
     int mTagId;
 
-    uint32_t mLogUid;
+    // The uid of the logging client (defaults to -1).
+    int32_t mLogUid = -1;
+
+    // The pid of the logging client (defaults to -1).
+    int32_t mLogPid = -1;
 };
 
 void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut);

@@ -21,18 +21,14 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.Service;
-import android.app.WindowConfiguration;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
-import android.view.WindowContainerTransaction;
 import android.view.SurfaceControl;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.ViewGroup;
+import android.view.WindowContainerTransaction;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -43,19 +39,21 @@ public class TaskOrganizerPipTest extends Service {
     TaskView mTaskView;
 
     class Organizer extends ITaskOrganizer.Stub {
-        public void taskAppeared(IWindowContainer wc, ActivityManager.RunningTaskInfo ti) {
-            mTaskView.reparentTask(wc);
+        public void taskAppeared(ActivityManager.RunningTaskInfo ti) {
+            mTaskView.reparentTask(ti.token);
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.scheduleFinishEnterPip(wc, new Rect(0, 0, PIP_WIDTH, PIP_HEIGHT));
+            wct.scheduleFinishEnterPip(ti.token, new Rect(0, 0, PIP_WIDTH, PIP_HEIGHT));
             try {
-                ActivityTaskManager.getService().applyContainerTransaction(wct);
+                ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(wct);
             } catch (Exception e) {
             }
         }
         public void taskVanished(IWindowContainer wc) {
         }
         public void transactionReady(int id, SurfaceControl.Transaction t) {
+        }
+        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         }
     }
 

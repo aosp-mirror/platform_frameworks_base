@@ -40,6 +40,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -340,6 +341,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
                     .setCreateActivity(false)
+                    .setIntent(new Intent())
                     .build();
         }
     }

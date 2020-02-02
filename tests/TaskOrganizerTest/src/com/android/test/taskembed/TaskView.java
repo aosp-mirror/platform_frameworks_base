@@ -44,7 +44,7 @@ class TaskView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         try {
-            ActivityTaskManager.getService().registerTaskOrganizer(mTaskOrganizer,
+            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(mTaskOrganizer,
                     mWindowingMode);
         } catch (Exception e) {
         }

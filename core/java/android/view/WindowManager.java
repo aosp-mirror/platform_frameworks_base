@@ -80,6 +80,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+import android.view.View.OnApplyWindowInsetsListener;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
@@ -2193,8 +2194,9 @@ public interface WindowManager extends ViewManager {
          * value for {@link #softInputMode} will be ignored; the window will
          * not resize, but will stay fullscreen.
          *
-         * @deprecated Use {@link Window#setOnContentApplyWindowInsetsListener} instead with a
-         * listener that fits {@link Type#ime()} instead.
+         * @deprecated Call {@link Window#setDecorFitsSystemWindows(boolean)} with {@code false} and
+         * install an {@link OnApplyWindowInsetsListener} on your root content view that fits insets
+         * of type {@link Type#ime()}.
          */
         @Deprecated
         public static final int SOFT_INPUT_ADJUST_RESIZE = 0x10;

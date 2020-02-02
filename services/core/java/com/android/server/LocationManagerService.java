@@ -2644,7 +2644,12 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (noGPSLocation == null && lastNoGPSLocation != null) {
                 // New location has no no-GPS location: adopt last no-GPS location. This is set
                 // directly into location because we do not want to notify COARSE clients.
-                location.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, lastNoGPSLocation);
+                Bundle extras = location.getExtras();
+                if (extras == null) {
+                    extras = new Bundle();
+                }
+                extras.putParcelable(Location.EXTRA_NO_GPS_LOCATION, lastNoGPSLocation);
+                location.setExtras(extras);
             }
         }
         lastLocation.set(location);

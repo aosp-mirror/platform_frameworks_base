@@ -51,6 +51,7 @@ static const char* kPathWhitelist[] = {
         "/dev/socket/webview_zygote",
         "/dev/socket/heapprofd",
         "/sys/kernel/debug/tracing/trace_marker",
+        "/sys/kernel/tracing/trace_marker",
         "/system/framework/framework-res.apk",
         "/dev/urandom",
         "/dev/ion",

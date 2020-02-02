@@ -1271,7 +1271,6 @@ package android.location {
 
   public class Location implements android.os.Parcelable {
     method public void makeComplete();
-    method public void setExtraLocation(@Nullable String, @Nullable android.location.Location);
     field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
@@ -1385,6 +1384,10 @@ package android.media {
     method public int getMaxFrameRate();
     method public long getMaxMacroBlockRate();
     method public int getMaxMacroBlocks();
+  }
+
+  public final class MediaRoute2Info implements android.os.Parcelable {
+    method @NonNull public String getOriginalId();
   }
 
   public final class PlaybackParams implements android.os.Parcelable {

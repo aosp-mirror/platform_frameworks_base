@@ -214,6 +214,9 @@ public class PowerManagerTest extends AndroidTestCase {
         }
         // Add listener2 on main thread.
         mPm.addThermalStatusListener(mListener2);
+        verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+            .times(1)).onThermalStatusChanged(status);
+        reset(mListener2);
         status = PowerManager.THERMAL_STATUS_MODERATE;
         mUiDevice.executeShellCommand("cmd thermalservice override-status "
                 + Integer.toString(status));

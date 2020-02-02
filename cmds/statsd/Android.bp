@@ -66,13 +66,11 @@ cc_defaults {
         "src/config/ConfigManager.cpp",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
-        "src/external/PowerStatsPuller.cpp",
         "src/external/PullResultReceiver.cpp",
         "src/external/puller_util.cpp",
         "src/external/StatsCallbackPuller.cpp",
         "src/external/StatsPuller.cpp",
         "src/external/StatsPullerManager.cpp",
-        "src/external/SubsystemSleepStatePuller.cpp",
         "src/external/TrainInfoPuller.cpp",
         "src/FieldValue.cpp",
         "src/guardrail/StatsdStats.cpp",
@@ -121,9 +119,6 @@ cc_defaults {
 
     static_libs: [
         "android.frameworks.stats@1.0",
-        "android.hardware.power.stats@1.0",
-        "android.hardware.power@1.0",
-        "android.hardware.power@1.1",
         "libbase",
         "libcutils",
         "liblog",

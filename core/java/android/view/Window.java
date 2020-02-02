@@ -697,12 +697,10 @@ public abstract class Window {
     }
 
     /**
-     * Listener for applying window insets on the content of a window in a custom way.
+     * Listener for applying window insets on the content of a window. Used only by the framework to
+     * fit content according to legacy SystemUI flags.
      *
-     * <p>Apps may choose to implement this interface if they want to apply custom policy
-     * to the way that window insets are treated for fitting root-level content views.
-     *
-     * @see Window#setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener)
+     * @hide
      */
     public interface OnContentApplyWindowInsetsListener {
 
@@ -716,12 +714,14 @@ public abstract class Window {
          *
          * @param insets The root level insets that are about to be dispatched
          * @return A pair, with the first element containing the insets to apply as margin to the
-         *         root-level content views, and the second element determining what should be
-         *         dispatched to the content view.
+         * root-level content views, and the second element determining what should be
+         * dispatched to the content view.
          */
-        @NonNull Pair<Insets, WindowInsets> onContentApplyWindowInsets(
+        @NonNull
+        Pair<Insets, WindowInsets> onContentApplyWindowInsets(
                 @NonNull WindowInsets insets);
     }
+
 
     public Window(Context context) {
         mContext = context;
@@ -1311,33 +1311,21 @@ public abstract class Window {
     }
 
     /**
-     * Sets the listener to be invoked when fitting root-level content views.
+     * Sets whether the decor view should fit root-level content views for {@link WindowInsets}.
      * <p>
-     * By default, a listener that inspects the now deprecated {@link View#SYSTEM_UI_LAYOUT_FLAGS}
-     * as well the {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag is installed and
-     * fits content according to these flags.
+     * If set to {@code true}, the framework will inspect the now deprecated
+     * {@link View#SYSTEM_UI_LAYOUT_FLAGS} as well the
+     * {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag and fits content according
+     * to these flags.
      * </p>
-     * @param contentOnApplyWindowInsetsListener The listener to use for fitting root-level content
-     *                                           views, or {@code null} to disable any kind of
-     *                                           content fitting on the window level and letting the
-     *                                           {@link WindowInsets} pass through to the content
-     *                                           view.
-     * @see OnContentApplyWindowInsetsListener
-     */
-    public void setOnContentApplyWindowInsetsListener(
-            @Nullable OnContentApplyWindowInsetsListener contentOnApplyWindowInsetsListener) {
-    }
-
-    /**
-     * Resets the listener set via {@link #setOnContentApplyWindowInsetsListener} to the default
-     * state.
      * <p>
-     * By default, a listener that inspects the now deprecated {@link View#SYSTEM_UI_LAYOUT_FLAGS}
-     * as well the {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag is installed and
-     * fits content according to these flags.
+     * If set to {@code false}, the framework will not fit the content view to the insets and will
+     * just pass through the {@link WindowInsets} to the content view.
      * </p>
+     * @param decorFitsSystemWindows Whether the decor view should fit root-level content views for
+     *                               insets.
      */
-    public void resetOnContentApplyWindowInsetsListener() {
+    public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
     }
 
     /**

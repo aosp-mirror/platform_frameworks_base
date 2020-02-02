@@ -21,6 +21,7 @@ import static android.media.MediaRouter2Utils.toUniqueId;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -360,6 +361,7 @@ public final class MediaRoute2Info implements Parcelable {
      * @hide
      */
     @NonNull
+    @TestApi
     public String getOriginalId() {
         return mId;
     }

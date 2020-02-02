@@ -49,6 +49,8 @@ import android.util.Log;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.Preconditions;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -183,9 +185,7 @@ public class ServiceWatcher implements ServiceConnection {
 
     // write from handler thread only, read anywhere
     private volatile ServiceInfo mServiceInfo;
-
-    // read/write from handler thread only
-    private IBinder mBinder;
+    private volatile IBinder mBinder;
 
     public ServiceWatcher(Context context, Handler handler, String action,
             @Nullable BinderRunner onBind, @Nullable Runnable onUnbind,
@@ -345,20 +345,25 @@ public class ServiceWatcher implements ServiceConnection {
         }
 
         mBinder = binder;
+
+        // we always run the on bind callback even if we know that the binder is dead already so
+        // that there are always balance pairs of bind/unbind callbacks
         if (mOnBind != null) {
-            runOnBinder(mOnBind);
-        }
-    }
-
-    @Override
-    public void onBindingDied(ComponentName component) {
-        Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
-
-        if (D) {
-            Log.i(TAG, getLogPrefix() + " " + component.toShortString() + " died");
+            try {
+                mOnBind.run(binder);
+            } catch (RuntimeException | RemoteException e) {
+                // binders may propagate some specific non-RemoteExceptions from the other side
+                // through the binder as well - we cannot allow those to crash the system server
+                Log.e(TAG, getLogPrefix() + " exception running on " + mServiceInfo, e);
+            }
         }
 
-        onBestServiceChanged(true);
+        try {
+            // setting the binder to null lets us skip queued transactions
+            binder.linkToDeath(() -> mBinder = null, 0);
+        } catch (RemoteException e) {
+            mBinder = null;
+        }
     }
 
     @Override
@@ -373,6 +378,17 @@ public class ServiceWatcher implements ServiceConnection {
         if (mOnUnbind != null) {
             mOnUnbind.run();
         }
+    }
+
+    @Override
+    public void onBindingDied(ComponentName component) {
+        Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
+
+        if (D) {
+            Log.i(TAG, getLogPrefix() + " " + component.toShortString() + " died");
+        }
+
+        onBestServiceChanged(true);
     }
 
     private void onUserSwitched(@UserIdInt int userId) {
@@ -398,7 +414,7 @@ public class ServiceWatcher implements ServiceConnection {
      * RemoteException thrown during execution.
      */
     public final void runOnBinder(BinderRunner runner) {
-        runOnHandler(() -> {
+        mHandler.post(() -> {
             if (mBinder == null) {
                 return;
             }
@@ -447,14 +463,6 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    private void runOnHandler(Runnable r) {
-        if (Looper.myLooper() == mHandler.getLooper()) {
-            r.run();
-        } else {
-            mHandler.post(r);
-        }
-    }
-
     private <T> T runOnHandlerBlocking(Callable<T> c)
             throws InterruptedException, TimeoutException {
         if (Looper.myLooper() == mHandler.getLooper()) {
@@ -488,5 +496,13 @@ public class ServiceWatcher implements ServiceConnection {
     @Override
     public String toString() {
         return mServiceInfo.toString();
+    }
+
+    /**
+     * Dump for debugging.
+     */
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("service=" + mServiceInfo);
+        pw.println("connected=" + (mBinder != null));
     }
 }

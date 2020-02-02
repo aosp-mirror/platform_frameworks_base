@@ -29,6 +29,7 @@ import android.app.IProcessObserver;
 import android.app.IRequestFinishCallback;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
+import android.app.ITaskOrganizerController;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
@@ -71,7 +72,6 @@ import android.view.IRecentsAnimationRunner;
 import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
-import android.view.WindowContainerTransaction;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -122,8 +122,6 @@ interface IActivityTaskManager {
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
             IBinder permissionToken, boolean ignoreTargetSecurity, int userId);
-
-    void registerTaskOrganizer(in ITaskOrganizer organizer, int windowingMode);
 
     boolean isActivityStartAllowedOnDisplay(int displayId, in Intent intent, in String resolvedType,
             int userId);
@@ -224,7 +222,6 @@ interface IActivityTaskManager {
     void setTaskResizeable(int taskId, int resizeableMode);
     void toggleFreeformWindowingMode(in IBinder token);
     void resizeTask(int taskId, in Rect bounds, int resizeMode);
-    void applyContainerTransaction(in WindowContainerTransaction t);
     void moveStackToDisplay(int stackId, int displayId);
     void removeStack(int stackId);
 
@@ -362,6 +359,11 @@ interface IActivityTaskManager {
     void resizeDockedStack(in Rect dockedBounds, in Rect tempDockedTaskBounds,
             in Rect tempDockedTaskInsetBounds,
             in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
+
+    /**
+     * Returns an interface enabling the management of task organizers.
+     */
+    ITaskOrganizerController getTaskOrganizerController();
 
     /**
      * Sets whether we are currently in an interactive split screen resize operation where we

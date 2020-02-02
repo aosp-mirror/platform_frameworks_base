@@ -16,16 +16,18 @@
 
 package com.android.server.location;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.security.SecureRandom;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.security.SecureRandom;
 
 
 /**
@@ -177,7 +179,12 @@ public class LocationFudger {
 
     private Location addCoarseLocationExtraLocked(Location location) {
         Location coarse = createCoarseLocked(location);
-        location.setExtraLocation(Location.EXTRA_COARSE_LOCATION, coarse);
+        Bundle extras = location.getExtras();
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        extras.putParcelable(Location.EXTRA_COARSE_LOCATION, coarse);
+        location.setExtras(extras);
         return coarse;
     }
 

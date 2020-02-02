@@ -220,7 +220,7 @@ private:
     int32_t mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-    sp<ReliableSurface> mNativeSurface;
+    std::unique_ptr<ReliableSurface> mNativeSurface;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;

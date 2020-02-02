@@ -320,7 +320,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** @see ViewRootImpl#mActivityConfigCallback */
     private ActivityConfigCallback mActivityConfigCallback;
 
-    private OnContentApplyWindowInsetsListener mPendingOnContentApplyWindowInsetsListener;
+    private OnContentApplyWindowInsetsListener mPendingOnContentApplyWindowInsetsListener
+            = createDefaultContentWindowInsetsListener();
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2109,14 +2110,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
-        if (mPendingOnContentApplyWindowInsetsListener != null) {
-            viewRoot.setOnContentApplyWindowInsetsListener(
-                    mPendingOnContentApplyWindowInsetsListener);
-            mPendingOnContentApplyWindowInsetsListener = null;
-        } else {
-            viewRoot.setOnContentApplyWindowInsetsListener(
-                    createDefaultContentWindowInsetsListener());
-        }
+        viewRoot.setOnContentApplyWindowInsetsListener(
+                mPendingOnContentApplyWindowInsetsListener);
+        mPendingOnContentApplyWindowInsetsListener = null;
     }
 
     private OnContentApplyWindowInsetsListener createDefaultContentWindowInsetsListener() {
@@ -3903,17 +3899,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
+    public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
         ViewRootImpl impl = getViewRootImpl();
+        OnContentApplyWindowInsetsListener listener = decorFitsSystemWindows
+                ? createDefaultContentWindowInsetsListener()
+                : null;
         if (impl != null) {
             impl.setOnContentApplyWindowInsetsListener(listener);
         } else {
             mPendingOnContentApplyWindowInsetsListener = listener;
         }
-    }
-
-    @Override
-    public void resetOnContentApplyWindowInsetsListener() {
-        setOnContentApplyWindowInsetsListener(createDefaultContentWindowInsetsListener());
     }
 }

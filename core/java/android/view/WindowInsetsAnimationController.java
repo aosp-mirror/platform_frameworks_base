@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Insets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationCallback.AnimationBounds;
+import android.view.animation.Interpolator;
 
 /**
  * Controller for app-driven animation of system windows.
@@ -32,7 +33,7 @@ import android.view.WindowInsetsAnimationCallback.AnimationBounds;
  *  synchronized, such that changes the system windows and the app's current frame
  *  are rendered at the same time.
  *  <p>
- *  Control is obtained through {@link WindowInsetsController#controlInputMethodAnimation}.
+ *  Control is obtained through {@link WindowInsetsController#controlWindowInsetsAnimation}.
  */
 @SuppressLint("NotClosable")
 public interface WindowInsetsAnimationController {

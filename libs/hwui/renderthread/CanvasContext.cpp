@@ -143,10 +143,11 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
     ATRACE_CALL();
 
     if (surface) {
-        mNativeSurface = new ReliableSurface{std::move(surface)};
+        mNativeSurface = std::make_unique<ReliableSurface>(std::move(surface));
+        mNativeSurface->init();
         if (enableTimeout) {
             // TODO: Fix error handling & re-shorten timeout
-            ANativeWindow_setDequeueTimeout(mNativeSurface.get(), 4000_ms);
+            ANativeWindow_setDequeueTimeout(mNativeSurface->getNativeWindow(), 4000_ms);
         }
     } else {
         mNativeSurface = nullptr;
@@ -161,8 +162,9 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
     }
 
     ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
-    bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode,
-                                                  mRenderAheadCapacity);
+    bool hasSurface = mRenderPipeline->setSurface(
+            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior, colorMode,
+            mRenderAheadCapacity);
 
     mFrameNumber = -1;
 
@@ -203,7 +205,8 @@ void CanvasContext::setStopped(bool stopped) {
 
 void CanvasContext::allocateBuffers() {
     if (mNativeSurface) {
-        mNativeSurface->allocateBuffers();
+        ANativeWindow* anw = mNativeSurface->getNativeWindow();
+        ANativeWindow_allocateBuffers(anw);
     }
 }
 
@@ -428,7 +431,7 @@ void CanvasContext::setPresentTime() {
         presentTime = mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
                 (frameIntervalNanos * (renderAhead + 1));
     }
-    native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
+    native_window_set_buffers_timestamp(mNativeSurface->getNativeWindow(), presentTime);
 }
 
 void CanvasContext::draw() {
@@ -489,16 +492,18 @@ void CanvasContext::draw() {
         swap.swapCompletedTime = systemTime(SYSTEM_TIME_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
         if (didDraw) {
-            nsecs_t dequeueStart = ANativeWindow_getLastDequeueStartTime(mNativeSurface.get());
+            nsecs_t dequeueStart =
+                    ANativeWindow_getLastDequeueStartTime(mNativeSurface->getNativeWindow());
             if (dequeueStart < mCurrentFrameInfo->get(FrameInfoIndex::SyncStart)) {
                 // Ignoring dequeue duration as it happened prior to frame render start
                 // and thus is not part of the frame.
                 swap.dequeueDuration = 0;
             } else {
                 swap.dequeueDuration =
-                        ANativeWindow_getLastDequeueDuration(mNativeSurface.get());
+                        ANativeWindow_getLastDequeueDuration(mNativeSurface->getNativeWindow());
             }
-            swap.queueDuration = ANativeWindow_getLastQueueDuration(mNativeSurface.get());
+            swap.queueDuration =
+                    ANativeWindow_getLastQueueDuration(mNativeSurface->getNativeWindow());
         } else {
             swap.dequeueDuration = 0;
             swap.queueDuration = 0;
@@ -567,14 +572,16 @@ void CanvasContext::doFrame() {
 }
 
 SkISize CanvasContext::getNextFrameSize() const {
-    ReliableSurface* surface = mNativeSurface.get();
-    if (surface) {
-        SkISize size;
-        size.fWidth = ANativeWindow_getWidth(surface);
-        size.fHeight = ANativeWindow_getHeight(surface);
-        return size;
+    static constexpr SkISize defaultFrameSize = {INT32_MAX, INT32_MAX};
+    if (mNativeSurface == nullptr) {
+        return defaultFrameSize;
     }
-    return {INT32_MAX, INT32_MAX};
+    ANativeWindow* anw = mNativeSurface->getNativeWindow();
+
+    SkISize size;
+    size.fWidth = ANativeWindow_getWidth(anw);
+    size.fHeight = ANativeWindow_getHeight(anw);
+    return size;
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {
@@ -702,11 +709,9 @@ bool CanvasContext::surfaceRequiresRedraw() {
     if (!mNativeSurface) return false;
     if (mHaveNewSurface) return true;
 
-    int width = -1;
-    int height = -1;
-    ReliableSurface* surface = mNativeSurface.get();
-    surface->query(NATIVE_WINDOW_WIDTH, &width);
-    surface->query(NATIVE_WINDOW_HEIGHT, &height);
+    ANativeWindow* anw = mNativeSurface->getNativeWindow();
+    const int width = ANativeWindow_getWidth(anw);
+    const int height = ANativeWindow_getHeight(anw);
 
     return width != mLastFrameWidth || height != mLastFrameHeight;
 }
