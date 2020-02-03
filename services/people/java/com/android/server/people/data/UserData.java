@@ -34,6 +34,12 @@ class UserData {
 
     private Map<String, PackageData> mPackageDataMap = new ArrayMap<>();
 
+    @Nullable
+    private String mDefaultDialer;
+
+    @Nullable
+    private String mDefaultSmsApp;
+
     UserData(@UserIdInt int userId) {
         mUserId = userId;
     }
@@ -66,8 +72,7 @@ class UserData {
      */
     @NonNull
     PackageData getOrCreatePackageData(String packageName) {
-        return mPackageDataMap.computeIfAbsent(
-                packageName, key -> new PackageData(packageName, mUserId));
+        return mPackageDataMap.computeIfAbsent(packageName, key -> createPackageData(packageName));
     }
 
     /**
@@ -80,24 +85,32 @@ class UserData {
     }
 
     void setDefaultDialer(@Nullable String packageName) {
-        for (PackageData packageData : mPackageDataMap.values()) {
-            if (packageData.isDefaultDialer()) {
-                packageData.setIsDefaultDialer(false);
-            }
-            if (TextUtils.equals(packageName, packageData.getPackageName())) {
-                packageData.setIsDefaultDialer(true);
-            }
-        }
+        mDefaultDialer = packageName;
+    }
+
+    @Nullable
+    PackageData getDefaultDialer() {
+        return mDefaultDialer != null ? getPackageData(mDefaultDialer) : null;
     }
 
     void setDefaultSmsApp(@Nullable String packageName) {
-        for (PackageData packageData : mPackageDataMap.values()) {
-            if (packageData.isDefaultSmsApp()) {
-                packageData.setIsDefaultSmsApp(false);
-            }
-            if (TextUtils.equals(packageName, packageData.getPackageName())) {
-                packageData.setIsDefaultSmsApp(true);
-            }
-        }
+        mDefaultSmsApp = packageName;
+    }
+
+    @Nullable
+    PackageData getDefaultSmsApp() {
+        return mDefaultSmsApp != null ? getPackageData(mDefaultSmsApp) : null;
+    }
+
+    private PackageData createPackageData(String packageName) {
+        return new PackageData(packageName, mUserId, this::isDefaultDialer, this::isDefaultSmsApp);
+    }
+
+    private boolean isDefaultDialer(String packageName) {
+        return TextUtils.equals(mDefaultDialer, packageName);
+    }
+
+    private boolean isDefaultSmsApp(String packageName) {
+        return TextUtils.equals(mDefaultSmsApp, packageName);
     }
 }

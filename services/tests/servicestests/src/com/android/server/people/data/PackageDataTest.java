@@ -16,7 +16,6 @@
 
 package com.android.server.people.data;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -46,12 +45,15 @@ public final class PackageDataTest {
     private Event mE2;
     private Event mE3;
     private Event mE4;
+    private boolean mIsDefaultDialer;
+    private boolean mIsDefaultSmsApp;
 
     private PackageData mPackageData;
 
     @Before
     public void setUp() {
-        mPackageData = new PackageData(PACKAGE_NAME, USER_ID);
+        mPackageData = new PackageData(
+                PACKAGE_NAME, USER_ID, pkg -> mIsDefaultDialer, pkg -> mIsDefaultSmsApp);
         ConversationInfo conversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setLocusId(LOCUS_ID)
@@ -83,8 +85,8 @@ public final class PackageDataTest {
 
     @Test
     public void testGetEventHistoryDefaultDialerAndSmsApp() {
-        mPackageData.setIsDefaultDialer(true);
-        mPackageData.setIsDefaultSmsApp(true);
+        mIsDefaultDialer = true;
+        mIsDefaultSmsApp = true;
         EventStore eventStore = mPackageData.getEventStore();
         eventStore.getOrCreateShortcutEventHistory(SHORTCUT_ID).addEvent(mE1);
         eventStore.getOrCreateCallEventHistory(PHONE_NUMBER).addEvent(mE3);
