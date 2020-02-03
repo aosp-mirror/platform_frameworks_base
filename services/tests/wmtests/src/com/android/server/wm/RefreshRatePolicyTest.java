@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -108,7 +110,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
         overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */);
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
     }
@@ -124,7 +126,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
 
         cameraUsingWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 cameraUsingWindow.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */);
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));
     }
 }

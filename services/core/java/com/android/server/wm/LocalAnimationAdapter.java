@@ -24,6 +24,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -50,9 +51,9 @@ class LocalAnimationAdapter implements AnimationAdapter {
 
     @Override
     public void startAnimation(SurfaceControl animationLeash, Transaction t,
-            OnAnimationFinishedCallback finishCallback) {
+            @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
         mAnimator.startAnimation(mSpec, animationLeash, t,
-                () -> finishCallback.onAnimationFinished(this));
+                () -> finishCallback.onAnimationFinished(type, this));
     }
 
     @Override

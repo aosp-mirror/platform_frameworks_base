@@ -196,6 +196,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -311,6 +312,8 @@ import com.android.server.protolog.common.ProtoLog;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
 
@@ -4080,7 +4083,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction, @Nullable Runnable animationFinishedCallback) {
+            boolean isVoiceInteraction,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
         if (mUseTransferredAnimation) {
             return false;
         }
@@ -4158,7 +4162,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
             // which we might have done because we were in closing/opening apps list.
-            onAnimationFinished();
+            onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION, null /* AnimationAdapter */);
             if (visible) {
                 // The token was made immediately visible, there will be no entrance animation.
                 // We need to inform the client the enter animation was finished.
@@ -6054,8 +6058,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    protected void onAnimationFinished() {
-        super.onAnimationFinished();
+    protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
+        super.onAnimationFinished(type, anim);
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AR#onAnimationFinished");
         mTransit = TRANSIT_UNSET;

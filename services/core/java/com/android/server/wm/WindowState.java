@@ -115,6 +115,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RESIZE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
@@ -231,6 +232,7 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
@@ -5027,12 +5029,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void startAnimation(Transaction t, AnimationAdapter adapter) {
-        startAnimation(t, adapter, mWinAnimator.mLastHidden, null /* animationFinishedCallback */);
+        startAnimation(t, adapter, mWinAnimator.mLastHidden, ANIMATION_TYPE_WINDOW_ANIMATION,
+                null /* animationFinishedCallback */);
     }
 
     @Override
-    protected void onAnimationFinished() {
-        super.onAnimationFinished();
+    protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
+        super.onAnimationFinished(type, anim);
         mWinAnimator.onAnimationFinished();
     }
 
