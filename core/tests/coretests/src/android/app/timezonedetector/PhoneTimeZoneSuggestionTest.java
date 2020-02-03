@@ -26,17 +26,17 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class PhoneTimeZoneSuggestionTest {
-    private static final int PHONE_ID = 99999;
+    private static final int SLOT_INDEX = 99999;
 
     @Test
     public void testEquals() {
-        PhoneTimeZoneSuggestion.Builder builder1 = new PhoneTimeZoneSuggestion.Builder(PHONE_ID);
+        PhoneTimeZoneSuggestion.Builder builder1 = new PhoneTimeZoneSuggestion.Builder(SLOT_INDEX);
         {
             PhoneTimeZoneSuggestion one = builder1.build();
             assertEquals(one, one);
         }
 
-        PhoneTimeZoneSuggestion.Builder builder2 = new PhoneTimeZoneSuggestion.Builder(PHONE_ID);
+        PhoneTimeZoneSuggestion.Builder builder2 = new PhoneTimeZoneSuggestion.Builder(SLOT_INDEX);
         {
             PhoneTimeZoneSuggestion one = builder1.build();
             PhoneTimeZoneSuggestion two = builder2.build();
@@ -45,7 +45,7 @@ public class PhoneTimeZoneSuggestionTest {
         }
 
         PhoneTimeZoneSuggestion.Builder builder3 =
-                new PhoneTimeZoneSuggestion.Builder(PHONE_ID + 1);
+                new PhoneTimeZoneSuggestion.Builder(SLOT_INDEX + 1);
         {
             PhoneTimeZoneSuggestion one = builder1.build();
             PhoneTimeZoneSuggestion three = builder3.build();
@@ -120,7 +120,7 @@ public class PhoneTimeZoneSuggestionTest {
 
     @Test(expected = RuntimeException.class)
     public void testBuilderValidates_emptyZone_badMatchType() {
-        PhoneTimeZoneSuggestion.Builder builder = new PhoneTimeZoneSuggestion.Builder(PHONE_ID);
+        PhoneTimeZoneSuggestion.Builder builder = new PhoneTimeZoneSuggestion.Builder(SLOT_INDEX);
         // No zone ID, so match type should be left unset.
         builder.setMatchType(PhoneTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET);
         builder.build();
@@ -128,7 +128,7 @@ public class PhoneTimeZoneSuggestionTest {
 
     @Test(expected = RuntimeException.class)
     public void testBuilderValidates_zoneSet_badMatchType() {
-        PhoneTimeZoneSuggestion.Builder builder = new PhoneTimeZoneSuggestion.Builder(PHONE_ID);
+        PhoneTimeZoneSuggestion.Builder builder = new PhoneTimeZoneSuggestion.Builder(SLOT_INDEX);
         builder.setZoneId("Europe/London");
         builder.setQuality(PhoneTimeZoneSuggestion.QUALITY_SINGLE_ZONE);
         builder.build();
@@ -136,7 +136,7 @@ public class PhoneTimeZoneSuggestionTest {
 
     @Test
     public void testParcelable() {
-        PhoneTimeZoneSuggestion.Builder builder = new PhoneTimeZoneSuggestion.Builder(PHONE_ID);
+        PhoneTimeZoneSuggestion.Builder builder = new PhoneTimeZoneSuggestion.Builder(SLOT_INDEX);
         assertRoundTripParcelable(builder.build());
 
         builder.setZoneId("Europe/London");
