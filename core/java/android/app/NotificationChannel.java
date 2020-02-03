@@ -15,8 +15,6 @@
  */
 package android.app;
 
-import static android.annotation.SystemApi.Client.MODULE_APPS;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -325,7 +323,7 @@ public final class NotificationChannel implements Parcelable {
      * @param blockableSystem if {@code true}, allows users to block notifications on this channel.
      * @hide
      */
-    @SystemApi(client = MODULE_APPS)
+    @SystemApi
     @TestApi
     public void setBlockableSystem(boolean blockableSystem) {
         mBlockableSystem = blockableSystem;
