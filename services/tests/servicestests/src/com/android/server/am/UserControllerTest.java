@@ -206,11 +206,15 @@ public class UserControllerTest {
     @Test
     public void testStartPreCreatedUser_foreground() {
         assertFalse(mUserController.startUser(TEST_PRE_CREATED_USER_ID, /* foreground= */ true));
+        // Make sure no intents have been fired for pre-created users.
+        assertTrue(mInjector.mSentIntents.isEmpty());
     }
 
     @Test
     public void testStartPreCreatedUser_background() throws Exception {
         assertTrue(mUserController.startUser(TEST_PRE_CREATED_USER_ID, /* foreground= */ false));
+        // Make sure no intents have been fired for pre-created users.
+        assertTrue(mInjector.mSentIntents.isEmpty());
 
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
