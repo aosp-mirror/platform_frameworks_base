@@ -17,6 +17,8 @@ package com.android.settingslib.media;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
@@ -42,12 +44,19 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     private int mConnectedRecord;
 
-    protected Context mContext;
-    protected int mType;
+    protected final Context mContext;
+    protected final int mType;
+    protected final MediaRoute2Info mRouteInfo;
+    protected final MediaRouter2Manager mRouterManager;
+    protected final String mPackageName;
 
-    MediaDevice(Context context, @MediaDeviceType int type) {
+    MediaDevice(Context context, @MediaDeviceType int type, MediaRouter2Manager routerManager,
+            MediaRoute2Info info, String packageName) {
         mType = type;
         mContext = context;
+        mRouteInfo = info;
+        mRouterManager = routerManager;
+        mPackageName = packageName;
     }
 
     void initDeviceRecord() {

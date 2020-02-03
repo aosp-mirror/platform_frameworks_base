@@ -19,6 +19,8 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -35,8 +37,9 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     private CachedBluetoothDevice mCachedDevice;
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device) {
-        super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
+    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
+            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
+        super(context, MediaDeviceType.TYPE_BLUETOOTH_DEVICE, routerManager, info, packageName);
         mCachedDevice = device;
         initDeviceRecord();
     }
