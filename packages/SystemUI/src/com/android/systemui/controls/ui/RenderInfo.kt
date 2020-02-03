@@ -50,7 +50,7 @@ data class RenderInfo(val iconResourceId: Int, val foreground: Int, val backgrou
 private const val BUCKET_SIZE = 1000
 private const val THERMOSTAT_RANGE = DeviceTypes.TYPE_THERMOSTAT * BUCKET_SIZE
 
-public val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
+private val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT) to
         Pair(R.color.thermo_heat_foreground, R.color.thermo_heat_background),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_COOL) to
@@ -60,7 +60,7 @@ public val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
         Pair(R.color.control_foreground, R.color.control_background)
 }
 
-public val deviceIconMap = mapOf<Int, IconState>(
+private val deviceIconMap = mapOf<Int, IconState>(
     THERMOSTAT_RANGE to IconState(
         R.drawable.ic_device_thermostat_gm2_24px,
         R.drawable.ic_device_thermostat_gm2_24px

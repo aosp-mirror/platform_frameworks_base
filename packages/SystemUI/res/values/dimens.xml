@@ -1187,7 +1187,27 @@
     <dimen name="control_corner_radius">15dp</dimen>
     <dimen name="control_height">100dp</dimen>
     <dimen name="control_padding">15dp</dimen>
-    <dimen name="control_status_normal">12dp</dimen>
-    <dimen name="control_status_expanded">18dp</dimen>
-    <dimen name="app_icon_size">32dp</dimen>
+    <dimen name="control_status_normal">12sp</dimen>
+    <dimen name="control_status_expanded">18sp</dimen>
+    <dimen name="control_base_item_margin">2dp</dimen>
+    <dimen name="control_status_padding">3dp</dimen>
+
+    <!-- Home Controls management screens -->
+    <dimen name="controls_management_top_padding">48dp</dimen>
+    <dimen name="controls_management_side_padding">8dp</dimen>
+    <dimen name="controls_management_titles_margin">8dp</dimen>
+    <dimen name="controls_management_list_margin">16dp</dimen>
+    <dimen name="controls_title_size">26sp</dimen>
+
+    <dimen name="controls_app_icon_size">32dp</dimen>
+    <dimen name="controls_app_icon_frame_side_padding">8dp</dimen>
+    <dimen name="controls_app_icon_frame_top_padding">4dp</dimen>
+    <dimen name="controls_app_bottom_margin">8dp</dimen>
+    <dimen name="controls_app_text_padding">8dp</dimen>
+    <dimen name="controls_app_divider_height">2dp</dimen>
+    <dimen name="controls_app_divider_side_margin">32dp</dimen>
+
+    <dimen name="controls_card_margin">2dp</dimen>
+
+
 </resources>

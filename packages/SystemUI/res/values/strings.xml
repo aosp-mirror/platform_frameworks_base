@@ -2547,6 +2547,24 @@
     <!-- Title for Magnification Controls Window [CHAR LIMIT=NONE] -->
     <string name="magnification_controls_title">Magnification Window Controls</string>
 
-    <!-- Quick Controls strings [CHAR LIMIT=30] -->
+    <!-- Quick Controls strings -->
+    <!-- Quick Controls view header [CHAR LIMIT=30] -->
     <string name="quick_controls_title">Quick Controls</string>
+
+    <!-- Controls management providers screen title [CHAR LIMIT=30]-->
+    <string name="controls_providers_title">Add Controls</string>
+    <!-- Controls management providers screen subtitle [CHAR LIMIT=NONE] -->
+    <string name="controls_providers_subtitle">Choose an app from which to add controls</string>
+    <!-- Number of favorites for controls management screen [CHAR LIMIT=NONE]-->
+    <plurals name="controls_number_of_favorites">
+        <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> current favorite.</item>
+        <item quantity="other"><xliff:g id="number" example="3">%s</xliff:g> current favorites.</item>
+    </plurals>
+
+    <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
+    <string name="controls_favorite_default_title">Controls</string>
+    <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_subtitle">Choose controls for quick access</string>
+
+
 </resources>
