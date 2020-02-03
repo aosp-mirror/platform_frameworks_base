@@ -1018,7 +1018,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void authenticate(int requestId, int datasetIndex, IntentSender intent, Bundle extras) {
+    public void authenticate(int requestId, int datasetIndex, IntentSender intent, Bundle extras,
+            boolean authenticateInline) {
         if (sDebug) {
             Slog.d(TAG, "authenticate(): requestId=" + requestId + "; datasetIdx=" + datasetIndex
                     + "; intentSender=" + intent);
@@ -1042,7 +1043,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int authenticationId = AutofillManager.makeAuthenticationId(requestId, datasetIndex);
         mHandler.sendMessage(obtainMessage(
                 Session::startAuthentication,
-                this, authenticationId, intent, fillInIntent));
+                this, authenticationId, intent, fillInIntent, authenticateInline));
     }
 
     // VultureCallback
@@ -2623,8 +2624,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mService.getServicePackageName(), mComponentName,
                 serviceLabel, serviceIcon, this, id, mCompatMode);
 
-        mService.logDatasetShown(id, mClientState);
-
         synchronized (mLock) {
             if (mUiShownTime == 0) {
                 // Log first time UI is shown.
@@ -2656,10 +2655,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private boolean requestShowInlineSuggestionsLocked(@NonNull FillResponse response,
             @Nullable String filterText) {
         final List<Dataset> datasets = response.getDatasets();
-        if (datasets == null) {
-            Log.w(TAG, "response returned null datasets");
-            return false;
-        }
 
         final InlineSuggestionSession.ImeResponse imeResponse =
                 mInlineSuggestionSession.waitAndGetImeResponse();
@@ -2671,9 +2666,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final InlineSuggestionsRequest request = imeResponse.getRequest();
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(request,
-                        response.getRequestId(),
-                        datasets.toArray(new Dataset[]{}), filterText, response.getInlineActions(),
-                        mCurrentViewId, mContext, this, () -> {
+                        response, filterText, response.getInlineActions(), mCurrentViewId, mContext,
+                        this, () -> {
                             synchronized (mLock) {
                                 requestHideFillUi(mCurrentViewId);
                             }
@@ -3160,7 +3154,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             final int authenticationId = AutofillManager.makeAuthenticationId(requestId,
                     datasetIndex);
-            startAuthentication(authenticationId, dataset.getAuthentication(), fillInIntent);
+            startAuthentication(authenticationId, dataset.getAuthentication(), fillInIntent,
+                    /* authenticateInline= */false);
 
         }
     }
@@ -3184,10 +3179,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private void startAuthentication(int authenticationId, IntentSender intent,
-            Intent fillInIntent) {
+            Intent fillInIntent, boolean authenticateInline) {
         try {
             synchronized (mLock) {
-                mClient.authenticate(id, authenticationId, intent, fillInIntent);
+                mClient.authenticate(id, authenticationId, intent, fillInIntent,
+                        authenticateInline);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Error launching auth intent", e);
