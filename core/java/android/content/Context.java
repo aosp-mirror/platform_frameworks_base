@@ -5099,6 +5099,7 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final String APP_INTEGRITY_SERVICE = "app_integrity";
 
     /**

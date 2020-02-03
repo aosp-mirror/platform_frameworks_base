@@ -19,6 +19,7 @@ package android.content.integrity;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.integrity.AtomicFormula.BooleanAtomicFormula;
 import android.content.integrity.AtomicFormula.LongAtomicFormula;
 import android.content.integrity.AtomicFormula.StringAtomicFormula;
@@ -37,6 +38,7 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
+@TestApi
 @VisibleForTesting
 public abstract class IntegrityFormula {
 

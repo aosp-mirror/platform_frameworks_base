@@ -18,6 +18,7 @@ package android.content.integrity;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@TestApi
 @SystemApi
 public class RuleSet {
     private final String mVersion;
