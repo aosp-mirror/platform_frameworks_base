@@ -139,6 +139,7 @@ import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
+import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetd;
@@ -180,6 +181,7 @@ import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Parcel;
@@ -210,6 +212,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
 import com.android.server.connectivity.ConnectivityConstants;
 import com.android.server.connectivity.DefaultNetworkMetrics;
 import com.android.server.connectivity.IpConnectivityMetrics;
@@ -322,6 +325,8 @@ public class ConnectivityServiceTest {
     @Mock UserManager mUserManager;
     @Mock NotificationManager mNotificationManager;
     @Mock AlarmManager mAlarmManager;
+    @Mock IConnectivityDiagnosticsCallback mConnectivityDiagnosticsCallback;
+    @Mock IBinder mIBinder;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
             ArgumentCaptor.forClass(ResolverParamsParcel.class);
@@ -6354,5 +6359,71 @@ public class ConnectivityServiceTest {
         packageInfo.applicationInfo.uid = UserHandle.getUid(UserHandle.USER_SYSTEM,
                 UserHandle.getAppId(uid));
         return packageInfo;
+    }
+
+    @Test
+    public void testRegisterConnectivityDiagnosticsCallbackInvalidRequest() throws Exception {
+        final NetworkRequest request =
+                new NetworkRequest(
+                        new NetworkCapabilities(), TYPE_ETHERNET, 0, NetworkRequest.Type.NONE);
+        try {
+            mService.registerConnectivityDiagnosticsCallback(
+                    mConnectivityDiagnosticsCallback, request);
+            fail("registerConnectivityDiagnosticsCallback should throw on invalid NetworkRequest");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testRegisterUnregisterConnectivityDiagnosticsCallback() throws Exception {
+        final NetworkRequest wifiRequest =
+                new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI).build();
+
+        when(mConnectivityDiagnosticsCallback.asBinder()).thenReturn(mIBinder);
+
+        mService.registerConnectivityDiagnosticsCallback(
+                mConnectivityDiagnosticsCallback, wifiRequest);
+
+        verify(mIBinder, timeout(TIMEOUT_MS))
+                .linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
+        assertTrue(
+                mService.mConnectivityDiagnosticsCallbacks.containsKey(
+                        mConnectivityDiagnosticsCallback));
+
+        mService.unregisterConnectivityDiagnosticsCallback(mConnectivityDiagnosticsCallback);
+        verify(mIBinder, timeout(TIMEOUT_MS))
+                .unlinkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
+        assertFalse(
+                mService.mConnectivityDiagnosticsCallbacks.containsKey(
+                        mConnectivityDiagnosticsCallback));
+        verify(mConnectivityDiagnosticsCallback, atLeastOnce()).asBinder();
+    }
+
+    @Test
+    public void testRegisterDuplicateConnectivityDiagnosticsCallback() throws Exception {
+        final NetworkRequest wifiRequest =
+                new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI).build();
+        when(mConnectivityDiagnosticsCallback.asBinder()).thenReturn(mIBinder);
+
+        mService.registerConnectivityDiagnosticsCallback(
+                mConnectivityDiagnosticsCallback, wifiRequest);
+
+        verify(mIBinder, timeout(TIMEOUT_MS))
+                .linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
+        verify(mConnectivityDiagnosticsCallback).asBinder();
+        assertTrue(
+                mService.mConnectivityDiagnosticsCallbacks.containsKey(
+                        mConnectivityDiagnosticsCallback));
+
+        // Register the same callback again
+        mService.registerConnectivityDiagnosticsCallback(
+                mConnectivityDiagnosticsCallback, wifiRequest);
+
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        assertTrue(
+                mService.mConnectivityDiagnosticsCallbacks.containsKey(
+                        mConnectivityDiagnosticsCallback));
     }
 }
