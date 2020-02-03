@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे कनेक्ट केले"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s द्वारे उपलब्‍ध"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"साइन अप करण्यासाठी टॅप करा"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"कनेक्‍ट केले, इंटरनेट नाही"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"खाजगी DNS सर्व्हर ॲक्सेस करू शकत नाही"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"मर्यादित कनेक्शन"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"इंटरनेट नाही"</string>

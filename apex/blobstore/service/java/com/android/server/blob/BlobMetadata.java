@@ -48,6 +48,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
+import com.android.server.blob.BlobStoreManagerService.DumpArgs;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -156,6 +157,12 @@ class BlobMetadata {
         }
     }
 
+    boolean hasLeases() {
+        synchronized (mMetadataLock) {
+            return mLeasees.isEmpty();
+        }
+    }
+
     boolean isAccessAllowedForCaller(String callingPackage, int callingUid) {
         // TODO: verify blob is still valid (expiryTime is not elapsed)
         synchronized (mMetadataLock) {
@@ -234,10 +241,10 @@ class BlobMetadata {
         return revocableFd.getRevocableFileDescriptor();
     }
 
-    void dump(IndentingPrintWriter fout) {
+    void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
         fout.println("blobHandle:");
         fout.increaseIndent();
-        blobHandle.dump(fout);
+        blobHandle.dump(fout, dumpArgs.shouldDumpFull());
         fout.decreaseIndent();
 
         fout.println("Committers:");

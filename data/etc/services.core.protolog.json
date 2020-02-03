@@ -1573,12 +1573,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "1004585481": {
-      "message": "%s forcing orientation to %d for display id=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "1051545910": {
       "message": "Exit animation finished in %s: remove=%b",
       "level": "VERBOSE",
@@ -1716,6 +1710,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
+    "1389009035": {
+      "message": "NonAppWindowContainer cannot set orientation: %s",
+      "level": "WARN",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1401700824": {
       "message": "Window drawn win=%s",
@@ -1890,6 +1890,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1674747211": {
+      "message": "%s forcing orientation to %d for display id=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayArea.java"
     },
     "1677260366": {
       "message": "Finish starting %s: first real window is shown, no animation",

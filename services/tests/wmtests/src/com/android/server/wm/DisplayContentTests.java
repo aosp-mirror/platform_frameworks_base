@@ -139,11 +139,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 mAppWindow,
                 mChildAppWindowAbove,
                 mDockedDividerWindow,
+                mImeWindow,
+                mImeDialogWindow,
                 mStatusBarWindow,
                 mNotificationShadeWindow,
-                mNavBarWindow,
-                mImeWindow,
-                mImeDialogWindow));
+                mNavBarWindow));
     }
 
     @Test
@@ -232,11 +232,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 mChildAppWindowAbove,
                 mDockedDividerWindow,
                 voiceInteractionWindow,
+                mImeWindow,
+                mImeDialogWindow,
                 mStatusBarWindow,
                 mNotificationShadeWindow,
-                mNavBarWindow,
-                mImeWindow,
-                mImeDialogWindow));
+                mNavBarWindow));
     }
 
     @Test

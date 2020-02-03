@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -179,9 +180,10 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ALIAS_CHANGED =
-            "android.bluetooth.action.ALIAS_CHANGED";
+            "android.bluetooth.device.action.ALIAS_CHANGED";
 
     /**
      * Broadcast Action: Indicates a change in the bond state of a remote
@@ -1091,7 +1093,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setAlias(@NonNull String alias) {
         final IBluetooth service = sService;
         if (service == null) {

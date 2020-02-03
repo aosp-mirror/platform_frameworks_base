@@ -8,6 +8,9 @@ import android.view.MotionEvent;
  */
 public final class GestureUtils {
 
+    public static int MM_PER_CM = 10;
+    public static float CM_PER_INCH = 2.54f;
+
     private GestureUtils() {
         /* cannot be instantiated */
     }
@@ -84,5 +87,13 @@ public final class GestureUtils {
         }
 
         return true;
+    }
+
+    /**
+     * Gets the index of the pointer that went up or down from a motion event.
+     */
+    public static int getActionIndex(MotionEvent event) {
+        return (event.getAction()
+                & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
     }
 }

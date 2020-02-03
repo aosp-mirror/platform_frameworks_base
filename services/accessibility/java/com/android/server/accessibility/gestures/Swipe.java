@@ -16,10 +16,10 @@
 
 package com.android.server.accessibility.gestures;
 
+import static com.android.server.accessibility.gestures.GestureUtils.MM_PER_CM;
 import static com.android.server.accessibility.gestures.TouchExplorer.DEBUG;
 
 import android.content.Context;
-import android.gesture.GesturePoint;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -44,10 +44,10 @@ class Swipe extends GestureMatcher {
     public static final int DOWN = 3;
     // This is the calculated movement threshold used track if the user is still
     // moving their finger.
-    private final float mGestureDetectionThreshold;
+    private final float mGestureDetectionThresholdPixels;
 
     // Buffer for storing points for gesture detection.
-    private final ArrayList<GesturePoint> mStrokeBuffer = new ArrayList<GesturePoint>(100);
+    private final ArrayList<PointF> mStrokeBuffer = new ArrayList<>(100);
 
     // The minimal delta between moves to add a gesture point.
     private static final int TOUCH_TOLERANCE_PIX = 3;
@@ -56,7 +56,7 @@ class Swipe extends GestureMatcher {
     private static final float MIN_PREDICTION_SCORE = 2.0f;
 
     // Distance a finger must travel before we decide if it is a gesture or not.
-    private static final int GESTURE_CONFIRM_CM = 1;
+    public static final int GESTURE_CONFIRM_CM = 1;
 
     // Time threshold used to determine if an interaction is a gesture or not.
     // If the first movement of 1cm takes longer than this value, we assume it's
@@ -67,17 +67,16 @@ class Swipe extends GestureMatcher {
     // all gestures started with the initial movement taking less than 100ms.
     // When touch exploring, the first movement almost always takes longer than
     // 200ms.
-    private static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 150;
+    public static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 150;
 
     // Time threshold used to determine if a gesture should be cancelled.  If
     // the finger takes more than this time to move 1cm, the ongoing gesture is
     // cancelled.
-    private static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 300;
+    public static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 300;
 
     private int[] mDirections;
     private float mBaseX;
     private float mBaseY;
-    private long mBaseTime;
     private float mPreviousGestureX;
     private float mPreviousGestureY;
     // Constants for sampling motion event points.
@@ -119,8 +118,8 @@ class Swipe extends GestureMatcher {
         super(gesture, new Handler(context.getMainLooper()), listener);
         mDirections = directions;
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        mGestureDetectionThreshold =
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 10, displayMetrics)
+        mGestureDetectionThresholdPixels =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, MM_PER_CM, displayMetrics)
                         * GESTURE_CONFIRM_CM;
         // Calculate minimum gesture velocity
         final float pixelsPerCmX = displayMetrics.xdpi / 2.54f;
@@ -135,18 +134,16 @@ class Swipe extends GestureMatcher {
     protected void clear() {
         mBaseX = Float.NaN;
         mBaseY = Float.NaN;
-        mBaseTime = 0;
         mStrokeBuffer.clear();
         super.clear();
     }
 
     @Override
     protected void onDown(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        cancelAfterDelay(event, rawEvent, policyFlags);
+        cancelAfterPauseThreshold(event, rawEvent, policyFlags);
         if (Float.isNaN(mBaseX) && Float.isNaN(mBaseY)) {
             mBaseX = rawEvent.getX();
             mBaseY = rawEvent.getY();
-            mBaseTime = event.getEventTime();
             mPreviousGestureX = mBaseX;
             mPreviousGestureY = mBaseY;
         }
@@ -157,10 +154,8 @@ class Swipe extends GestureMatcher {
     protected void onMove(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         final float x = rawEvent.getX();
         final float y = rawEvent.getY();
-        final long time = event.getEventTime();
         final float dX = Math.abs(x - mPreviousGestureX);
         final float dY = Math.abs(y - mPreviousGestureY);
-        final long timeDelta = time - mBaseTime;
         final double moveDelta = Math.hypot(Math.abs(x - mBaseX), Math.abs(y - mBaseY));
         if (DEBUG) {
             Slog.d(
@@ -168,7 +163,7 @@ class Swipe extends GestureMatcher {
                     "moveDelta:"
                             + Double.toString(moveDelta)
                             + " mGestureDetectionThreshold: "
-                            + Float.toString(mGestureDetectionThreshold));
+                            + Float.toString(mGestureDetectionThresholdPixels));
         }
         if (getState() == STATE_CLEAR) {
             if (moveDelta < mTouchSlop) {
@@ -176,25 +171,24 @@ class Swipe extends GestureMatcher {
                 return;
             } else if (mStrokeBuffer.size() == 0) {
                 // First, make sure the pointer is going in the right direction.
-                cancelAfterDelay(event, rawEvent, policyFlags);
+                cancelAfterPauseThreshold(event, rawEvent, policyFlags);
                 int direction = toDirection(x - mBaseX, y - mBaseY);
                 if (direction != mDirections[0]) {
                     cancelGesture(event, rawEvent, policyFlags);
                     return;
                 } else {
                     // This is confirmed to be some kind of swipe so start tracking points.
-                    mStrokeBuffer.add(new GesturePoint(mBaseX, mBaseY, mBaseTime));
+                    mStrokeBuffer.add(new PointF(mBaseX, mBaseY));
                 }
             }
-            if (moveDelta > mGestureDetectionThreshold) {
+            if (moveDelta > mGestureDetectionThresholdPixels) {
                 // If the pointer has moved more than the threshold,
                 // update the stored values.
                 mBaseX = x;
                 mBaseY = y;
-                mBaseTime = time;
                 if (getState() == STATE_CLEAR) {
                     startGesture(event, rawEvent, policyFlags);
-                    cancelAfterDelay(event, rawEvent, policyFlags);
+                    cancelAfterPauseThreshold(event, rawEvent, policyFlags);
                 }
             }
         }
@@ -202,8 +196,8 @@ class Swipe extends GestureMatcher {
             if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
                 mPreviousGestureX = x;
                 mPreviousGestureY = y;
-                mStrokeBuffer.add(new GesturePoint(x, y, time));
-                cancelAfterDelay(event, rawEvent, policyFlags);
+                mStrokeBuffer.add(new PointF(x, y));
+                cancelAfterPauseThreshold(event, rawEvent, policyFlags);
             }
         }
     }
@@ -217,11 +211,10 @@ class Swipe extends GestureMatcher {
 
         final float x = rawEvent.getX();
         final float y = rawEvent.getY();
-        final long time = event.getEventTime();
         final float dX = Math.abs(x - mPreviousGestureX);
         final float dY = Math.abs(y - mPreviousGestureY);
         if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
-            mStrokeBuffer.add(new GesturePoint(x, y, time));
+            mStrokeBuffer.add(new PointF(x, y));
         }
         recognizeGesture(event, rawEvent, policyFlags);
     }
@@ -240,7 +233,8 @@ class Swipe extends GestureMatcher {
      * queues a transition to STATE_GESTURE_CANCEL based on the current state. If we have
      * transitioned to STATE_GESTURE_STARTED the delay is longer.
      */
-    private void cancelAfterDelay(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+    private void cancelAfterPauseThreshold(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         cancelPendingTransitions();
         switch (getState()) {
             case STATE_CLEAR:
@@ -275,7 +269,7 @@ class Swipe extends GestureMatcher {
         // 90 degrees.
 
         ArrayList<PointF> path = new ArrayList<>();
-        PointF lastDelimiter = new PointF(mStrokeBuffer.get(0).x, mStrokeBuffer.get(0).y);
+        PointF lastDelimiter = mStrokeBuffer.get(0);
         path.add(lastDelimiter);
 
         float dX = 0; // Sum of unit vectors from last delimiter to each following point
@@ -283,9 +277,9 @@ class Swipe extends GestureMatcher {
         int count = 0; // Number of points since last delimiter
         float length = 0; // Vector length from delimiter to most recent point
 
-        PointF next = new PointF();
+        PointF next = null;
         for (int i = 1; i < mStrokeBuffer.size(); ++i) {
-            next = new PointF(mStrokeBuffer.get(i).x, mStrokeBuffer.get(i).y);
+            next = mStrokeBuffer.get(i);
             if (count > 0) {
                 // Average of unit vectors from delimiter to following points
                 float currentDX = dX / count;
@@ -428,7 +422,7 @@ class Swipe extends GestureMatcher {
                     .append(", mBaseY: ")
                     .append(mBaseY)
                     .append(", mGestureDetectionThreshold:")
-                    .append(mGestureDetectionThreshold)
+                    .append(mGestureDetectionThresholdPixels)
                     .append(", mMinPixelsBetweenSamplesX:")
                     .append(mMinPixelsBetweenSamplesX)
                     .append(", mMinPixelsBetweenSamplesY:")

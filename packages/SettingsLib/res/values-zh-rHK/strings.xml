@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"已透過「<xliff:g id="NAME">%1$s</xliff:g>」連線"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"可透過 %1$s 連線"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"輕按即可登入"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"已連線，但沒有互聯網"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"無法存取私人 DNS 伺服器"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"連線受限"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"沒有互聯網連線"</string>

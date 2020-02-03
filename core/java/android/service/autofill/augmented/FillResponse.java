@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.os.Bundle;
 import android.service.autofill.Dataset;
 
 import com.android.internal.util.DataClass;
@@ -50,11 +51,22 @@ public final class FillResponse {
     @DataClass.PluralOf("inlineSuggestion")
     private @Nullable List<Dataset> mInlineSuggestions;
 
+    /**
+     * The client state that {@link AugmentedAutofillService} implementation can put anything in to
+     * identify the request and the response when calling
+     * {@link AugmentedAutofillService#getFillEventHistory()}.
+     */
+    private @Nullable Bundle mClientState;
+
     private static FillWindow defaultFillWindow() {
         return null;
     }
 
     private static List<Dataset> defaultInlineSuggestions() {
+        return null;
+    }
+
+    private static Bundle defaultClientState() {
         return null;
     }
 
@@ -82,9 +94,11 @@ public final class FillResponse {
     @DataClass.Generated.Member
     /* package-private */ FillResponse(
             @Nullable FillWindow fillWindow,
-            @Nullable List<Dataset> inlineSuggestions) {
+            @Nullable List<Dataset> inlineSuggestions,
+            @Nullable Bundle clientState) {
         this.mFillWindow = fillWindow;
         this.mInlineSuggestions = inlineSuggestions;
+        this.mClientState = clientState;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -111,6 +125,18 @@ public final class FillResponse {
     }
 
     /**
+     * The client state that {@link AugmentedAutofillService} implementation can put anything in to
+     * identify the request and the response when calling
+     * {@link AugmentedAutofillService#getFillEventHistory()}.
+     *
+     * @hide
+     */
+    @DataClass.Generated.Member
+    public @Nullable Bundle getClientState() {
+        return mClientState;
+    }
+
+    /**
      * A builder for {@link FillResponse}
      */
     @SuppressWarnings("WeakerAccess")
@@ -119,6 +145,7 @@ public final class FillResponse {
 
         private @Nullable FillWindow mFillWindow;
         private @Nullable List<Dataset> mInlineSuggestions;
+        private @Nullable Bundle mClientState;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -157,10 +184,23 @@ public final class FillResponse {
             return this;
         }
 
+        /**
+         * The client state that {@link AugmentedAutofillService} implementation can put anything in to
+         * identify the request and the response when calling
+         * {@link AugmentedAutofillService#getFillEventHistory()}.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setClientState(@Nullable Bundle value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x4;
+            mClientState = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull FillResponse build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
+            mBuilderFieldsSet |= 0x8; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mFillWindow = defaultFillWindow();
@@ -168,14 +208,18 @@ public final class FillResponse {
             if ((mBuilderFieldsSet & 0x2) == 0) {
                 mInlineSuggestions = defaultInlineSuggestions();
             }
+            if ((mBuilderFieldsSet & 0x4) == 0) {
+                mClientState = defaultClientState();
+            }
             FillResponse o = new FillResponse(
                     mFillWindow,
-                    mInlineSuggestions);
+                    mInlineSuggestions,
+                    mClientState);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
+            if ((mBuilderFieldsSet & 0x8) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -183,10 +227,10 @@ public final class FillResponse {
     }
 
     @DataClass.Generated(
-            time = 1577476012370L,
+            time = 1580335256422L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/service/autofill/augmented/FillResponse.java",
-            inputSignatures = "private @android.annotation.Nullable android.service.autofill.augmented.FillWindow mFillWindow\nprivate @com.android.internal.util.DataClass.PluralOf(\"inlineSuggestion\") @android.annotation.Nullable java.util.List<android.service.autofill.Dataset> mInlineSuggestions\nprivate static  android.service.autofill.augmented.FillWindow defaultFillWindow()\nprivate static  java.util.List<android.service.autofill.Dataset> defaultInlineSuggestions()\nclass FillResponse extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genHiddenGetters=true)\nabstract  android.service.autofill.augmented.FillResponse.Builder addInlineSuggestion(android.service.autofill.Dataset)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private @android.annotation.Nullable android.service.autofill.augmented.FillWindow mFillWindow\nprivate @com.android.internal.util.DataClass.PluralOf(\"inlineSuggestion\") @android.annotation.Nullable java.util.List<android.service.autofill.Dataset> mInlineSuggestions\nprivate @android.annotation.Nullable android.os.Bundle mClientState\nprivate static  android.service.autofill.augmented.FillWindow defaultFillWindow()\nprivate static  java.util.List<android.service.autofill.Dataset> defaultInlineSuggestions()\nprivate static  android.os.Bundle defaultClientState()\nclass FillResponse extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genHiddenGetters=true)\nabstract  android.service.autofill.augmented.FillResponse.Builder addInlineSuggestion(android.service.autofill.Dataset)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

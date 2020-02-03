@@ -19,9 +19,17 @@ package android.accessibilityservice;
 
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SINGLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_DOWN;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_LEFT;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_RIGHT;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_TRIPLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SINGLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_DOWN;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_LEFT;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_RIGHT;
+import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_TRIPLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_DOUBLE_TAP_AND_HOLD;
@@ -89,7 +97,15 @@ public final class AccessibilityGestureEvent implements Parcelable {
             GESTURE_SWIPE_RIGHT,
             GESTURE_SWIPE_RIGHT_AND_UP,
             GESTURE_SWIPE_RIGHT_AND_LEFT,
-            GESTURE_SWIPE_RIGHT_AND_DOWN
+            GESTURE_SWIPE_RIGHT_AND_DOWN,
+            GESTURE_2_FINGER_SWIPE_DOWN,
+            GESTURE_2_FINGER_SWIPE_LEFT,
+            GESTURE_2_FINGER_SWIPE_RIGHT,
+            GESTURE_2_FINGER_SWIPE_UP,
+            GESTURE_3_FINGER_SWIPE_DOWN,
+            GESTURE_3_FINGER_SWIPE_LEFT,
+            GESTURE_3_FINGER_SWIPE_RIGHT,
+            GESTURE_3_FINGER_SWIPE_UP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface GestureId {}
@@ -167,6 +183,14 @@ public final class AccessibilityGestureEvent implements Parcelable {
             case GESTURE_SWIPE_UP_AND_LEFT: return "GESTURE_SWIPE_UP_AND_LEFT";
             case GESTURE_SWIPE_UP_AND_DOWN: return "GESTURE_SWIPE_UP_AND_DOWN";
             case GESTURE_SWIPE_UP_AND_RIGHT: return "GESTURE_SWIPE_UP_AND_RIGHT";
+            case GESTURE_2_FINGER_SWIPE_DOWN: return "GESTURE_2_FINGER_SWIPE_DOWN";
+            case GESTURE_2_FINGER_SWIPE_LEFT: return "GESTURE_2_FINGER_SWIPE_LEFT";
+            case GESTURE_2_FINGER_SWIPE_RIGHT: return "GESTURE_2_FINGER_SWIPE_RIGHT";
+            case GESTURE_2_FINGER_SWIPE_UP: return "GESTURE_2_FINGER_SWIPE_UP";
+            case GESTURE_3_FINGER_SWIPE_DOWN: return "GESTURE_3_FINGER_SWIPE_DOWN";
+            case GESTURE_3_FINGER_SWIPE_LEFT: return "GESTURE_3_FINGER_SWIPE_LEFT";
+            case GESTURE_3_FINGER_SWIPE_RIGHT: return "GESTURE_3_FINGER_SWIPE_RIGHT";
+            case GESTURE_3_FINGER_SWIPE_UP: return "GESTURE_3_FINGER_SWIPE_UP";
             default: return Integer.toHexString(eventType);
         }
     }

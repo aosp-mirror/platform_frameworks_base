@@ -18,6 +18,8 @@ package com.android.server.accessibility.gestures;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
+import static com.android.server.accessibility.gestures.GestureUtils.getActionIndex;
+
 import android.content.Context;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -153,11 +155,6 @@ class SecondFingerMultiTap extends GestureMatcher {
         }
         final double moveDelta = Math.hypot(deltaX, deltaY);
         return moveDelta <= slop;
-    }
-
-    private int getActionIndex(MotionEvent event) {
-        return event.getAction()
-                & MotionEvent.ACTION_POINTER_INDEX_MASK << MotionEvent.ACTION_POINTER_INDEX_SHIFT;
     }
 
     @Override

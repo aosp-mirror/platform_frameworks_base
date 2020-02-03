@@ -42,7 +42,8 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g>을(를) 통해 연결됨"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s을(를) 통해 사용 가능"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"탭하여 가입"</string>
-    <string name="wifi_connected_no_internet" msgid="2381729074310543563">"연결됨, 인터넷 사용 불가"</string>
+    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
+    <skip />
     <string name="private_dns_broken" msgid="1984159464346556931">"비공개 DNS 서버에 액세스할 수 없습니다."</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"제한된 연결"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"인터넷 연결 없음"</string>
