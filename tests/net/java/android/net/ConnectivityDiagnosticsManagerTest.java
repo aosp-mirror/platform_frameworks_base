@@ -27,12 +27,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.content.Context;
 import android.os.PersistableBundle;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,15 +58,27 @@ public class ConnectivityDiagnosticsManagerTest {
 
     private static final Executor INLINE_EXECUTOR = x -> x.run();
 
+    @Mock private Context mContext;
+    @Mock private IConnectivityManager mService;
     @Mock private ConnectivityDiagnosticsCallback mCb;
 
     private ConnectivityDiagnosticsBinder mBinder;
+    private ConnectivityDiagnosticsManager mManager;
 
     @Before
     public void setUp() {
+        mContext = mock(Context.class);
+        mService = mock(IConnectivityManager.class);
         mCb = mock(ConnectivityDiagnosticsCallback.class);
 
         mBinder = new ConnectivityDiagnosticsBinder(mCb, INLINE_EXECUTOR);
+        mManager = new ConnectivityDiagnosticsManager(mContext, mService);
+    }
+
+    @After
+    public void tearDown() {
+        // clear ConnectivityDiagnosticsManager callbacks map
+        ConnectivityDiagnosticsManager.sCallbacks.clear();
     }
 
     private ConnectivityReport createSampleConnectivityReport() {
@@ -244,5 +262,54 @@ public class ConnectivityDiagnosticsManagerTest {
         // The callback will be invoked synchronously by inline executor. Immediately check the
         // latch without waiting.
         verify(mCb).onNetworkConnectivityReported(eq(n), eq(connectivity));
+    }
+
+    @Test
+    public void testRegisterConnectivityDiagnosticsCallback() throws Exception {
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+
+        mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
+
+        verify(mService).registerConnectivityDiagnosticsCallback(
+                any(ConnectivityDiagnosticsBinder.class), eq(request));
+        assertTrue(ConnectivityDiagnosticsManager.sCallbacks.containsKey(mCb));
+    }
+
+    @Test
+    public void testRegisterDuplicateConnectivityDiagnosticsCallback() throws Exception {
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+
+        mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
+
+        try {
+            mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
+            fail("Duplicate callback registration should fail");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testUnregisterConnectivityDiagnosticsCallback() throws Exception {
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
+
+        mManager.unregisterConnectivityDiagnosticsCallback(mCb);
+
+        verify(mService).unregisterConnectivityDiagnosticsCallback(
+                any(ConnectivityDiagnosticsBinder.class));
+        assertFalse(ConnectivityDiagnosticsManager.sCallbacks.containsKey(mCb));
+
+        // verify that re-registering is successful
+        mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
+        verify(mService, times(2)).registerConnectivityDiagnosticsCallback(
+                any(ConnectivityDiagnosticsBinder.class), eq(request));
+        assertTrue(ConnectivityDiagnosticsManager.sCallbacks.containsKey(mCb));
+    }
+
+    @Test
+    public void testUnregisterUnknownConnectivityDiagnosticsCallback() throws Exception {
+        mManager.unregisterConnectivityDiagnosticsCallback(mCb);
+
+        verifyNoMoreInteractions(mService);
     }
 }
