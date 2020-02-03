@@ -301,7 +301,7 @@ class EventDispatcher {
      * @param policyFlags The policy flags associated with the event.
      */
     void sendUpForInjectedDownPointers(MotionEvent prototype, int policyFlags) {
-        int pointerIdBits = 0;
+        int pointerIdBits = prototype.getPointerIdBits();
         final int pointerCount = prototype.getPointerCount();
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
@@ -309,10 +309,10 @@ class EventDispatcher {
             if (!isInjectedPointerDown(pointerId)) {
                 continue;
             }
-            pointerIdBits |= (1 << pointerId);
-            final int action = computeInjectionAction(MotionEvent.ACTION_UP, i);
+            final int action = computeInjectionAction(MotionEvent.ACTION_POINTER_UP, i);
             sendMotionEvent(
                     prototype, action, mState.getLastReceivedEvent(), pointerIdBits, policyFlags);
+            pointerIdBits &= ~(1 << pointerId);
         }
     }
 }
