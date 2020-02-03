@@ -161,6 +161,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 // again, it will only show after the brightness sensor has stabilized,
                 // avoiding a potential flicker.
                 scrimOpacity = 255;
+            } else if (!mScreenOff && mLightSensor == null) {
+                // No light sensor but previous state turned the screen black. Make the scrim
+                // transparent and below views visible.
+                scrimOpacity = 0;
             } else if (brightnessReady) {
                 // Only unblank scrim once brightness is ready.
                 scrimOpacity = computeScrimOpacity(sensorValue);
