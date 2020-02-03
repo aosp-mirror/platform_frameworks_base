@@ -182,6 +182,7 @@ cc_library_shared {
                 "android_hardware_UsbRequest.cpp",
                 "android_hardware_location_ActivityRecognitionHardware.cpp",
                 "android_util_FileObserver.cpp",
+                "android/graphics/GraphicsStatsService.cpp",
                 "android/graphics/SurfaceTexture.cpp",
                 "android/opengl/poly_clip.cpp", // TODO: .arm
                 "android/opengl/util.cpp",
@@ -273,6 +274,7 @@ cc_library_shared {
                 "libstats_jni",
                 "libstatslog",
                 "server_configurable_flags",
+                "libstatspull",
             ],
             export_shared_lib_headers: [
                 // AndroidRuntime.h depends on nativehelper/jni.h

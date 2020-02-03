@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package android.graphics;
 
+import android.annotation.SystemApi;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -26,13 +27,14 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.MemoryFile;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.system.ErrnoException;
 import android.util.Log;
 import android.view.IGraphicsStats;
 import android.view.IGraphicsStatsCallback;
@@ -45,6 +47,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -84,8 +87,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     // This isn't static because we need this to happen after registerNativeMethods, however
     // the class is loaded (and thus static ctor happens) before that occurs.
-    private final int ASHMEM_SIZE = nGetAshmemSize();
-    private final byte[] ZERO_DATA = new byte[ASHMEM_SIZE];
+    private final int mAshmemSize = nGetAshmemSize();
+    private final byte[] mZeroData = new byte[mAshmemSize];
 
     private final Context mContext;
     private final AppOpsManager mAppOps;
@@ -97,6 +100,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     private Handler mWriteOutHandler;
     private boolean mRotateIsScheduled = false;
 
+    @SystemApi
     public GraphicsStatsService(Context context) {
         mContext = context;
         mAppOps = context.getSystemService(AppOpsManager.class);
@@ -108,7 +112,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             throw new IllegalStateException("Graphics stats directory does not exist: "
                     + mGraphicsStatsDir.getAbsolutePath());
         }
-        HandlerThread bgthread = new HandlerThread("GraphicsStats-disk", Process.THREAD_PRIORITY_BACKGROUND);
+        HandlerThread bgthread = new HandlerThread("GraphicsStats-disk",
+                Process.THREAD_PRIORITY_BACKGROUND);
         bgthread.start();
 
         mWriteOutHandler = new Handler(bgthread.getLooper(), new Handler.Callback() {
@@ -159,7 +164,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
                 active.mCallback.onRotateGraphicsStatsBuffer();
             } catch (RemoteException e) {
                 Log.w(TAG, String.format("Failed to notify '%s' (pid=%d) to rotate buffers",
-                        active.mInfo.packageName, active.mPid), e);
+                        active.mInfo.mPackageName, active.mPid), e);
             }
         }
         // Give a few seconds for everyone to rotate before doing the cleanup
@@ -167,8 +172,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     }
 
     @Override
-    public ParcelFileDescriptor requestBufferForProcess(String packageName, IGraphicsStatsCallback token)
-            throws RemoteException {
+    public ParcelFileDescriptor requestBufferForProcess(String packageName,
+            IGraphicsStatsCallback token) throws RemoteException {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
         ParcelFileDescriptor pfd = null;
@@ -196,7 +201,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     // current day.
     // This method is invoked from native code only.
     @SuppressWarnings({"UnusedDeclaration"})
-    private long pullGraphicsStats(boolean lastFullDay) throws RemoteException {
+    private void pullGraphicsStats(boolean lastFullDay, long pulledData) throws RemoteException {
         int uid = Binder.getCallingUid();
 
         // DUMP and PACKAGE_USAGE_STATS permissions are required to invoke this method.
@@ -213,13 +218,13 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
         long callingIdentity = Binder.clearCallingIdentity();
         try {
-            return pullGraphicsStatsImpl(lastFullDay);
+            pullGraphicsStatsImpl(lastFullDay, pulledData);
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
     }
 
-    private long pullGraphicsStatsImpl(boolean lastFullDay) {
+    private void pullGraphicsStatsImpl(boolean lastFullDay, long pulledData) {
         long targetDay;
         if (lastFullDay) {
             // Get stats from yesterday. Stats stay constant, because the day is over.
@@ -235,7 +240,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             buffers = new ArrayList<>(mActive.size());
             for (int i = 0; i < mActive.size(); i++) {
                 ActiveBuffer buffer = mActive.get(i);
-                if (buffer.mInfo.startTime == targetDay) {
+                if (buffer.mInfo.mStartTime == targetDay) {
                     try {
                         buffers.add(new HistoricalBuffer(buffer));
                     } catch (IOException ex) {
@@ -267,18 +272,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
                 }
             }
         } finally {
-            return nFinishDumpInMemory(dump);
-        }
-    }
-
-    private ParcelFileDescriptor getPfd(MemoryFile file) {
-        try {
-            if (!file.getFileDescriptor().valid()) {
-                throw new IllegalStateException("Invalid file descriptor");
-            }
-            return ParcelFileDescriptor.dup(file.getFileDescriptor());
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to get PFD from memory file", ex);
+            nFinishDumpInMemory(dump, pulledData, lastFullDay);
         }
     }
 
@@ -286,7 +280,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             int uid, int pid, String packageName, long versionCode) throws RemoteException {
         ActiveBuffer buffer = fetchActiveBuffersLocked(token, uid, pid, packageName, versionCode);
         scheduleRotateLocked();
-        return getPfd(buffer.mProcessBuffer);
+        return buffer.getPfd();
     }
 
     private Calendar normalizeDate(long timestamp) {
@@ -301,13 +295,15 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     private File pathForApp(BufferInfo info) {
         String subPath = String.format("%d/%s/%d/total",
-                normalizeDate(info.startTime).getTimeInMillis(), info.packageName, info.versionCode);
+                normalizeDate(info.mStartTime).getTimeInMillis(), info.mPackageName,
+                info.mVersionCode);
         return new File(mGraphicsStatsDir, subPath);
     }
 
     private void saveBuffer(HistoricalBuffer buffer) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "saving graphicsstats for " + buffer.mInfo.packageName);
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                    "saving graphicsstats for " + buffer.mInfo.mPackageName);
         }
         synchronized (mFileAccessLock) {
             File path = pathForApp(buffer.mInfo);
@@ -317,8 +313,9 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
                 Log.w(TAG, "Unable to create path: '" + parent.getAbsolutePath() + "'");
                 return;
             }
-            nSaveBuffer(path.getAbsolutePath(), buffer.mInfo.packageName, buffer.mInfo.versionCode,
-                    buffer.mInfo.startTime, buffer.mInfo.endTime, buffer.mData);
+            nSaveBuffer(path.getAbsolutePath(), buffer.mInfo.mPackageName,
+                    buffer.mInfo.mVersionCode, buffer.mInfo.mStartTime, buffer.mInfo.mEndTime,
+                    buffer.mData);
         }
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
@@ -365,7 +362,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             HistoricalBuffer data = new HistoricalBuffer(buffer);
             Message.obtain(mWriteOutHandler, SAVE_BUFFER, data).sendToTarget();
         } catch (IOException e) {
-            Log.w(TAG, "Failed to copy graphicsstats from " + buffer.mInfo.packageName, e);
+            Log.w(TAG, "Failed to copy graphicsstats from " + buffer.mInfo.mPackageName, e);
         }
         buffer.closeAllBuffers();
     }
@@ -386,7 +383,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             if (buffer.mPid == pid
                     && buffer.mUid == uid) {
                 // If the buffer is too old we remove it and return a new one
-                if (buffer.mInfo.startTime < today) {
+                if (buffer.mInfo.mStartTime < today) {
                     buffer.binderDied();
                     break;
                 } else {
@@ -410,8 +407,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             HistoricalBuffer buffer = buffers.get(i);
             File path = pathForApp(buffer.mInfo);
             skipFiles.add(path);
-            nAddToDump(dump, path.getAbsolutePath(), buffer.mInfo.packageName,
-                    buffer.mInfo.versionCode,  buffer.mInfo.startTime, buffer.mInfo.endTime,
+            nAddToDump(dump, path.getAbsolutePath(), buffer.mInfo.mPackageName,
+                    buffer.mInfo.mVersionCode,  buffer.mInfo.mStartTime, buffer.mInfo.mEndTime,
                     buffer.mData);
         }
         return skipFiles;
@@ -478,20 +475,20 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             long versionCode, long startTime, long endTime, byte[] data);
     private static native void nAddToDump(long dump, String path);
     private static native void nFinishDump(long dump);
-    private static native long nFinishDumpInMemory(long dump);
+    private static native void nFinishDumpInMemory(long dump, long pulledData, boolean lastFullDay);
     private static native void nSaveBuffer(String path, String packageName, long versionCode,
             long startTime, long endTime, byte[] data);
 
     private final class BufferInfo {
-        final String packageName;
-        final long versionCode;
-        long startTime;
-        long endTime;
+        final String mPackageName;
+        final long mVersionCode;
+        long mStartTime;
+        long mEndTime;
 
         BufferInfo(String packageName, long versionCode, long startTime) {
-            this.packageName = packageName;
-            this.versionCode = versionCode;
-            this.startTime = startTime;
+            this.mPackageName = packageName;
+            this.mVersionCode = versionCode;
+            this.mStartTime = startTime;
         }
     }
 
@@ -501,7 +498,8 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         final int mPid;
         final IGraphicsStatsCallback mCallback;
         final IBinder mToken;
-        MemoryFile mProcessBuffer;
+        SharedMemory mProcessBuffer;
+        ByteBuffer mMapping;
 
         ActiveBuffer(IGraphicsStatsCallback token, int uid, int pid, String packageName,
                 long versionCode)
@@ -512,8 +510,14 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             mCallback = token;
             mToken = mCallback.asBinder();
             mToken.linkToDeath(this, 0);
-            mProcessBuffer = new MemoryFile("GFXStats-" + pid, ASHMEM_SIZE);
-            mProcessBuffer.writeBytes(ZERO_DATA, 0, 0, ASHMEM_SIZE);
+            try {
+                mProcessBuffer = SharedMemory.create("GFXStats-" + pid, mAshmemSize);
+                mMapping = mProcessBuffer.mapReadWrite();
+            } catch (ErrnoException ex) {
+                ex.rethrowAsIOException();
+            }
+            mMapping.position(0);
+            mMapping.put(mZeroData, 0, mAshmemSize);
         }
 
         @Override
@@ -523,20 +527,40 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         }
 
         void closeAllBuffers() {
+            if (mMapping != null) {
+                SharedMemory.unmap(mMapping);
+                mMapping = null;
+            }
             if (mProcessBuffer != null) {
                 mProcessBuffer.close();
                 mProcessBuffer = null;
             }
         }
+
+        ParcelFileDescriptor getPfd() {
+            try {
+                return mProcessBuffer.getFdDup();
+            } catch (IOException ex) {
+                throw new IllegalStateException("Failed to get PFD from memory file", ex);
+            }
+        }
+
+        void readBytes(byte[] buffer, int count) throws IOException  {
+            if (mMapping == null) {
+                throw new IOException("SharedMemory has been deactivated");
+            }
+            mMapping.position(0);
+            mMapping.get(buffer, 0, count);
+        }
     }
 
     private final class HistoricalBuffer {
         final BufferInfo mInfo;
-        final byte[] mData = new byte[ASHMEM_SIZE];
+        final byte[] mData = new byte[mAshmemSize];
         HistoricalBuffer(ActiveBuffer active) throws IOException {
             mInfo = active.mInfo;
-            mInfo.endTime = System.currentTimeMillis();
-            active.mProcessBuffer.readBytes(mData, 0, 0, ASHMEM_SIZE);
+            mInfo.mEndTime = System.currentTimeMillis();
+            active.readBytes(mData, mAshmemSize);
         }
     }
 }

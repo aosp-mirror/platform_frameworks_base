@@ -26,9 +26,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <algorithm>
-#include <map>
-#include <vector>
+#include <android/util/ProtoOutputStream.h>
+#include <stats_event.h>
+#include <statslog.h>
 
 #include "JankTracker.h"
 #include "protos/graphicsstats.pb.h"
@@ -61,7 +61,7 @@ public:
         }
     }
     bool valid() { return mFd != -1; }
-    operator int() { return mFd; }  // NOLINT(google-explicit-constructor)
+    operator int() { return mFd; } // NOLINT(google-explicit-constructor)
 
 private:
     int mFd;
@@ -485,79 +485,82 @@ void GraphicsStatsService::finishDump(Dump* dump) {
     delete dump;
 }
 
-class MemOutputStreamLite : public io::ZeroCopyOutputStream {
-public:
-    explicit MemOutputStreamLite() : mCopyAdapter(), mImpl(&mCopyAdapter) {}
-    virtual ~MemOutputStreamLite() {}
+using namespace google::protobuf;
 
-    virtual bool Next(void** data, int* size) override { return mImpl.Next(data, size); }
+// Field ids taken from FrameTimingHistogram message in atoms.proto
+#define TIME_MILLIS_BUCKETS_FIELD_NUMBER 1
+#define FRAME_COUNTS_FIELD_NUMBER 2
 
-    virtual void BackUp(int count) override { mImpl.BackUp(count); }
-
-    virtual int64 ByteCount() const override { return mImpl.ByteCount(); }
-
-    bool Flush() { return mImpl.Flush(); }
-
-    void copyData(const DumpMemoryFn& reader, void* param1, void* param2) {
-        int bufferOffset = 0;
-        int totalSize = mCopyAdapter.mBuffersSize - mCopyAdapter.mCurrentBufferUnusedSize;
-        int totalDataLeft = totalSize;
-        for (auto& it : mCopyAdapter.mBuffers) {
-            int bufferSize = std::min(totalDataLeft, (int)it.size());  // last buffer is not full
-            reader(it.data(), bufferOffset, bufferSize, totalSize, param1, param2);
-            bufferOffset += bufferSize;
-            totalDataLeft -= bufferSize;
-        }
+static void writeCpuHistogram(AStatsEvent* event,
+                              const uirenderer::protos::GraphicsStatsProto& stat) {
+    util::ProtoOutputStream proto;
+    for (int bucketIndex = 0; bucketIndex < stat.histogram_size(); bucketIndex++) {
+        auto& bucket = stat.histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT32 | android::util::FIELD_COUNT_REPEATED |
+                            TIME_MILLIS_BUCKETS_FIELD_NUMBER /* field id */,
+                    (int)bucket.render_millis());
     }
-
-private:
-    struct MemAdapter : public io::CopyingOutputStream {
-        // Data is stored in an array of buffers.
-        // JNI SetByteArrayRegion assembles data in one continuous Java byte[] buffer.
-        std::vector<std::vector<unsigned char>> mBuffers;
-        int mBuffersSize = 0;                     // total bytes allocated in mBuffers
-        int mCurrentBufferUnusedSize = 0;         // unused bytes in the last buffer mBuffers.back()
-        unsigned char* mCurrentBuffer = nullptr;  // pointer to next free byte in mBuffers.back()
-
-        explicit MemAdapter() {}
-        virtual ~MemAdapter() {}
-
-        virtual bool Write(const void* buffer, int size) override {
-            while (size > 0) {
-                if (0 == mCurrentBufferUnusedSize) {
-                    mCurrentBufferUnusedSize =
-                            std::max(size, mBuffersSize ? 2 * mBuffersSize : 10000);
-                    mBuffers.emplace_back();
-                    mBuffers.back().resize(mCurrentBufferUnusedSize);
-                    mCurrentBuffer = mBuffers.back().data();
-                    mBuffersSize += mCurrentBufferUnusedSize;
-                }
-                int dataMoved = std::min(mCurrentBufferUnusedSize, size);
-                memcpy(mCurrentBuffer, buffer, dataMoved);
-                mCurrentBufferUnusedSize -= dataMoved;
-                mCurrentBuffer += dataMoved;
-                buffer = reinterpret_cast<const unsigned char*>(buffer) + dataMoved;
-                size -= dataMoved;
-            }
-            return true;
-        }
-    };
-
-    MemOutputStreamLite::MemAdapter mCopyAdapter;
-    io::CopyingOutputStreamAdaptor mImpl;
-};
-
-void GraphicsStatsService::finishDumpInMemory(Dump* dump, const DumpMemoryFn& reader, void* param1,
-                                              void* param2) {
-    MemOutputStreamLite stream;
-    dump->updateProto();
-    bool success = dump->proto().SerializeToZeroCopyStream(&stream) && stream.Flush();
-    delete dump;
-    if (!success) {
-        return;
+    for (int bucketIndex = 0; bucketIndex < stat.histogram_size(); bucketIndex++) {
+        auto& bucket = stat.histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT64 | android::util::FIELD_COUNT_REPEATED |
+                            FRAME_COUNTS_FIELD_NUMBER /* field id */,
+                    (long long)bucket.frame_count());
     }
-    stream.copyData(reader, param1, param2);
+    std::vector<uint8_t> outVector;
+    proto.serializeToVector(&outVector);
+    AStatsEvent_writeByteArray(event, outVector.data(), outVector.size());
 }
+
+static void writeGpuHistogram(AStatsEvent* event,
+                              const uirenderer::protos::GraphicsStatsProto& stat) {
+    util::ProtoOutputStream proto;
+    for (int bucketIndex = 0; bucketIndex < stat.gpu_histogram_size(); bucketIndex++) {
+        auto& bucket = stat.gpu_histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT32 | android::util::FIELD_COUNT_REPEATED |
+                            TIME_MILLIS_BUCKETS_FIELD_NUMBER /* field id */,
+                    (int)bucket.render_millis());
+    }
+    for (int bucketIndex = 0; bucketIndex < stat.gpu_histogram_size(); bucketIndex++) {
+        auto& bucket = stat.gpu_histogram(bucketIndex);
+        proto.write(android::util::FIELD_TYPE_INT64 | android::util::FIELD_COUNT_REPEATED |
+                            FRAME_COUNTS_FIELD_NUMBER /* field id */,
+                    (long long)bucket.frame_count());
+    }
+    std::vector<uint8_t> outVector;
+    proto.serializeToVector(&outVector);
+    AStatsEvent_writeByteArray(event, outVector.data(), outVector.size());
+}
+
+
+void GraphicsStatsService::finishDumpInMemory(Dump* dump, AStatsEventList* data,
+                                              bool lastFullDay) {
+    dump->updateProto();
+    auto& serviceDump = dump->proto();
+    for (int stat_index = 0; stat_index < serviceDump.stats_size(); stat_index++) {
+        auto& stat = serviceDump.stats(stat_index);
+        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+        AStatsEvent_setAtomId(event, android::util::GRAPHICS_STATS);
+        AStatsEvent_writeString(event, stat.package_name().c_str());
+        AStatsEvent_writeInt64(event, (int64_t)stat.version_code());
+        AStatsEvent_writeInt64(event, (int64_t)stat.stats_start());
+        AStatsEvent_writeInt64(event, (int64_t)stat.stats_end());
+        AStatsEvent_writeInt32(event, (int32_t)stat.pipeline());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().total_frames());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().missed_vsync_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().high_input_latency_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_ui_thread_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_bitmap_upload_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_draw_count());
+        AStatsEvent_writeInt32(event, (int32_t)stat.summary().missed_deadline_count());
+        writeCpuHistogram(event, stat);
+        writeGpuHistogram(event, stat);
+        // TODO: fill in UI mainline module version, when the feature is available.
+        AStatsEvent_writeInt64(event, (int64_t)0);
+        AStatsEvent_writeBool(event, !lastFullDay);
+        AStatsEvent_build(event);
+    }
+}
+
 
 } /* namespace uirenderer */
 } /* namespace android */
