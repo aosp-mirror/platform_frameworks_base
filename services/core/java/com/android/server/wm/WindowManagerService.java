@@ -938,7 +938,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Whether the UI is currently running in touch mode (not showing
      * navigational focus because the user is directly pressing the screen).
      */
-    boolean mInTouchMode;
+    private boolean mInTouchMode;
 
     private ViewServer mViewServer;
     final ArrayList<WindowChangeListener> mWindowChangeListeners = new ArrayList<>();
@@ -3459,6 +3459,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mInTouchMode = mode;
         }
         mInputManager.setInTouchMode(mode);
+    }
+
+    boolean getInTouchMode() {
+        synchronized (mGlobalLock) {
+            return mInTouchMode;
+        }
     }
 
     public void showEmulatorDisplayOverlayIfNeeded() {
