@@ -105,7 +105,7 @@ public class WifiNetworkSuggestionTest {
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setIsUserInteractionRequired(true)
-                .setIsInitialAutoJoinEnabled(false)
+                .setIsInitialAutojoinEnabled(false)
                 .setIsMetered(true)
                 .build();
 
@@ -155,7 +155,7 @@ public class WifiNetworkSuggestionTest {
                 .setSsid(TEST_SSID)
                 .setWpa3Passphrase(TEST_PRESHARED_KEY)
                 .setCredentialSharedWithUser(true)
-                .setIsInitialAutoJoinEnabled(false)
+                .setIsInitialAutojoinEnabled(false)
                 .build();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
@@ -732,20 +732,20 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
-     * when {@link WifiNetworkSuggestion.Builder#setIsInitialAutoJoinEnabled(boolean)} to
+     * when {@link WifiNetworkSuggestion.Builder#setIsInitialAutojoinEnabled(boolean)} to
      * false on a open network suggestion.
      */
     @Test(expected = IllegalStateException.class)
     public void testSetIsAutoJoinDisabledWithOpenNetwork() {
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
-                .setIsInitialAutoJoinEnabled(false)
+                .setIsInitialAutojoinEnabled(false)
                 .build();
     }
 
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
-     * when set both {@link WifiNetworkSuggestion.Builder#setIsInitialAutoJoinEnabled(boolean)}
+     * when set both {@link WifiNetworkSuggestion.Builder#setIsInitialAutojoinEnabled(boolean)}
      * and {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} (boolean)}
      * to false on a network suggestion.
      */
@@ -755,7 +755,7 @@ public class WifiNetworkSuggestionTest {
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setCredentialSharedWithUser(false)
-                .setIsInitialAutoJoinEnabled(false)
+                .setIsInitialAutojoinEnabled(false)
                 .build();
     }
 
@@ -808,7 +808,7 @@ public class WifiNetworkSuggestionTest {
 
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
-     * when set both {@link WifiNetworkSuggestion.Builder#setIsInitialAutoJoinEnabled(boolean)}
+     * when set both {@link WifiNetworkSuggestion.Builder#setIsInitialAutojoinEnabled(boolean)}
      * and {@link WifiNetworkSuggestion.Builder#setCredentialSharedWithUser(boolean)} (boolean)}
      * to false on a passpoint suggestion.
      */
@@ -818,7 +818,7 @@ public class WifiNetworkSuggestionTest {
         new WifiNetworkSuggestion.Builder()
                 .setPasspointConfig(passpointConfiguration)
                 .setCredentialSharedWithUser(false)
-                .setIsInitialAutoJoinEnabled(false)
+                .setIsInitialAutojoinEnabled(false)
                 .build();
     }
 }

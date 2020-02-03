@@ -4308,16 +4308,16 @@ public class WifiManager {
     }
 
     /**
-     * Allows the OEM to enable/disable auto-join globally.
+     * Enable/disable auto-join globally.
      *
-     * @param choice true to allow autojoin, false to disallow autojoin
+     * @param allowAutojoin true to allow auto-join, false to disallow auto-join
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void allowAutojoinGlobal(boolean choice) {
+    public void allowAutojoinGlobal(boolean allowAutojoin) {
         try {
-            mService.allowAutojoinGlobal(choice);
+            mService.allowAutojoinGlobal(allowAutojoin);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4329,15 +4329,15 @@ public class WifiManager {
      * The updated choice will be made available through the updated config supplied by the
      * CONFIGURED_NETWORKS_CHANGED broadcast.
      *
-     * @param netId the id of the network to allow/disallow autojoin for.
-     * @param choice true to allow autojoin, false to disallow autojoin
+     * @param netId the id of the network to allow/disallow auto-join for.
+     * @param allowAutojoin true to allow auto-join, false to disallow auto-join
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void allowAutojoin(int netId, boolean choice) {
+    public void allowAutojoin(int netId, boolean allowAutojoin) {
         try {
-            mService.allowAutojoin(netId, choice);
+            mService.allowAutojoin(netId, allowAutojoin);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4347,14 +4347,14 @@ public class WifiManager {
      * Configure auto-join settings for a Passpoint profile.
      *
      * @param fqdn the FQDN (fully qualified domain name) of the passpoint profile.
-     * @param enableAutoJoin true to enable autojoin, false to disable autojoin.
+     * @param allowAutojoin true to enable auto-join, false to disable auto-join.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void allowAutojoinPasspoint(@NonNull String fqdn, boolean enableAutoJoin) {
+    public void allowAutojoinPasspoint(@NonNull String fqdn, boolean allowAutojoin) {
         try {
-            mService.allowAutojoinPasspoint(fqdn, enableAutoJoin);
+            mService.allowAutojoinPasspoint(fqdn, allowAutojoin);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

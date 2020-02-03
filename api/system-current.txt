@@ -8052,7 +8052,7 @@ package android.net.wifi.hotspot2 {
 
   public final class PasspointConfiguration implements android.os.Parcelable {
     method public int getMeteredOverride();
-    method public boolean isAutoJoinEnabled();
+    method public boolean isAutojoinEnabled();
     method public boolean isMacRandomizationEnabled();
   }
 
