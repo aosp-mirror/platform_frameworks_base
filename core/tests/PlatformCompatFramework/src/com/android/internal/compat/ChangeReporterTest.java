@@ -24,10 +24,10 @@ import org.junit.Test;
 public class ChangeReporterTest {
     @Test
     public void testStatsLogOnce() {
-        ChangeReporter reporter = new ChangeReporter(0);
+        ChangeReporter reporter = new ChangeReporter(ChangeReporter.SOURCE_UNKNOWN_SOURCE);
         int myUid = 1022, otherUid = 1023;
         long myChangeId = 500L, otherChangeId = 600L;
-        int myState = 1, otherState = 2;
+        int myState = ChangeReporter.STATE_ENABLED, otherState = ChangeReporter.STATE_DISABLED;
 
         assertTrue(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
         reporter.reportChange(myUid, myChangeId, myState);
@@ -42,10 +42,10 @@ public class ChangeReporterTest {
 
     @Test
     public void testStatsLogAfterReset() {
-        ChangeReporter reporter = new ChangeReporter(0);
+        ChangeReporter reporter = new ChangeReporter(ChangeReporter.SOURCE_UNKNOWN_SOURCE);
         int myUid = 1022;
         long myChangeId = 500L;
-        int myState = 1;
+        int myState = ChangeReporter.STATE_ENABLED;
 
         assertTrue(reporter.shouldWriteToStatsLog(myUid, myChangeId, myState));
         reporter.reportChange(myUid, myChangeId, myState);
@@ -60,10 +60,10 @@ public class ChangeReporterTest {
 
     @Test
     public void testDebugLogOnce() {
-        ChangeReporter reporter = new ChangeReporter(0);
+        ChangeReporter reporter = new ChangeReporter(ChangeReporter.SOURCE_UNKNOWN_SOURCE);
         int myUid = 1022, otherUid = 1023;
         long myChangeId = 500L, otherChangeId = 600L;
-        int myState = 1, otherState = 2;
+        int myState = ChangeReporter.STATE_ENABLED, otherState = ChangeReporter.STATE_DISABLED;
 
         assertTrue(reporter.shouldWriteToDebug(myUid, myChangeId, myState));
         reporter.reportChange(myUid, myChangeId, myState);
@@ -78,10 +78,10 @@ public class ChangeReporterTest {
 
     @Test
     public void testDebugLogAfterReset() {
-        ChangeReporter reporter = new ChangeReporter(0);
+        ChangeReporter reporter = new ChangeReporter(ChangeReporter.SOURCE_UNKNOWN_SOURCE);
         int myUid = 1022;
         long myChangeId = 500L;
-        int myState = 1;
+        int myState = ChangeReporter.STATE_ENABLED;
 
         assertTrue(reporter.shouldWriteToDebug(myUid, myChangeId, myState));
         reporter.reportChange(myUid, myChangeId, myState);
@@ -96,10 +96,10 @@ public class ChangeReporterTest {
 
     @Test
     public void testDebugLogWithLogAll() {
-        ChangeReporter reporter = new ChangeReporter(0);
+        ChangeReporter reporter = new ChangeReporter(ChangeReporter.SOURCE_UNKNOWN_SOURCE);
         int myUid = 1022;
         long myChangeId = 500L;
-        int myState = 1;
+        int myState = ChangeReporter.STATE_ENABLED;
 
         assertTrue(reporter.shouldWriteToDebug(myUid, myChangeId, myState));
         reporter.reportChange(myUid, myChangeId, myState);
