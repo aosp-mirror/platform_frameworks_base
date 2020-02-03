@@ -3721,6 +3721,11 @@ public class DevicePolicyManager {
      * requires that you request both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}}.
      * <p>
+     * When this policy is set by a device owner, profile owner of an organization-owned device or
+     * an admin on the primary user, the device will be factory reset after too many incorrect
+     * password attempts. When set by a profile owner or an admin on a secondary user or a managed
+     * profile, only the corresponding user or profile will be wiped.
+     * <p>
      * To implement any other policy (e.g. wiping data for a particular application only, erasing or
      * revoking credentials, or reporting the failure to a server), you should implement
      * {@link DeviceAdminReceiver#onPasswordFailed(Context, android.content.Intent)} instead. Do not
@@ -3789,10 +3794,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the profile with the smallest maximum failed passwords for wipe,
-     * for the given user. So for primary user, it might return the primary or
-     * a managed profile. For a secondary user, it would be the same as the
-     * user passed in.
+     * Returns the user that will be wiped first when too many failed attempts are made to unlock
+     * user {@code userHandle}. That user is either the same as {@code userHandle} or belongs to the
+     * same profile group. When there is no such policy, returns {@code UserHandle.USER_NULL}.
+     * E.g. managed profile user may be wiped as a result of failed primary profile password
+     * attempts when using unified challenge. Primary user may be wiped as a result of failed
+     * password attempts on the managed profile on an organization-owned device.
      * @hide Used only by Keyguard
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
