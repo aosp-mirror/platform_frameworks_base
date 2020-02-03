@@ -373,7 +373,7 @@ public class DataManager {
     @WorkerThread
     void queryUsageStatsService(@UserIdInt int userId, long currentTime, long lastQueryTime) {
         UsageEvents usageEvents = mUsageStatsManagerInternal.queryEventsForUser(
-                userId, lastQueryTime, currentTime, false);
+                userId, lastQueryTime, currentTime, false, false);
         if (usageEvents == null) {
             return;
         }
