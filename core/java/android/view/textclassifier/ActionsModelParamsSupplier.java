@@ -60,7 +60,9 @@ public final class ActionsModelParamsSupplier implements
     private boolean mParsed = true;
 
     public ActionsModelParamsSupplier(Context context, @Nullable Runnable onChangedListener) {
-        mAppContext = Preconditions.checkNotNull(context).getApplicationContext();
+        final Context appContext = Preconditions.checkNotNull(context).getApplicationContext();
+        // Some contexts don't have an app context.
+        mAppContext = appContext != null ? appContext : context;
         mOnChangedListener = onChangedListener == null ? () -> {} : onChangedListener;
         mSettingsObserver = new SettingsObserver(mAppContext, () -> {
             synchronized (mLock) {
