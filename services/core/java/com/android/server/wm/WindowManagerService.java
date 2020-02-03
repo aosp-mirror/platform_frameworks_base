@@ -229,7 +229,6 @@ import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.InsetsState;
 import android.view.KeyEvent;
@@ -5738,20 +5737,6 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.performLayout(false /* initial */,
                     false /* updateInputWindows */);
             return displayContent.getDisplayPolicy().getNavBarPosition();
-        }
-    }
-
-    @Override
-    public WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
-            InputEventReceiver.Factory inputEventReceiverFactory, int displayId) {
-        synchronized (mGlobalLock) {
-            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent != null) {
-                return displayContent.getInputMonitor().createInputConsumer(looper, name,
-                        inputEventReceiverFactory);
-            } else {
-                return null;
-            }
         }
     }
 
