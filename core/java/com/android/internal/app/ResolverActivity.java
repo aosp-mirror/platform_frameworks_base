@@ -1155,7 +1155,9 @@ public class ResolverActivity extends Activity implements
     }
 
     private void safelyStartActivityInternal(TargetInfo cti) {
-        mPersonalPackageMonitor.unregister();
+        if (mPersonalPackageMonitor != null) {
+            mPersonalPackageMonitor.unregister();
+        }
         if (mWorkPackageMonitor != null) {
             mWorkPackageMonitor.unregister();
         }
