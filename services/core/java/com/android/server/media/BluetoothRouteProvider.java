@@ -186,6 +186,7 @@ class BluetoothRouteProvider {
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())
+                .setDeviceType(MediaRoute2Info.DEVICE_TYPE_BLUETOOTH)
                 .build();
         newBtRoute.connectedProfiles = new SparseBooleanArray();
         return newBtRoute;
