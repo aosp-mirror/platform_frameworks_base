@@ -25,7 +25,6 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_SUPL;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_INFO;
 import static android.net.ConnectivityManager.EXTRA_NETWORK_TYPE;
 import static android.net.ConnectivityManager.NETID_UNSET;
@@ -1374,7 +1373,6 @@ public class ConnectivityServiceTest {
             @NonNull final Predicate<Intent> filter) {
         final ConditionVariable cv = new ConditionVariable();
         final IntentFilter intentFilter = new IntentFilter(CONNECTIVITY_ACTION);
-        intentFilter.addAction(CONNECTIVITY_ACTION_SUPL);
         final BroadcastReceiver receiver = new BroadcastReceiver() {
                     private int remaining = count;
                     public void onReceive(Context context, Intent intent) {
@@ -1422,56 +1420,28 @@ public class ConnectivityServiceTest {
         final NetworkRequest legacyRequest = new NetworkRequest(legacyCaps, TYPE_MOBILE_SUPL,
                 ConnectivityManager.REQUEST_ID_UNSET, NetworkRequest.Type.REQUEST);
 
-        // Send request and check that the legacy broadcast for SUPL is sent correctly.
+        // File request, withdraw it and make sure no broadcast is sent
+        final ConditionVariable cv2 = registerConnectivityBroadcast(1);
         final TestNetworkCallback callback = new TestNetworkCallback();
-        final ConditionVariable cv2 = registerConnectivityBroadcastThat(1,
-                intent -> intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE_SUPL);
         mCm.requestNetwork(legacyRequest, callback);
         callback.expectCallback(CallbackEntry.AVAILABLE, mCellNetworkAgent);
-        waitFor(cv2);
-
-        // File another request, withdraw it and make sure no broadcast is sent
-        final ConditionVariable cv3 = registerConnectivityBroadcast(1);
-        final TestNetworkCallback callback2 = new TestNetworkCallback();
-        mCm.requestNetwork(legacyRequest, callback2);
-        callback2.expectCallback(CallbackEntry.AVAILABLE, mCellNetworkAgent);
-        mCm.unregisterNetworkCallback(callback2);
-        assertFalse(cv3.block(800)); // 800ms long enough to at least flake if this is sent
+        mCm.unregisterNetworkCallback(callback);
+        assertFalse(cv2.block(800)); // 800ms long enough to at least flake if this is sent
         // As the broadcast did not fire, the receiver was not unregistered. Do this now.
         mServiceContext.clearRegisteredReceivers();
 
-        // Withdraw the request and check that the broadcast for disconnection is sent.
-        final ConditionVariable cv4 = registerConnectivityBroadcastThat(1, intent ->
-                !((NetworkInfo) intent.getExtra(EXTRA_NETWORK_INFO, -1)).isConnected()
-                        && intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE_SUPL);
-        mCm.unregisterNetworkCallback(callback);
-        waitFor(cv4);
-
-        // Re-file the request and expect the connected broadcast again
-        final ConditionVariable cv5 = registerConnectivityBroadcastThat(1,
-                intent -> intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE_SUPL);
-        final TestNetworkCallback callback3 = new TestNetworkCallback();
-        mCm.requestNetwork(legacyRequest, callback3);
-        callback3.expectCallback(CallbackEntry.AVAILABLE, mCellNetworkAgent);
-        waitFor(cv5);
-
-        // Disconnect the network and expect two disconnected broadcasts, one for SUPL and one
-        // for mobile. Use a small hack to check that both have been sent, but the order is
-        // not contractual.
+        // Disconnect the network and expect mobile disconnected broadcast. Use a small hack to
+        // check that has been sent.
         final AtomicBoolean vanillaAction = new AtomicBoolean(false);
-        final AtomicBoolean suplAction = new AtomicBoolean(false);
-        final ConditionVariable cv6 = registerConnectivityBroadcastThat(2, intent -> {
+        final ConditionVariable cv3 = registerConnectivityBroadcastThat(1, intent -> {
             if (intent.getAction().equals(CONNECTIVITY_ACTION)) {
                 vanillaAction.set(true);
-            } else if (intent.getAction().equals(CONNECTIVITY_ACTION_SUPL)) {
-                suplAction.set(true);
             }
             return !((NetworkInfo) intent.getExtra(EXTRA_NETWORK_INFO, -1)).isConnected();
         });
         mCellNetworkAgent.disconnect();
-        waitFor(cv6);
+        waitFor(cv3);
         assertTrue(vanillaAction.get());
-        assertTrue(suplAction.get());
     }
 
     @Test

@@ -145,16 +145,6 @@ public class ConnectivityManager {
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
 
     /**
-     * A temporary hack until SUPL system can get off the legacy APIS.
-     * They do too many network requests and the long list of apps listening
-     * and waking due to the CONNECTIVITY_ACTION broadcast makes it expensive.
-     * Use this broadcast intent instead for SUPL requests.
-     * @hide
-     */
-    public static final String CONNECTIVITY_ACTION_SUPL =
-            "android.net.conn.CONNECTIVITY_CHANGE_SUPL";
-
-    /**
      * The device has connected to a network that has presented a captive
      * portal, which is blocking Internet connectivity. The user was presented
      * with a notification that network sign in is required,
@@ -1515,84 +1505,6 @@ public class ConnectivityManager {
             return networkCapabilitiesForType(TYPE_WIFI_P2P);
         }
         return null;
-    }
-
-    /**
-     * Guess what the network request was trying to say so that the resulting
-     * network is accessible via the legacy (deprecated) API such as
-     * requestRouteToHost.
-     *
-     * This means we should try to be fairly precise about transport and
-     * capability but ignore things such as networkSpecifier.
-     * If the request has more than one transport or capability it doesn't
-     * match the old legacy requests (they selected only single transport/capability)
-     * so this function cannot map the request to a single legacy type and
-     * the resulting network will not be available to the legacy APIs.
-     *
-     * This code is only called from the requestNetwork API (L and above).
-     *
-     * Setting a legacy type causes CONNECTIVITY_ACTION broadcasts, which are expensive
-     * because they wake up lots of apps - see http://b/23350688 . So we currently only
-     * do this for SUPL requests, which are the only ones that we know need it. If
-     * omitting these broadcasts causes unacceptable app breakage, then for backwards
-     * compatibility we can send them:
-     *
-     * if (targetSdkVersion < Build.VERSION_CODES.M) &&        // legacy API unsupported >= M
-     *     targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP))  // requestNetwork not present < L
-     *
-     * TODO - This should be removed when the legacy APIs are removed.
-     */
-    private int inferLegacyTypeForNetworkCapabilities(NetworkCapabilities netCap) {
-        if (netCap == null) {
-            return TYPE_NONE;
-        }
-
-        if (!netCap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-            return TYPE_NONE;
-        }
-
-        // Do this only for SUPL, until GnssLocationProvider is fixed. http://b/25876485 .
-        if (!netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
-            // NOTE: if this causes app breakage, we should not just comment out this early return;
-            // instead, we should make this early return conditional on the requesting app's target
-            // SDK version, as described in the comment above.
-            return TYPE_NONE;
-        }
-
-        String type = null;
-        int result = TYPE_NONE;
-
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_CBS)) {
-            type = "enableCBS";
-            result = TYPE_MOBILE_CBS;
-        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_IMS)) {
-            type = "enableIMS";
-            result = TYPE_MOBILE_IMS;
-        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOTA)) {
-            type = "enableFOTA";
-            result = TYPE_MOBILE_FOTA;
-        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_DUN)) {
-            type = "enableDUN";
-            result = TYPE_MOBILE_DUN;
-        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
-            type = "enableSUPL";
-            result = TYPE_MOBILE_SUPL;
-        // back out this hack for mms as they no longer need this and it's causing
-        // device slowdowns - b/23350688 (note, supl still needs this)
-        //} else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
-        //    type = "enableMMS";
-        //    result = TYPE_MOBILE_MMS;
-        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-            type = "enableHIPRI";
-            result = TYPE_MOBILE_HIPRI;
-        }
-        if (type != null) {
-            NetworkCapabilities testCap = networkCapabilitiesForFeature(TYPE_MOBILE, type);
-            if (testCap.equalsNetCapabilities(netCap) && testCap.equalsTransportTypes(netCap)) {
-                return result;
-            }
-        }
-        return TYPE_NONE;
     }
 
     private int legacyTypeForNetworkCapabilities(NetworkCapabilities netCap) {
@@ -3894,9 +3806,8 @@ public class ConnectivityManager {
      */
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
-        int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        requestNetwork(request, networkCallback, 0, legacyType, cbHandler);
+        requestNetwork(request, networkCallback, 0, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -3929,8 +3840,7 @@ public class ConnectivityManager {
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, int timeoutMs) {
         checkTimeout(timeoutMs);
-        int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
-        requestNetwork(request, networkCallback, timeoutMs, legacyType, getDefaultHandler());
+        requestNetwork(request, networkCallback, timeoutMs, TYPE_NONE, getDefaultHandler());
     }
 
     /**
@@ -3955,9 +3865,8 @@ public class ConnectivityManager {
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler, int timeoutMs) {
         checkTimeout(timeoutMs);
-        int legacyType = inferLegacyTypeForNetworkCapabilities(request.networkCapabilities);
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        requestNetwork(request, networkCallback, timeoutMs, legacyType, cbHandler);
+        requestNetwork(request, networkCallback, timeoutMs, TYPE_NONE, cbHandler);
     }
 
     /**

@@ -2238,14 +2238,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 final NetworkInfo ni = intent.getParcelableExtra(
                         ConnectivityManager.EXTRA_NETWORK_INFO);
-                if (ni.getType() == ConnectivityManager.TYPE_MOBILE_SUPL) {
-                    intent.setAction(ConnectivityManager.CONNECTIVITY_ACTION_SUPL);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                } else {
-                    BroadcastOptions opts = BroadcastOptions.makeBasic();
-                    opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
-                    options = opts.toBundle();
-                }
+                final BroadcastOptions opts = BroadcastOptions.makeBasic();
+                opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
+                options = opts.toBundle();
                 final IBatteryStats bs = mDeps.getBatteryStatsService();
                 try {
                     bs.noteConnectivityChanged(intent.getIntExtra(
