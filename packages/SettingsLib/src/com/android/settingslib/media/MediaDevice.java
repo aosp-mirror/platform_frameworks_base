@@ -109,6 +109,59 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract boolean isConnected();
 
     /**
+     * Request to set volume.
+     *
+     * @param volume is the new value.
+     */
+    public void requestSetVolume(int volume) {
+    }
+
+    /**
+     * Get max volume from MediaDevice.
+     *
+     * @return max volume.
+     */
+    public int getMaxVolume() {
+        return 100;
+    }
+
+    /**
+     * Get current volume from MediaDevice.
+     *
+     * @return current volume.
+     */
+    public int getCurrentVolume() {
+        return 0;
+    }
+
+    /**
+     * Get application package name.
+     *
+     * @return package name.
+     */
+    public String getClientPackageName() {
+        return null;
+    }
+
+    /**
+     * Get application label from MediaDevice.
+     *
+     * @return application label.
+     */
+    public String getClientAppLabel() {
+        return null;
+    }
+
+    /**
+     * Get application label from MediaDevice.
+     *
+     * @return application label.
+     */
+    public int getDeviceType() {
+        return mType;
+    }
+
+    /**
      * Rules:
      * 1. If there is one of the connected devices identified as a carkit, this carkit will
      * be always on the top of the device list. Rule 2 and Rule 3 can’t overrule this rule.

@@ -74,6 +74,21 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
+    public void requestSetVolume(int volume) {
+        mRouterManager.requestSetVolume(mRouteInfo, volume);
+    }
+
+    @Override
+    public int getMaxVolume() {
+        return mRouteInfo.getVolumeMax();
+    }
+
+    @Override
+    public int getCurrentVolume() {
+        return mRouteInfo.getVolume();
+    }
+
+    @Override
     public void disconnect() {
         //TODO(b/144535188): disconnected last select device
     }
