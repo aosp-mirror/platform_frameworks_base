@@ -4317,7 +4317,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throwIfLockdownEnabled();
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
-                return vpn.prepare(oldPackage, newPackage);
+                return vpn.prepare(oldPackage, newPackage, false);
             } else {
                 return false;
             }
@@ -4362,6 +4362,78 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             throwIfLockdownEnabled();
             return mVpns.get(user).establish(config);
+        }
+    }
+
+    /**
+     * Stores the given VPN profile based on the provisioning package name.
+     *
+     * <p>If there is already a VPN profile stored for the provisioning package, this call will
+     * overwrite the profile.
+     *
+     * <p>This is designed to serve the VpnManager only; settings-based VPN profiles are managed
+     * exclusively by the Settings app, and passed into the platform at startup time.
+     *
+     * @return {@code true} if user consent has already been granted, {@code false} otherwise.
+     * @hide
+     */
+    @Override
+    public boolean provisionVpnProfile(@NonNull VpnProfile profile, @NonNull String packageName) {
+        final int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            return mVpns.get(user).provisionVpnProfile(packageName, profile, mKeyStore);
+        }
+    }
+
+    /**
+     * Deletes the stored VPN profile for the provisioning package
+     *
+     * <p>If there are no profiles for the given package, this method will silently succeed.
+     *
+     * <p>This is designed to serve the VpnManager only; settings-based VPN profiles are managed
+     * exclusively by the Settings app, and passed into the platform at startup time.
+     *
+     * @hide
+     */
+    @Override
+    public void deleteVpnProfile(@NonNull String packageName) {
+        final int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            mVpns.get(user).deleteVpnProfile(packageName, mKeyStore);
+        }
+    }
+
+    /**
+     * Starts the VPN based on the stored profile for the given package
+     *
+     * <p>This is designed to serve the VpnManager only; settings-based VPN profiles are managed
+     * exclusively by the Settings app, and passed into the platform at startup time.
+     *
+     * @throws IllegalArgumentException if no profile was found for the given package name.
+     * @hide
+     */
+    @Override
+    public void startVpnProfile(@NonNull String packageName) {
+        final int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            throwIfLockdownEnabled();
+            mVpns.get(user).startVpnProfile(packageName, mKeyStore);
+        }
+    }
+
+    /**
+     * Stops the Platform VPN if the provided package is running one.
+     *
+     * <p>This is designed to serve the VpnManager only; settings-based VPN profiles are managed
+     * exclusively by the Settings app, and passed into the platform at startup time.
+     *
+     * @hide
+     */
+    @Override
+    public void stopVpnProfile(@NonNull String packageName) {
+        final int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            mVpns.get(user).stopVpnProfile(packageName);
         }
     }
 
@@ -4568,6 +4640,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    /**
+     * Throws if there is any currently running, always-on Legacy VPN.
+     *
+     * <p>The LockdownVpnTracker and mLockdownEnabled both track whether an always-on Legacy VPN is
+     * running across the entire system. Tracking for app-based VPNs is done on a per-user,
+     * per-package basis in Vpn.java
+     */
     @GuardedBy("mVpns")
     private void throwIfLockdownEnabled() {
         if (mLockdownEnabled) {
