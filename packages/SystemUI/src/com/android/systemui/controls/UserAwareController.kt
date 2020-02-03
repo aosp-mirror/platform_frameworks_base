@@ -16,10 +16,10 @@
 
 package com.android.systemui.controls
 
-import android.service.controls.Control
+import android.os.UserHandle
 
-data class ControlStatus(
-    val control: Control,
-    val favorite: Boolean,
-    val removed: Boolean = false
-)
+interface UserAwareController {
+
+    fun changeUser(newUser: UserHandle) {}
+    val currentUserId: Int
+}

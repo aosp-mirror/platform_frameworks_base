@@ -17,6 +17,7 @@
 package com.android.systemui.controls.controller
 
 import android.content.ComponentName
+import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.IControlsActionCallback
 import android.service.controls.IControlsLoadCallback
@@ -86,6 +87,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
                 loadCallback,
                 actionCallback,
                 subscriber,
+                UserHandle.of(0),
                 componentName
         )
     }

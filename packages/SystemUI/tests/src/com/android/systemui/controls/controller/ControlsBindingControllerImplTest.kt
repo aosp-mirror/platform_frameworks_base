@@ -19,6 +19,7 @@ package com.android.systemui.controls.controller
 import android.content.ComponentName
 import android.content.Context
 import android.os.Binder
+import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.testing.AndroidTestingRunner
@@ -38,6 +39,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -54,6 +56,9 @@ class ControlsBindingControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var mockControlsController: ControlsController
+
+    private val user = UserHandle.of(mContext.userId)
+    private val otherUser = UserHandle.of(user.identifier + 1)
 
     private val executor = FakeExecutor(FakeSystemClock())
     private lateinit var controller: ControlsBindingController
@@ -72,6 +77,11 @@ class ControlsBindingControllerTest : SysuiTestCase() {
         executor.advanceClockToLast()
         executor.runAllReady()
         providers.clear()
+    }
+
+    @Test
+    fun testStartOnUser() {
+        assertEquals(user.identifier, controller.currentUserId)
     }
 
     @Test
@@ -145,6 +155,41 @@ class ControlsBindingControllerTest : SysuiTestCase() {
             verify(it).unsubscribe()
         }
     }
+
+    @Test
+    fun testCurrentUserId() {
+        controller.changeUser(otherUser)
+        assertEquals(otherUser.identifier, controller.currentUserId)
+    }
+
+    @Test
+    fun testChangeUsers_providersHaveCorrectUser() {
+        controller.bindServices(listOf(TEST_COMPONENT_NAME_1))
+        controller.changeUser(otherUser)
+        controller.bindServices(listOf(TEST_COMPONENT_NAME_2))
+
+        val provider1 = providers.first { it.componentName == TEST_COMPONENT_NAME_1 }
+        assertEquals(user, provider1.user)
+        val provider2 = providers.first { it.componentName == TEST_COMPONENT_NAME_2 }
+        assertEquals(otherUser, provider2.user)
+    }
+
+    @Test
+    fun testChangeUsers_providersUnbound() {
+        controller.bindServices(listOf(TEST_COMPONENT_NAME_1))
+        controller.changeUser(otherUser)
+
+        val provider1 = providers.first { it.componentName == TEST_COMPONENT_NAME_1 }
+        verify(provider1).unbindService()
+
+        controller.bindServices(listOf(TEST_COMPONENT_NAME_2))
+        controller.changeUser(user)
+
+        reset(provider1)
+        val provider2 = providers.first { it.componentName == TEST_COMPONENT_NAME_2 }
+        verify(provider2).unbindService()
+        verify(provider1, never()).unbindService()
+    }
 }
 
 class TestableControlsBindingControllerImpl(
@@ -157,12 +202,16 @@ class TestableControlsBindingControllerImpl(
         val providers = mutableSetOf<ControlsProviderLifecycleManager>()
     }
 
+    // Replaces the real provider with a mock and puts the mock in a visible set.
+    // The mock has the same componentName and user as the real one would have
     override fun createProviderManager(component: ComponentName):
             ControlsProviderLifecycleManager {
+        val realProvider = super.createProviderManager(component)
         val provider = mock(ControlsProviderLifecycleManager::class.java)
         val token = Binder()
-        `when`(provider.componentName).thenReturn(component)
+        `when`(provider.componentName).thenReturn(realProvider.componentName)
         `when`(provider.token).thenReturn(token)
+        `when`(provider.user).thenReturn(realProvider.user)
         providers.add(provider)
         return provider
     }

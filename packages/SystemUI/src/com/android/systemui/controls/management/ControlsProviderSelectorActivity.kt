@@ -22,7 +22,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.CurrentUserTracker
 import com.android.systemui.util.LifecycleActivity
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -32,7 +35,9 @@ import javax.inject.Inject
  */
 class ControlsProviderSelectorActivity @Inject constructor(
     @Main private val executor: Executor,
-    private val listingController: ControlsListingController
+    @Background private val backExecutor: Executor,
+    private val listingController: ControlsListingController,
+    broadcastDispatcher: BroadcastDispatcher
 ) : LifecycleActivity() {
 
     companion object {
@@ -40,6 +45,16 @@ class ControlsProviderSelectorActivity @Inject constructor(
     }
 
     private lateinit var recyclerView: RecyclerView
+    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+        private val startingUser = listingController.currentUserId
+
+        override fun onUserSwitched(newUserId: Int) {
+            if (newUserId != startingUser) {
+                stopTracking()
+                finish()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +65,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
         recyclerView.layoutManager = LinearLayoutManager(applicationContext)
 
         setContentView(recyclerView)
+        currentUserTracker.startTracking()
     }
 
     /**
@@ -57,13 +73,17 @@ class ControlsProviderSelectorActivity @Inject constructor(
      * @param component a component name for a [ControlsProviderService]
      */
     fun launchFavoritingActivity(component: ComponentName?) {
-        component?.let {
-            val intent = Intent(applicationContext, ControlsFavoritingActivity::class.java).apply {
-                putExtra(ControlsFavoritingActivity.EXTRA_APP, listingController.getAppLabel(it))
-                putExtra(ControlsFavoritingActivity.EXTRA_COMPONENT, it)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        backExecutor.execute {
+            component?.let {
+                val intent = Intent(applicationContext, ControlsFavoritingActivity::class.java)
+                        .apply {
+                    putExtra(ControlsFavoritingActivity.EXTRA_APP,
+                            listingController.getAppLabel(it))
+                    putExtra(ControlsFavoritingActivity.EXTRA_COMPONENT, it)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                }
+                startActivity(intent)
             }
-            startActivity(intent)
         }
     }
 }

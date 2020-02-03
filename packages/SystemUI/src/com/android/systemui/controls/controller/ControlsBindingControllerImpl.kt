@@ -19,6 +19,7 @@ package com.android.systemui.controls.controller
 import android.content.ComponentName
 import android.content.Context
 import android.os.IBinder
+import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.IControlsActionCallback
 import android.service.controls.IControlsLoadCallback
@@ -50,12 +51,17 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     private val refreshing = AtomicBoolean(false)
 
+    private var currentUser = context.user
+
+    override val currentUserId: Int
+        get() = currentUser.identifier
+
     @GuardedBy("componentMap")
     private val tokenMap: MutableMap<IBinder, ControlsProviderLifecycleManager> =
             ArrayMap<IBinder, ControlsProviderLifecycleManager>()
     @GuardedBy("componentMap")
-    private val componentMap: MutableMap<ComponentName, ControlsProviderLifecycleManager> =
-            ArrayMap<ComponentName, ControlsProviderLifecycleManager>()
+    private val componentMap: MutableMap<Key, ControlsProviderLifecycleManager> =
+            ArrayMap<Key, ControlsProviderLifecycleManager>()
 
     private val loadCallbackService = object : IControlsLoadCallback.Stub() {
         override fun accept(token: IBinder, controls: MutableList<Control>) {
@@ -103,6 +109,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 loadCallbackService,
                 actionCallbackService,
                 subscriberService,
+                currentUser,
                 component
         )
     }
@@ -110,7 +117,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     private fun retrieveLifecycleManager(component: ComponentName):
             ControlsProviderLifecycleManager {
         synchronized(componentMap) {
-            val provider = componentMap.getOrPut(component) {
+            val provider = componentMap.getOrPut(Key(component, currentUser)) {
                 createProviderManager(component)
             }
             tokenMap.putIfAbsent(provider.token, provider)
@@ -137,7 +144,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
         val providersWithFavorites = controlsByComponentName.keys
         synchronized(componentMap) {
             componentMap.forEach {
-                if (it.key !in providersWithFavorites) {
+                if (it.key.component !in providersWithFavorites) {
                     backgroundExecutor.execute { it.value.unbindService() }
                 }
             }
@@ -167,6 +174,36 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
+    override fun changeUser(newUser: UserHandle) {
+        if (newUser == currentUser) return
+        synchronized(componentMap) {
+            unbindAllProvidersLocked() // unbind all providers from the old user
+        }
+        refreshing.set(false)
+        currentUser = newUser
+    }
+
+    private fun unbindAllProvidersLocked() {
+        componentMap.values.forEach {
+            if (it.user == currentUser) {
+                it.unbindService()
+            }
+        }
+    }
+
+    override fun toString(): String {
+        return StringBuilder("  ControlsBindingController:\n").apply {
+            append("    refreshing=${refreshing.get()}\n")
+            append("    currentUser=$currentUser\n")
+            append("    Providers:\n")
+            synchronized(componentMap) {
+                componentMap.values.forEach {
+                    append("      $it\n")
+                }
+            }
+        }.toString()
+    }
+
     private abstract inner class CallbackRunnable(val token: IBinder) : Runnable {
         protected val provider: ControlsProviderLifecycleManager? =
                 synchronized(componentMap) {
@@ -181,6 +218,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
         override fun run() {
             if (provider == null) {
                 Log.e(TAG, "No provider found for token:$token")
+                return
+            }
+            if (provider.user != currentUser) {
+                Log.e(TAG, "User ${provider.user} is not current user")
                 return
             }
             synchronized(componentMap) {
@@ -203,6 +244,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
         override fun run() {
             if (!refreshing.get()) {
                 Log.d(TAG, "onRefresh outside of window from:${provider?.componentName}")
+            }
+            if (provider?.user != currentUser) {
+                Log.e(TAG, "User ${provider?.user} is not current user")
+                return
             }
             provider?.let {
                 lazyController.get().refreshStatus(it.componentName, control)
@@ -229,7 +274,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     ) : CallbackRunnable(token) {
         override fun run() {
             provider?.let {
-                Log.i(TAG, "onComplete receive from '${provider?.componentName}'")
+                Log.i(TAG, "onComplete receive from '${provider.componentName}'")
             }
         }
     }
@@ -240,7 +285,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
     ) : CallbackRunnable(token) {
         override fun run() {
             provider?.let {
-                Log.e(TAG, "onError receive from '${provider?.componentName}': $error")
+                Log.e(TAG, "onError receive from '${provider.componentName}': $error")
             }
         }
     }
@@ -251,9 +296,15 @@ open class ControlsBindingControllerImpl @Inject constructor(
         @ControlAction.ResponseResult val response: Int
     ) : CallbackRunnable(token) {
         override fun run() {
+            if (provider?.user != currentUser) {
+                Log.e(TAG, "User ${provider?.user} is not current user")
+                return
+            }
             provider?.let {
                 lazyController.get().onActionResponse(it.componentName, controlId, response)
             }
         }
     }
 }
+
+private data class Key(val component: ComponentName, val user: UserHandle)

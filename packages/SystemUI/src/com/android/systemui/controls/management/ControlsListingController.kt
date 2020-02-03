@@ -18,14 +18,17 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import com.android.settingslib.widget.CandidateInfo
+import com.android.systemui.controls.UserAwareController
 import com.android.systemui.statusbar.policy.CallbackController
 
 interface ControlsListingController :
-        CallbackController<ControlsListingController.ControlsListingCallback> {
+        CallbackController<ControlsListingController.ControlsListingCallback>,
+        UserAwareController {
 
     fun getCurrentServices(): List<CandidateInfo>
     fun getAppLabel(name: ComponentName): CharSequence? = ""
 
+    @FunctionalInterface
     interface ControlsListingCallback {
         fun onServicesUpdated(list: List<CandidateInfo>)
     }

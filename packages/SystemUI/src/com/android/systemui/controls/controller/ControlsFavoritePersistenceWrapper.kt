@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.controller
 
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.util.AtomicFile
 import android.util.Log
@@ -32,8 +31,8 @@ import java.io.FileNotFoundException
 import java.io.IOException
 
 class ControlsFavoritePersistenceWrapper(
-    val file: File,
-    val executor: DelayableExecutor
+    private var file: File,
+    private var executor: DelayableExecutor
 ) {
 
     companion object {
@@ -47,11 +46,13 @@ class ControlsFavoritePersistenceWrapper(
         private const val TAG_TYPE = "type"
     }
 
-    val currentUser: Int
-        get() = ActivityManager.getCurrentUser()
+    fun changeFile(fileName: File) {
+        file = fileName
+    }
 
     fun storeFavorites(list: List<ControlInfo>) {
         executor.execute {
+            Log.d(TAG, "Saving data to file: $file")
             val atomicFile = AtomicFile(file)
             val writer = try {
                 atomicFile.startWrite()
@@ -98,6 +99,7 @@ class ControlsFavoritePersistenceWrapper(
             return emptyList()
         }
         try {
+            Log.d(TAG, "Reading data from file: $file")
             val parser = Xml.newPullParser()
             parser.setInput(reader, null)
             return parseXml(parser)
@@ -111,7 +113,7 @@ class ControlsFavoritePersistenceWrapper(
     }
 
     private fun parseXml(parser: XmlPullParser): List<ControlInfo> {
-        var type: Int = 0
+        var type = 0
         val infos = mutableListOf<ControlInfo>()
         while (parser.next().also { type = it } != XmlPullParser.END_DOCUMENT) {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -123,9 +125,9 @@ class ControlsFavoritePersistenceWrapper(
                         parser.getAttributeValue(null, TAG_COMPONENT))
                 val id = parser.getAttributeValue(null, TAG_ID)
                 val title = parser.getAttributeValue(null, TAG_TITLE)
-                val type = parser.getAttributeValue(null, TAG_TYPE)?.toInt()
-                if (component != null && id != null && title != null && type != null) {
-                    infos.add(ControlInfo(component, id, title, type))
+                val deviceType = parser.getAttributeValue(null, TAG_TYPE)?.toInt()
+                if (component != null && id != null && title != null && deviceType != null) {
+                    infos.add(ControlInfo(component, id, title, deviceType))
                 }
             }
         }
