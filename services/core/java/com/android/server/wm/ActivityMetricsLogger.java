@@ -1212,7 +1212,7 @@ class ActivityMetricsLogger {
         final ProtoOutputStream protoOutputStream =
                 new ProtoOutputStream(LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
         // Write this data out as the top-most ActivityRecordProto (i.e. it is not a sub-object).
-        record.dumpDebug(protoOutputStream);
+        record.dumpDebug(protoOutputStream, WindowTraceLogLevel.ALL);
         final byte[] bytes = protoOutputStream.getBytes();
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

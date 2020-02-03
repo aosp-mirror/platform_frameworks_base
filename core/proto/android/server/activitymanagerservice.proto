@@ -55,87 +55,8 @@ message ActivityManagerServiceProto {
 message ActivityManagerServiceDumpActivitiesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional ActivityStackSupervisorProto activity_stack_supervisor = 1;
-}
-
-message ActivityStackSupervisorProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
-    repeated ActivityDisplayProto displays = 2;
-    optional KeyguardControllerProto keyguard_controller = 3;
-    // TODO(b/111541062): Focused stack and resumed activity are now per-display. Topmost instances
-    // can be obtained from top display and these fields can be removed.
-    optional int32 focused_stack_id = 4;
-    optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
-    // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
-    // know what activity types to check for when invoking splitscreen multi-window.
-    optional bool is_home_recents_component = 6;
-    repeated .com.android.server.wm.IdentifierProto pending_activities = 7;
-    optional .com.android.server.wm.RootWindowContainerProto root_window_container = 8;
-}
-
-/* represents ActivityStackSupervisor.ActivityDisplay */
-message ActivityDisplayProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // To be removed soon.
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
-    optional int32 id = 2;
-    repeated ActivityStackProto stacks = 3;
-    optional int32 focused_stack_id = 4;
-    optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
-    optional bool single_task_instance = 6;
-    optional .com.android.server.wm.DisplayContentProto display = 7;
-}
-
-message ActivityStackProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // To be removed soon.
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
-    optional int32 id = 2;
-    repeated TaskRecordProto tasks = 3;
-    optional .com.android.server.wm.IdentifierProto resumed_activity = 4;
-    optional int32 display_id = 5;
-    optional bool fullscreen = 6;
-    optional .android.graphics.RectProto bounds = 7;
-    optional .com.android.server.wm.StackProto stack = 8;
-}
-
-message TaskRecordProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // To be removed soon.
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
-    optional int32 id = 2;
-    repeated .com.android.server.wm.ActivityRecordProto activities = 3;
-    optional int32 stack_id = 4;
-    optional .android.graphics.RectProto last_non_fullscreen_bounds = 5;
-    optional string real_activity = 6;
-    optional string orig_activity = 7;
-    optional int32 activity_type = 8;
-    optional int32 resize_mode = 9;
-    optional bool fullscreen = 10;
-    optional .android.graphics.RectProto bounds = 11;
-    optional int32 min_width = 12;
-    optional int32 min_height = 13;
-    optional .com.android.server.wm.TaskProto task = 14;
-}
-
-message KeyguardControllerProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional bool keyguard_showing = 1;
-    repeated KeyguardOccludedProto keyguard_occluded_states= 2;
-    optional bool aod_showing = 3;
-}
-
-message KeyguardOccludedProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional int32 display_id = 1;
-    optional bool keyguard_occluded = 2;
+    reserved 1; // activity_stack_supervisor
+    optional .com.android.server.wm.RootWindowContainerProto root_window_container = 2;
 }
 
 // "dumpsys activity --proto broadcasts"
@@ -669,8 +590,6 @@ message ActivityManagerServiceDumpProcessesProto {
     optional int64 previous_proc_visible_time_ms = 17;
     optional ProcessRecordProto heavy_weight_proc = 18;
     optional .android.content.ConfigurationProto global_configuration = 19;
-    // ActivityStackSupervisorProto dumps these values as well, still here?
-    // repeated ActivityDisplayProto displays = 20;
 
     optional bool config_will_change = 21;
 
