@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.content.res.AssetFileDescriptor;
 import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
@@ -478,7 +479,7 @@ public class UpdateEngine {
          * </ul>
          */
         @ErrorCode
-        public int errorCode() {
+        public int getErrorCode() {
             return mErrorCode;
         }
 
@@ -492,14 +493,15 @@ public class UpdateEngine {
          *
          * @return The following values:
          * <ul>
-         * <li>zero if {@link #errorCode} returns {@link ErrorCodeConstants#SUCCESS}</li>
-         * <li>non-zero if {@link #errorCode} returns {@link ErrorCodeConstants#NOT_ENOUGH_SPACE}.
+         * <li>zero if {@link #getErrorCode} returns {@link ErrorCodeConstants#SUCCESS}</li>
+         * <li>non-zero if {@link #getErrorCode} returns
+         * {@link ErrorCodeConstants#NOT_ENOUGH_SPACE}.
          * Value is the estimated total space required on userdata partition.</li>
          * </ul>
-         * @throws IllegalStateException if {@link #errorCode} is not one of the above.
+         * @throws IllegalStateException if {@link #getErrorCode} is not one of the above.
          *
          */
-        public long freeSpaceRequired() {
+        public long getFreeSpaceRequired() {
             if (mErrorCode == ErrorCodeConstants.SUCCESS) {
                 return 0;
             }
@@ -507,7 +509,7 @@ public class UpdateEngine {
                 return mFreeSpaceRequired;
             }
             throw new IllegalStateException(String.format(
-                    "freeSpaceRequired() is not available when error code is %d", mErrorCode));
+                    "getFreeSpaceRequired() is not available when error code is %d", mErrorCode));
         }
     }
 
@@ -531,8 +533,10 @@ public class UpdateEngine {
      *
      * @param payloadMetadataFilename See {@link #verifyPayloadMetadata}.
      * @param headerKeyValuePairs See {@link #applyPayload}.
-     * @return See {@link AllocateSpaceResult}.
+     * @return See {@link AllocateSpaceResult#getErrorCode} and
+     *             {@link AllocateSpaceResult#getFreeSpaceRequired}.
      */
+    @WorkerThread
     @NonNull
     public AllocateSpaceResult allocateSpace(
                 @NonNull String payloadMetadataFilename,
@@ -583,6 +587,7 @@ public class UpdateEngine {
      * @throws ServiceSpecificException if other transient errors has occurred.
      * A reboot may or may not help resolving the issue.
      */
+    @WorkerThread
     @ErrorCode
     public int cleanupAppliedPayload() {
         try {
