@@ -93,7 +93,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             } else {
                 Path clipPath = getClipPath(false /* ignoreTranslation */);
                 if (clipPath != null) {
-                    outline.setConvexPath(clipPath);
+                    outline.setPath(clipPath);
                 }
             }
             outline.setAlpha(mOutlineAlpha);

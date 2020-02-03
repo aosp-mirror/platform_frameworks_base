@@ -1915,7 +1915,7 @@ public class GradientDrawable extends Drawable {
             case RECTANGLE:
                 if (st.mRadiusArray != null) {
                     buildPathIfDirty();
-                    outline.setConvexPath(mPath);
+                    outline.setPath(mPath);
                     return;
                 }
 
