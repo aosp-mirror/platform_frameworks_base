@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
 
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
@@ -87,9 +88,15 @@ public class BiometricManager {
 
         /**
          * Empty set with no authenticators specified.
+         *
+         * <p>This constant is intended for use by {@link android.provider.DeviceConfig} to adjust
+         * the reported strength of a biometric sensor. It is not a valid parameter for any of the
+         * public {@link android.hardware.biometrics} APIs.
+         *
          * @hide
          */
         @SystemApi
+        @RequiresPermission(WRITE_DEVICE_CONFIG)
         int EMPTY_SET = 0x0000;
 
         /**
@@ -115,12 +122,16 @@ public class BiometricManager {
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Convenience</strong>, as defined by the Android CDD. This
-         * is not a valid parameter to any of the {@link android.hardware.biometrics} APIs, since
-         * the CDD allows only {@link #BIOMETRIC_WEAK} and stronger authenticators to participate.
+         * requirements for <strong>Convenience</strong>, as defined by the Android CDD.
+         *
+         * <p>This constant is intended for use by {@link android.provider.DeviceConfig} to adjust
+         * the reported strength of a biometric sensor. It is not a valid parameter for any of the
+         * public {@link android.hardware.biometrics} APIs.
+         *
          * @hide
          */
         @SystemApi
+        @RequiresPermission(WRITE_DEVICE_CONFIG)
         int BIOMETRIC_CONVENIENCE = 0x0FFF;
 
         /**
