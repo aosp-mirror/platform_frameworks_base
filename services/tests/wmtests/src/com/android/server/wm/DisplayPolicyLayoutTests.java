@@ -73,6 +73,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * Tests for the {@link DisplayPolicy} class.
  *
@@ -122,9 +125,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     private void updateDisplayFrames() {
+        mFrames = createDisplayFrames();
+    }
+
+    private DisplayFrames createDisplayFrames() {
         final Pair<DisplayInfo, WmDisplayCutout> info = displayInfoAndCutoutForRotation(mRotation,
                 mHasDisplayCutout);
-        mFrames = new DisplayFrames(mDisplayContent.getDisplayId(), info.first, info.second);
+        return new DisplayFrames(mDisplayContent.getDisplayId(), info.first, info.second);
     }
 
     @Test
@@ -822,6 +829,49 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertThat(outContentInsets, is(new Rect()));
         assertThat(outStableInsets, is(new Rect()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
+    }
+
+    /**
+     * Verify that {@link DisplayPolicy#simulateLayoutDisplay} outputs the same display frames as
+     * {@link DisplayPolicy#beginLayoutLw}.
+     */
+    @Test
+    public void testSimulateLayoutDisplay() {
+        assertSimulateLayoutSameDisplayFrames();
+        setRotation(ROTATION_90);
+        assertSimulateLayoutSameDisplayFrames();
+        addDisplayCutout();
+        assertSimulateLayoutSameDisplayFrames();
+    }
+
+    private void assertSimulateLayoutSameDisplayFrames() {
+        final int uiMode = 0;
+        final String prefix = "";
+        final InsetsState simulatedInsetsState = new InsetsState();
+        final DisplayFrames simulatedDisplayFrames = createDisplayFrames();
+        mDisplayContent.mDisplayFrames = mFrames;
+        mDisplayPolicy.beginLayoutLw(mFrames, uiMode);
+        mDisplayContent.getInsetsStateController().onPostLayout();
+        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames, simulatedInsetsState, uiMode);
+
+        final StringWriter realFramesDump = new StringWriter();
+        mFrames.dump(prefix, new PrintWriter(realFramesDump));
+        final StringWriter simulatedFramesDump = new StringWriter();
+        simulatedDisplayFrames.dump(prefix, new PrintWriter(simulatedFramesDump));
+
+        assertEquals(realFramesDump.toString(), simulatedFramesDump.toString());
+
+        final StringWriter realInsetsDump = new StringWriter();
+        final InsetsState realInsetsState = new InsetsState(
+                mDisplayContent.getInsetsStateController().getRawInsetsState());
+        // Exclude comparing IME insets because currently the simulated layout only focuses on the
+        // insets from status bar and navigation bar.
+        realInsetsState.removeSource(InsetsState.ITYPE_IME);
+        realInsetsState.dump(prefix, new PrintWriter(realInsetsDump));
+        final StringWriter simulatedInsetsDump = new StringWriter();
+        simulatedInsetsState.dump(prefix, new PrintWriter(simulatedInsetsDump));
+
+        assertEquals(realInsetsDump.toString(), simulatedInsetsDump.toString());
     }
 
     @Test

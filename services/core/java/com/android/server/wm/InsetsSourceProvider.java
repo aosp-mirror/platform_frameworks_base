@@ -186,6 +186,17 @@ class InsetsSourceProvider {
         }
     }
 
+    /** @return A new source computed by the specified window frame in the given display frames. */
+    InsetsSource createSimulatedSource(DisplayFrames displayFrames, WindowFrames windowFrames) {
+        final InsetsSource source = new InsetsSource(mSource);
+        mTmpRect.set(windowFrames.mFrame);
+        if (mFrameProvider != null) {
+            mFrameProvider.accept(displayFrames, mWin, mTmpRect);
+        }
+        source.setFrame(mTmpRect);
+        return source;
+    }
+
     /**
      * Called when a layout pass has occurred.
      */
