@@ -14055,7 +14055,7 @@ public final class Settings {
          * means Common Criteria mode is enabled.
          * @hide
          */
-        @SystemApi(client = SystemApi.Client.MODULE_APPS)
+        @SystemApi
         public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
     }
 

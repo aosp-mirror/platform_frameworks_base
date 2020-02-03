@@ -665,6 +665,7 @@ package android.app {
     method public int getUserLockedFields();
     method public boolean isDeleted();
     method public void populateFromXml(org.xmlpull.v1.XmlPullParser);
+    method public void setBlockableSystem(boolean);
     method public org.json.JSONObject toJson() throws org.json.JSONException;
     method public void writeXml(org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
     field public static final int USER_LOCKED_SOUND = 32; // 0x20
@@ -9460,6 +9461,7 @@ package android.provider {
   }
 
   public final class DocumentsContract {
+    method @NonNull public static android.net.Uri buildDocumentUriAsUser(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public static boolean isManageMode(@NonNull android.net.Uri);
     method @NonNull public static android.net.Uri setManageMode(@NonNull android.net.Uri);
     field public static final String ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
@@ -9620,6 +9622,7 @@ package android.provider {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
+    field public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
     field public static final String DEVICE_DEMO_MODE = "device_demo_mode";
     field public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED = "device_provisioning_mobile_data";
