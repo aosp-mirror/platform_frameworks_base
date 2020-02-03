@@ -22,20 +22,22 @@
 #include "android_hardware_input_InputWindowHandle.h"
 #include "core_jni_helpers.h"
 
+#include <memory>
+
+#include <android-base/chrono_utils.h>
 #include <android/graphics/region.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <android-base/chrono_utils.h>
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
-#include <memory>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <stdio.h>
 #include <system/graphics.h>
 #include <ui/ConfigStoreTypes.h>
+#include <ui/DisplayConfig.h>
 #include <ui/DisplayInfo.h>
 #include <ui/DisplayedFrameStats.h>
 #include <ui/FrameStats.h>
@@ -63,16 +65,21 @@ static const char* const OutOfResourcesException =
 static struct {
     jclass clazz;
     jmethodID ctor;
+    jfieldID density;
+    jfieldID secure;
+} gDisplayInfoClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID width;
     jfieldID height;
-    jfieldID refreshRate;
-    jfieldID density;
     jfieldID xDpi;
     jfieldID yDpi;
-    jfieldID secure;
+    jfieldID refreshRate;
     jfieldID appVsyncOffsetNanos;
     jfieldID presentationDeadlineNanos;
-} gPhysicalDisplayInfoClassInfo;
+} gDisplayConfigClassInfo;
 
 static struct {
     jfieldID bottom;
@@ -766,37 +773,46 @@ static void nativeSetDisplaySize(JNIEnv* env, jclass clazz,
     }
 }
 
-static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
-        jobject tokenObj) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
-    if (token == NULL) return NULL;
-
-    Vector<DisplayInfo> configs;
-    if (SurfaceComposerClient::getDisplayConfigs(token, &configs) != NO_ERROR ||
-            configs.size() == 0) {
-        return NULL;
+static jobject nativeGetDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    DisplayInfo info;
+    if (const auto token = ibinderForJavaObject(env, tokenObj);
+        !token || SurfaceComposerClient::getDisplayInfo(token, &info) != NO_ERROR) {
+        return nullptr;
     }
 
-    jobjectArray configArray = env->NewObjectArray(configs.size(),
-            gPhysicalDisplayInfoClassInfo.clazz, NULL);
+    jobject object = env->NewObject(gDisplayInfoClassInfo.clazz, gDisplayInfoClassInfo.ctor);
+    env->SetFloatField(object, gDisplayInfoClassInfo.density, info.density);
+    env->SetBooleanField(object, gDisplayInfoClassInfo.secure, info.secure);
+    return object;
+}
+
+static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    Vector<DisplayConfig> configs;
+    if (const auto token = ibinderForJavaObject(env, tokenObj); !token ||
+        SurfaceComposerClient::getDisplayConfigs(token, &configs) != NO_ERROR ||
+        configs.isEmpty()) {
+        return nullptr;
+    }
+
+    jobjectArray configArray =
+            env->NewObjectArray(configs.size(), gDisplayConfigClassInfo.clazz, nullptr);
 
     for (size_t c = 0; c < configs.size(); ++c) {
-        const DisplayInfo& info = configs[c];
-        jobject infoObj = env->NewObject(gPhysicalDisplayInfoClassInfo.clazz,
-                gPhysicalDisplayInfoClassInfo.ctor);
-        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.width, info.w);
-        env->SetIntField(infoObj, gPhysicalDisplayInfoClassInfo.height, info.h);
-        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.refreshRate, info.fps);
-        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.density, info.density);
-        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.xDpi, info.xdpi);
-        env->SetFloatField(infoObj, gPhysicalDisplayInfoClassInfo.yDpi, info.ydpi);
-        env->SetBooleanField(infoObj, gPhysicalDisplayInfoClassInfo.secure, info.secure);
-        env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.appVsyncOffsetNanos,
-                info.appVsyncOffset);
-        env->SetLongField(infoObj, gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos,
-                info.presentationDeadline);
-        env->SetObjectArrayElement(configArray, static_cast<jsize>(c), infoObj);
-        env->DeleteLocalRef(infoObj);
+        const DisplayConfig& config = configs[c];
+        jobject object =
+                env->NewObject(gDisplayConfigClassInfo.clazz, gDisplayConfigClassInfo.ctor);
+        env->SetIntField(object, gDisplayConfigClassInfo.width, config.resolution.getWidth());
+        env->SetIntField(object, gDisplayConfigClassInfo.height, config.resolution.getHeight());
+        env->SetFloatField(object, gDisplayConfigClassInfo.xDpi, config.xDpi);
+        env->SetFloatField(object, gDisplayConfigClassInfo.yDpi, config.yDpi);
+
+        env->SetFloatField(object, gDisplayConfigClassInfo.refreshRate, config.refreshRate);
+        env->SetLongField(object, gDisplayConfigClassInfo.appVsyncOffsetNanos,
+                          config.appVsyncOffset);
+        env->SetLongField(object, gDisplayConfigClassInfo.presentationDeadlineNanos,
+                          config.presentationDeadline);
+        env->SetObjectArrayElement(configArray, static_cast<jsize>(c), object);
+        env->DeleteLocalRef(object);
     }
 
     return configArray;
@@ -1409,7 +1425,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDisplayProjection },
     {"nativeSetDisplaySize", "(JLandroid/os/IBinder;II)V",
             (void*)nativeSetDisplaySize },
-    {"nativeGetDisplayConfigs", "(Landroid/os/IBinder;)[Landroid/view/SurfaceControl$PhysicalDisplayInfo;",
+    {"nativeGetDisplayInfo", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayInfo;",
+            (void*)nativeGetDisplayInfo },
+    {"nativeGetDisplayConfigs", "(Landroid/os/IBinder;)[Landroid/view/SurfaceControl$DisplayConfig;",
             (void*)nativeGetDisplayConfigs },
     {"nativeGetActiveConfig", "(Landroid/os/IBinder;)I",
             (void*)nativeGetActiveConfig },
@@ -1507,21 +1525,24 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     int err = RegisterMethodsOrDie(env, "android/view/SurfaceControl",
             sSurfaceControlMethods, NELEM(sSurfaceControlMethods));
 
-    jclass clazz = FindClassOrDie(env, "android/view/SurfaceControl$PhysicalDisplayInfo");
-    gPhysicalDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
-    gPhysicalDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env,
-            gPhysicalDisplayInfoClassInfo.clazz, "<init>", "()V");
-    gPhysicalDisplayInfoClassInfo.width =       GetFieldIDOrDie(env, clazz, "width", "I");
-    gPhysicalDisplayInfoClassInfo.height =      GetFieldIDOrDie(env, clazz, "height", "I");
-    gPhysicalDisplayInfoClassInfo.refreshRate = GetFieldIDOrDie(env, clazz, "refreshRate", "F");
-    gPhysicalDisplayInfoClassInfo.density =     GetFieldIDOrDie(env, clazz, "density", "F");
-    gPhysicalDisplayInfoClassInfo.xDpi =        GetFieldIDOrDie(env, clazz, "xDpi", "F");
-    gPhysicalDisplayInfoClassInfo.yDpi =        GetFieldIDOrDie(env, clazz, "yDpi", "F");
-    gPhysicalDisplayInfoClassInfo.secure =      GetFieldIDOrDie(env, clazz, "secure", "Z");
-    gPhysicalDisplayInfoClassInfo.appVsyncOffsetNanos = GetFieldIDOrDie(env,
-            clazz, "appVsyncOffsetNanos", "J");
-    gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = GetFieldIDOrDie(env,
-            clazz, "presentationDeadlineNanos", "J");
+    jclass infoClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayInfo");
+    gDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, infoClazz);
+    gDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env, infoClazz, "<init>", "()V");
+    gDisplayInfoClassInfo.density = GetFieldIDOrDie(env, infoClazz, "density", "F");
+    gDisplayInfoClassInfo.secure = GetFieldIDOrDie(env, infoClazz, "secure", "Z");
+
+    jclass configClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayConfig");
+    gDisplayConfigClassInfo.clazz = MakeGlobalRefOrDie(env, configClazz);
+    gDisplayConfigClassInfo.ctor = GetMethodIDOrDie(env, configClazz, "<init>", "()V");
+    gDisplayConfigClassInfo.width = GetFieldIDOrDie(env, configClazz, "width", "I");
+    gDisplayConfigClassInfo.height = GetFieldIDOrDie(env, configClazz, "height", "I");
+    gDisplayConfigClassInfo.xDpi = GetFieldIDOrDie(env, configClazz, "xDpi", "F");
+    gDisplayConfigClassInfo.yDpi = GetFieldIDOrDie(env, configClazz, "yDpi", "F");
+    gDisplayConfigClassInfo.refreshRate = GetFieldIDOrDie(env, configClazz, "refreshRate", "F");
+    gDisplayConfigClassInfo.appVsyncOffsetNanos =
+            GetFieldIDOrDie(env, configClazz, "appVsyncOffsetNanos", "J");
+    gDisplayConfigClassInfo.presentationDeadlineNanos =
+            GetFieldIDOrDie(env, configClazz, "presentationDeadlineNanos", "J");
 
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");

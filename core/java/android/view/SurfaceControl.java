@@ -152,7 +152,8 @@ public final class SurfaceControl implements Parcelable {
             int L, int T, int R, int B);
     private static native void nativeSetDisplaySize(long transactionObj, IBinder displayToken,
             int width, int height);
-    private static native SurfaceControl.PhysicalDisplayInfo[] nativeGetDisplayConfigs(
+    private static native SurfaceControl.DisplayInfo nativeGetDisplayInfo(IBinder displayToken);
+    private static native SurfaceControl.DisplayConfig[] nativeGetDisplayConfigs(
             IBinder displayToken);
     private static native DisplayedContentSamplingAttributes
             nativeGetDisplayedContentSamplingAttributes(IBinder displayToken);
@@ -1278,140 +1279,45 @@ public final class SurfaceControl implements Parcelable {
                 Integer.toHexString(System.identityHashCode(this));
     }
 
-    /*
-     * set display parameters.
-     * needs to be inside open/closeTransaction block
-     */
-
     /**
-     * Describes the properties of a physical display known to surface flinger.
+     * Immutable information about physical display.
+     *
      * @hide
      */
-    public static final class PhysicalDisplayInfo {
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public int width;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public int height;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public float refreshRate;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
+    public static final class DisplayInfo {
         public float density;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public float xDpi;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public float yDpi;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
         public boolean secure;
 
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public long appVsyncOffsetNanos;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public long presentationDeadlineNanos;
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public PhysicalDisplayInfo() {
-        }
-
-        /**
-         * @hide
-         */
-        public PhysicalDisplayInfo(PhysicalDisplayInfo other) {
-            copyFrom(other);
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof PhysicalDisplayInfo && equals((PhysicalDisplayInfo)o);
-        }
-
-        /**
-         * @hide
-         */
-        public boolean equals(PhysicalDisplayInfo other) {
-            return other != null
-                    && width == other.width
-                    && height == other.height
-                    && refreshRate == other.refreshRate
-                    && density == other.density
-                    && xDpi == other.xDpi
-                    && yDpi == other.yDpi
-                    && secure == other.secure
-                    && appVsyncOffsetNanos == other.appVsyncOffsetNanos
-                    && presentationDeadlineNanos == other.presentationDeadlineNanos;
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public int hashCode() {
-            return 0; // don't care
-        }
-
-        /**
-         * @hide
-         */
-        public void copyFrom(PhysicalDisplayInfo other) {
-            width = other.width;
-            height = other.height;
-            refreshRate = other.refreshRate;
-            density = other.density;
-            xDpi = other.xDpi;
-            yDpi = other.yDpi;
-            secure = other.secure;
-            appVsyncOffsetNanos = other.appVsyncOffsetNanos;
-            presentationDeadlineNanos = other.presentationDeadlineNanos;
-        }
-
-        /**
-         * @hide
-         */
         @Override
         public String toString() {
-            return "PhysicalDisplayInfo{" + width + " x " + height + ", " + refreshRate + " fps, "
-                    + "density " + density + ", " + xDpi + " x " + yDpi + " dpi, secure " + secure
-                    + ", appVsyncOffset " + appVsyncOffsetNanos
-                    + ", bufferDeadline " + presentationDeadlineNanos + "}";
+            return "DisplayInfo{density=" + density + ", secure=" + secure + "}";
+        }
+    }
+
+    /**
+     * Configuration supported by physical display.
+     *
+     * @hide
+     */
+    public static final class DisplayConfig {
+        public int width;
+        public int height;
+        public float xDpi;
+        public float yDpi;
+
+        public float refreshRate;
+        public long appVsyncOffsetNanos;
+        public long presentationDeadlineNanos;
+
+        @Override
+        public String toString() {
+            return "DisplayConfig{width=" + width
+                    + ", height=" + height
+                    + ", xDpi=" + xDpi
+                    + ", yDpi=" + yDpi
+                    + ", refreshRate=" + refreshRate
+                    + ", appVsyncOffsetNanos=" + appVsyncOffsetNanos
+                    + ", presentationDeadlineNanos=" + presentationDeadlineNanos + "}";
         }
     }
 
@@ -1428,8 +1334,17 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
-    public static SurfaceControl.PhysicalDisplayInfo[] getDisplayConfigs(IBinder displayToken) {
+    public static SurfaceControl.DisplayInfo getDisplayInfo(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetDisplayInfo(displayToken);
+    }
+
+    /**
+     * @hide
+     */
+    public static SurfaceControl.DisplayConfig[] getDisplayConfigs(IBinder displayToken) {
         if (displayToken == null) {
             throw new IllegalArgumentException("displayToken must not be null");
         }
@@ -1825,7 +1740,7 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * TODO(116025192): Remove this stopgap once framework is display-agnostic.
+     * TODO(b/116025192): Remove this stopgap once framework is display-agnostic.
      *
      * @hide
      */
