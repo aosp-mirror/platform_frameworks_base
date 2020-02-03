@@ -469,7 +469,7 @@ java_library {
         "framework-appsearch-stubs",
         "framework-sdkextensions-stubs-systemapi",
         "framework-statsd", // TODO(b/146167933): Use framework-statsd-stubs
-        "framework-permission-stubs",
+        "framework-permission-stubs-systemapi",
         "framework-wifi-stubs",
         "ike-stubs",
     ],
@@ -520,7 +520,7 @@ java_library {
         "updatable_media_stubs",
         "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
-        "framework-permission-stubs",
+        "framework-permission-stubs-systemapi",
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
