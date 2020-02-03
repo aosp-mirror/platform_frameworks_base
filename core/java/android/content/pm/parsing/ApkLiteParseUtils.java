@@ -97,6 +97,10 @@ public class ApkLiteParseUtils {
             throw new PackageParser.PackageParserException(
                     PackageManager.INSTALL_PARSE_FAILED_NOT_APK, "No packages found in split");
         }
+        // Apk directory is directly nested under the current directory
+        if (files.length == 1 && files[0].isDirectory()) {
+            return parseClusterPackageLite(files[0], flags);
+        }
 
         String packageName = null;
         int versionCode = 0;

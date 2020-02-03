@@ -83,6 +83,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -917,5 +918,22 @@ public class PackageManagerServiceUtils {
             return null;
         }
         return packageSetting.getPermissionsState();
+    }
+
+    /**
+     * Recursively create target directory
+     */
+    public static void makeDirRecursive(File targetDir, int mode) throws ErrnoException {
+        final Path targetDirPath = targetDir.toPath();
+        final int directoriesCount = targetDirPath.getNameCount();
+        File currentDir;
+        for (int i = 1; i <= directoriesCount; i++) {
+            currentDir = targetDirPath.subpath(0, i).toFile();
+            if (currentDir.exists()) {
+                continue;
+            }
+            Os.mkdir(currentDir.getAbsolutePath(), mode);
+            Os.chmod(currentDir.getAbsolutePath(), mode);
+        }
     }
 }
