@@ -147,6 +147,12 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         public RecoverableKeyStoreManager getRecoverableKeyStoreManager(KeyStore keyStore) {
             return mRecoverableKeyStoreManager;
         }
+
+        @Override
+        public ManagedProfilePasswordCache getManagedProfilePasswordCache() {
+            return mock(ManagedProfilePasswordCache.class);
+        }
+
     }
 
     public MockInjector mInjector;
