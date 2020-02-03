@@ -1948,6 +1948,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setUidMode(int code, int uid, int mode) {
+        setUidMode(code, uid, mode, null);
+    }
+
+    private void setUidMode(int code, int uid, int mode,
+            @Nullable IAppOpsCallback callbackToIgnore) {
         if (DEBUG) {
             Slog.i(TAG, "uid " + uid + " OP_" + opToName(code) + " := " + modeToName(mode)
                     + " by uid " + Binder.getCallingUid());
@@ -2030,6 +2035,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                         changedPackages.add(uidPackageName);
                     }
                 }
+            }
+
+            if (callbackSpecs != null && callbackToIgnore != null) {
+                callbackSpecs.remove(mModeWatchers.get(callbackToIgnore.asBinder()));
             }
         }
 
@@ -2158,6 +2167,11 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     @Override
     public void setMode(int code, int uid, @NonNull String packageName, int mode) {
+        setMode(code, uid, packageName, mode, null);
+    }
+
+    private void setMode(int code, int uid, @NonNull String packageName, int mode,
+            @Nullable IAppOpsCallback callbackToIgnore) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         ArraySet<ModeCallback> repCbs = null;
@@ -2200,6 +2214,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                             repCbs = new ArraySet<>();
                         }
                         repCbs.addAll(cbs);
+                    }
+                    if (repCbs != null && callbackToIgnore != null) {
+                        repCbs.remove(mModeWatchers.get(callbackToIgnore.asBinder()));
                     }
                     if (mode == AppOpsManager.opToDefaultMode(op.op)) {
                         // If going into the default mode, prune this op
@@ -5586,6 +5603,18 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void updateAppWidgetVisibility(SparseArray<String> uidPackageNames,
                 boolean visible) {
             AppOpsService.this.updateAppWidgetVisibility(uidPackageNames, visible);
+        }
+
+        @Override
+        public void setUidModeIgnoringCallback(int code, int uid, int mode,
+                @Nullable IAppOpsCallback callbackToIgnore) {
+            setUidMode(code, uid, mode, callbackToIgnore);
+        }
+
+        @Override
+        public void setModeIgnoringCallback(int code, int uid, @NonNull String packageName,
+                int mode, @Nullable IAppOpsCallback callbackToIgnore) {
+            setMode(code, uid, packageName, mode, callbackToIgnore);
         }
     }
 }
