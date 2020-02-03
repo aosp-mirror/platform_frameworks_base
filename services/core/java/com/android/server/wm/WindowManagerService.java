@@ -397,7 +397,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #HIERARCHICAL_ANIMATIONS_PROPERTY
      */
     static boolean sHierarchicalAnimations =
-            SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, false);
+            SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, true);
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
