@@ -127,6 +127,11 @@ public class DozeTriggers implements DozeMachine.Part {
             mDozeLog.tracePulseDropped("pulseOnNotificationsDisabled");
             return;
         }
+        if (mConfig.dozeSuppressed(UserHandle.USER_CURRENT)) {
+            runIfNotNull(onPulseSuppressedListener);
+            mDozeLog.tracePulseDropped("dozeSuppressed");
+            return;
+        }
         requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */,
                 onPulseSuppressedListener);
         mDozeLog.traceNotificationPulse();
