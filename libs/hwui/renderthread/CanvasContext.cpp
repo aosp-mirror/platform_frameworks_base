@@ -700,7 +700,7 @@ void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
 int64_t CanvasContext::getFrameNumber() {
     // mFrameNumber is reset to -1 when the surface changes or we swap buffers
     if (mFrameNumber == -1 && mNativeSurface.get()) {
-        mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
+        mFrameNumber = ANativeWindow_getNextFrameId(mNativeSurface->getNativeWindow());
     }
     return mFrameNumber;
 }
