@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.mediarouteprovider.example;
+package com.android.mediaroutertest;
 
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
