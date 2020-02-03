@@ -308,17 +308,23 @@ public class NotifCollection implements Dumpable {
     private void applyRanking(@NonNull RankingMap rankingMap) {
         for (NotificationEntry entry : mNotificationSet.values()) {
             if (!isLifetimeExtended(entry)) {
-                Ranking ranking = requireRanking(rankingMap, entry.getKey());
-                entry.setRanking(ranking);
 
-                // TODO: (b/145659174) update the sbn's overrideGroupKey in
-                //  NotificationEntry.setRanking instead of here once we fully migrate to the
-                //  NewNotifPipeline
-                if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-                    final String newOverrideGroupKey = ranking.getOverrideGroupKey();
-                    if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
-                            newOverrideGroupKey)) {
-                        entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                // TODO: (b/148791039) We should crash if we are ever handed a ranking with
+                //  incomplete entries. Right now, there's a race condition in NotificationListener
+                //  that means this might occur when SystemUI is starting up.
+                Ranking ranking = new Ranking();
+                if (rankingMap.getRanking(entry.getKey(), ranking)) {
+                    entry.setRanking(ranking);
+
+                    // TODO: (b/145659174) update the sbn's overrideGroupKey in
+                    //  NotificationEntry.setRanking instead of here once we fully migrate to the
+                    //  NewNotifPipeline
+                    if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+                        final String newOverrideGroupKey = ranking.getOverrideGroupKey();
+                        if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
+                                newOverrideGroupKey)) {
+                            entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                        }
                     }
                 }
             }
