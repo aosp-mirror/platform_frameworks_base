@@ -16,6 +16,7 @@
 
 package com.android.internal.compat;
 
+import android.annotation.IntDef;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
@@ -23,6 +24,8 @@ import android.util.StatsLog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -42,7 +45,7 @@ public final class ChangeReporter {
         long mChangeId;
         int mState;
 
-        ChangeReport(long changeId, int state) {
+        ChangeReport(long changeId, @State int state) {
             mChangeId = changeId;
             mState = state;
         }
@@ -69,7 +72,7 @@ public final class ChangeReporter {
     // When true will of every time to debug (logcat).
     private boolean mDebugLogAll;
 
-    public ChangeReporter(int source) {
+    public ChangeReporter(@Source int source) {
         mSource = source;
         mReportedChanges =  new HashMap<>();
         mDebugLogAll = false;
@@ -174,7 +177,7 @@ public final class ChangeReporter {
     private void debugLog(int uid, long changeId, int state) {
         String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
-        if (mSource == StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER) {
+        if (mSource == SOURCE_SYSTEM_SERVER) {
             Slog.d(TAG, message);
         } else {
             Log.d(TAG, message);
@@ -183,21 +186,56 @@ public final class ChangeReporter {
     }
 
     /**
-     * Transforms StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE enum to a string.
+     * Transforms {@link #ChangeReporter.State} enum to a string.
      *
      * @param state to transform
      * @return a string representing the state
      */
-    private static String stateToString(int state) {
+    private static String stateToString(@State int state) {
         switch (state) {
-            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED:
+            case STATE_LOGGED:
                 return "LOGGED";
-            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED:
+            case STATE_ENABLED:
                 return "ENABLED";
-            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED:
+            case STATE_DISABLED:
                 return "DISABLED";
             default:
                 return "UNKNOWN";
         }
+    }
+
+    /** These values should be kept in sync with those in atoms.proto */
+    public static final int STATE_UNKNOWN_STATE =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__UNKNOWN_STATE;
+    public static final int STATE_ENABLED =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED;
+    public static final int STATE_DISABLED =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED;
+    public static final int STATE_LOGGED =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED;
+    public static final int SOURCE_UNKNOWN_SOURCE =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__UNKNOWN_SOURCE;
+    public static final int SOURCE_APP_PROCESS =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS;
+    public static final int SOURCE_SYSTEM_SERVER =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "STATE_" }, value = {
+            STATE_UNKNOWN_STATE,
+            STATE_ENABLED,
+            STATE_DISABLED,
+            STATE_LOGGED
+    })
+    public @interface State {
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+            SOURCE_UNKNOWN_SOURCE,
+            SOURCE_APP_PROCESS,
+            SOURCE_SYSTEM_SERVER
+    })
+    public @interface Source {
     }
 }

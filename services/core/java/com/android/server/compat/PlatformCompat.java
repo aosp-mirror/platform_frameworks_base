@@ -25,7 +25,6 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.AndroidBuildClassifier;
@@ -54,7 +53,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     public PlatformCompat(Context context) {
         mContext = context;
         mChangeReporter = new ChangeReporter(
-                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER);
+                ChangeReporter.SOURCE_SYSTEM_SERVER);
         mCompatConfig = CompatConfig.create(new AndroidBuildClassifier(), mContext);
     }
 
@@ -62,14 +61,14 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     PlatformCompat(Context context, CompatConfig compatConfig) {
         mContext = context;
         mChangeReporter = new ChangeReporter(
-                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER);
+                ChangeReporter.SOURCE_SYSTEM_SERVER);
         mCompatConfig = compatConfig;
     }
 
     @Override
     public void reportChange(long changeId, ApplicationInfo appInfo) {
         reportChange(changeId, appInfo.uid,
-                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
+                ChangeReporter.STATE_LOGGED);
     }
 
     @Override
@@ -83,18 +82,18 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     public void reportChangeByUid(long changeId, int uid) {
-        reportChange(changeId, uid, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
+        reportChange(changeId, uid, ChangeReporter.STATE_LOGGED);
     }
 
     @Override
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
         if (mCompatConfig.isChangeEnabled(changeId, appInfo)) {
             reportChange(changeId, appInfo.uid,
-                    StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED);
+                    ChangeReporter.STATE_ENABLED);
             return true;
         }
         reportChange(changeId, appInfo.uid,
-                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED);
+                ChangeReporter.STATE_DISABLED);
         return false;
     }
 
