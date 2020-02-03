@@ -54,6 +54,14 @@
           "include-filter": "com.android.server.am."
         }
       ]
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.AppDataIsolationTests"
+        }
+      ]
     }
   ]
 }
