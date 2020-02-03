@@ -66,12 +66,12 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
 
     /**
      * Creates an empty time zone suggestion, i.e. one that will cancel previous suggestions with
-     * the same {@code phoneId}.
+     * the same {@code slotIndex}.
      */
     @NonNull
     public static PhoneTimeZoneSuggestion createEmptySuggestion(
-            int phoneId, @NonNull String debugInfo) {
-        return new Builder(phoneId).addDebugInfo(debugInfo).build();
+            int slotIndex, @NonNull String debugInfo) {
+        return new Builder(slotIndex).addDebugInfo(debugInfo).build();
     }
 
     /** @hide */
@@ -135,7 +135,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
      * The ID of the phone this suggestion is associated with. For multiple-sim devices this
      * helps to establish source so filtering / stickiness can be implemented.
      */
-    private final int mPhoneId;
+    private final int mSlotIndex;
 
     /**
      * The suggestion. {@code null} means there is no current suggestion and any previous suggestion
@@ -165,7 +165,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     private List<String> mDebugInfo;
 
     private PhoneTimeZoneSuggestion(Builder builder) {
-        mPhoneId = builder.mPhoneId;
+        mSlotIndex = builder.mSlotIndex;
         mZoneId = builder.mZoneId;
         mMatchType = builder.mMatchType;
         mQuality = builder.mQuality;
@@ -175,8 +175,8 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     @SuppressWarnings("unchecked")
     private static PhoneTimeZoneSuggestion createFromParcel(Parcel in) {
         // Use the Builder so we get validation during build().
-        int phoneId = in.readInt();
-        PhoneTimeZoneSuggestion suggestion = new Builder(phoneId)
+        int slotIndex = in.readInt();
+        PhoneTimeZoneSuggestion suggestion = new Builder(slotIndex)
                 .setZoneId(in.readString())
                 .setMatchType(in.readInt())
                 .setQuality(in.readInt())
@@ -190,7 +190,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mPhoneId);
+        dest.writeInt(mSlotIndex);
         dest.writeString(mZoneId);
         dest.writeInt(mMatchType);
         dest.writeInt(mQuality);
@@ -203,11 +203,11 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     }
 
     /**
-     * Returns an identifier for the source of this suggestion. When a device has several "phones",
-     * i.e. sim slots or equivalent, it is used to identify which one.
+     * Returns an identifier for the source of this suggestion. When a device has several sim slots
+     * or equivalent, it is used to identify which one the suggestion is from.
      */
-    public int getPhoneId() {
-        return mPhoneId;
+    public int getSlotIndex() {
+        return mSlotIndex;
     }
 
     /**
@@ -282,7 +282,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
             return false;
         }
         PhoneTimeZoneSuggestion that = (PhoneTimeZoneSuggestion) o;
-        return mPhoneId == that.mPhoneId
+        return mSlotIndex == that.mSlotIndex
                 && mMatchType == that.mMatchType
                 && mQuality == that.mQuality
                 && Objects.equals(mZoneId, that.mZoneId);
@@ -290,13 +290,13 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPhoneId, mZoneId, mMatchType, mQuality);
+        return Objects.hash(mSlotIndex, mZoneId, mMatchType, mQuality);
     }
 
     @Override
     public String toString() {
         return "PhoneTimeZoneSuggestion{"
-                + "mPhoneId=" + mPhoneId
+                + "mSlotIndex=" + mSlotIndex
                 + ", mZoneId='" + mZoneId + '\''
                 + ", mMatchType=" + mMatchType
                 + ", mQuality=" + mQuality
@@ -311,14 +311,14 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class Builder {
-        private final int mPhoneId;
+        private final int mSlotIndex;
         @Nullable private String mZoneId;
         @MatchType private int mMatchType;
         @Quality private int mQuality;
         @Nullable private List<String> mDebugInfo;
 
-        public Builder(int phoneId) {
-            mPhoneId = phoneId;
+        public Builder(int slotIndex) {
+            mSlotIndex = slotIndex;
         }
 
         /**
