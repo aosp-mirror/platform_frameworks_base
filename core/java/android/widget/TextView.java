@@ -11283,6 +11283,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Nullable
+    final TextClassificationManager getTextClassificationManagerForUser() {
+        return getServiceManagerForUser(
+                getContext().getPackageName(), TextClassificationManager.class);
+    }
+
+    @Nullable
     final <T> T getServiceManagerForUser(String packageName, Class<T> managerClazz) {
         if (mTextOperationUser == null) {
             return getContext().getSystemService(managerClazz);
@@ -12383,8 +12389,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @NonNull
     public TextClassifier getTextClassifier() {
         if (mTextClassifier == null) {
-            final TextClassificationManager tcm =
-                    mContext.getSystemService(TextClassificationManager.class);
+            final TextClassificationManager tcm = getTextClassificationManagerForUser();
             if (tcm != null) {
                 return tcm.getTextClassifier();
             }
@@ -12400,8 +12405,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @NonNull
     TextClassifier getTextClassificationSession() {
         if (mTextClassificationSession == null || mTextClassificationSession.isDestroyed()) {
-            final TextClassificationManager tcm =
-                    mContext.getSystemService(TextClassificationManager.class);
+            final TextClassificationManager tcm = getTextClassificationManagerForUser();
             if (tcm != null) {
                 final String widgetType;
                 if (isTextEditable()) {
