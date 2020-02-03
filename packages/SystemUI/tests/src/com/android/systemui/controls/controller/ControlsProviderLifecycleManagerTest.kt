@@ -99,13 +99,13 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Test
     fun testBindService() {
-        manager.bindPermanently()
+        manager.bindService()
         assertTrue(mContext.isBound(componentName))
     }
 
     @Test
     fun testUnbindService() {
-        manager.bindPermanently()
+        manager.bindService()
         manager.unbindService()
         assertFalse(mContext.isBound(componentName))
     }
@@ -125,7 +125,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     fun testMaybeUnbind_bindingAndCallback() {
         manager.maybeBindAndLoad {}
 
-        manager.maybeUnbindAndRemoveCallback()
+        manager.unbindService()
         assertFalse(mContext.isBound(componentName))
         assertNull(manager.lastLoadCallback)
     }

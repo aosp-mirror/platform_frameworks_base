@@ -56,9 +56,7 @@ class ControlsProviderLifecycleManager(
     val token: IBinder = Binder()
     @GuardedBy("subscriptions")
     private val subscriptions = mutableListOf<IControlsSubscription>()
-    private var unbindImmediate = false
     private var requiresBound = false
-    private var isBound = false
     @GuardedBy("queuedMessages")
     private val queuedMessages: MutableSet<Message> = ArraySet()
     private var wrapper: ServiceWrapper? = null
@@ -98,28 +96,20 @@ class ControlsProviderLifecycleManager(
             }
             bindTryCount++
             try {
-                isBound = context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
+                context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
             } catch (e: SecurityException) {
                 Log.e(TAG, "Failed to bind to service", e)
-                isBound = false
             }
         } else {
             if (DEBUG) {
                 Log.d(TAG, "Unbinding service $intent")
             }
             bindTryCount = 0
-            wrapper = null
-            if (isBound) {
+            wrapper?.run {
                 context.unbindService(serviceConnection)
-                isBound = false
             }
+            wrapper = null
         }
-    }
-
-    fun bindPermanently() {
-        unbindImmediate = false
-        unqueueMessage(Message.Unbind)
-        bindService(true)
     }
 
     private val serviceConnection = object : ServiceConnection {
@@ -135,7 +125,7 @@ class ControlsProviderLifecycleManager(
 
         override fun onServiceDisconnected(name: ComponentName?) {
             if (DEBUG) Log.d(TAG, "onServiceDisconnected $name")
-            isBound = false
+            wrapper = null
             bindService(false)
         }
     }
@@ -197,6 +187,15 @@ class ControlsProviderLifecycleManager(
         }
     }
 
+    private fun invokeOrQueue(f: () -> Unit, msg: Message) {
+        wrapper?.run {
+            f()
+        } ?: run {
+            queueMessage(msg)
+            bindService(true)
+        }
+    }
+
     fun maybeBindAndLoad(callback: LoadCallback) {
         unqueueMessage(Message.Unbind)
         lastLoadCallback = callback
@@ -205,22 +204,12 @@ class ControlsProviderLifecycleManager(
             Log.d(TAG, "Timeout waiting onLoad for $componentName")
             loadCallbackService.accept(token, emptyList())
         }, LOAD_TIMEOUT, TimeUnit.MILLISECONDS)
-        if (isBound) {
-            load()
-        } else {
-            queueMessage(Message.Load)
-            unbindImmediate = true
-            bindService(true)
-        }
+
+        invokeOrQueue(::load, Message.Load)
     }
 
     fun maybeBindAndSubscribe(controlIds: List<String>) {
-        if (isBound) {
-            subscribe(controlIds)
-        } else {
-            queueMessage(Message.Subscribe(controlIds))
-            bindService(true)
-        }
+        invokeOrQueue({ subscribe(controlIds) }, Message.Subscribe(controlIds))
     }
 
     private fun subscribe(controlIds: List<String>) {
@@ -234,12 +223,7 @@ class ControlsProviderLifecycleManager(
     }
 
     fun maybeBindAndSendAction(controlId: String, action: ControlAction) {
-        if (isBound) {
-            action(controlId, action)
-        } else {
-            queueMessage(Message.Action(controlId, action))
-            bindService(true)
-        }
+        invokeOrQueue({ action(controlId, action) }, Message.Action(controlId, action))
     }
 
     private fun action(controlId: String, action: ControlAction) {
@@ -276,25 +260,23 @@ class ControlsProviderLifecycleManager(
         }
     }
 
-    fun maybeUnbindAndRemoveCallback() {
-        lastLoadCallback = null
-        onLoadCanceller?.run()
-        onLoadCanceller = null
-        if (unbindImmediate) {
-            bindService(false)
-        }
+    fun bindService() {
+        unqueueMessage(Message.Unbind)
+        bindService(true)
     }
 
     fun unbindService() {
-        unbindImmediate = true
-        maybeUnbindAndRemoveCallback()
+        lastLoadCallback = null
+        onLoadCanceller?.run()
+        onLoadCanceller = null
+
+        bindService(false)
     }
 
     override fun toString(): String {
         return StringBuilder("ControlsProviderLifecycleManager(").apply {
             append("component=$componentName")
             append(", user=$user")
-            append(", bound=$isBound")
             append(")")
         }.toString()
     }
