@@ -639,8 +639,9 @@ public class ConnectivityDiagnosticsManager {
     /**
      * Registers a ConnectivityDiagnosticsCallback with the System.
      *
-     * <p>Only apps that offer network connectivity to the user are allowed to register callbacks.
-     * This includes:
+     * <p>Only apps that offer network connectivity to the user should be registering callbacks.
+     * These are the only apps whose callbacks will be invoked by the system. Apps considered to
+     * meet these conditions include:
      *
      * <ul>
      *   <li>Carrier apps with active subscriptions
@@ -648,8 +649,7 @@ public class ConnectivityDiagnosticsManager {
      *   <li>WiFi Suggesters
      * </ul>
      *
-     * <p>Callbacks will be limited to receiving notifications for networks over which apps provide
-     * connectivity.
+     * <p>Callbacks registered by apps not meeting the above criteria will not be invoked.
      *
      * <p>If a registering app loses its relevant permissions, any callbacks it registered will
      * silently stop receiving callbacks.
