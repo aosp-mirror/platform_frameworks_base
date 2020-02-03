@@ -26,8 +26,8 @@ interface IBlobStoreManager {
     ParcelFileDescriptor openBlob(in BlobHandle handle, in String packageName);
     void deleteSession(long sessionId, in String packageName);
 
-    void acquireLease(in BlobHandle handle, int descriptionResId, long leaseTimeout,
-            in String packageName);
+    void acquireLease(in BlobHandle handle, int descriptionResId, in CharSequence description,
+            long leaseTimeoutMillis, in String packageName);
     void releaseLease(in BlobHandle handle, in String packageName);
 
     void waitForIdle(in RemoteCallback callback);

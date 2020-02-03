@@ -511,7 +511,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     }
 
     @Nullable
-    static BlobStoreSession createFromXml(@NonNull XmlPullParser in,
+    static BlobStoreSession createFromXml(@NonNull XmlPullParser in, int version,
             @NonNull Context context, @NonNull SessionStateChangeListener stateChangeListener)
             throws IOException, XmlPullParserException {
         final int sessionId = XmlUtils.readIntAttribute(in, ATTR_ID);

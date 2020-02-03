@@ -28,7 +28,12 @@ class BlobStoreConfig {
     public static final String TAG = "BlobStore";
     public static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
-    public static final int CURRENT_XML_VERSION = 1;
+    // Initial version.
+    public static final int XML_VERSION_INIT = 1;
+    // Added a string variant of lease description.
+    public static final int XML_VERSION_ADD_STRING_DESC = 2;
+
+    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_STRING_DESC;
 
     private static final String ROOT_DIR_NAME = "blobstore";
     private static final String BLOBS_DIR_NAME = "blobs";
