@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Idivayisi yakho izosulwa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Uhlelo lokusebenza lomlawuli alikwazi ukusetshenziswa. Idivayisi yakho manje izosuswa.\n\nUma unemibuzo, xhumana nomlawuli wezinhlangano zakho."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Ukuphrinta kukhutshazwe nge-<xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Izinhlelo zokusebenza zimiswe okwesikhashana ngumlawuli"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Thepha lapha ukuze uhlole ukuthobelana kwenqubomgomo."</string>
     <string name="me" msgid="6207584824693813140">"Mina"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Okukhethwa kukho kwethebhulethi"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Izinketho ze-Android TV"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%1$d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%2$d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google\n\n Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%3$d</xliff:g> amasekhondi."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Susa"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Ingemuva eqalise isevisi yasemuva kusuka ku-<xliff:g id="PACKAGENAME">%1$s</xliff:g> ngeke ithole imvume yokusebenzisa yesikhathi ekwakheni kwe-R ezayo. Sicela ubone i-go/r-bg-fgs-restriction bese ufayele umbiko wesiphazamiso."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Khuphukisa ivolumu ngaphezu kweleveli enconyiwe?\n\nUkulalela ngevolumu ephezulu izikhathi ezide kungahle kulimaze ukuzwa kwakho."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sebenzisa isinqamuleli sokufinyelela?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Uma kuvulwe isinqamuleli, ukucindezela zombili izinkinobho zevolumu amasekhondi angu-3 kuzoqala isici sokufinyelela.\n\n Isici samanje sokufinyelela:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Ungashintsha isici kuzilungiselelo &gt; Ukufinyelela."</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Uhlelo lokusebenza alutholakali"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"I-<xliff:g id="APP_NAME_0">%1$s</xliff:g> ayitholakali okwamanje. Lokhu kuphethwe i-<xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Funda kabanzi"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Susa ukuphumuza uhlelo lokusebenza"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vula iphrofayela yomsebenzi?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Izinhlelo zakho zokusebenza zomsebenzi, izaziso, idatha, nezinye izici zephrofayela yomsebenzi kuzovulwa"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Vula"</string>
@@ -2007,12 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Guqula ukuhlukanisa isikrini"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Khiya isikrini"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Isithombe-skrini"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Imenyu yokufinyeleleka"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Ibha yamazwibela we-<xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"I-<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ifakwe kubhakede LOKUKHAWULELWE"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Okomuntu siqu"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Umsebenzi"</string>
 </resources>

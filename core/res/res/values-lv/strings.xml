@@ -196,10 +196,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jūsu ierīces dati tiks dzēsti"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administratora lietotni nevar izmantot. Ierīcē saglabātie dati tiks dzēsti.\n\nJa jums ir kādi jautājumi, sazinieties ar savas organizācijas administratoru."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Administrators apturēja privāto lietotņu darbību"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Pieskarieties šeit, lai noskaidrotu atbilstību politikai."</string>
     <string name="me" msgid="6207584824693813140">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV opcijas"</string>
@@ -1635,8 +1633,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">"  — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Noņemt"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Fonā sāktam priekšplāna pakalpojumam no pakotnes <xliff:g id="PACKAGENAME">%1$s</xliff:g> nebūs atļaujas “while-in-use” turpmākajās R versijās. Lūdzu, skatiet vietni go/r-bg-fgs-restriction un iesniedziet kļūdas pārskatu."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vai palielināt skaļumu virs ieteicamā līmeņa?\n\nIlgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Ja saīsne ir iespējota, vienlaikus nospiežot abas skaļuma regulēšanas pogas un trīs sekundes turot tās, tiks palaista pieejamības funkcija.\n\n Pašreiz iestatītā pieejamības funkcija:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Šo funkciju var mainīt sadaļā Iestatījumi &gt; Pieejamība."</string>
@@ -1884,8 +1881,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Lietotne nav pieejama"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> pašlaik nav pieejama. Šo darbību pārvalda <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Uzzināt vairāk"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Atsākt lietotnes darbību"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vai ieslēgt darba profilu?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Tiks ieslēgtas jūsu darba lietotnes, paziņojumi, dati un citas darba profila funkcijas."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ieslēgt"</string>
@@ -2041,12 +2037,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Pārslēgt ekrāna sadalīšanu"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Bloķēt ekrānu"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekrānuzņēmums"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Pieejamības izvēlne"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> subtitru josla."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Pakotne “<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>” ir ievietota ierobežotā kopā."</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Privātais profils"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Darba profils"</string>
 </resources>
