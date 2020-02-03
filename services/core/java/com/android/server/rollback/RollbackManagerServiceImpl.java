@@ -52,6 +52,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -94,7 +95,7 @@ import java.util.concurrent.TimeUnit;
 class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private static final String TAG = "RollbackManager";
-    private static final boolean LOCAL_LOGV = false;
+    private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     // Rollbacks expire after 14 days.
     private static final long DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS =
