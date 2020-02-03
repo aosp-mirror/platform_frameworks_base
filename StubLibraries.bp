@@ -109,6 +109,16 @@ droidstubs {
     jdiff_enabled: true,
 }
 
+priv_apps = " " +
+    "--show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+    "\\) "
+
+module_libs = " " +
+    " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\) "
+
 droidstubs {
     name: "system-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
@@ -120,10 +130,7 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
-        "process=android.annotation.SystemApi.Process.ALL\\)",
+    args: metalava_framework_docs_args + priv_apps,
     check_api: {
         current: {
             api_file: "api/system-current.txt",
@@ -171,49 +178,17 @@ droidstubs {
 // @SystemApi(client=MODULE_APPS) and @SystemApi(client=MODULE_LIBRARIES)
 /////////////////////////////////////////////////////////////////////
 
-// TODO(b/146727827) remove the *-api modules when we can teach metalava
+// TODO(b/146727827) remove the *-api module when we can teach metalava
 // about the relationship among the API surfaces. Currently, these modules are only to generate
 // the API signature files and ensure that the APIs evolve in a backwards compatible manner.
 // They however are NOT used for building the API stub.
-droidstubs {
-    name: "module-app-api",
-    defaults: ["metalava-api-stubs-default"],
-    libs: ["framework-all"],
-    arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_APPS," +
-        "process=android.annotation.SystemApi.Process.ALL\\)",
-    check_api: {
-        current: {
-            api_file: "api/module-app-current.txt",
-            removed_api_file: "api/module-app-removed.txt",
-        },
-        // TODO(b/147559833) enable the compatibility check against the last release API
-        // and the API lint
-        //last_released: {
-        //    api_file: ":last-released-module-app-api",
-        //    removed_api_file: "api/module-app-removed.txt",
-        //    baseline_file: ":module-app-api-incompatibilities-with-last-released"
-        //},
-        //api_lint: {
-        //    enabled: true,
-        //    new_since: ":last-released-module-app-api",
-        //    baseline_file: "api/module-app-lint-baseline.txt",
-        //},
-    },
-    //jdiff_enabled: true,
-}
 
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-api-stubs-default"],
     libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES," +
-        "process=android.annotation.SystemApi.Process.ALL\\)",
+    args: metalava_framework_docs_args + module_libs,
     check_api: {
         current: {
             api_file: "api/module-lib-current.txt",
@@ -235,39 +210,17 @@ droidstubs {
     //jdiff_enabled: true,
 }
 
-// The following two droidstubs modules generate source files for the API stub libraries for
-// modules. Note that they not only include their own APIs but also other APIs that have
-// narrower scope. For example, module-lib-api-stubs-docs includes all @SystemApis not just
-// the ones with 'client=MODULE_LIBRARIES'.
-droidstubs {
-    name: "module-app-api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
-    libs: ["framework-all"],
-    arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
-        "process=android.annotation.SystemApi.Process.ALL\\)" +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_APPS," +
-        "process=android.annotation.SystemApi.Process.ALL\\)",
-}
+
+// The following droidstub module generates source files for the API stub library for
+// modules. Note that it not only includes its own APIs but also other APIs that have
+// narrower scope (all @SystemApis, not just the ones with 'client=MODULE_LIBRARIES').
 
 droidstubs {
     name: "module-lib-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
     libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS," +
-        "process=android.annotation.SystemApi.Process.ALL\\)" +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_APPS," +
-        "process=android.annotation.SystemApi.Process.ALL\\)" +
-        " --show-annotation android.annotation.SystemApi\\(" +
-        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES," +
-        "process=android.annotation.SystemApi.Process.ALL\\)",
+    args: metalava_framework_docs_args + priv_apps + module_libs,
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -336,21 +289,6 @@ java_library_static {
 }
 
 java_library_static {
-    name: "android_module_app_stubs_current",
-    srcs: [
-        ":module-app-api-stubs-docs",
-    ],
-    libs: [
-        "stub-annotations",
-        "framework-all",
-    ],
-    static_libs: [
-        "private-stub-annotations-jar",
-    ],
-    defaults: ["framework-stubs-default"],
-}
-
-java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [
         ":module-lib-api-stubs-docs",
@@ -397,7 +335,7 @@ droidstubs {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
-    args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\)",
+    args: priv_apps,
 }
 
 java_library_static {
@@ -423,7 +361,7 @@ droidstubs {
     removed_dex_api_filename: "removed-dex.txt",
     args: metalava_framework_docs_args +
         " --show-unannotated " +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) " +
+        priv_apps +
         " --show-annotation android.annotation.TestApi ",
 }
 
@@ -442,7 +380,7 @@ droidstubs {
         " --hide ReferencesHidden " +
         " --hide UnhiddenSystemApi " +
         " --show-unannotated " +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS,process=android.annotation.SystemApi.Process.ALL\\) " +
+        priv_apps +
         " --show-annotation android.annotation.TestApi ",
 }
 
