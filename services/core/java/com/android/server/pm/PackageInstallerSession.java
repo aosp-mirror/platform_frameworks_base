@@ -558,10 +558,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionErrorMessage =
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
 
-        if (isStreamingInstallation()
-                && this.params.dataLoaderParams.getComponentName().getPackageName()
-                == SYSTEM_DATA_LOADER_PACKAGE) {
-            assertShellOrSystemCalling("System data loaders");
+        if (isDataLoaderInstallation()) {
+            if (isApexInstallation()) {
+                throw new IllegalArgumentException(
+                        "DataLoader installation of APEX modules is not allowed.");
+            }
+        }
+
+        if (isStreamingInstallation()) {
+            if (!isIncrementalInstallationAllowed(mPackageName)) {
+                throw new IllegalArgumentException(
+                        "Incremental installation of this package is not allowed.");
+            }
+            if (this.params.dataLoaderParams.getComponentName().getPackageName()
+                    == SYSTEM_DATA_LOADER_PACKAGE) {
+                assertShellOrSystemCalling("System data loaders");
+            }
         }
     }
 
@@ -1174,6 +1186,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
+     * Checks if the package can be installed on IncFs.
+     */
+    private static boolean isIncrementalInstallationAllowed(String packageName) {
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final AndroidPackage existingPackage = pmi.getPackage(packageName);
+        if (existingPackage == null) {
+            return true;
+        }
+
+        return !PackageManagerService.isSystemApp(existingPackage);
+    }
+
+    /**
      * If this was not already called, the session will be sealed.
      *
      * This method may be called multiple times to update the status receiver validate caller
@@ -1362,14 +1387,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return false;
                 }
 
-                final PackageInfo pkgInfo = mPm.getPackageInfo(
-                        params.appPackageName, PackageManager.GET_SIGNATURES
-                                | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
-
                 if (isApexInstallation()) {
                     validateApexInstallLocked();
                 } else {
-                    validateApkInstallLocked(pkgInfo);
+                    validateApkInstallLocked();
                 }
             }
 
@@ -1786,8 +1807,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link PackageManagerService}.
      */
     @GuardedBy("mLock")
-    private void validateApkInstallLocked(@Nullable PackageInfo pkgInfo)
-            throws PackageManagerException {
+    private void validateApkInstallLocked() throws PackageManagerException {
         ApkLite baseApk = null;
         mPackageName = null;
         mVersionCode = -1;
@@ -1796,6 +1816,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedBaseFile = null;
         mResolvedStagedFiles.clear();
         mResolvedInheritedFiles.clear();
+
+        final PackageInfo pkgInfo = mPm.getPackageInfo(
+                params.appPackageName, PackageManager.GET_SIGNATURES
+                        | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
 
         // Partial installs must be consistent with existing install
         if (params.mode == SessionParams.MODE_INHERIT_EXISTING
