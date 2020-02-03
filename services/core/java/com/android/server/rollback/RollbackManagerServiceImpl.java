@@ -50,7 +50,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
@@ -120,10 +119,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // Set of allocated rollback ids
     @GuardedBy("mLock")
     private final SparseBooleanArray mAllocatedRollbackIds = new SparseBooleanArray();
-
-    // Rollbacks we are in the process of enabling.
-    @GuardedBy("mLock")
-    private final Set<Rollback> mNewRollbacks = new ArraySet<>();
 
     // The list of all rollbacks, including available and committed rollbacks.
     @GuardedBy("mLock")
@@ -441,15 +436,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     iter.remove();
                     rollback.delete(mAppDataRollbackHelper);
                 }
-            }
-            Iterator<Rollback> iter2 = mNewRollbacks.iterator();
-            while (iter2.hasNext()) {
-                Rollback newRollback = iter2.next();
-                if (newRollback.includesPackage(packageName)) {
-                    iter2.remove();
-                    newRollback.delete(mAppDataRollbackHelper);
-                }
-
             }
         }
     }
@@ -826,13 +812,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         synchronized (mLock) {
-            Rollback newRollback = getNewRollbackForPackageSessionLocked(sessionId);
-            if (newRollback != null) {
-                Slog.w(TAG, "Delete new rollback id=" + newRollback.info.getRollbackId()
-                        + " for session id=" + sessionId);
-                mNewRollbacks.remove(newRollback);
-                newRollback.delete(mAppDataRollbackHelper);
-            }
             Iterator<Rollback> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 Rollback rollback = iter.next();
@@ -968,13 +947,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     + " users=" + Arrays.toString(userIds));
         }
         synchronized (mLock) {
-            // staged installs
             for (int i = 0; i < mRollbacks.size(); i++) {
                 Rollback rollback = mRollbacks.get(i);
-                rollback.snapshotUserData(packageName, userIds, mAppDataRollbackHelper);
-            }
-            // non-staged installs
-            for (Rollback rollback : mNewRollbacks) {
                 rollback.snapshotUserData(packageName, userIds, mAppDataRollbackHelper);
             }
         }
