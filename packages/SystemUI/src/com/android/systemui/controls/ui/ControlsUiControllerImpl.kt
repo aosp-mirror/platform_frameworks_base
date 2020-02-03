@@ -138,7 +138,10 @@ class ControlsUiControllerImpl @Inject constructor (
         val serviceIntent = Intent()
         serviceIntent.setComponent(ComponentName("com.android.systemui.home.mock",
                 "com.android.systemui.home.mock.AuthService"))
-        context.bindService(serviceIntent, tokenProviderConnection!!, Context.BIND_AUTO_CREATE)
+        if (!context.bindService(serviceIntent, tokenProviderConnection!!,
+                Context.BIND_AUTO_CREATE)) {
+            controlsController.get().subscribeToFavorites()
+        }
     }
 
     private fun showInitialSetupView() {
