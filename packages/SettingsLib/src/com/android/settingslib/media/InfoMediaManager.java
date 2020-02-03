@@ -40,15 +40,16 @@ public class InfoMediaManager extends MediaManager {
     final Executor mExecutor = Executors.newSingleThreadExecutor();
     @VisibleForTesting
     MediaRouter2Manager mRouterManager;
+    @VisibleForTesting
+    String mPackageName;
 
-    private String mPackageName;
     private MediaDevice mCurrentConnectedDevice;
 
     public InfoMediaManager(Context context, String packageName, Notification notification) {
         super(context, notification);
 
         mRouterManager = MediaRouter2Manager.getInstance(context);
-        if (packageName != null) {
+        if (!TextUtils.isEmpty(packageName)) {
             mPackageName = packageName;
         }
     }
@@ -57,6 +58,7 @@ public class InfoMediaManager extends MediaManager {
     public void startScan() {
         mMediaDevices.clear();
         mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+        refreshDevices();
     }
 
     @VisibleForTesting
@@ -79,21 +81,37 @@ public class InfoMediaManager extends MediaManager {
         return mCurrentConnectedDevice;
     }
 
-    class RouterManagerCallback extends MediaRouter2Manager.Callback {
-
-        private void refreshDevices() {
-            mMediaDevices.clear();
-            mCurrentConnectedDevice = null;
-            for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
-                final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, route,
-                        mPackageName);
-                if (TextUtils.equals(route.getClientPackageName(), mPackageName)) {
-                    mCurrentConnectedDevice = device;
-                }
-                mMediaDevices.add(device);
-            }
-            dispatchDeviceListAdded();
+    private void refreshDevices() {
+        mMediaDevices.clear();
+        mCurrentConnectedDevice = null;
+        if (TextUtils.isEmpty(mPackageName)) {
+            buildAllRoutes();
+        } else {
+            buildAvailableRoutes();
         }
+        dispatchDeviceListAdded();
+    }
+
+    private void buildAllRoutes() {
+        for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
+            final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, route,
+                    mPackageName);
+            mMediaDevices.add(device);
+        }
+    }
+
+    private void buildAvailableRoutes() {
+        for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
+            final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, route,
+                    mPackageName);
+            if (TextUtils.equals(route.getClientPackageName(), mPackageName)) {
+                mCurrentConnectedDevice = device;
+            }
+            mMediaDevices.add(device);
+        }
+    }
+
+    class RouterManagerCallback extends MediaRouter2Manager.Callback {
 
         @Override
         public void onRoutesAdded(List<MediaRoute2Info> routes) {
