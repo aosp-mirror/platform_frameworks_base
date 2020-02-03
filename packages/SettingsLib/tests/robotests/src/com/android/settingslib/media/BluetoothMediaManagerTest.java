@@ -96,7 +96,7 @@ public class BluetoothMediaManagerTest {
         when(mA2dpProfile.getConnectableDevices()).thenReturn(devices);
         when(mCachedDeviceManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        when(mA2dpProfile.isPreferred(bluetoothDevice)).thenReturn(true);
+        when(mA2dpProfile.isEnabled(bluetoothDevice)).thenReturn(true);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -113,7 +113,7 @@ public class BluetoothMediaManagerTest {
         when(mA2dpProfile.getConnectableDevices()).thenReturn(devices);
         when(mCachedDeviceManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
-        when(mA2dpProfile.isPreferred(bluetoothDevice)).thenReturn(true);
+        when(mA2dpProfile.isEnabled(bluetoothDevice)).thenReturn(true);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -141,7 +141,7 @@ public class BluetoothMediaManagerTest {
         when(mHapProfile.getConnectableDevices()).thenReturn(devices);
         when(mCachedDeviceManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        when(mHapProfile.isPreferred(bluetoothDevice)).thenReturn(true);
+        when(mHapProfile.isEnabled(bluetoothDevice)).thenReturn(true);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
