@@ -11585,12 +11585,14 @@ public class DevicePolicyManager {
      * #setCrossProfilePackages(ComponentName, Set)}.</li>
      * <li>The default package names set by the OEM that are allowed to request user consent for
      * cross-profile communication without being explicitly enabled by the admin, via
-     * {@link com.android.internal.R.array#cross_profile_apps}</li>
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.</li>
      * </ul>
      *
      * @return the combined set of whitelisted package names set via
-     * {@link #setCrossProfilePackages(ComponentName, Set)} and
-     * {@link com.android.internal.R.array#cross_profile_apps}
+     * {@link #setCrossProfilePackages(ComponentName, Set)},
+     * {@link com.android.internal.R.array#cross_profile_apps},
+     * and {@link com.android.internal.R.array#vendor_cross_profile_apps}.
      *
      * @hide
      */
@@ -11600,10 +11602,30 @@ public class DevicePolicyManager {
             permission.INTERACT_ACROSS_PROFILES
     })
     public @NonNull Set<String> getAllCrossProfilePackages() {
-        throwIfParentInstance("getDefaultCrossProfilePackages");
+        throwIfParentInstance("getAllCrossProfilePackages");
         if (mService != null) {
             try {
                 return new ArraySet<>(mService.getAllCrossProfilePackages());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    /**
+     * Returns the default package names set by the OEM that are allowed to request user consent for
+     * cross-profile communication without being explicitly enabled by the admin, via
+     * {@link com.android.internal.R.array#cross_profile_apps} and
+     * {@link com.android.internal.R.array#vendor_cross_profile_apps}.
+     *
+     * @hide
+     */
+    public @NonNull Set<String> getDefaultCrossProfilePackages() {
+        throwIfParentInstance("getDefaultCrossProfilePackages");
+        if (mService != null) {
+            try {
+                return new ArraySet<>(mService.getDefaultCrossProfilePackages());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
