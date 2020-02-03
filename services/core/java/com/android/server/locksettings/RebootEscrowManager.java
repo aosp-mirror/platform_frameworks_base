@@ -27,6 +27,7 @@ import android.os.UserManager;
 import android.util.Slog;
 import android.util.StatsLog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.RebootEscrowListener;
 
@@ -34,18 +35,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.crypto.spec.SecretKeySpec;
 
 class RebootEscrowManager {
     private static final String TAG = "RebootEscrowManager";
 
     /**
-     * Used to track when the reboot escrow is wanted. Set to false when mRebootEscrowReady is
-     * true.
+     * Used to track when the reboot escrow is wanted. Should stay true once escrow is requested
+     * unless clearRebootEscrow is called. This will allow all the active users to be unlocked
+     * after reboot.
      */
-    private final AtomicBoolean mRebootEscrowWanted = new AtomicBoolean(false);
+    private boolean mRebootEscrowWanted;
 
     /** Used to track when reboot escrow is ready. */
     private boolean mRebootEscrowReady;
@@ -54,10 +53,16 @@ class RebootEscrowManager {
     private RebootEscrowListener mRebootEscrowListener;
 
     /**
+     * Hold this lock when checking or generating the reboot escrow key.
+     */
+    private final Object mKeyGenerationLock = new Object();
+
+    /**
      * Stores the reboot escrow data between when it's supplied and when
      * {@link #armRebootEscrowIfNeeded()} is called.
      */
-    private RebootEscrowData mPendingRebootEscrowData;
+    @GuardedBy("mKeyGenerationLock")
+    private RebootEscrowKey mPendingRebootEscrowKey;
 
     private final UserManager mUserManager;
 
@@ -82,6 +87,7 @@ class RebootEscrowManager {
         public Context getContext() {
             return mContext;
         }
+
         public UserManager getUserManager() {
             return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
@@ -123,7 +129,7 @@ class RebootEscrowManager {
             return;
         }
 
-        SecretKeySpec escrowKey = getAndClearRebootEscrowKey();
+        RebootEscrowKey escrowKey = getAndClearRebootEscrowKey();
         if (escrowKey == null) {
             Slog.w(TAG, "Had reboot escrow data for users, but no key; removing escrow storage.");
             for (UserInfo user : users) {
@@ -140,7 +146,7 @@ class RebootEscrowManager {
         StatsLog.write(StatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, allUsersUnlocked);
     }
 
-    private SecretKeySpec getAndClearRebootEscrowKey() {
+    private RebootEscrowKey getAndClearRebootEscrowKey() {
         IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
         if (rebootEscrow == null) {
             return null;
@@ -170,14 +176,14 @@ class RebootEscrowManager {
             // Overwrite the existing key with the null key
             rebootEscrow.storeKey(new byte[32]);
 
-            return RebootEscrowData.fromKeyBytes(escrowKeyBytes);
+            return RebootEscrowKey.fromKeyBytes(escrowKeyBytes);
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not retrieve escrow data");
             return null;
         }
     }
 
-    private boolean restoreRebootEscrowForUser(@UserIdInt int userId, SecretKeySpec escrowKey) {
+    private boolean restoreRebootEscrowForUser(@UserIdInt int userId, RebootEscrowKey key) {
         if (!mStorage.hasRebootEscrow(userId)) {
             return false;
         }
@@ -186,7 +192,7 @@ class RebootEscrowManager {
             byte[] blob = mStorage.readRebootEscrow(userId);
             mStorage.removeRebootEscrow(userId);
 
-            RebootEscrowData escrowData = RebootEscrowData.fromEncryptedData(escrowKey, blob);
+            RebootEscrowData escrowData = RebootEscrowData.fromEncryptedData(key, blob);
 
             mCallbacks.onRebootEscrowRestored(escrowData.getSpVersion(),
                     escrowData.getSyntheticPassword(), userId);
@@ -199,33 +205,60 @@ class RebootEscrowManager {
 
     void callToRebootEscrowIfNeeded(@UserIdInt int userId, byte spVersion,
             byte[] syntheticPassword) {
-        if (!mRebootEscrowWanted.compareAndSet(true, false)) {
+        if (!mRebootEscrowWanted) {
             return;
         }
 
         IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
         if (rebootEscrow == null) {
+            mRebootEscrowWanted = false;
+            setRebootEscrowReady(false);
+            return;
+        }
+
+        RebootEscrowKey escrowKey = generateEscrowKeyIfNeeded();
+        if (escrowKey == null) {
+            Slog.e(TAG, "Could not generate escrow key");
+            mRebootEscrowWanted = false;
             setRebootEscrowReady(false);
             return;
         }
 
         final RebootEscrowData escrowData;
         try {
-            escrowData = RebootEscrowData.fromSyntheticPassword(spVersion, syntheticPassword);
+            escrowData = RebootEscrowData.fromSyntheticPassword(escrowKey, spVersion,
+                    syntheticPassword);
         } catch (IOException e) {
             setRebootEscrowReady(false);
             Slog.w(TAG, "Could not escrow reboot data", e);
             return;
         }
 
-        mPendingRebootEscrowData = escrowData;
         mStorage.writeRebootEscrow(userId, escrowData.getBlob());
 
         setRebootEscrowReady(true);
     }
 
+    private RebootEscrowKey generateEscrowKeyIfNeeded() {
+        synchronized (mKeyGenerationLock) {
+            if (mPendingRebootEscrowKey != null) {
+                return mPendingRebootEscrowKey;
+            }
+
+            RebootEscrowKey key;
+            try {
+                key = RebootEscrowKey.generate();
+            } catch (IOException e) {
+                return null;
+            }
+
+            mPendingRebootEscrowKey = key;
+            return key;
+        }
+    }
+
     private void clearRebootEscrowIfNeeded() {
-        mRebootEscrowWanted.set(false);
+        mRebootEscrowWanted = false;
         setRebootEscrowReady(false);
 
         IRebootEscrow rebootEscrow = mInjector.getRebootEscrow();
@@ -255,14 +288,18 @@ class RebootEscrowManager {
             return false;
         }
 
-        RebootEscrowData escrowData = mPendingRebootEscrowData;
-        if (escrowData == null) {
+        RebootEscrowKey escrowKey;
+        synchronized (mKeyGenerationLock) {
+            escrowKey = mPendingRebootEscrowKey;
+        }
+
+        if (escrowKey == null) {
             return false;
         }
 
         boolean armedRebootEscrow = false;
         try {
-            rebootEscrow.storeKey(escrowData.getKey());
+            rebootEscrow.storeKey(escrowKey.getKeyBytes());
             armedRebootEscrow = true;
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed escrow secret to RebootEscrow HAL", e);
@@ -283,7 +320,7 @@ class RebootEscrowManager {
         }
 
         clearRebootEscrowIfNeeded();
-        mRebootEscrowWanted.set(true);
+        mRebootEscrowWanted = true;
         return true;
     }
 

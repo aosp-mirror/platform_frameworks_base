@@ -26,16 +26,12 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Holds the data necessary to complete a reboot escrow of the Synthetic Password.
@@ -47,17 +43,11 @@ class RebootEscrowData {
      */
     private static final int CURRENT_VERSION = 1;
 
-    /** The secret key will be of this format. */
-    private static final String KEY_ALGO = "AES";
-
-    /** The key size used for encrypting the reboot escrow data. */
-    private static final int KEY_SIZE_BITS = 256;
-
     /** The algorithm used for the encryption of the key blob. */
     private static final String CIPHER_ALGO = "AES/GCM/NoPadding";
 
     private RebootEscrowData(byte spVersion, byte[] iv, byte[] syntheticPassword, byte[] blob,
-            byte[] key) {
+            RebootEscrowKey key) {
         mSpVersion = spVersion;
         mIv = iv;
         mSyntheticPassword = syntheticPassword;
@@ -69,7 +59,7 @@ class RebootEscrowData {
     private final byte[] mIv;
     private final byte[] mSyntheticPassword;
     private final byte[] mBlob;
-    private final byte[] mKey;
+    private final RebootEscrowKey mKey;
 
     public byte getSpVersion() {
         return mSpVersion;
@@ -87,17 +77,13 @@ class RebootEscrowData {
         return mBlob;
     }
 
-    public byte[] getKey() {
+    public RebootEscrowKey getKey() {
         return mKey;
     }
 
-    static SecretKeySpec fromKeyBytes(byte[] keyBytes) {
-        return new SecretKeySpec(keyBytes, KEY_ALGO);
-    }
-
-    static RebootEscrowData fromEncryptedData(SecretKeySpec keySpec, byte[] blob)
+    static RebootEscrowData fromEncryptedData(RebootEscrowKey key, byte[] blob)
             throws IOException {
-        Preconditions.checkNotNull(keySpec);
+        Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(blob);
 
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(blob));
@@ -126,7 +112,7 @@ class RebootEscrowData {
         final byte[] syntheticPassword;
         try {
             Cipher c = Cipher.getInstance(CIPHER_ALGO);
-            c.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(iv));
+            c.init(Cipher.DECRYPT_MODE, key.getKey(), new IvParameterSpec(iv));
             syntheticPassword = c.doFinal(cipherText);
         } catch (NoSuchAlgorithmException | InvalidKeyException | BadPaddingException
                 | IllegalBlockSizeException | NoSuchPaddingException
@@ -134,30 +120,22 @@ class RebootEscrowData {
             throw new IOException("Could not decrypt ciphertext", e);
         }
 
-        return new RebootEscrowData(spVersion, iv, syntheticPassword, blob, keySpec.getEncoded());
+        return new RebootEscrowData(spVersion, iv, syntheticPassword, blob, key);
     }
 
-    static RebootEscrowData fromSyntheticPassword(byte spVersion, byte[] syntheticPassword)
+    static RebootEscrowData fromSyntheticPassword(RebootEscrowKey key, byte spVersion,
+            byte[] syntheticPassword)
             throws IOException {
         Preconditions.checkNotNull(syntheticPassword);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
 
-        final SecretKey secretKey;
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGO);
-            keyGenerator.init(KEY_SIZE_BITS, new SecureRandom());
-            secretKey = keyGenerator.generateKey();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IOException("Could not generate new secret key", e);
-        }
-
         final byte[] cipherText;
         final byte[] iv;
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_ALGO);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            cipher.init(Cipher.ENCRYPT_MODE, key.getKey());
             cipherText = cipher.doFinal(syntheticPassword);
             iv = cipher.getIV();
         } catch (NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException
@@ -173,6 +151,6 @@ class RebootEscrowData {
         dos.write(cipherText);
 
         return new RebootEscrowData(spVersion, iv, syntheticPassword, bos.toByteArray(),
-                secretKey.getEncoded());
+                key);
     }
 }
