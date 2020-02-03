@@ -111,10 +111,9 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
 binder::Status BinderIncrementalService::createStorage(const std::string& path,
                                                        const DataLoaderParamsParcel& params,
                                                        int32_t createMode, int32_t* _aidl_return) {
-    *_aidl_return =
-            mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params),
-                                android::incremental::IncrementalService::CreateOptions(
-                                        createMode));
+    *_aidl_return = mImpl.createStorage(path, const_cast<DataLoaderParamsParcel&&>(params),
+                                        android::incremental::IncrementalService::CreateOptions(
+                                                createMode));
     return ok();
 }
 
@@ -195,7 +194,7 @@ binder::Status BinderIncrementalService::makeFile(
         return ok();
     }
 
-    *_aidl_return = mImpl.makeFile(storageId, path, 0555, fileId, nfp);
+    *_aidl_return = mImpl.makeFile(storageId, path, 0777, fileId, nfp);
     return ok();
 }
 binder::Status BinderIncrementalService::makeFileFromRange(int32_t storageId,

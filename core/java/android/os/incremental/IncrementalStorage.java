@@ -174,9 +174,12 @@ public final class IncrementalStorage {
             @Nullable byte[] metadata, int hashAlgorithm, @Nullable byte[] rootHash,
             @Nullable byte[] additionalData, @Nullable byte[] signature) throws IOException {
         try {
+            if (id == null && metadata == null) {
+                throw new IOException("File ID and metadata cannot both be null");
+            }
             final IncrementalNewFileParams params = new IncrementalNewFileParams();
             params.size = size;
-            params.metadata = metadata;
+            params.metadata = (metadata == null ? new byte[0] : metadata);
             params.fileId = idToBytes(id);
             if (hashAlgorithm != 0 || signature != null) {
                 params.signature = new IncrementalSignature();
@@ -354,9 +357,10 @@ public final class IncrementalStorage {
      * @param id The id to convert
      * @return Byte array that contains the same ID.
      */
-    public static byte[] idToBytes(UUID id) {
+    @NonNull
+    public static byte[] idToBytes(@Nullable UUID id) {
         if (id == null) {
-            return null;
+            return new byte[0];
         }
         final ByteBuffer buf = ByteBuffer.wrap(new byte[UUID_BYTE_SIZE]);
         buf.putLong(id.getMostSignificantBits());
@@ -370,7 +374,8 @@ public final class IncrementalStorage {
      * @param bytes The id in byte array format, 16 bytes long
      * @return UUID constructed from the byte array.
      */
-    public static UUID bytesToId(byte[] bytes) {
+    @NonNull
+    public static UUID bytesToId(byte[] bytes) throws IllegalArgumentException {
         if (bytes.length != UUID_BYTE_SIZE) {
             throw new IllegalArgumentException("Expected array of size " + UUID_BYTE_SIZE
                                                + ", got " + bytes.length);
