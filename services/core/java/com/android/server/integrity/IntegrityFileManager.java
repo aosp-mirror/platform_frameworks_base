@@ -147,19 +147,21 @@ public class IntegrityFileManager {
     /**
      * Read rules from persistent storage.
      *
-     * @param appInstallMetadata information about the install used to select rules to read
+     * @param appInstallMetadata information about the install used to select rules to read. If
+     *     null, all rules will be read.
      */
-    public List<Rule> readRules(AppInstallMetadata appInstallMetadata)
+    public List<Rule> readRules(@Nullable AppInstallMetadata appInstallMetadata)
             throws IOException, RuleParseException {
         synchronized (RULES_LOCK) {
             // Try to identify indexes from the index file.
-            List<RuleIndexRange> ruleReadingIndexes;
-            try {
-                ruleReadingIndexes =
-                        mRuleIndexingController.identifyRulesToEvaluate(appInstallMetadata);
-            } catch (Exception e) {
-                Slog.w(TAG, "Error identifying the rule indexes. Trying unindexed.", e);
-                ruleReadingIndexes = Collections.emptyList();
+            List<RuleIndexRange> ruleReadingIndexes = Collections.emptyList();
+            if (appInstallMetadata != null) {
+                try {
+                    ruleReadingIndexes =
+                            mRuleIndexingController.identifyRulesToEvaluate(appInstallMetadata);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Error identifying the rule indexes. Trying unindexed.", e);
+                }
             }
 
             // Read the rules based on the index information when available.

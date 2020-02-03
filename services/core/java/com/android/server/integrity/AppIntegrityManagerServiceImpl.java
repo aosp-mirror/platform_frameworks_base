@@ -46,6 +46,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.StatsLog;
 
@@ -67,6 +68,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +107,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private final RuleEvaluationEngine mEvaluationEngine;
     private final IntegrityFileManager mIntegrityFileManager;
 
+    private final boolean mCheckIntegrityForRuleProviders;
+
     /** Create an instance of {@link AppIntegrityManagerServiceImpl}. */
     public static AppIntegrityManagerServiceImpl create(Context context) {
         HandlerThread handlerThread = new HandlerThread("AppIntegrityManagerServiceHandler");
@@ -115,7 +119,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 LocalServices.getService(PackageManagerInternal.class),
                 RuleEvaluationEngine.getRuleEvaluationEngine(),
                 IntegrityFileManager.getInstance(),
-                handlerThread.getThreadHandler());
+                handlerThread.getThreadHandler(),
+                Settings.Global.getInt(
+                                    context.getContentResolver(),
+                                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                                    0)
+                            == 1
+                );
     }
 
     @VisibleForTesting
@@ -124,12 +134,14 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             PackageManagerInternal packageManagerInternal,
             RuleEvaluationEngine evaluationEngine,
             IntegrityFileManager integrityFileManager,
-            Handler handler) {
+            Handler handler,
+            boolean checkIntegrityForRuleProviders) {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mEvaluationEngine = evaluationEngine;
         mIntegrityFileManager = integrityFileManager;
         mHandler = handler;
+        mCheckIntegrityForRuleProviders = checkIntegrityForRuleProviders;
 
         IntentFilter integrityVerificationFilter = new IntentFilter();
         integrityVerificationFilter.addAction(ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
@@ -207,6 +219,17 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 : "";
     }
 
+    @Override
+    public ParceledListSlice<Rule> getCurrentRules() {
+        List<Rule> rules = Collections.emptyList();
+        try {
+            rules = mIntegrityFileManager.readRules(/* appInstallMetadata= */ null);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error getting current rules", e);
+        }
+        return new ParceledListSlice<>(rules);
+    }
+
     private void handleIntegrityVerification(Intent intent) {
         int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
 
@@ -228,7 +251,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             String installerPackageName = getInstallerPackageName(intent);
 
             // Skip integrity verification if the verifier is doing the install.
-            if (isRuleProvider(installerPackageName)) {
+            if (!mCheckIntegrityForRuleProviders
+                    && isRuleProvider(installerPackageName)) {
                 Slog.i(TAG, "Verifier doing the install. Skipping integrity check.");
                 mPackageManagerInternal.setIntegrityVerificationResult(
                         verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
@@ -295,7 +319,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
      * Verify the UID and return the installer package name.
      *
      * @return the package name of the installer, or null if it cannot be determined or it is
-     * installed via adb.
+     *     installed via adb.
      */
     @Nullable
     private String getInstallerPackageName(Intent intent) {
@@ -584,12 +608,13 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     private List<String> getAllowedRuleProviders() {
-        return Arrays.asList(mContext.getResources().getStringArray(
-                R.array.config_integrityRuleProviderPackages));
+        return Arrays.asList(
+                mContext.getResources()
+                        .getStringArray(R.array.config_integrityRuleProviderPackages));
     }
 
     private boolean isRuleProvider(String installerPackageName) {
-        return getAllowedRuleProviders().stream().anyMatch(
-                ruleProvider -> ruleProvider.equals(installerPackageName));
+        return getAllowedRuleProviders().stream()
+                .anyMatch(ruleProvider -> ruleProvider.equals(installerPackageName));
     }
 }

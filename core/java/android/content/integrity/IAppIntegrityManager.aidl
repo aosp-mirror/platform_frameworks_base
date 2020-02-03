@@ -25,4 +25,5 @@ interface IAppIntegrityManager {
     void updateRuleSet(String version, in ParceledListSlice<Rule> rules, in IntentSender statusReceiver);
     String getCurrentRuleSetVersion();
     String getCurrentRuleSetProvider();
+    ParceledListSlice<Rule> getCurrentRules();
 }
