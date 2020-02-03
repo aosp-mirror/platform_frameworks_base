@@ -40,14 +40,12 @@ import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.content.pm.ShortcutManager.ShareShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
@@ -221,31 +219,6 @@ public final class DataManagerTest {
         verify(mShortcutServiceInternal).getShortcuts(anyInt(), anyString(), anyLong(),
                 eq(TEST_PKG_NAME), eq(Collections.singletonList(TEST_SHORTCUT_ID)),
                 eq(null), anyInt(), eq(USER_ID_PRIMARY), anyInt(), anyInt());
-    }
-
-    @Test
-    public void testGetShareTargets() {
-        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
-
-        ShortcutInfo shortcut1 =
-                buildShortcutInfo("pkg_1", USER_ID_PRIMARY, "sc_1", buildPerson());
-        ShareShortcutInfo shareShortcut1 =
-                new ShareShortcutInfo(shortcut1, new ComponentName("pkg_1", "activity"));
-
-        ShortcutInfo shortcut2 =
-                buildShortcutInfo("pkg_2", USER_ID_PRIMARY, "sc_2", buildPerson());
-        ShareShortcutInfo shareShortcut2 =
-                new ShareShortcutInfo(shortcut2, new ComponentName("pkg_2", "activity"));
-        mDataManager.onShortcutAddedOrUpdated(shortcut2);
-
-        when(mShortcutManager.getShareTargets(any(IntentFilter.class)))
-                .thenReturn(Arrays.asList(shareShortcut1, shareShortcut2));
-
-        List<ShareShortcutInfo> shareShortcuts =
-                mDataManager.getConversationShareTargets(new IntentFilter());
-        // Only "sc_2" is stored as a conversation.
-        assertEquals(1, shareShortcuts.size());
-        assertEquals("sc_2", shareShortcuts.get(0).getShortcutInfo().getId());
     }
 
     @Test

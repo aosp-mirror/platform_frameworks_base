@@ -25,7 +25,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.people.data.DataManager;
-import com.android.server.people.prediction.ConversationPredictor;
+import com.android.server.people.prediction.AppTargetPredictor;
 
 import java.util.List;
 
@@ -34,12 +34,12 @@ class SessionInfo {
 
     private static final String TAG = "SessionInfo";
 
-    private final ConversationPredictor mConversationPredictor;
+    private final AppTargetPredictor mAppTargetPredictor;
     private final RemoteCallbackList<IPredictionCallback> mCallbacks =
             new RemoteCallbackList<>();
 
     SessionInfo(AppPredictionContext predictionContext, DataManager dataManager) {
-        mConversationPredictor = new ConversationPredictor(predictionContext,
+        mAppTargetPredictor = AppTargetPredictor.create(predictionContext,
                 this::updatePredictions, dataManager);
     }
 
@@ -51,8 +51,8 @@ class SessionInfo {
         mCallbacks.unregister(callback);
     }
 
-    ConversationPredictor getPredictor() {
-        return mConversationPredictor;
+    AppTargetPredictor getPredictor() {
+        return mAppTargetPredictor;
     }
 
     void onDestroy() {

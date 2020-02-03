@@ -28,6 +28,7 @@ import android.app.prediction.IPredictionCallback;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteException;
 
 import com.android.server.LocalServices;
@@ -76,6 +77,7 @@ public final class PeopleServiceTest {
         mPredictionContext = new AppPredictionContext.Builder(mContext)
                 .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
                 .setPredictedTargetCount(APP_PREDICTION_TARGET_COUNT)
+                .setExtras(new Bundle())
                 .build();
     }
 
