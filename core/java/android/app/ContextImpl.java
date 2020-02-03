@@ -750,7 +750,7 @@ class ContextImpl extends Context {
             if (type != null) {
                 dirs = Environment.buildPaths(dirs, type);
             }
-            return ensureExternalDirsExistOrFilter(dirs);
+            return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
     }
 
@@ -765,7 +765,7 @@ class ContextImpl extends Context {
     public File[] getObbDirs() {
         synchronized (mSync) {
             File[] dirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
-            return ensureExternalDirsExistOrFilter(dirs);
+            return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
     }
 
@@ -809,7 +809,10 @@ class ContextImpl extends Context {
     public File[] getExternalCacheDirs() {
         synchronized (mSync) {
             File[] dirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
-            return ensureExternalDirsExistOrFilter(dirs);
+            // We don't try to create cache directories in-process, because they need special
+            // setup for accurate quota tracking. This ensures the cache dirs are always
+            // created through StorageManagerService.
+            return ensureExternalDirsExistOrFilter(dirs, false /* tryCreateInProcess */);
         }
     }
 
@@ -817,7 +820,7 @@ class ContextImpl extends Context {
     public File[] getExternalMediaDirs() {
         synchronized (mSync) {
             File[] dirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
-            return ensureExternalDirsExistOrFilter(dirs);
+            return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
     }
 
@@ -2804,24 +2807,24 @@ class ContextImpl extends Context {
      * Ensure that given directories exist, trying to create them if missing. If
      * unable to create, they are filtered by replacing with {@code null}.
      */
-    private File[] ensureExternalDirsExistOrFilter(File[] dirs) {
+    private File[] ensureExternalDirsExistOrFilter(File[] dirs, boolean tryCreateInProcess) {
         final StorageManager sm = getSystemService(StorageManager.class);
         final File[] result = new File[dirs.length];
         for (int i = 0; i < dirs.length; i++) {
             File dir = dirs[i];
             if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    // recheck existence in case of cross-process race
-                    if (!dir.exists()) {
-                        // Failing to mkdir() may be okay, since we might not have
-                        // enough permissions; ask vold to create on our behalf.
-                        try {
+                try {
+                    if (!tryCreateInProcess || !dir.mkdirs()) {
+                        // recheck existence in case of cross-process race
+                        if (!dir.exists()) {
+                            // Failing to mkdir() may be okay, since we might not have
+                            // enough permissions; ask vold to create on our behalf.
                             sm.mkdirs(dir);
-                        } catch (Exception e) {
-                            Log.w(TAG, "Failed to ensure " + dir + ": " + e);
-                            dir = null;
                         }
                     }
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to ensure " + dir + ": " + e);
+                    dir = null;
                 }
             }
             result[i] = dir;
