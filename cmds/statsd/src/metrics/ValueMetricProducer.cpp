@@ -384,9 +384,6 @@ void ValueMetricProducer::invalidateCurrentBucketWithoutResetBase(const int64_t 
     if (!mCurrentBucketIsInvalid) {
         // Only report to StatsdStats once per invalid bucket.
         StatsdStats::getInstance().noteInvalidatedBucket(mMetricId);
-
-        mCurrentSkippedBucket.bucketStartTimeNs = mCurrentBucketStartTimeNs;
-        mCurrentSkippedBucket.bucketEndTimeNs = getCurrentBucketEndTimeNs();
     }
 
     if (!maxDropEventsReached()) {
@@ -960,12 +957,6 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     int64_t conditionTrueDuration = mConditionTimer.newBucketStart(bucketEndTime);
     bool isBucketLargeEnough = bucketEndTime - mCurrentBucketStartTimeNs >= mMinBucketSizeNs;
     if (!isBucketLargeEnough) {
-        // If the bucket is valid, this is the only drop reason and we need to
-        // set the skipped bucket start and end times.
-        if (!mCurrentBucketIsInvalid) {
-            mCurrentSkippedBucket.bucketStartTimeNs = mCurrentBucketStartTimeNs;
-            mCurrentSkippedBucket.bucketEndTimeNs = bucketEndTime;
-        }
         if (!maxDropEventsReached()) {
             mCurrentSkippedBucket.dropEvents.emplace_back(
                     buildDropEvent(eventTimeNs, BucketDropReason::BUCKET_TOO_SMALL));
@@ -983,6 +974,8 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
             }
         }
     } else {
+        mCurrentSkippedBucket.bucketStartTimeNs = mCurrentBucketStartTimeNs;
+        mCurrentSkippedBucket.bucketEndTimeNs = bucketEndTime;
         mSkippedBuckets.emplace_back(mCurrentSkippedBucket);
     }
 

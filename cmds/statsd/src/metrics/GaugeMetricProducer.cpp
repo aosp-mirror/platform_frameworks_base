@@ -549,14 +549,11 @@ void GaugeMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
 void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                                    const int64_t& nextBucketStartTimeNs) {
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
+    int64_t bucketEndTime = eventTimeNs < fullBucketEndTimeNs ? eventTimeNs : fullBucketEndTimeNs;
 
     GaugeBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
-    if (eventTimeNs < fullBucketEndTimeNs) {
-        info.mBucketEndNs = eventTimeNs;
-    } else {
-        info.mBucketEndNs = fullBucketEndTimeNs;
-    }
+    info.mBucketEndNs = bucketEndTime;
 
     // Add bucket to mPastBuckets if bucket is large enough.
     // Otherwise, drop the bucket data and add bucket metadata to mSkippedBuckets.
@@ -571,7 +568,7 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
         }
     } else {
         mCurrentSkippedBucket.bucketStartTimeNs = mCurrentBucketStartTimeNs;
-        mCurrentSkippedBucket.bucketEndTimeNs = eventTimeNs;
+        mCurrentSkippedBucket.bucketEndTimeNs = bucketEndTime;
         if (!maxDropEventsReached()) {
             mCurrentSkippedBucket.dropEvents.emplace_back(
                     buildDropEvent(eventTimeNs, BucketDropReason::BUCKET_TOO_SMALL));
