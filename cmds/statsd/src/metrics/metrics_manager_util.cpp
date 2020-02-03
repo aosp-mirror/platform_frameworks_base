@@ -40,7 +40,6 @@
 #include "stats_util.h"
 
 using std::set;
-using std::string;
 using std::unordered_map;
 using std::vector;
 

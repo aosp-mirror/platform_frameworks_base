@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 #include "ConditionWizard.h"
-#include <unordered_set>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
-using std::string;
 using std::vector;
 
 ConditionState ConditionWizard::query(const int index, const ConditionKey& parameters,

@@ -25,8 +25,6 @@
 #include "stats_util.h"
 #include "stats_log_util.h"
 
-#include <android-base/file.h>
-#include <dirent.h>
 #include <stdio.h>
 #include <vector>
 #include "android-base/stringprintf.h"
@@ -35,9 +33,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
 using std::pair;
-using std::set;
 using std::string;
 using std::vector;
 

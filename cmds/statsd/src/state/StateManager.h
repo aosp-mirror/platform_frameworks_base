@@ -15,7 +15,6 @@
  */
 #pragma once
 
-#include <gtest/gtest_prod.h>
 #include <inttypes.h>
 #include <utils/RefBase.h>
 

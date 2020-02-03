@@ -21,8 +21,6 @@
 #include <android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
 
-#include <queue>
-#include <set>
 #include <unordered_set>
 #include <vector>
 

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 #include "EventMatcherWizard.h"
-#include <unordered_set>
 
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
-using std::string;
 using std::vector;
 
 MatchingState EventMatcherWizard::matchLogEvent(const LogEvent& event, int matcher_index) {

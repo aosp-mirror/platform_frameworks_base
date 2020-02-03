@@ -24,7 +24,6 @@
 #include <android/os/IIncidentManager.h>
 #include <android/os/IncidentReportArgs.h>
 #include <android/util/ProtoOutputStream.h>
-#include <binder/IBinder.h>
 #include <binder/IServiceManager.h>
 
 #include <vector>

@@ -23,8 +23,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using std::string;
-using std::unordered_set;
 using std::vector;
 
 StateConditionTracker::StateConditionTracker(const ConfigKey& key, const int64_t& id, const int index,
