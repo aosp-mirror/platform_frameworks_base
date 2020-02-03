@@ -1,9 +1,1 @@
 // Signature format: 2.0
-package android.app {
-
-  public final class NotificationChannel implements android.os.Parcelable {
-    method public void setBlockableSystem(boolean);
-  }
-
-}
-
