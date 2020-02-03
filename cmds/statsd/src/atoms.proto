@@ -4231,6 +4231,9 @@ message BootTimeEventDuration {
         // Time since last factory reset.
         // Logged from bootstat.
         FACTORY_RESET_TIME_SINCE_RESET = 18;
+        // Init's total time spent for completing the 1st stage.
+        // Logged from bootstat.
+        ANDROID_INIT_STAGE_1 = 19;
     }
 
     // Type of the event.
@@ -4258,19 +4261,19 @@ message BootTimeEventElapsedTime {
         // BOOT_COMPLETE for device with no encryption.
         BOOT_COMPLETE_NO_ENCRYPTION = 4;
         // Adjusted BOOT_COMPLETE for encrypted device extracting decryption time.
-        BOOT_COMPLETE_POST_DESCRYPT = 5;
+        BOOT_COMPLETE_POST_DECRYPT = 5;
         // BOOT_COMPLETE after factory reset.
         FACTORY_RESET_BOOT_COMPLETE = 6;
         // BOOT_COMPLETE_NO_ENCRYPTION after factory reset.
         FACTORY_RESET_BOOT_COMPLETE_NO_ENCRYPTION = 7;
-        // BOOT_COMPLETE_POST_DESCRYPT after factory reset.
-        FACTORY_RESET_BOOT_COMPLETE_POST_DESCRYPT = 8;
+        // BOOT_COMPLETE_POST_DECRYPT after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE_POST_DECRYPT = 8;
         // BOOT_COMPLETE after OTA.
         OTA_BOOT_COMPLETE = 9;
         // BOOT_COMPLETE_NO_ENCRYPTION after OTA.
         OTA_BOOT_COMPLETE_NO_ENCRYPTION = 10;
-        // BOOT_COMPLETE_POST_DESCRYPT after OTA.
-        OTA_BOOT_COMPLETE_POST_DESCRYPT = 11;
+        // BOOT_COMPLETE_POST_DECRYPT after OTA.
+        OTA_BOOT_COMPLETE_POST_DECRYPT = 11;
         // Time when the system starts sending LOCKED_BOOT_COMPLETED broadcast.
         // Logged from  f/b/services/.../UserController.java
         FRAMEWORK_LOCKED_BOOT_COMPLETED = 12;
