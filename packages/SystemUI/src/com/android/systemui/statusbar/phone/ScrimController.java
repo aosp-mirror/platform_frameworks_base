@@ -455,11 +455,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             if (mDarkenWhileDragging) {
                 mCurrentBehindAlpha = MathUtils.lerp(GRADIENT_SCRIM_ALPHA_BUSY, alphaBehind,
                         interpolatedFract);
-                mCurrentInFrontAlpha = 0;
+                mCurrentInFrontAlpha = mState.getFrontAlpha();
             } else {
                 mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, alphaBehind,
                         interpolatedFract);
-                mCurrentInFrontAlpha = 0;
+                mCurrentInFrontAlpha = mState.getFrontAlpha();
             }
             mCurrentBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                     mState.getBehindTint(), interpolatedFract);
@@ -485,13 +485,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * device is dozing when the light sensor is on.
      */
     public void setAodFrontScrimAlpha(float alpha) {
-        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()
-                && mCurrentInFrontAlpha != alpha) {
+        if (((mState == ScrimState.AOD && mDozeParameters.getAlwaysOn())
+                || mState == ScrimState.PULSING) && mCurrentInFrontAlpha != alpha) {
             mCurrentInFrontAlpha = alpha;
             updateScrims();
         }
 
         mState.AOD.setAodFrontScrimAlpha(alpha);
+        mState.PULSING.setAodFrontScrimAlpha(alpha);
     }
 
     /**
