@@ -326,6 +326,8 @@ public class NotifCollection implements Dumpable {
                             entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
                         }
                     }
+                } else {
+                    mLogger.logRankingMissing(entry.getKey(), rankingMap);
                 }
             }
         }

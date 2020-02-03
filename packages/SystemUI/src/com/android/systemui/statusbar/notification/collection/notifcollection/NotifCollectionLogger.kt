@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
+import android.service.notification.NotificationListenerService.RankingMap
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
 import javax.inject.Inject
 
@@ -25,7 +28,7 @@ class NotifCollectionLogger @Inject constructor(
     @NotificationLog private val buffer: LogBuffer
 ) {
     fun logNotifPosted(key: String) {
-        buffer.log(TAG, LogLevel.INFO, {
+        buffer.log(TAG, INFO, {
             str1 = key
         }, {
             "POSTED $str1"
@@ -33,7 +36,7 @@ class NotifCollectionLogger @Inject constructor(
     }
 
     fun logNotifGroupPosted(groupKey: String, batchSize: Int) {
-        buffer.log(TAG, LogLevel.INFO, {
+        buffer.log(TAG, INFO, {
             str1 = groupKey
             int1 = batchSize
         }, {
@@ -42,7 +45,7 @@ class NotifCollectionLogger @Inject constructor(
     }
 
     fun logNotifUpdated(key: String) {
-        buffer.log(TAG, LogLevel.INFO, {
+        buffer.log(TAG, INFO, {
             str1 = key
         }, {
             "UPDATED $str1"
@@ -50,12 +53,20 @@ class NotifCollectionLogger @Inject constructor(
     }
 
     fun logNotifRemoved(key: String, reason: Int) {
-        buffer.log(TAG, LogLevel.INFO, {
+        buffer.log(TAG, INFO, {
             str1 = key
             int1 = reason
         }, {
             "REMOVED $str1 reason=$int1"
         })
+    }
+
+    fun logRankingMissing(key: String, rankingMap: RankingMap) {
+        buffer.log(TAG, WARNING, { str1 = key }, { "Ranking update is missing ranking for $str1" })
+        buffer.log(TAG, DEBUG, {}, { "Ranking map contents:" })
+        for (entry in rankingMap.orderedKeys) {
+            buffer.log(TAG, DEBUG, { str1 = entry }, { "  $str1" })
+        }
     }
 }
 
