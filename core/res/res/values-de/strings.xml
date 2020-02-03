@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Die Daten auf deinem Gerät werden gelöscht."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Die Admin-App kann nicht verwendet werden. Die Daten auf deinem Gerät werden nun gelöscht.\n\nBitte wende dich bei Fragen an den Administrator deiner Organisation."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drucken wurde von <xliff:g id="OWNER_APP">%s</xliff:g> deaktiviert."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Private Apps wurden von einem Administrator gesperrt"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Tippe hier, um die Einhaltung der Richtlinie zu prüfen."</string>
     <string name="me" msgid="6207584824693813140">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-Optionen"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-Optionen"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%2$d</xliff:g> weiteren erfolglosen Versuchen wirst du aufgefordert, dein Telefon mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuche es in <xliff:g id="NUMBER_2">%3$d</xliff:g> Sekunden erneut."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Entfernen"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Der Dienst im Vordergrund von <xliff:g id="PACKAGENAME">%1$s</xliff:g>, der im Hintergrund gestartet wurde, hat in zukünftigen R-Builds keine Zugriffsberechtigung mehr während der Nutzung. Siehe dazu go/r-bg-fgs-restriction und reiche einen Fehlerbericht ein."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lautstärke über den Schwellenwert anheben?\n\nWenn du über einen längeren Zeitraum Musik in hoher Lautstärke hörst, kann dies dein Gehör schädigen."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Verknüpfung für Bedienungshilfen verwenden?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Wenn die Verknüpfung aktiviert ist, kannst du die beiden Lautstärketasten drei Sekunden lang gedrückt halten, um eine Bedienungshilfe zu starten.\n\n Aktuelle Bedienungshilfe:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Du kannst die Bedienungshilfe unter \"Einstellungen\" &gt; \"Bedienungshilfen\" ändern."</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"App nicht verfügbar"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ist momentan nicht verfügbar. Dies wird über die App \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\" verwaltet."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Weitere Informationen"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"App-Pausierung aufheben"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Arbeitsprofil aktivieren?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Deine geschäftlichen Apps, Benachrichtigungen, Daten und andere Funktionen des Arbeitsprofils werden aktiviert"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivieren"</string>
@@ -2007,12 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"\"Bildschirm teilen\" ein-/ausschalten"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Sperrbildschirm"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menü \"Bedienungshilfen\""</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Untertitelleiste von <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> wurde in den BESCHRÄNKT-Bucket gelegt"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Geschäftlich"</string>
 </resources>

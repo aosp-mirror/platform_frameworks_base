@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮਿਟਾਇਆ ਜਾਏਗਾ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।\n\nਜੇਕਰ ਤੁਹਾਡੇ ਕੋਲ ਕੋਈ ਸਵਾਲ ਹਨ, ਤਾਂ ਆਪਣੀ ਸੰਸਥਾ ਦੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਿੰਟ ਕਰਨਾ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"ਨਿੱਜੀ ਐਪਾਂ ਨੂੰ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮੁਅੱਤਲ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"ਨੀਤੀ ਦੀ ਪਾਲਣਾ ਨੂੰ ਦੇਖਣ ਲਈ ਇੱਥੇ ਟੈਪ ਕਰੋ।"</string>
     <string name="me" msgid="6207584824693813140">"ਮੈਂ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ਟੈਬਲੈੱਟ ਵਿਕਲਪ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ਦੇ ਵਿਕਲਪ"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਫ਼ੋਨ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ਹਟਾਓ"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> ਤੋਂ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਸ਼ੁਰੂ ਕੀਤੀ ਗਈ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਲਈ ਭਵਿੱਖੀ R ਬਿਲਡ ਵਿੱਚ \'ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ \'ਤੇ ਇਜਾਜ਼ਤ\' ਵਿਸ਼ੇਸ਼ਤਾ ਨਹੀਂ ਹੋਵੇਗੀ। ਕਿਰਪਾ ਕਰਕੇ go/r-bg-fgs-restriction ਦੇਖੋ ਅਤੇ ਬੱਗ ਰਿਪੋਰਟ ਫ਼ਾਈਲ ਕਰੋ।"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।\n\n ਵਰਤਮਾਨ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ਤੁਸੀਂ ਸੈਟਿੰਗਾਂ &gt; ਪਹੁੰਚਯੋਗਤਾ ਵਿੱਚ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਐਪ ਫਿਲਹਾਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਇਸਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ਹੋਰ ਜਾਣੋ"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ਐਪ ਤੋਂ ਰੋਕ ਹਟਾਓ"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"ਕੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ ਕਰਨੀ ਹੈ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ਤੁਹਾਡੀਆਂ ਕਾਰਜ-ਸਥਾਨ ਐਪਾਂ, ਸੂਚਨਾਵਾਂ, ਡਾਟਾ ਅਤੇ ਹੋਰ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚਾਲੂ ਕੀਤੀਆਂ ਜਾਣਗੀਆਂ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ਚਾਲੂ ਕਰੋ"</string>
@@ -1989,8 +1985,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> ਸਪਰੈੱਡਸ਼ੀਟ"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"ਪੇਸ਼ਕਾਰੀ"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ਪੇਸ਼ਕਾਰੀ"</string>
-    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
-    <skip />
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ਹਵਾਈ-ਜਹਾਜ਼ ਮੋਡ ਵੇਲੇ ਬਲੂਟੁੱਥ ਹਾਲੇ ਵੀ ਚਾਲੂ ਹੋ ਜਾਵੇਗਾ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ਫ਼ਾਈਲ</item>
@@ -2008,13 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ਲਾਕ ਸਕ੍ਰੀਨ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ਪਹੁੰਚਯੋਗਤਾ ਮੀਨੂ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੀ ਸੁਰਖੀ ਪੱਟੀ।"</string>
-    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
-    <skip />
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ਨੂੰ ਪ੍ਰਤਿਬੰਧਿਤ ਖਾਨੇ ਵਿੱਚ ਪਾਇਆ ਗਿਆ ਹੈ"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"ਨਿੱਜੀ"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"ਕੰਮ"</string>
 </resources>

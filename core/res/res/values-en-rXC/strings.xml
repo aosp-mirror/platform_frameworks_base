@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎Your device will be erased‎‏‎‎‏‎"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organization\'s admin.‎‏‎‎‏‎"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‎‎‏‎Printing disabled by ‎‏‎‎‏‏‎<xliff:g id="OWNER_APP">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‏‎‏‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‎‏‏‎‎Personal apps have been suspended by an admin‎‏‎‎‏‎"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‎‎‏‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‏‎Tap here to check policy compliance.‎‏‎‎‏‎"</string>
     <string name="me" msgid="6207584824693813140">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‎‏‏‏‏‏‎‏‎‏‏‏‎‏‏‏‏‏‎‎‏‎‏‎‎‎Me‎‏‎‎‏‎"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‏‎‏‏‎‎‎‎‎‎‎‎‏‎‎‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‎‏‎Tablet options‎‏‎‎‏‎"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‏‎‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎Android TV options‎‏‎‎‏‎"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‎‎‎‎‎‏‏‎‏‏‎‎‎You have incorrectly drawn your unlock pattern ‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%1$d</xliff:g>‎‏‎‎‏‏‏‎ times. After ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%2$d</xliff:g>‎‏‎‎‏‏‏‎ more unsuccessful attempts, you will be asked to unlock your phone using an email account.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎ Try again in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_2">%3$d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" ‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‏‏‎‎‎‏‏‎‏‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‏‎‏‏‎‎‎‏‎‎ — ‎‏‎‎‏‎ "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‎‎‏‏‏‎‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‏‎‎‎‎‎‎‎‎‎‏‎‎Remove‎‏‎‎‏‎"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎The background started foreground service from ‎‏‎‎‏‏‎<xliff:g id="PACKAGENAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ will not have while-in-use permission in future R builds. Please see go/r-bg-fgs-restriction and file a bugreport.‎‏‎‎‏‎"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‎Raise volume above recommended level?‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Listening at high volume for long periods may damage your hearing.‎‏‎‎‏‎"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‏‎‏‏‎‏‎‏‎‏‎‏‎‏‎‏‏‏‎‎‎‎‏‎‏‎‏‎‏‎Use Accessibility Shortcut?‎‏‎‎‏‎"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‎‏‎‏‏‎‏‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‎‎‏‎‏‏‎‎‎When the shortcut is on, pressing both volume buttons for 3 seconds will start an accessibility feature.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎ Current accessibility feature:‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎ ‎‏‎‎‏‏‎<xliff:g id="SERVICE_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎ You can change the feature in Settings &gt; Accessibility.‎‏‎‎‏‎"</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‏‎‎‏‏‎‏‏‎‎‎‎‎‏‎‏‎‏‎‎‎‎‎‏‏‏‏‎‎‎‏‏‎‏‎‎‏‏‎‏‏‎‏‎‎App isn’t available‎‏‎‎‏‎"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‎‏‎‏‎‎‏‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="APP_NAME_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ isn’t available right now. This is managed by ‎‏‎‎‏‏‎<xliff:g id="APP_NAME_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‎‎‎‏‏‎‎‏‎‎‎‎‎‎‏‏‏‎‏‏‎‎‎‏‏‎‎Learn more‎‏‎‎‏‎"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‎‎‏‏‏‎‎‏‏‎‏‎‎‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‎‎‎‎‎‏‎‎‎‎‏‏‎Unpause app‎‏‎‎‏‎"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‎‎‎‎‎Turn on work profile?‎‏‎‎‏‎"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‎‎‎‏‏‏‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‏‏‎‏‏‎Your work apps, notifications, data, and other work profile features will be turned on‎‏‎‎‏‎"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎‎‎‎‏‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‏‎‏‏‏‏‎‏‏‎‎‎‎‎‎‎‎‏‏‏‏‎‏‎‏‏‎‏‎Turn on‎‏‎‎‏‎"</string>
@@ -2007,12 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‎‎‎‎‎‏‏‎‎‎‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‏‏‎‎‏‎‎‎Toggle Split Screen‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‎‏‎‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‏‏‎‎Lock Screen‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‏‏‏‏‏‎‎‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎Screenshot‎‏‎‎‏‎"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‎‎‏‏‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‏‎‎‏‏‏‎‎‏‏‎‎‏‎‎‏‏‏‏‎‎‏‏‎‎‎‎‎‎‎Accessibility Menu‎‏‎‎‏‎"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‏‎‏‎‎Caption bar of ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‎‏‎‎‏‎‎‏‎‏‏‎‎‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‏‏‏‎‏‎‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ has been put into the RESTRICTED bucket‎‏‎‎‏‎"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‏‎‎‏‎‎‎‏‏‏‎‎‏‏‏‎‎‏‎‏‏‎‎‏‎Personal‎‏‎‎‏‎"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‏‎‏‎‎‏‏‎‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‏‏‎Work‎‏‎‎‏‎"</string>
 </resources>

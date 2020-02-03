@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ବର୍ତ୍ତମାନ ଲିଭାଯିବ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ଆଡମିନ୍‍ ଆପ୍‍‍ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ଆପଣଙ୍କ ଡିଭାଇସ୍‍‌ର ସମସ୍ତ ଡାଟାକୁ ବର୍ତ୍ତମାନ ଲିଭାଇଦିଆଯିବ। \n\nଯଦି ଆପଣଙ୍କର କୌଣସି ପ୍ରଶ୍ନ ରହିଥାଏ, ଆପଣଙ୍କ ସଂସ୍ଥାର ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ଦ୍ଵାରା ପ୍ରିଣ୍ଟିଙ୍ଗ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକୁ ଆଡମିନଙ୍କ ଦ୍ୱାରା ସାମୟିକ ଭାବରେ ବନ୍ଦ କରାଯାଇଛି"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"ନୀତି ଅନୁପାଳନର ଯାଞ୍ଚ କରିବା ପାଇଁ ଏଠାରେ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="me" msgid="6207584824693813140">"ମୁଁ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ଟାବଲେଟ୍‌ର ବିକଳ୍ପ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ଟିଭିର ବିକଳ୍ପଗୁଡ଼ିକ"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଏକ ଇମେଲ୍‍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ନିଜ ଫୋନ୍‌କୁ ଅନଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ବାହାର କରନ୍ତୁ"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"ପୃଷ୍ଠଭୂମିରେ <xliff:g id="PACKAGENAME">%1$s</xliff:g>ରୁ ଆରମ୍ଭ ହୋଇଥିବା ସମ୍ମୁଖଭାଗ ସେବା ପାଇଁ ଭବିଷ୍ୟତର R ବିଲ୍ଡଗୁଡ଼ିକରେ ବ୍ୟବହାର କରାଯିବା ସମୟରେ ଅନୁମତି ସୁବିଧା ରହିବ ନାହିଁ। ଦୟାକରି go/r-bg-fgs-restriction ଦେଖନ୍ତୁ ଏବଂ ଏକ ବଗରିପୋର୍ଟ ଫାଇଲ୍ କରନ୍ତୁ।"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"ସର୍ଟକଟ୍‌ ଅନ୍‌ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍‍ ବଟନ୍‍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ ଆରମ୍ଭ ହେବ।\n\n ସମ୍ପ୍ରତି ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ୍ୟ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ସେଟିଙ୍ଗ ଓ ଆକ୍ସେସବିଲିଟିରେ ଆପଣ ବୈଶିଷ୍ଟ୍ୟ ବଦଳାଇ ପାରିବେ।"</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ଆପ୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ଆପ୍ ଅନପଜ୍ କରନ୍ତୁ"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ଆପଣଙ୍କର କାର୍ଯ୍ୟକାରୀ ଆପ୍‌, ବିଜ୍ଞପ୍ତି, ଡାଟା ଓ ଅନ୍ୟ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ଗୁଡ଼ିକ ଚାଲୁ ହୋଇଯିବ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ଅନ୍ କରନ୍ତୁ"</string>
@@ -1989,8 +1985,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> ସ୍ପ୍ରେଡ୍‌ସିଟ୍"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"ଉପସ୍ଥାପନା"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ଉପସ୍ଥାପନା"</string>
-    <!-- no translation found for bluetooth_airplane_mode_toast (2066399056595768554) -->
-    <skip />
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ଏୟାରପ୍ଲେନ୍ ମୋଡରେ ବ୍ଲୁଟୁଥ୍ ଚାଲୁ ରହିବ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ଲୋଡ୍ ହେଉଛି"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g>ଟି ଫାଇଲ୍</item>
@@ -2008,13 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"ଦୁଇଟି ସ୍କ୍ରିନ୍ ମଧ୍ୟରେ ଟୋଗଲ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ସ୍କ୍ରିନ୍ ଲକ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ସ୍କ୍ରି‍ନ୍‍ସଟ୍ ନିଅନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ଆକ୍ସେସିବିଲିଟୀ ମେନୁ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>ର କ୍ୟାପ୍ସନ୍ ବାର୍।"</string>
-    <!-- no translation found for as_app_forced_to_restricted_bucket (8233871289353898964) -->
-    <skip />
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>କୁ ପ୍ରତିବନ୍ଧିତ ବକେଟରେ ରଖାଯାଇଛି"</string>
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"ବ୍ୟକ୍ତିଗତ"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"କାର୍ଯ୍ୟ"</string>
 </resources>

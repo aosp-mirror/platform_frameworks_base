@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossibile usare l\'app di amministrazione. Il dispositivo verrà resettato.\n\nPer eventuali domande, contatta l\'amministratore della tua organizzazione."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Stampa disattivata da <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Le app personali sono state sospese da un amministratore"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Tocca qui per controllare il rispetto delle norme."</string>
     <string name="me" msgid="6207584824693813140">"Io"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opzioni tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opzioni Android TV"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Rimuovi"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Il servizio in primo piano avviato in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> non avrà l\'autorizzazione \"durante l\'uso\" nelle future build R. Visita la pagina go/r-bg-fgs-restriction e invia una segnalazione di bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità.\n\n Funzione di accessibilità corrente:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puoi cambiare la funzione in Impostazioni &gt; Accessibilità."</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"App non disponibile"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ulteriori informazioni"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Riattiva app"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Attiva"</string>
@@ -2007,12 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Attiva/disattiva schermo diviso"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Schermata di blocco"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menu Accessibilità"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra del titolo di <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> è stato inserito nel bucket RESTRICTED"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Personale"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Lavoro"</string>
 </resources>

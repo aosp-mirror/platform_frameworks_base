@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"വ്യക്തഗത ആപ്പുകൾ ഒരു അഡ്‌മിൻ താൽക്കാലികമായി റദ്ദാക്കിയിരിക്കുന്നു"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"നയത്തിന് അനുസൃതമാണോ എന്ന് പരിശോധിക്കാൻ ഇവിടെ ടാപ്പ് ചെയ്യുക."</string>
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android ടിവി ഓപ്‌ഷനുകൾ"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"നീക്കംചെയ്യുക"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള പശ്ചാത്തലത്തിൽ ആരംഭിച്ച് ഫോർഗ്രൗണ്ടിൽ വരുന്ന സേവനത്തിന് ഭാവി R ബിൽഡുകളിൽ, \'ഉപയോഗിക്കുമ്പോൾ മാത്രമുള്ള അനുമതി\' ഉണ്ടായിരിക്കില്ല. go/r-bg-fgs-restriction കണ്ട് ബഗ് റിപ്പോർട്ട് ഫയൽ ചെയ്യുക."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"കുറുക്കുവഴി ഓണാണെങ്കിൽ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും.\n\n നിലവിലെ  ഉപയോഗസഹായി ഫീച്ചർ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിൽ ഏത് സമയത്തും നിങ്ങൾക്ക് ഫീച്ചർ മാറ്റാവുന്നതാണ്."</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല. <xliff:g id="APP_NAME_1">%2$s</xliff:g> ആണ് ഇത് മാനേജ് ചെയ്യുന്നത്."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"കൂടുതലറിയുക"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ആപ്പ് പുനഃരാംഭിക്കുക"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ഓണാക്കുക"</string>
@@ -2007,12 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"സ്‌ക്രീൻ വിഭജന മോഡ് മാറ്റുക"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"സ്ക്രീൻഷോട്ട്"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ഉപയോഗസഹായി മെനു"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
 </resources>
