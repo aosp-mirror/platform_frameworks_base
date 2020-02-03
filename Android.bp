@@ -218,6 +218,14 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-wifi-updatable-exported-aidl-sources",
+    srcs: [
+        "wifi/aidl-export/**/*.aidl",
+    ],
+    path: "wifi/aidl-export",
+}
+
+filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
@@ -280,6 +288,7 @@ filegroup {
     srcs: [
         ":framework-sdkextensions-sources",
         ":framework-tethering-srcs",
+        ":framework-wifi-updatable-exported-aidl-sources",
         ":updatable-media-srcs",
         ":ike-srcs",
     ]
@@ -317,6 +326,7 @@ java_defaults {
             "telecomm/java",
             "telephony/java",
             "wifi/java",
+            "wifi/aidl-export",
         ],
     },
 }
