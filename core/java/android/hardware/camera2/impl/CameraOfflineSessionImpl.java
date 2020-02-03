@@ -63,6 +63,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
     private SimpleEntry<Integer, InputConfiguration> mOfflineInput =
             new SimpleEntry<>(REQUEST_ID_NONE, null);
     private SparseArray<OutputConfiguration> mOfflineOutputs = new SparseArray<>();
+    private SparseArray<OutputConfiguration> mConfiguredOutputs = new SparseArray<>();
 
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
 
@@ -96,6 +97,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             Executor offlineExecutor, CameraOfflineSessionCallback offlineCallback,
             SparseArray<OutputConfiguration> offlineOutputs,
             SimpleEntry<Integer, InputConfiguration> offlineInput,
+            SparseArray<OutputConfiguration> configuredOutputs,
             FrameNumberTracker frameNumberTracker, SparseArray<CaptureCallbackHolder> callbackMap,
             List<RequestLastFrameNumbersHolder> frameNumberList) {
         if ((cameraId == null) || (characteristics == null)) {
@@ -117,6 +119,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         mOfflineRequestLastFrameNumbersList.addAll(frameNumberList);
         mFrameNumberTracker = frameNumberTracker;
         mCaptureCallbackMap = callbackMap;
+        mConfiguredOutputs = configuredOutputs;
         mOfflineOutputs = offlineOutputs;
         mOfflineInput = offlineInput;
         mOfflineExecutor = checkNotNull(offlineExecutor, "offline executor must not be null");
@@ -137,9 +140,6 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         @Override
         public void onDeviceError(final int errorCode, CaptureResultExtras resultExtras) {
             synchronized(mInterfaceLock) {
-                if (mRemoteSession == null) {
-                    return; // Camera already closed
-                }
 
                 switch (errorCode) {
                     case CameraDeviceCallbacks.ERROR_CAMERA_REQUEST:
@@ -177,6 +177,11 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         @Override
         public void onDeviceIdle() {
             synchronized(mInterfaceLock) {
+                if (mRemoteSession == null) {
+                    Log.v(TAG, "Ignoring idle state notifications during offline switches");
+                    return;
+                }
+
                 Runnable idleDispatch = new Runnable() {
                     @Override
                     public void run() {
@@ -203,8 +208,6 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             final CaptureCallbackHolder holder;
 
             synchronized(mInterfaceLock) {
-                if (mRemoteSession == null) return; // Camera already closed
-
                 // Get the callback for this frame ID, if there is one
                 holder = CameraOfflineSessionImpl.this.mCaptureCallbackMap.get(requestId);
 
@@ -269,8 +272,6 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             long frameNumber = resultExtras.getFrameNumber();
 
             synchronized(mInterfaceLock) {
-                if (mRemoteSession == null) return; // Camera already closed
-
                 // TODO: Handle CameraCharacteristics access from CaptureResult correctly.
                 result.set(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE,
                         mCharacteristics.get(CameraCharacteristics.LENS_INFO_SHADING_MAP_SIZE));
@@ -445,8 +446,12 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             if (errorCode == ERROR_CAMERA_BUFFER) {
                 // Because 1 stream id could map to multiple surfaces, we need to specify both
                 // streamId and surfaceId.
-                OutputConfiguration config = mOfflineOutputs.get(
-                        resultExtras.getErrorStreamId());
+                OutputConfiguration config;
+                if ((mRemoteSession == null) && !isClosed()) {
+                    config = mConfiguredOutputs.get(resultExtras.getErrorStreamId());
+                } else {
+                    config = mOfflineOutputs.get(resultExtras.getErrorStreamId());
+                }
                 if (config == null) {
                     Log.v(TAG, String.format(
                             "Stream %d has been removed. Skipping buffer lost callback",
@@ -538,11 +543,6 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             final Executor executor;
             final CameraCaptureSession.CaptureCallback callback;
             synchronized(mInterfaceLock) {
-                if (mRemoteSession == null) {
-                    Log.w(TAG, "Camera closed while checking sequences");
-                    return;
-                }
-
                 int index = mCaptureCallbackMap.indexOfKey(requestId);
                 holder = (index >= 0) ?
                         mCaptureCallbackMap.valueAt(index) : null;
@@ -575,7 +575,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             }
 
             // Call onCaptureSequenceCompleted
-            if ((sequenceCompleted) && (callback != null) && (executor == null)) {
+            if ((sequenceCompleted) && (callback != null) && (executor != null)) {
                 Runnable resultDispatch = new Runnable() {
                     @Override
                     public void run() {
@@ -592,7 +592,12 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
+
+                if (mCaptureCallbackMap.size() == 0) {
+                    getCallbacks().onDeviceIdle();
+                }
             }
+
         }
     }
 
@@ -686,9 +691,7 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
             Runnable closeDispatch = new Runnable() {
                 @Override
                 public void run() {
-                    if (!isClosed()) {
-                        mOfflineCallback.onClosed(CameraOfflineSessionImpl.this);
-                    }
+                    mOfflineCallback.onClosed(CameraOfflineSessionImpl.this);
                 }
             };
 
