@@ -402,7 +402,7 @@ java_defaults {
         "ext",
         "unsupportedappusage",
         "framework-media-stubs-systemapi",
-        "framework_mediaprovider_stubs",
+        "framework-mediaprovider-stubs-systemapi",
         "framework-tethering",
         "framework-telephony-stubs",
     ],
@@ -517,9 +517,9 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "framework-media-stubs-systemapi",
-        "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
+        "framework-media-stubs-systemapi",
+        "framework-mediaprovider-stubs-systemapi",
         "framework-permission-stubs-systemapi",
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
