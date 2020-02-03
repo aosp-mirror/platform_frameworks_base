@@ -20,10 +20,12 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.SpannedString;
 import android.util.ArrayMap;
 import android.view.textclassifier.TextClassifier.EntityType;
@@ -211,6 +213,8 @@ public final class TextSelection implements Parcelable {
         private final boolean mDarkLaunchAllowed;
         private final Bundle mExtras;
         @Nullable private String mCallingPackageName;
+        @UserIdInt
+        private int mUserId = UserHandle.USER_NULL;
 
         private Request(
                 CharSequence text,
@@ -289,6 +293,24 @@ public final class TextSelection implements Parcelable {
         @Nullable
         public String getCallingPackageName() {
             return mCallingPackageName;
+        }
+
+        /**
+         * Sets the id of the user that sent this request.
+         * <p>
+         * Package-private for SystemTextClassifier's use.
+         */
+        void setUserId(@UserIdInt int userId) {
+            mUserId = userId;
+        }
+
+        /**
+         * Returns the id of the user that sent this request.
+         * @hide
+         */
+        @UserIdInt
+        public int getUserId() {
+            return mUserId;
         }
 
         /**
@@ -394,6 +416,7 @@ public final class TextSelection implements Parcelable {
             dest.writeInt(mEndIndex);
             dest.writeParcelable(mDefaultLocales, flags);
             dest.writeString(mCallingPackageName);
+            dest.writeInt(mUserId);
             dest.writeBundle(mExtras);
         }
 
@@ -403,11 +426,13 @@ public final class TextSelection implements Parcelable {
             final int endIndex = in.readInt();
             final LocaleList defaultLocales = in.readParcelable(null);
             final String callingPackageName = in.readString();
+            final int userId = in.readInt();
             final Bundle extras = in.readBundle();
 
             final Request request = new Request(text, startIndex, endIndex, defaultLocales,
                     /* darkLaunchAllowed= */ false, extras);
             request.setCallingPackageName(callingPackageName);
+            request.setUserId(userId);
             return request;
         }
 
