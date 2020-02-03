@@ -92,8 +92,8 @@ import javax.inject.Singleton;
  * {@link #addNotificationLifetimeExtender(NotifLifetimeExtender)}).
  *
  * Interested parties can register listeners
- * ({@link #addCollectionListener(NotifCollectionListener)}) to be informed when notifications are
- * added, updated, or removed.
+ * ({@link #addCollectionListener(NotifCollectionListener)}) to be informed when notifications
+ * events occur.
  */
 @MainThread
 @Singleton
@@ -230,6 +230,8 @@ public class NotifCollection implements Dumpable {
 
             entry = new NotificationEntry(sbn, ranking);
             mNotificationSet.put(sbn.getKey(), entry);
+            dispatchOnEntryInit(entry);
+
             if (rankingMap != null) {
                 applyRanking(rankingMap);
             }
@@ -297,6 +299,7 @@ public class NotifCollection implements Dumpable {
             }
 
             dispatchOnEntryRemoved(entry, reason, dismissedByUserStats != null /* removedByUser */);
+            dispatchOnEntryCleanUp(entry);
         }
 
         rebuildList();
@@ -378,6 +381,14 @@ public class NotifCollection implements Dumpable {
         return ranking;
     }
 
+    private void dispatchOnEntryInit(NotificationEntry entry) {
+        mAmDispatchingToOtherCode = true;
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryInit(entry);
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
     private void dispatchOnEntryAdded(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
@@ -409,6 +420,14 @@ public class NotifCollection implements Dumpable {
         mAmDispatchingToOtherCode = true;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryRemoved(entry, reason, removedByUser);
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
+    private void dispatchOnEntryCleanUp(NotificationEntry entry) {
+        mAmDispatchingToOtherCode = true;
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryCleanUp(entry);
         }
         mAmDispatchingToOtherCode = false;
     }

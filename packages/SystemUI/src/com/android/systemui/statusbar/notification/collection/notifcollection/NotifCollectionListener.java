@@ -18,14 +18,24 @@ package com.android.systemui.statusbar.notification.collection.notifcollection;
 
 import android.service.notification.NotificationListenerService;
 
-import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
- * Listener interface for {@link NotifCollection}.
+ * Listener interface for {@link NotificationEntry} events.
  */
 public interface NotifCollectionListener {
+    /**
+     * Called whenever a new {@link NotificationEntry} is initialized. This should be used for
+     * initializing any decorated state tied to the notification.
+     *
+     * Do not reference other registered {@link NotifCollectionListener} implementations here as
+     * there is no guarantee of order and they may not have had a chance to initialize yet. Instead,
+     * use {@link #onEntryAdded} which is called after all initialization.
+     */
+    default void onEntryInit(NotificationEntry entry) {
+    }
+
     /**
      * Called whenever a notification with a new key is posted.
      */
@@ -48,6 +58,18 @@ public interface NotifCollectionListener {
             NotificationEntry entry,
             @CancellationReason int reason,
             boolean removedByUser) {
+    }
+
+    /**
+     * Called whenever a {@link NotificationEntry} is considered deleted. This should be used for
+     * cleaning up any state tied to the notification.
+     *
+     * This is the deletion parallel of {@link #onEntryInit} and similarly means that you cannot
+     * expect other {@link NotifCollectionListener} implementations to still have valid state for
+     * the entry during this call. Instead, use {@link #onEntryRemoved} which will be called before
+     * deletion.
+     */
+    default void onEntryCleanUp(NotificationEntry entry) {
     }
 
     /**
