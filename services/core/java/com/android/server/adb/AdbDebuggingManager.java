@@ -46,12 +46,12 @@ import android.service.adb.AdbDebuggingManagerProto;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
@@ -493,8 +493,8 @@ public class AdbDebuggingManager {
                     "Logging key " + key + ", state = " + state + ", alwaysAllow = " + alwaysAllow
                             + ", lastConnectionTime = " + lastConnectionTime + ", authWindow = "
                             + authWindow);
-            StatsLog.write(StatsLog.ADB_CONNECTION_CHANGED, lastConnectionTime, authWindow, state,
-                    alwaysAllow);
+            FrameworkStatsLog.write(FrameworkStatsLog.ADB_CONNECTION_CHANGED, lastConnectionTime,
+                    authWindow, state, alwaysAllow);
         }
 
 

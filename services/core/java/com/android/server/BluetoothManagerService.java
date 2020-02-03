@@ -69,24 +69,23 @@ import android.text.TextUtils;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.UserRestrictionsUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
@@ -2300,9 +2299,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     new ActiveLog(reason, packageName, enable, System.currentTimeMillis()));
         }
 
-        int state = enable ? StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED :
-                             StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED;
-        StatsLog.write_non_chained(StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
+        int state = enable ? FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED :
+                             FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED;
+        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
                 Binder.getCallingUid(), null, state, reason, packageName);
     }
 

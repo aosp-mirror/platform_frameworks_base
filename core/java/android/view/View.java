@@ -17,12 +17,13 @@
 package android.view;
 
 import static android.content.res.Resources.ID_NULL;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 
 import static java.lang.Math.max;
 
@@ -102,7 +103,6 @@ import android.util.Property;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StateSet;
-import android.util.StatsLog;
 import android.util.SuperNotCalledException;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
@@ -142,6 +142,7 @@ import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 
 import com.android.internal.R;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.view.TooltipPopup;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.widget.ScrollBarUtils;
@@ -28059,7 +28060,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private boolean mOriginalPressedState;
         /**
          * The classification of the long click being checked: one of the
-         * StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__* constants.
+         * FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__* constants.
          */
         private int mClassification;
 
@@ -28125,7 +28126,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         // To avoid negatively impacting View performance, the latency and displacement metrics
         // are omitted.
-        StatsLog.write(StatsLog.TOUCH_GESTURE_CLASSIFIED, getClass().getName(), classification);
+        FrameworkStatsLog.write(FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED, getClass().getName(),
+                classification);
     }
 
     /**

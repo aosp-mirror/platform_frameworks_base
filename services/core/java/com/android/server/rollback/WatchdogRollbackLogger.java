@@ -16,11 +16,11 @@
 
 package com.android.server.rollback;
 
-import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH;
-import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING;
-import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK;
-import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH;
-import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH;
+import static com.android.internal.util.FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +36,7 @@ import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.PackageWatchdog;
 
 import java.util.ArrayList;
@@ -138,11 +139,13 @@ public final class WatchdogRollbackLogger {
         for (VersionedPackage oldLoggingPackage : oldLoggingPackages) {
             if (sessionInfo.isStagedSessionApplied()) {
                 logEvent(oldLoggingPackage,
-                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                        FrameworkStatsLog
+                                .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
                         WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
             } else if (sessionInfo.isStagedSessionFailed()) {
                 logEvent(oldLoggingPackage,
-                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                        FrameworkStatsLog
+                                .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
                         WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
             }
         }
@@ -186,13 +189,14 @@ public final class WatchdogRollbackLogger {
 
     private static String rollbackTypeToString(int type) {
         switch (type) {
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
+            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
                 return "ROLLBACK_INITIATE";
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
+            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
                 return "ROLLBACK_SUCCESS";
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE:
+            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE:
                 return "ROLLBACK_FAILURE";
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED:
+            case FrameworkStatsLog
+                        .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED:
                 return "ROLLBACK_BOOT_TRIGGERED";
             default:
                 return "UNKNOWN";
@@ -201,13 +205,15 @@ public final class WatchdogRollbackLogger {
 
     private static String rollbackReasonToString(int reason) {
         switch (reason) {
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH:
+            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH:
                 return "REASON_NATIVE_CRASH";
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK:
+            case FrameworkStatsLog
+                    .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK:
                 return "REASON_EXPLICIT_HEALTH_CHECK";
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH:
+            case FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH:
                 return "REASON_APP_CRASH";
-            case StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING:
+            case FrameworkStatsLog
+                        .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING:
                 return "REASON_APP_NOT_RESPONDING";
             default:
                 return "UNKNOWN";

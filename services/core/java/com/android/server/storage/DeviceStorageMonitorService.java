@@ -41,11 +41,11 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
@@ -512,15 +512,15 @@ public class DeviceStorageMonitorService extends SystemService {
             notification.flags |= Notification.FLAG_NO_CLEAR;
             mNotifManager.notifyAsUser(uuid.toString(), SystemMessage.NOTE_LOW_STORAGE,
                     notification, UserHandle.ALL);
-            StatsLog.write(StatsLog.LOW_STORAGE_STATE_CHANGED,
+            FrameworkStatsLog.write(FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED,
                     Objects.toString(vol.getDescription()),
-                    StatsLog.LOW_STORAGE_STATE_CHANGED__STATE__ON);
+                    FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED__STATE__ON);
         } else if (State.isLeaving(State.LEVEL_LOW, oldLevel, newLevel)) {
             mNotifManager.cancelAsUser(uuid.toString(), SystemMessage.NOTE_LOW_STORAGE,
                     UserHandle.ALL);
-            StatsLog.write(StatsLog.LOW_STORAGE_STATE_CHANGED,
+            FrameworkStatsLog.write(FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED,
                     Objects.toString(vol.getDescription()),
-                    StatsLog.LOW_STORAGE_STATE_CHANGED__STATE__OFF);
+                    FrameworkStatsLog.LOW_STORAGE_STATE_CHANGED__STATE__OFF);
         }
     }
 

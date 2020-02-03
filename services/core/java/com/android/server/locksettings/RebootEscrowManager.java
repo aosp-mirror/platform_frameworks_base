@@ -25,10 +25,10 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserManager;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.RebootEscrowListener;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ class RebootEscrowManager {
             for (UserInfo user : users) {
                 mStorage.removeRebootEscrow(user.id);
             }
-            StatsLog.write(StatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, false);
+            FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, false);
             return;
         }
 
@@ -143,7 +143,8 @@ class RebootEscrowManager {
         for (UserInfo user : rebootEscrowUsers) {
             allUsersUnlocked &= restoreRebootEscrowForUser(user.id, escrowKey);
         }
-        StatsLog.write(StatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, allUsersUnlocked);
+        FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED,
+                allUsersUnlocked);
     }
 
     private RebootEscrowKey getAndClearRebootEscrowKey() {

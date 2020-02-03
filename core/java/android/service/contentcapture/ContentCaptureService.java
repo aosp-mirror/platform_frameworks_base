@@ -42,7 +42,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
@@ -55,6 +54,7 @@ import android.view.contentcapture.IContentCaptureDirectManager;
 import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
@@ -594,7 +594,7 @@ public abstract class ContentCaptureService extends Service {
                     + rightUid);
             long now = System.currentTimeMillis();
             if (now - mLastCallerMismatchLog > mCallerMismatchTimeout) {
-                StatsLog.write(StatsLog.CONTENT_CAPTURE_CALLER_MISMATCH_REPORTED,
+                FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_CALLER_MISMATCH_REPORTED,
                         getPackageManager().getNameForUid(rightUid),
                         getPackageManager().getNameForUid(uid));
                 mLastCallerMismatchLog = now;

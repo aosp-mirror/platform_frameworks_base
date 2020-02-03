@@ -381,8 +381,8 @@ message Atom {
         NotificationReported notification_reported = 244;
         NotificationPanelReported notification_panel_reported = 245;
         NotificationChannelModified notification_panel_modified = 246;
-        IntegrityCheckResultReported integrity_check_result_reported = 247;
-        IntegrityRulesPushed integrity_rules_pushed = 248;
+        IntegrityCheckResultReported integrity_check_result_reported = 247 [(module) = "framework"];
+        IntegrityRulesPushed integrity_rules_pushed = 248 [(module) = "framework"];
         CellBroadcastMessageReported cb_message_reported =
             249 [(module) = "cellbroadcast"];
         CellBroadcastMessageError cb_message_error =

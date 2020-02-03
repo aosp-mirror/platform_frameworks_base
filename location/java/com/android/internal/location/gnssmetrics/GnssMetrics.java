@@ -24,12 +24,12 @@ import android.server.location.ServerLocationProtoEnums;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -540,7 +540,7 @@ public class GnssMetrics {
             }
             int signalLevel = getSignalLevel(avgCn0);
             if (signalLevel != mLastSignalLevel) {
-                StatsLog.write(StatsLog.GPS_SIGNAL_QUALITY_CHANGED, signalLevel);
+                FrameworkStatsLog.write(FrameworkStatsLog.GPS_SIGNAL_QUALITY_CHANGED, signalLevel);
                 mLastSignalLevel = signalLevel;
             }
             try {

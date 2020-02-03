@@ -56,13 +56,12 @@ import android.service.attention.IAttentionService;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -274,8 +273,8 @@ public class AttentionManagerService extends SystemService {
                     userState.mAttentionCheckCacheBuffer.add(
                             new AttentionCheckCache(SystemClock.uptimeMillis(), result, timestamp));
                 }
-                StatsLog.write(
-                        StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
                         result);
             }
 
@@ -287,8 +286,8 @@ public class AttentionManagerService extends SystemService {
                     userState.mCurrentAttentionCheck.mIsFulfilled = true;
                 }
 
-                StatsLog.write(
-                        StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
                         error);
             }
         };

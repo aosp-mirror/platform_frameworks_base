@@ -40,10 +40,10 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.wm.SurfaceAnimationThread;
 
@@ -636,7 +636,8 @@ public class Watchdog extends Thread {
                                     "watchdog", null, "system_server", null, null, null,
                                     subject, cpuInfo, stack, null);
                         }
-                        StatsLog.write(StatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED, subject);
+                        FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_WATCHDOG_OCCURRED,
+                                subject);
                     }
                 };
             dropboxThread.start();

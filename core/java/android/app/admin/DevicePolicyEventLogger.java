@@ -19,10 +19,9 @@ package android.app.admin;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.stats.devicepolicy.nano.StringList;
-import android.util.StatsLog;
 
 import com.android.framework.protobuf.nano.MessageNano;
-import com.android.internal.util.Preconditions;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -197,8 +196,8 @@ public class DevicePolicyEventLogger {
      */
     public void write() {
         byte[] bytes = stringArrayValueToBytes(mStringArrayValue);
-        StatsLog.write(StatsLog.DEVICE_POLICY_EVENT, mEventId, mAdminPackageName, mIntValue,
-                mBooleanValue, mTimePeriodMs, bytes);
+        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_POLICY_EVENT, mEventId, mAdminPackageName,
+                mIntValue, mBooleanValue, mTimePeriodMs, bytes);
     }
 
     /**
