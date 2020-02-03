@@ -43,7 +43,7 @@ public class MessagingLinearLayout extends ViewGroup {
 
     private int mMaxDisplayedLines = Integer.MAX_VALUE;
 
-    private MessagingLayout mMessagingLayout;
+    private IMessagingLayout mMessagingLayout;
 
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -255,11 +255,11 @@ public class MessagingLinearLayout extends ViewGroup {
         mMaxDisplayedLines = numberLines;
     }
 
-    public void setMessagingLayout(MessagingLayout layout) {
+    public void setMessagingLayout(IMessagingLayout layout) {
         mMessagingLayout = layout;
     }
 
-    public MessagingLayout getMessagingLayout() {
+    public IMessagingLayout getMessagingLayout() {
         return mMessagingLayout;
     }
 

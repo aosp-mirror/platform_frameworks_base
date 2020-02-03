@@ -21,9 +21,9 @@ import android.util.Pools;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.widget.IMessagingLayout;
 import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingImageMessage;
-import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.internal.widget.MessagingMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
@@ -41,7 +41,7 @@ public class MessagingLayoutTransformState extends TransformState {
     private static Pools.SimplePool<MessagingLayoutTransformState> sInstancePool
             = new Pools.SimplePool<>(40);
     private MessagingLinearLayout mMessageContainer;
-    private MessagingLayout mMessagingLayout;
+    private IMessagingLayout mMessagingLayout;
     private HashMap<MessagingGroup, MessagingGroup> mGroupMap = new HashMap<>();
     private float mRelativeTranslationOffset;
 

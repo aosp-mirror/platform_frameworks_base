@@ -21,6 +21,7 @@ import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
 import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
+import static com.android.internal.widget.ConversationLayout.CONVERSATION_LAYOUT_ENABLED;
 
 import android.annotation.ColorInt;
 import android.annotation.DimenRes;
@@ -389,6 +390,7 @@ public class Notification implements Parcelable
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_text);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_inbox);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_messaging);
+        STANDARD_LAYOUTS.add(R.layout.notification_template_material_conversation);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_media);
         STANDARD_LAYOUTS.add(R.layout.notification_template_material_big_media);
         STANDARD_LAYOUTS.add(R.layout.notification_template_header);
@@ -5138,7 +5140,7 @@ public class Notification implements Parcelable
             int color = isColorized(p) ? getPrimaryTextColor(p) : getSecondaryTextColor(p);
             contentView.setDrawableTint(R.id.expand_button, false, color,
                     PorterDuff.Mode.SRC_ATOP);
-            contentView.setInt(R.id.notification_header, "setOriginalNotificationColor",
+            contentView.setInt(R.id.expand_button, "setOriginalNotificationColor",
                     color);
         }
 
@@ -6116,7 +6118,9 @@ public class Notification implements Parcelable
         }
 
         private int getMessagingLayoutResource() {
-            return R.layout.notification_template_material_messaging;
+            return CONVERSATION_LAYOUT_ENABLED
+                    ? R.layout.notification_template_material_conversation
+                    : R.layout.notification_template_material_messaging;
         }
 
         private int getActionLayoutResource() {
@@ -7379,7 +7383,7 @@ public class Notification implements Parcelable
         public RemoteViews makeContentView(boolean increasedHeight) {
             mBuilder.mOriginalActions = mBuilder.mActions;
             mBuilder.mActions = new ArrayList<>();
-            RemoteViews remoteViews = makeMessagingView(true /* displayImagesAtEnd */,
+            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */,
                     false /* hideLargeIcon */);
             mBuilder.mActions = mBuilder.mOriginalActions;
             mBuilder.mOriginalActions = null;
@@ -7469,19 +7473,18 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
-            return makeMessagingView(false /* displayImagesAtEnd */, true /* hideLargeIcon */);
+            return makeMessagingView(false /* isCollapsed */, true /* hideLargeIcon */);
         }
 
         /**
          * Create a messaging layout.
          *
-         * @param displayImagesAtEnd should images be displayed at the end of the content instead
-         *                           of inline.
+         * @param isCollapsed Should this use the collapsed layout
          * @param hideRightIcons Should the reply affordance be shown at the end of the notification
          * @return the created remoteView.
          */
         @NonNull
-        private RemoteViews makeMessagingView(boolean displayImagesAtEnd, boolean hideRightIcons) {
+        private RemoteViews makeMessagingView(boolean isCollapsed, boolean hideRightIcons) {
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
@@ -7522,14 +7525,16 @@ public class Notification implements Parcelable
                     mBuilder.getPrimaryTextColor(p));
             contentView.setInt(R.id.status_bar_latest_event_content, "setMessageTextColor",
                     mBuilder.getSecondaryTextColor(p));
-            contentView.setBoolean(R.id.status_bar_latest_event_content, "setDisplayImagesAtEnd",
-                    displayImagesAtEnd);
+            contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsCollapsed",
+                    isCollapsed);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setAvatarReplacement",
                     avatarReplacement);
             contentView.setCharSequence(R.id.status_bar_latest_event_content, "setNameReplacement",
                     nameReplacement);
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsOneToOne",
                     isOneToOne);
+            contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
+                    mBuilder.mN.mLargeIcon);
             contentView.setBundle(R.id.status_bar_latest_event_content, "setData",
                     mBuilder.mN.extras);
             return contentView;
@@ -7590,9 +7595,11 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews remoteViews = makeMessagingView(true /* displayImagesAtEnd */,
+            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */,
                     true /* hideLargeIcon */);
-            remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
+            if (!CONVERSATION_LAYOUT_ENABLED) {
+                remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
+            }
             return remoteViews;
         }
 

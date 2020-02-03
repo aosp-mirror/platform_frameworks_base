@@ -683,6 +683,22 @@
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
 
     <dimen name="messaging_avatar_size">52dp</dimen>
+    <dimen name="conversation_avatar_size">52dp</dimen>
+    <!-- Start of the content in the conversation template -->
+    <dimen name="conversation_content_start">80dp</dimen>
+    <!-- Top margin of the expand button for conversations when expanded -->
+    <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
+    <!-- Side margins of the conversation badge in relation to the conversation icon -->
+    <dimen name="conversation_badge_side_margin">36dp</dimen>
+    <!-- size of the notification icon when badged in a conversation -->
+    <dimen name="conversation_icon_size_badged">15dp</dimen>
+    <!-- size of the notification icon when centered in a conversation -->
+    <dimen name="conversation_icon_size_centered">20dp</dimen>
+    <!-- margin on the top when the icon is centered for group conversations -->
+    <dimen name="conversation_icon_margin_top_centered">5dp</dimen>
+
+    <!-- Padding between text and sender when singleline -->
+    <dimen name="messaging_group_singleline_sender_padding_end">4dp</dimen>
 
     <dimen name="messaging_group_sending_progress_size">24dp</dimen>
 

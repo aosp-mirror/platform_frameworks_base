@@ -53,6 +53,7 @@ public class RemeasuringLinearLayout extends LinearLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int count = getChildCount();
         int height = 0;
+        boolean isVertical = getOrientation() == LinearLayout.VERTICAL;
         for (int i = 0; i < count; ++i) {
             final View child = getChildAt(i);
             if (child == null || child.getVisibility() == View.GONE) {
@@ -60,8 +61,8 @@ public class RemeasuringLinearLayout extends LinearLayout {
             }
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            height = Math.max(height, height + child.getMeasuredHeight() + lp.topMargin +
-                    lp.bottomMargin);
+            int childHeight = child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
+            height = Math.max(height, isVertical ? height + childHeight : childHeight);
         }
         setMeasuredDimension(getMeasuredWidth(), height);
     }

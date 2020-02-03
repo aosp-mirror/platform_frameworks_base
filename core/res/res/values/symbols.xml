@@ -3876,6 +3876,18 @@
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
 
+  <java-symbol type="id" name="conversation_icon" />
+  <java-symbol type="id" name="conversation_icon_badge" />
+  <java-symbol type="id" name="expand_button_container" />
+  <java-symbol type="id" name="messaging_group_content_container" />
+  <java-symbol type="dimen" name="conversation_expand_button_top_margin_expanded" />
+  <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
+  <java-symbol type="dimen" name="conversation_badge_side_margin" />
+  <java-symbol type="dimen" name="conversation_icon_size_badged" />
+  <java-symbol type="dimen" name="conversation_icon_size_centered" />
+  <java-symbol type="dimen" name="conversation_icon_margin_top_centered" />
+  <java-symbol type="layout" name="notification_template_material_conversation" />
+
   <!-- Intent resolver and share sheet -->
   <java-symbol type="color" name="resolver_tabs_active_color" />
   <java-symbol type="color" name="resolver_tabs_inactive_color" />
