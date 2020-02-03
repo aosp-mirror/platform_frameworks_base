@@ -811,6 +811,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (newRollback == null) {
                 newRollback = createNewRollbackLocked(parentSession);
                 mNewRollbacks.add(newRollback);
+                newRollback.setIsNewRollback(true);
             }
         }
         newRollback.addToken(token);
@@ -1201,6 +1202,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     newRollback = getNewRollbackForPackageSessionLocked(sessionId);
                     if (newRollback != null && newRollback.notifySessionWithSuccess()) {
                         mNewRollbacks.remove(newRollback);
+                        newRollback.setIsNewRollback(false);
                     } else {
                         // Not all child sessions finished with success.
                         // Don't enable the rollback yet.
