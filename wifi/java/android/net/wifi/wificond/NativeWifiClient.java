@@ -36,8 +36,7 @@ public final class NativeWifiClient implements Parcelable {
     @NonNull public final byte[] macAddress;
 
     /**
-     * public constructor
-     * @hide
+     * Construct a native Wi-Fi client.
      */
     public NativeWifiClient(@NonNull byte[] macAddress) {
         this.macAddress = macAddress;

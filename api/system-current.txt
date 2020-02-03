@@ -8202,6 +8202,7 @@ package android.net.wifi.wificond {
   }
 
   public final class NativeScanResult implements android.os.Parcelable {
+    ctor public NativeScanResult();
     method public int describeContents();
     method @NonNull public byte[] getBssid();
     method @NonNull public java.util.BitSet getCapabilities();
@@ -8217,6 +8218,7 @@ package android.net.wifi.wificond {
   }
 
   public final class NativeWifiClient implements android.os.Parcelable {
+    ctor public NativeWifiClient(@NonNull byte[]);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
@@ -8254,6 +8256,7 @@ package android.net.wifi.wificond {
   }
 
   public final class RadioChainInfo implements android.os.Parcelable {
+    ctor public RadioChainInfo(int, int);
     method public int describeContents();
     method public int getChainId();
     method public int getLevelDbm();
