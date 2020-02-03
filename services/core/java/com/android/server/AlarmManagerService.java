@@ -331,12 +331,16 @@ class AlarmManagerService extends SystemService {
             return (history == null) ? 0 : history.size();
         }
 
-        long getLastWakeupForPackage(String packageName, int userId, int positionFromEnd) {
+        /**
+         * @param n The desired nth-last wakeup
+         *                (1=1st-last=the ultimate wakeup and 2=2nd-last=the penultimate wakeup)
+         */
+        long getNthLastWakeupForPackage(String packageName, int userId, int n) {
             final LongArrayQueue history = mPackageHistory.get(Pair.create(packageName, userId));
             if (history == null) {
                 return 0;
             }
-            final int i = history.size() - positionFromEnd;
+            final int i = history.size() - n;
             return (i < 0) ? 0 : history.get(i);
         }
 
@@ -400,6 +404,11 @@ class AlarmManagerService extends SystemService {
                 "standby_rare_quota",
                 "standby_never_quota",
         };
+        // Not putting this in the KEYS_APP_STANDBY_QUOTAS array because this uses a different
+        // window size.
+        private static final String KEY_APP_STANDBY_RESTRICTED_QUOTA = "standby_restricted_quota";
+        private static final String KEY_APP_STANDBY_RESTRICTED_WINDOW =
+                "app_standby_restricted_window";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -420,6 +429,8 @@ class AlarmManagerService extends SystemService {
                 1,      // Rare
                 0       // Never
         };
+        private static final int DEFAULT_APP_STANDBY_RESTRICTED_QUOTA = 1;
+        private static final long DEFAULT_APP_STANDBY_RESTRICTED_WINDOW = MILLIS_IN_DAY;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -446,6 +457,8 @@ class AlarmManagerService extends SystemService {
 
         public long APP_STANDBY_WINDOW = DEFAULT_APP_STANDBY_WINDOW;
         public int[] APP_STANDBY_QUOTAS = new int[DEFAULT_APP_STANDBY_QUOTAS.length];
+        public int APP_STANDBY_RESTRICTED_QUOTA = DEFAULT_APP_STANDBY_RESTRICTED_QUOTA;
+        public long APP_STANDBY_RESTRICTED_WINDOW = DEFAULT_APP_STANDBY_RESTRICTED_WINDOW;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -520,6 +533,14 @@ class AlarmManagerService extends SystemService {
                             Math.min(APP_STANDBY_QUOTAS[i - 1], DEFAULT_APP_STANDBY_QUOTAS[i]));
                 }
 
+                APP_STANDBY_RESTRICTED_QUOTA = Math.max(1,
+                        mParser.getInt(KEY_APP_STANDBY_RESTRICTED_QUOTA,
+                                DEFAULT_APP_STANDBY_RESTRICTED_QUOTA));
+
+                APP_STANDBY_RESTRICTED_WINDOW = Math.max(APP_STANDBY_WINDOW,
+                        mParser.getLong(KEY_APP_STANDBY_RESTRICTED_WINDOW,
+                                DEFAULT_APP_STANDBY_RESTRICTED_WINDOW));
+
                 MAX_ALARMS_PER_UID = mParser.getInt(KEY_MAX_ALARMS_PER_UID,
                         DEFAULT_MAX_ALARMS_PER_UID);
                 if (MAX_ALARMS_PER_UID < DEFAULT_MAX_ALARMS_PER_UID) {
@@ -580,6 +601,14 @@ class AlarmManagerService extends SystemService {
                 pw.print(KEYS_APP_STANDBY_QUOTAS[i]); pw.print("=");
                 pw.println(APP_STANDBY_QUOTAS[i]);
             }
+
+            pw.print(KEY_APP_STANDBY_RESTRICTED_QUOTA); pw.print("=");
+            TimeUtils.formatDuration(APP_STANDBY_RESTRICTED_QUOTA, pw);
+            pw.println();
+
+            pw.print(KEY_APP_STANDBY_RESTRICTED_WINDOW); pw.print("=");
+            TimeUtils.formatDuration(APP_STANDBY_RESTRICTED_WINDOW, pw);
+            pw.println();
 
             pw.decreaseIndent();
         }
@@ -1814,25 +1843,44 @@ class AlarmManagerService extends SystemService {
                 sourcePackage, sourceUserId, mInjector.getElapsedRealtime());
 
         // Quota deferring implementation:
+        boolean deferred = false;
         final int wakeupsInWindow = mAppWakeupHistory.getTotalWakeupsInWindow(sourcePackage,
                 sourceUserId);
-        final int quotaForBucket = getQuotaForBucketLocked(standbyBucket);
-        boolean deferred = false;
-        if (wakeupsInWindow >= quotaForBucket) {
-            final long minElapsed;
-            if (quotaForBucket <= 0) {
-                // Just keep deferring for a day till the quota changes
-                minElapsed = mInjector.getElapsedRealtime() + MILLIS_IN_DAY;
-            } else {
-                // Suppose the quota for window was q, and the qth last delivery time for this
-                // package was t(q) then the next delivery must be after t(q) + <window_size>
-                final long t = mAppWakeupHistory.getLastWakeupForPackage(sourcePackage,
-                        sourceUserId, quotaForBucket);
-                minElapsed = t + 1 + mConstants.APP_STANDBY_WINDOW;
+        if (standbyBucket == UsageStatsManager.STANDBY_BUCKET_RESTRICTED) {
+            // Special case because it's 1/day instead of 1/hour.
+            // AppWakeupHistory doesn't delete old wakeup times until a new one is logged, so we
+            // should always have the last wakeup available.
+            if (wakeupsInWindow > 0) {
+                final long lastWakeupTime = mAppWakeupHistory.getNthLastWakeupForPackage(
+                        sourcePackage, sourceUserId, mConstants.APP_STANDBY_RESTRICTED_QUOTA);
+                if (mInjector.getElapsedRealtime() - lastWakeupTime
+                        < mConstants.APP_STANDBY_RESTRICTED_WINDOW) {
+                    final long minElapsed =
+                            lastWakeupTime + mConstants.APP_STANDBY_RESTRICTED_WINDOW;
+                    if (alarm.expectedWhenElapsed < minElapsed) {
+                        alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
+                        deferred = true;
+                    }
+                }
             }
-            if (alarm.expectedWhenElapsed < minElapsed) {
-                alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
-                deferred = true;
+        } else {
+            final int quotaForBucket = getQuotaForBucketLocked(standbyBucket);
+            if (wakeupsInWindow >= quotaForBucket) {
+                final long minElapsed;
+                if (quotaForBucket <= 0) {
+                    // Just keep deferring for a day till the quota changes
+                    minElapsed = mInjector.getElapsedRealtime() + MILLIS_IN_DAY;
+                } else {
+                    // Suppose the quota for window was q, and the qth last delivery time for this
+                    // package was t(q) then the next delivery must be after t(q) + <window_size>
+                    final long t = mAppWakeupHistory.getNthLastWakeupForPackage(
+                            sourcePackage, sourceUserId, quotaForBucket);
+                    minElapsed = t + 1 + mConstants.APP_STANDBY_WINDOW;
+                }
+                if (alarm.expectedWhenElapsed < minElapsed) {
+                    alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
+                    deferred = true;
+                }
             }
         }
         if (!deferred) {
