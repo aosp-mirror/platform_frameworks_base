@@ -34,7 +34,7 @@ import com.android.internal.util.FrameworkStatsLog;
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
  * define custom metrics inside statsd.
  */
-public final class StatsLog extends StatsLogInternal {
+public final class StatsLog {
     private static final String TAG = "StatsLog";
     private static final boolean DEBUG = false;
 
