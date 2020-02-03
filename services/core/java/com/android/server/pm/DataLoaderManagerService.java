@@ -225,9 +225,6 @@ public class DataLoaderManagerService extends SystemService {
         private void remove() {
             synchronized (mLock) {
                 mServiceConnections.remove(mId);
-                if (mServiceConnections.size() == 0) {
-                    mServiceConnections = null;
-                }
             }
             mParams.clear();
         }
