@@ -24,6 +24,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -156,6 +158,16 @@ public class Vpn {
     // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
     // is actually O(n²)+O(n²).
     private static final int MAX_ROUTES_TO_EVALUATE = 150;
+
+    /**
+     * Largest profile size allowable for Platform VPNs.
+     *
+     * <p>The largest platform VPN profiles use IKEv2 RSA Certificate Authentication and have two
+     * X509Certificates, and one RSAPrivateKey. This should lead to a max size of 2x 12kB for the
+     * certificates, plus a reasonable upper bound on the private key of 32kB. The rest of the
+     * profile is expected to be negligible in size.
+     */
+    @VisibleForTesting static final int MAX_VPN_PROFILE_SIZE_BYTES = 1 << 17; // 128kB
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -656,6 +668,11 @@ public class Vpn {
      * It uses {@link VpnConfig#LEGACY_VPN} as its package name, and
      * it can be revoked by itself.
      *
+     * The permission checks to verify that the VPN has already been granted
+     * user consent are dependent on the type of the VPN being prepared. See
+     * {@link AppOpsManager#OP_ACTIVATE_VPN} and {@link
+     * AppOpsManager#OP_ACTIVATE_PLATFORM_VPN} for more information.
+     *
      * Note: when we added VPN pre-consent in
      * https://android.googlesource.com/platform/frameworks/base/+/0554260
      * the names oldPackage and newPackage became misleading, because when
@@ -674,10 +691,13 @@ public class Vpn {
      *
      * @param oldPackage The package name of the old VPN application
      * @param newPackage The package name of the new VPN application
-     *
+     * @param isPlatformVpn Whether the package being prepared is using a platform VPN profile.
+     *     Preparing a platform VPN profile requires only the lesser ACTIVATE_PLATFORM_VPN appop.
      * @return true if the operation succeeded.
      */
-    public synchronized boolean prepare(String oldPackage, String newPackage) {
+    // TODO: Use an Intdef'd type to represent what kind of VPN the caller is preparing.
+    public synchronized boolean prepare(
+            String oldPackage, String newPackage, boolean isPlatformVpn) {
         if (oldPackage != null) {
             // Stop an existing always-on VPN from being dethroned by other apps.
             if (mAlwaysOn && !isCurrentPreparedPackage(oldPackage)) {
@@ -688,13 +708,14 @@ public class Vpn {
             if (!isCurrentPreparedPackage(oldPackage)) {
                 // The package doesn't match. We return false (to obtain user consent) unless the
                 // user has already consented to that VPN package.
-                if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
+                if (!oldPackage.equals(VpnConfig.LEGACY_VPN)
+                        && isVpnPreConsented(mContext, oldPackage, isPlatformVpn)) {
                     prepareInternal(oldPackage);
                     return true;
                 }
                 return false;
             } else if (!oldPackage.equals(VpnConfig.LEGACY_VPN)
-                    && !isVpnUserPreConsented(oldPackage)) {
+                    && !isVpnPreConsented(mContext, oldPackage, isPlatformVpn)) {
                 // Currently prepared VPN is revoked, so unprepare it and return false.
                 prepareInternal(VpnConfig.LEGACY_VPN);
                 return false;
@@ -805,13 +826,29 @@ public class Vpn {
         return false;
     }
 
-    private boolean isVpnUserPreConsented(String packageName) {
-        AppOpsManager appOps =
-                (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+    private static boolean isVpnPreConsented(
+            Context context, String packageName, boolean isPlatformVpn) {
+        return isPlatformVpn
+                ? isVpnProfilePreConsented(context, packageName)
+                : isVpnServicePreConsented(context, packageName);
+    }
 
-        // Verify that the caller matches the given package and has permission to activate VPNs.
-        return appOps.noteOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, Binder.getCallingUid(),
-                packageName) == AppOpsManager.MODE_ALLOWED;
+    private static boolean doesPackageHaveAppop(Context context, String packageName, int appop) {
+        final AppOpsManager appOps =
+                (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+
+        // Verify that the caller matches the given package and has the required permission.
+        return appOps.noteOpNoThrow(appop, Binder.getCallingUid(), packageName)
+                == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private static boolean isVpnServicePreConsented(Context context, String packageName) {
+        return doesPackageHaveAppop(context, packageName, AppOpsManager.OP_ACTIVATE_VPN);
+    }
+
+    private static boolean isVpnProfilePreConsented(Context context, String packageName) {
+        return doesPackageHaveAppop(context, packageName, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN)
+                || isVpnServicePreConsented(context, packageName);
     }
 
     private int getAppUid(String app, int userHandle) {
@@ -1001,6 +1038,9 @@ public class Vpn {
      * Establish a VPN network and return the file descriptor of the VPN interface. This methods
      * returns {@code null} if the application is revoked or not prepared.
      *
+     * <p>This method supports ONLY VpnService-based VPNs. For Platform VPNs, see {@link
+     * provisionVpnProfile} and {@link startVpnProfile}
+     *
      * @param config The parameters to configure the network.
      * @return The file descriptor of the VPN interface.
      */
@@ -1011,7 +1051,7 @@ public class Vpn {
             return null;
         }
         // Check to ensure consent hasn't been revoked since we were prepared.
-        if (!isVpnUserPreConsented(mPackage)) {
+        if (!isVpnServicePreConsented(mContext, mPackage)) {
             return null;
         }
         // Check if the service is properly declared.
@@ -1676,6 +1716,10 @@ public class Vpn {
         public int settingsSecureGetIntForUser(String key, int def, int userId) {
             return Settings.Secure.getIntForUser(mContext.getContentResolver(), key, def, userId);
         }
+
+        public boolean isCallerSystem() {
+            return Binder.getCallingUid() == Process.SYSTEM_UID;
+        }
     }
 
     private native int jniCreate(int mtu);
@@ -2223,5 +2267,149 @@ public class Vpn {
                 }
             }
         }
+    }
+
+    private void verifyCallingUidAndPackage(String packageName) {
+        if (getAppUid(packageName, mUserHandle) != Binder.getCallingUid()) {
+            throw new SecurityException("Mismatched package and UID");
+        }
+    }
+
+    @VisibleForTesting
+    String getProfileNameForPackage(String packageName) {
+        return Credentials.PLATFORM_VPN + mUserHandle + "_" + packageName;
+    }
+
+    /**
+     * Stores an app-provisioned VPN profile and returns whether the app is already prepared.
+     *
+     * @param packageName the package name of the app provisioning this profile
+     * @param profile the profile to be stored and provisioned
+     * @param keyStore the System keystore instance to save VPN profiles
+     * @returns whether or not the app has already been granted user consent
+     */
+    public synchronized boolean provisionVpnProfile(
+            @NonNull String packageName, @NonNull VpnProfile profile, @NonNull KeyStore keyStore) {
+        checkNotNull(packageName, "No package name provided");
+        checkNotNull(profile, "No profile provided");
+        checkNotNull(keyStore, "KeyStore missing");
+
+        verifyCallingUidAndPackage(packageName);
+
+        final byte[] encodedProfile = profile.encode();
+        if (encodedProfile.length > MAX_VPN_PROFILE_SIZE_BYTES) {
+            throw new IllegalArgumentException("Profile too big");
+        }
+
+        // Permissions checked during startVpnProfile()
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    keyStore.put(
+                            getProfileNameForPackage(packageName),
+                            encodedProfile,
+                            Process.SYSTEM_UID,
+                            0 /* flags */);
+                });
+
+        // TODO: if package has CONTROL_VPN, grant the ACTIVATE_PLATFORM_VPN appop.
+        // This mirrors the prepareAndAuthorize that is used by VpnService.
+
+        // Return whether the app is already pre-consented
+        return isVpnProfilePreConsented(mContext, packageName);
+    }
+
+    /**
+     * Deletes an app-provisioned VPN profile.
+     *
+     * @param packageName the package name of the app provisioning this profile
+     * @param keyStore the System keystore instance to save VPN profiles
+     */
+    public synchronized void deleteVpnProfile(
+            @NonNull String packageName, @NonNull KeyStore keyStore) {
+        checkNotNull(packageName, "No package name provided");
+        checkNotNull(keyStore, "KeyStore missing");
+
+        verifyCallingUidAndPackage(packageName);
+
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    keyStore.delete(getProfileNameForPackage(packageName), Process.SYSTEM_UID);
+                });
+    }
+
+    /**
+     * Retrieves the VpnProfile.
+     *
+     * <p>Must be used only as SYSTEM_UID, otherwise the key/UID pair will not match anything in the
+     * keystore.
+     */
+    @VisibleForTesting
+    @Nullable
+    VpnProfile getVpnProfilePrivileged(@NonNull String packageName, @NonNull KeyStore keyStore) {
+        if (!mSystemServices.isCallerSystem()) {
+            Log.wtf(TAG, "getVpnProfilePrivileged called as non-System UID ");
+            return null;
+        }
+
+        final byte[] encoded = keyStore.get(getProfileNameForPackage(packageName));
+        if (encoded == null) return null;
+
+        return VpnProfile.decode("" /* Key unused */, encoded);
+    }
+
+    /**
+     * Starts an already provisioned VPN Profile, keyed by package name.
+     *
+     * <p>This method is meant to be called by apps (via VpnManager and ConnectivityService).
+     * Privileged (system) callers should use startVpnProfilePrivileged instead. Otherwise the UIDs
+     * will not match during appop checks.
+     *
+     * @param packageName the package name of the app provisioning this profile
+     * @param keyStore the System keystore instance to retrieve VPN profiles
+     */
+    public synchronized void startVpnProfile(
+            @NonNull String packageName, @NonNull KeyStore keyStore) {
+        checkNotNull(packageName, "No package name provided");
+        checkNotNull(keyStore, "KeyStore missing");
+
+        // Prepare VPN for startup
+        if (!prepare(packageName, null /* newPackage */, true /* isPlatformVpn */)) {
+            throw new SecurityException("User consent not granted for package " + packageName);
+        }
+
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    final VpnProfile profile = getVpnProfilePrivileged(packageName, keyStore);
+                    if (profile == null) {
+                        throw new IllegalArgumentException("No profile found for " + packageName);
+                    }
+
+                    startVpnProfilePrivileged(profile);
+                });
+    }
+
+    private void startVpnProfilePrivileged(@NonNull VpnProfile profile) {
+        // TODO: Start PlatformVpnRunner
+    }
+
+    /**
+     * Stops an already running VPN Profile for the given package.
+     *
+     * <p>This method is meant to be called by apps (via VpnManager and ConnectivityService).
+     * Privileged (system) callers should (re-)prepare the LEGACY_VPN instead.
+     *
+     * @param packageName the package name of the app provisioning this profile
+     */
+    public synchronized void stopVpnProfile(@NonNull String packageName) {
+        checkNotNull(packageName, "No package name provided");
+
+        // To stop the VPN profile, the caller must be the current prepared package. Otherwise,
+        // the app is not prepared, and we can just return.
+        if (!isCurrentPreparedPackage(packageName)) {
+            // TODO: Also check to make sure that the running VPN is a VPN profile.
+            return;
+        }
+
+        prepareInternal(VpnConfig.LEGACY_VPN);
     }
 }
