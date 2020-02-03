@@ -44,6 +44,16 @@ public class OverlayManager {
     private final IOverlayManager mService;
     private final Context mContext;
 
+    /**
+     * Pre R a {@link java.lang.SecurityException} would only be thrown by setEnabled APIs (e
+     * .g. {@link #setEnabled(String, boolean, UserHandle)}) for a permission error.
+     * Since R this no longer holds true, and {@link java.lang.SecurityException} can be
+     * thrown for any number of reasons, none of which are exposed to the caller.
+     *
+     * <p>To maintain existing API behavior, if a legacy permission failure or actor enforcement
+     * failure occurs for an app not yet targeting R, coerce it into an {@link
+     * java.lang.IllegalStateException}, which existed in the source prior to R.
+     */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long THROW_SECURITY_EXCEPTIONS = 147340954;
