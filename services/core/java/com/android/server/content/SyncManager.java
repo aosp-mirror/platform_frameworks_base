@@ -212,8 +212,11 @@ public class SyncManager {
 
 
     private static final int SYNC_OP_STATE_VALID = 0;
-    private static final int SYNC_OP_STATE_INVALID = 1;
+    // "1" used to include errors 3, 4 and 5 but now it's split up.
     private static final int SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS = 2;
+    private static final int SYNC_OP_STATE_INVALID_NO_ACCOUNT = 3;
+    private static final int SYNC_OP_STATE_INVALID_NOT_SYNCABLE = 4;
+    private static final int SYNC_OP_STATE_INVALID_SYNC_DISABLED = 5;
 
     /** Flags used when connecting to a sync adapter service */
     private static final int SYNC_ADAPTER_CONNECTION_FLAGS = Context.BIND_AUTO_CREATE
@@ -3206,12 +3209,10 @@ public class SyncManager {
             }
 
             final int syncOpState = computeSyncOpState(op);
-            switch (syncOpState) {
-                case SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS:
-                case SYNC_OP_STATE_INVALID: {
-                    SyncJobService.callJobFinished(op.jobId, false,
-                            "invalid op state: " + syncOpState);
-                } return;
+            if (syncOpState != SYNC_OP_STATE_VALID) {
+                SyncJobService.callJobFinished(op.jobId, false,
+                        "invalid op state: " + syncOpState);
+                return;
             }
 
             if (!dispatchSyncOperation(op)) {
@@ -3354,27 +3355,27 @@ public class SyncManager {
                     pollFrequencyMillis, flexMillis, ContentResolver.SYNC_EXEMPTION_NONE);
 
             final int syncOpState = computeSyncOpState(op);
-            switch (syncOpState) {
-                case SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS: {
-                    String packageName = op.owningPackage;
-                    final int userId = UserHandle.getUserId(op.owningUid);
-                    // If the app did not run and has no account access, done
-                    if (!wasPackageEverLaunched(packageName, userId)) {
-                        return;
-                    }
-                    mAccountManagerInternal.requestAccountAccess(op.target.account,
-                            packageName, userId, new RemoteCallback((Bundle result) -> {
-                                if (result != null
-                                        && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
-                                    updateOrAddPeriodicSync(target, pollFrequency, flex, extras);
-                                }
-                            }
-                        ));
-                } return;
-
-                case SYNC_OP_STATE_INVALID: {
+            if (syncOpState == SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS) {
+                String packageName = op.owningPackage;
+                final int userId = UserHandle.getUserId(op.owningUid);
+                // If the app did not run and has no account access, done
+                if (!wasPackageEverLaunched(packageName, userId)) {
                     return;
                 }
+                mLogger.log("requestAccountAccess for SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS");
+                mAccountManagerInternal.requestAccountAccess(op.target.account,
+                        packageName, userId, new RemoteCallback((Bundle result) -> {
+                            if (result != null
+                                    && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
+                                updateOrAddPeriodicSync(target, pollFrequency, flex, extras);
+                            }
+                        }
+                        ));
+                return;
+            }
+            if (syncOpState != SYNC_OP_STATE_VALID) {
+                mLogger.log("syncOpState=", syncOpState);
+                return;
             }
 
             scheduleSyncOperationH(op);
@@ -3452,7 +3453,7 @@ public class SyncManager {
                     Slog.v(TAG, "    Dropping sync operation: account doesn't exist.");
                 }
                 Slog.wtf(TAG, "SYNC_OP_STATE_INVALID: account doesn't exist.");
-                return SYNC_OP_STATE_INVALID;
+                return SYNC_OP_STATE_INVALID_NO_ACCOUNT;
             }
             // Drop this sync request if it isn't syncable.
             state = computeSyncable(target.account, target.userId, target.provider, true);
@@ -3469,7 +3470,7 @@ public class SyncManager {
                     Slog.v(TAG, "    Dropping sync operation: isSyncable == NOT_SYNCABLE");
                 }
                 Slog.wtf(TAG, "SYNC_OP_STATE_INVALID: NOT_SYNCABLE");
-                return SYNC_OP_STATE_INVALID;
+                return SYNC_OP_STATE_INVALID_NOT_SYNCABLE;
             }
 
             final boolean syncEnabled = mSyncStorageEngine.getMasterSyncAutomatically(target.userId)
@@ -3488,7 +3489,7 @@ public class SyncManager {
                     Slog.v(TAG, "    Dropping sync operation: disallowed by settings/network.");
                 }
                 Slog.wtf(TAG, "SYNC_OP_STATE_INVALID: disallowed by settings/network");
-                return SYNC_OP_STATE_INVALID;
+                return SYNC_OP_STATE_INVALID_SYNC_DISABLED;
             }
             return SYNC_OP_STATE_VALID;
         }
