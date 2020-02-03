@@ -11114,6 +11114,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(id);
             }
         }
+        if (uninstallBlocked) {
+            final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+            pmi.removeNonSystemPackageSuspensions(packageName, userId);
+            pmi.removeDistractingPackageRestrictions(packageName, userId);
+            pmi.flushPackageRestrictions(userId);
+        }
         final boolean isDelegate = (who == null);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_UNINSTALL_BLOCKED)

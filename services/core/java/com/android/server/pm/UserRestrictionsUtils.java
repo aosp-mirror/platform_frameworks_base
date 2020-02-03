@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -42,6 +43,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 
 import com.google.android.collect.Sets;
 
@@ -675,6 +677,15 @@ public class UserRestrictionsUtils {
                                 context.getContentResolver(),
                                 Global.LOCATION_GLOBAL_KILL_SWITCH, "0");
                     }
+                    break;
+                case UserManager.DISALLOW_APPS_CONTROL:
+                    // Intentional fall-through
+                case UserManager.DISALLOW_UNINSTALL_APPS:
+                    final PackageManagerInternal pmi = LocalServices.getService(
+                            PackageManagerInternal.class);
+                    pmi.removeAllNonSystemPackageSuspensions(userId);
+                    pmi.removeAllDistractingPackageRestrictions(userId);
+                    pmi.flushPackageRestrictions(userId);
                     break;
             }
         } finally {

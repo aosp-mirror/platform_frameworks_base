@@ -217,6 +217,33 @@ public abstract class PackageManagerInternal {
     public abstract boolean isPackageSuspended(String packageName, int userId);
 
     /**
+     * Removes all package suspensions imposed by any non-system packages.
+     */
+    public abstract void removeAllNonSystemPackageSuspensions(int userId);
+
+    /**
+     * Removes all suspensions imposed on the given package by non-system packages.
+     */
+    public abstract void removeNonSystemPackageSuspensions(String packageName, int userId);
+
+    /**
+     * Removes all {@link PackageManager.DistractionRestriction restrictions} set on the given
+     * package
+     */
+    public abstract void removeDistractingPackageRestrictions(String packageName, int userId);
+
+    /**
+     * Removes all {@link PackageManager.DistractionRestriction restrictions} set on all the
+     * packages.
+     */
+    public abstract void removeAllDistractingPackageRestrictions(int userId);
+
+    /**
+     * Flushes package restrictions for the given user immediately to disk.
+     */
+    public abstract void flushPackageRestrictions(int userId);
+
+    /**
      * Get the name of the package that suspended the given package. Packages can be suspended by
      * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
      * {@link android.Manifest.permission#SUSPEND_APPS}.
