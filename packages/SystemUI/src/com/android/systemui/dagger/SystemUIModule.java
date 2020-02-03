@@ -19,14 +19,13 @@ package com.android.systemui.dagger;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
+import android.view.Choreographer;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.DumpController;
 import com.android.systemui.assist.AssistModule;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -34,17 +33,21 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.StatusBarWindowBlurController;
+import com.android.systemui.statusbar.NotificationShadeWindowBlurController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.ConcurrencyModule;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.time.SystemClock;
@@ -97,11 +100,16 @@ public abstract class SystemUIModule {
     @Singleton
     @Provides
     @Nullable
-    static StatusBarWindowBlurController providesBlurController(BlurUtils blurUtils,
-            @Main Resources resources, SysuiStatusBarStateController statusBarStateController,
-            DumpController dumpController) {
-        return blurUtils.supportsBlursOnWindows() ? new StatusBarWindowBlurController(resources,
-                statusBarStateController, blurUtils, dumpController) : null;
+    static NotificationShadeWindowBlurController providesBlurController(BlurUtils blurUtils,
+            SysuiStatusBarStateController statusBarStateController,
+            DumpController dumpController, BiometricUnlockController biometricUnlockController,
+            KeyguardStateController keyguardStateController,
+            NotificationShadeWindowController notificationShadeWindowController,
+            Choreographer choreographer) {
+        return blurUtils.supportsBlursOnWindows() ? new NotificationShadeWindowBlurController(
+                statusBarStateController, blurUtils, biometricUnlockController,
+                keyguardStateController, notificationShadeWindowController, choreographer,
+                dumpController) : null;
     }
 
     /** */

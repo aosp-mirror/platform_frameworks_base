@@ -101,6 +101,7 @@ import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EmergencyDialerConstants;
@@ -1666,7 +1667,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             if (mBackgroundDrawable == null) {
                 mBackgroundDrawable = new ScrimDrawable();
-                mScrimAlpha = 0.8f;
+                mScrimAlpha = ScrimController.BUSY_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }

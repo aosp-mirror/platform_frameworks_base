@@ -521,10 +521,10 @@ public class ScrimControllerTest extends SysuiTestCase {
         Assert.assertEquals(ScrimController.TRANSPARENT,
                 mScrimInFront.getViewAlpha(), 0.0f);
         // Back scrim should be visible
-        Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+        Assert.assertEquals(ScrimController.BUSY_SCRIM_ALPHA,
                 mScrimBehind.getViewAlpha(), 0.0f);
         // Bubble scrim should be visible
-        Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+        Assert.assertEquals(ScrimController.BUSY_SCRIM_ALPHA,
                 mScrimBehind.getViewAlpha(), 0.0f);
     }
 
