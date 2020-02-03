@@ -2056,6 +2056,21 @@ public final class InputMethodManager {
     }
 
     /**
+     * Notify IME directly to remove surface as it is no longer visible.
+     * @hide
+     */
+    public void removeImeSurface() {
+        synchronized (mH) {
+            try {
+                if (mCurMethod != null) {
+                    mCurMethod.removeImeSurface();
+                }
+            } catch (RemoteException re) {
+            }
+        }
+    }
+
+    /**
      * Report the current selection range.
      *
      * <p><strong>Editor authors</strong>, you need to call this method whenever
