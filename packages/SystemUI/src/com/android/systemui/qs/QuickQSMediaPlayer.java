@@ -23,13 +23,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -44,9 +38,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.systemui.R;
 
@@ -63,7 +54,6 @@ public class QuickQSMediaPlayer {
     private LinearLayout mMediaNotifView;
     private MediaSession.Token mToken;
     private MediaController mController;
-    private int mBackgroundColor;
     private int mForegroundColor;
     private ComponentName mRecvComponent;
 
@@ -142,7 +132,6 @@ public class QuickQSMediaPlayer {
             View actionsContainer, int[] actionsToShow, PendingIntent contentIntent) {
         mToken = token;
         mForegroundColor = iconColor;
-        mBackgroundColor = bgColor;
 
         String oldPackage = "";
         if (mController != null) {
@@ -185,8 +174,7 @@ public class QuickQSMediaPlayer {
             }
         });
 
-        // Album art
-        addAlbumArtBackground(mMediaMetadata, mBackgroundColor);
+        mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(bgColor));
 
         // App icon
         ImageView appIcon = mMediaNotifView.findViewById(R.id.icon);
@@ -194,14 +182,8 @@ public class QuickQSMediaPlayer {
         iconDrawable.setTint(mForegroundColor);
         appIcon.setImageDrawable(iconDrawable);
 
-        // Artist name
-        TextView appText = mMediaNotifView.findViewById(R.id.header_title);
-        String artistName = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        appText.setText(artistName);
-        appText.setTextColor(mForegroundColor);
-
         // Song name
-        TextView titleText = mMediaNotifView.findViewById(R.id.header_text);
+        TextView titleText = mMediaNotifView.findViewById(R.id.header_title);
         String songName = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_TITLE);
         titleText.setText(songName);
         titleText.setTextColor(mForegroundColor);
@@ -276,55 +258,5 @@ public class QuickQSMediaPlayer {
      */
     public boolean hasMediaSession() {
         return mController != null && mController.getPlaybackState() != null;
-    }
-
-    private void addAlbumArtBackground(MediaMetadata metadata, int bgColor) {
-        Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-        float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
-        Rect bounds = new Rect();
-        mMediaNotifView.getBoundsOnScreen(bounds);
-        int width = bounds.width();
-        int height = bounds.height();
-        if (albumArt != null && width > 0 && height > 0) {
-            Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
-            Bitmap scaled = scaleBitmap(original, width, height);
-            Canvas canvas = new Canvas(scaled);
-
-            // Add translucent layer over album art to improve contrast
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(bgColor);
-            p.setAlpha(200);
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), p);
-
-            RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(
-                    mContext.getResources(), scaled);
-            roundedDrawable.setCornerRadius(radius);
-
-            mMediaNotifView.setBackground(roundedDrawable);
-        } else {
-            Log.e(TAG, "No album art available");
-            GradientDrawable rect = new GradientDrawable();
-            rect.setCornerRadius(radius);
-            rect.setColor(bgColor);
-            mMediaNotifView.setBackground(rect);
-        }
-    }
-
-    private Bitmap scaleBitmap(Bitmap original, int width, int height) {
-        Bitmap cropped = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(cropped);
-
-        float scale = (float) cropped.getWidth() / (float) original.getWidth();
-        float dy = (cropped.getHeight() - original.getHeight() * scale) / 2.0f;
-        Matrix transformation = new Matrix();
-        transformation.postTranslate(0, dy);
-        transformation.preScale(scale, scale);
-
-        Paint paint = new Paint();
-        paint.setFilterBitmap(true);
-        canvas.drawBitmap(original, transformation, paint);
-
-        return cropped;
     }
 }
