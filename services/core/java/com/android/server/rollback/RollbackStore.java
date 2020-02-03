@@ -199,11 +199,6 @@ class RollbackStore {
      * Creates a new Rollback instance for a non-staged rollback with
      * backupDir assigned.
      */
-    Rollback createNonStagedRollback(int rollbackId, int userId, String installerPackageName) {
-        File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
-        return new Rollback(rollbackId, backupDir, -1, userId, installerPackageName);
-    }
-
     Rollback createNonStagedRollback(int rollbackId, int userId, String installerPackageName,
             int[] packageSessionIds) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
@@ -214,16 +209,6 @@ class RollbackStore {
     /**
      * Creates a new Rollback instance for a staged rollback with
      * backupDir assigned.
-     */
-    Rollback createStagedRollback(int rollbackId, int stagedSessionId, int userId,
-            String installerPackageName) {
-        File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
-        return new Rollback(rollbackId, backupDir, stagedSessionId, userId, installerPackageName);
-    }
-
-    /**
-     * TODO: Now we have 4 factory methods for creating Rollback objects which is verbose and
-     * cumbersome. Need to merge them for simplicity.
      */
     Rollback createStagedRollback(int rollbackId, int stagedSessionId, int userId,
             String installerPackageName, int[] packageSessionIds) {
