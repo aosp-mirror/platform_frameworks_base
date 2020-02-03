@@ -7510,20 +7510,16 @@ package android.net.wifi {
 
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
     method @Deprecated public int getAuthType();
-    method @Deprecated @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
     method @Deprecated @NonNull public android.net.IpConfiguration getIpConfiguration();
     method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus getNetworkSelectionStatus();
     method @Deprecated @NonNull public String getPrintableSsid();
-    method @Deprecated @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
     method @Deprecated public int getRecentFailureReason();
-    method @Deprecated @Nullable public android.net.StaticIpConfiguration getStaticIpConfiguration();
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
     method @Deprecated public static boolean isMetered(@Nullable android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiInfo);
     method @Deprecated public boolean isNoInternetAccessExpected();
     method @Deprecated public void setIpConfiguration(@Nullable android.net.IpConfiguration);
     method @Deprecated public void setNetworkSelectionStatus(@NonNull android.net.wifi.WifiConfiguration.NetworkSelectionStatus);
-    method @Deprecated public void setProxy(@NonNull android.net.IpConfiguration.ProxySettings, @NonNull android.net.ProxyInfo);
     field @Deprecated public static final int AP_BAND_2GHZ = 0; // 0x0
     field @Deprecated public static final int AP_BAND_5GHZ = 1; // 0x1
     field @Deprecated public static final int AP_BAND_ANY = -1; // 0xffffffff
