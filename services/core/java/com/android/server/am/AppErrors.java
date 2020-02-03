@@ -798,7 +798,6 @@ class AppErrors {
         boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
-        final String packageName;
         final int userId;
         synchronized (mService) {
             final ProcessRecord proc = data.proc;
@@ -807,7 +806,6 @@ class AppErrors {
                 Slog.e(TAG, "handleShowAppErrorUi: proc is null");
                 return;
             }
-            packageName = proc.info.packageName;
             userId = proc.userId;
             if (proc.getDialogController().hasCrashDialogs()) {
                 Slog.e(TAG, "App already has crash dialog: " + proc);
