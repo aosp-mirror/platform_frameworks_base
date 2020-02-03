@@ -3385,13 +3385,11 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void binderDied() {
-            int oldModeOwnerPid = 0;
+            int oldModeOwnerPid;
             int newModeOwnerPid = 0;
             synchronized (mDeviceBroker.mSetModeLock) {
                 Log.w(TAG, "setMode() client died");
-                if (!mSetModeDeathHandlers.isEmpty()) {
-                    oldModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
-                }
+                oldModeOwnerPid = getModeOwnerPid();
                 int index = mSetModeDeathHandlers.indexOf(this);
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
@@ -3425,17 +3423,19 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setMode(int) */
     public void setMode(int mode, IBinder cb, String callingPackage) {
-        if (DEBUG_MODE) { Log.v(TAG, "setMode(mode=" + mode + ", callingPackage=" + callingPackage + ")"); }
+        if (DEBUG_MODE) {
+            Log.v(TAG, "setMode(mode=" + mode + ", callingPackage=" + callingPackage + ")");
+        }
         if (!checkAudioSettingsPermission("setMode()")) {
             return;
         }
-
-        if ( (mode == AudioSystem.MODE_IN_CALL) &&
-                (mContext.checkCallingOrSelfPermission(
+        final boolean hasModifyPhoneStatePermission = mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.MODIFY_PHONE_STATE)
-                            != PackageManager.PERMISSION_GRANTED)) {
+                        == PackageManager.PERMISSION_GRANTED;
+        final int callingPid = Binder.getCallingPid();
+        if ((mode == AudioSystem.MODE_IN_CALL) && !hasModifyPhoneStatePermission) {
             Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode(MODE_IN_CALL) from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+                    + callingPid + ", uid=" + Binder.getCallingUid());
             return;
         }
 
@@ -3449,16 +3449,25 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        int oldModeOwnerPid = 0;
-        int newModeOwnerPid = 0;
+        int oldModeOwnerPid;
+        int newModeOwnerPid;
         synchronized (mDeviceBroker.mSetModeLock) {
-            if (!mSetModeDeathHandlers.isEmpty()) {
-                oldModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
-            }
             if (mode == AudioSystem.MODE_CURRENT) {
                 mode = mMode;
             }
-            newModeOwnerPid = setModeInt(mode, cb, Binder.getCallingPid(), callingPackage);
+            oldModeOwnerPid = getModeOwnerPid();
+            // Do not allow changing mode if a call is active and the requester
+            // does not have permission to modify phone state or is not the mode owner.
+            if (((mMode == AudioSystem.MODE_IN_CALL)
+                    || (mMode == AudioSystem.MODE_IN_COMMUNICATION))
+                    && !(hasModifyPhoneStatePermission || (oldModeOwnerPid == callingPid))) {
+                Log.w(TAG, "setMode(" + mode + ") from pid=" + callingPid
+                        + ", uid=" + Binder.getCallingUid()
+                        + ", cannot change mode from " + mMode
+                        + " without permission or being mode owner");
+                return;
+            }
+            newModeOwnerPid = setModeInt(mode, cb, callingPid, callingPackage);
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
@@ -3548,10 +3557,9 @@ public class AudioService extends IAudioService.Stub
 
         if (status == AudioSystem.AUDIO_STATUS_OK) {
             if (actualMode != AudioSystem.MODE_NORMAL) {
-                if (mSetModeDeathHandlers.isEmpty()) {
+                newModeOwnerPid = getModeOwnerPid();
+                if (newModeOwnerPid == 0) {
                     Log.e(TAG, "setMode() different from MODE_NORMAL with empty mode client stack");
-                } else {
-                    newModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
                 }
             }
             // Note: newModeOwnerPid is always 0 when actualMode is MODE_NORMAL
