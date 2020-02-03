@@ -87,6 +87,7 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
     private int mBorderDragSize;
+    private int mOuterBorderSize;
     private View mOverlayView;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
@@ -118,6 +119,8 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
                 R.dimen.magnification_mirror_surface_margin);
         mBorderDragSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_border_drag_size);
+        mOuterBorderSize = mResources.getDimensionPixelSize(
+                R.dimen.magnification_outer_border_margin);
     }
 
     /**
@@ -357,7 +360,7 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
     }
 
     /**
-     * Modifies the placement of the mirrored content.
+     * Modifies the placement of the mirrored content when the position of mMirrorView is updated.
      */
     private void modifyWindowMagnification(SurfaceControl.Transaction t) {
         Rect sourceBounds = getSourceBounds(mMagnificationFrame, mScale);
@@ -365,13 +368,43 @@ public class WindowMagnificationController implements View.OnTouchListener, Surf
         // ViewRootImpl's position will change
         mTmpRect.set(0, 0, mMagnificationFrame.width(), mMagnificationFrame.height());
 
+        updateMirrorViewLayout();
+
+        t.setGeometry(mMirrorSurface, sourceBounds, mTmpRect, Surface.ROTATION_0);
+    }
+
+    /**
+     * Updates the layout params of MirrorView and translates MirrorView position when the view is
+     * moved close to the screen edges.
+     */
+    private void updateMirrorViewLayout() {
         WindowManager.LayoutParams params =
                 (WindowManager.LayoutParams) mMirrorView.getLayoutParams();
         params.x = mMagnificationFrame.left;
         params.y = mMagnificationFrame.top;
+        // Translates MirrorView position to make MirrorSurfaceView that is inside MirrorView
+        // able to move close to the screen edges.
+        final int maxMirrorViewX = mDisplaySize.x - mMirrorView.getWidth();
+        final int maxMirrorViewY = mDisplaySize.y - mMirrorView.getHeight();
+        final float translationX;
+        final float translationY;
+        if (params.x < 0) {
+            translationX = Math.max(params.x, -mOuterBorderSize);
+        } else if (params.x > maxMirrorViewX) {
+            translationX = Math.min(params.x - maxMirrorViewX, mOuterBorderSize);
+        } else {
+            translationX = 0;
+        }
+        if (params.y < 0) {
+            translationY = Math.max(params.y, -mOuterBorderSize);
+        } else if (params.y > maxMirrorViewY) {
+            translationY = Math.min(params.y - maxMirrorViewY, mOuterBorderSize);
+        } else {
+            translationY = 0;
+        }
+        mMirrorView.setTranslationX(translationX);
+        mMirrorView.setTranslationY(translationY);
         mWm.updateViewLayout(mMirrorView, params);
-
-        t.setGeometry(mMirrorSurface, sourceBounds, mTmpRect, Surface.ROTATION_0);
     }
 
     @Override
