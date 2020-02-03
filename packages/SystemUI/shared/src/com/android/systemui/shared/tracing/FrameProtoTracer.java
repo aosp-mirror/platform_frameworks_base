@@ -40,7 +40,7 @@ import java.util.function.Consumer;
  * @param <R> The proto class type of the entry root proto in the buffer
  */
 public class FrameProtoTracer<P, S extends P, T extends P, R>
-        implements TraceBuffer.ProtoProvider<P, S, T>, Choreographer.FrameCallback {
+        implements Choreographer.FrameCallback {
 
     private static final String TAG = "FrameProtoTracer";
     private static final int BUFFER_CAPACITY = 1024 * 1024;
@@ -57,6 +57,25 @@ public class FrameProtoTracer<P, S extends P, T extends P, R>
     private volatile boolean mEnabled;
     private boolean mFrameScheduled;
 
+    private final TraceBuffer.ProtoProvider<P, S, T> mProvider =
+            new TraceBuffer.ProtoProvider<P, S, T>() {
+        @Override
+        public int getItemSize(P proto) {
+            return mParams.getProtoSize(proto);
+        }
+
+        @Override
+        public byte[] getBytes(P proto) {
+            return mParams.getProtoBytes(proto);
+        }
+
+        @Override
+        public void write(S encapsulatingProto, Queue<T> buffer, OutputStream os)
+                throws IOException {
+            os.write(mParams.serializeEncapsulatingProto(encapsulatingProto, buffer));
+        }
+    };
+
     public interface ProtoTraceParams<P, S, T, R> {
         File getTraceFile();
         S getEncapsulatingTraceProto();
@@ -68,7 +87,7 @@ public class FrameProtoTracer<P, S extends P, T extends P, R>
 
     public FrameProtoTracer(ProtoTraceParams<P, S, T, R> params) {
         mParams = params;
-        mBuffer = new TraceBuffer<>(BUFFER_CAPACITY, this, new Consumer<T>() {
+        mBuffer = new TraceBuffer<>(BUFFER_CAPACITY, mProvider, new Consumer<T>() {
             @Override
             public void accept(T t) {
                 onProtoDequeued(t);
@@ -76,21 +95,6 @@ public class FrameProtoTracer<P, S extends P, T extends P, R>
         });
         mTraceFile = params.getTraceFile();
         mChoreographer = Choreographer.getMainThreadInstance();
-    }
-
-    @Override
-    public int getItemSize(P proto) {
-        return mParams.getProtoSize(proto);
-    }
-
-    @Override
-    public byte[] getBytes(P proto) {
-        return mParams.getProtoBytes(proto);
-    }
-
-    @Override
-    public void write(S encapsulatingProto, Queue<T> buffer, OutputStream os) throws IOException {
-        os.write(mParams.serializeEncapsulatingProto(encapsulatingProto, buffer));
     }
 
     public void start() {
