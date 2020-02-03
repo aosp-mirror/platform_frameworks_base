@@ -401,7 +401,7 @@ java_defaults {
         "app-compat-annotations",
         "ext",
         "unsupportedappusage",
-        "updatable_media_stubs",
+        "framework-media-stubs-systemapi",
         "framework_mediaprovider_stubs",
         "framework-tethering",
         "framework-telephony-stubs",
@@ -517,7 +517,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "updatable_media_stubs",
+        "framework-media-stubs-systemapi",
         "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
         "framework-permission-stubs",
