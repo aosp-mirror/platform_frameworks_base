@@ -24,6 +24,7 @@ import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
 /**
  * Utility class for adding a View hierarchy to a {@link SurfaceControl}. The View hierarchy
@@ -40,6 +41,7 @@ public class SurfaceControlViewHost {
     private WindowlessWindowManager mWm;
 
     private SurfaceControl mSurfaceControl;
+    private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
     /**
      * Package encapsulating a Surface hierarchy which contains interactive view
@@ -49,15 +51,18 @@ public class SurfaceControlViewHost {
      */
     public static final class SurfacePackage implements Parcelable {
         private final SurfaceControl mSurfaceControl;
-        // TODO: Accessibility ID goes here
+        private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
-        SurfacePackage(SurfaceControl sc) {
+        SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection) {
             mSurfaceControl = sc;
+            mAccessibilityEmbeddedConnection = connection;
         }
 
         private SurfacePackage(Parcel in) {
             mSurfaceControl = new SurfaceControl();
             mSurfaceControl.readFromParcel(in);
+            mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
+                    in.readStrongBinder());
         }
 
         /**
@@ -69,6 +74,16 @@ public class SurfaceControlViewHost {
             return mSurfaceControl;
         }
 
+        /**
+         * Gets an accessibility embedded connection interface for this SurfaceControlViewHost.
+         *
+         * @return {@link IAccessibilityEmbeddedConnection} interface.
+         * @hide
+         */
+        public IAccessibilityEmbeddedConnection getAccessibilityEmbeddedConnection() {
+            return mAccessibilityEmbeddedConnection;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -77,6 +92,7 @@ public class SurfaceControlViewHost {
         @Override
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
+            out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
@@ -95,6 +111,7 @@ public class SurfaceControlViewHost {
             @NonNull WindowlessWindowManager wwm) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm);
+        mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
     /**
@@ -118,6 +135,7 @@ public class SurfaceControlViewHost {
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
         mViewRoot = new ViewRootImpl(context, display, mWm);
+        mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
     /**
@@ -128,8 +146,8 @@ public class SurfaceControlViewHost {
      * are linked.
      */
     public @Nullable SurfacePackage getSurfacePackage() {
-        if (mSurfaceControl != null) {
-            return new SurfacePackage(mSurfaceControl);
+        if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
+            return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection);
         } else {
             return null;
         }

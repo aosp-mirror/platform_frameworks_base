@@ -28,6 +28,7 @@ import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -38,12 +39,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceControlViewHost;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -203,8 +206,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
     private int mParentSurfaceGenerationId;
 
-    // The token of embedded windowless view hierarchy.
-    private IBinder mEmbeddedViewHierarchy;
+    private RemoteAccessibilityEmbeddedConnection mRemoteAccessibilityEmbeddedConnection;
+
+    private final Matrix mScreenMatrixForEmbeddedHierarchy = new Matrix();
+    private final Matrix mTmpMatrix = new Matrix();
+    private final float[] mMatrixValues = new float[9];
+
     SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
     public SurfaceView(Context context) {
@@ -923,6 +930,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     }
 
                     mTmpTransaction.apply();
+                    updateScreenMatrixForEmbeddedHierarchy();
 
                     if (sizeChanged || creating) {
                         redrawNeeded = true;
@@ -1510,6 +1518,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @Override
     public void surfaceDestroyed() {
         setWindowStopped(true);
+        setRemoteAccessibilityEmbeddedConnection(null, null);
     }
 
     /**
@@ -1568,31 +1577,133 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void reparentSurfacePackage(SurfaceControl.Transaction t,
             SurfaceControlViewHost.SurfacePackage p) {
-        // TODO: Link accessibility IDs here.
+        initEmbeddedHierarchyForAccessibility(p);
         final SurfaceControl sc = p.getSurfaceControl();
         t.reparent(sc, mSurfaceControl).show(sc);
-    }
-
-    /**
-     * Add the token of embedded view hierarchy. Set {@code null} to clear the embedded view
-     * hierarchy.
-     *
-     * @param token IBinder token.
-     * @hide
-     */
-    public void setEmbeddedViewHierarchy(IBinder token) {
-        mEmbeddedViewHierarchy = token;
     }
 
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        if (mEmbeddedViewHierarchy == null) {
+        final RemoteAccessibilityEmbeddedConnection wrapper =
+                getRemoteAccessibilityEmbeddedConnection();
+        if (wrapper == null) {
             return;
         }
         // Add a leashed child when this SurfaceView embeds another view hierarchy. Getting this
         // leashed child would return the root node in the embedded hierarchy
-        info.addChild(mEmbeddedViewHierarchy);
+        info.addChild(wrapper.getLeashToken());
+    }
+
+    private void initEmbeddedHierarchyForAccessibility(SurfaceControlViewHost.SurfacePackage p) {
+        final IAccessibilityEmbeddedConnection connection = p.getAccessibilityEmbeddedConnection();
+        final RemoteAccessibilityEmbeddedConnection wrapper =
+                getRemoteAccessibilityEmbeddedConnection();
+
+        // Do nothing if package is embedding the same view hierarchy.
+        if (wrapper != null && wrapper.getConnection().equals(connection)) {
+            return;
+        }
+
+        // If this SurfaceView embeds a different view hierarchy, unlink the previous one first.
+        setRemoteAccessibilityEmbeddedConnection(null, null);
+
+        try {
+            final IBinder leashToken = connection.associateEmbeddedHierarchy(
+                    getViewRootImpl().mLeashToken, getAccessibilityViewId());
+            setRemoteAccessibilityEmbeddedConnection(connection, leashToken);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error while associateEmbeddedHierarchy " + e);
+        }
+        updateScreenMatrixForEmbeddedHierarchy();
+    }
+
+    private void setRemoteAccessibilityEmbeddedConnection(
+            IAccessibilityEmbeddedConnection connection, IBinder leashToken) {
+        try {
+            if (mRemoteAccessibilityEmbeddedConnection != null) {
+                mRemoteAccessibilityEmbeddedConnection.getConnection()
+                        .disassociateEmbeddedHierarchy();
+                mRemoteAccessibilityEmbeddedConnection.unlinkToDeath();
+                mRemoteAccessibilityEmbeddedConnection = null;
+            }
+            if (connection != null && leashToken != null) {
+                mRemoteAccessibilityEmbeddedConnection =
+                        new RemoteAccessibilityEmbeddedConnection(connection, leashToken);
+                mRemoteAccessibilityEmbeddedConnection.linkToDeath();
+            }
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error while setRemoteEmbeddedConnection " + e);
+        }
+    }
+
+    private RemoteAccessibilityEmbeddedConnection getRemoteAccessibilityEmbeddedConnection() {
+        return mRemoteAccessibilityEmbeddedConnection;
+    }
+
+    private void updateScreenMatrixForEmbeddedHierarchy() {
+        mTmpMatrix.reset();
+        mTmpMatrix.setTranslate(mScreenRect.left, mScreenRect.top);
+        mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
+                mScreenRect.height() / (float) mSurfaceHeight);
+
+        // If the screen matrix is identity or doesn't change, do nothing.
+        if (mTmpMatrix.isIdentity() || mTmpMatrix.equals(mScreenMatrixForEmbeddedHierarchy)) {
+            return;
+        }
+
+        try {
+            final RemoteAccessibilityEmbeddedConnection wrapper =
+                    getRemoteAccessibilityEmbeddedConnection();
+            if (wrapper == null) {
+                return;
+            }
+            mTmpMatrix.getValues(mMatrixValues);
+            wrapper.getConnection().setScreenMatrix(mMatrixValues);
+            mScreenMatrixForEmbeddedHierarchy.set(mTmpMatrix);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Error while setScreenMatrix " + e);
+        }
+    }
+
+    /**
+     * Wrapper of accessibility embedded connection for embedded view hierarchy.
+     */
+    private final class RemoteAccessibilityEmbeddedConnection implements IBinder.DeathRecipient {
+        private final IAccessibilityEmbeddedConnection mConnection;
+        private final IBinder mLeashToken;
+
+        RemoteAccessibilityEmbeddedConnection(IAccessibilityEmbeddedConnection connection,
+                IBinder leashToken) {
+            mConnection = connection;
+            mLeashToken = leashToken;
+        }
+
+        IAccessibilityEmbeddedConnection getConnection() {
+            return mConnection;
+        }
+
+        IBinder getLeashToken() {
+            return mLeashToken;
+        }
+
+        void linkToDeath() throws RemoteException {
+            mConnection.asBinder().linkToDeath(this, 0);
+        }
+
+        void unlinkToDeath() {
+            mConnection.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            unlinkToDeath();
+            runOnUiThread(() -> {
+                if (mRemoteAccessibilityEmbeddedConnection == this) {
+                    mRemoteAccessibilityEmbeddedConnection = null;
+                }
+            });
+        }
     }
 }
