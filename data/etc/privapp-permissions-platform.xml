@@ -346,6 +346,7 @@ applications that come with the platform
         <!-- Permissions required to test ambient display. -->
         <permission name="android.permission.READ_DREAM_STATE" />
         <permission name="android.permission.WRITE_DREAM_STATE" />
+        <permission name="android.permission.REBOOT"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
