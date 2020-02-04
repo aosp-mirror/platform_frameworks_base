@@ -147,8 +147,9 @@ public class StatsCompanion {
         @Override
         public void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
                 long subscriptionRuleId, String[] cookies,
-                StatsDimensionsValueParcel dimensionsValue) {
-            enforceStatsCompanionPermission(mContext);
+                StatsDimensionsValueParcel dimensionsValueParcel) {
+            enforceStatsdCallingUid();
+            StatsDimensionsValue dimensionsValue = new StatsDimensionsValue(dimensionsValueParcel);
             Intent intent =
                     new Intent()
                             .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
@@ -169,8 +170,6 @@ public class StatsCompanion {
                                 "Statsd sendSubscriberBroadcast with params {%d %d %d %d %s %s}",
                                 configUid, configId, subscriptionId, subscriptionRuleId,
                                 Arrays.toString(cookies),
-                                // TODO (b/148604617): convert StatsDimensionsValueParcel into
-                                // StatsDimensionsValue
                                 dimensionsValue));
             }
             try {

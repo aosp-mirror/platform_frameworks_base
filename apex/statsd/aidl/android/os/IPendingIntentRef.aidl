@@ -42,5 +42,5 @@ interface IPendingIntentRef {
       */
      oneway void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
                                          long subscriptionRuleId, in String[] cookies,
-                                         in StatsDimensionsValueParcel dimensionsValue);
+                                         in StatsDimensionsValueParcel dimensionsValueParcel);
 }

@@ -4,7 +4,12 @@ package android.os;
  * @hide
  */
 parcelable StatsDimensionsValueParcel {
-    int atomTag;
+    /**
+     * Field equals:
+     *      - atomTag for top level StatsDimensionsValueParcel
+     *      - position in dimension for all other levels
+     */
+    int field;
     int valueType;
 
     String stringValue;
@@ -12,5 +17,5 @@ parcelable StatsDimensionsValueParcel {
     long longValue;
     boolean boolValue;
     float floatValue;
-    StatsDimensionsValueParcel[] arrayValue;
+    StatsDimensionsValueParcel[] tupleValue;
 }

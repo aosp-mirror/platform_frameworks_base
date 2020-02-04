@@ -126,7 +126,6 @@ cc_defaults {
         "libbinder",
         "libincident",
         "liblog",
-        "libservices",
         "libstatssocket",
         "statsd-aidl-cpp",
     ],

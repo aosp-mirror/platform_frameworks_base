@@ -26,6 +26,86 @@ namespace statsd {
 using std::string;
 using std::vector;
 
+// These constants must be kept in sync with those in StatsDimensionsValue.java
+const static int STATS_DIMENSIONS_VALUE_STRING_TYPE = 2;
+const static int STATS_DIMENSIONS_VALUE_INT_TYPE = 3;
+const static int STATS_DIMENSIONS_VALUE_LONG_TYPE = 4;
+// const static int STATS_DIMENSIONS_VALUE_BOOL_TYPE = 5; (commented out because
+// unused -- statsd does not correctly support bool types)
+const static int STATS_DIMENSIONS_VALUE_FLOAT_TYPE = 6;
+const static int STATS_DIMENSIONS_VALUE_TUPLE_TYPE = 7;
+
+/**
+ * Recursive helper function that populates a parent StatsDimensionsValueParcel
+ * with children StatsDimensionsValueParcels.
+ *
+ * \param dims vector of FieldValues stored by HashableDimensionKey
+ * \param index positions in dims vector to start reading children from
+ * \param depth level of parent parcel in the full StatsDimensionsValueParcel
+ * tree
+ */
+static void populateStatsDimensionsValueParcelChildren(StatsDimensionsValueParcel &parentParcel,
+                                                const vector<FieldValue>& dims, size_t& index,
+                                                int depth, int prefix) {
+    while (index < dims.size()) {
+        const FieldValue& dim = dims[index];
+        int fieldDepth = dim.mField.getDepth();
+        int fieldPrefix = dim.mField.getPrefix(depth);
+        StatsDimensionsValueParcel childParcel;
+        childParcel.field = dim.mField.getPosAtDepth(depth);
+        if (depth > 2) {
+            ALOGE("Depth > 2 not supported by StatsDimensionsValueParcel.");
+            return;
+        }
+        if (depth == fieldDepth && prefix == fieldPrefix) {
+            switch (dim.mValue.getType()) {
+                case INT:
+                    childParcel.valueType = STATS_DIMENSIONS_VALUE_INT_TYPE;
+                    childParcel.intValue = dim.mValue.int_value;
+                    break;
+                case LONG:
+                    childParcel.valueType = STATS_DIMENSIONS_VALUE_LONG_TYPE;
+                    childParcel.longValue = dim.mValue.long_value;
+                    break;
+                case FLOAT:
+                    childParcel.valueType = STATS_DIMENSIONS_VALUE_FLOAT_TYPE;
+                    childParcel.floatValue = dim.mValue.float_value;
+                    break;
+                case STRING:
+                    childParcel.valueType = STATS_DIMENSIONS_VALUE_STRING_TYPE;
+                    childParcel.stringValue = String16(dim.mValue.str_value.c_str());
+                    break;
+                default:
+                    ALOGE("Encountered FieldValue with unsupported value type.");
+                    break;
+            }
+            index++;
+            parentParcel.tupleValue.push_back(childParcel);
+        } else if (fieldDepth > depth && fieldPrefix == prefix) {
+            childParcel.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
+            populateStatsDimensionsValueParcelChildren(childParcel, dims, index, depth + 1,
+                                                       dim.mField.getPrefix(depth + 1));
+            parentParcel.tupleValue.push_back(childParcel);
+        } else {
+            return;
+        }
+    }
+}
+
+StatsDimensionsValueParcel HashableDimensionKey::toStatsDimensionsValueParcel() const {
+    StatsDimensionsValueParcel parcel;
+    if (mValues.size() == 0) {
+        return parcel;
+    }
+
+    parcel.field = mValues[0].mField.getTag();
+    parcel.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
+
+    size_t index = 0;
+    populateStatsDimensionsValueParcelChildren(parcel, mValues, index, /*depth=*/0, /*prefix=*/0);
+    return parcel;
+}
+
 android::hash_t hashDimension(const HashableDimensionKey& value) {
     android::hash_t hash = 0;
     for (const auto& fieldValue : value.getValues()) {
