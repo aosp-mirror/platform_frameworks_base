@@ -235,6 +235,22 @@ public class LocalMediaManager implements BluetoothCallback {
         return mCurrentConnectedDevice;
     }
 
+    /**
+     * Find the active MediaDevice.
+     *
+     * @param type the media device type.
+     * @return MediaDevice list
+     */
+    public List<MediaDevice> getActiveMediaDevice(@MediaDevice.MediaDeviceType int type) {
+        final List<MediaDevice> devices = new ArrayList<>();
+        for (MediaDevice device : mMediaDevices) {
+            if (type == device.mType && device.getClientPackageName() != null) {
+                devices.add(device);
+            }
+        }
+        return devices;
+    }
+
     private MediaDevice updateCurrentConnectedDevice() {
         for (MediaDevice device : mMediaDevices) {
             if (device instanceof  BluetoothMediaDevice) {
