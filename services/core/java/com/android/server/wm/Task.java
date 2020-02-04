@@ -79,11 +79,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
-import static com.android.server.wm.TaskProto.FILLS_PARENT;
-import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
-import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
-import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -125,7 +120,6 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationTarget;
@@ -1433,18 +1427,27 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * @return whether or not there are ONLY task overlay activities in the stack.
+     * @return whether or not there are ONLY task overlay activities in the task.
      *         If {@param includeFinishing} is set, then don't ignore finishing activities in the
      *         check. If there are no task overlay activities, this call returns false.
      */
     boolean onlyHasTaskOverlayActivities(boolean includeFinishing) {
-        if (getChildCount() == 0) {
-            return false;
+        int count = 0;
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = getChildAt(i).asActivityRecord();
+            if (r == null) {
+                // Has a child that is other than Activity.
+                return false;
+            }
+            if (!includeFinishing && r.finishing) {
+                continue;
+            }
+            if (!r.isTaskOverlay()) {
+                return false;
+            }
+            count++;
         }
-        if (includeFinishing) {
-            return getActivity((r) -> r.isTaskOverlay()) != null;
-        }
-        return getActivity((r) -> !r.finishing && r.isTaskOverlay()) != null;
+        return count > 0;
     }
 
     private boolean autoRemoveFromRecents() {
@@ -2369,6 +2372,15 @@ class Task extends WindowContainer<WindowContainer> {
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
+    }
+
+    boolean isLeafTask() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).asTask() != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     int getDescendantTaskCount() {
