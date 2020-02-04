@@ -964,4 +964,5 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"หน้าต่างการขยายที่วางซ้อน"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"หน้าต่างการขยาย"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"การควบคุมหน้าต่างการขยาย"</string>
+    <string name="quick_controls_title" msgid="525285759614231333">"การควบคุมอย่างรวดเร็ว"</string>
 </resources>

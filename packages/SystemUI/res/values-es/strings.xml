@@ -964,4 +964,5 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ventana de superposición de ampliación"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ventana de controles de ampliación"</string>
+    <string name="quick_controls_title" msgid="525285759614231333">"Controles rápidos"</string>
 </resources>
