@@ -234,7 +234,7 @@ public class VpnService extends Service {
             if (!cm.prepareVpn(packageName, null, userId)) {
                 cm.prepareVpn(null, packageName, userId);
             }
-            cm.setVpnPackageAuthorization(packageName, userId, true);
+            cm.setVpnPackageAuthorization(packageName, userId, VpnManager.TYPE_VPN_SERVICE);
         } catch (RemoteException e) {
             // ignore
         }
