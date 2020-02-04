@@ -617,15 +617,7 @@ int IncrementalService::bind(StorageId storage, std::string_view source, std::st
     if (storageInfo == ifs->storages.end()) {
         return -EINVAL;
     }
-    std::string normSource;
-    if (path::isAbsolute(source)) {
-        normSource = path::normalize(source);
-    } else {
-        normSource = path::normalize(path::join(storageInfo->second.name, source));
-    }
-    if (!path::startsWith(normSource, storageInfo->second.name)) {
-        return -EINVAL;
-    }
+    std::string normSource = normalizePathToStorage(ifs, storage, source);
     l.unlock();
     std::unique_lock l2(mLock, std::defer_lock);
     return addBindMount(*ifs, storage, storageInfo->second.name, std::move(normSource),
@@ -674,20 +666,29 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
     return 0;
 }
 
+std::string IncrementalService::normalizePathToStorage(const IncrementalService::IfsMountPtr ifs,
+                                                       StorageId storage, std::string_view path) {
+    const auto storageInfo = ifs->storages.find(storage);
+    if (storageInfo == ifs->storages.end()) {
+        return {};
+    }
+    std::string normPath;
+    if (path::isAbsolute(path)) {
+        normPath = path::normalize(path);
+    } else {
+        normPath = path::normalize(path::join(storageInfo->second.name, path));
+    }
+    if (!path::startsWith(normPath, storageInfo->second.name)) {
+        return {};
+    }
+    return normPath;
+}
+
 int IncrementalService::makeFile(StorageId storage, std::string_view path, int mode, FileId id,
                                  incfs::NewFileParams params) {
     if (auto ifs = getIfs(storage)) {
-        const auto storageInfo = ifs->storages.find(storage);
-        if (storageInfo == ifs->storages.end()) {
-            return -EINVAL;
-        }
-        std::string normPath;
-        if (path::isAbsolute(path)) {
-            normPath = path::normalize(path);
-        } else {
-            normPath = path::normalize(path::join(storageInfo->second.name, path));
-        }
-        if (!path::startsWith(normPath, storageInfo->second.name)) {
+        std::string normPath = normalizePathToStorage(ifs, storage, path);
+        if (normPath.empty()) {
             return -EINVAL;
         }
         auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params);
@@ -706,7 +707,11 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
 
 int IncrementalService::makeDir(StorageId storageId, std::string_view path, int mode) {
     if (auto ifs = getIfs(storageId)) {
-        return mIncFs->makeDir(ifs->control, path, mode);
+        std::string normPath = normalizePathToStorage(ifs, storageId, path);
+        if (normPath.empty()) {
+            return -EINVAL;
+        }
+        return mIncFs->makeDir(ifs->control, normPath, mode);
     }
     return -EINVAL;
 }
@@ -716,31 +721,40 @@ int IncrementalService::makeDirs(StorageId storageId, std::string_view path, int
     if (!ifs) {
         return -EINVAL;
     }
-
-    auto err = mIncFs->makeDir(ifs->control, path, mode);
+    std::string normPath = normalizePathToStorage(ifs, storageId, path);
+    if (normPath.empty()) {
+        return -EINVAL;
+    }
+    auto err = mIncFs->makeDir(ifs->control, normPath, mode);
     if (err == -EEXIST) {
         return 0;
     } else if (err != -ENOENT) {
         return err;
     }
-    if (auto err = makeDirs(storageId, path::dirname(path), mode)) {
+    if (auto err = makeDirs(storageId, path::dirname(normPath), mode)) {
         return err;
     }
-    return mIncFs->makeDir(ifs->control, path, mode);
+    return mIncFs->makeDir(ifs->control, normPath, mode);
 }
 
 int IncrementalService::link(StorageId sourceStorageId, std::string_view oldPath,
                              StorageId destStorageId, std::string_view newPath) {
     if (auto ifsSrc = getIfs(sourceStorageId), ifsDest = getIfs(destStorageId);
         ifsSrc && ifsSrc == ifsDest) {
-        return mIncFs->link(ifsSrc->control, oldPath, newPath);
+        std::string normOldPath = normalizePathToStorage(ifsSrc, sourceStorageId, oldPath);
+        std::string normNewPath = normalizePathToStorage(ifsDest, destStorageId, newPath);
+        if (normOldPath.empty() || normNewPath.empty()) {
+            return -EINVAL;
+        }
+        return mIncFs->link(ifsSrc->control, normOldPath, normNewPath);
     }
     return -EINVAL;
 }
 
 int IncrementalService::unlink(StorageId storage, std::string_view path) {
     if (auto ifs = getIfs(storage)) {
-        return mIncFs->unlink(ifs->control, path);
+        std::string normOldPath = normalizePathToStorage(ifs, storage, path);
+        return mIncFs->unlink(ifs->control, normOldPath);
     }
     return -EINVAL;
 }
