@@ -277,7 +277,7 @@ public final class WindowManagerImpl implements WindowManager {
                     .setStableInsets(Insets.of(stableInsets))
                     .setDisplayCutout(displayCutout.get()).build();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 }
