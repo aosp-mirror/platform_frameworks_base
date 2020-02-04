@@ -17,6 +17,8 @@ package com.android.server.blob;
 
 import static com.android.server.blob.BlobStoreConfig.IDLE_JOB_ID;
 import static com.android.server.blob.BlobStoreConfig.IDLE_JOB_PERIOD_MILLIS;
+import static com.android.server.blob.BlobStoreConfig.LOGV;
+import static com.android.server.blob.BlobStoreConfig.TAG;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -25,6 +27,7 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Slog;
 
 import com.android.server.LocalServices;
 
@@ -45,6 +48,8 @@ public class BlobStoreIdleJobService extends JobService {
 
     @Override
     public boolean onStopJob(final JobParameters params) {
+        Slog.d(TAG, "Idle maintenance job is stopped; id=" + params.getJobId()
+                + ", reason=" + JobParameters.getReasonCodeDescription(params.getStopReason()));
         return false;
     }
 
@@ -58,5 +63,8 @@ public class BlobStoreIdleJobService extends JobService {
                         .setPeriodic(IDLE_JOB_PERIOD_MILLIS)
                         .build();
         jobScheduler.schedule(job);
+        if (LOGV) {
+            Slog.v(TAG, "Scheduling the idle maintenance job");
+        }
     }
 }

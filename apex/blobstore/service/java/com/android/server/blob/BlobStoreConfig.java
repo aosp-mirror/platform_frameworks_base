@@ -18,6 +18,7 @@ package com.android.server.blob;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Environment;
+import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 class BlobStoreConfig {
     public static final String TAG = "BlobStore";
+    public static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     public static final int CURRENT_XML_VERSION = 1;
 

@@ -26,6 +26,7 @@ import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.SEEK_SET;
 
+import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 
 import android.annotation.BytesLong;
@@ -390,6 +391,9 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 mState = STATE_VERIFIED_VALID;
                 // Commit callback will be sent once the data is persisted.
             } else {
+                if (LOGV) {
+                    Slog.v(TAG, "Digest of the data didn't match the given BlobHandle.digest");
+                }
                 mState = STATE_VERIFIED_INVALID;
                 sendCommitCallbackResult(COMMIT_RESULT_ERROR);
             }
@@ -445,6 +449,16 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 Slog.wtf(TAG, "Unknown state: " + state);
                 return "<unknown>";
         }
+    }
+
+    @Override
+    public String toString() {
+        return "BlobStoreSession {"
+                + "id:" + mSessionId
+                + ",handle:" + mBlobHandle
+                + ",uid:" + mOwnerUid
+                + ",pkg:" + mOwnerPackageName
+                + "}";
     }
 
     private void assertCallerIsOwner() {

@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.os.UserHandle.USER_NULL;
 
 import static com.android.server.blob.BlobStoreConfig.CURRENT_XML_VERSION;
+import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.SESSION_EXPIRY_TIMEOUT_MILLIS;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
@@ -96,6 +97,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -268,6 +270,10 @@ public class BlobStoreManagerService extends SystemService {
                     sessionId, blobHandle, callingUid, callingPackage,
                     mSessionStateChangeListener);
             addSessionForUserLocked(session, UserHandle.getUserId(callingUid));
+            if (LOGV) {
+                Slog.v(TAG, "Created session for " + blobHandle
+                        + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
+            }
             writeBlobSessionsAsync();
             return sessionId;
         }
@@ -295,7 +301,10 @@ public class BlobStoreManagerService extends SystemService {
                     callingUid, callingPackage);
             session.open();
             session.abandon();
-
+            if (LOGV) {
+                Slog.v(TAG, "Deleted session with id " + sessionId
+                        + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
+            }
             writeBlobSessionsAsync();
         }
     }
@@ -330,6 +339,10 @@ public class BlobStoreManagerService extends SystemService {
             }
             blobMetadata.addLeasee(callingPackage, callingUid,
                     descriptionResId, leaseExpiryTimeMillis);
+            if (LOGV) {
+                Slog.v(TAG, "Acquired lease on " + blobHandle
+                        + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
+            }
             writeBlobsInfoAsync();
         }
     }
@@ -345,6 +358,10 @@ public class BlobStoreManagerService extends SystemService {
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
             }
             blobMetadata.removeLeasee(callingPackage, callingUid);
+            if (LOGV) {
+                Slog.v(TAG, "Released lease on " + blobHandle
+                        + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
+            }
             writeBlobsInfoAsync();
         }
     }
@@ -374,6 +391,9 @@ public class BlobStoreManagerService extends SystemService {
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
                     mKnownBlobIds.remove(session.getSessionId());
+                    if (LOGV) {
+                        Slog.v(TAG, "Session is invalid; deleted " + session);
+                    }
                     break;
                 case STATE_COMMITTED:
                     session.verifyBlobData();
@@ -400,6 +420,9 @@ public class BlobStoreManagerService extends SystemService {
                     }
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
+                    if (LOGV) {
+                        Slog.v(TAG, "Successfully committed session " + session);
+                    }
                     break;
                 default:
                     Slog.wtf(TAG, "Invalid session state: "
@@ -442,6 +465,9 @@ public class BlobStoreManagerService extends SystemService {
             out.endTag(null, TAG_SESSIONS);
             out.endDocument();
             sessionsIndexFile.finishWrite(fos);
+            if (LOGV) {
+                Slog.v(TAG, "Finished persisting sessions data");
+            }
         } catch (Exception e) {
             sessionsIndexFile.failWrite(fos);
             Slog.wtf(TAG, "Error writing sessions data", e);
@@ -491,6 +517,9 @@ public class BlobStoreManagerService extends SystemService {
                     mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, session.getSessionId());
                 }
             }
+            if (LOGV) {
+                Slog.v(TAG, "Finished reading sessions data");
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, "Error reading sessions data", e);
         }
@@ -524,6 +553,9 @@ public class BlobStoreManagerService extends SystemService {
             out.endTag(null, TAG_BLOBS);
             out.endDocument();
             blobsIndexFile.finishWrite(fos);
+            if (LOGV) {
+                Slog.v(TAG, "Finished persisting blobs data");
+            }
         } catch (Exception e) {
             blobsIndexFile.failWrite(fos);
             Slog.wtf(TAG, "Error writing blobs data", e);
@@ -566,6 +598,9 @@ public class BlobStoreManagerService extends SystemService {
                     }
                     mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, blobMetadata.getBlobId());
                 }
+            }
+            if (LOGV) {
+                Slog.v(TAG, "Finished reading blobs data");
             }
         } catch (Exception e) {
             Slog.wtf(TAG, "Error reading blobs data", e);
@@ -687,6 +722,10 @@ public class BlobStoreManagerService extends SystemService {
                 userBlobs.removeAt(indicesToRemove.get(i));
             }
             writeBlobsInfoAsync();
+            if (LOGV) {
+                Slog.v(TAG, "Removed blobs data associated with pkg="
+                        + packageName + ", uid=" + uid);
+            }
         }
     }
 
@@ -711,6 +750,9 @@ public class BlobStoreManagerService extends SystemService {
                     mKnownBlobIds.remove(blobMetadata.getBlobId());
                 }
             }
+            if (LOGV) {
+                Slog.v(TAG, "Removed blobs data in user " + userId);
+            }
         }
     }
 
@@ -718,6 +760,7 @@ public class BlobStoreManagerService extends SystemService {
     @VisibleForTesting
     void handleIdleMaintenanceLocked() {
         // Cleanup any left over data on disk that is not part of index.
+        final ArrayList<Long> deletedBlobIds = new ArrayList<>();
         final ArrayList<File> filesToDelete = new ArrayList<>();
         final File blobsDir = BlobStoreConfig.getBlobsDir();
         if (blobsDir.exists()) {
@@ -726,8 +769,10 @@ public class BlobStoreManagerService extends SystemService {
                     final long id = Long.parseLong(file.getName());
                     if (mKnownBlobIds.indexOf(id) < 0) {
                         filesToDelete.add(file);
+                        deletedBlobIds.add(id);
                     }
                 } catch (NumberFormatException e) {
+                    Slog.wtf(TAG, "Error parsing the file name: " + file, e);
                     filesToDelete.add(file);
                 }
             }
@@ -758,6 +803,7 @@ public class BlobStoreManagerService extends SystemService {
                 if (shouldRemove) {
                     blobMetadata.getBlobFile().delete();
                     mKnownBlobIds.remove(blobMetadata.getBlobId());
+                    deletedBlobIds.add(blobMetadata.getBlobId());
                 }
                 return shouldRemove;
             });
@@ -788,11 +834,16 @@ public class BlobStoreManagerService extends SystemService {
                     blobStoreSession.getSessionFile().delete();
                     mKnownBlobIds.remove(blobStoreSession.getSessionId());
                     indicesToRemove.add(j);
+                    deletedBlobIds.add(blobStoreSession.getSessionId());
                 }
             }
             for (int j = 0; j < indicesToRemove.size(); ++j) {
                 userSessions.removeAt(indicesToRemove.get(j));
             }
+        }
+        if (LOGV) {
+            Slog.v(TAG, "Completed idle maintenance; deleted "
+                    + Arrays.toString(deletedBlobIds.toArray()));
         }
         writeBlobSessionsAsync();
     }
@@ -874,6 +925,9 @@ public class BlobStoreManagerService extends SystemService {
     private class PackageChangedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (LOGV) {
+                Slog.v(TAG, "Received " + intent);
+            }
             switch (intent.getAction()) {
                 case Intent.ACTION_PACKAGE_FULLY_REMOVED:
                 case Intent.ACTION_PACKAGE_DATA_CLEARED:
@@ -1025,6 +1079,14 @@ public class BlobStoreManagerService extends SystemService {
             final DumpArgs dumpArgs = DumpArgs.parse(args);
 
             final IndentingPrintWriter fout = new IndentingPrintWriter(writer, "    ");
+            if (dumpArgs.shouldDumpHelp()) {
+                writer.println("dumpsys blob_store [options]:");
+                fout.increaseIndent();
+                dumpArgs.dumpArgsUsage(fout);
+                fout.decreaseIndent();
+                return;
+            }
+
             synchronized (mBlobsLock) {
                 fout.println("mCurrentMaxSessionId: " + mCurrentMaxSessionId);
                 fout.println();
@@ -1058,6 +1120,7 @@ public class BlobStoreManagerService extends SystemService {
         private boolean mDumpOnlySelectedSections;
         private boolean mDumpSessions;
         private boolean mDumpBlobs;
+        private boolean mDumpHelp;
 
         public boolean shouldDumpSession(String packageName, int uid, long blobId) {
             if (!CollectionUtils.isEmpty(mDumpPackages)
@@ -1103,6 +1166,10 @@ public class BlobStoreManagerService extends SystemService {
                     || mDumpUserIds.indexOf(userId) >= 0;
         }
 
+        public boolean shouldDumpHelp() {
+            return mDumpHelp;
+        }
+
         private DumpArgs() {}
 
         public static DumpArgs parse(String[] args) {
@@ -1132,6 +1199,8 @@ public class BlobStoreManagerService extends SystemService {
                     dumpArgs.mDumpUserIds.add(getIntArgRequired(args, ++i, "userId"));
                 } else if ("--blob".equals(opt) || "-b".equals(opt)) {
                     dumpArgs.mDumpBlobIds.add(getLongArgRequired(args, ++i, "blobId"));
+                } else if ("--help".equals(opt) || "-h".equals(opt)) {
+                    dumpArgs.mDumpHelp = true;
                 } else {
                     // Everything else is assumed to be blob ids.
                     dumpArgs.mDumpBlobIds.add(getLongArgRequired(args, i, "blobId"));
@@ -1171,6 +1240,31 @@ public class BlobStoreManagerService extends SystemService {
                 throw new IllegalArgumentException("Invalid " + argName + ": " + args[index]);
             }
             return value;
+        }
+
+        private void dumpArgsUsage(IndentingPrintWriter pw) {
+            pw.println("--help | -h");
+            printWithIndent(pw, "Dump this help text");
+            pw.println("--sessions");
+            printWithIndent(pw, "Dump only the sessions info");
+            pw.println("--blobs");
+            printWithIndent(pw, "Dump only the committed blobs info");
+            pw.println("--package | -p [package-name]");
+            printWithIndent(pw, "Dump blobs info associated with the given package");
+            pw.println("--uid | -u [uid]");
+            printWithIndent(pw, "Dump blobs info associated with the given uid");
+            pw.println("--user [user-id]");
+            printWithIndent(pw, "Dump blobs info in the given user");
+            pw.println("--blob | -b [session-id | blob-id]");
+            printWithIndent(pw, "Dump blob info corresponding to the given ID");
+            pw.println("--full | -f");
+            printWithIndent(pw, "Dump full unredacted blobs data");
+        }
+
+        private void printWithIndent(IndentingPrintWriter pw, String str) {
+            pw.increaseIndent();
+            pw.println(str);
+            pw.decreaseIndent();
         }
     }
 
