@@ -626,7 +626,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      * Get names of the settings for which the current value should be preserved during restore.
      */
     private Set<String> getSettingsToPreserveInRestore(Uri settingsUri) {
-        if (!FeatureFlagUtils.isEnabled(getApplicationContext(),
+        if (!FeatureFlagUtils.isEnabled(getBaseContext(),
                 FeatureFlagUtils.SETTINGS_DO_NOT_RESTORE_PRESERVED)) {
             return Collections.emptySet();
         }
