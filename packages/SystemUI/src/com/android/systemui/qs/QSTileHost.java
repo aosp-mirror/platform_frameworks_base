@@ -90,8 +90,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private int mCurrentUser;
     private final Optional<StatusBar> mStatusBarOptional;
 
-    private QSColorController mQSColorController = QSColorController.Companion.getInstance();
-
     @Inject
     public QSTileHost(Context context,
             StatusBarIconController iconController,
@@ -127,8 +125,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
             mAutoTiles = autoTiles.get();
         });
-
-        mQSColorController.initQSTileHost(this);
     }
 
     public StatusBarIconController getIconController() {
@@ -142,8 +138,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mServices.destroy();
         mPluginManager.removePluginListener(this);
         mDumpController.unregisterDumpable(this);
-
-        mQSColorController.destroy();
     }
 
     @Override
@@ -280,8 +274,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 mCallbacks.get(i).onTilesChanged();
             }
         }
-
-        mQSColorController.applyColorToAllTiles();
     }
 
     @Override
