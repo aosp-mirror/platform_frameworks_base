@@ -16,8 +16,22 @@
 
 package com.android.mediaroutertest;
 
+import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
+
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ACTION_REMOVE_ROUTE;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.FEATURE_SAMPLE;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.FEATURE_SPECIAL;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID1;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID2;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID5_TO_TRANSFER_TO;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID_FIXED_VOLUME;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID_SPECIAL_FEATURE;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID_VARIABLE_VOLUME;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_NAME1;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_NAME2;
+import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.VOLUME_MAX;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,50 +70,6 @@ import java.util.function.Predicate;
 @SmallTest
 public class MediaRouterManagerTest {
     private static final String TAG = "MediaRouterManagerTest";
-
-    public static final String SAMPLE_PROVIDER_ROUTES_ID_PREFIX =
-            "com.android.mediarouteprovider.example/.SampleMediaRoute2ProviderService:";
-
-    // Must be the same as SampleMediaRoute2ProviderService except the prefix of IDs.
-    public static final String ROUTE_ID1 = SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id1";
-    public static final String ROUTE_NAME1 = "Sample Route 1";
-    public static final String ROUTE_ID2 = SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id2";
-    public static final String ROUTE_NAME2 = "Sample Route 2";
-    public static final String ROUTE_ID3_SESSION_CREATION_FAILED =
-            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id3_session_creation_failed";
-    public static final String ROUTE_NAME3 = "Sample Route 3 - Session creation failed";
-    public static final String ROUTE_ID4_TO_SELECT_AND_DESELECT =
-            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id4_to_select_and_deselect";
-    public static final String ROUTE_NAME4 = "Sample Route 4 - Route to select and deselect";
-    public static final String ROUTE_ID5_TO_TRANSFER_TO =
-            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_id5_to_transfer_to";
-    public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
-
-    public static final String ROUTE_ID_SPECIAL_FEATURE =
-            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_special_feature";
-    public static final String ROUTE_NAME_SPECIAL_FEATURE = "Special Feature Route";
-
-    public static final String SYSTEM_PROVIDER_ID =
-            "com.android.server.media/.SystemMediaRoute2Provider";
-
-    public static final int VOLUME_MAX = 100;
-    public static final String ROUTE_ID_FIXED_VOLUME =
-            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_fixed_volume";
-    public static final String ROUTE_NAME_FIXED_VOLUME = "Fixed Volume Route";
-    public static final String ROUTE_ID_VARIABLE_VOLUME =
-            SAMPLE_PROVIDER_ROUTES_ID_PREFIX + "route_variable_volume";
-    public static final String ROUTE_NAME_VARIABLE_VOLUME = "Variable Volume Route";
-
-    public static final String ACTION_REMOVE_ROUTE =
-            "com.android.mediarouteprovider.action_remove_route";
-
-    public static final String FEATURE_SAMPLE =
-            "com.android.mediarouteprovider.FEATURE_SAMPLE";
-    public static final String FEATURE_SPECIAL =
-            "com.android.mediarouteprovider.FEATURE_SPECIAL";
-
-    private static final String FEATURE_LIVE_AUDIO = "android.media.intent.route.LIVE_AUDIO";
-
     private static final int TIMEOUT_MS = 5000;
 
     private Context mContext;
@@ -155,7 +125,8 @@ public class MediaRouterManagerTest {
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
                 assertTrue(routes.size() > 0);
                 for (MediaRoute2Info route : routes) {
-                    if (route.getId().equals(ROUTE_ID1) && route.getName().equals(ROUTE_NAME1)) {
+                    if (route.getOriginalId().equals(ROUTE_ID1)
+                            && route.getName().equals(ROUTE_NAME1)) {
                         latch.countDown();
                     }
                 }
@@ -176,7 +147,8 @@ public class MediaRouterManagerTest {
             public void onRoutesRemoved(List<MediaRoute2Info> routes) {
                 assertTrue(routes.size() > 0);
                 for (MediaRoute2Info route : routes) {
-                    if (route.getId().equals(ROUTE_ID2) && route.getName().equals(ROUTE_NAME2)) {
+                    if (route.getOriginalId().equals(ROUTE_ID2)
+                            && route.getName().equals(ROUTE_NAME2)) {
                         latch.countDown();
                     }
                 }
@@ -352,8 +324,7 @@ public class MediaRouterManagerTest {
             @Override
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
                 for (int i = 0; i < routes.size(); i++) {
-                    //TODO: use isSystem() or similar method when it's ready
-                    if (!TextUtils.equals(routes.get(i).getProviderId(), SYSTEM_PROVIDER_ID)) {
+                    if (!routes.get(i).isSystemRoute()) {
                         latch.countDown();
                         break;
                     }
@@ -406,7 +377,7 @@ public class MediaRouterManagerTest {
     static Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
         Map<String, MediaRoute2Info> routeMap = new HashMap<>();
         for (MediaRoute2Info route : routes) {
-            routeMap.put(route.getId(), route);
+            routeMap.put(route.getOriginalId(), route);
         }
         return routeMap;
     }
