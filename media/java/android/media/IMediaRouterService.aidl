@@ -52,7 +52,6 @@ interface IMediaRouterService {
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route,
             in Intent request);
     void requestSetVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
-    void requestUpdateVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int direction);
 
     void requestCreateSession(IMediaRouter2Client client, in MediaRoute2Info route, int requestId,
             in @nullable Bundle sessionHints);
@@ -70,8 +69,6 @@ interface IMediaRouterService {
 
     void requestSetVolume2Manager(IMediaRouter2Manager manager,
             in MediaRoute2Info route, int volume);
-    void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
-            in MediaRoute2Info route, int direction);
 
     List<RoutingSessionInfo> getActiveSessions(IMediaRouter2Manager manager);
     void selectClientRoute(IMediaRouter2Manager manager,
