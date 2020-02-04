@@ -66,12 +66,14 @@ public interface TextClassifier {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {LOCAL, SYSTEM})
+    @IntDef(value = {LOCAL, SYSTEM, DEFAULT_SERVICE})
     @interface TextClassifierType {}  // TODO: Expose as system APIs.
     /** Specifies a TextClassifier that runs locally in the app's process. @hide */
     int LOCAL = 0;
     /** Specifies a TextClassifier that runs in the system process and serves all apps. @hide */
     int SYSTEM = 1;
+    /** Specifies the default TextClassifier that runs in the system process. @hide */
+    int DEFAULT_SERVICE = 2;
 
     /** The TextClassifier failed to run. */
     String TYPE_UNKNOWN = "";
@@ -667,8 +669,10 @@ public interface TextClassifier {
             Preconditions.checkArgument(endIndex > startIndex);
         }
 
-        static void checkTextLength(CharSequence text, int maxLength) {
-            Preconditions.checkArgumentInRange(text.length(), 0, maxLength, "text.length()");
+        /** Returns if the length of the text is within the range. */
+        static boolean checkTextLength(CharSequence text, int maxLength) {
+            int textLength = text.length();
+            return textLength >= 0 && textLength <= maxLength;
         }
 
         /**

@@ -1535,15 +1535,16 @@ public class PackageManagerService extends IPackageManager.Stub
     final @NonNull String mRequiredPermissionControllerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
-    final @Nullable String mSystemTextClassifierPackage;
+    final @Nullable String mDefaultTextClassifierPackage;
+    final @Nullable String mSystemTextClassifierPackageName;
     final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
     final @Nullable String mIncidentReportApproverPackage;
     final @Nullable String[] mTelephonyPackages;
-    final @NonNull String mServicesExtensionPackageName;
-    final @NonNull String mSharedSystemSharedLibraryPackageName;
+    final @Nullable String mServicesExtensionPackageName;
+    final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -3153,8 +3154,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mSetupWizardPackage = getSetupWizardPackageNameImpl();
             mComponentResolver.fixProtectedFilterPriorities();
 
-            mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
-
+            mDefaultTextClassifierPackage = getDefaultTextClassifierPackageName();
+            mSystemTextClassifierPackageName = getSystemTextClassifierPackageName();
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage = getDeviceConfiguratorPackageName();
@@ -3349,6 +3350,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mServicesExtensionPackageName = null;
                 mSharedSystemSharedLibraryPackageName = null;
             }
+
             // PermissionController hosts default permission granting and role management, so it's a
             // critical part of the core system.
             mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
@@ -19586,15 +19588,15 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String getSystemTextClassifierPackageName() {
-        return ensureSystemPackageName(mContext.getString(
-                R.string.config_defaultTextClassifierPackage));
+    public String getDefaultTextClassifierPackageName() {
+        return ensureSystemPackageName(
+                mContext.getString(R.string.config_servicesExtensionPackage));
     }
 
     @Override
-    public String[] getSystemTextClassifierPackages() {
-        return ensureSystemPackageNames(mContext.getResources().getStringArray(
-                R.array.config_defaultTextClassifierPackages));
+    public String getSystemTextClassifierPackageName() {
+        return ensureSystemPackageName(
+                mContext.getString(R.string.config_defaultTextClassifierPackage));
     }
 
     @Override
@@ -23018,7 +23020,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {
-            switch(knownPackage) {
+            switch (knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
                     return new String[]{mPermissionManager.getDefaultBrowser(userId)};
                 case PackageManagerInternal.PACKAGE_INSTALLER:
@@ -23030,7 +23032,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 case PackageManagerInternal.PACKAGE_VERIFIER:
                     return filterOnlySystemPackages(mRequiredVerifierPackage);
                 case PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER:
-                    return filterOnlySystemPackages(mSystemTextClassifierPackage);
+                    return filterOnlySystemPackages(
+                            mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
                     return filterOnlySystemPackages(mRequiredPermissionControllerPackage);
                 case PackageManagerInternal.PACKAGE_WELLBEING:

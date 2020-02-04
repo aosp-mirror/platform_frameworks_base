@@ -38,6 +38,7 @@ public final class TextClassificationContext implements Parcelable {
     @Nullable private final String mWidgetVersion;
     @UserIdInt
     private int mUserId = UserHandle.USER_NULL;
+    private boolean mUseDefaultTextClassifier;
 
     private TextClassificationContext(
             String packageName,
@@ -73,6 +74,26 @@ public final class TextClassificationContext implements Parcelable {
     @UserIdInt
     public int getUserId() {
         return mUserId;
+    }
+
+    /**
+     * Sets whether to use the default text classifier to handle this request.
+     * This will be ignored if it is not the system text classifier to handle this request.
+     *
+     * @hide
+     */
+    void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
+        mUseDefaultTextClassifier = useDefaultTextClassifier;
+    }
+
+    /**
+     * Returns whether to use the default text classifier to handle this request. This
+     * will be ignored if it is not the system text classifier to handle this request.
+     *
+     * @hide
+     */
+    public boolean getUseDefaultTextClassifier() {
+        return mUseDefaultTextClassifier;
     }
 
     /**
@@ -156,6 +177,7 @@ public final class TextClassificationContext implements Parcelable {
         parcel.writeString(mWidgetType);
         parcel.writeString(mWidgetVersion);
         parcel.writeInt(mUserId);
+        parcel.writeBoolean(mUseDefaultTextClassifier);
     }
 
     private TextClassificationContext(Parcel in) {
@@ -163,6 +185,7 @@ public final class TextClassificationContext implements Parcelable {
         mWidgetType = in.readString();
         mWidgetVersion = in.readString();
         mUserId = in.readInt();
+        mUseDefaultTextClassifier = in.readBoolean();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationContext> CREATOR =

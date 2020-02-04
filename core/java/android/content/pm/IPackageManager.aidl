@@ -679,9 +679,9 @@ interface IPackageManager {
 
     boolean hasUidSigningCertificate(int uid, in byte[] signingCertificate, int flags);
 
-    String getSystemTextClassifierPackageName();
+    String getDefaultTextClassifierPackageName();
 
-    String[] getSystemTextClassifierPackages();
+    String getSystemTextClassifierPackageName();
 
     String getAttentionServicePackageName();
 

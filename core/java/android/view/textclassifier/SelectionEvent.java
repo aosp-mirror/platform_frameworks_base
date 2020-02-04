@@ -140,6 +140,7 @@ public final class SelectionEvent implements Parcelable {
     private int mEnd;
     private int mSmartStart;
     private int mSmartEnd;
+    private boolean mUseDefaultTextClassifier;
 
     SelectionEvent(
             int start, int end,
@@ -175,6 +176,7 @@ public final class SelectionEvent implements Parcelable {
         mSmartStart = in.readInt();
         mSmartEnd = in.readInt();
         mUserId = in.readInt();
+        mUseDefaultTextClassifier = in.readBoolean();
     }
 
     @Override
@@ -204,6 +206,7 @@ public final class SelectionEvent implements Parcelable {
         dest.writeInt(mSmartStart);
         dest.writeInt(mSmartEnd);
         dest.writeInt(mUserId);
+        dest.writeBoolean(mUseDefaultTextClassifier);
     }
 
     @Override
@@ -428,6 +431,26 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
+     * Sets whether to use the default text classifier to handle this request.
+     * This will be ignored if it is not the system text classifier to handle this request.
+     *
+     * @hide
+     */
+    void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
+        mUseDefaultTextClassifier = useDefaultTextClassifier;
+    }
+
+    /**
+     * Returns whether to use the default text classifier to handle this request. This
+     * will be ignored if it is not the system text classifier to handle this request.
+     *
+     * @hide
+     */
+    public boolean getUseDefaultTextClassifier() {
+        return mUseDefaultTextClassifier;
+    }
+
+    /**
      * Returns the type of widget that was involved in triggering this event.
      */
     @WidgetType
@@ -642,7 +665,8 @@ public final class SelectionEvent implements Parcelable {
         return Objects.hash(mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
                 mWidgetVersion, mPackageName, mUserId, mWidgetType, mInvocationMethod, mResultId,
                 mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
-                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
+                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd,
+                mUseDefaultTextClassifier);
     }
 
     @Override
@@ -673,7 +697,8 @@ public final class SelectionEvent implements Parcelable {
                 && mStart == other.mStart
                 && mEnd == other.mEnd
                 && mSmartStart == other.mSmartStart
-                && mSmartEnd == other.mSmartEnd;
+                && mSmartEnd == other.mSmartEnd
+                && mUseDefaultTextClassifier == other.mUseDefaultTextClassifier;
     }
 
     @Override
@@ -683,12 +708,13 @@ public final class SelectionEvent implements Parcelable {
                         + "widgetVersion=%s, packageName=%s, widgetType=%s, invocationMethod=%s, "
                         + "userId=%d, resultId=%s, eventTime=%d, durationSinceSessionStart=%d, "
                         + "durationSincePreviousEvent=%d, eventIndex=%d,"
-                        + "sessionId=%s, start=%d, end=%d, smartStart=%d, smartEnd=%d}",
+                        + "sessionId=%s, start=%d, end=%d, smartStart=%d, smartEnd=%d, "
+                        + "mUseDefaultTextClassifier=%b}",
                 mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
                 mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod,
                 mUserId, mResultId, mEventTime, mDurationSinceSessionStart,
                 mDurationSincePreviousEvent, mEventIndex,
-                mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
+                mSessionId, mStart, mEnd, mSmartStart, mSmartEnd, mUseDefaultTextClassifier);
     }
 
     public static final @android.annotation.NonNull Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
