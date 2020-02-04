@@ -3145,8 +3145,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             mAttachInfo.mHasWindowFocus = hasWindowFocus;
-            mAttachInfo.mHasImeFocus = mImeFocusController.updateImeFocusable(
-                    mWindowAttributes, true /* force */);
+            mImeFocusController.updateImeFocusable(mWindowAttributes, true /* force */);
             mImeFocusController.onPreWindowFocus(hasWindowFocus, mWindowAttributes);
 
             if (mView != null) {
