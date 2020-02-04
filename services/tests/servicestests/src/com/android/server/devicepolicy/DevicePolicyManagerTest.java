@@ -2188,6 +2188,42 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(actualAccounts).containsExactlyElementsIn(expectedAccounts);
     }
 
+    public void testSetKeyguardDisabledFeaturesWithDO() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+
+        dpm.setKeyguardDisabledFeatures(admin1, DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+
+        assertThat(dpm.getKeyguardDisabledFeatures(admin1)).isEqualTo(
+                DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+    }
+
+    public void testSetKeyguardDisabledFeaturesWithPO() throws Exception {
+        setupProfileOwner();
+
+        dpm.setKeyguardDisabledFeatures(admin1, DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+
+        assertThat(dpm.getKeyguardDisabledFeatures(admin1)).isEqualTo(
+                DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+    }
+
+    public void testSetKeyguardDisabledFeaturesWithPOOfOrganizationOwnedDevice()
+            throws Exception {
+        final int MANAGED_PROFILE_USER_ID = DpmMockContext.CALLER_USER_HANDLE;
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(MANAGED_PROFILE_USER_ID, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        parentDpm.setKeyguardDisabledFeatures(admin1,
+                DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+
+        assertThat(parentDpm.getKeyguardDisabledFeatures(admin1)).isEqualTo(
+                DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
+    }
+
     public void testSetApplicationHiddenWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
