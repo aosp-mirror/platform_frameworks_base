@@ -70,7 +70,7 @@ public:
     virtual ~IncFsWrapper() = default;
     virtual ErrorCode makeFile(Control control, std::string_view path, int mode, FileId id,
                                NewFileParams params) const = 0;
-    virtual ErrorCode makeDir(Control control, std::string_view path, int mode = 0555) const = 0;
+    virtual ErrorCode makeDir(Control control, std::string_view path, int mode) const = 0;
     virtual RawMetadata getMetadata(Control control, FileId fileid) const = 0;
     virtual RawMetadata getMetadata(Control control, std::string_view path) const = 0;
     virtual FileId getFileId(Control control, std::string_view path) const = 0;

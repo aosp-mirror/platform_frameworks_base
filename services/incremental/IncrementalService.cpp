@@ -170,7 +170,7 @@ auto IncrementalService::IncFsMount::makeStorage(StorageId id) -> StorageMap::it
         base::StringAppendF(&name, "%.*s_%d_%d", int(constants().storagePrefix.size()),
                             constants().storagePrefix.data(), id, no);
         auto fullName = path::join(root, constants().mount, name);
-        if (auto err = incrementalService.mIncFs->makeDir(control, fullName); !err) {
+        if (auto err = incrementalService.mIncFs->makeDir(control, fullName, 0755); !err) {
             std::lock_guard l(lock);
             return storages.insert_or_assign(id, Storage{std::move(fullName)}).first;
         } else if (err != EEXIST) {
