@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -109,14 +110,21 @@ public class AppIntegrityManagerServiceImplTest {
     private static final String PLAY_STORE_CERT = "play_store_cert";
     private static final String ADB_CERT = "";
 
-    @org.junit.Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @org.junit.Rule
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
-    @Mock PackageManagerInternal mPackageManagerInternal;
-    @Mock Context mMockContext;
-    @Mock Resources mMockResources;
-    @Mock RuleEvaluationEngine mRuleEvaluationEngine;
-    @Mock IntegrityFileManager mIntegrityFileManager;
-    @Mock Handler mHandler;
+    @Mock
+    PackageManagerInternal mPackageManagerInternal;
+    @Mock
+    Context mMockContext;
+    @Mock
+    Resources mMockResources;
+    @Mock
+    RuleEvaluationEngine mRuleEvaluationEngine;
+    @Mock
+    IntegrityFileManager mIntegrityFileManager;
+    @Mock
+    Handler mHandler;
 
     private PackageManager mSpyPackageManager;
     private File mTestApk;
@@ -142,12 +150,9 @@ public class AppIntegrityManagerServiceImplTest {
         // setup mocks to prevent NPE
         when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
         when(mMockContext.getResources()).thenReturn(mMockResources);
-        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[] {});
+        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[]{});
         when(mIntegrityFileManager.initialized()).thenReturn(true);
     }
-
-    // TODO(b/148370598): Implement a test to validate that allow response is retuned when the test
-    //    request times out.
 
     @Test
     public void updateRuleSet_notAuthorized() throws Exception {
@@ -357,9 +362,17 @@ public class AppIntegrityManagerServiceImplTest {
     public void verifierAsInstaller_skipIntegrityVerification() throws Exception {
         whitelistUsAsRuleProvider();
         makeUsSystemApp();
+        mService =
+                new AppIntegrityManagerServiceImpl(
+                        mMockContext,
+                        mPackageManagerInternal,
+                        mRuleEvaluationEngine,
+                        mIntegrityFileManager,
+                        mHandler,
+                        /* checkIntegrityForRuleProviders= */ false);
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mMockContext)
+        verify(mMockContext, atLeastOnce())
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent(TEST_FRAMEWORK_PACKAGE);
         when(mRuleEvaluationEngine.evaluate(any(), any()))
@@ -386,7 +399,7 @@ public class AppIntegrityManagerServiceImplTest {
     private void whitelistUsAsRuleProvider() {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getStringArray(R.array.config_integrityRuleProviderPackages))
-                .thenReturn(new String[] {TEST_FRAMEWORK_PACKAGE});
+                .thenReturn(new String[]{TEST_FRAMEWORK_PACKAGE});
         when(mMockContext.getResources()).thenReturn(mockResources);
     }
 
