@@ -20,8 +20,10 @@ import android.app.Activity
 import android.content.ComponentName
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsControllerImpl
@@ -44,6 +46,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ControlAdapter
+    private var component: ComponentName? = null
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -56,10 +59,9 @@ class ControlsFavoritingActivity @Inject constructor(
         }
     }
 
-    private var component: ComponentName? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.controls_management)
 
         val app = intent.getCharSequenceExtra(EXTRA_APP)
         component = intent.getParcelableExtra<ComponentName>(EXTRA_COMPONENT)
@@ -72,17 +74,17 @@ class ControlsFavoritingActivity @Inject constructor(
             }
         } ?: { _, _ -> Unit }
 
-        recyclerView = RecyclerView(applicationContext)
+        recyclerView = requireViewById(R.id.list)
         adapter = ControlAdapter(LayoutInflater.from(applicationContext), callback)
         recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(applicationContext)
+        recyclerView.layoutManager = GridLayoutManager(applicationContext, 2)
+        val margin = resources.getDimensionPixelSize(R.dimen.controls_card_margin)
+        recyclerView.addItemDecoration(MarginItemDecorator(margin, margin))
 
-        if (app != null) {
-            setTitle("Controls for $app")
-        } else {
-            setTitle("Controls")
-        }
-        setContentView(recyclerView)
+        requireViewById<TextView>(R.id.title).text = app?.let { it }
+                ?: resources.getText(R.string.controls_favorite_default_title)
+        requireViewById<TextView>(R.id.subtitle).text =
+                resources.getText(R.string.controls_favorite_subtitle)
 
         currentUserTracker.startTracking()
     }

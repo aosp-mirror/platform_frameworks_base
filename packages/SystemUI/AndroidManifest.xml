@@ -644,7 +644,7 @@
 
         <activity android:name=".controls.management.ControlsProviderSelectorActivity"
                   android:label="Controls Providers"
-                  android:theme="@style/Theme.SystemUI"
+                  android:theme="@style/Theme.ControlsManagement"
                   android:exported="true"
                   android:showForAllUsers="true"
                   android:excludeFromRecents="true"
@@ -654,7 +654,7 @@
 
         <activity android:name=".controls.management.ControlsFavoritingActivity"
                   android:parentActivityName=".controls.management.ControlsProviderSelectorActivity"
-                  android:theme="@style/Theme.SystemUI"
+                  android:theme="@style/Theme.ControlsManagement"
                   android:excludeFromRecents="true"
                   android:showForAllUsers="true"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"

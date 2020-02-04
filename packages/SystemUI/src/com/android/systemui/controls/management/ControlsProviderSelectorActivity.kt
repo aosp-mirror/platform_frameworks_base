@@ -20,9 +20,12 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
@@ -37,6 +40,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
     @Main private val executor: Executor,
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
+    private val controlsController: ControlsController,
     broadcastDispatcher: BroadcastDispatcher
 ) : LifecycleActivity() {
 
@@ -58,13 +62,19 @@ class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.controls_management)
 
-        recyclerView = RecyclerView(applicationContext)
+        recyclerView = requireViewById(R.id.list)
         recyclerView.adapter = AppAdapter(executor, lifecycle, listingController,
-                LayoutInflater.from(this), ::launchFavoritingActivity)
+                LayoutInflater.from(this), ::launchFavoritingActivity,
+                FavoritesRenderer(resources, controlsController::countFavoritesForComponent))
         recyclerView.layoutManager = LinearLayoutManager(applicationContext)
 
-        setContentView(recyclerView)
+        requireViewById<TextView>(R.id.title).text =
+                resources.getText(R.string.controls_providers_title)
+        requireViewById<TextView>(R.id.subtitle).text =
+                resources.getText(R.string.controls_providers_subtitle)
+
         currentUserTracker.startTracking()
     }
 

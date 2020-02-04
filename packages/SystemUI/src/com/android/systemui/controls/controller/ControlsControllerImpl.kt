@@ -328,6 +328,12 @@ class ControlsControllerImpl @Inject constructor (
         }
     }
 
+    override fun countFavoritesForComponent(componentName: ComponentName): Int {
+        return synchronized(currentFavorites) {
+            currentFavorites.get(componentName)?.size ?: 0
+        }
+    }
+
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
         pw.println("  Available: $available")

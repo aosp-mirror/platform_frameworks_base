@@ -36,8 +36,8 @@ import android.widget.TextView
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.R
 
-public const val MIN_LEVEL = 0
-public const val MAX_LEVEL = 10000
+const val MIN_LEVEL = 0
+const val MAX_LEVEL = 10000
 
 class ControlViewHolder(
     val layout: ViewGroup,

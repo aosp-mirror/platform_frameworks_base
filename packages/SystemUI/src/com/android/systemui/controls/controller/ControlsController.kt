@@ -29,6 +29,7 @@ interface ControlsController : UserAwareController {
     fun loadForComponent(componentName: ComponentName, callback: (List<ControlStatus>) -> Unit)
     fun subscribeToFavorites()
     fun changeFavoriteStatus(controlInfo: ControlInfo, state: Boolean)
+    fun countFavoritesForComponent(componentName: ComponentName): Int = 0
     fun unsubscribe()
     fun action(controlInfo: ControlInfo, action: ControlAction)
     fun refreshStatus(componentName: ComponentName, control: Control)
