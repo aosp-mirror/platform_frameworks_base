@@ -1744,12 +1744,9 @@ public final class ViewRootImpl implements ViewParent,
         mSurface.release();
         mSurfaceControl.release();
 
-        if (mBlastBufferQueue != null) {
-            mTransaction.remove(mBlastSurfaceControl).apply();
-            mBlastSurfaceControl = null;
-            // We should probably add an explicit dispose.
-            mBlastBufferQueue = null;
-        }
+        mBlastSurfaceControl.release();
+        // We should probably add an explicit dispose.
+        mBlastBufferQueue = null;
     }
 
     /**
