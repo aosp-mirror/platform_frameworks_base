@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 
@@ -91,4 +92,16 @@ public abstract class AppOpsManagerInternal {
      */
     public abstract void updateAppWidgetVisibility(SparseArray<String> uidPackageNames,
             boolean visible);
+
+    /**
+     * Like {@link AppOpsManager#setUidMode}, but allows ignoring a certain callback.
+     */
+    public abstract void setUidModeIgnoringCallback(int code, int uid, int mode,
+            @Nullable IAppOpsCallback callbackToIgnore);
+
+    /**
+     * Like {@link AppOpsManager#setMode}, but allows ignoring a certain callback.
+     */
+    public abstract void setModeIgnoringCallback(int code, int uid, @NonNull String packageName,
+            int mode, @Nullable IAppOpsCallback callbackToIgnore);
 }

@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -84,6 +85,8 @@ public final class PermissionPolicyService extends SystemService {
 
     private final Object mLock = new Object();
 
+    private IAppOpsCallback mAppOpsCallback;
+
     /** Whether the user is started but not yet stopped */
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsStarted = new SparseBooleanArray();
@@ -138,7 +141,7 @@ public final class PermissionPolicyService extends SystemService {
         permManagerInternal.addOnRuntimePermissionStateChangedListener(
                 this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
 
-        IAppOpsCallback appOpsListener = new IAppOpsCallback.Stub() {
+        mAppOpsCallback = new IAppOpsCallback.Stub() {
             public void opChanged(int op, int uid, String packageName) {
                 synchronizePackagePermissionsAndAppOpsAsyncForUser(packageName,
                         UserHandle.getUserId(uid));
@@ -155,7 +158,7 @@ public final class PermissionPolicyService extends SystemService {
                 PermissionInfo perm = dangerousPerms.get(i);
 
                 if (perm.isRuntime()) {
-                    appOpsService.startWatchingMode(getSwitchOp(perm.name), null, appOpsListener);
+                    appOpsService.startWatchingMode(getSwitchOp(perm.name), null, mAppOpsCallback);
                 }
                 if (perm.isSoftRestricted()) {
                     SoftRestrictedPermissionPolicy policy =
@@ -163,7 +166,7 @@ public final class PermissionPolicyService extends SystemService {
                                     perm.name);
                     int extraAppOp = policy.getExtraAppOpCode();
                     if (extraAppOp != OP_NONE) {
-                        appOpsService.startWatchingMode(extraAppOp, null, appOpsListener);
+                        appOpsService.startWatchingMode(extraAppOp, null, mAppOpsCallback);
                     }
                 }
             }
@@ -386,10 +389,11 @@ public final class PermissionPolicyService extends SystemService {
      * Synchronizes permission to app ops. You *must* always sync all packages
      * in a shared UID at the same time to ensure proper synchronization.
      */
-    private static class PermissionToOpSynchroniser {
+    private class PermissionToOpSynchroniser {
         private final @NonNull Context mContext;
         private final @NonNull PackageManager mPackageManager;
         private final @NonNull AppOpsManager mAppOpsManager;
+        private final @NonNull AppOpsManagerInternal mAppOpsManagerInternal;
 
         private final @NonNull ArrayMap<String, PermissionInfo> mRuntimePermissionInfos;
 
@@ -429,6 +433,7 @@ public final class PermissionPolicyService extends SystemService {
             mContext = context;
             mPackageManager = context.getPackageManager();
             mAppOpsManager = context.getSystemService(AppOpsManager.class);
+            mAppOpsManagerInternal = LocalServices.getService(AppOpsManagerInternal.class);
 
             mRuntimePermissionInfos = new ArrayMap<>();
             PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
@@ -668,7 +673,8 @@ public final class PermissionPolicyService extends SystemService {
                     opCode), uid, packageName);
             if (currentMode != MODE_ALLOWED) {
                 if (currentMode != MODE_IGNORED) {
-                    mAppOpsManager.setUidMode(opCode, uid, MODE_IGNORED);
+                    mAppOpsManagerInternal.setUidModeIgnoringCallback(opCode, uid, MODE_IGNORED,
+                            mAppOpsCallback);
                 }
                 return true;
             }
@@ -680,15 +686,16 @@ public final class PermissionPolicyService extends SystemService {
             final int oldMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
                     opCode), uid, packageName);
             if (oldMode != mode) {
-                mAppOpsManager.setUidMode(opCode, uid, mode);
+                mAppOpsManagerInternal.setUidModeIgnoringCallback(opCode, uid, mode,
+                        mAppOpsCallback);
                 final int newMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
                         opCode), uid, packageName);
                 if (newMode != mode) {
                     // Work around incorrectly-set package mode. It never makes sense for app ops
                     // related to runtime permissions, but can get in the way and we have to reset
                     // it.
-                    mAppOpsManager.setMode(opCode, uid, packageName, AppOpsManager.opToDefaultMode(
-                            opCode));
+                    mAppOpsManagerInternal.setModeIgnoringCallback(opCode, uid, packageName,
+                            AppOpsManager.opToDefaultMode(opCode), mAppOpsCallback);
                 }
             }
         }
