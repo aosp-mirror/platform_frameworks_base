@@ -22653,6 +22653,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private class PackageManagerNative extends IPackageManagerNative.Stub {
         @Override
+        public String[] getAllPackages() {
+            return PackageManagerService.this.getAllPackages().toArray(new String[0]);
+        }
+
+        @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
             final String[] results = PackageManagerService.this.getNamesForUids(uids);
             // massage results so they can be parsed by the native binder
