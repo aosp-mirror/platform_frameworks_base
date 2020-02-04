@@ -56,7 +56,7 @@ import dagger.Provides;
  * overridden by the System UI implementation.
  */
 @Module(includes = {DividerModule.class})
-abstract class SystemUIDefaultModule {
+public abstract class SystemUIDefaultModule {
 
     @Singleton
     @Provides
