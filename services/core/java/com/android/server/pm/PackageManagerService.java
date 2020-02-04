@@ -10572,6 +10572,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkgSetting.sharedUser != null) {
             pkgSetting.sharedUser.addPackage(pkgSetting);
         }
+        if (reconciledPkg.installArgs != null && reconciledPkg.installArgs.forceQueryableOverride) {
+            pkgSetting.forceQueryableOverride = true;
+        }
+
         // TODO(toddke): Consider a method specifically for modifying the Package object
         // post scan; or, moving this stuff out of the Package object since it has nothing
         // to do with the package on disk.
@@ -14065,6 +14069,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Nullable
         MultiPackageInstallParams mParentInstallParams;
         final long requiredInstalledVersionCode;
+        final boolean forceQueryableOverride;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -14086,6 +14091,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.signingDetails = signingDetails;
             this.installReason = installReason;
             this.requiredInstalledVersionCode = requiredInstalledVersionCode;
+            this.forceQueryableOverride = false;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -14119,6 +14125,7 @@ public class PackageManagerService extends IPackageManager.Stub
             signingDetails = activeInstallSession.getSigningDetails();
             requiredInstalledVersionCode = activeInstallSession.getSessionParams()
                     .requiredInstalledVersionCode;
+            forceQueryableOverride = activeInstallSession.getSessionParams().forceQueryableOverride;
         }
 
         @Override
@@ -14719,6 +14726,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int traceCookie;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
+        final boolean forceQueryableOverride;
         @Nullable final MultiPackageInstallParams mMultiPackageInstallParams;
 
         // The list of instruction sets supported by this app. This is currently
@@ -14732,7 +14740,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 String abiOverride, String[] installGrantPermissions,
                 List<String> whitelistedRestrictedPermissions,
                 String traceMethod, int traceCookie, SigningDetails signingDetails,
-                int installReason,
+                int installReason, boolean forceQueryableOverride,
                 MultiPackageInstallParams multiPackageInstallParams) {
             this.origin = origin;
             this.move = move;
@@ -14749,6 +14757,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.traceCookie = traceCookie;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
+            this.forceQueryableOverride = forceQueryableOverride;
             this.mMultiPackageInstallParams = multiPackageInstallParams;
         }
 
@@ -14759,7 +14768,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.mParentInstallParams);
+                    params.installReason, params.forceQueryableOverride, params.mParentInstallParams);
         }
 
         abstract int copyApk();
@@ -14850,7 +14859,7 @@ public class PackageManagerService extends IPackageManager.Stub
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, null, 0,
                     PackageParser.SigningDetails.UNKNOWN,
-                    PackageManager.INSTALL_REASON_UNKNOWN, null /* parent */);
+                    PackageManager.INSTALL_REASON_UNKNOWN, false, null /* parent */);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }

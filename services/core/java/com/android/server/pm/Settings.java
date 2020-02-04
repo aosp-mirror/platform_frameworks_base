@@ -2836,6 +2836,9 @@ public final class Settings {
         if (pkg.updateAvailable) {
             serializer.attribute(null, "updateAvailable", "true");
         }
+        if (pkg.forceQueryableOverride) {
+            serializer.attribute(null, "forceQueryable", "true");
+        }
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
@@ -3599,6 +3602,7 @@ public final class Settings {
         PackageSetting packageSetting = null;
         String version = null;
         long versionCode = 0;
+        String installedForceQueryable = null;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3615,6 +3619,7 @@ public final class Settings {
             secondaryCpuAbiString = parser.getAttributeValue(null, "secondaryCpuAbi");
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeValue(null, "updateAvailable");
+            installedForceQueryable = parser.getAttributeValue(null, "forceQueryable");
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3798,6 +3803,7 @@ public final class Settings {
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
             packageSetting.updateAvailable = "true".equals(updateAvailable);
+            packageSetting.forceQueryableOverride = "true".equals(installedForceQueryable);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
