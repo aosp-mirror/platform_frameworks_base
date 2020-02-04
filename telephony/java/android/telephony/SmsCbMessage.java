@@ -586,6 +586,7 @@ public final class SmsCbMessage implements Parcelable {
         cv.put(CellBroadcasts.SERIAL_NUMBER, getSerialNumber());
         cv.put(CellBroadcasts.SERVICE_CATEGORY, getServiceCategory());
         cv.put(CellBroadcasts.LANGUAGE_CODE, getLanguageCode());
+        cv.put(CellBroadcasts.DATA_CODING_SCHEME, getDataCodingScheme());
         cv.put(CellBroadcasts.MESSAGE_BODY, getMessageBody());
         cv.put(CellBroadcasts.MESSAGE_FORMAT, getMessageFormat());
         cv.put(CellBroadcasts.MESSAGE_PRIORITY, getMessagePriority());
