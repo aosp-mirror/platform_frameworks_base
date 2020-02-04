@@ -20,8 +20,10 @@ package com.android.server.wm;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.IWindow;
+import android.view.InputApplicationHandle;
 
 /**
  * Keeps track of embedded windows.
@@ -44,21 +46,12 @@ class EmbeddedWindowController {
      *
      * @param inputToken input channel token passed in by the embedding process when it requests
      *                   the server to add an input channel to the embedded surface.
-     * @param window     client token used to clean up the map if the embedding process dies
-     * @param hostWindowState input channel token belonging to the host window. This is needed to
-     *                        handle input callbacks to wm. It's used when raising ANR and when
-     *                        the user taps out side of the focused region on screen. This can be
-     *                        null if there is no host window.
-     * @param ownerUid  calling uid
-     * @param ownerPid  calling pid used for anr blaming
+     * @param embeddedWindow An {@link EmbeddedWindow} object to add to this controller.
      */
-    void add(IBinder inputToken, IWindow window, @Nullable WindowState hostWindowState,
-            int ownerUid, int ownerPid) {
-        EmbeddedWindow embeddedWindow = new EmbeddedWindow(window, hostWindowState, ownerUid,
-                ownerPid);
+    void add(IBinder inputToken, EmbeddedWindow embeddedWindow) {
         try {
             mWindows.put(inputToken, embeddedWindow);
-            window.asBinder().linkToDeath(()-> {
+            embeddedWindow.mClient.asBinder().linkToDeath(()-> {
                 synchronized (mWmLock) {
                     mWindows.remove(inputToken);
                 }
@@ -101,12 +94,37 @@ class EmbeddedWindowController {
         final int mOwnerUid;
         final int mOwnerPid;
 
+        /**
+         * @param clientToken client token used to clean up the map if the embedding process dies
+         * @param hostWindowState input channel token belonging to the host window. This is needed
+         *                        to handle input callbacks to wm. It's used when raising ANR and
+         *                        when the user taps out side of the focused region on screen. This
+         *                        can be null if there is no host window.
+         * @param ownerUid  calling uid
+         * @param ownerPid  calling pid used for anr blaming
+         */
         EmbeddedWindow(IWindow clientToken, WindowState hostWindowState, int ownerUid,
                 int ownerPid) {
             mClient = clientToken;
             mHostWindowState = hostWindowState;
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
+        }
+
+        String getName() {
+            final String hostWindowName = (mHostWindowState != null)
+                    ? mHostWindowState.getWindowTag().toString() : "Internal";
+            return "EmbeddedWindow{ u" + UserHandle.getUserId(mOwnerUid) + " " + hostWindowName
+                    + "}";
+        }
+
+        InputApplicationHandle getApplicationHandle() {
+            if (mHostWindowState == null
+                    || mHostWindowState.mInputWindowHandle.inputApplicationHandle == null) {
+                return null;
+            }
+            return new InputApplicationHandle(
+                    mHostWindowState.mInputWindowHandle.inputApplicationHandle);
         }
     }
 }

@@ -622,7 +622,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
+            IWindow window, IBinder hostInputToken, int flags, InputChannel outInputChannel) {
         if (hostInputToken == null && !mCanAddInternalSystemWindow) {
             // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
             // embedded windows without providing a host window input token
@@ -631,8 +631,19 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.grantInputChannel(mUid, mPid, displayId, surface, window,
-                    hostInputToken, outInputChannel);
+            mService.grantInputChannel(mUid, mPid, displayId, surface, window, hostInputToken,
+                    flags, outInputChannel);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
+            int flags) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.updateInputChannel(channelToken, displayId, surface, flags);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
