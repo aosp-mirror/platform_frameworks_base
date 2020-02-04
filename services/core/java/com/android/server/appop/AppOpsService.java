@@ -88,6 +88,7 @@ import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -2117,10 +2118,24 @@ public class AppOpsService extends IAppOpsService.Stub {
                 continue;
             }
 
+            PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                    PackageManagerInternal.class);
+            boolean supportsRuntimePermissions = packageManagerInternal.getUidTargetSdkVersion(uid)
+                    >= Build.VERSION_CODES.M;
+
             UserHandle user = UserHandle.getUserHandleForUid(uid);
             boolean isRevokedCompat;
             if (permissionInfo.backgroundPermission != null) {
                 boolean isBackgroundRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+
+                if (isBackgroundRevokedCompat && supportsRuntimePermissions) {
+                    Slog.w(TAG, "setUidMode() called with a mode inconsistent with runtime"
+                            + " permission state, this is discouraged and you should revoke the"
+                            + " runtime permission instead: uid=" + uid + ", switchCode="
+                            + switchCode + ", mode=" + mode + ", permission="
+                            + permissionInfo.backgroundPermission);
+                }
+
                 long identity = Binder.clearCallingIdentity();
                 try {
                     packageManager.updatePermissionFlags(permissionInfo.backgroundPermission,
@@ -2135,6 +2150,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                         && mode != AppOpsManager.MODE_FOREGROUND;
             } else {
                 isRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+            }
+
+            if (isRevokedCompat && supportsRuntimePermissions) {
+                Slog.w(TAG, "setUidMode() called with a mode inconsistent with runtime"
+                        + " permission state, this is discouraged and you should revoke the"
+                        + " runtime permission instead: uid=" + uid + ", switchCode="
+                        + switchCode + ", mode=" + mode + ", permission=" + permissionName);
             }
 
             long identity = Binder.clearCallingIdentity();
