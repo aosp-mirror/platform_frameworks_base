@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
@@ -45,6 +46,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
     static final String NAME = "HearingAid";
     private final LocalBluetoothProfileManager mProfileManager;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     // Order of this profile in device profiles list
     private static final int ORDINAL = 1;
@@ -97,7 +99,8 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         mContext = context;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.getProfileProxy(context,
                 new HearingAidServiceListener(), BluetoothProfile.HEARING_AID);
     }
 
@@ -171,8 +174,10 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.setActiveDevice(device);
+        if (mBluetoothAdapter == null) {
+            return false;
+        }
+        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_ALL);
     }
 
     public List<BluetoothDevice> getActiveDevices() {

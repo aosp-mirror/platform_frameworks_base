@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_AUDIO;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
@@ -45,6 +46,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     private boolean mIsProfileReady;
 
     private final CachedBluetoothDeviceManager mDeviceManager;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     static final ParcelUuid[] SINK_UUIDS = {
         BluetoothUuid.A2DP_SINK,
@@ -99,7 +101,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
         mContext = context;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new A2dpServiceListener(),
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
     }
 
@@ -173,8 +176,10 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.setActiveDevice(device);
+        if (mBluetoothAdapter == null) {
+            return false;
+        }
+        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_AUDIO);
     }
 
     public BluetoothDevice getActiveDevice() {
