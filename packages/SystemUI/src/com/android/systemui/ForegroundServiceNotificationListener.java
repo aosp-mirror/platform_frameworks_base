@@ -89,7 +89,7 @@ public class ForegroundServiceNotificationListener {
             }
 
             @Override
-            public void onEntryRemoved(NotificationEntry entry, int reason, boolean removedByUser) {
+            public void onEntryRemoved(NotificationEntry entry, int reason) {
                 removeNotification(entry.getSbn());
             }
         });

@@ -72,7 +72,7 @@ public class PreparationCoordinator implements Coordinator {
         }
 
         @Override
-        public void onEntryRemoved(NotificationEntry entry, int reason, boolean removedByUser) {
+        public void onEntryRemoved(NotificationEntry entry, int reason) {
             abortInflation(entry, "entryRemoved reason=" + reason);
         }
     };
