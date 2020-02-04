@@ -324,6 +324,9 @@ public final class BarringInfo implements Parcelable {
     /** @hide */
     @SystemApi
     public @NonNull BarringInfo createLocationInfoSanitizedCopy() {
+        // The only thing that would need sanitizing is the CellIdentity
+        if (mCellIdentity == null) return this;
+
         return new BarringInfo(mCellIdentity.sanitizeLocationInfo(), mBarringServiceInfos);
     }
 
