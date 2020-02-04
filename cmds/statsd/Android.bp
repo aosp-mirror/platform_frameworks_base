@@ -118,7 +118,6 @@ cc_defaults {
     ],
 
     static_libs: [
-        "android.frameworks.stats@1.0",
         "libbase",
         "libcutils",
         "libprotoutil",
@@ -128,7 +127,6 @@ cc_defaults {
     ],
     shared_libs: [
         "libbinder",
-        "libhidlbase",
         "libincident",
         "liblog",
         "libservices",
@@ -221,8 +219,6 @@ cc_binary {
     },
 
     shared_libs: ["libgtest_prod"],
-
-    vintf_fragments: ["android.frameworks.stats@1.0-service.xml"],
 
     init_rc: ["statsd.rc"],
 }
