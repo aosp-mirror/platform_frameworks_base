@@ -231,8 +231,9 @@ interface IActivityTaskManager {
      * @param taskId The id of the task to set the windowing mode for.
      * @param windowingMode The windowing mode to set for the task.
      * @param toTop If the task should be moved to the top once the windowing mode changes.
+     * @return Whether the task was successfully put into the specified windowing mode.
      */
-    void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
+    boolean setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     /**
      * Resizes the input pinned stack to the given bounds with animation.
