@@ -284,6 +284,10 @@ public final class BasePermission {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_COMPANION) != 0;
     }
 
+    public boolean isRetailDemo() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0;
+    }
+
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {
             return;

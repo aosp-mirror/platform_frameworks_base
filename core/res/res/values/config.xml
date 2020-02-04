@@ -3590,7 +3590,6 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
-
     <!-- The package name for the system telephony apps.
          This package must be trusted, as it will be granted with permissions with special telephony
          protection level. Note, framework by default support multiple telephony apps, each package
@@ -3657,6 +3656,19 @@
          Example: "com.android.contentsuggestions/.ContentSuggestionsService"
     -->
     <string name="config_defaultContentSuggestionsService" translatable="false"></string>
+
+    <!-- The package name for the default retail demo app.
+         This package must be trusted, as it has the permissions to query the usage stats on the
+         device.
+         Example: "com.google.android.retaildemo"
+     -->
+    <string name="config_retailDemoPackage" translatable="false"></string>
+
+    <!-- The package signature hash for the default retail demo app.
+         This package must be trusted, as it has the permissions to query the usage stats on the
+         device.
+     -->
+    <string name="config_retailDemoPackageSignature" translatable="false"></string>
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
