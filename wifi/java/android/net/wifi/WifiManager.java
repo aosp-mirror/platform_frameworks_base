@@ -257,12 +257,12 @@ public class WifiManager {
      * - {@link #EXTRA_SCAN_AVAILABLE}
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_WIFI_SCAN_AVAILABLE =
-            "android.net.wifi.action.WIFI_SCAN_AVAILABLE";
+    public static final String ACTION_WIFI_SCAN_AVAILABILITY_CHANGED =
+            "android.net.wifi.action.WIFI_SCAN_AVAILABILITY_CHANGED";
 
     /**
      * A boolean extra indicating whether scanning is currently available.
-     * Sent in the broadcast {@link #ACTION_WIFI_SCAN_AVAILABLE}.
+     * Sent in the broadcast {@link #ACTION_WIFI_SCAN_AVAILABILITY_CHANGED}.
      * Its value is true if scanning is currently available, false otherwise.
      */
     public static final String EXTRA_SCAN_AVAILABLE = "android.net.wifi.extra.SCAN_AVAILABLE";
