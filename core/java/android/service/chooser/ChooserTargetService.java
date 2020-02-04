@@ -72,7 +72,13 @@ import java.util.List;
  *                 android:value=".MyChooserTargetService" />
  *     &lt;/activity>
  * </pre>
+ *
+ * @deprecated For publishing direct share targets, please follow the instructions in
+ * https://developer.android.com/training/sharing/receive.html#providing-direct-share-targets
+ * instead.
  */
+
+@Deprecated
 public abstract class ChooserTargetService extends Service {
     // TAG = "ChooserTargetService[MySubclass]";
     private final String TAG = ChooserTargetService.class.getSimpleName()
