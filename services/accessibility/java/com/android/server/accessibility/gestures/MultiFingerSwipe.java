@@ -250,11 +250,29 @@ class MultiFingerSwipe extends GestureMatcher {
 
     @Override
     protected void onMove(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        for (int pointerIndex = 0; pointerIndex < rawEvent.getPointerCount(); ++pointerIndex) {
+        for (int pointerIndex = 0; pointerIndex < mTargetFingerCount; ++pointerIndex) {
+            if (mPointerIds[pointerIndex] == INVALID_POINTER_ID) {
+                // Fingers have started to move before the required number of fingers are down.
+                // However, they can still move less than the touch slop and still be considered
+                // touching, not moving.
+                // So we just ignore fingers that haven't been assigned a pointer id and process
+                // those who have.
+                continue;
+            }
             if (DEBUG) {
                 Slog.d(getGestureName(), "Processing move on finger " + pointerIndex);
             }
             int index = rawEvent.findPointerIndex(mPointerIds[pointerIndex]);
+            if (index < 0) {
+                // This finger is not present in this event. It could have gone up just before this
+                // movement.
+                if (DEBUG) {
+                    Slog.d(
+                            getGestureName(),
+                            "Finger " + pointerIndex + " not found in this event. skipping.");
+                }
+                continue;
+            }
             final float x = rawEvent.getX(index);
             final float y = rawEvent.getY(index);
             if (x < 0f || y < 0f) {
