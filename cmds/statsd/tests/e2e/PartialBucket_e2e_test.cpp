@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <android/os/BnPullAtomCallback.h>
+#include <android/os/IPullAtomResultReceiver.h>
+#include <binder/IPCThreadState.h>
 #include <gtest/gtest.h>
 
-#include <binder/IPCThreadState.h>
+#include <vector>
+
 #include "src/StatsLogProcessor.h"
 #include "src/StatsService.h"
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
-
-#include <vector>
 
 namespace android {
 namespace os {
 namespace statsd {
 
 #ifdef __ANDROID__
-
+namespace {
 const string kApp1 = "app1.sharing.1";
 const int kConfigKey = 789130123;  // Randomly chosen to avoid collisions with existing configs.
 const int kCallingUid = 0; // Randomly chosen
@@ -109,6 +111,7 @@ StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
     gaugeMetric->set_min_bucket_size_nanos(minTime);
     return config;
 }
+}  // anonymous namespace
 
 TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
     StatsService service(nullptr, nullptr);
@@ -202,6 +205,9 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
 
 TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
     StatsService service(nullptr, nullptr);
+    service.mPullerManager->RegisterPullAtomCallback(
+            /*uid=*/0, android::util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
+            new FakeSubsystemSleepCallback());
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeValueMetricConfig(0));
@@ -220,6 +226,9 @@ TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
 
 TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
     StatsService service(nullptr, nullptr);
+    service.mPullerManager->RegisterPullAtomCallback(
+            /*uid=*/0, android::util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
+            new FakeSubsystemSleepCallback());
     // Partial buckets don't occur when app is first installed.
     service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeValueMetricConfig(60 * NS_PER_SEC /* One minute */));

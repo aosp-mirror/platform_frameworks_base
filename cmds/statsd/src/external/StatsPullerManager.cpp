@@ -84,7 +84,7 @@ bool StatsPullerManager::PullLocked(int tagId, vector<shared_ptr<LogEvent>>* dat
         }
         return ret;
     } else {
-        VLOG("Unknown tagId %d", tagId);
+        ALOGW("StatsPullerManager: Unknown tagId %d", tagId);
         return false;  // Return early since we don't know what to pull.
     }
 }
