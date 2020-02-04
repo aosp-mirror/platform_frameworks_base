@@ -2078,6 +2078,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 continue;
             }
 
+            if (packageManager.checkPermission(permissionName, packageName)
+                    != PackageManager.PERMISSION_GRANTED) {
+                continue;
+            }
+
             PermissionInfo permissionInfo;
             try {
                 permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
