@@ -3749,8 +3749,8 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
-    field public static final int CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
+    field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
     field public final int audioCapabilities;
     field @NonNull public final String description;
