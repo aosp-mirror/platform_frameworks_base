@@ -28821,6 +28821,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Point mLocationInParentDisplay = new Point();
 
         /**
+         * The screen matrix of this view when it's on a {@link SurfaceControlViewHost} that is
+         * embedded within a SurfaceView.
+         */
+        Matrix mScreenMatrixInEmbeddedHierarchy;
+
+        /**
          * Global to the view hierarchy used as a temporary for dealing with
          * x/y points in the transparent region computations.
          */
