@@ -14,11 +14,11 @@
 
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "src/StatsLogProcessor.h"
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
-
-#include <vector>
 
 namespace android {
 namespace os {
@@ -29,12 +29,13 @@ namespace statsd {
 namespace {
 
 const int64_t metricId = 123456;
+const int32_t ATOM_TAG = android::util::SUBSYSTEM_SLEEP_STATE;
 
 StatsdConfig CreateStatsdConfig(const GaugeMetric::SamplingType sampling_type,
                                 bool useCondition = true) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
-    auto atomMatcher = CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+    auto atomMatcher = CreateSimpleAtomMatcher("TestMatcher", ATOM_TAG);
     *config.add_atom_matcher() = atomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
@@ -51,7 +52,7 @@ StatsdConfig CreateStatsdConfig(const GaugeMetric::SamplingType sampling_type,
     gaugeMetric->set_sampling_type(sampling_type);
     gaugeMetric->mutable_gauge_fields_filter()->set_include_all(true);
     *gaugeMetric->mutable_dimensions_in_what() =
-            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {1 /* subsystem name */});
+            CreateDimensions(ATOM_TAG, {1 /* subsystem name */});
     gaugeMetric->set_bucket(FIVE_MINUTES);
     gaugeMetric->set_max_pull_delay_sec(INT_MAX);
     config.set_hash_strings_in_metric_report(false);
@@ -69,8 +70,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -144,7 +145,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_GT((int)gaugeMetrics.data_size(), 1);
 
     auto data = gaugeMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -214,8 +215,8 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -267,7 +268,7 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
     EXPECT_GT((int)gaugeMetrics.data_size(), 1);
 
     auto data = gaugeMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -315,8 +316,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback, ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -371,7 +372,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     EXPECT_GT((int)gaugeMetrics.data_size(), 1);
 
     auto data = gaugeMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -424,8 +425,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
     event_activation->set_ttl_seconds(ttlNs / 1000000000);
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -493,7 +494,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
     EXPECT_GT((int)gaugeMetrics.data_size(), 0);
 
     auto data = gaugeMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -542,8 +543,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {
         TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -586,7 +587,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {
     EXPECT_GT((int)gaugeMetrics.data_size(), 0);
 
     auto data = gaugeMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(ATOM_TAG, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());

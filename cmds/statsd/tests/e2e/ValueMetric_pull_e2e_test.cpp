@@ -69,8 +69,9 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
         TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(),
+                                             android::util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -173,8 +174,9 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
         TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(),
+                                             android::util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -285,8 +287,9 @@ TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation) {
     event_activation->set_ttl_seconds(ttlNs / 1000000000);
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(
-        baseTimeNs, configAddedTimeNs, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                             new FakeSubsystemSleepCallback(),
+                                             android::util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();

@@ -14,12 +14,16 @@
 
 #pragma once
 
+#include <android/os/BnPullAtomCallback.h>
+#include <android/os/IPullAtomCallback.h>
+#include <android/os/IPullAtomResultReceiver.h>
 #include <gtest/gtest.h>
+
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "src/StatsLogProcessor.h"
-#include "src/logd/LogEvent.h"
 #include "src/hash.h"
+#include "src/logd/LogEvent.h"
 #include "src/stats_log_util.h"
 #include "statslog.h"
 
@@ -224,9 +228,10 @@ std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
 AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
 
 // Create a statsd log event processor upon the start time in seconds, config and key.
-sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs,
-                                              const int64_t currentTimeNs,
-                                              const StatsdConfig& config, const ConfigKey& key);
+sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
+                                              const StatsdConfig& config, const ConfigKey& key,
+                                              const sp<IPullAtomCallback>& puller = nullptr,
+                                              const int32_t atomTag = 0 /*for puller only*/);
 
 // Util function to sort the log events by timestamp.
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
@@ -277,6 +282,12 @@ void backfillDimensionPath(ConfigMetricsReportList* config_report_list);
 bool backfillDimensionPath(const DimensionsValue& path,
                            const google::protobuf::RepeatedPtrField<DimensionsValue>& leafValues,
                            DimensionsValue* dimension);
+
+class FakeSubsystemSleepCallback : public BnPullAtomCallback {
+public:
+    binder::Status onPullAtom(int atomTag,
+                              const sp<IPullAtomResultReceiver>& resultReceiver) override;
+};
 
 template <typename T>
 void backfillDimensionPath(const DimensionsValue& whatPath,
