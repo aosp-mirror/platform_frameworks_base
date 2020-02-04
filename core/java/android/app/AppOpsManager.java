@@ -88,10 +88,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * API for interacting with "application operation" tracking.
+ * AppOps are mappings of [package/uid, op-name] -> [mode]. The list of existing appops is defined
+ * by the system and cannot be amended by apps. Only system apps can change appop-modes.
  *
- * <p>This API is not generally intended for third party application developers; most
- * features are only available to system applications.
+ * <p>Beside a mode the system tracks when an op was {@link #noteOp noted}. The tracked data can
+ * only be read by system components.
+ *
+ * <p>Installed apps can usually only listen to changes and events on their own ops. E.g.
+ * {@link AppOpsCollector} allows to get a callback each time an app called {@link #noteOp} or
+ * {@link #startOp} for an op belonging to the app.
  */
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
@@ -6774,6 +6779,9 @@ public class AppOpsManager {
      * succeeds, the last execution time of the operation for this app will be updated to
      * the current time.
      *
+     * <p>If this is a check that is not preceding the protected operation, use
+     * {@link #unsafeCheckOp} instead.
+     *
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
@@ -6797,6 +6805,9 @@ public class AppOpsManager {
      * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
      * succeeds, the last execution time of the operation for this app will be updated to
      * the current time.
+     *
+     * <p>If this is a check that is not preceding the protected operation, use
+     * {@link #unsafeCheckOp} instead.
      *
      * @param op The operation to note.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
@@ -7757,9 +7768,38 @@ public class AppOpsManager {
 
     /**
      * Callback an app can choose to {@link #setNotedAppOpsCollector register} to monitor it's noted
-     * appops.
+     * appops. I.e. each time any app calls {@link #noteOp} or {@link #startOp} one of the callback
+     * methods of this object is called.
      *
      * <p><b>Only appops related to dangerous permissions are collected.</b>
+     *
+     * <pre>
+     * setNotedAppOpsCollector(new AppOpsCollector() {
+     *     ArraySet<Pair<String, String>> opsNotedForThisProcess = new ArraySet<>();
+     *
+     *     private synchronized void addAccess(String op, String accessLocation) {
+     *         // Ops are often noted when permission protected APIs were called.
+     *         // In this case permissionToOp() allows to resolve the permission<->op
+     *         opsNotedForThisProcess.add(new Pair(accessType, accessLocation));
+     *     }
+     *
+     *     public void onNoted(SyncNotedAppOp op) {
+     *         // Accesses is currently happening, hence stack trace describes location of access
+     *         addAccess(op.getOp(), Arrays.toString(Thread.currentThread().getStackTrace()));
+     *     }
+     *
+     *     public void onSelfNoted(SyncNotedAppOp op) {
+     *         onNoted(op);
+     *     }
+     *
+     *     public void onAsyncNoted(AsyncNotedAppOp asyncOp) {
+     *         // Stack trace is not useful for async ops as accessed happened on different thread
+     *         addAccess(asyncOp.getOp(), asyncOp.getMessage());
+     *     }
+     * });
+     * </pre>
+     *
+     * @see #setNotedAppOpsCollector
      */
     public abstract static class AppOpsCollector {
         /** Callback registered with the system. This will receive the async notes ops */
