@@ -1071,8 +1071,13 @@ public class WifiCondManager {
     }
 
     /**
-     * Register the provided callback handler for SoftAp events. Note that the Soft AP itself is
-     * configured using {@link #setupInterfaceForSoftApMode(String)}.
+     * Register the provided callback handler for SoftAp events. The interface must first be created
+     * using {@link #setupInterfaceForSoftApMode(String)}. The callback registration is valid until
+     * the interface is deleted using {@link #tearDownSoftApInterface(String)} (no deregistration
+     * method is provided).
+     * <p>
+     * Note that only one callback can be registered at a time - any registration overrides previous
+     * registrations.
      *
      * @param ifaceName Name of the interface on which to register the callback.
      * @param executor The Executor on which to execute the callbacks.
