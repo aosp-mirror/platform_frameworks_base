@@ -8235,12 +8235,12 @@ package android.net.wifi.wificond {
   public final class PnoSettings implements android.os.Parcelable {
     ctor public PnoSettings();
     method public int describeContents();
-    method public int getIntervalMillis();
+    method public long getIntervalMillis();
     method public int getMin2gRssiDbm();
     method public int getMin5gRssiDbm();
     method public int getMin6gRssiDbm();
     method @NonNull public java.util.List<android.net.wifi.wificond.PnoNetwork> getPnoNetworks();
-    method public void setIntervalMillis(int);
+    method public void setIntervalMillis(long);
     method public void setMin2gRssiDbm(int);
     method public void setMin5gRssiDbm(int);
     method public void setMin6gRssiDbm(int);
