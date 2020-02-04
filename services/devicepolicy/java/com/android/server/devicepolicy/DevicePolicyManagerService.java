@@ -408,6 +408,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
             = "application-restrictions-manager";
 
+    private static final String CALLED_FROM_PARENT = "calledFromParent";
+    private static final String NOT_CALLED_FROM_PARENT = "notCalledFromParent";
+
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
         DELEGATION_CERT_INSTALL,
@@ -4467,7 +4470,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_QUALITY)
                 .setAdmin(who)
                 .setInt(quality)
-                .setBoolean(parent)
+                .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
     }
 
@@ -5255,8 +5258,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public int getPasswordComplexity(boolean parent) {
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.GET_USER_PASSWORD_COMPLEXITY_LEVEL)
-                .setStrings(mInjector.getPackageManager()
-                        .getPackagesForUid(mInjector.binderGetCallingUid()))
+                .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT,
+                        mInjector.getPackageManager().getPackagesForUid(
+                                mInjector.binderGetCallingUid()))
                 .write();
         final int callingUserId = mInjector.userHandleGetCallingUserId();
 
@@ -6930,6 +6934,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
                 .setAdmin(admin.info.getComponent())
                 .setInt(flags)
+                .setStrings(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         String internalReason = String.format(
                 "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
@@ -8089,6 +8094,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.SET_CAMERA_DISABLED)
                 .setAdmin(who)
                 .setBoolean(disabled)
+                .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
     }
 
@@ -8166,7 +8172,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.SET_KEYGUARD_DISABLED_FEATURES)
                 .setAdmin(who)
                 .setInt(which)
-                .setBoolean(parent)
+                .setStrings(parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
     }
 
@@ -10670,7 +10676,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DevicePolicyEventLogger
                 .createEvent(eventId)
                 .setAdmin(who)
-                .setStrings(key)
+                .setStrings(key, parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         if (SecurityLog.isLoggingEnabled()) {
             final int eventTag = enabledFromThisOwner
@@ -10814,8 +10820,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.SET_APPLICATION_HIDDEN)
                 .setAdmin(callerPackage)
                 .setBoolean(isDelegate)
-                .setBoolean(parent)
-                .setStrings(packageName, hidden ? "hidden" : "not_hidden")
+                .setStrings(packageName, hidden ? "hidden" : "not_hidden",
+                        parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         return result;
     }

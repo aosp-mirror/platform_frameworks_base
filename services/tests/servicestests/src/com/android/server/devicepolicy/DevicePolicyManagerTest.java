@@ -5689,6 +5689,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_securityExceptionNotThrownForParentInstance() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
         setAsProfileOwner(admin1);
 
@@ -5698,12 +5701,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_illegalStateExceptionIfLocked() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(false);
         assertThrows(IllegalStateException.class, () -> dpm.getPasswordComplexity());
     }
 
     public void testGetPasswordComplexity_securityExceptionWithoutPermissions() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         assertThrows(SecurityException.class, () -> dpm.getPasswordComplexity());
@@ -5711,6 +5720,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
 
     public void testGetPasswordComplexity_currentUserNoPassword() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
@@ -5721,6 +5733,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_currentUserHasPassword() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
@@ -5734,6 +5749,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetPasswordComplexity_unifiedChallengeReturnsParentUserPassword() {
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        when(getServices().packageManager.getPackagesForUid(DpmMockContext.CALLER_UID)).thenReturn(
+                new String[0]);
         when(getServices().userManager.isUserUnlocked(DpmMockContext.CALLER_USER_HANDLE))
                 .thenReturn(true);
         mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
