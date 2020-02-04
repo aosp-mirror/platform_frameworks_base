@@ -38,9 +38,9 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.attention.AttentionService;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -285,7 +285,8 @@ public class AttentionDetector {
     private void resetConsecutiveExtensionCount() {
         final long previousCount = mConsecutiveTimeoutExtendedCount.getAndSet(0);
         if (previousCount > 0) {
-            StatsLog.write(StatsLog.SCREEN_TIMEOUT_EXTENSION_REPORTED, previousCount);
+            FrameworkStatsLog.write(FrameworkStatsLog.SCREEN_TIMEOUT_EXTENSION_REPORTED,
+                    previousCount);
         }
     }
 
