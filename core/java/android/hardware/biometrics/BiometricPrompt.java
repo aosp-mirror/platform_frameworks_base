@@ -388,7 +388,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     private final IBinder mToken = new Binder();
     private final Context mContext;
-    private final IBiometricService mService;
+    private final IAuthService mService;
     private final Bundle mBundle;
     private final ButtonInfo mPositiveButtonInfo;
     private final ButtonInfo mNegativeButtonInfo;
@@ -466,8 +466,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         mBundle = bundle;
         mPositiveButtonInfo = positiveButtonInfo;
         mNegativeButtonInfo = negativeButtonInfo;
-        mService = IBiometricService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_SERVICE));
+        mService = IAuthService.Stub.asInterface(
+                ServiceManager.getService(Context.AUTH_SERVICE));
     }
 
     /**

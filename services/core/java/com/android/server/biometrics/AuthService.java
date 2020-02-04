@@ -150,9 +150,18 @@ public class AuthService extends SystemService {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
                 return;
             }
-
             mBiometricService.authenticate(token, sessionId, userId, receiver, opPackageName,
                     bundle);
+        }
+
+        public void cancelAuthentication(IBinder token, String opPackageName)
+                throws RemoteException {
+            checkPermission();
+            if (token == null || opPackageName == null) {
+                Slog.e(TAG, "Unable to authenticate, one or more null arguments");
+                return;
+            }
+            mBiometricService.cancelAuthentication(token, opPackageName);
         }
 
         @Override
