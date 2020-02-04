@@ -44,34 +44,68 @@ java_library {
     ],
 }
 
-droidstubs {
-    name: "framework-sdkextensions-droidstubs-publicapi",
-    defaults: [
-        "framework-sdkextensions-stubs-defaults",
-        "framework-module-stubs-defaults-publicapi",
-    ]
-}
-
-droidstubs {
-    name: "framework-sdkextensions-droidstubs-systemapi",
-    defaults: [
-        "framework-sdkextensions-stubs-defaults",
-        "framework-module-stubs-defaults-systemapi",
-    ]
-}
-
 stubs_defaults {
     name: "framework-sdkextensions-stubs-defaults",
-    srcs: [
-        ":framework-sdkextensions-sources",
-        ":framework-annotations",
-    ],
+    srcs: [ ":framework-sdkextensions-sources" ],
+    libs: [ "framework-annotations-lib" ],
     sdk_version: "system_current",
+}
+
+droidstubs {
+    name: "framework-sdkextensions-stubs-srcs-publicapi",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+droidstubs {
+    name: "framework-sdkextensions-stubs-srcs-systemapi",
+    defaults: [
+        "framework-module-stubs-defaults-systemapi",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+droidstubs {
+    name: "framework-sdkextensions-api-module_libs_api",
+    defaults: [
+        "framework-module-api-defaults-module_libs_api",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+droidstubs {
+    name: "framework-sdkextensions-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-module-stubs-defaults-module_libs_api",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+java_library {
+    name: "framework-sdkextensions-stubs-publicapi",
+    srcs: [":framework-sdkextensions-stubs-srcs-publicapi"],
+    sdk_version: "current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
+    ]
 }
 
 java_library {
     name: "framework-sdkextensions-stubs-systemapi",
-    srcs: [":framework-sdkextensions-droidstubs-systemapi"],
+    srcs: [":framework-sdkextensions-stubs-srcs-systemapi"],
+    sdk_version: "system_current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
+    ]
+}
+
+java_library {
+    name: "framework-sdkextensions-stubs-module_libs_api",
+    srcs: [":framework-sdkextensions-stubs-srcs-module_libs_api"],
     sdk_version: "system_current",
     visibility: [
         "//frameworks/base", // Framework
