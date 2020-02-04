@@ -3130,7 +3130,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
-            mConfiguratorPackage = getDeviceConfiguratorPackageName();
+            mConfiguratorPackage =
+                    mContext.getString(R.string.config_deviceConfiguratorPackageName);
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
 
@@ -21142,8 +21143,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getSystemTextClassifierPackageName() {
-        return ensureSystemPackageName(mContext.getString(
-                R.string.config_defaultTextClassifierPackage));
+        return mContext.getString(R.string.config_defaultTextClassifierPackage);
     }
 
     @Override
@@ -21153,7 +21153,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (flattenedComponentName != null) {
             ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
             if (componentName != null && componentName.getPackageName() != null) {
-                return ensureSystemPackageName(componentName.getPackageName());
+                return componentName.getPackageName();
             }
         }
         return null;
@@ -21178,15 +21178,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @Nullable
-    private String getDeviceConfiguratorPackageName() {
-        return ensureSystemPackageName(mContext.getString(
-                R.string.config_deviceConfiguratorPackageName));
-    }
-
     @Override
     public String getWellbeingPackageName() {
-        return ensureSystemPackageName(mContext.getString(R.string.config_defaultWellbeingPackage));
+        return mContext.getString(R.string.config_defaultWellbeingPackage);
     }
 
     @Override
@@ -21201,7 +21195,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (appPredictionServiceComponentName == null) {
             return null;
         }
-        return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
+        return appPredictionServiceComponentName.getPackageName();
     }
 
     @Override
@@ -21218,23 +21212,11 @@ public class PackageManagerService extends IPackageManager.Stub
         if (systemCaptionsServiceComponentName == null) {
             return null;
         }
-        return ensureSystemPackageName(systemCaptionsServiceComponentName.getPackageName());
+        return systemCaptionsServiceComponentName.getPackageName();
     }
 
     public String getIncidentReportApproverPackageName() {
-        return ensureSystemPackageName(mContext.getString(
-                R.string.config_incidentReportApproverPackage));
-    }
-
-    @Nullable
-    private String ensureSystemPackageName(@Nullable String packageName) {
-        if (packageName == null) {
-            return null;
-        }
-        if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
-            return null;
-        }
-        return packageName;
+        return mContext.getString(R.string.config_incidentReportApproverPackage);
     }
 
     @Override
