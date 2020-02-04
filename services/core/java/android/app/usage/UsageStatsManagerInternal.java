@@ -216,17 +216,11 @@ public abstract class UsageStatsManagerInternal {
     /**
      * Returns the events for the user in the given time period.
      *
-     * @param obfuscateInstantApps whether instant app package names need to be obfuscated in the
-     *     result.
-     * @param hideShortcutInvocationEvents whether the {@link UsageEvents.Event#SHORTCUT_INVOCATION}
-     *     events need to be excluded from the result.
-     * @param hideLocusIdEvents whether the {@link UsageEvents.Event#LOCUS_ID_SET}
-     *     events need to be excluded from the result.
-     *
+     * @param flags defines the visibility of certain usage events - see flags defined in
+     * {@link UsageEvents}.
      */
     public abstract UsageEvents queryEventsForUser(@UserIdInt int userId, long beginTime,
-            long endTime, boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents,
-            boolean hideLocusIdEvents);
+            long endTime, int flags);
 
     /**
      * Used to persist the last time a job was run for this app, in order to make decisions later

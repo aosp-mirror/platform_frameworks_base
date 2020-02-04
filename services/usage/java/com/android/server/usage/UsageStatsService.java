@@ -500,6 +500,19 @@ public class UsageStatsService extends SystemService implements
                 == PackageManager.PERMISSION_GRANTED);
     }
 
+    /**
+     * Obfuscate both {@link UsageEvents.Event#NOTIFICATION_SEEN} and
+     * {@link UsageEvents.Event#NOTIFICATION_INTERRUPTION} events if the provided calling uid does
+     * not hold the {@link android.Manifest.permission.MANAGE_NOTIFICATIONS} permission.
+     */
+    private boolean shouldObfuscateNotificationEvents(int callingPid, int callingUid) {
+        if (callingUid == Process.SYSTEM_UID) {
+            return false;
+        }
+        return !(getContext().checkPermission(android.Manifest.permission.MANAGE_NOTIFICATIONS,
+                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED);
+    }
+
     private static void deleteRecursively(File f) {
         File[] files = f.listFiles();
         if (files != null) {
@@ -1038,9 +1051,7 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
-    UsageEvents queryEvents(int userId, long beginTime, long endTime,
-            boolean shouldObfuscateInstantApps, boolean shouldHideShortcutInvocationEvents,
-            boolean shouldHideLocusIdEvents) {
+    UsageEvents queryEvents(int userId, long beginTime, long endTime, int flags) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.get(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
@@ -1051,8 +1062,7 @@ public class UsageStatsService extends SystemService implements
             if (service == null) {
                 return null; // user was stopped or removed
             }
-            return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps,
-                    shouldHideShortcutInvocationEvents, shouldHideLocusIdEvents);
+            return service.queryEvents(beginTime, endTime, flags);
         }
     }
 
@@ -1475,10 +1485,15 @@ public class UsageStatsService extends SystemService implements
             try {
                 final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
                         userId, callingPackage, callingPid, callingUid);
-                boolean shouldHideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
-                return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
-                        obfuscateInstantApps, hideShortcutInvocationEvents,
-                        shouldHideLocusIdEvents);
+                final boolean hideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
+                final boolean obfuscateNotificationEvents = shouldObfuscateNotificationEvents(
+                        callingPid, callingUid);
+                int flags = UsageEvents.SHOW_ALL_EVENT_DATA;
+                if (obfuscateInstantApps) flags |= UsageEvents.OBFUSCATE_INSTANT_APPS;
+                if (hideShortcutInvocationEvents) flags |= UsageEvents.HIDE_SHORTCUT_EVENTS;
+                if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
+                if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
+                return UsageStatsService.this.queryEvents(userId, beginTime, endTime, flags);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1525,10 +1540,15 @@ public class UsageStatsService extends SystemService implements
             try {
                 final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
                         userId, callingPackage, callingPid, callingUid);
-                boolean shouldHideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
-                return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
-                        obfuscateInstantApps, hideShortcutInvocationEvents,
-                        shouldHideLocusIdEvents);
+                final boolean obfuscateNotificationEvents = shouldObfuscateNotificationEvents(
+                        callingPid, callingUid);
+                boolean hideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
+                int flags = UsageEvents.SHOW_ALL_EVENT_DATA;
+                if (obfuscateInstantApps) flags |= UsageEvents.OBFUSCATE_INSTANT_APPS;
+                if (hideShortcutInvocationEvents) flags |= UsageEvents.HIDE_SHORTCUT_EVENTS;
+                if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
+                if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
+                return UsageStatsService.this.queryEvents(userId, beginTime, endTime, flags);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2144,12 +2164,8 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public UsageEvents queryEventsForUser(int userId, long beginTime, long endTime,
-                boolean obfuscateInstantApps, boolean shouldHideShortcutInvocationEvents,
-                boolean shouldHideLocusIdEvents) {
-            return UsageStatsService.this.queryEvents(
-                    userId, beginTime, endTime, obfuscateInstantApps,
-                    shouldHideShortcutInvocationEvents, shouldHideLocusIdEvents);
+        public UsageEvents queryEventsForUser(int userId, long beginTime, long endTime, int flags) {
+            return UsageStatsService.this.queryEvents(userId, beginTime, endTime, flags);
         }
 
         @Override
