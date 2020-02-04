@@ -307,6 +307,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
@@ -798,6 +799,8 @@ public class PackageManagerService extends IPackageManager.Stub
             PackagePartitions.getOrderedPartitions(ScanPartition::new));
 
     private final List<ScanPartition> mDirsToScanAsSystem;
+
+    private final OverlayConfig mOverlayConfig;
 
     /**
      * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
@@ -2896,6 +2899,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         packageParser, executorService);
             }
 
+            // Parse overlay configuration files to set default enable state, mutability, and
+            // priority of system overlays.
+            mOverlayConfig = OverlayConfig.initializeSystemInstance(mPmInternal::forEachPackage);
 
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
@@ -11531,50 +11537,17 @@ public class PackageManagerService extends IPackageManager.Stub
                     // We are scanning a system overlay. This can be the first scan of the
                     // system/vendor/oem partition, or an update to the system overlay.
                     if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        // This must be an update to a system overlay.
-                        final PackageSetting previousPkg = assertNotNull(
-                                mSettings.getPackageLPr(pkg.getPackageName()),
-                                "previous package state not present");
-
-                        // previousPkg.pkg may be null: the package will be not be scanned if the
-                        // package manager knows there is a newer version on /data.
-                        // TODO[b/79435695]: Find a better way to keep track of the "static"
-                        // property for RROs instead of having to parse packages on /system
-                        AndroidPackage ppkg = previousPkg.pkg;
-                        if (ppkg == null) {
-                            try {
-                                final PackageParser pp = new PackageParser();
-                                // TODO(b/135203078): Do we really need to parse here? Maybe use
-                                //  a shortened path?
-                                ppkg = pp.parseParsedPackage(previousPkg.codePath,
-                                        parseFlags | PackageParser.PARSE_IS_SYSTEM_DIR,
-                                        false)
-                                        .hideAsFinal();
-                            } catch (PackageParserException e) {
-                                Slog.w(TAG, "failed to parse " + previousPkg.codePath, e);
-                            }
-                        }
-
-                        // Static overlays cannot be updated.
-                        if (ppkg != null && ppkg.isOverlayIsStatic()) {
+                        // This must be an update to a system overlay. Immutable overlays cannot be
+                        // upgraded.
+                        Objects.requireNonNull(mOverlayConfig,
+                                "Parsing non-system dir before overlay configs are initialized");
+                        if (!mOverlayConfig.isMutable(pkg.getPackageName())) {
                             throw new PackageManagerException("Overlay "
                                     + pkg.getPackageName()
                                     + " is static and cannot be upgraded.");
-                        // Non-static overlays cannot be converted to static overlays.
-                        } else if (pkg.isOverlayIsStatic()) {
-                            throw new PackageManagerException("Overlay "
-                                    + pkg.getPackageName()
-                                    + " cannot be upgraded into a static overlay.");
                         }
                     }
                 } else {
-                    // The overlay is a non-system overlay. Non-system overlays cannot be static.
-                    if (pkg.isOverlayIsStatic()) {
-                        throw new PackageManagerException("Overlay "
-                                + pkg.getPackageName()
-                                + " is static but not pre-installed.");
-                    }
-
                     // A non-preloaded overlay packages must have targetSdkVersion >= Q, or be
                     // signed with the platform certificate. Check this in increasing order of
                     // computational cost.
