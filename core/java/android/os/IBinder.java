@@ -244,6 +244,18 @@ public interface IBinder {
             @NonNull ResultReceiver resultReceiver) throws RemoteException;
 
     /**
+     * Get the binder extension of this binder interface.
+     * This allows one to customize an interface without having to modify the original interface.
+     *
+     * @return null if don't have binder extension
+     * @throws RemoteException
+     * @hide
+     */
+    public default @Nullable IBinder getExtension() throws RemoteException {
+        throw new IllegalStateException("Method is not implemented");
+    }
+
+    /**
      * Perform a generic operation with the object.
      * 
      * @param code The action to perform.  This should

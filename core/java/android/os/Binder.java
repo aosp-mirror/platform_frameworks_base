@@ -913,6 +913,18 @@ public class Binder implements IBinder {
         resultReceiver.send(0, null);
     }
 
+    /** @hide */
+    @Override
+    public final native @Nullable IBinder getExtension();
+
+    /**
+     * Set the binder extension.
+     * This should be called immediately when the object is created.
+     *
+     * @hide
+     */
+    public final native void setExtension(@Nullable IBinder extension);
+
     /**
      * Default implementation rewinds the parcels and calls onTransact.  On
      * the remote side, transact calls into the binder to do the IPC.
