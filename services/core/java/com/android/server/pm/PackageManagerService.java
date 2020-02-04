@@ -2506,7 +2506,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"));
 
-        PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
+        PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest);
         t.traceEnd(); // "create package manager"
 
         injector.getCompatibility().registerListener(SELinuxMMAC.SELINUX_LATEST_CHANGES,
