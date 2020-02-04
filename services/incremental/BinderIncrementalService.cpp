@@ -17,12 +17,14 @@
 #include "BinderIncrementalService.h"
 
 #include <binder/IResultReceiver.h>
+#include <binder/PermissionCache.h>
 #include <incfs.h>
 
 #include "ServiceWrappers.h"
 #include "jni.h"
 #include "nativehelper/JNIHelp.h"
 #include "path.h"
+#include <android-base/logging.h>
 
 using namespace std::literals;
 using namespace android::incremental;
@@ -90,8 +92,13 @@ BinderIncrementalService* BinderIncrementalService::start() {
     return self.get();
 }
 
-status_t BinderIncrementalService::dump(int fd, const Vector<String16>& args) {
-    return OK;
+status_t BinderIncrementalService::dump(int fd, const Vector<String16>&) {
+    static const String16 kDump("android.permission.DUMP");
+    if (!PermissionCache::checkCallingPermission(kDump)) {
+        return PERMISSION_DENIED;
+    }
+    mImpl.onDump(fd);
+    return NO_ERROR;
 }
 
 void BinderIncrementalService::onSystemReady() {
@@ -278,5 +285,12 @@ jlong Incremental_IncrementalService_Start() {
 void Incremental_IncrementalService_OnSystemReady(jlong self) {
     if (self) {
         ((android::os::incremental::BinderIncrementalService*)self)->onSystemReady();
+    }
+}
+void Incremental_IncrementalService_OnDump(jlong self, jint fd) {
+    if (self) {
+        ((android::os::incremental::BinderIncrementalService*)self)->dump(fd, {});
+    } else {
+        dprintf(fd, "BinderIncrementalService is stopped.");
     }
 }

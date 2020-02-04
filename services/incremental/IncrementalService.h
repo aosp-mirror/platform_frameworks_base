@@ -90,6 +90,8 @@ public:
         return idFromMetadata({(const uint8_t*)metadata.data(), metadata.size()});
     }
 
+    void onDump(int fd);
+
     std::optional<std::future<void>> onSystemReady();
 
     StorageId createStorage(std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
