@@ -33,9 +33,14 @@ static void nativeSystemReady(JNIEnv* env, jclass klass, jlong self) {
     Incremental_IncrementalService_OnSystemReady(self);
 }
 
+static void nativeDump(JNIEnv* env, jclass klass, jlong self, jint fd) {
+    Incremental_IncrementalService_OnDump(self, fd);
+}
+
 static const JNINativeMethod method_table[] = {
         {"nativeStartService", "()J", (void*)nativeStartService},
         {"nativeSystemReady", "(J)V", (void*)nativeSystemReady},
+        {"nativeDump", "(JI)V", (void*)nativeDump},
 };
 
 int register_android_server_incremental_IncrementalManagerService(JNIEnv* env) {

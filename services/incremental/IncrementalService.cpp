@@ -35,6 +35,7 @@
 #include <uuid/uuid.h>
 #include <zlib.h>
 
+#include <ctime>
 #include <iterator>
 #include <span>
 #include <stack>
@@ -255,6 +256,68 @@ FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
 }
 
 IncrementalService::~IncrementalService() = default;
+
+inline const char* toString(TimePoint t) {
+    using SystemClock = std::chrono::system_clock;
+    time_t time = SystemClock::to_time_t(SystemClock::now() + std::chrono::duration_cast<SystemClock::duration>(t - Clock::now()));
+    return std::ctime(&time);
+}
+
+inline const char* toString(IncrementalService::BindKind kind) {
+    switch (kind) {
+    case IncrementalService::BindKind::Temporary:
+        return "Temporary";
+    case IncrementalService::BindKind::Permanent:
+        return "Permanent";
+    }
+}
+
+void IncrementalService::onDump(int fd) {
+    dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
+    dprintf(fd, "Incremental dir: %s\n", mIncrementalDir.c_str());
+
+    std::unique_lock l(mLock);
+
+    dprintf(fd, "Mounts (%d):\n", int(mMounts.size()));
+    for (auto&& [id, ifs] : mMounts) {
+        const IncFsMount& mnt = *ifs.get();
+        dprintf(fd, "\t[%d]:\n", id);
+        dprintf(fd, "\t\tmountId: %d\n", mnt.mountId);
+        dprintf(fd, "\t\tnextStorageDirNo: %d\n", mnt.nextStorageDirNo.load());
+        dprintf(fd, "\t\tdataLoaderStatus: %d\n", mnt.dataLoaderStatus.load());
+        dprintf(fd, "\t\tconnectionLostTime: %s\n", toString(mnt.connectionLostTime));
+        if (mnt.savedDataLoaderParams) {
+            const auto& params = mnt.savedDataLoaderParams.value();
+            dprintf(fd, "\t\tsavedDataLoaderParams:\n");
+            dprintf(fd, "\t\t\ttype: %s\n", toString(params.type).c_str());
+            dprintf(fd, "\t\t\tpackageName: %s\n", params.packageName.c_str());
+            dprintf(fd, "\t\t\tclassName: %s\n", params.className.c_str());
+            dprintf(fd, "\t\t\targuments: %s\n", params.arguments.c_str());
+            dprintf(fd, "\t\t\tdynamicArgs: %d\n", int(params.dynamicArgs.size()));
+        }
+        dprintf(fd, "\t\tstorages (%d):\n", int(mnt.storages.size()));
+        for (auto&& [storageId, storage] : mnt.storages) {
+            dprintf(fd, "\t\t\t[%d] -> [%s]\n", storageId, storage.name.c_str());
+        }
+
+        dprintf(fd, "\t\tbindPoints (%d):\n", int(mnt.bindPoints.size()));
+        for (auto&& [target, bind] : mnt.bindPoints) {
+            dprintf(fd, "\t\t\t[%s]->[%d]:\n", target.c_str(), bind.storage);
+            dprintf(fd, "\t\t\t\tsavedFilename: %s\n", bind.savedFilename.c_str());
+            dprintf(fd, "\t\t\t\tsourceDir: %s\n", bind.sourceDir.c_str());
+            dprintf(fd, "\t\t\t\tkind: %s\n", toString(bind.kind));
+        }
+    }
+
+    dprintf(fd, "Sorted binds (%d):\n", int(mBindsByPath.size()));
+    for (auto&& [target, mountPairIt] : mBindsByPath) {
+        const auto& bind = mountPairIt->second;
+        dprintf(fd, "\t\t[%s]->[%d]:\n", target.c_str(), bind.storage);
+        dprintf(fd, "\t\t\tsavedFilename: %s\n", bind.savedFilename.c_str());
+        dprintf(fd, "\t\t\tsourceDir: %s\n", bind.sourceDir.c_str());
+        dprintf(fd, "\t\t\tkind: %s\n", toString(bind.kind));
+    }
+}
 
 std::optional<std::future<void>> IncrementalService::onSystemReady() {
     std::promise<void> threadFinished;
