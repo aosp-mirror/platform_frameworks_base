@@ -2681,18 +2681,24 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration,
                 int displayId, @Nullable ITransientNotificationCallback callback) {
-            enqueueToast(pkg, token, text, null, duration, displayId, callback);
+            enqueueToast(pkg, token, text, null, duration, displayId, callback, false);
         }
 
         @Override
         public void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
                 int duration, int displayId) {
-            enqueueToast(pkg, token, null, callback, duration, displayId, null);
+            enqueueToast(pkg, token, null, callback, duration, displayId, null, true);
+        }
+
+        @Override
+        public void enqueueTextOrCustomToast(String pkg, IBinder token,
+                ITransientNotification callback, int duration, int displayId, boolean isCustom) {
+            enqueueToast(pkg, token, null, callback, duration, displayId, null, isCustom);
         }
 
         private void enqueueToast(String pkg, IBinder token, @Nullable CharSequence text,
                 @Nullable ITransientNotification callback, int duration, int displayId,
-                @Nullable ITransientNotificationCallback textCallback) {
+                @Nullable ITransientNotificationCallback textCallback, boolean isCustom) {
             if (DBG) {
                 Slog.i(TAG, "enqueueToast pkg=" + pkg + " token=" + token
                         + " duration=" + duration + " displayId=" + displayId);
@@ -2730,7 +2736,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
 
-            if (callback != null && !appIsForeground && !isSystemToast) {
+            if (callback != null && !appIsForeground && !isSystemToast && isCustom) {
                 boolean block;
                 long id = Binder.clearCallingIdentity();
                 try {
