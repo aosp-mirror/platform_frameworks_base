@@ -39,6 +39,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -74,6 +76,8 @@ import java.util.StringJoiner;
  */
 public class AccessibilityButtonChooserActivity extends Activity {
     private static final char SERVICES_SEPARATOR = ':';
+    private static final float DISABLED_ALPHA = 0.5f;
+    private static final float ENABLED_ALPHA = 1.0f;
     private static final TextUtils.SimpleStringSplitter sStringColonSplitter =
             new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
     @ShortcutType
@@ -452,9 +456,16 @@ public class AccessibilityButtonChooserActivity extends Activity {
             final boolean isLaunchMenuMode = (mShortcutMenuMode == ShortcutMenuMode.LAUNCH);
             final boolean isHardwareButtonTriggered =
                     (mShortcutButtonType == ACCESSIBILITY_SHORTCUT_KEY);
+            final boolean enabledState = (isLaunchMenuMode || isHardwareButtonTriggered);
+            final ColorMatrix grayScaleMatrix = new ColorMatrix();
+            grayScaleMatrix.setSaturation(/* grayScale */0);
 
-            holder.mLabelView.setEnabled(isLaunchMenuMode || isHardwareButtonTriggered);
-            holder.mViewItem.setEnabled(isLaunchMenuMode || isHardwareButtonTriggered);
+            holder.mIconView.setColorFilter(enabledState
+                    ? null : new ColorMatrixColorFilter(grayScaleMatrix));
+            holder.mIconView.setAlpha(enabledState
+                    ? ENABLED_ALPHA : DISABLED_ALPHA);
+            holder.mLabelView.setEnabled(enabledState);
+            holder.mViewItem.setEnabled(enabledState);
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(View.VISIBLE);
             holder.mSwitchItem.setVisibility(View.GONE);
@@ -463,12 +474,15 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         private void updateInvisibleActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder) {
-            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
-
+            holder.mIconView.setColorFilter(null);
+            holder.mIconView.setAlpha(ENABLED_ALPHA);
+            holder.mLabelView.setEnabled(true);
+            holder.mViewItem.setEnabled(true);
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(View.VISIBLE);
             holder.mSwitchItem.setVisibility(View.GONE);
-            holder.mItemContainer.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
+            holder.mItemContainer.setVisibility((mShortcutMenuMode == ShortcutMenuMode.EDIT)
+                    ? View.VISIBLE : View.GONE);
         }
 
         private void updateIntuitiveActionItemVisibility(@NonNull Context context,
@@ -478,6 +492,10 @@ public class AccessibilityButtonChooserActivity extends Activity {
                     ? isWhiteListingServiceEnabled(context, target)
                     : isAccessibilityServiceEnabled(context, target);
 
+            holder.mIconView.setColorFilter(null);
+            holder.mIconView.setAlpha(ENABLED_ALPHA);
+            holder.mLabelView.setEnabled(true);
+            holder.mViewItem.setEnabled(true);
             holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
             holder.mViewItem.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
             holder.mSwitchItem.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
@@ -487,12 +505,13 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         private void updateBounceActionItemVisibility(@NonNull Context context,
                 @NonNull ViewHolder holder) {
-            final boolean isEditMenuMode = (mShortcutMenuMode == ShortcutMenuMode.EDIT);
-
-            holder.mViewItem.setImageDrawable(
-                    isEditMenuMode ? context.getDrawable(R.drawable.ic_delete_item)
-                            : context.getDrawable(R.drawable.ic_open_in_new));
-            holder.mViewItem.setVisibility(isEditMenuMode ? View.VISIBLE : View.GONE);
+            holder.mIconView.setColorFilter(null);
+            holder.mIconView.setAlpha(ENABLED_ALPHA);
+            holder.mLabelView.setEnabled(true);
+            holder.mViewItem.setEnabled(true);
+            holder.mViewItem.setImageDrawable(context.getDrawable(R.drawable.ic_delete_item));
+            holder.mViewItem.setVisibility((mShortcutMenuMode == ShortcutMenuMode.EDIT)
+                    ? View.VISIBLE : View.GONE);
             holder.mSwitchItem.setVisibility(View.GONE);
             holder.mItemContainer.setVisibility(View.VISIBLE);
         }

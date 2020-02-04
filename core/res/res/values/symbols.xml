@@ -3230,7 +3230,6 @@
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
 
   <java-symbol type="drawable" name="ic_delete_item" />
-  <java-symbol type="drawable" name="ic_open_in_new" />
 
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>
