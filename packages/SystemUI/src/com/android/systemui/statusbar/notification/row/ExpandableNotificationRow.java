@@ -745,6 +745,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPrivateLayout.setRemoteInputController(r);
     }
 
+
+    String getAppName() {
+        return mAppName;
+    }
+
     public void addChildNotification(ExpandableNotificationRow row) {
         addChildNotification(row, -1);
     }

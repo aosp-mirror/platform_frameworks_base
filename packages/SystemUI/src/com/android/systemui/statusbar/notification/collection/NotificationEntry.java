@@ -22,6 +22,7 @@ import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -177,18 +178,29 @@ public final class NotificationEntry extends ListEntry {
     private Runnable mOnSensitiveChangedListener;
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
+    private boolean mAllowFgsDismissal;
     private int mBucket = BUCKET_ALERTING;
 
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking) {
-        super(requireNonNull(requireNonNull(sbn).getKey()));
+        this(sbn, ranking, false);
+    }
+
+    public NotificationEntry(
+            @NonNull StatusBarNotification sbn,
+            @NonNull Ranking ranking,
+            boolean allowFgsDismissal
+    ) {
+        super(requireNonNull(Objects.requireNonNull(sbn).getKey()));
 
         requireNonNull(ranking);
 
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
+
+        mAllowFgsDismissal = allowFgsDismissal;
     }
 
     @Override
@@ -827,8 +839,11 @@ public final class NotificationEntry extends ListEntry {
      *         notification can be dismissed in case notifications are sensitive on the lockscreen.
      * @see #canViewBeDismissed()
      */
+    // TOOD: This logic doesn't belong on NotificationEntry. It should be moved to the
+    // ForegroundsServiceDismissalFeatureController or some other controller that can be added
+    // as a dependency to any class that needs to answer this question.
     public boolean isClearable() {
-        if (!mSbn.isClearable()) {
+        if (!isDismissable()) {
             return false;
         }
 
@@ -836,12 +851,37 @@ public final class NotificationEntry extends ListEntry {
         if (children != null && children.size() > 0) {
             for (int i = 0; i < children.size(); i++) {
                 NotificationEntry child =  children.get(i);
-                if (!child.isClearable()) {
+                if (!child.isDismissable()) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * Notifications might have any combination of flags:
+     * - FLAG_ONGOING_EVENT
+     * - FLAG_NO_CLEAR
+     * - FLAG_FOREGROUND_SERVICE
+     *
+     * We want to allow dismissal of notifications that represent foreground services, which may
+     * have all 3 flags set. If we only find NO_CLEAR though, we don't want to allow dismissal
+     */
+    private boolean isDismissable() {
+        boolean ongoing = ((mSbn.getNotification().flags & Notification.FLAG_ONGOING_EVENT) != 0);
+        boolean noclear = ((mSbn.getNotification().flags & Notification.FLAG_NO_CLEAR) != 0);
+        boolean fgs = ((mSbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0);
+
+        if (mAllowFgsDismissal) {
+            if (noclear && !ongoing && !fgs) {
+                return false;
+            }
+            return true;
+        } else {
+            return mSbn.isClearable();
+        }
+
     }
 
     public boolean canViewBeDismissed() {

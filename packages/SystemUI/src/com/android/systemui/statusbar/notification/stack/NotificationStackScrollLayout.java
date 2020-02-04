@@ -35,7 +35,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -57,7 +56,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
-import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
@@ -109,6 +107,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
+import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -121,6 +120,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
+import com.android.systemui.statusbar.notification.row.ForegroundServiceDungeonView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -506,6 +506,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private final NotificationGutsManager mNotificationGutsManager;
     private final NotificationSectionsManager mSectionsManager;
+    private final ForegroundServiceSectionController mFgsSectionController;
+    private ForegroundServiceDungeonView mFgsSectionView;
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
@@ -525,7 +527,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
             ZenModeController zenController,
-            NotificationSectionsManager notificationSectionsManager) {
+            NotificationSectionsManager notificationSectionsManager,
+            ForegroundServiceSectionController fgsSectionController,
+            ForegroundServiceDismissalFeatureController fgsFeatureController
+    ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -541,6 +546,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mKeyguardBypassController = keyguardBypassController;
         mFalsingManager = falsingManager;
         mZenController = zenController;
+        mFgsSectionController = fgsSectionController;
 
         mSectionsManager = notificationSectionsManager;
         mSectionsManager.initialize(this, LayoutInflater.from(context));
@@ -614,6 +620,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         dynamicPrivacyController.addListener(this);
         mDynamicPrivacyController = dynamicPrivacyController;
         mStatusbarStateController = statusBarStateController;
+        initializeForegroundServiceSection(fgsFeatureController);
+    }
+
+    private void initializeForegroundServiceSection(
+            ForegroundServiceDismissalFeatureController featureController) {
+        if (featureController.isForegroundServiceDismissalEnabled()) {
+            LayoutInflater li = LayoutInflater.from(mContext);
+            mFgsSectionView =
+                    (ForegroundServiceDungeonView) mFgsSectionController.createView(li);
+            addView(mFgsSectionView, -1);
+        }
     }
 
     private void updateDismissRtlSetting(boolean dismissRtl) {
@@ -3374,7 +3391,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (currentIndex == -1) {
             boolean isTransient = false;
             if (child instanceof ExpandableNotificationRow
-                    && ((ExpandableNotificationRow) child).getTransientContainer() != null) {
+                    && child.getTransientContainer() != null) {
                 isTransient = true;
             }
             Log.e(TAG, "Attempting to re-position "
@@ -3387,10 +3404,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         if (child != null && child.getParent() == this && currentIndex != newIndex) {
             mChangePositionInProgress = true;
-            ((ExpandableView) child).setChangingPosition(true);
+            child.setChangingPosition(true);
             removeView(child);
             addView(child, newIndex);
-            ((ExpandableView) child).setChangingPosition(false);
+            child.setChangingPosition(false);
             mChangePositionInProgress = false;
             if (mIsExpanded && mAnimationsEnabled && child.getVisibility() != View.GONE) {
                 mChildrenChangingPositions.add(child);
@@ -5637,15 +5654,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void onUpdateRowStates() {
-        changeViewPosition(mFooterView, -1);
 
         // The following views will be moved to the end of mStackScroller. This counter represents
         // the offset from the last child. Initialized to 1 for the very last position. It is post-
         // incremented in the following "changeViewPosition" calls so that its value is correct for
         // subsequent calls.
         int offsetFromEnd = 1;
-        changeViewPosition(mEmptyShadeView,
-                getChildCount() - offsetFromEnd++);
+        if (mFgsSectionView != null) {
+            changeViewPosition(mFgsSectionView, getChildCount() - offsetFromEnd++);
+        }
+        changeViewPosition(mFooterView, getChildCount() - offsetFromEnd++);
+        changeViewPosition(mEmptyShadeView, getChildCount() - offsetFromEnd++);
 
         // No post-increment for this call because it is the last one. Make sure to add one if
         // another "changeViewPosition" call is ever added.

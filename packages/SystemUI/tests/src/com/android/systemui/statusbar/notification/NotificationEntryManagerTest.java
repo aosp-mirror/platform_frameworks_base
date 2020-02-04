@@ -247,11 +247,12 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 mFeatureFlags,
                 () -> notificationRowBinder,
                 () -> mRemoteInputManager,
-                mLeakDetector
+                mLeakDetector,
+                mock(ForegroundServiceDismissalFeatureController.class)
         );
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         mEntryManager.addNotificationEntryListener(mEntryListener);
-        mEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
+        mEntryManager.addNotificationRemoveInterceptor(mRemoveInterceptor);
 
         notificationRowBinder.setUpWithPresenter(
                 mPresenter, mListContainer, mHeadsUpManager, mBindCallback);
@@ -546,7 +547,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.addActiveNotificationForTest(mEntry);
 
         // GIVEN interceptor that intercepts that entry
-        when(mRemoveInterceptor.onNotificationRemoveRequested(eq(mEntry.getKey()), anyInt()))
+        when(mRemoveInterceptor.onNotificationRemoveRequested(
+                eq(mEntry.getKey()), eq(mEntry), anyInt()))
                 .thenReturn(true);
 
         // WHEN the notification is removed
@@ -564,7 +566,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.addActiveNotificationForTest(mEntry);
 
         // GIVEN interceptor that doesn't intercept
-        when(mRemoveInterceptor.onNotificationRemoveRequested(eq(mEntry.getKey()), anyInt()))
+        when(mRemoveInterceptor.onNotificationRemoveRequested(
+                eq(mEntry.getKey()), eq(mEntry), anyInt()))
                 .thenReturn(false);
 
         // WHEN the notification is removed

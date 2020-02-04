@@ -41,9 +41,10 @@ class TestableNotificationEntryManager(
     ff: FeatureFlags,
     rb: dagger.Lazy<NotificationRowBinder>,
     notificationRemoteInputManagerLazy: dagger.Lazy<NotificationRemoteInputManager>,
-    leakDetector: LeakDetector
+    leakDetector: LeakDetector,
+    fgsFeatureController: ForegroundServiceDismissalFeatureController
 ) : NotificationEntryManager(log, gm, rm, ke, ff, rb,
-        notificationRemoteInputManagerLazy, leakDetector) {
+        notificationRemoteInputManagerLazy, leakDetector, fgsFeatureController) {
 
     public var countDownLatch: CountDownLatch = CountDownLatch(1)
 
