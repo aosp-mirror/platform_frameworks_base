@@ -2964,6 +2964,33 @@ public class CarrierConfigManager {
             "5g_icon_display_grace_period_sec_int";
 
     /**
+     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
+     */
+    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_long";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
+
+    /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
      * this feature.
      * @hide
@@ -3041,11 +3068,6 @@ public class CarrierConfigManager {
     public static final String KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL =
             "ping_test_before_data_switch_bool";
 
-    /**
-     * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
-     */
-    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG =
-            "5g_watchdog_time_long";
     /**
      * Controls whether to switch data to primary from opportunistic subscription
      * if primary is out of service. This control only affects system or 1st party app
@@ -3948,6 +3970,11 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G");
         sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
+        /* Default value is 1 hour. */
+        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
@@ -3967,8 +3994,6 @@ public class CarrierConfigManager {
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
-        /* Default value is 1 hour. */
-        sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_PING_PONG_TIME_LONG, 60000);
