@@ -8197,6 +8197,7 @@ package android.net.wifi.wificond {
   }
 
   public final class NativeScanResult implements android.os.Parcelable {
+    ctor public NativeScanResult();
     method public int describeContents();
     method @NonNull public byte[] getBssid();
     method @NonNull public java.util.BitSet getCapabilities();
@@ -8212,6 +8213,7 @@ package android.net.wifi.wificond {
   }
 
   public final class NativeWifiClient implements android.os.Parcelable {
+    ctor public NativeWifiClient(@NonNull byte[]);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
@@ -8249,6 +8251,7 @@ package android.net.wifi.wificond {
   }
 
   public final class RadioChainInfo implements android.os.Parcelable {
+    ctor public RadioChainInfo(int, int);
     method public int describeContents();
     method public int getChainId();
     method public int getLevelDbm();
@@ -8259,7 +8262,7 @@ package android.net.wifi.wificond {
   public class WifiCondManager {
     method public void abortScan(@NonNull String);
     method public void enableVerboseLogging(boolean);
-    method @NonNull public int[] getChannelsMhzForBand(int);
+    method @NonNull public java.util.List<java.lang.Integer> getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);

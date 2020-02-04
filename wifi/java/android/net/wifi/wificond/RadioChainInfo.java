@@ -61,7 +61,9 @@ public final class RadioChainInfo implements Parcelable {
         return level;
     }
 
-    /** @hide */
+    /**
+     * Construct a RadioChainInfo.
+     */
     public RadioChainInfo(int chainId, int level) {
         this.chainId = chainId;
         this.level = level;
