@@ -1899,9 +1899,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldShowControls() {
-        return isCurrentUserOwner()
-                && !mKeyguardManager.isDeviceLocked()
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                        "systemui.controls_available", 0) == 1;
+        return !mKeyguardManager.isDeviceLocked()
+                && mControlsUiController.getAvailable();
     }
 }

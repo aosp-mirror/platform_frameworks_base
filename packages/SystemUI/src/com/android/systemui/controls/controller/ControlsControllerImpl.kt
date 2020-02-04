@@ -19,9 +19,12 @@ package com.android.systemui.controls.controller
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.ContentObserver
+import android.net.Uri
 import android.os.Environment
 import android.os.UserHandle
 import android.provider.Settings
@@ -30,6 +33,7 @@ import android.service.controls.actions.ControlAction
 import android.util.ArrayMap
 import android.util.Log
 import com.android.internal.annotations.GuardedBy
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -53,15 +57,16 @@ class ControlsControllerImpl @Inject constructor (
     private val uiController: ControlsUiController,
     private val bindingController: ControlsBindingController,
     private val listingController: ControlsListingController,
-    broadcastDispatcher: BroadcastDispatcher,
+    private val broadcastDispatcher: BroadcastDispatcher,
     optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
     dumpController: DumpController
 ) : Dumpable, ControlsController {
 
     companion object {
         private const val TAG = "ControlsControllerImpl"
-        const val CONTROLS_AVAILABLE = "systemui.controls_available"
-        const val USER_CHANGE_RETRY_DELAY = 500L // ms
+        internal const val CONTROLS_AVAILABLE = "systemui.controls_available"
+        internal val URI = Settings.Secure.getUriFor(CONTROLS_AVAILABLE)
+        private const val USER_CHANGE_RETRY_DELAY = 500L // ms
     }
 
     // Map of map: ComponentName -> (String -> ControlInfo).
@@ -69,9 +74,11 @@ class ControlsControllerImpl @Inject constructor (
     @GuardedBy("currentFavorites")
     private val currentFavorites = ArrayMap<ComponentName, MutableMap<String, ControlInfo>>()
 
-    private var userChanging = true
-    override var available = Settings.Secure.getInt(
-            context.contentResolver, CONTROLS_AVAILABLE, 0) != 0
+    private var userChanging: Boolean = true
+
+    private val contentResolver: ContentResolver
+        get() = context.contentResolver
+    override var available = Settings.Secure.getInt(contentResolver, CONTROLS_AVAILABLE, 0) != 0
         private set
 
     private var currentUser = context.user
@@ -95,8 +102,8 @@ class ControlsControllerImpl @Inject constructor (
         val fileName = Environment.buildPath(
                 userContext.filesDir, ControlsFavoritePersistenceWrapper.FILE_NAME)
         persistenceWrapper.changeFile(fileName)
-        available = Settings.Secure.getIntForUser(
-                context.contentResolver, CONTROLS_AVAILABLE, 0) != 0
+        available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
+                /* default */ 0, newUser.identifier) != 0
         synchronized(currentFavorites) {
             currentFavorites.clear()
         }
@@ -123,6 +130,25 @@ class ControlsControllerImpl @Inject constructor (
         }
     }
 
+    @VisibleForTesting
+    internal val settingObserver = object : ContentObserver(null) {
+        override fun onChange(selfChange: Boolean, uri: Uri, userId: Int) {
+            // Do not listen to changes in the middle of user change, those will be read by the
+            // user-switch receiver.
+            if (userChanging || userId != currentUserId) {
+                return
+            }
+            available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
+                    /* default */ 0, currentUserId) != 0
+            synchronized(currentFavorites) {
+                currentFavorites.clear()
+            }
+            if (available) {
+                loadFavorites()
+            }
+        }
+    }
+
     init {
         dumpController.registerDumpable(this)
         if (available) {
@@ -135,6 +161,7 @@ class ControlsControllerImpl @Inject constructor (
                 executor,
                 UserHandle.ALL
         )
+        contentResolver.registerContentObserver(URI, false, settingObserver, UserHandle.USER_ALL)
     }
 
     private fun confirmAvailability(): Boolean {

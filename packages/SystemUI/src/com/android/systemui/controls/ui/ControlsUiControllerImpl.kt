@@ -116,6 +116,9 @@ class ControlsUiControllerImpl @Inject constructor (
     private val controlViewsById = mutableMapOf<String, ControlViewHolder>()
     private lateinit var parent: ViewGroup
 
+    override val available: Boolean
+        get() = controlsController.get().available
+
     override fun show(parent: ViewGroup) {
         Log.d(TAG, "show()")
 
