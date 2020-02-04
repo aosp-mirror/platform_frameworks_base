@@ -278,7 +278,7 @@ public abstract class ActivityManagerInternal {
             String resolvedType, boolean fgRequired, String callingPackage, @UserIdInt int userId,
             boolean allowBackgroundActivityStarts) throws TransactionTooLargeException;
 
-    public abstract void disconnectActivityFromServices(Object connectionHolder, Object conns);
+    public abstract void disconnectActivityFromServices(Object connectionHolder);
     public abstract void cleanUpServices(@UserIdInt int userId, ComponentName component,
             Intent baseIntent);
     public abstract ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, @UserIdInt int userId);
