@@ -30,6 +30,7 @@ java_library {
     ],
     permitted_packages: [
         "android.app",
+        "android.os",
         "android.util",
     ],
     libs: [
