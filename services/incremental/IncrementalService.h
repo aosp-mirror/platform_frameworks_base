@@ -18,8 +18,8 @@
 
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
-#include <android/os/incremental/IIncrementalManager.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
+#include <android/os/incremental/IIncrementalManager.h>
 #include <binder/IServiceManager.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
@@ -92,8 +92,7 @@ public:
 
     std::optional<std::future<void>> onSystemReady();
 
-    StorageId createStorage(std::string_view mountPoint,
-                            DataLoaderParamsParcel&& dataLoaderParams,
+    StorageId createStorage(std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
                             CreateOptions options = CreateOptions::Default);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
@@ -207,6 +206,8 @@ private:
     void deleteStorage(IncFsMount& ifs);
     void deleteStorageLocked(IncFsMount& ifs, std::unique_lock<std::mutex>&& ifsLock);
     MountMap::iterator getStorageSlotLocked();
+    std::string normalizePathToStorage(const IfsMountPtr incfs, StorageId storage,
+                                       std::string_view path);
 
     // Member variables
     std::unique_ptr<VoldServiceWrapper> mVold;
