@@ -249,21 +249,21 @@ public class AlwaysOnHotwordDetector {
         }
 
         /**
-         * The inclusive start of supported range.
+         * Get the beginning of the param range
          *
-         * @return start of range
+         * @return The inclusive start of the supported range.
          */
-        public int start() {
-            return mModelParamRange.start;
+        public int getStart() {
+            return mModelParamRange.getStart();
         }
 
         /**
-         * The inclusive end of supported range.
+         * Get the end of the param range
          *
-         * @return end of range
+         * @return The inclusive end of the supported range.
          */
-        public int end() {
-            return mModelParamRange.end;
+        public int getEnd() {
+            return mModelParamRange.getEnd();
         }
 
         @Override
