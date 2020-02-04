@@ -291,7 +291,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 mWfdEnabling = true;
 
                 WifiP2pWfdInfo wfdInfo = new WifiP2pWfdInfo();
-                wfdInfo.setWfdEnabled(true);
+                wfdInfo.setEnabled(true);
                 wfdInfo.setDeviceType(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE);
                 wfdInfo.setSessionAvailable(true);
                 wfdInfo.setControlPort(DEFAULT_CONTROL_PORT);
@@ -323,7 +323,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             // WFD should be disabled.
             if (mWfdEnabled || mWfdEnabling) {
                 WifiP2pWfdInfo wfdInfo = new WifiP2pWfdInfo();
-                wfdInfo.setWfdEnabled(false);
+                wfdInfo.setEnabled(false);
                 mWifiP2pManager.setWfdInfo(mWifiP2pChannel, wfdInfo, new ActionListener() {
                     @Override
                     public void onSuccess() {
@@ -1044,7 +1044,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     private static boolean isWifiDisplay(WifiP2pDevice device) {
         WifiP2pWfdInfo wfdInfo = device.getWfdInfo();
         return wfdInfo != null
-                && wfdInfo.isWfdEnabled()
+                && wfdInfo.isEnabled()
                 && isPrimarySinkDeviceType(wfdInfo.getDeviceType());
     }
 
