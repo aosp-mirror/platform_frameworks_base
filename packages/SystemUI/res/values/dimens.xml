@@ -1209,5 +1209,7 @@
 
     <dimen name="controls_card_margin">2dp</dimen>
 
-
+    <!-- Screen Record -->
+    <dimen name="screenrecord_dialog_padding">18dp</dimen>
+    <dimen name="screenrecord_logo_size">24dp</dimen>
 </resources>

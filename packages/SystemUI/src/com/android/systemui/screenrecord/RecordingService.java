@@ -16,7 +16,6 @@
 
 package com.android.systemui.screenrecord;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -26,16 +25,21 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
+import android.media.projection.IMediaProjection;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -83,7 +87,6 @@ public class RecordingService extends Service {
     private static final int AUDIO_SAMPLE_RATE = 44100;
 
     private final RecordingController mController;
-    private MediaProjectionManager mMediaProjectionManager;
     private MediaProjection mMediaProjection;
     private Surface mInputSurface;
     private VirtualDisplay mVirtualDisplay;
@@ -134,13 +137,30 @@ public class RecordingService extends Service {
 
         switch (action) {
             case ACTION_START:
-                int resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED);
                 mUseAudio = intent.getBooleanExtra(EXTRA_USE_AUDIO, false);
                 mShowTaps = intent.getBooleanExtra(EXTRA_SHOW_TAPS, false);
-                Intent data = intent.getParcelableExtra(EXTRA_DATA);
-                if (data != null) {
-                    mMediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, data);
+                try {
+                    IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
+                    IMediaProjectionManager mediaService =
+                            IMediaProjectionManager.Stub.asInterface(b);
+                    IMediaProjection proj = mediaService.createProjection(getUserId(),
+                            getPackageName(),
+                            MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
+                    IBinder projection = proj.asBinder();
+                    if (projection == null) {
+                        Log.e(TAG, "Projection was null");
+                        Toast.makeText(this, R.string.screenrecord_start_error, Toast.LENGTH_LONG)
+                                .show();
+                        return Service.START_NOT_STICKY;
+                    }
+                    mMediaProjection = new MediaProjection(getApplicationContext(),
+                            IMediaProjection.Stub.asInterface(projection));
                     startRecording();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, R.string.screenrecord_start_error, Toast.LENGTH_LONG)
+                            .show();
+                    return Service.START_NOT_STICKY;
                 }
                 break;
 
@@ -195,9 +215,6 @@ public class RecordingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        mMediaProjectionManager =
-                (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
     }
 
     /**
@@ -269,6 +286,7 @@ public class RecordingService extends Service {
     }
 
     private void createRecordingNotification() {
+        Resources res = getResources();
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 getString(R.string.screenrecord_name),
@@ -281,11 +299,15 @@ public class RecordingService extends Service {
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                getResources().getString(R.string.screenrecord_name));
+                res.getString(R.string.screenrecord_name));
+
+        String notificationTitle = mUseAudio
+                ? res.getString(R.string.screenrecord_ongoing_screen_and_audio)
+                : res.getString(R.string.screenrecord_ongoing_screen_only);
 
         mRecordingNotificationBuilder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)
-                .setContentTitle(getResources().getString(R.string.screenrecord_name))
+                .setContentTitle(notificationTitle)
                 .setContentText(getResources().getString(R.string.screenrecord_stop_text))
                 .setUsesChronometer(true)
                 .setColorized(true)
@@ -332,8 +354,7 @@ public class RecordingService extends Service {
 
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)
-                .setContentTitle(getResources().getString(R.string.screenrecord_name))
-                .setContentText(getResources().getString(R.string.screenrecord_save_message))
+                .setContentTitle(getResources().getString(R.string.screenrecord_save_message))
                 .setContentIntent(PendingIntent.getActivity(
                         this,
                         REQUEST_CODE,
