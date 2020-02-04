@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.CarrierTextController;
@@ -37,6 +38,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -297,6 +299,27 @@ public class QSCarrierGroupController {
         String contentDescription;
         String typeContentDescription;
         boolean roaming;
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof CellSignalState)) return false;
+            CellSignalState other = (CellSignalState) obj;
+            return this.visible == other.visible
+                    && this.mobileSignalIconId == other.mobileSignalIconId
+                    && Objects.equals(this.contentDescription, other.contentDescription)
+                    && Objects.equals(this.typeContentDescription, other.typeContentDescription)
+                    && this.roaming == other.roaming;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(visible,
+                    mobileSignalIconId,
+                    contentDescription,
+                    typeContentDescription,
+                    roaming);
+        }
     }
 
     public static class Builder {

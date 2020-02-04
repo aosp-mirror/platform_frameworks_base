@@ -30,6 +30,8 @@ import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 
+import java.util.Objects;
+
 public class QSCarrier extends LinearLayout {
 
     private View mMobileGroup;
@@ -39,6 +41,7 @@ public class QSCarrier extends LinearLayout {
     private DualToneHandler mDualToneHandler;
     private ColorStateList mColorForegroundStateList;
     private float mColorForegroundIntensity;
+    private QSCarrierGroupController.CellSignalState mLastSignalState;
 
     public QSCarrier(Context context) {
         super(context);
@@ -74,6 +77,8 @@ public class QSCarrier extends LinearLayout {
     }
 
     public void updateState(QSCarrierGroupController.CellSignalState state) {
+        if (Objects.equals(state, mLastSignalState)) return;
+        mLastSignalState = state;
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
