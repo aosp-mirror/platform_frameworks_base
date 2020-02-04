@@ -2677,7 +2677,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             synchronized (mLock) {
                                 requestHideFillUi(mCurrentViewId);
                             }
-                        });
+                        }, mService.getRemoteInlineSuggestionRenderServiceLocked());
         try {
             imeResponse.getCallback().onInlineSuggestionsResponse(inlineSuggestionsResponse);
         } catch (RemoteException e) {
@@ -2981,7 +2981,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     synchronized (mLock) {
                         cancelAugmentedAutofillLocked();
                     }
-                });
+                }, mService.getRemoteInlineSuggestionRenderServiceLocked());
 
         if (mAugmentedAutofillDestroyer == null) {
             mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest();

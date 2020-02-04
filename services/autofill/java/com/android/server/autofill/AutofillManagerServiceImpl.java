@@ -119,6 +119,9 @@ final class AutofillManagerServiceImpl
     private final LocalLog mUiLatencyHistory;
     private final LocalLog mWtfHistory;
     private final FieldClassificationStrategy mFieldClassificationStrategy;
+
+    @GuardedBy("mLock")
+    @Nullable
     private RemoteInlineSuggestionRenderService mRemoteInlineSuggestionRenderService;
 
     /**
@@ -236,17 +239,8 @@ final class AutofillManagerServiceImpl
             sendStateToClients(/* resetClient= */ false);
         }
         updateRemoteAugmentedAutofillService();
+        updateRemoteInlineSuggestionRenderServiceLocked();
 
-        final ComponentName componentName = RemoteInlineSuggestionRenderService
-                .getServiceComponentName(getContext(), mUserId);
-        if (componentName != null) {
-            mRemoteInlineSuggestionRenderService = new RemoteInlineSuggestionRenderService(
-                    getContext(), componentName, InlineSuggestionRenderService.SERVICE_INTERFACE,
-                    mUserId, new InlineSuggestionRenderCallbacksImpl(),
-                    mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
-        } else {
-            mRemoteInlineSuggestionRenderService = null;
-        }
         return enabledChanged;
     }
 
@@ -1644,7 +1638,29 @@ final class AutofillManagerServiceImpl
         return mFieldClassificationStrategy.getDefaultAlgorithm();
     }
 
-    RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderService() {
+    private void updateRemoteInlineSuggestionRenderServiceLocked() {
+        if (mRemoteInlineSuggestionRenderService != null) {
+            if (sVerbose) {
+                Slog.v(TAG, "updateRemoteInlineSuggestionRenderService(): "
+                        + "destroying old remote service");
+            }
+            mRemoteInlineSuggestionRenderService = null;
+        }
+
+        mRemoteInlineSuggestionRenderService = getRemoteInlineSuggestionRenderServiceLocked();
+    }
+
+    RemoteInlineSuggestionRenderService getRemoteInlineSuggestionRenderServiceLocked() {
+        final ComponentName componentName = RemoteInlineSuggestionRenderService
+                .getServiceComponentName(getContext(), mUserId);
+
+        if (mRemoteInlineSuggestionRenderService == null) {
+            mRemoteInlineSuggestionRenderService = new RemoteInlineSuggestionRenderService(
+                    getContext(), componentName, InlineSuggestionRenderService.SERVICE_INTERFACE,
+                    mUserId, new InlineSuggestionRenderCallbacksImpl(),
+                    mMaster.isBindInstantServiceAllowed(), mMaster.verbose);
+        }
+
         return mRemoteInlineSuggestionRenderService;
     }
 
