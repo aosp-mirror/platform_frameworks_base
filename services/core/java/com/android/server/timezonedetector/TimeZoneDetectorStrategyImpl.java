@@ -15,17 +15,17 @@
  */
 package com.android.server.timezonedetector;
 
-import static android.app.timezonedetector.PhoneTimeZoneSuggestion.MATCH_TYPE_EMULATOR_ZONE_ID;
-import static android.app.timezonedetector.PhoneTimeZoneSuggestion.MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY;
-import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;
-import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
-import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
+import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_EMULATOR_ZONE_ID;
+import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY;
+import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;
+import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
+import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.PhoneTimeZoneSuggestion;
+import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
 import android.util.LocalLog;
 import android.util.Slog;
@@ -44,11 +44,11 @@ import java.util.Objects;
  * suggestions. Suggestions are acted on or ignored as needed, dependent on the current "auto time
  * zone detection" setting.
  *
- * <p>For automatic detection it keeps track of the most recent suggestion from each phone it uses
- * the best suggestion based on a scoring algorithm. If several phones provide the same score then
- * the phone with the lowest numeric ID "wins". If the situation changes and it is no longer
- * possible to be confident about the time zone, phones must submit an empty suggestion in order to
- * "withdraw" their previous suggestion.
+ * <p>For automatic detection, it keeps track of the most recent telephony suggestion from each
+ * slotIndex and it uses the best suggestion based on a scoring algorithm. If several slotIndexes
+ * provide the same score then the slotIndex with the lowest numeric value "wins". If the situation
+ * changes and it is no longer possible to be confident about the time zone, slotIndexes must have
+ * an empty suggestion submitted in order to "withdraw" their previous suggestion.
  *
  * <p>Most public methods are marked synchronized to ensure thread safety around internal state.
  */
@@ -91,28 +91,28 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private static final String LOG_TAG = "TimeZoneDetectorStrategy";
     private static final boolean DBG = false;
 
-    @IntDef({ ORIGIN_PHONE, ORIGIN_MANUAL })
+    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Origin {}
 
     /** Used when a time value originated from a telephony signal. */
     @Origin
-    private static final int ORIGIN_PHONE = 1;
+    private static final int ORIGIN_TELEPHONY = 1;
 
     /** Used when a time value originated from a user / manual settings. */
     @Origin
     private static final int ORIGIN_MANUAL = 2;
 
     /**
-     * The abstract score for an empty or invalid phone suggestion.
+     * The abstract score for an empty or invalid telephony suggestion.
      *
-     * Used to score phone suggestions where there is no zone.
+     * Used to score telephony suggestions where there is no zone.
      */
     @VisibleForTesting
-    public static final int PHONE_SCORE_NONE = 0;
+    public static final int TELEPHONY_SCORE_NONE = 0;
 
     /**
-     * The abstract score for a low quality phone suggestion.
+     * The abstract score for a low quality telephony suggestion.
      *
      * Used to score suggestions where:
      * The suggested zone ID is one of several possibilities, and the possibilities have different
@@ -121,10 +121,10 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * You would have to be quite desperate to want to use this choice.
      */
     @VisibleForTesting
-    public static final int PHONE_SCORE_LOW = 1;
+    public static final int TELEPHONY_SCORE_LOW = 1;
 
     /**
-     * The abstract score for a medium quality phone suggestion.
+     * The abstract score for a medium quality telephony suggestion.
      *
      * Used for:
      * The suggested zone ID is one of several possibilities but at least the possibilities have the
@@ -132,36 +132,38 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * switch to DST at the wrong time and (for example) their calendar events.
      */
     @VisibleForTesting
-    public static final int PHONE_SCORE_MEDIUM = 2;
+    public static final int TELEPHONY_SCORE_MEDIUM = 2;
 
     /**
-     * The abstract score for a high quality phone suggestion.
+     * The abstract score for a high quality telephony suggestion.
      *
      * Used for:
      * The suggestion was for one zone ID and the answer was unambiguous and likely correct given
      * the info available.
      */
     @VisibleForTesting
-    public static final int PHONE_SCORE_HIGH = 3;
+    public static final int TELEPHONY_SCORE_HIGH = 3;
 
     /**
-     * The abstract score for a highest quality phone suggestion.
+     * The abstract score for a highest quality telephony suggestion.
      *
      * Used for:
      * Suggestions that must "win" because they constitute test or emulator zone ID.
      */
     @VisibleForTesting
-    public static final int PHONE_SCORE_HIGHEST = 4;
+    public static final int TELEPHONY_SCORE_HIGHEST = 4;
 
     /**
-     * The threshold at which phone suggestions are good enough to use to set the device's time
+     * The threshold at which telephony suggestions are good enough to use to set the device's time
      * zone.
      */
     @VisibleForTesting
-    public static final int PHONE_SCORE_USAGE_THRESHOLD = PHONE_SCORE_MEDIUM;
+    public static final int TELEPHONY_SCORE_USAGE_THRESHOLD = TELEPHONY_SCORE_MEDIUM;
 
-    /** The number of previous phone suggestions to keep for each ID (for use during debugging). */
-    private static final int KEEP_PHONE_SUGGESTION_HISTORY_SIZE = 30;
+    /**
+     * The number of previous telephony suggestions to keep for each ID (for use during debugging).
+     */
+    private static final int KEEP_TELEPHONY_SUGGESTION_HISTORY_SIZE = 30;
 
     @NonNull
     private final Callback mCallback;
@@ -174,13 +176,14 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private final LocalLog mTimeZoneChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
     /**
-     * A mapping from slotIndex to a phone time zone suggestion. We typically expect one or two
-     * mappings: devices will have a small number of telephony devices and slotIndexs are assumed to
-     * be stable.
+     * A mapping from slotIndex to a telephony time zone suggestion. We typically expect one or two
+     * mappings: devices will have a small number of telephony devices and slotIndexes are assumed
+     * to be stable.
      */
     @GuardedBy("this")
-    private ArrayMapWithHistory<Integer, QualifiedPhoneTimeZoneSuggestion> mSuggestionBySlotIndex =
-            new ArrayMapWithHistory<>(KEEP_PHONE_SUGGESTION_HISTORY_SIZE);
+    private ArrayMapWithHistory<Integer, QualifiedTelephonyTimeZoneSuggestion>
+            mSuggestionBySlotIndex =
+            new ArrayMapWithHistory<>(KEEP_TELEPHONY_SUGGESTION_HISTORY_SIZE);
 
     /**
      * Creates a new instance of {@link TimeZoneDetectorStrategyImpl}.
@@ -205,42 +208,43 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     @Override
-    public synchronized void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion suggestion) {
+    public synchronized void suggestTelephonyTimeZone(
+            @NonNull TelephonyTimeZoneSuggestion suggestion) {
         if (DBG) {
-            Slog.d(LOG_TAG, "Phone suggestion received. newSuggestion=" + suggestion);
+            Slog.d(LOG_TAG, "Telephony suggestion received. newSuggestion=" + suggestion);
         }
         Objects.requireNonNull(suggestion);
 
         // Score the suggestion.
-        int score = scorePhoneSuggestion(suggestion);
-        QualifiedPhoneTimeZoneSuggestion scoredSuggestion =
-                new QualifiedPhoneTimeZoneSuggestion(suggestion, score);
+        int score = scoreTelephonySuggestion(suggestion);
+        QualifiedTelephonyTimeZoneSuggestion scoredSuggestion =
+                new QualifiedTelephonyTimeZoneSuggestion(suggestion, score);
 
         // Store the suggestion against the correct slotIndex.
         mSuggestionBySlotIndex.put(suggestion.getSlotIndex(), scoredSuggestion);
 
         // Now perform auto time zone detection. The new suggestion may be used to modify the time
         // zone setting.
-        String reason = "New phone time suggested. suggestion=" + suggestion;
+        String reason = "New telephony time suggested. suggestion=" + suggestion;
         doAutoTimeZoneDetection(reason);
     }
 
-    private static int scorePhoneSuggestion(@NonNull PhoneTimeZoneSuggestion suggestion) {
+    private static int scoreTelephonySuggestion(@NonNull TelephonyTimeZoneSuggestion suggestion) {
         int score;
         if (suggestion.getZoneId() == null) {
-            score = PHONE_SCORE_NONE;
+            score = TELEPHONY_SCORE_NONE;
         } else if (suggestion.getMatchType() == MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY
                 || suggestion.getMatchType() == MATCH_TYPE_EMULATOR_ZONE_ID) {
             // Handle emulator / test cases : These suggestions should always just be used.
-            score = PHONE_SCORE_HIGHEST;
+            score = TELEPHONY_SCORE_HIGHEST;
         } else if (suggestion.getQuality() == QUALITY_SINGLE_ZONE) {
-            score = PHONE_SCORE_HIGH;
+            score = TELEPHONY_SCORE_HIGH;
         } else if (suggestion.getQuality() == QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET) {
             // The suggestion may be wrong, but at least the offset should be correct.
-            score = PHONE_SCORE_MEDIUM;
+            score = TELEPHONY_SCORE_MEDIUM;
         } else if (suggestion.getQuality() == QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS) {
             // The suggestion has a good chance of being wrong.
-            score = PHONE_SCORE_LOW;
+            score = TELEPHONY_SCORE_LOW;
         } else {
             throw new AssertionError();
         }
@@ -248,9 +252,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     /**
-     * Finds the best available time zone suggestion from all phones. If it is high-enough quality
-     * and automatic time zone detection is enabled then it will be set on the device. The outcome
-     * can be that this strategy becomes / remains un-opinionated and nothing is set.
+     * Finds the best available time zone suggestion from all slotIndexes. If it is high-enough
+     * quality and automatic time zone detection is enabled then it will be set on the device. The
+     * outcome can be that this strategy becomes / remains un-opinionated and nothing is set.
      */
     @GuardedBy("this")
     private void doAutoTimeZoneDetection(@NonNull String detectionReason) {
@@ -259,35 +263,37 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             return;
         }
 
-        QualifiedPhoneTimeZoneSuggestion bestPhoneSuggestion = findBestPhoneSuggestion();
+        QualifiedTelephonyTimeZoneSuggestion bestTelephonySuggestion =
+                findBestTelephonySuggestion();
 
         // Work out what to do with the best suggestion.
-        if (bestPhoneSuggestion == null) {
-            // There is no phone suggestion available at all. Become un-opinionated.
+        if (bestTelephonySuggestion == null) {
+            // There is no telephony suggestion available at all. Become un-opinionated.
             if (DBG) {
-                Slog.d(LOG_TAG, "Could not determine time zone: No best phone suggestion."
+                Slog.d(LOG_TAG, "Could not determine time zone: No best telephony suggestion."
                         + " detectionReason=" + detectionReason);
             }
             return;
         }
 
         // Special case handling for uninitialized devices. This should only happen once.
-        String newZoneId = bestPhoneSuggestion.suggestion.getZoneId();
+        String newZoneId = bestTelephonySuggestion.suggestion.getZoneId();
         if (newZoneId != null && !mCallback.isDeviceTimeZoneInitialized()) {
             String cause = "Device has no time zone set. Attempting to set the device to the best"
                     + " available suggestion."
-                    + " bestPhoneSuggestion=" + bestPhoneSuggestion
+                    + " bestTelephonySuggestion=" + bestTelephonySuggestion
                     + ", detectionReason=" + detectionReason;
             Slog.i(LOG_TAG, cause);
-            setDeviceTimeZoneIfRequired(ORIGIN_PHONE, newZoneId, cause);
+            setDeviceTimeZoneIfRequired(ORIGIN_TELEPHONY, newZoneId, cause);
             return;
         }
 
-        boolean suggestionGoodEnough = bestPhoneSuggestion.score >= PHONE_SCORE_USAGE_THRESHOLD;
+        boolean suggestionGoodEnough =
+                bestTelephonySuggestion.score >= TELEPHONY_SCORE_USAGE_THRESHOLD;
         if (!suggestionGoodEnough) {
             if (DBG) {
                 Slog.d(LOG_TAG, "Best suggestion not good enough."
-                        + " bestPhoneSuggestion=" + bestPhoneSuggestion
+                        + " bestTelephonySuggestion=" + bestTelephonySuggestion
                         + ", detectionReason=" + detectionReason);
             }
             return;
@@ -297,16 +303,16 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         // zone ID.
         if (newZoneId == null) {
             Slog.w(LOG_TAG, "Empty zone suggestion scored higher than expected. This is an error:"
-                    + " bestPhoneSuggestion=" + bestPhoneSuggestion
+                    + " bestTelephonySuggestion=" + bestTelephonySuggestion
                     + " detectionReason=" + detectionReason);
             return;
         }
 
-        String zoneId = bestPhoneSuggestion.suggestion.getZoneId();
+        String zoneId = bestTelephonySuggestion.suggestion.getZoneId();
         String cause = "Found good suggestion."
-                + ", bestPhoneSuggestion=" + bestPhoneSuggestion
+                + ", bestTelephonySuggestion=" + bestTelephonySuggestion
                 + ", detectionReason=" + detectionReason;
-        setDeviceTimeZoneIfRequired(ORIGIN_PHONE, zoneId, cause);
+        setDeviceTimeZoneIfRequired(ORIGIN_TELEPHONY, zoneId, cause);
     }
 
     @GuardedBy("this")
@@ -372,15 +378,15 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
     @GuardedBy("this")
     @Nullable
-    private QualifiedPhoneTimeZoneSuggestion findBestPhoneSuggestion() {
-        QualifiedPhoneTimeZoneSuggestion bestSuggestion = null;
+    private QualifiedTelephonyTimeZoneSuggestion findBestTelephonySuggestion() {
+        QualifiedTelephonyTimeZoneSuggestion bestSuggestion = null;
 
-        // Iterate over the latest QualifiedPhoneTimeZoneSuggestion objects received for each phone
-        // and find the best. Note that we deliberately do not look at age: the caller can
+        // Iterate over the latest QualifiedTelephonyTimeZoneSuggestion objects received for each
+        // slotIndex and find the best. Note that we deliberately do not look at age: the caller can
         // rate-limit so age is not a strong indicator of confidence. Instead, the callers are
         // expected to withdraw suggestions they no longer have confidence in.
         for (int i = 0; i < mSuggestionBySlotIndex.size(); i++) {
-            QualifiedPhoneTimeZoneSuggestion candidateSuggestion =
+            QualifiedTelephonyTimeZoneSuggestion candidateSuggestion =
                     mSuggestionBySlotIndex.valueAt(i);
             if (candidateSuggestion == null) {
                 // Unexpected
@@ -404,13 +410,13 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     }
 
     /**
-     * Returns the current best phone suggestion. Not intended for general use: it is used during
-     * tests to check strategy behavior.
+     * Returns the current best telephony suggestion. Not intended for general use: it is used
+     * during tests to check strategy behavior.
      */
     @VisibleForTesting
     @Nullable
-    public synchronized QualifiedPhoneTimeZoneSuggestion findBestPhoneSuggestionForTests() {
-        return findBestPhoneSuggestion();
+    public synchronized QualifiedTelephonyTimeZoneSuggestion findBestTelephonySuggestionForTests() {
+        return findBestTelephonySuggestion();
     }
 
     @Override
@@ -447,7 +453,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         mTimeZoneChangesLog.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
-        ipw.println("Phone suggestion history:");
+        ipw.println("Telephony suggestion history:");
         ipw.increaseIndent(); // level 2
         mSuggestionBySlotIndex.dump(ipw);
         ipw.decreaseIndent(); // level 2
@@ -459,18 +465,19 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
      * A method used to inspect strategy state during tests. Not intended for general use.
      */
     @VisibleForTesting
-    public synchronized QualifiedPhoneTimeZoneSuggestion getLatestPhoneSuggestion(int slotIndex) {
+    public synchronized QualifiedTelephonyTimeZoneSuggestion getLatestTelephonySuggestion(
+            int slotIndex) {
         return mSuggestionBySlotIndex.get(slotIndex);
     }
 
     /**
-     * A {@link PhoneTimeZoneSuggestion} with additional qualifying metadata.
+     * A {@link TelephonyTimeZoneSuggestion} with additional qualifying metadata.
      */
     @VisibleForTesting
-    public static class QualifiedPhoneTimeZoneSuggestion {
+    public static class QualifiedTelephonyTimeZoneSuggestion {
 
         @VisibleForTesting
-        public final PhoneTimeZoneSuggestion suggestion;
+        public final TelephonyTimeZoneSuggestion suggestion;
 
         /**
          * The score the suggestion has been given. This can be used to rank against other
@@ -480,7 +487,8 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         public final int score;
 
         @VisibleForTesting
-        public QualifiedPhoneTimeZoneSuggestion(PhoneTimeZoneSuggestion suggestion, int score) {
+        public QualifiedTelephonyTimeZoneSuggestion(
+                TelephonyTimeZoneSuggestion suggestion, int score) {
             this.suggestion = suggestion;
             this.score = score;
         }
@@ -493,7 +501,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            QualifiedPhoneTimeZoneSuggestion that = (QualifiedPhoneTimeZoneSuggestion) o;
+            QualifiedTelephonyTimeZoneSuggestion that = (QualifiedTelephonyTimeZoneSuggestion) o;
             return score == that.score
                     && suggestion.equals(that.suggestion);
         }
@@ -505,7 +513,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         @Override
         public String toString() {
-            return "QualifiedPhoneTimeZoneSuggestion{"
+            return "QualifiedTelephonyTimeZoneSuggestion{"
                     + "suggestion=" + suggestion
                     + ", score=" + score
                     + '}';

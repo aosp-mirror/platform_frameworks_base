@@ -2559,7 +2559,7 @@
          <p>Not for use by third-party applications.
          @hide
      -->
-    <permission android:name="android.permission.SUGGEST_PHONE_TIME_AND_ZONE"
+    <permission android:name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE"
         android:protectionLevel="signature|telephony" />
 
     <!-- Allows applications like settings to suggest the user's manually chosen time / time zone.

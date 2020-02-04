@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.PhoneTimeZoneSuggestion;
+import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.HandlerThread;
@@ -76,35 +76,35 @@ public class TimeZoneDetectorServiceTest {
     }
 
     @Test(expected = SecurityException.class)
-    public void testSuggestPhoneTime_withoutPermission() {
+    public void testSuggestTelephonyTime_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
-        PhoneTimeZoneSuggestion timeZoneSuggestion = createPhoneTimeZoneSuggestion();
+        TelephonyTimeZoneSuggestion timeZoneSuggestion = createTelephonyTimeZoneSuggestion();
 
         try {
-            mTimeZoneDetectorService.suggestPhoneTimeZone(timeZoneSuggestion);
+            mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
             fail();
         } finally {
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE),
+                    eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
                     anyString());
         }
     }
 
     @Test
-    public void testSuggestPhoneTimeZone() throws Exception {
+    public void testSuggestTelephonyTimeZone() throws Exception {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        PhoneTimeZoneSuggestion timeZoneSuggestion = createPhoneTimeZoneSuggestion();
-        mTimeZoneDetectorService.suggestPhoneTimeZone(timeZoneSuggestion);
+        TelephonyTimeZoneSuggestion timeZoneSuggestion = createTelephonyTimeZoneSuggestion();
+        mTimeZoneDetectorService.suggestTelephonyTimeZone(timeZoneSuggestion);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE),
+                eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
                 anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeZoneDetectorStrategy.verifySuggestPhoneTimeZoneCalled(timeZoneSuggestion);
+        mStubbedTimeZoneDetectorStrategy.verifySuggestTelephonyTimeZoneCalled(timeZoneSuggestion);
     }
 
     @Test(expected = SecurityException.class)
@@ -165,12 +165,12 @@ public class TimeZoneDetectorServiceTest {
         mStubbedTimeZoneDetectorStrategy.verifyHandleAutoTimeZoneDetectionChangedCalled();
     }
 
-    private static PhoneTimeZoneSuggestion createPhoneTimeZoneSuggestion() {
+    private static TelephonyTimeZoneSuggestion createTelephonyTimeZoneSuggestion() {
         int slotIndex = 1234;
-        return new PhoneTimeZoneSuggestion.Builder(slotIndex)
+        return new TelephonyTimeZoneSuggestion.Builder(slotIndex)
                 .setZoneId("TestZoneId")
-                .setMatchType(PhoneTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET)
-                .setQuality(PhoneTimeZoneSuggestion.QUALITY_SINGLE_ZONE)
+                .setMatchType(TelephonyTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET)
+                .setQuality(TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE)
                 .build();
     }
 
@@ -181,14 +181,14 @@ public class TimeZoneDetectorServiceTest {
     private static class StubbedTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
 
         // Call tracking.
-        private PhoneTimeZoneSuggestion mLastPhoneSuggestion;
+        private TelephonyTimeZoneSuggestion mLastTelephonySuggestion;
         private ManualTimeZoneSuggestion mLastManualSuggestion;
         private boolean mHandleAutoTimeZoneDetectionChangedCalled;
         private boolean mDumpCalled;
 
         @Override
-        public void suggestPhoneTimeZone(PhoneTimeZoneSuggestion timeZoneSuggestion) {
-            mLastPhoneSuggestion = timeZoneSuggestion;
+        public void suggestTelephonyTimeZone(TelephonyTimeZoneSuggestion timeZoneSuggestion) {
+            mLastTelephonySuggestion = timeZoneSuggestion;
         }
 
         @Override
@@ -207,14 +207,14 @@ public class TimeZoneDetectorServiceTest {
         }
 
         void resetCallTracking() {
-            mLastPhoneSuggestion = null;
+            mLastTelephonySuggestion = null;
             mLastManualSuggestion = null;
             mHandleAutoTimeZoneDetectionChangedCalled = false;
             mDumpCalled = false;
         }
 
-        void verifySuggestPhoneTimeZoneCalled(PhoneTimeZoneSuggestion expectedSuggestion) {
-            assertEquals(expectedSuggestion, mLastPhoneSuggestion);
+        void verifySuggestTelephonyTimeZoneCalled(TelephonyTimeZoneSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastTelephonySuggestion);
         }
 
         public void verifySuggestManualTimeZoneCalled(ManualTimeZoneSuggestion expectedSuggestion) {

@@ -40,12 +40,12 @@ public final class TimeDetectorImpl implements TimeDetector {
     }
 
     @Override
-    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
+    public void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion) {
         if (DEBUG) {
-            Log.d(TAG, "suggestPhoneTime called: " + timeSuggestion);
+            Log.d(TAG, "suggestTelephonyTime called: " + timeSuggestion);
         }
         try {
-            mITimeDetectorService.suggestPhoneTime(timeSuggestion);
+            mITimeDetectorService.suggestTelephonyTime(timeSuggestion);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

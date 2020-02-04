@@ -47,8 +47,8 @@ public interface TimeZoneDetector {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
-    void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion);
+    @RequiresPermission(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE)
+    void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion);
 
     /**
      * Suggests the current time zone, determined for the user's manually information, to the
