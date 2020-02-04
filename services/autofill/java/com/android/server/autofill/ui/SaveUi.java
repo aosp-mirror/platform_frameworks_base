@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
@@ -187,7 +188,10 @@ final class SaveUi {
         context = new ContextThemeWrapper(context, mThemeId) {
             @Override
             public void startActivity(Intent intent) {
-                if (intent.resolveActivity(getPackageManager()) == null) {
+                if (resolveActivity(intent) == null) {
+                    if (sDebug) {
+                        Slog.d(TAG, "Can not startActivity for save UI with intent=" + intent);
+                    }
                     return;
                 }
                 intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
@@ -198,6 +202,16 @@ final class SaveUi {
                 }
                 // Apply restore mechanism
                 startIntentSenderWithRestore(p, intent);
+            }
+
+            private ComponentName resolveActivity(Intent intent) {
+                final PackageManager packageManager = getPackageManager();
+                final ComponentName componentName = intent.resolveActivity(packageManager);
+                if (componentName != null) {
+                    return componentName;
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_MATCH_EXTERNAL);
+                return intent.resolveActivity(packageManager);
             }
         };
         final LayoutInflater inflater = LayoutInflater.from(context);
