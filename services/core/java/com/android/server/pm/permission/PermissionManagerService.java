@@ -4223,7 +4223,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         int[] grantPermissionsUserIds = EMPTY_INT_ARRAY;
         for (int userId : UserManagerService.getInstance().getUserIds()) {
-            if (!mPackageManagerInt.areDefaultRuntimePermissionsGranted(userId)) {
+            if (mPackageManagerInt.isPermissionUpgradeNeeded(userId)) {
                 grantPermissionsUserIds = ArrayUtils.appendInt(
                         grantPermissionsUserIds, userId);
             }
@@ -4624,13 +4624,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             synchronized (mLock) {
                 mDefaultPermissionGrantPolicy
                         .grantDefaultPermissionsToDefaultBrowser(packageName, userId);
-            }
-        }
-
-        @Override
-        public boolean wereDefaultPermissionsGrantedSinceBoot(int userId) {
-            synchronized (mLock) {
-                return mDefaultPermissionGrantPolicy.wereDefaultPermissionsGrantedSinceBoot(userId);
             }
         }
 

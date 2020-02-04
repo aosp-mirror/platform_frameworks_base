@@ -280,7 +280,7 @@ public final class PermissionPolicyService extends SystemService {
                 LocalServices.getService(PackageManagerInternal.class);
         final PermissionManagerServiceInternal permissionManagerInternal =
                 LocalServices.getService(PermissionManagerServiceInternal.class);
-        if (permissionManagerInternal.wereDefaultPermissionsGrantedSinceBoot(userId)) {
+        if (packageManagerInternal.isPermissionUpgradeNeeded(userId)) {
             if (DEBUG) Slog.i(LOG_TAG, "defaultPermsWereGrantedSinceBoot(" + userId + ")");
 
             // Now call into the permission controller to apply policy around permissions
@@ -314,7 +314,7 @@ public final class PermissionPolicyService extends SystemService {
 
             permissionControllerManager.updateUserSensitive();
 
-            packageManagerInternal.setRuntimePermissionsFingerPrint(Build.FINGERPRINT, userId);
+            packageManagerInternal.updateRuntimePermissionsFingerprint(userId);
         }
     }
 

@@ -927,13 +927,11 @@ public abstract class PackageManagerInternal {
             IntentSender intentSender, int flags);
 
     /**
-     * Get fingerprint of build that updated the runtime permissions for a user.
+     * Update fingerprint of build that updated the runtime permissions for a user.
      *
      * @param userId The user to update
-     * @param fingerPrint The fingerprint to set
      */
-    public abstract void setRuntimePermissionsFingerPrint(@NonNull String fingerPrint,
-            @UserIdInt int userId);
+    public abstract void updateRuntimePermissionsFingerprint(@UserIdInt int userId);
 
     /**
      * Migrates legacy obb data to its new location.
@@ -961,8 +959,8 @@ public abstract class PackageManagerInternal {
     public abstract boolean isCallerInstallerOfRecord(
             @NonNull AndroidPackage pkg, int callingUid);
 
-    /** Returns whether or not default runtime permissions are granted for the given user */
-    public abstract boolean areDefaultRuntimePermissionsGranted(@UserIdInt int userId);
+    /** Returns whether or not permissions need to be upgraded for the given user */
+    public abstract boolean isPermissionUpgradeNeeded(@UserIdInt int userId);
 
     /** Sets the enforcement of reading external storage */
     public abstract void setReadExternalStorageEnforced(boolean enforced);
