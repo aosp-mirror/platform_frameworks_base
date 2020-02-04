@@ -3333,7 +3333,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenDumpReportRequeste
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 40),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
@@ -3393,7 +3393,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenConditionEventWron
 
     EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket3StartTimeNs),
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs + 100),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
@@ -3470,7 +3470,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenAccumulateEventWro
 
     EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket3StartTimeNs),
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs + 100),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
@@ -3519,7 +3519,8 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenConditionUnknown) 
     // Check dump report.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucketStartTimeNs + 100, true /* include recent buckets */, true,
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 10000;
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
                                 NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
@@ -3529,13 +3530,13 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenConditionUnknown) 
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
     EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
 }
 
 /*
@@ -3569,7 +3570,8 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenPullFailed) {
     // Check dump report.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucketStartTimeNs + 100, true /* include recent buckets */, true,
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 10000;
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
                                 NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
@@ -3579,13 +3581,13 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenPullFailed) {
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
     EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
 }
 
 /*
@@ -3691,8 +3693,9 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
     // Check dump report.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucketStartTimeNs + 9000000, true /* include recent buckets */,
-                                true, NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 9000000;
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
@@ -3701,13 +3704,13 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 9000000),
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
     EXPECT_EQ(BucketDropReason::BUCKET_TOO_SMALL, dropEvent.drop_reason());
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 9000000), dropEvent.drop_time_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
 }
 
 /*
@@ -3739,7 +3742,8 @@ TEST(ValueMetricProducerTest_BucketDrop, TestMultipleBucketDropEvents) {
     // Check dump report.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucketStartTimeNs + 1000, true /* include recent buckets */, true,
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 1000;
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
                                 FAST /* dumpLatency */, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
@@ -3749,7 +3753,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestMultipleBucketDropEvents) {
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(2, report.value_metrics().skipped(0).drop_event_size());
 
@@ -3759,7 +3763,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestMultipleBucketDropEvents) {
 
     dropEvent = report.value_metrics().skipped(0).drop_event(1);
     EXPECT_EQ(BucketDropReason::DUMP_REPORT_REQUESTED, dropEvent.drop_reason());
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 1000), dropEvent.drop_time_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
 }
 
 /*
@@ -3826,6 +3830,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestMaxBucketDropEvents) {
     // Check dump report.
     ProtoOutputStream output;
     std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 1000;
     // Because we already have 10 dump events in the current bucket,
     // this case should not be added to the list of dump events.
     valueProducer->onDumpReport(bucketStartTimeNs + 1000, true /* include recent buckets */, true,
@@ -3838,7 +3843,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestMaxBucketDropEvents) {
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     EXPECT_EQ(10, report.value_metrics().skipped(0).drop_event_size());
 
