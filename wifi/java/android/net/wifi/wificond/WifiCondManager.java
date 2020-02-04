@@ -496,22 +496,17 @@ public class WifiCondManager {
     }
 
     /**
-     * Initializes WifiCondManager & registers a death notification for the WifiCondManager which
-     * acts as a proxy for the wificond daemon (i.e. the death listener will be called when and if
-     * the wificond daemon dies).
-     *
-     * Note: This method clears any existing state in wificond daemon.
+     * Register a death notification for the WifiCondManager which acts as a proxy for the
+     * wificond daemon (i.e. the death listener will be called when and if the wificond daemon
+     * dies).
      *
      * @param deathEventHandler A {@link Runnable} to be called whenever the wificond daemon dies.
-     * @return Returns true on success.
      */
-    public boolean initialize(@NonNull Runnable deathEventHandler) {
+    public void setOnServiceDeadCallback(@NonNull Runnable deathEventHandler) {
         if (mDeathEventHandler != null) {
             Log.e(TAG, "Death handler already present");
         }
         mDeathEventHandler = deathEventHandler;
-        tearDownInterfaces();
-        return true;
     }
 
     /**

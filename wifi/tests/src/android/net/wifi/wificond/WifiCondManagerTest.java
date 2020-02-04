@@ -720,8 +720,7 @@ public class WifiCondManagerTest {
     @Test
     public void testRegisterDeathHandler() throws Exception {
         Runnable deathHandler = mock(Runnable.class);
-        assertTrue(mWificondControl.initialize(deathHandler));
-        verify(mWificond).tearDownInterfaces();
+        mWificondControl.setOnServiceDeadCallback(deathHandler);
         mWificondControl.binderDied();
         mLooper.dispatchAll();
         verify(deathHandler).run();
@@ -734,7 +733,7 @@ public class WifiCondManagerTest {
     @Test
     public void testDeathHandling() throws Exception {
         Runnable deathHandler = mock(Runnable.class);
-        assertTrue(mWificondControl.initialize(deathHandler));
+        mWificondControl.setOnServiceDeadCallback(deathHandler);
 
         testSetupInterfaceForClientMode();
 
