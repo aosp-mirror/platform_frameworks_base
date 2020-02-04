@@ -79,7 +79,7 @@ public class TimeUtils {
             return null;
         }
         CountryTimeZones.OffsetResult offsetResult = countryTimeZones.lookupByOffsetWithBias(
-                offsetMillis, isDst, null /* dstOffsetMillis */, whenMillis, bias);
+                whenMillis, bias, offsetMillis, isDst);
         return offsetResult != null ? offsetResult.getTimeZone() : null;
     }
 
