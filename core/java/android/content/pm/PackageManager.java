@@ -60,6 +60,7 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.util.AndroidException;
@@ -2995,6 +2996,18 @@ public abstract class PackageManager {
     @SystemApi
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite kernel support to support incremental delivery aka Incremental FileSystem.
+     *
+     * @see IncrementalManager#isEnabled
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_INCREMENTAL_DELIVERY =
+            "android.software.incremental_delivery";
 
     /**
      * Extra field name for the URI to a verification file. Passed to a package
