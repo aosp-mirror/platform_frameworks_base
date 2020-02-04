@@ -1340,6 +1340,10 @@
         <service android:name="android.os.BinderWorkSourceNestedService"
                 android:process=":BinderWorkSourceNestedService" />
 
+        <!-- Used by BinderProxyTest -->
+        <service android:name="android.os.BinderProxyService"
+                android:process=":BinderProxyService" />
+
         <!-- Application components used for search manager tests -->
 
         <activity android:name="android.app.activity.SearchableActivity"
