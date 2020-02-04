@@ -854,6 +854,8 @@ public final class Magnifier {
         // The z of the magnifier surface, defining its z order in the list of
         // siblings having the same parent surface (usually the main app surface).
         private static final int SURFACE_Z = 5;
+        // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
+        private static final int FISHEYE_RAMP_WIDTH = 30;
 
         // Display associated to the view the magnifier is attached to.
         private final Display mDisplay;
@@ -906,7 +908,8 @@ public final class Magnifier {
         // Whether is in the new magnifier style.
         private boolean mIsFishEyeStyle;
         // The mesh matrix for the fish-eye effect.
-        private float[] mMesh;
+        private float[] mMeshLeft;
+        private float[] mMeshRight;
         private int mMeshWidth;
         private int mMeshHeight;
 
@@ -986,29 +989,29 @@ public final class Magnifier {
         }
 
         private void createMeshMatrixForFishEyeEffect() {
-            mMeshWidth = mZoom < 1.5f ? 5 : 4;
+            mMeshWidth = 1;
             mMeshHeight = 6;
             final float w = mContentWidth;
             final float h = mContentHeight;
-            final float dx = (w - mZoom * w * (mMeshWidth - 2) / mMeshWidth) / 2;
-            mMesh = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
+            final float h0 = h / mZoom;
+            final float dh = h - h0;
+            final float ramp = FISHEYE_RAMP_WIDTH;
+            mMeshLeft = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
+            mMeshRight = new float[2 * (mMeshWidth + 1) * (mMeshHeight + 1)];
             for (int i = 0; i < 2 * (mMeshWidth + 1) * (mMeshHeight + 1); i += 2) {
                 // Calculates X value.
                 final int colIndex = i % (2 * (mMeshWidth + 1)) / 2;
-                if (colIndex == 0) {
-                    mMesh[i] = 0;
-                } else if (colIndex == mMeshWidth) {
-                    mMesh[i] = w;
-                } else {
-                    mMesh[i] = (colIndex - 1) * (w - 2 * dx) / (mMeshWidth - 2) + dx;
-                }
+                mMeshLeft[i] = (float) colIndex * ramp / mMeshWidth;
+                mMeshRight[i] = w - ramp + colIndex * ramp / mMeshWidth;
+
                 // Calculates Y value.
                 final int rowIndex = i / 2 / (mMeshWidth + 1);
-                final float y0 = colIndex == 0 || colIndex == mMeshWidth
-                        ? (h - h / mZoom) / 2 : 0;
-                final float dy = colIndex == 0 || colIndex == mMeshWidth
-                        ? h / mZoom / mMeshHeight : h / mMeshHeight;
-                mMesh[i + 1] = y0 + rowIndex * dy;
+                final float hl = h0 + dh * colIndex / mMeshWidth;
+                final float yl = (h - hl) / 2;
+                mMeshLeft[i + 1] = yl + hl * rowIndex / mMeshHeight;
+                final float hr = h - dh * colIndex / mMeshWidth;
+                final float yr = (h - hr) / 2;
+                mMeshRight[i + 1] = yr + hr * rowIndex / mMeshHeight;
             }
         }
 
@@ -1166,14 +1169,31 @@ public final class Magnifier {
                 final RecordingCanvas canvas =
                         mBitmapRenderNode.beginRecording(mContentWidth, mContentHeight);
                 try {
+                    final int w = mBitmap.getWidth();
+                    final int h = mBitmap.getHeight();
+                    final Paint paint = new Paint();
+                    paint.setFilterBitmap(true);
                     if (mIsFishEyeStyle) {
+                        final int ramp = FISHEYE_RAMP_WIDTH;
+                        final int margin =
+                            (int)((mContentWidth - (mContentWidth - 2 * ramp) / mZoom) / 2);
+
+                        // Draws the middle part.
+                        final Rect srcRect = new Rect(margin, 0, w - margin, h);
+                        final Rect dstRect = new Rect(
+                            ramp, 0, mContentWidth - ramp, mContentHeight);
+                        canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
+
+                        // Draws the left/right parts with mesh matrixes.
                         canvas.drawBitmapMesh(
-                                mBitmap, mMeshWidth, mMeshHeight, mMesh, 0, null, 0, null);
+                                Bitmap.createBitmap(mBitmap, 0, 0, margin, h),
+                                mMeshWidth, mMeshHeight, mMeshLeft, 0, null, 0, paint);
+                        canvas.drawBitmapMesh(
+                                Bitmap.createBitmap(mBitmap, w - margin, 0, margin, h),
+                                mMeshWidth, mMeshHeight, mMeshRight, 0, null, 0, paint);
                     } else {
-                        final Rect srcRect = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+                        final Rect srcRect = new Rect(0, 0, w, h);
                         final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
-                        final Paint paint = new Paint();
-                        paint.setFilterBitmap(true);
                         canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
                     }
                 } finally {
