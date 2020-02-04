@@ -964,4 +964,6 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ဝင်းဒိုး ထပ်ပိုးလွှာ ချဲ့ခြင်း"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ဝင်းဒိုး ချဲ့ခြင်း"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ဝင်းဒိုး ထိန်းချုပ်မှုများ ချဲ့ခြင်း"</string>
+    <!-- no translation found for quick_controls_title (525285759614231333) -->
+    <skip />
 </resources>

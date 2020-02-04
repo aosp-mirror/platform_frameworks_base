@@ -968,4 +968,6 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay-Vergrößerungsfenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrößerungsfenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Einstellungen für Vergrößerungsfenster"</string>
+    <!-- no translation found for quick_controls_title (525285759614231333) -->
+    <skip />
 </resources>

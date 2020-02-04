@@ -964,4 +964,6 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Cửa sổ lớp phủ phóng to"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Cửa sổ phóng to"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Các tùy chọn điều khiển cửa sổ phóng to"</string>
+    <!-- no translation found for quick_controls_title (525285759614231333) -->
+    <skip />
 </resources>

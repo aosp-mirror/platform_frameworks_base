@@ -909,7 +909,7 @@
     <string name="notification_channel_battery" msgid="9219995638046695106">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Zrzuty ekranu"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Wiadomości"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"Pamięć"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"Pamięć wewnętrzna"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Wskazówki"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplikacje błyskawiczne"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa"</string>
@@ -974,4 +974,5 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Okno nakładki powiększenia"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno powiększenia"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Elementy sterujące okna powiększenia"</string>
+    <string name="quick_controls_title" msgid="525285759614231333">"Szybkie sterowanie"</string>
 </resources>
