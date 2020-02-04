@@ -291,6 +291,17 @@ public class RollbackUnitTest {
         verify(mMockDataHelper).restoreAppData(123, pkgInfo1, 7, 333, "blah");
     }
 
+    @Test
+    public void notifySessionWithSuccess() {
+        int[] sessionIds = new int[]{ 7777, 8888 };
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER,
+                sessionIds);
+        // The 1st invocation returns false because not all child sessions are notified.
+        assertThat(rollback.notifySessionWithSuccess()).isFalse();
+        // The 2nd invocation returns true because now all child sessions are notified.
+        assertThat(rollback.notifySessionWithSuccess()).isTrue();
+    }
+
     private static PackageRollbackInfo newPkgInfoFor(
             String packageName, long fromVersion, long toVersion, boolean isApex) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
