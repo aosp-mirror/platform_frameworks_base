@@ -109,8 +109,8 @@ public:
 
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
                  incfs::NewFileParams params);
-    int makeDir(StorageId storage, std::string_view path, int mode = 0555);
-    int makeDirs(StorageId storage, std::string_view path, int mode = 0555);
+    int makeDir(StorageId storage, std::string_view path, int mode = 0755);
+    int makeDirs(StorageId storage, std::string_view path, int mode = 0755);
 
     int link(StorageId sourceStorageId, std::string_view oldPath, StorageId destStorageId,
              std::string_view newPath);
