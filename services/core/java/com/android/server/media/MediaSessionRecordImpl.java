@@ -20,6 +20,8 @@ import android.media.AudioManager;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
+import com.android.server.media.SessionPolicyProvider.SessionPolicy;
+
 import java.io.PrintWriter;
 
 /**
@@ -126,6 +128,18 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      */
     boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
             KeyEvent ke, int sequenceId, ResultReceiver cb);
+
+    /**
+     * Get session policies from custom policy provider set when MediaSessionRecord is instantiated.
+     * If custom policy does not exist, will return null.
+     */
+    @SessionPolicy
+    int getSessionPolicies();
+
+    /**
+     * Overwrite session policies that have been set when MediaSessionRecord is instantiated.
+     */
+    void setSessionPolicies(@SessionPolicy int policies);
 
     /**
      * Dumps internal state
