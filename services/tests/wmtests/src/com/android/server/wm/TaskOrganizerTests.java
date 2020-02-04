@@ -34,14 +34,21 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
+import android.app.PictureInPictureParams;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -49,6 +56,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
+import android.content.pm.ActivityInfo;
+import android.util.Rational;
 import android.view.Display;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
@@ -482,5 +491,77 @@ public class TaskOrganizerTests extends WindowTestsBase {
         w.finishDrawing(null);
         verify(transactionListener)
             .transactionReady(anyInt(), any());
+    }
+
+    class StubOrganizer extends ITaskOrganizer.Stub {
+        RunningTaskInfo mInfo;
+
+        @Override
+        public void taskAppeared(RunningTaskInfo info) {
+            mInfo = info;
+        }
+        @Override
+        public void taskVanished(IWindowContainer wc) {
+        }
+        @Override
+        public void transactionReady(int id, SurfaceControl.Transaction t) {
+        }
+        @Override
+        public void onTaskInfoChanged(RunningTaskInfo info) {
+        }
+    };
+
+    private ActivityRecord makePipableActivity() {
+        final ActivityRecord record = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        record.info.flags |= ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        spyOn(record);
+        doReturn(true).when(record).checkEnterPictureInPictureState(any(), anyBoolean());
+        return record;
+    }
+
+    @Test
+    public void testEnterPipParams() {
+        final StubOrganizer o = new StubOrganizer();
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o, WINDOWING_MODE_PINNED);
+        final ActivityRecord record = makePipableActivity();
+
+        final PictureInPictureParams p =
+            new PictureInPictureParams.Builder().setAspectRatio(new Rational(1, 2)).build();
+        assertTrue(mWm.mAtmService.enterPictureInPictureMode(record.token, p));
+        waitUntilHandlersIdle();
+        assertNotNull(o.mInfo);
+        assertNotNull(o.mInfo.pictureInPictureParams);
+    }
+
+    @Test
+    public void testChangePipParams() {
+        class ChangeSavingOrganizer extends StubOrganizer {
+            RunningTaskInfo mChangedInfo;
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) {
+                mChangedInfo = info;
+            }
+        }
+        ChangeSavingOrganizer o = new ChangeSavingOrganizer();
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o, WINDOWING_MODE_PINNED);
+
+        final ActivityRecord record = makePipableActivity();
+        final PictureInPictureParams p =
+            new PictureInPictureParams.Builder().setAspectRatio(new Rational(1, 2)).build();
+        assertTrue(mWm.mAtmService.enterPictureInPictureMode(record.token, p));
+        waitUntilHandlersIdle();
+        assertNotNull(o.mInfo);
+        assertNotNull(o.mInfo.pictureInPictureParams);
+
+        final PictureInPictureParams p2 =
+            new PictureInPictureParams.Builder().setAspectRatio(new Rational(3, 4)).build();
+        mWm.mAtmService.setPictureInPictureParams(record.token, p2);
+        waitUntilHandlersIdle();
+        assertNotNull(o.mChangedInfo);
+        assertNotNull(o.mChangedInfo.pictureInPictureParams);
+        final Rational ratio = o.mChangedInfo.pictureInPictureParams.getAspectRatioRational();
+        assertEquals(3, ratio.getNumerator());
+        assertEquals(4, ratio.getDenominator());
     }
 }
