@@ -51,5 +51,15 @@
         car:icon="@drawable/car_ic_music"/>
   <item car:usage="assistant"
         car:icon="@drawable/car_ic_music"/>
+  <item car:usage="call_assistant"
+        car:icon="@*android:drawable/ic_audio_ring_notif"/>
+  <item car:usage="emergency"
+        car:icon="@drawable/ic_volume_alarm"/>
+  <item car:usage="safety"
+        car:icon="@drawable/ic_volume_alarm"/>
+  <item car:usage="vehicle_status"
+        car:icon="@drawable/car_ic_notification"/>
+  <item car:usage="announcement"
+        car:icon="@drawable/car_ic_notification"/>
 </carVolumeItems>
 
