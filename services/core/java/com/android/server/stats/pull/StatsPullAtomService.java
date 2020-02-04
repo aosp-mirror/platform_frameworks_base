@@ -899,7 +899,6 @@ public class StatsPullAtomService extends SystemService {
                     return data;
                 }
             }
-            Slog.e(TAG, "no controller energy info supplied for " + receiver.getName());
         } catch (TimeoutException e) {
             Slog.w(TAG, "timeout reading " + receiver.getName() + " stats");
         }

@@ -16,12 +16,20 @@
 
 package android.net;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.test.mock.MockContext;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.net.VpnProfile;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +39,12 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class VpnManagerTest {
-    private static final String VPN_PROFILE_KEY = "KEY";
+    private static final String PKG_NAME = "fooPackage";
+
+    private static final String SESSION_NAME_STRING = "testSession";
+    private static final String SERVER_ADDR_STRING = "1.2.3.4";
+    private static final String IDENTITY_STRING = "Identity";
+    private static final byte[] PSK_BYTES = "preSharedKey".getBytes();
 
     private IConnectivityManager mMockCs;
     private VpnManager mVpnManager;
@@ -39,7 +52,7 @@ public class VpnManagerTest {
             new MockContext() {
                 @Override
                 public String getOpPackageName() {
-                    return "fooPackage";
+                    return PKG_NAME;
                 }
             };
 
@@ -50,34 +63,49 @@ public class VpnManagerTest {
     }
 
     @Test
-    public void testProvisionVpnProfile() throws Exception {
-        try {
-            mVpnManager.provisionVpnProfile(mock(PlatformVpnProfile.class));
-        } catch (UnsupportedOperationException expected) {
-        }
+    public void testProvisionVpnProfilePreconsented() throws Exception {
+        final PlatformVpnProfile profile = getPlatformVpnProfile();
+        when(mMockCs.provisionVpnProfile(any(VpnProfile.class), eq(PKG_NAME))).thenReturn(true);
+
+        // Expect there to be no intent returned, as consent has already been granted.
+        assertNull(mVpnManager.provisionVpnProfile(profile));
+        verify(mMockCs).provisionVpnProfile(eq(profile.toVpnProfile()), eq(PKG_NAME));
+    }
+
+    @Test
+    public void testProvisionVpnProfileNeedsConsent() throws Exception {
+        final PlatformVpnProfile profile = getPlatformVpnProfile();
+        when(mMockCs.provisionVpnProfile(any(VpnProfile.class), eq(PKG_NAME))).thenReturn(false);
+
+        // Expect intent to be returned, as consent has not already been granted.
+        assertNotNull(mVpnManager.provisionVpnProfile(profile));
+        verify(mMockCs).provisionVpnProfile(eq(profile.toVpnProfile()), eq(PKG_NAME));
     }
 
     @Test
     public void testDeleteProvisionedVpnProfile() throws Exception {
-        try {
-            mVpnManager.deleteProvisionedVpnProfile();
-        } catch (UnsupportedOperationException expected) {
-        }
+        mVpnManager.deleteProvisionedVpnProfile();
+        verify(mMockCs).deleteVpnProfile(eq(PKG_NAME));
     }
 
     @Test
     public void testStartProvisionedVpnProfile() throws Exception {
-        try {
-            mVpnManager.startProvisionedVpnProfile();
-        } catch (UnsupportedOperationException expected) {
-        }
+        mVpnManager.startProvisionedVpnProfile();
+        verify(mMockCs).startVpnProfile(eq(PKG_NAME));
     }
 
     @Test
     public void testStopProvisionedVpnProfile() throws Exception {
-        try {
-            mVpnManager.stopProvisionedVpnProfile();
-        } catch (UnsupportedOperationException expected) {
-        }
+        mVpnManager.stopProvisionedVpnProfile();
+        verify(mMockCs).stopVpnProfile(eq(PKG_NAME));
+    }
+
+    private Ikev2VpnProfile getPlatformVpnProfile() throws Exception {
+        return new Ikev2VpnProfile.Builder(SERVER_ADDR_STRING, IDENTITY_STRING)
+                .setBypassable(true)
+                .setMaxMtu(1300)
+                .setMetered(true)
+                .setAuthPsk(PSK_BYTES)
+                .build();
     }
 }

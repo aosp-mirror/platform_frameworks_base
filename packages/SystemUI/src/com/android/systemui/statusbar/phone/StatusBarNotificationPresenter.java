@@ -141,7 +141,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             ActivityLaunchAnimator activityLaunchAnimator,
             DynamicPrivacyController dynamicPrivacyController,
             NotificationAlertingManager notificationAlertingManager,
-            NotificationRowBinderImpl notificationRowBinder,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
             StatusBar statusBar,
@@ -216,8 +215,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mEntryManager.addNotificationLifetimeExtender(mGutsManager);
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
-            notificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
-                    this);
             mNotificationInterruptionStateProvider.setUpWithPresenter(
                     this, mHeadsUpManager, this::canHeadsUp);
             mLockscreenUserManager.setUpWithPresenter(this);

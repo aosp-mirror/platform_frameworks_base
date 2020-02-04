@@ -22,15 +22,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.CurrentUserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
-    private val controller: ControlsControllerImpl
+    private val controller: ControlsControllerImpl,
+    broadcastDispatcher: BroadcastDispatcher
 ) : Activity() {
 
     companion object {
@@ -42,11 +45,24 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ControlAdapter
 
+    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+        private val startingUser = controller.currentUserId
+
+        override fun onUserSwitched(newUserId: Int) {
+            if (newUserId != startingUser) {
+                stopTracking()
+                finish()
+            }
+        }
+    }
+
+    private var component: ComponentName? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val app = intent.getCharSequenceExtra(EXTRA_APP)
-        val component = intent.getParcelableExtra<ComponentName>(EXTRA_COMPONENT)
+        component = intent.getParcelableExtra<ComponentName>(EXTRA_COMPONENT)
 
         // If we have no component name, there's not much we can do.
         val callback = component?.let {
@@ -68,6 +84,11 @@ class ControlsFavoritingActivity @Inject constructor(
         }
         setContentView(recyclerView)
 
+        currentUserTracker.startTracking()
+    }
+
+    override fun onResume() {
+        super.onResume()
         component?.let {
             controller.loadForComponent(it) {
                 executor.execute {

@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"నిర్వాహక యాప్‌ ఉపయోగించడం సాధ్యపడదు. మీ పరికరంలోని డేటా ఇప్పుడు తొలగించబడుతుంది.\n\nమీకు ప్రశ్నలు ఉంటే, మీ సంస్థ యొక్క నిర్వాహకులను సంప్రదించండి."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ముద్రణ <xliff:g id="OWNER_APP">%s</xliff:g> ద్వారా నిలిపివేయబడింది."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"అడ్మిన్ ద్వారా వ్యక్తిగత యాప్‌లు సస్పెండ్ చేయబడ్డాయి"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"పాలసీ పాటించబడుతోందో లేదో తనిఖీ చేయడానికి ఇక్కడ ట్యాప్ చేయండి."</string>
     <string name="me" msgid="6207584824693813140">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"టాబ్లెట్ ఎంపికలు"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ఎంపికలు"</string>
@@ -1613,8 +1611,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయి"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> నుండి, బ్యాక్‌గ్రౌండ్‌లో ప్రారంభమైన ఫోర్ గ్రౌండ్ సేవకు భవిష్యత్తు R బిల్డ్స్‌లో \'ఉపయోగంలో వున్నప్పుడు\' అనుమతి ఉండదు. దయచేసి go/r-bg-fgs-restrictionను చూసి బగ్ నివేదికను ఫైల్ చేయండి."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
@@ -1852,8 +1849,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"మరింత తెలుసుకోండి"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"యాప్‌పై వున్న పాజ్‌ను తొలగించండి"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"కార్యాలయ ప్రొఫైల్‌ని ఆన్ చేయాలా?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"మీ కార్యాలయ యాప్‌లు, నోటిఫికేషన్‌లు, డేటా మరియు ఇతర కార్యాలయ ప్రొఫైల్ ఫీచర్‌లు ఆన్ చేయబడతాయి"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ఆన్ చేయి"</string>
@@ -2007,12 +2003,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"స్క్రీన్ విభజనను టోగుల్ చేయి"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"స్క్రీన్‌ను లాక్ చేయి"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"స్క్రీన్‌షాట్"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"యాక్సెసిబిలిటీ మెను"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> క్యాప్షన్ బార్."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> పరిమితం చేయబడిన బకెట్‌లో ఉంచబడింది"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"వ్యక్తిగతం"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"కార్యాలయం"</string>
 </resources>

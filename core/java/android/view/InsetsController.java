@@ -70,7 +70,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private static final int ANIMATION_DURATION_HIDE_MS = 340;
     private static final int PENDING_CONTROL_TIMEOUT_MS = 2000;
 
-    static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    public static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
 
     /**
      * Layout mode during insets animation: The views should be laid out as if the changing inset
@@ -78,7 +78,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * be called as if the changing insets types are shown, which will result in the views being
      * laid out as if the insets are fully shown.
      */
-    static final int LAYOUT_INSETS_DURING_ANIMATION_SHOWN = 0;
+    public static final int LAYOUT_INSETS_DURING_ANIMATION_SHOWN = 0;
 
     /**
      * Layout mode during insets animation: The views should be laid out as if the changing inset
@@ -86,7 +86,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * be called as if the changing insets types are hidden, which will result in the views being
      * laid out as if the insets are fully hidden.
      */
-    static final int LAYOUT_INSETS_DURING_ANIMATION_HIDDEN = 1;
+    public static final int LAYOUT_INSETS_DURING_ANIMATION_HIDDEN = 1;
 
     /**
      * Determines the behavior of how the views should be laid out during an insets animation that
@@ -149,7 +149,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @Override
         public void set(WindowInsetsAnimationController controller, Insets value) {
             controller.setInsetsAndAlpha(
-                    value, 1f /* alpha */, (((DefaultAnimationControlListener)
+                    value, 1f /* alpha */, (((InternalAnimationControlListener)
                             ((InsetsAnimationControlImpl) controller).getListener())
                                     .getRawFraction()));
         }
@@ -166,7 +166,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private ObjectAnimator mAnimator;
         protected boolean mShow;
 
-        InternalAnimationControlListener(boolean show) {
+        public InternalAnimationControlListener(boolean show) {
             mShow = show;
         }
 
@@ -214,7 +214,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return (float) mAnimator.getCurrentPlayTime() / mAnimator.getDuration();
         }
 
-        protected long getDurationMs() {
+        /**
+         * To get the animation duration in MS.
+         */
+        public long getDurationMs() {
             if (mAnimator != null) {
                 return mAnimator.getDuration();
             }

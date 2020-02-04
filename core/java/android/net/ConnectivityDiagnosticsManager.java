@@ -25,13 +25,16 @@ import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 /**
@@ -57,6 +60,11 @@ import java.util.concurrent.Executor;
  * </ul>
  */
 public class ConnectivityDiagnosticsManager {
+    /** @hide */
+    @VisibleForTesting
+    public static final Map<ConnectivityDiagnosticsCallback, ConnectivityDiagnosticsBinder>
+            sCallbacks = new ConcurrentHashMap<>();
+
     private final Context mContext;
     private final IConnectivityManager mService;
 
@@ -631,8 +639,9 @@ public class ConnectivityDiagnosticsManager {
     /**
      * Registers a ConnectivityDiagnosticsCallback with the System.
      *
-     * <p>Only apps that offer network connectivity to the user are allowed to register callbacks.
-     * This includes:
+     * <p>Only apps that offer network connectivity to the user should be registering callbacks.
+     * These are the only apps whose callbacks will be invoked by the system. Apps considered to
+     * meet these conditions include:
      *
      * <ul>
      *   <li>Carrier apps with active subscriptions
@@ -640,15 +649,14 @@ public class ConnectivityDiagnosticsManager {
      *   <li>WiFi Suggesters
      * </ul>
      *
-     * <p>Callbacks will be limited to receiving notifications for networks over which apps provide
-     * connectivity.
+     * <p>Callbacks registered by apps not meeting the above criteria will not be invoked.
      *
      * <p>If a registering app loses its relevant permissions, any callbacks it registered will
      * silently stop receiving callbacks.
      *
-     * <p>Each register() call <b>MUST</b> use a unique ConnectivityDiagnosticsCallback instance. If
-     * a single instance is registered with multiple NetworkRequests, an IllegalArgumentException
-     * will be thrown.
+     * <p>Each register() call <b>MUST</b> use a ConnectivityDiagnosticsCallback instance that is
+     * not currently registered. If a ConnectivityDiagnosticsCallback instance is registered with
+     * multiple NetworkRequests, an IllegalArgumentException will be thrown.
      *
      * @param request The NetworkRequest that will be used to match with Networks for which
      *     callbacks will be fired
@@ -657,15 +665,21 @@ public class ConnectivityDiagnosticsManager {
      *     System
      * @throws IllegalArgumentException if the same callback instance is registered with multiple
      *     NetworkRequests
-     * @throws SecurityException if the caller does not have appropriate permissions to register a
-     *     callback
      */
     public void registerConnectivityDiagnosticsCallback(
             @NonNull NetworkRequest request,
             @NonNull Executor e,
             @NonNull ConnectivityDiagnosticsCallback callback) {
-        // TODO(b/143187964): implement ConnectivityDiagnostics functionality
-        throw new UnsupportedOperationException("registerCallback() not supported yet");
+        final ConnectivityDiagnosticsBinder binder = new ConnectivityDiagnosticsBinder(callback, e);
+        if (sCallbacks.putIfAbsent(callback, binder) != null) {
+            throw new IllegalArgumentException("Callback is currently registered");
+        }
+
+        try {
+            mService.registerConnectivityDiagnosticsCallback(binder, request);
+        } catch (RemoteException exception) {
+            exception.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -678,7 +692,15 @@ public class ConnectivityDiagnosticsManager {
      */
     public void unregisterConnectivityDiagnosticsCallback(
             @NonNull ConnectivityDiagnosticsCallback callback) {
-        // TODO(b/143187964): implement ConnectivityDiagnostics functionality
-        throw new UnsupportedOperationException("registerCallback() not supported yet");
+        // unconditionally removing from sCallbacks prevents race conditions here, since remove() is
+        // atomic.
+        final ConnectivityDiagnosticsBinder binder = sCallbacks.remove(callback);
+        if (binder == null) return;
+
+        try {
+            mService.unregisterConnectivityDiagnosticsCallback(binder);
+        } catch (RemoteException exception) {
+            exception.rethrowFromSystemServer();
+        }
     }
 }

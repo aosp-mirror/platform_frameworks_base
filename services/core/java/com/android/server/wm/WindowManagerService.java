@@ -397,7 +397,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see #HIERARCHICAL_ANIMATIONS_PROPERTY
      */
     static boolean sHierarchicalAnimations =
-            SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, false);
+            SystemProperties.getBoolean(HIERARCHICAL_ANIMATIONS_PROPERTY, true);
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
@@ -938,7 +938,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Whether the UI is currently running in touch mode (not showing
      * navigational focus because the user is directly pressing the screen).
      */
-    boolean mInTouchMode;
+    private boolean mInTouchMode;
 
     private ViewServer mViewServer;
     final ArrayList<WindowChangeListener> mWindowChangeListeners = new ArrayList<>();
@@ -3461,6 +3461,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager.setInTouchMode(mode);
     }
 
+    boolean getInTouchMode() {
+        synchronized (mGlobalLock) {
+            return mInTouchMode;
+        }
+    }
+
     public void showEmulatorDisplayOverlayIfNeeded() {
         if (mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowEnableCircularEmulatorDisplayOverlay)
@@ -5906,7 +5912,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void dumpDebugLocked(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         mPolicy.dumpDebug(proto, POLICY);
-        mRoot.dumpDebugInner(proto, ROOT_WINDOW_CONTAINER, logLevel);
+        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
         final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
         if (topFocusedDisplayContent.mCurrentFocus != null) {
             topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);

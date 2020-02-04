@@ -20,11 +20,9 @@
 
 #include <android/frameworks/stats/1.0/types.h>
 #include <android/util/ProtoOutputStream.h>
-#include <log/log_read.h>
 #include <private/android_logger.h>
 #include <stats_event_list.h>
 #include <stats_event.h>
-#include <utils/Errors.h>
 
 #include <string>
 #include <vector>

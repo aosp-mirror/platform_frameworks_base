@@ -387,7 +387,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public void getOutline(@NonNull Outline outline) {
-        outline.setConvexPath(mMask);
+        outline.setPath(mMask);
     }
 
     /** @hide */

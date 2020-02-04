@@ -87,7 +87,7 @@ public class RuleBinarySerializer implements RuleSerializer {
             }
 
             if (rules.size() > TOTAL_RULE_SIZE_LIMIT) {
-                throw new IllegalArgumentException("Too many rules provided.");
+                throw new IllegalArgumentException("Too many rules provided: " + rules.size());
             }
 
             // Determine the indexing groups and the order of the rules within each indexed group.
@@ -134,7 +134,11 @@ public class RuleBinarySerializer implements RuleSerializer {
                         .map(list -> list.size())
                         .collect(Collectors.summingInt(Integer::intValue));
         if (totalRuleCount > ruleSizeLimit) {
-            throw new IllegalArgumentException("Too many rules provided in the indexing group.");
+            throw new IllegalArgumentException(
+                    "Too many rules provided in the indexing group. Provided "
+                            + totalRuleCount
+                            + " limit "
+                            + ruleSizeLimit);
         }
     }
 

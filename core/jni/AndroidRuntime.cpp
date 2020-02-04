@@ -108,6 +108,7 @@ namespace android {
 extern int register_android_app_admin_SecurityLog(JNIEnv* env);
 extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
+extern int register_android_util_StatsLog(JNIEnv* env);
 extern int register_android_util_StatsLogInternal(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_MemoryIntArray(JNIEnv* env);
@@ -143,6 +144,7 @@ extern int register_android_os_Parcel(JNIEnv* env);
 extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_VintfObject(JNIEnv *env);
 extern int register_android_os_VintfRuntimeInfo(JNIEnv *env);
+extern int register_android_os_storage_StorageManager(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
@@ -1445,6 +1447,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_EventLog),
     REG_JNI(register_android_util_Log),
     REG_JNI(register_android_util_MemoryIntArray),
+    REG_JNI(register_android_util_StatsLog),
     REG_JNI(register_android_util_StatsLogInternal),
     REG_JNI(register_android_app_admin_SecurityLog),
     REG_JNI(register_android_content_AssetManager),
@@ -1466,6 +1469,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_HwParcel),
     REG_JNI(register_android_os_HwRemoteBinder),
     REG_JNI(register_android_os_NativeHandle),
+    REG_JNI(register_android_os_storage_StorageManager),
     REG_JNI(register_android_os_VintfObject),
     REG_JNI(register_android_os_VintfRuntimeInfo),
     REG_JNI(register_android_service_DataLoaderService),

@@ -194,6 +194,11 @@ public class AmbientDisplayConfiguration {
         return !TextUtils.isEmpty(ambientDisplayComponent());
     }
 
+    /** {@hide} */
+    public boolean dozeSuppressed(int user) {
+        return boolSettingDefaultOff(Settings.Secure.SUPPRESS_DOZE, user);
+    }
+
     private boolean alwaysOnDisplayAvailable() {
         return mContext.getResources().getBoolean(R.bool.config_dozeAlwaysOnDisplayAvailable);
     }

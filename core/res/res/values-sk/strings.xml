@@ -198,10 +198,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Vaše zariadenie bude vymazané"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Daná aplikácia na správu sa nedá použiť. Vaše zariadenie bude vymazané.\n\nV prípade otázok kontaktujte správcu organizácie."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Tlač zakázala aplikácia <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Osobné aplikácie boli pozastavené správcom"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Klepnutím tu skontrolujte súlad s pravidlami."</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabletu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Možnosti zariadenia Android TV"</string>
@@ -1657,8 +1655,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odstrániť"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Služba na popredí spustená na pozadí z balíka <xliff:g id="PACKAGENAME">%1$s</xliff:g> nebude mať v budúcich zostavách R povolenie Počas používania. Prejdite na go/r-bg-fgs-restriction a odošlite hlásenie chyby."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšiť hlasitosť nad odporúčanú úroveň?\n\nDlhodobé počúvanie pri vysokej hlasitosti môže poškodiť váš sluch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použiť skratku dostupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Keď je skratka zapnutá, stlačením obidvoch tlačidiel hlasitosti na tri sekundy spustíte funkciu dostupnosti.\n\n Aktuálna funkcia dostupnosti:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkciu môžete zmeniť v časti Nastavenia &gt; Dostupnosť."</string>
@@ -1916,8 +1913,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikácia nie je k dispozícii"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie je momentálne k dispozícii. Spravuje to aplikácia <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ďalšie informácie"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Znova spustiť aplikáciu"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Zapnúť pracovný profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Pracovné aplikácie, upozornenia, dáta a ďalšie funkcie pracovného profilu sa zapnú"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnúť"</string>
@@ -2075,12 +2071,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Prepnúť rozdelenú obrazovku"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Uzamknúť obrazovku"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímka obrazovky"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Ponuka Dostupnosť"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Popis aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Balík <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> bol vložený do kontajnera OBMEDZENÉ"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Osobné"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Práca"</string>
 </resources>

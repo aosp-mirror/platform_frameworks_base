@@ -377,9 +377,9 @@ public class AppTransitionController {
                     transitioningDecendants.add(app);
                 }
             }
-            wc.applyAnimation(animLp, transit, visible, voiceInteraction, () -> {
+            wc.applyAnimation(animLp, transit, visible, voiceInteraction, (type, anim) -> {
                 for (int j = 0; j < transitioningDecendants.size(); ++j) {
-                    transitioningDecendants.get(j).onAnimationFinished();
+                    transitioningDecendants.get(j).onAnimationFinished(type, anim);
                 }
             });
         }

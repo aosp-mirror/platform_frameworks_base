@@ -37,6 +37,7 @@ import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -103,14 +104,15 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         AnimationAdapter adapter = mController.addAnimation(activity.getTask(),
                 false /* isRecentTaskInvisible */);
-        adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+        adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_RECENTS,
+                mFinishedCallback);
 
         // Remove the app window so that the animation target can not be created
         activity.removeImmediately();
         mController.startAnimation();
 
         // Verify that the finish callback to reparent the leash is called
-        verify(mFinishedCallback).onAnimationFinished(eq(adapter));
+        verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_RECENTS), eq(adapter));
         // Verify the animation canceled callback to the app was made
         verify(mMockRunner).onAnimationCanceled(null /* taskSnapshot */);
         verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
@@ -122,7 +124,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         AnimationAdapter adapter = mController.addAnimation(activity.getTask(),
                 false /* isRecentTaskInvisible */);
-        adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+        adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_RECENTS,
+                mFinishedCallback);
 
         // Remove the app window so that the animation target can not be created
         activity.removeImmediately();

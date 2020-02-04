@@ -457,6 +457,7 @@ interface IDevicePolicyManager {
     List<String> getCrossProfilePackages(in ComponentName admin);
 
     List<String> getAllCrossProfilePackages();
+    List<String> getDefaultCrossProfilePackages();
 
     boolean isManagedKiosk();
     boolean isUnattendedManagedKiosk();

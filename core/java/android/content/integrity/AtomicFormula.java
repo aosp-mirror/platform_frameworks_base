@@ -460,14 +460,14 @@ public abstract class AtomicFormula extends IntegrityFormula {
         }
 
         private static String hashValue(@Key int key, String value) {
-            // Hash the string value unless it is a PACKAGE_NAME or INSTALLER_NAME and the value is
-            // less than 33 characters.
-            if (value.length() <= 32) {
+            // Hash the string value if it is a PACKAGE_NAME or INSTALLER_NAME and the value is
+            // greater than 32 characters.
+            if (value.length() > 32) {
                 if (key == PACKAGE_NAME || key == INSTALLER_NAME) {
-                    return value;
+                    return hash(value);
                 }
             }
-            return hash(value);
+            return value;
         }
 
         private static String hash(String value) {

@@ -42,11 +42,11 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
@@ -253,7 +253,7 @@ public class RescueParty {
 
     private static void executeRescueLevelInternal(Context context, int level, @Nullable
             String failedPackage) throws Exception {
-        StatsLog.write(StatsLog.RESCUE_PARTY_RESET_REPORTED, level);
+        FrameworkStatsLog.write(FrameworkStatsLog.RESCUE_PARTY_RESET_REPORTED, level);
         switch (level) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
                 resetAllSettings(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS, failedPackage);
@@ -393,8 +393,8 @@ public class RescueParty {
         @Override
         public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
                 @FailureReasons int failureReason) {
-            if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
-                    || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
+            if (!isDisabled() && (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
+                    || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING)) {
                 return mapRescueLevelToUserImpact(getNextRescueLevel());
             } else {
                 return PackageHealthObserverImpact.USER_IMPACT_NONE;

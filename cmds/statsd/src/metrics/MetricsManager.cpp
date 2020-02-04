@@ -18,9 +18,7 @@
 
 #include "MetricsManager.h"
 
-#include <log/logprint.h>
 #include <private/android_filesystem_config.h>
-#include <utils/SystemClock.h>
 
 #include "CountMetricProducer.h"
 #include "atoms_info.h"
@@ -42,10 +40,8 @@ using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
 
-using std::make_unique;
 using std::set;
 using std::string;
-using std::unordered_map;
 using std::vector;
 
 namespace android {

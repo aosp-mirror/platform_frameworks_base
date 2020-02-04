@@ -83,6 +83,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         super(sComponentName);
         setCallback(callback);
 
+        mIsSystemRouteProvider = true;
+
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
 

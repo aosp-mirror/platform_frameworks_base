@@ -431,7 +431,7 @@ public class BubbleFlyoutView extends FrameLayout {
             final float interpolatedRadius = getInterpolatedRadius();
             rectPath.addRoundRect(mBgRect, interpolatedRadius,
                     interpolatedRadius, Path.Direction.CW);
-            outline.setConvexPath(rectPath);
+            outline.setPath(rectPath);
 
             // Get rid of the triangle path once it has disappeared behind the flyout.
             if (mPercentStillFlyout > 0.5f) {

@@ -102,6 +102,10 @@ public class DozeMachine {
             }
         }
 
+        boolean isAlwaysOn() {
+            return this == DOZE_AOD || this == DOZE_AOD_DOCKED;
+        }
+
         int screenState(DozeParameters parameters) {
             switch (this) {
                 case UNINITIALIZED:
@@ -323,6 +327,11 @@ public class DozeMachine {
     private State transitionPolicy(State requestedState) {
         if (mState == State.FINISH) {
             return State.FINISH;
+        }
+        if (mConfig.dozeSuppressed(UserHandle.USER_CURRENT) && requestedState.isAlwaysOn()) {
+            Log.i(TAG, "Doze is suppressed. Suppressing state: " + requestedState);
+            mDozeLog.traceDozeSuppressed(requestedState);
+            return State.DOZE;
         }
         if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING
                 || mState == State.DOZE_AOD || mState == State.DOZE)

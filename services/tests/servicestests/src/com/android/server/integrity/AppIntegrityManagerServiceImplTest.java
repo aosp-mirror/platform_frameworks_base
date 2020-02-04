@@ -23,6 +23,8 @@ import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_INSTALLER_UID;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +45,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.integrity.AppInstallMetadata;
 import android.content.integrity.AtomicFormula;
+import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -103,12 +106,10 @@ public class AppIntegrityManagerServiceImplTest {
 
     private static final String PLAY_STORE_PKG = "com.android.vending";
     private static final String ADB_INSTALLER = "adb";
-    private static final String PLAY_STORE_CERT =
-            "play_store_cert";
+    private static final String PLAY_STORE_CERT = "play_store_cert";
     private static final String ADB_CERT = "";
 
-    @org.junit.Rule
-    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @org.junit.Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     @Mock PackageManagerInternal mPackageManagerInternal;
     @Mock Context mMockContext;
@@ -134,13 +135,14 @@ public class AppIntegrityManagerServiceImplTest {
                         mPackageManagerInternal,
                         mRuleEvaluationEngine,
                         mIntegrityFileManager,
-                        mHandler);
+                        mHandler,
+                        /* checkIntegrityForRuleProviders= */ true);
 
         mSpyPackageManager = spy(mRealContext.getPackageManager());
         // setup mocks to prevent NPE
         when(mMockContext.getPackageManager()).thenReturn(mSpyPackageManager);
         when(mMockContext.getResources()).thenReturn(mMockResources);
-        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[]{});
+        when(mMockResources.getStringArray(anyInt())).thenReturn(new String[] {});
         when(mIntegrityFileManager.initialized()).thenReturn(true);
     }
 
@@ -152,8 +154,7 @@ public class AppIntegrityManagerServiceImplTest {
         makeUsSystemApp();
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(
-                                AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
         TestUtils.assertExpectException(
                 SecurityException.class,
@@ -171,8 +172,7 @@ public class AppIntegrityManagerServiceImplTest {
         whitelistUsAsRuleProvider();
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(
-                                AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
         TestUtils.assertExpectException(
                 SecurityException.class,
@@ -191,8 +191,7 @@ public class AppIntegrityManagerServiceImplTest {
         makeUsSystemApp();
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(
-                                AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
 
         // no SecurityException
@@ -207,12 +206,7 @@ public class AppIntegrityManagerServiceImplTest {
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
                 Arrays.asList(
-                        new Rule(
-                                new AtomicFormula.StringAtomicFormula(
-                                        AtomicFormula.PACKAGE_NAME,
-                                        PACKAGE_NAME,
-                                        /* isHashedValue= */ false),
-                                Rule.DENY));
+                        new Rule(IntegrityFormula.PACKAGE_NAME.equalTo(PACKAGE_NAME), Rule.DENY));
 
         mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
         runJobInHandler();
@@ -231,12 +225,7 @@ public class AppIntegrityManagerServiceImplTest {
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
                 Arrays.asList(
-                        new Rule(
-                                new AtomicFormula.StringAtomicFormula(
-                                        AtomicFormula.PACKAGE_NAME,
-                                        PACKAGE_NAME,
-                                        /* isHashedValue= */ false),
-                                Rule.DENY));
+                        new Rule(IntegrityFormula.PACKAGE_NAME.equalTo(PACKAGE_NAME), Rule.DENY));
 
         mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
         runJobInHandler();
@@ -373,8 +362,8 @@ public class AppIntegrityManagerServiceImplTest {
         verify(mMockContext)
                 .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
         Intent intent = makeVerificationIntent(TEST_FRAMEWORK_PACKAGE);
-        when(mRuleEvaluationEngine.evaluate(any(), any())).thenReturn(
-                IntegrityCheckResult.deny(/* rule= */ null));
+        when(mRuleEvaluationEngine.evaluate(any(), any()))
+                .thenReturn(IntegrityCheckResult.deny(/* rule= */ null));
 
         broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
         runJobInHandler();
@@ -384,10 +373,20 @@ public class AppIntegrityManagerServiceImplTest {
                         1, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
     }
 
+    @Test
+    public void getCurrentRules() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
+        Rule rule = new Rule(IntegrityFormula.PACKAGE_NAME.equalTo("package"), Rule.DENY);
+        when(mIntegrityFileManager.readRules(any())).thenReturn(Arrays.asList(rule));
+
+        assertThat(mService.getCurrentRules().getList()).containsExactly(rule);
+    }
+
     private void whitelistUsAsRuleProvider() {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getStringArray(R.array.config_integrityRuleProviderPackages))
-                .thenReturn(new String[]{TEST_FRAMEWORK_PACKAGE});
+                .thenReturn(new String[] {TEST_FRAMEWORK_PACKAGE});
         when(mMockContext.getResources()).thenReturn(mockResources);
     }
 
@@ -409,14 +408,11 @@ public class AppIntegrityManagerServiceImplTest {
 
     private Intent makeVerificationIntent() throws Exception {
         PackageInfo packageInfo =
-                mRealContext.getPackageManager()
+                mRealContext
+                        .getPackageManager()
                         .getPackageInfo(TEST_FRAMEWORK_PACKAGE, PackageManager.GET_SIGNATURES);
-        doReturn(packageInfo)
-                .when(mSpyPackageManager)
-                .getPackageInfo(eq(INSTALLER), anyInt());
-        doReturn(1)
-                .when(mSpyPackageManager)
-                .getPackageUid(eq(INSTALLER), anyInt());
+        doReturn(packageInfo).when(mSpyPackageManager).getPackageInfo(eq(INSTALLER), anyInt());
+        doReturn(1).when(mSpyPackageManager).getPackageUid(eq(INSTALLER), anyInt());
         return makeVerificationIntent(INSTALLER);
     }
 

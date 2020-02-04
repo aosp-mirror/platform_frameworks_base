@@ -1218,19 +1218,21 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
     SET(BasebandCn0DbHz, measurement_V2_1->basebandCN0DbHz);
 
     if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_RECEIVER_ISB) {
-        SET(ReceiverInterSignalBiasNs, measurement_V2_1->receiverInterSignalBiasNs);
+        SET(ReceiverInterSignalBiasNanos, measurement_V2_1->receiverInterSignalBiasNs);
     }
 
     if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_RECEIVER_ISB_UNCERTAINTY) {
-        SET(ReceiverInterSignalBiasUncertaintyNs, measurement_V2_1->receiverInterSignalBiasUncertaintyNs);
+        SET(ReceiverInterSignalBiasUncertaintyNanos,
+            measurement_V2_1->receiverInterSignalBiasUncertaintyNs);
     }
 
     if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB) {
-        SET(SatelliteInterSignalBiasNs, measurement_V2_1->satelliteInterSignalBiasNs);
+        SET(SatelliteInterSignalBiasNanos, measurement_V2_1->satelliteInterSignalBiasNs);
     }
 
     if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB_UNCERTAINTY) {
-        SET(SatelliteInterSignalBiasUncertaintyNs, measurement_V2_1->satelliteInterSignalBiasUncertaintyNs);
+        SET(SatelliteInterSignalBiasUncertaintyNanos,
+            measurement_V2_1->satelliteInterSignalBiasUncertaintyNs);
     }
 }
 

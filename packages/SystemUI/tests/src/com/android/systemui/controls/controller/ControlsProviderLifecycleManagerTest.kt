@@ -17,6 +17,7 @@
 package com.android.systemui.controls.controller
 
 import android.content.ComponentName
+import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.IControlsActionCallback
 import android.service.controls.IControlsLoadCallback
@@ -86,6 +87,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
                 loadCallback,
                 actionCallback,
                 subscriber,
+                UserHandle.of(0),
                 componentName
         )
     }
@@ -97,13 +99,13 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Test
     fun testBindService() {
-        manager.bindPermanently()
+        manager.bindService()
         assertTrue(mContext.isBound(componentName))
     }
 
     @Test
     fun testUnbindService() {
-        manager.bindPermanently()
+        manager.bindService()
         manager.unbindService()
         assertFalse(mContext.isBound(componentName))
     }
@@ -123,7 +125,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     fun testMaybeUnbind_bindingAndCallback() {
         manager.maybeBindAndLoad {}
 
-        manager.maybeUnbindAndRemoveCallback()
+        manager.unbindService()
         assertFalse(mContext.isBound(componentName))
         assertNull(manager.lastLoadCallback)
     }

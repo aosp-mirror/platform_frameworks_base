@@ -3672,6 +3672,10 @@
     <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"
                 android:protectionLevel="signature|installer" />
 
+    <!-- @hide Allows an application to upgrade runtime permissions. -->
+    <permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to whitelist restricted permissions
          on any of the whitelists.
     @hide -->
@@ -4234,7 +4238,7 @@
 
     <!-- @SystemApi @TestApi @hide Allows managing apk level rollbacks. -->
     <permission android:name="android.permission.MANAGE_ROLLBACKS"
-        android:protectionLevel="signature|verifier" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- @TestApi @hide Allows testing apk level rollbacks. -->
     <permission android:name="android.permission.TEST_MANAGE_ROLLBACKS"

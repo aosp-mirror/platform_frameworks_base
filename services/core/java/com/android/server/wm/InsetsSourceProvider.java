@@ -24,6 +24,7 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
 import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED;
 
 import android.annotation.NonNull;
@@ -34,11 +35,11 @@ import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.util.function.TriConsumer;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -185,6 +186,17 @@ class InsetsSourceProvider {
         }
     }
 
+    /** @return A new source computed by the specified window frame in the given display frames. */
+    InsetsSource createSimulatedSource(DisplayFrames displayFrames, WindowFrames windowFrames) {
+        final InsetsSource source = new InsetsSource(mSource);
+        mTmpRect.set(windowFrames.mFrame);
+        if (mFrameProvider != null) {
+            mFrameProvider.accept(displayFrames, mWin, mTmpRect);
+        }
+        source.setFrame(mTmpRect);
+        return source;
+    }
+
     /**
      * Called when a layout pass has occurred.
      */
@@ -243,7 +255,8 @@ class InsetsSourceProvider {
         mAdapter = new ControlAdapter();
         setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
         final Transaction t = mDisplayContent.getPendingTransaction();
-        mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */);
+        mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
+                ANIMATION_TYPE_INSETS_CONTROL, null /* animationFinishedCallback */);
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         final long frameNumber = mFinishSeamlessRotateFrameNumber;
         mFinishSeamlessRotateFrameNumber = -1;
@@ -348,7 +361,7 @@ class InsetsSourceProvider {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
-                OnAnimationFinishedCallback finishCallback) {
+                @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
             // TODO(b/118118435): We can remove the type check when implementing the transient bar
             //                    animation.
             if (mSource.getType() == ITYPE_IME) {

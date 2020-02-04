@@ -359,7 +359,7 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getPersonalListAdapter());
         mPersonalPackageMonitor.register(
                 this, getMainLooper(), getPersonalProfileUserHandle(), false);
-        if (hasWorkProfile()) {
+        if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
             mWorkPackageMonitor = createPackageMonitor(
                     mMultiProfilePagerAdapter.getWorkListAdapter());
             mWorkPackageMonitor.register(this, getMainLooper(), getWorkProfileUserHandle(), false);
@@ -725,7 +725,7 @@ public class ResolverActivity extends Activity implements
         if (!mRegistered) {
             mPersonalPackageMonitor.register(this, getMainLooper(),
                     getPersonalProfileUserHandle(), false);
-            if (hasWorkProfile()) {
+            if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
                 if (mWorkPackageMonitor == null) {
                     mWorkPackageMonitor = createPackageMonitor(
                             mMultiProfilePagerAdapter.getWorkListAdapter());
@@ -1155,7 +1155,9 @@ public class ResolverActivity extends Activity implements
     }
 
     private void safelyStartActivityInternal(TargetInfo cti) {
-        mPersonalPackageMonitor.unregister();
+        if (mPersonalPackageMonitor != null) {
+            mPersonalPackageMonitor.unregister();
+        }
         if (mWorkPackageMonitor != null) {
             mWorkPackageMonitor.unregister();
         }

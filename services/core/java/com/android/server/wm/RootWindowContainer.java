@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -41,12 +40,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
-import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
-import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static com.android.server.am.ActivityStackSupervisorProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -74,6 +67,9 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.RootWindowContainerProto.DISPLAYS;
+import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
+import static com.android.server.wm.RootWindowContainerProto.PENDING_ACTIVITIES;
 import static com.android.server.wm.RootWindowContainerProto.WINDOWS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
@@ -1278,7 +1274,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    public void dumpDebugInner(ProtoOutputStream proto, long fieldId,
+    @Override
+    public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
@@ -1290,14 +1287,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent = mChildren.get(i);
-                displayContent.dumpDebugInner(proto, DISPLAYS, logLevel);
+                displayContent.dumpDebug(proto, DISPLAYS, logLevel);
             }
         }
         if (logLevel == WindowTraceLogLevel.ALL) {
             forAllWindows((w) -> {
-                w.writeIdentifierToProto(proto, WINDOWS);
+                w.dumpDebug(proto, WINDOWS, logLevel);
             }, true);
         }
+
+        mStackSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
+        proto.write(IS_HOME_RECENTS_COMPONENT,
+                mStackSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
+        mService.getActivityStartController().dumpDebug(proto, PENDING_ACTIVITIES);
+
         proto.end(token);
     }
 
@@ -3541,15 +3544,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    public void dumpDisplays(PrintWriter pw) {
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final DisplayContent display = getChildAt(i);
-            pw.print("[id:" + display.mDisplayId + " stacks:");
-            display.dumpStacks(pw);
-            pw.print("]");
-        }
-    }
-
     boolean dumpActivities(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
             String dumpPackage) {
         boolean printed = false;
@@ -3576,34 +3570,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 false, dumpPackage, true, "  Activities waiting to stop:", null);
 
         return printed;
-    }
-
-    @Override
-    public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
-        final long token = proto.start(fieldId);
-        dumpDebugInner(proto, ROOT_WINDOW_CONTAINER, logLevel);
-        for (int displayNdx = 0; displayNdx < getChildCount(); ++displayNdx) {
-            final DisplayContent displayContent = getChildAt(displayNdx);
-            displayContent.dumpDebug(proto,
-                    com.android.server.am.ActivityStackSupervisorProto.DISPLAYS, logLevel);
-        }
-        mStackSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
-        // TODO(b/111541062): Update tests to look for resumed activities on all displays
-        final ActivityStack focusedStack = getTopDisplayFocusedStack();
-        if (focusedStack != null) {
-            proto.write(FOCUSED_STACK_ID, focusedStack.getRootTaskId());
-            final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
-            if (focusedActivity != null) {
-                focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
-            }
-        } else {
-            proto.write(FOCUSED_STACK_ID, INVALID_STACK_ID);
-        }
-        proto.write(IS_HOME_RECENTS_COMPONENT,
-                mStackSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
-        mService.getActivityStartController().dumpDebug(proto, PENDING_ACTIVITIES);
-        proto.end(token);
     }
 
     private final class SleepTokenImpl extends ActivityTaskManagerInternal.SleepToken {

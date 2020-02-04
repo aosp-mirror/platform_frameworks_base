@@ -194,10 +194,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"មិនអាច​ប្រើ​កម្មវិធី​អ្នកគ្រប់គ្រង​បានទេ។ ឧបករណ៍​របស់អ្នក​នឹងលុប​ឥឡូវនេះ។\n\nប្រសិនបើ​អ្នកមាន​សំណួរផ្សេងៗ​ សូមទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​ស្ថាប័ន​របស់​អ្នក។"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"អ្នកគ្រប់គ្រង​បានផ្អាក​កម្មវិធី​ផ្ទាល់ខ្លួន"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"ចុច​ត្រង់នេះ ដើម្បី​ពិនិត្យមើល​ការអនុលោម​តាម​គោលការណ៍​។"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ជម្រើស Android TV"</string>
@@ -1615,8 +1613,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%2$d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី។"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"លុប​ចេញ"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"សេវាកម្ម​ផ្ទៃខាងមុខ​ដែលចាប់ផ្ដើមដោយ​ផ្ទៃខាងក្រោយ​ពី <xliff:g id="PACKAGENAME">%1$s</xliff:g> នឹង​មិនមាន​ការអនុញ្ញាត​ខណៈពេល​កំពុង​ប្រើប្រាស់​ទេ នៅក្នុង​កំណែបង្កើត R នៅពេល​អនាគត​។ សូម​មើល go/r-bg-fgs-restriction និង​ផ្ញើ​របាយការណ៍​អំពី​បញ្ហា​។"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"នៅពេល​ផ្លូវកាត់​នេះបើក ការ​ចុច​ប៊ូតុង​កម្រិត​សំឡេង​ទាំង​ពីរ​ឲ្យ​ជាប់​រយៈពេល​ 3 វិនាទីនឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយស្រួល។\n\n មុខងារ​ភាពងាយស្រួល​បច្ចុប្បន្ន៖\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n អ្នក​អាច​ផ្លាស់​ប្តូរ​មុខងារ​នេះ​បាន​នៅក្នុង​ការ កំណត់ &gt; ភាព​ងាយស្រួល។"</string>
@@ -1854,8 +1851,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"​កម្មវិធី​មិន​អាច​ប្រើ​បានទេ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> មិន​អាច​ប្រើ​បាន​ទេនៅពេលនេះ។ វា​ស្ថិត​ក្រោម​ការគ្រប់គ្រងរបស់ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ។"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ស្វែងយល់បន្ថែម"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ឈប់ផ្អាក​កម្មវិធី"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"បើក​កម្រង​ព័ត៌មាន​ការ​ងារ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"បើក"</string>
@@ -2009,12 +2005,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"បិទ/បើក​មុខងារ​បំបែកអេក្រង់"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"អេក្រង់ចាក់សោ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"រូបថតអេក្រង់"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"ផ្ទាល់ខ្លួន"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"ការងារ"</string>
 </resources>

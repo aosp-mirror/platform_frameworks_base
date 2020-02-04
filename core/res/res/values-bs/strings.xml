@@ -196,10 +196,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Uređaj će biti izbrisan"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Nije moguće koristiti aplikaciju administratora. Potpuno će se izbrisati podaci na vašem uređaju.\n\nAko imate pitanja, obratite se administratoru svoje organizacije."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Lične aplikacije je obustavio administrator"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Dodirnite ovdje da provjerite usklađenost s pravilima."</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije tableta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcije Android TV uređaja"</string>
@@ -1637,8 +1635,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ukloni"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Usluge iz prvog plana započete u pozadini s web lokacije <xliff:g id="PACKAGENAME">%1$s</xliff:g> neće imati odobrenje za funkciju \"za vrijeme korištenja\" u budućim R verzijama. Pogledajte go/r-bg-fgs-restriction i podnesite izvještaj o greškama."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite li pojačati zvuk iznad preporučenog nivoa?\n\nDužim slušanjem glasnog zvuka možete oštetiti sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li koristiti Prečicu za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Kada je prečica uključena, pritiskom na oba dugmeta za podešavanje jačine zvuka u trajanju od 3 sekunde pokrenut će se funkcija za pristupačnost.\n\n Trenutna funkcija za pristupačnost je:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkciju možete promijeniti ako odete u Postavke &gt; Pristupačnost."</string>
@@ -1886,8 +1883,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikacija nije dostupna"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikacija <xliff:g id="APP_NAME_0">%1$s</xliff:g> trenutno nije dostupna. Ovim upravlja aplikacija <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saznajte više"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Ponovo aktiviraj aplikaciju"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Uključiti radni profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Uključit će se poslovne aplikacije, obavještenja, podaci i druge funkcije radnog profila"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Uključi"</string>
@@ -2024,7 +2020,7 @@
     <string name="mime_type_spreadsheet_ext" msgid="8720173181137254414">"<xliff:g id="EXTENSION">%1$s</xliff:g> tabela"</string>
     <string name="mime_type_presentation" msgid="1145384236788242075">"Prezentacija"</string>
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> prezentacija"</string>
-    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth će ostati uključen i u načinu rada u avionu"</string>
+    <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth će ostati uključen tokom načina rada u avionu"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Učitavanje"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajl</item>
@@ -2043,12 +2039,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Uključi/isključi podijeljeni ekran"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaključavanje ekrana"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snimak ekrana"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Meni za pristupačnost"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Traka za natpis aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je stavljen u odjeljak OGRANIČENO"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Lično"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Posao"</string>
 </resources>

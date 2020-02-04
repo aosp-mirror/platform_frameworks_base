@@ -118,6 +118,7 @@ public class DozeFactory {
                 new DozeWallpaperState(mWallpaperManager, mBiometricUnlockController,
                         mDozeParameters),
                 new DozeDockHandler(config, machine, mDockManager),
+                new DozeSuppressedHandler(dozeService, config, machine),
                 new DozeAuthRemover(dozeService)
         });
 

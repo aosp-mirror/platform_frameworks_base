@@ -139,9 +139,10 @@ public class NotifCollectionTest extends SysuiTestCase {
                         .setRank(4747));
 
         // THEN the listener is notified
-        verify(mCollectionListener).onEntryAdded(mEntryCaptor.capture());
-
+        verify(mCollectionListener).onEntryInit(mEntryCaptor.capture());
         NotificationEntry entry = mEntryCaptor.getValue();
+
+        verify(mCollectionListener).onEntryAdded(entry);
         assertEquals(notif1.key, entry.getKey());
         assertEquals(notif1.sbn, entry.getSbn());
         assertEquals(notif1.ranking, entry.getRanking());
@@ -236,6 +237,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // THEN the listener is notified
         verify(mCollectionListener).onEntryRemoved(entry, REASON_APP_CANCEL, false);
+        verify(mCollectionListener).onEntryCleanUp(entry);
         assertEquals(notif.sbn, entry.getSbn());
         assertEquals(notif.ranking, entry.getRanking());
     }
@@ -606,6 +608,10 @@ public class NotifCollectionTest extends SysuiTestCase {
         private final Map<String, NotificationEntry> mLastSeenEntries = new ArrayMap<>();
 
         @Override
+        public void onEntryInit(NotificationEntry entry) {
+        }
+
+        @Override
         public void onEntryAdded(NotificationEntry entry) {
             mLastSeenEntries.put(entry.getKey(), entry);
         }
@@ -616,6 +622,10 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         @Override
         public void onEntryRemoved(NotificationEntry entry, int reason, boolean removedByUser) {
+        }
+
+        @Override
+        public void onEntryCleanUp(NotificationEntry entry) {
         }
 
         public NotificationEntry getEntry(String key) {

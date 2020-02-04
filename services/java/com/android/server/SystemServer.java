@@ -71,7 +71,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureManager;
 
 import com.android.internal.R;
@@ -79,6 +78,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
@@ -453,8 +453,9 @@ public final class SystemServer {
             final long uptimeMillis = SystemClock.elapsedRealtime();
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN, uptimeMillis);
             if (!mRuntimeRestart) {
-                StatsLog.write(StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
-                        StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SYSTEM_SERVER_INIT_START,
+                FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                        FrameworkStatsLog
+                                .BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SYSTEM_SERVER_INIT_START,
                         uptimeMillis);
             }
 
@@ -570,8 +571,8 @@ public final class SystemServer {
 
         if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
             final long uptimeMillis = SystemClock.elapsedRealtime();
-            StatsLog.write(StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
-                    StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SYSTEM_SERVER_READY,
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                    FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SYSTEM_SERVER_READY,
                     uptimeMillis);
             final long maxUptimeMillis = 60 * 1000;
             if (uptimeMillis > maxUptimeMillis) {
@@ -807,8 +808,9 @@ public final class SystemServer {
 
         // Start the package manager.
         if (!mRuntimeRestart) {
-            StatsLog.write(StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
-                    StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__PACKAGE_MANAGER_INIT_START,
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                    FrameworkStatsLog
+                            .BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__PACKAGE_MANAGER_INIT_START,
                     SystemClock.elapsedRealtime());
         }
 
@@ -825,8 +827,9 @@ public final class SystemServer {
         mPackageManager = mSystemContext.getPackageManager();
         t.traceEnd();
         if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
-            StatsLog.write(StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
-                    StatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__PACKAGE_MANAGER_INIT_READY,
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
+                    FrameworkStatsLog
+                            .BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__PACKAGE_MANAGER_INIT_READY,
                     SystemClock.elapsedRealtime());
         }
         // Manages A/B OTA dexopting. This is a bootstrap service as we need it to rename

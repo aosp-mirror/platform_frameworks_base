@@ -17,12 +17,15 @@
 package com.android.systemui.controls.management
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.ServiceInfo
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.settingslib.applications.ServiceListing
-import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
@@ -69,13 +72,22 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     private var serviceListingCallbackCaptor =
             ArgumentCaptor.forClass(ServiceListing.Callback::class.java)
 
+    private val user = mContext.userId
+    private val otherUser = user + 1
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         `when`(serviceInfo.componentName).thenReturn(componentName)
 
-        controller = ControlsListingControllerImpl(mContext, executor, mockSL)
+        val wrapper = object : ContextWrapper(mContext) {
+            override fun createContextAsUser(user: UserHandle, flags: Int): Context {
+                return baseContext
+            }
+        }
+
+        controller = ControlsListingControllerImpl(wrapper, executor, { mockSL })
         verify(mockSL).addCallback(capture(serviceListingCallbackCaptor))
     }
 
@@ -83,6 +95,11 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     fun tearDown() {
         executor.advanceClockToLast()
         executor.runAllReady()
+    }
+
+    @Test
+    fun testStartsOnUser() {
+        assertEquals(user, controller.currentUserId)
     }
 
     @Test
@@ -167,8 +184,9 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         controller.addCallback(mockCallbackOther)
 
         @Suppress("unchecked_cast")
-        val captor: ArgumentCaptor<List<CandidateInfo>> =
-                ArgumentCaptor.forClass(List::class.java) as ArgumentCaptor<List<CandidateInfo>>
+        val captor: ArgumentCaptor<List<ControlsServiceInfo>> =
+                ArgumentCaptor.forClass(List::class.java)
+                        as ArgumentCaptor<List<ControlsServiceInfo>>
 
         executor.runAllReady()
         reset(mockCallback)
@@ -184,5 +202,12 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         verify(mockCallbackOther).onServicesUpdated(capture(captor))
         assertEquals(1, captor.value.size)
         assertEquals(componentName.flattenToString(), captor.value[0].key)
+    }
+
+    @Test
+    fun testChangeUser() {
+        controller.changeUser(UserHandle.of(otherUser))
+        executor.runAllReady()
+        assertEquals(otherUser, controller.currentUserId)
     }
 }

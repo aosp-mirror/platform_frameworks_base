@@ -1781,8 +1781,11 @@
         <attr name="crossProfile" format="boolean" />
     </declare-styleable>
 
-    <!-- The <code>feature</code> tag declares a feature. A feature is a part of an app. E.g.
-    photo sharing app might include a direct messaging component.
+    <!-- The <code>feature</code> tag declares a feature. A feature is a logical part of an app.
+    E.g. photo sharing app might include a direct messaging component. To tag certain code as
+    belonging to a feature, use a context created via
+    {@link android.content.Context#createFeatureContext(String)} for any interaction with the
+    system.
 
     <p>This appears as a child tag of the root {@link #AndroidManifest manifest} tag.
 

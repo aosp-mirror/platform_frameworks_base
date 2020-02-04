@@ -194,6 +194,14 @@ class DozeLogger @Inject constructor(
             "Sensor triggered, type=${reasonToString(int1)}"
         })
     }
+
+    fun logDozeSuppressed(state: DozeMachine.State) {
+        buffer.log(TAG, INFO, {
+            str1 = state.name
+        }, {
+            "Doze state suppressed, state=$str1"
+        })
+    }
 }
 
 private const val TAG = "DozeLog"

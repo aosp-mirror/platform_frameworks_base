@@ -22,7 +22,7 @@ import com.android.settingslib.applications.DefaultAppInfo
 
 class ControlsServiceInfo(
     context: Context,
-    serviceInfo: ServiceInfo
+    val serviceInfo: ServiceInfo
 ) : DefaultAppInfo(
     context,
     context.packageManager,

@@ -203,8 +203,8 @@ public class RuleBinarySerializerTest {
                         + getBits(DEFAULT_FORMAT_VERSION_BYTES.length, /* numOfBits= */ 32)
                         + SERIALIZED_END_INDEXING_KEY
                         + getBits(
-                        DEFAULT_FORMAT_VERSION_BYTES.length + getBytes(expectedBits).length,
-                        /* numOfBits= */ 32);
+                                DEFAULT_FORMAT_VERSION_BYTES.length + getBytes(expectedBits).length,
+                                /* numOfBits= */ 32);
         expectedIndexingOutputStream.write(
                 getBytes(
                         expectedIndexingBitsForIndexed
@@ -427,8 +427,7 @@ public class RuleBinarySerializerTest {
         Rule rule =
                 new Rule(
                         new AtomicFormula.LongAtomicFormula(
-                                AtomicFormula.VERSION_CODE, AtomicFormula.EQ,
-                                versionCode),
+                                AtomicFormula.VERSION_CODE, AtomicFormula.EQ, versionCode),
                         Rule.DENY);
         RuleSerializer binarySerializer = new RuleBinarySerializer();
         String expectedBits =
@@ -456,8 +455,7 @@ public class RuleBinarySerializerTest {
         String preInstalled = "1";
         Rule rule =
                 new Rule(
-                        new AtomicFormula.BooleanAtomicFormula(
-                                AtomicFormula.PRE_INSTALLED, true),
+                        new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
                         Rule.DENY);
         RuleSerializer binarySerializer = new RuleBinarySerializer();
         String expectedBits =

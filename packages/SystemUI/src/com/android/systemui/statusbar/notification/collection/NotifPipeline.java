@@ -90,7 +90,8 @@ public class NotifPipeline {
     }
 
     /**
-     * Registers a listener to be informed when notifications are added, removed or updated.
+     * Registers a listener to be informed when there is a notification entry event such as an add,
+     * update, or remove.
      */
     public void addCollectionListener(NotifCollectionListener listener) {
         mNotifCollection.addCollectionListener(listener);

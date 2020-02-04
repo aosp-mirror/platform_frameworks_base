@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
-import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
@@ -188,7 +186,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
     @Override
     public void finish(boolean shown) {
-        if (mCancelled) {
+        if (mCancelled || mFinished) {
             return;
         }
         setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */);

@@ -18,7 +18,6 @@ package com.android.systemui.doze;
 
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
-import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_DOCKED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSE_DONE;
@@ -90,10 +89,10 @@ public class DozeScreenState implements DozeMachine.Part {
         }
 
         final boolean messagePending = mHandler.hasCallbacks(mApplyPendingScreenState);
-        final boolean pulseEnding = oldState == DOZE_PULSE_DONE && isAlwaysOnState(newState);
+        final boolean pulseEnding = oldState == DOZE_PULSE_DONE && newState.isAlwaysOn();
         final boolean turningOn = (oldState == DOZE_AOD_PAUSED || oldState == DOZE)
-                && isAlwaysOnState(newState);
-        final boolean turningOff = (isAlwaysOnState(oldState) && newState == DOZE)
+                && newState.isAlwaysOn();
+        final boolean turningOff = (newState.isAlwaysOn() && newState == DOZE)
                 || (oldState == DOZE_AOD_PAUSING && newState == DOZE_AOD_PAUSED);
         final boolean justInitialized = oldState == DozeMachine.State.INITIALIZED;
         if (messagePending || justInitialized || pulseEnding || turningOn) {
@@ -130,10 +129,6 @@ public class DozeScreenState implements DozeMachine.Part {
         } else {
             applyScreenState(screenState);
         }
-    }
-
-    private boolean isAlwaysOnState(DozeMachine.State state) {
-        return state == DOZE_AOD || state == DOZE_AOD_DOCKED;
     }
 
     private void applyPendingScreenState() {

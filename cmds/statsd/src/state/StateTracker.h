@@ -74,6 +74,8 @@ private:
 
     int32_t mResetState = kStateUnknown;
 
+    const bool mNested;
+
     // Maps primary key to state value info
     std::unordered_map<HashableDimensionKey, StateValueInfo> mStateMap;
 

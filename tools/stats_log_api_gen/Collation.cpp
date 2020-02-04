@@ -40,18 +40,21 @@ AtomDecl::AtomDecl()
 {
 }
 
-AtomDecl::AtomDecl(const AtomDecl& that)
-    : code(that.code),
-      name(that.name),
-      message(that.message),
-      fields(that.fields),
-      primaryFields(that.primaryFields),
-      exclusiveField(that.exclusiveField),
-      uidField(that.uidField),
-      whitelisted(that.whitelisted),
-      binaryFields(that.binaryFields),
-      hasModule(that.hasModule),
-      moduleName(that.moduleName) {}
+AtomDecl::AtomDecl(const AtomDecl &that)
+      : code(that.code),
+        name(that.name),
+        message(that.message),
+        fields(that.fields),
+        primaryFields(that.primaryFields),
+        exclusiveField(that.exclusiveField),
+        defaultState(that.defaultState),
+        resetState(that.resetState),
+        nested(that.nested),
+        uidField(that.uidField),
+        whitelisted(that.whitelisted),
+        binaryFields(that.binaryFields),
+        hasModule(that.hasModule),
+        moduleName(that.moduleName) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -281,7 +284,7 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     atomDecl->fields.push_back(atField);
 
     if (field->options().GetExtension(os::statsd::state_field_option).option() ==
-        os::statsd::StateField::PRIMARY) {
+        os::statsd::StateField::PRIMARY_FIELD) {
         if (javaType == JAVA_TYPE_UNKNOWN ||
             javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
             javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
@@ -300,7 +303,7 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     }
 
     if (field->options().GetExtension(os::statsd::state_field_option).option() ==
-        os::statsd::StateField::EXCLUSIVE) {
+        os::statsd::StateField::EXCLUSIVE_STATE) {
         if (javaType == JAVA_TYPE_UNKNOWN ||
             javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
             javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
@@ -312,6 +315,21 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
         } else {
             errorCount++;
         }
+
+        if (field->options()
+                    .GetExtension(os::statsd::state_field_option)
+                    .has_default_state_value()) {
+            atomDecl->defaultState = field->options()
+                                             .GetExtension(os::statsd::state_field_option)
+                                             .default_state_value();
+        }
+
+        if (field->options().GetExtension(os::statsd::state_field_option).has_reset_state_value()) {
+            atomDecl->resetState = field->options()
+                                           .GetExtension(os::statsd::state_field_option)
+                                           .reset_state_value();
+        }
+        atomDecl->nested = field->options().GetExtension(os::statsd::state_field_option).nested();
     }
 
     if (field->options().GetExtension(os::statsd::is_uid) == true) {

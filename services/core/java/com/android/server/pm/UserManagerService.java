@@ -932,6 +932,7 @@ public class UserManagerService extends IUserManager.Stub {
                         userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
             }
+            mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
             boolean needToShowConfirmCredential =
                     mLockPatternUtils.isSecure(userId)
                             && !StorageManager.isUserKeyUnlocked(userId);
@@ -942,8 +943,7 @@ public class UserManagerService extends IUserManager.Stub {
                 showConfirmCredentialToDisableQuietMode(userId, target);
                 return false;
             }
-            setQuietModeEnabled(
-                    userId, false /* enableQuietMode */, target, callingPackage);
+            setQuietModeEnabled(userId, false /* enableQuietMode */, target, callingPackage);
             return true;
         } finally {
             Binder.restoreCallingIdentity(identity);

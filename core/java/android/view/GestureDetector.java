@@ -16,12 +16,12 @@
 
 package android.view;
 
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DOUBLE_TAP;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SCROLL;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DOUBLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SCROLL;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -29,7 +29,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.StatsLog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Detects various gestures and events using the supplied {@link MotionEvent}s.
@@ -887,8 +888,8 @@ public class GestureDetector {
             mHasRecordedClassification = true;
             return;
         }
-        StatsLog.write(
-                StatsLog.TOUCH_GESTURE_CLASSIFIED,
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED,
                 getClass().getName(),
                 classification,
                 (int) (SystemClock.uptimeMillis() - mCurrentMotionEvent.getDownTime()),

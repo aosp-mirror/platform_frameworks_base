@@ -85,19 +85,20 @@ public class QuickQSPanel extends QSPanel {
             mHorizontalLinearLayout.setClipChildren(false);
             mHorizontalLinearLayout.setClipToPadding(false);
 
+            int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
+            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout);
+            LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
+            lp2.setMarginEnd(marginSize);
+            lp2.setMarginStart(0);
+            mHorizontalLinearLayout.addView(mMediaPlayer.getView(), lp2);
+
             mTileLayout = new DoubleLineTileLayout(context);
             mMediaTileLayout = mTileLayout;
             mRegularTileLayout = new HeaderTileLayout(context);
             LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
-            lp.setMarginEnd(10);
-            lp.setMarginStart(0);
+            lp.setMarginEnd(0);
+            lp.setMarginStart(marginSize);
             mHorizontalLinearLayout.addView((View) mTileLayout, lp);
-
-            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout);
-            LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
-            lp2.setMarginEnd(0);
-            lp2.setMarginStart(25);
-            mHorizontalLinearLayout.addView(mMediaPlayer.getView(), lp2);
 
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
 

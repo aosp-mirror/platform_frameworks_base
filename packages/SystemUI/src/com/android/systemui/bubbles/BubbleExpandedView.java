@@ -448,12 +448,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         int bottomInset = getRootWindowInsets() != null
                 ? getRootWindowInsets().getStableInsetBottom()
                 : 0;
-        int mh = mDisplaySize.y - windowLocation[1] - mSettingsIconHeight - mPointerHeight
+        return mDisplaySize.y - windowLocation[1] - mSettingsIconHeight - mPointerHeight
                 - mPointerMargin - bottomInset;
-        Log.i(TAG, "max exp height: " + mh);
-//        return mDisplaySize.y - windowLocation[1] - mSettingsIconHeight - mPointerHeight
-//                - mPointerMargin - bottomInset;
-        return mh;
     }
 
     /**

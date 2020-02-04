@@ -101,11 +101,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private TimestampedValue<Long> mLastAutoSystemClockTimeSet;
 
     /**
-     * A mapping from phoneId to a time suggestion. We typically expect one or two mappings: devices
-     * will have a small number of telephony devices and phoneIds are assumed to be stable.
+     * A mapping from slotIndex to a time suggestion. We typically expect one or two mappings:
+     * devices will have a small number of telephony devices and slotIndexs are assumed to be
+     * stable.
      */
     @GuardedBy("this")
-    private final ArrayMapWithHistory<Integer, PhoneTimeSuggestion> mSuggestionByPhoneId =
+    private final ArrayMapWithHistory<Integer, PhoneTimeSuggestion> mSuggestionBySlotIndex =
             new ArrayMapWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
     @GuardedBy("this")
@@ -155,7 +156,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Perform validation / input filtering and record the validated suggestion against the
-        // phoneId.
+        // slotIndex.
         if (!validateAndStorePhoneSuggestion(timeSuggestion)) {
             return;
         }
@@ -202,7 +203,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         ipw.println("Phone suggestion history:");
         ipw.increaseIndent(); // level 2
-        mSuggestionByPhoneId.dump(ipw);
+        mSuggestionBySlotIndex.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
         ipw.println("Network suggestion history:");
@@ -223,8 +224,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return false;
         }
 
-        int phoneId = suggestion.getPhoneId();
-        PhoneTimeSuggestion previousSuggestion = mSuggestionByPhoneId.get(phoneId);
+        int slotIndex = suggestion.getSlotIndex();
+        PhoneTimeSuggestion previousSuggestion = mSuggestionBySlotIndex.get(slotIndex);
         if (previousSuggestion != null) {
             // We can log / discard suggestions with obvious issues with the reference time clock.
             if (previousSuggestion.getUtcTime() == null
@@ -249,7 +250,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Store the latest suggestion.
-        mSuggestionByPhoneId.put(phoneId, suggestion);
+        mSuggestionBySlotIndex.put(slotIndex, suggestion);
         return true;
     }
 
@@ -323,15 +324,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         //
         // [1] https://en.wikipedia.org/wiki/NITZ
         //
-        // Generally, when there are suggestions from multiple phoneIds they should usually
+        // Generally, when there are suggestions from multiple slotIndexs they should usually
         // approximately agree. In cases where signals *are* inaccurate we don't want to vacillate
-        // between signals from two phoneIds. However, it is known for NITZ signals to be incorrect
-        // occasionally, which means we also don't want to stick forever with one phoneId. Without
-        // cross-referencing across sources (e.g. the current device time, NTP), or doing some kind
-        // of statistical analysis of consistency within and across phoneIds, we can't know which
-        // suggestions are more correct.
+        // between signals from two slotIndexs. However, it is known for NITZ signals to be
+        // incorrect occasionally, which means we also don't want to stick forever with one
+        // slotIndex. Without cross-referencing across sources (e.g. the current device time, NTP),
+        // or doing some kind of statistical analysis of consistency within and across slotIndexs,
+        // we can't know which suggestions are more correct.
         //
-        // For simplicity, we try to value recency, then consistency of phoneId.
+        // For simplicity, we try to value recency, then consistency of slotIndex.
         //
         // The heuristic works as follows:
         // Recency: The most recent suggestion from each phone is scored. The score is based on a
@@ -339,20 +340,20 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // bucket, thus applying a loose reference time ordering. The suggestion with the highest
         // score is used.
         // Consistency: If there a multiple suggestions with the same score, the suggestion with the
-        // lowest phoneId is always taken.
+        // lowest slotIndex is always taken.
         //
         // In the trivial case with a single ID this will just mean that the latest received
         // suggestion is used.
 
         PhoneTimeSuggestion bestSuggestion = null;
         int bestScore = PHONE_INVALID_SCORE;
-        for (int i = 0; i < mSuggestionByPhoneId.size(); i++) {
-            Integer phoneId = mSuggestionByPhoneId.keyAt(i);
-            PhoneTimeSuggestion candidateSuggestion = mSuggestionByPhoneId.valueAt(i);
+        for (int i = 0; i < mSuggestionBySlotIndex.size(); i++) {
+            Integer slotIndex = mSuggestionBySlotIndex.keyAt(i);
+            PhoneTimeSuggestion candidateSuggestion = mSuggestionBySlotIndex.valueAt(i);
             if (candidateSuggestion == null) {
                 // Unexpected - null suggestions should never be stored.
-                Slog.w(LOG_TAG, "Latest suggestion unexpectedly null for phoneId."
-                        + " phoneId=" + phoneId);
+                Slog.w(LOG_TAG, "Latest suggestion unexpectedly null for slotIndex."
+                        + " slotIndex=" + slotIndex);
                 continue;
             } else if (candidateSuggestion.getUtcTime() == null) {
                 // Unexpected - we do not store empty suggestions.
@@ -372,10 +373,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                 bestSuggestion = candidateSuggestion;
                 bestScore = candidateScore;
             } else if (bestScore == candidateScore) {
-                // Tie! Use the suggestion with the lowest phoneId.
-                int candidatePhoneId = candidateSuggestion.getPhoneId();
-                int bestPhoneId = bestSuggestion.getPhoneId();
-                if (candidatePhoneId < bestPhoneId) {
+                // Tie! Use the suggestion with the lowest slotIndex.
+                int candidateSlotIndex = candidateSuggestion.getSlotIndex();
+                int bestSlotIndex = bestSuggestion.getSlotIndex();
+                if (candidateSlotIndex < bestSlotIndex) {
                     bestSuggestion = candidateSuggestion;
                 }
             }
@@ -396,7 +397,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // The score is based on the age since receipt. Suggestions are bucketed so two
-        // suggestions in the same bucket from different phoneIds are scored the same.
+        // suggestions in the same bucket from different slotIndexs are scored the same.
         long ageMillis = elapsedRealtimeMillis - utcTime.getReferenceTimeMillis();
 
         // Turn the age into a discrete value: 0 <= bucketIndex < PHONE_BUCKET_COUNT.
@@ -560,8 +561,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     @VisibleForTesting
     @Nullable
-    public synchronized PhoneTimeSuggestion getLatestPhoneSuggestion(int phoneId) {
-        return mSuggestionByPhoneId.get(phoneId);
+    public synchronized PhoneTimeSuggestion getLatestPhoneSuggestion(int slotIndex) {
+        return mSuggestionBySlotIndex.get(slotIndex);
     }
 
     /**

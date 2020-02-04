@@ -196,6 +196,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -311,6 +312,8 @@ import com.android.server.protolog.common.ProtoLog;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.utils.InsetUtils;
 
@@ -4080,7 +4083,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction, @Nullable Runnable animationFinishedCallback) {
+            boolean isVoiceInteraction,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
         if (mUseTransferredAnimation) {
             return false;
         }
@@ -4158,7 +4162,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
             // which we might have done because we were in closing/opening apps list.
-            onAnimationFinished();
+            onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION, null /* AnimationAdapter */);
             if (visible) {
                 // The token was made immediately visible, there will be no entrance animation.
                 // We need to inform the client the enter animation was finished.
@@ -6054,8 +6058,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    protected void onAnimationFinished() {
-        super.onAnimationFinished();
+    protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
+        super.onAnimationFinished(type, anim);
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AR#onAnimationFinished");
         mTransit = TRANSIT_UNSET;
@@ -7502,17 +7506,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Write all fields to an {@code ActivityRecordProto}. This assumes the
      * {@code ActivityRecordProto} is the outer-most proto data.
      */
-    void dumpDebug(ProtoOutputStream proto) {
+    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
         writeNameToProto(proto, NAME);
-        super.dumpDebug(proto, WINDOW_TOKEN, WindowTraceLogLevel.ALL);
+        super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating());
-        if (mThumbnail != null) {
+        proto.write(IS_ANIMATING, isAnimating(PARENTS));
+        if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }
         proto.write(FILLS_PARENT, mOccludesParent);
         proto.write(APP_STOPPED, mAppStopped);
+        proto.write(TRANSLUCENT, !occludesParent());
+        proto.write(VISIBLE, mVisible);
         proto.write(VISIBLE_REQUESTED, mVisibleRequested);
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
@@ -7535,24 +7541,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
-        proto.write(VISIBLE_REQUESTED, mVisibleRequested);
         proto.write(FRONT_OF_TASK, isRootOfTask());
         if (hasProcess()) {
             proto.write(PROC_ID, app.getPid());
         }
-        proto.write(TRANSLUCENT, !occludesParent());
-        proto.write(VISIBLE, mVisible);
     }
 
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
-        dumpDebug(proto);
-        proto.end(token);
-    }
-
-    /**
-     * Copied from old AppWindowToken.
-     */
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
@@ -7562,36 +7556,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final long token = proto.start(fieldId);
-        writeNameToProto(proto, NAME);
-        super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
-        proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
-        proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating(PARENTS));
-        if (mThumbnail != null){
-            mThumbnail.dumpDebug(proto, THUMBNAIL);
-        }
-        proto.write(FILLS_PARENT, mOccludesParent);
-        proto.write(APP_STOPPED, mAppStopped);
-        proto.write(VISIBLE_REQUESTED, mVisibleRequested);
-        proto.write(CLIENT_VISIBLE, mClientVisible);
-        proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
-        proto.write(REPORTED_DRAWN, reportedDrawn);
-        proto.write(REPORTED_VISIBLE, reportedVisible);
-        proto.write(NUM_INTERESTING_WINDOWS, mNumInterestingWindows);
-        proto.write(NUM_DRAWN_WINDOWS, mNumDrawnWindows);
-        proto.write(ALL_DRAWN, allDrawn);
-        proto.write(LAST_ALL_DRAWN, mLastAllDrawn);
-        if (startingWindow != null) {
-            startingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
-        }
-        proto.write(STARTING_DISPLAYED, startingDisplayed);
-        proto.write(STARTING_MOVED, startingMoved);
-        proto.write(VISIBLE_SET_FROM_TRANSFERRED_STARTING_WINDOW,
-                mVisibleSetFromTransferredStartingWindow);
-        for (Rect bounds : mFrozenBounds) {
-            bounds.dumpDebug(proto, FROZEN_BOUNDS);
-        }
-        proto.write(VISIBLE, mVisible);
+        dumpDebug(proto, logLevel);
         proto.end(token);
     }
 

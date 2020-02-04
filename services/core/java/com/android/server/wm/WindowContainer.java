@@ -31,6 +31,7 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -74,6 +75,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -1851,19 +1854,24 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param anim The animation to run.
      * @param hidden Whether our container is currently hidden. TODO This should use isVisible at
      *               some point but the meaning is too weird to work for all containers.
+     * @param type The type of animation defined as {@link AnimationType}.
      * @param animationFinishedCallback The callback being triggered when the animation finishes.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
-            @Nullable Runnable animationFinishedCallback) {
-        if (DEBUG_ANIM) Slog.v(TAG, "Starting animation on " + this + ": " + anim);
+            @AnimationType int type,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
+        if (DEBUG_ANIM) {
+            Slog.v(TAG, "Starting animation on " + this + ": type=" + type + ", anim=" + anim);
+        }
 
         // TODO: This should use isVisible() but because isVisible has a really weird meaning at
         // the moment this doesn't work for all animatable window containers.
-        mSurfaceAnimator.startAnimation(t, anim, hidden, animationFinishedCallback);
+        mSurfaceAnimator.startAnimation(t, anim, hidden, type, animationFinishedCallback);
     }
 
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
-        startAnimation(t, anim, hidden, null /* animationFinishedCallback */);
+    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
+            @AnimationType int type) {
+        startAnimation(t, anim, hidden, type, null /* animationFinishedCallback */);
     }
 
     void transferAnimation(WindowContainer from) {
@@ -1916,7 +1924,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @see #getAnimationAdapter
      */
     boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction, @Nullable Runnable animationFinishedCallback) {
+            boolean isVoiceInteraction,
+            @Nullable OnAnimationFinishedCallback animationFinishedCallback) {
         if (mWmService.mDisableTransitionAnimation) {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: transition animation is disabled or skipped. "
@@ -1937,7 +1946,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 AnimationAdapter thumbnailAdapter = adapters.second;
                 if (adapter != null) {
                     startAnimation(getPendingTransaction(), adapter, !isVisible(),
-                            animationFinishedCallback);
+                            ANIMATION_TYPE_APP_TRANSITION, animationFinishedCallback);
                     if (adapter.getShowWallpaper()) {
                         getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                     }
@@ -2128,7 +2137,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * Called when an animation has finished running.
      */
-    protected void onAnimationFinished() {
+    protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
         mWmService.onAnimationFinished();
     }
 

@@ -27,17 +27,17 @@ import android.os.TimestampedValue;
 import org.junit.Test;
 
 public class PhoneTimeSuggestionTest {
-    private static final int PHONE_ID = 99999;
+    private static final int SLOT_INDEX = 99999;
 
     @Test
     public void testEquals() {
-        PhoneTimeSuggestion.Builder builder1 = new PhoneTimeSuggestion.Builder(PHONE_ID);
+        PhoneTimeSuggestion.Builder builder1 = new PhoneTimeSuggestion.Builder(SLOT_INDEX);
         {
             PhoneTimeSuggestion one = builder1.build();
             assertEquals(one, one);
         }
 
-        PhoneTimeSuggestion.Builder builder2 = new PhoneTimeSuggestion.Builder(PHONE_ID);
+        PhoneTimeSuggestion.Builder builder2 = new PhoneTimeSuggestion.Builder(SLOT_INDEX);
         {
             PhoneTimeSuggestion one = builder1.build();
             PhoneTimeSuggestion two = builder2.build();
@@ -59,7 +59,7 @@ public class PhoneTimeSuggestionTest {
             assertEquals(two, one);
         }
 
-        PhoneTimeSuggestion.Builder builder3 = new PhoneTimeSuggestion.Builder(PHONE_ID + 1);
+        PhoneTimeSuggestion.Builder builder3 = new PhoneTimeSuggestion.Builder(SLOT_INDEX + 1);
         builder3.setUtcTime(new TimestampedValue<>(1111L, 2222L));
         {
             PhoneTimeSuggestion one = builder1.build();
@@ -80,7 +80,7 @@ public class PhoneTimeSuggestionTest {
 
     @Test
     public void testParcelable() {
-        PhoneTimeSuggestion.Builder builder = new PhoneTimeSuggestion.Builder(PHONE_ID);
+        PhoneTimeSuggestion.Builder builder = new PhoneTimeSuggestion.Builder(SLOT_INDEX);
         assertRoundTripParcelable(builder.build());
 
         builder.setUtcTime(new TimestampedValue<>(1111L, 2222L));

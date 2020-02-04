@@ -20,9 +20,7 @@
 #include "config/ConfigListener.h"
 
 #include <android/os/IPendingIntentRef.h>
-#include <map>
 #include <mutex>
-#include <set>
 #include <string>
 
 #include <stdio.h>

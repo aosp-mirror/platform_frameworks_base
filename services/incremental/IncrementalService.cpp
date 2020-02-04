@@ -30,7 +30,6 @@
 #include <binder/BinderService.h>
 #include <binder/ParcelFileDescriptor.h>
 #include <binder/Status.h>
-
 #include <openssl/sha.h>
 #include <sys/stat.h>
 #include <uuid/uuid.h>
@@ -612,12 +611,17 @@ int IncrementalService::bind(StorageId storage, std::string_view source, std::st
     if (!ifs) {
         return -EINVAL;
     }
-    auto normSource = path::normalize(source);
 
     std::unique_lock l(ifs->lock);
     const auto storageInfo = ifs->storages.find(storage);
     if (storageInfo == ifs->storages.end()) {
         return -EINVAL;
+    }
+    std::string normSource;
+    if (path::isAbsolute(source)) {
+        normSource = path::normalize(source);
+    } else {
+        normSource = path::normalize(path::join(storageInfo->second.name, source));
     }
     if (!path::startsWith(normSource, storageInfo->second.name)) {
         return -EINVAL;
@@ -673,7 +677,20 @@ int IncrementalService::unbind(StorageId storage, std::string_view target) {
 int IncrementalService::makeFile(StorageId storage, std::string_view path, int mode, FileId id,
                                  incfs::NewFileParams params) {
     if (auto ifs = getIfs(storage)) {
-        auto err = mIncFs->makeFile(ifs->control, path, mode, id, params);
+        const auto storageInfo = ifs->storages.find(storage);
+        if (storageInfo == ifs->storages.end()) {
+            return -EINVAL;
+        }
+        std::string normPath;
+        if (path::isAbsolute(path)) {
+            normPath = path::normalize(path);
+        } else {
+            normPath = path::normalize(path::join(storageInfo->second.name, path));
+        }
+        if (!path::startsWith(normPath, storageInfo->second.name)) {
+            return -EINVAL;
+        }
+        auto err = mIncFs->makeFile(ifs->control, normPath, mode, id, params);
         if (err) {
             return err;
         }

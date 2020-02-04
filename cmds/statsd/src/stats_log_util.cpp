@@ -17,12 +17,8 @@
 #include "hash.h"
 #include "stats_log_util.h"
 
-#include <logd/LogEvent.h>
 #include <private/android_filesystem_config.h>
-#include <utils/Log.h>
 #include <set>
-#include <stack>
-#include <utils/Log.h>
 #include <utils/SystemClock.h>
 
 using android::util::AtomsInfo;

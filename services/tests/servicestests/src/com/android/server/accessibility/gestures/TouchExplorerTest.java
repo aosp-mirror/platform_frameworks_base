@@ -89,9 +89,12 @@ public class TouchExplorerTest {
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-            MotionEventMatcher lastEventMatcher = new MotionEventMatcher(mLastEvent);
             mEvents.add(0, event.copy());
-            assertThat(rawEvent, lastEventMatcher);
+            // LastEvent may not match if we're clearing the state
+            if (mLastEvent != null) {
+                MotionEventMatcher lastEventMatcher = new MotionEventMatcher(mLastEvent);
+                assertThat(rawEvent, lastEventMatcher);
+            }
         }
 
         @Override
@@ -123,6 +126,31 @@ public class TouchExplorerTest {
                 MotionEvent.ACTION_DOWN,
                 MotionEvent.ACTION_POINTER_DOWN);
         assertCapturedEventsNoHistory();
+    }
+
+    @Test
+    public void upEventWhenInTwoFingerMove_clearsState() {
+        goFromStateClearTo(STATE_MOVING_2FINGERS);
+
+        send(upEvent());
+        assertState(STATE_CLEAR);
+    }
+
+    @Test
+    public void clearEventsWhenInTwoFingerMove_clearsStateAndSendsUp() {
+        goFromStateClearTo(STATE_MOVING_2FINGERS);
+
+        // Clear last event so we don't try to match against anything when cleanup events are sent
+        // for the clear
+        mLastEvent = null;
+        mTouchExplorer.clearEvents(InputDevice.SOURCE_TOUCHSCREEN);
+        assertState(STATE_CLEAR);
+        List<MotionEvent> events = getCapturedEvents();
+        assertCapturedEvents(
+                MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_POINTER_DOWN,
+                MotionEvent.ACTION_POINTER_UP,
+                MotionEvent.ACTION_UP);
     }
 
     @Test
@@ -266,6 +294,12 @@ public class TouchExplorerTest {
         return fromTouchscreen(
                 MotionEvent.obtain(mLastDownTime, mLastDownTime, MotionEvent.ACTION_DOWN, DEFAULT_X,
                         DEFAULT_Y, 0));
+    }
+
+    private MotionEvent upEvent() {
+        MotionEvent event = downEvent();
+        event.setAction(MotionEvent.ACTION_UP);
+        return event;
     }
 
     private MotionEvent pointerDownEvent() {

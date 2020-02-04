@@ -87,10 +87,8 @@ import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -103,12 +101,10 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer;
+import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -124,7 +120,6 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
-import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -141,7 +136,6 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.volume.VolumeComponent;
@@ -257,7 +251,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     public CarStatusBar(
             Context context,
-            FeatureFlags featureFlags,
+            NotificationsController notificationsController,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -269,13 +263,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
-            Lazy<NotifPipelineInitializer> notifPipelineInitializer,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             NotificationGutsManager notificationGutsManager,
             NotificationLogger notificationLogger,
-            NotificationEntryManager notificationEntryManager,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -296,12 +288,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             VibratorHelper vibratorHelper,
             BubbleController bubbleController,
             NotificationGroupManager groupManager,
-            NotificationGroupAlertTransferHelper groupAlertTransferHelper,
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
             Lazy<AssistManager> assistManagerLazy,
-            NotificationListener notificationListener,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
             LockscreenLockIconController lockscreenLockIconController,
@@ -318,7 +308,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             Optional<Recents> recents,
             Provider<StatusBarComponent.Builder> statusBarComponentBuilder,
             PluginManager pluginManager,
-            RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             LightsOutNotifController lightsOutNotifController,
@@ -334,7 +323,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             KeyguardDismissUtil keyguardDismissUtil,
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
-            NotificationRowBinderImpl notificationRowBinder,
             DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
             CarServiceProvider carServiceProvider,
@@ -345,7 +333,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
         super(
                 context,
-                featureFlags,
+                notificationsController,
                 lightBarController,
                 autoHideController,
                 keyguardUpdateMonitor,
@@ -357,13 +345,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 headsUpManagerPhone,
                 dynamicPrivacyController,
                 bypassHeadsUpNotifier,
-                notifPipelineInitializer,
                 falsingManager,
                 broadcastDispatcher,
                 remoteInputQuickSettingsDisabler,
                 notificationGutsManager,
                 notificationLogger,
-                notificationEntryManager,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
                 keyguardViewMediator,
@@ -384,12 +370,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 vibratorHelper,
                 bubbleController,
                 groupManager,
-                groupAlertTransferHelper,
                 visualStabilityManager,
                 deviceProvisionedController,
                 navigationBarController,
                 assistManagerLazy,
-                notificationListener,
                 configurationController,
                 notificationShadeWindowController,
                 lockscreenLockIconController,
@@ -407,7 +391,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 recents,
                 statusBarComponentBuilder,
                 pluginManager,
-                remoteInputUriController,
                 dividerOptional,
                 lightsOutNotifController,
                 statusBarNotificationActivityStarterBuilder,
@@ -422,7 +405,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 keyguardDismissUtil,
                 extensionController,
                 userInfoControllerImpl,
-                notificationRowBinder,
                 dismissCallbackRegistry);
         mUserSwitcherController = userSwitcherController;
         mScrimController = scrimController;

@@ -6,7 +6,7 @@ package android.app.timedetector {
     method public void addDebugInfo(@NonNull java.util.List<java.lang.String>);
     method public int describeContents();
     method @NonNull public java.util.List<java.lang.String> getDebugInfo();
-    method public int getPhoneId();
+    method public int getSlotIndex();
     method @Nullable public android.os.TimestampedValue<java.lang.Long> getUtcTime();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.timedetector.PhoneTimeSuggestion> CREATOR;
@@ -34,8 +34,8 @@ package android.app.timezonedetector {
     method public int describeContents();
     method @NonNull public java.util.List<java.lang.String> getDebugInfo();
     method public int getMatchType();
-    method public int getPhoneId();
     method public int getQuality();
+    method public int getSlotIndex();
     method @Nullable public String getZoneId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.timezonedetector.PhoneTimeZoneSuggestion> CREATOR;

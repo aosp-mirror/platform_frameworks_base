@@ -266,6 +266,14 @@ public class DozeLog implements Dumpable {
         mLogger.logSensorTriggered(reason);
     }
 
+    /**
+     * Appends doze suppressed event to the logs
+     * @param suppressedState The {@link DozeMachine.State} that was suppressed
+     */
+    public void traceDozeSuppressed(DozeMachine.State suppressedState) {
+        mLogger.logDozeSuppressed(suppressedState);
+    }
+
     private class SummaryStats {
         private int mCount;
 

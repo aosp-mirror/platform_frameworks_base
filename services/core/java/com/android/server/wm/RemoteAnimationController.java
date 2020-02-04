@@ -40,6 +40,7 @@ import android.view.SurfaceControl.Transaction;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.protolog.ProtoLogImpl;
 import com.android.server.protolog.common.ProtoLog;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -180,12 +181,14 @@ class RemoteAnimationController implements DeathRecipient {
                 if (wrappers.mAdapter != null
                         && wrappers.mAdapter.mCapturedFinishCallback != null) {
                     wrappers.mAdapter.mCapturedFinishCallback
-                            .onAnimationFinished(wrappers.mAdapter);
+                            .onAnimationFinished(wrappers.mAdapter.mAnimationType,
+                                    wrappers.mAdapter);
                 }
                 if (wrappers.mThumbnailAdapter != null
                         && wrappers.mThumbnailAdapter.mCapturedFinishCallback != null) {
                     wrappers.mThumbnailAdapter.mCapturedFinishCallback
-                            .onAnimationFinished(wrappers.mThumbnailAdapter);
+                            .onAnimationFinished(wrappers.mAdapter.mAnimationType,
+                                    wrappers.mThumbnailAdapter);
                 }
                 mPendingAnimations.remove(i);
             }
@@ -221,11 +224,13 @@ class RemoteAnimationController implements DeathRecipient {
                     final RemoteAnimationRecord adapters = mPendingAnimations.get(i);
                     if (adapters.mAdapter != null) {
                         adapters.mAdapter.mCapturedFinishCallback
-                                .onAnimationFinished(adapters.mAdapter);
+                                .onAnimationFinished(adapters.mAdapter.mAnimationType,
+                                        adapters.mAdapter);
                     }
                     if (adapters.mThumbnailAdapter != null) {
                         adapters.mThumbnailAdapter.mCapturedFinishCallback
-                                .onAnimationFinished(adapters.mThumbnailAdapter);
+                                .onAnimationFinished(adapters.mAdapter.mAnimationType,
+                                        adapters.mThumbnailAdapter);
                     }
                     mPendingAnimations.remove(i);
                     ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "\tcontainer=%s",
@@ -234,7 +239,8 @@ class RemoteAnimationController implements DeathRecipient {
 
                 for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
                     final WallpaperAnimationAdapter adapter = mPendingWallpaperAnimations.get(i);
-                    adapter.getLeashFinishedCallback().onAnimationFinished(adapter);
+                    adapter.getLeashFinishedCallback().onAnimationFinished(
+                            adapter.getLastAnimationType(), adapter);
                     mPendingWallpaperAnimations.remove(i);
                     ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "\twallpaper=%s", adapter.getToken());
                 }
@@ -393,6 +399,7 @@ class RemoteAnimationController implements DeathRecipient {
         private final RemoteAnimationRecord mRecord;
         SurfaceControl mCapturedLeash;
         private OnAnimationFinishedCallback mCapturedFinishCallback;
+        private @AnimationType int mAnimationType;
         final Point mPosition = new Point();
         final Rect mStackBounds = new Rect();
 
@@ -410,7 +417,7 @@ class RemoteAnimationController implements DeathRecipient {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
-                OnAnimationFinishedCallback finishCallback) {
+                @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
 
             // Restore z-layering, position and stack crop until client has a chance to modify it.
@@ -425,6 +432,7 @@ class RemoteAnimationController implements DeathRecipient {
             }
             mCapturedLeash = animationLeash;
             mCapturedFinishCallback = finishCallback;
+            mAnimationType = type;
         }
 
         @Override

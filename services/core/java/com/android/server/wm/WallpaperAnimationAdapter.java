@@ -18,6 +18,7 @@ package com.android.server.wm;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 
 import android.graphics.Point;
 import android.os.SystemClock;
@@ -26,6 +27,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 
 import com.android.server.protolog.common.ProtoLog;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
     private final WallpaperWindowToken mWallpaperToken;
     private SurfaceControl mCapturedLeash;
     private SurfaceAnimator.OnAnimationFinishedCallback mCapturedLeashFinishCallback;
+    private @AnimationType int mLastAnimationType;
 
     private long mDurationHint;
     private long mStatusBarTransitionDelay;
@@ -77,7 +80,7 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
                     wallpaperWindow, durationHint, statusBarTransitionDelay,
                     animationCanceledRunnable);
             wallpaperWindow.startAnimation(wallpaperWindow.getPendingTransaction(),
-                    wallpaperAdapter, false /* hidden */);
+                    wallpaperAdapter, false /* hidden */, ANIMATION_TYPE_WINDOW_ANIMATION);
             targets.add(wallpaperAdapter.createRemoteAnimationTarget());
             adaptersOut.add(wallpaperAdapter);
         });
@@ -110,6 +113,13 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
     }
 
     /**
+     * @return the type of animation.
+     */
+    @AnimationType int getLastAnimationType() {
+        return mLastAnimationType;
+    }
+
+    /**
      * @return the wallpaper window
      */
     WallpaperWindowToken getToken() {
@@ -124,13 +134,14 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
 
     @Override
     public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-            SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+            @AnimationType int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
 
         // Restore z-layering until client has a chance to modify it.
         t.setLayer(animationLeash, mWallpaperToken.getPrefixOrderIndex());
         mCapturedLeash = animationLeash;
         mCapturedLeashFinishCallback = finishCallback;
+        mLastAnimationType = type;
     }
 
     @Override

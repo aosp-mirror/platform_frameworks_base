@@ -19,6 +19,7 @@ package android.content.integrity;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
@@ -33,6 +34,7 @@ import android.os.RemoteException;
  *
  * @hide
  */
+@TestApi
 @SystemApi
 @SystemService(Context.APP_INTEGRITY_SERVICE)
 public class AppIntegrityManager {
@@ -96,6 +98,25 @@ public class AppIntegrityManager {
     public String getCurrentRuleSetProvider() {
         try {
             return mManager.getCurrentRuleSetProvider();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get current RuleSet on device.
+     *
+     * <p>Warning: this method is only used for tests.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public RuleSet getCurrentRuleSet() {
+        try {
+            ParceledListSlice<Rule> rules = mManager.getCurrentRules();
+            String version = mManager.getCurrentRuleSetVersion();
+            return new RuleSet.Builder().setVersion(version).addRules(rules.getList()).build();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

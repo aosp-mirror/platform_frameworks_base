@@ -43,8 +43,6 @@ public:
 
     int query(int what, int* value) const { return mSurface->query(what, value); }
 
-    uint64_t getNextFrameNumber() const { return mSurface->getNextFrameNumber(); }
-
     int getAndClearError() {
         int ret = mBufferQueueState;
         mBufferQueueState = OK;

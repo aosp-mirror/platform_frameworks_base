@@ -18,4 +18,8 @@ package com.android.systemui.controls
 
 import android.service.controls.Control
 
-data class ControlStatus(val control: Control, val favorite: Boolean, val removed: Boolean = false)
+data class ControlStatus(
+    val control: Control,
+    val favorite: Boolean,
+    val removed: Boolean = false
+)

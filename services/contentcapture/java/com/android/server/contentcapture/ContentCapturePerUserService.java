@@ -61,13 +61,13 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 import com.android.server.infra.AbstractPerUserSystemService;
@@ -275,7 +275,7 @@ final class ContentCapturePerUserService
                     /* binder= */ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
                     componentName, /* isChildSession= */ false);
             return;
@@ -299,7 +299,7 @@ final class ContentCapturePerUserService
                     /* binder= */ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
                     componentName, /* isChildSession= */ false);
             return;
@@ -313,7 +313,7 @@ final class ContentCapturePerUserService
                     /* binder=*/ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_DUPLICATED_ID,
                     serviceComponentName, componentName, /* isChildSession= */ false);
             return;
@@ -330,7 +330,7 @@ final class ContentCapturePerUserService
                     /* binder= */ null);
             // Log metrics.
             writeSessionEvent(sessionId,
-                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
                     componentName, /* isChildSession= */ false);
             return;
@@ -651,7 +651,7 @@ final class ContentCapturePerUserService
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-            writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_DISABLED,
+            writeServiceEvent(FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_DISABLED,
                     getServiceComponentName());
         }
 

@@ -92,8 +92,8 @@ import javax.inject.Singleton;
  * {@link #addNotificationLifetimeExtender(NotifLifetimeExtender)}).
  *
  * Interested parties can register listeners
- * ({@link #addCollectionListener(NotifCollectionListener)}) to be informed when notifications are
- * added, updated, or removed.
+ * ({@link #addCollectionListener(NotifCollectionListener)}) to be informed when notifications
+ * events occur.
  */
 @MainThread
 @Singleton
@@ -230,6 +230,8 @@ public class NotifCollection implements Dumpable {
 
             entry = new NotificationEntry(sbn, ranking);
             mNotificationSet.put(sbn.getKey(), entry);
+            dispatchOnEntryInit(entry);
+
             if (rankingMap != null) {
                 applyRanking(rankingMap);
             }
@@ -297,6 +299,7 @@ public class NotifCollection implements Dumpable {
             }
 
             dispatchOnEntryRemoved(entry, reason, dismissedByUserStats != null /* removedByUser */);
+            dispatchOnEntryCleanUp(entry);
         }
 
         rebuildList();
@@ -305,18 +308,26 @@ public class NotifCollection implements Dumpable {
     private void applyRanking(@NonNull RankingMap rankingMap) {
         for (NotificationEntry entry : mNotificationSet.values()) {
             if (!isLifetimeExtended(entry)) {
-                Ranking ranking = requireRanking(rankingMap, entry.getKey());
-                entry.setRanking(ranking);
 
-                // TODO: (b/145659174) update the sbn's overrideGroupKey in
-                //  NotificationEntry.setRanking instead of here once we fully migrate to the
-                //  NewNotifPipeline
-                if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
-                    final String newOverrideGroupKey = ranking.getOverrideGroupKey();
-                    if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
-                            newOverrideGroupKey)) {
-                        entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                // TODO: (b/148791039) We should crash if we are ever handed a ranking with
+                //  incomplete entries. Right now, there's a race condition in NotificationListener
+                //  that means this might occur when SystemUI is starting up.
+                Ranking ranking = new Ranking();
+                if (rankingMap.getRanking(entry.getKey(), ranking)) {
+                    entry.setRanking(ranking);
+
+                    // TODO: (b/145659174) update the sbn's overrideGroupKey in
+                    //  NotificationEntry.setRanking instead of here once we fully migrate to the
+                    //  NewNotifPipeline
+                    if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+                        final String newOverrideGroupKey = ranking.getOverrideGroupKey();
+                        if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
+                                newOverrideGroupKey)) {
+                            entry.getSbn().setOverrideGroupKey(newOverrideGroupKey);
+                        }
                     }
+                } else {
+                    mLogger.logRankingMissing(entry.getKey(), rankingMap);
                 }
             }
         }
@@ -378,6 +389,14 @@ public class NotifCollection implements Dumpable {
         return ranking;
     }
 
+    private void dispatchOnEntryInit(NotificationEntry entry) {
+        mAmDispatchingToOtherCode = true;
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryInit(entry);
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
     private void dispatchOnEntryAdded(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
@@ -409,6 +428,14 @@ public class NotifCollection implements Dumpable {
         mAmDispatchingToOtherCode = true;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryRemoved(entry, reason, removedByUser);
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
+    private void dispatchOnEntryCleanUp(NotificationEntry entry) {
+        mAmDispatchingToOtherCode = true;
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryCleanUp(entry);
         }
         mAmDispatchingToOtherCode = false;
     }

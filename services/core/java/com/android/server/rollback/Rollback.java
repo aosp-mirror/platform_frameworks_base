@@ -44,6 +44,7 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.pm.ApexManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -651,14 +652,22 @@ class Rollback {
      */
     void delete(AppDataRollbackHelper dataHelper) {
         synchronized (mLock) {
+            boolean containsApex = false;
             for (PackageRollbackInfo pkgInfo : info.getPackages()) {
-                IntArray snapshottedUsers = pkgInfo.getSnapshottedUsers();
-                for (int i = 0; i < snapshottedUsers.size(); i++) {
-                    // Destroy app data snapshot.
-                    int userId = snapshottedUsers.get(i);
+                if (pkgInfo.isApex()) {
+                    containsApex = true;
+                } else {
+                    IntArray snapshottedUsers = pkgInfo.getSnapshottedUsers();
+                    for (int i = 0; i < snapshottedUsers.size(); i++) {
+                        // Destroy app data snapshot.
+                        int userId = snapshottedUsers.get(i);
 
-                    dataHelper.destroyAppDataSnapshot(info.getRollbackId(), pkgInfo, userId);
+                        dataHelper.destroyAppDataSnapshot(info.getRollbackId(), pkgInfo, userId);
+                    }
                 }
+            }
+            if (containsApex) {
+                ApexManager.getInstance().destroyDeSnapshots(info.getRollbackId());
             }
 
             RollbackStore.deleteRollback(this);

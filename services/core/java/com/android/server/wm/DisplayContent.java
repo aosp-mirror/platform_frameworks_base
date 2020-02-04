@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -83,10 +84,9 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.am.ActivityDisplayProto.DISPLAY;
-import static com.android.server.am.ActivityDisplayProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
-import static com.android.server.am.ActivityDisplayProto.SINGLE_TASK_INSTANCE;
+import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
+import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
+import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -111,7 +111,7 @@ import static com.android.server.wm.DisplayContentProto.OVERLAY_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
-import static com.android.server.wm.DisplayContentProto.STACKS;
+import static com.android.server.wm.DisplayContentProto.TASKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -2733,30 +2733,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
-        final long token = proto.start(fieldId);
-        dumpDebugInner(proto, DISPLAY, logLevel);
-        proto.write(com.android.server.am.ActivityDisplayProto.ID, mDisplayId);
-        proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
-        final ActivityStack focusedStack = getFocusedStack();
-        if (focusedStack != null) {
-            proto.write(FOCUSED_STACK_ID, focusedStack.getRootTaskId());
-            final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
-            if (focusedActivity != null) {
-                focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
-            }
-        } else {
-            proto.write(FOCUSED_STACK_ID, INVALID_STACK_ID);
-        }
-        for (int stackNdx = getStackCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = getStackAt(stackNdx);
-            stack.dumpDebug(proto, com.android.server.am.ActivityDisplayProto.STACKS, logLevel);
-        }
-        proto.end(token);
-    }
-
-    // TODO(proto-merge): Remove once protos for ActivityDisplay and DisplayContent are merged.
-    public void dumpDebugInner(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
@@ -2764,11 +2740,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
+
         proto.write(ID, mDisplayId);
         mRootDisplayArea.dumpDebug(proto, ROOT_DISPLAY_AREA, logLevel);
-        for (int stackNdx = mTaskContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mTaskContainers.getChildAt(stackNdx);
-            stack.dumpDebugInnerStackOnly(proto, STACKS, logLevel);
+        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = mTaskContainers.getChildAt(i);
+            stack.dumpDebug(proto, TASKS, logLevel);
         }
         mDividerControllerLocked.dumpDebug(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
         for (int i = mOverlayContainers.getChildCount() - 1; i >= 0; --i) {
@@ -2796,6 +2773,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         for (int i = mChangingApps.size() - 1; i >= 0; i--) {
             mChangingApps.valueAt(i).writeIdentifierToProto(proto, CHANGING_APPS);
         }
+
+        proto.write(SINGLE_TASK_INSTANCE, mSingleTaskInstance);
+        final ActivityStack focusedStack = getFocusedStack();
+        if (focusedStack != null) {
+            proto.write(FOCUSED_ROOT_TASK_ID, focusedStack.getRootTaskId());
+            final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
+            if (focusedActivity != null) {
+                focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
+            }
+        } else {
+            proto.write(FOCUSED_ROOT_TASK_ID, INVALID_TASK_ID);
+        }
+
         proto.end(token);
     }
 

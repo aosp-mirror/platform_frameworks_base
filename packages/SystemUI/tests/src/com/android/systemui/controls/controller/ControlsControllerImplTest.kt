@@ -17,7 +17,12 @@
 package com.android.systemui.controls.controller
 
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.os.UserHandle
 import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
@@ -26,6 +31,8 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.DumpController
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -37,10 +44,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -61,18 +69,25 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var pendingIntent: PendingIntent
     @Mock
     private lateinit var persistenceWrapper: ControlsFavoritePersistenceWrapper
+    @Mock
+    private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock
+    private lateinit var listingController: ControlsListingController
 
     @Captor
     private lateinit var controlInfoListCaptor: ArgumentCaptor<List<ControlInfo>>
     @Captor
     private lateinit var controlLoadCallbackCaptor: ArgumentCaptor<(List<Control>) -> Unit>
+    @Captor
+    private lateinit var broadcastReceiverCaptor: ArgumentCaptor<BroadcastReceiver>
 
     private lateinit var delayableExecutor: FakeExecutor
     private lateinit var controller: ControlsController
 
     companion object {
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
-        fun <T : Any> safeEq(value: T): T = eq(value) ?: value
+        fun <T> eq(value: T): T = Mockito.eq(value) ?: value
+        fun <T> any(): T = Mockito.any<T>()
 
         private val TEST_COMPONENT = ComponentName("test.pkg", "test.class")
         private const val TEST_CONTROL_ID = "control1"
@@ -89,29 +104,49 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 TEST_COMPONENT_2, TEST_CONTROL_ID_2, TEST_CONTROL_TITLE_2, TEST_DEVICE_TYPE_2)
     }
 
+    private val user = mContext.userId
+    private val otherUser = user + 1
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         Settings.Secure.putInt(mContext.contentResolver,
                 ControlsControllerImpl.CONTROLS_AVAILABLE, 1)
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 1, otherUser)
 
         delayableExecutor = FakeExecutor(FakeSystemClock())
 
+        val wrapper = object : ContextWrapper(mContext) {
+            override fun createContextAsUser(user: UserHandle, flags: Int): Context {
+                return baseContext
+            }
+        }
+
         controller = ControlsControllerImpl(
-                mContext,
+                wrapper,
                 delayableExecutor,
                 uiController,
                 bindingController,
+                listingController,
+                broadcastDispatcher,
                 Optional.of(persistenceWrapper),
                 dumpController
         )
         assertTrue(controller.available)
+        verify(broadcastDispatcher).registerReceiver(
+                capture(broadcastReceiverCaptor), any(), any(), eq(UserHandle.ALL))
     }
 
     private fun builderFromInfo(controlInfo: ControlInfo): Control.StatelessBuilder {
         return Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
                 .setDeviceType(controlInfo.deviceType).setTitle(controlInfo.controlTitle)
+    }
+
+    @Test
+    fun testStartOnUser() {
+        assertEquals(user, controller.currentUserId)
     }
 
     @Test
@@ -127,6 +162,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 delayableExecutor,
                 uiController,
                 bindingController,
+                listingController,
+                broadcastDispatcher,
                 Optional.of(persistenceWrapper),
                 dumpController
         )
@@ -190,7 +227,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         controller.loadForComponent(TEST_COMPONENT) {}
 
         reset(persistenceWrapper)
-        verify(bindingController).bindAndLoad(safeEq(TEST_COMPONENT),
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.invoke(listOf(control))
@@ -262,7 +299,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
             assertEquals(ControlStatus(control, false), controlStatus)
         }
 
-        verify(bindingController).bindAndLoad(safeEq(TEST_COMPONENT),
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.invoke(listOf(control))
@@ -287,7 +324,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
             assertEquals(ControlStatus(control2, false), controlStatus2)
         }
 
-        verify(bindingController).bindAndLoad(safeEq(TEST_COMPONENT),
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.invoke(listOf(control, control2))
@@ -309,7 +346,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
             assertTrue(controlStatus.removed)
         }
 
-        verify(bindingController).bindAndLoad(safeEq(TEST_COMPONENT),
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.invoke(emptyList())
@@ -325,7 +362,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         controller.loadForComponent(TEST_COMPONENT) {}
 
-        verify(bindingController).bindAndLoad(safeEq(TEST_COMPONENT),
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
 
         controlLoadCallbackCaptor.value.invoke(listOf(control))
@@ -357,5 +394,27 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         controller.clearFavorites()
         assertTrue(controller.getFavoriteControls().isEmpty())
+    }
+
+    @Test
+    fun testSwitchUsers() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+
+        reset(persistenceWrapper)
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
+            putExtra(Intent.EXTRA_USER_HANDLE, otherUser)
+        }
+        val pendingResult = mock(BroadcastReceiver.PendingResult::class.java)
+        `when`(pendingResult.sendingUserId).thenReturn(otherUser)
+        broadcastReceiverCaptor.value.pendingResult = pendingResult
+
+        broadcastReceiverCaptor.value.onReceive(mContext, intent)
+
+        verify(persistenceWrapper).changeFile(any())
+        verify(persistenceWrapper).readFavorites()
+        verify(bindingController).changeUser(UserHandle.of(otherUser))
+        verify(listingController).changeUser(UserHandle.of(otherUser))
+        assertTrue(controller.getFavoriteControls().isEmpty())
+        assertEquals(otherUser, controller.currentUserId)
     }
 }

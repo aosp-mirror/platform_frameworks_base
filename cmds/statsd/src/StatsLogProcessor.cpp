@@ -20,11 +20,7 @@
 #include "StatsLogProcessor.h"
 
 #include <android-base/file.h>
-#include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
-#include <log/log_event_list.h>
-#include <utils/Errors.h>
-#include <utils/SystemClock.h>
 
 #include "android-base/stringprintf.h"
 #include "atoms_info.h"
@@ -47,8 +43,6 @@ using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
 using android::util::ProtoOutputStream;
-using std::make_unique;
-using std::unique_ptr;
 using std::vector;
 
 namespace android {

@@ -117,6 +117,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFiles;
 import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.pm.PackageManagerServiceUtils.makeDirRecursive;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 
 import android.Manifest;
@@ -361,7 +362,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -650,6 +650,8 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private static final String[] INSTANT_APP_BROADCAST_PERMISSION =
             new String[] { android.Manifest.permission.ACCESS_INSTANT_APPS };
+
+    private static final String RANDOM_DIR_PREFIX = "~~";
 
     final ServiceThread mHandlerThread;
 
@@ -2996,9 +2998,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            //delete tmp files
-            deleteTempPackageFiles();
-
             final int cachedSystemApps = PackageParser.sCachedPackageReadCount.get();
 
             // Remove any shared userIDs that have no associated packages
@@ -3591,8 +3590,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 getNextCodePath(Environment.getDataAppDirectory(null), packageName);
         int ret = PackageManager.INSTALL_SUCCEEDED;
         try {
-            Os.mkdir(dstCodePath.getAbsolutePath(), 0755);
-            Os.chmod(dstCodePath.getAbsolutePath(), 0755);
+            makeDirRecursive(dstCodePath, 0755);
             for (File srcFile : compressedFiles) {
                 final String srcFileName = srcFile.getName();
                 final String dstFileName = srcFileName.substring(
@@ -9852,8 +9850,12 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mInstallLock")
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
+            File codePathParent = codePath.getParentFile();
             try {
                 mInstaller.rmPackageDir(codePath.getAbsolutePath());
+                if (codePathParent.getName().startsWith(RANDOM_DIR_PREFIX)) {
+                    mInstaller.rmPackageDir(codePathParent.getAbsolutePath());
+                }
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to remove code path", e);
             }
@@ -14926,7 +14928,9 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean onIncremental = mIncrementalManager != null
                     && isIncrementalPath(beforeCodeFile.getAbsolutePath());
             try {
+                makeDirRecursive(afterCodeFile.getParentFile(), 0775);
                 if (onIncremental) {
+                    // TODO(b/147371381): fix incremental installation
                     mIncrementalManager.rename(beforeCodeFile.getAbsolutePath(),
                             afterCodeFile.getAbsolutePath());
                 } else {
@@ -15138,16 +15142,29 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * Given {@code targetDir}, returns {@code targetDir/~~[randomStrA]/[packageName]-[randomStrB].}
+     * Makes sure that {@code targetDir/~~[randomStrA]} directory doesn't exist.
+     * Notice that this method doesn't actually create any directory.
+     *
+     * @param targetDir Directory that is two-levels up from the result directory.
+     * @param packageName Name of the package whose code files are to be installed under the result
+     *                    directory.
+     * @return File object for the directory that should hold the code files of {@code packageName}.
+     */
     private File getNextCodePath(File targetDir, String packageName) {
-        File result;
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[16];
+        File firstLevelDir;
         do {
             random.nextBytes(bytes);
-            String suffix = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
-            result = new File(targetDir, packageName + "-" + suffix);
-        } while (result.exists());
-        return result;
+            String dirName = RANDOM_DIR_PREFIX
+                    + Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
+            firstLevelDir = new File(targetDir, dirName);
+        } while (firstLevelDir.exists());
+        random.nextBytes(bytes);
+        String suffix = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP);
+        return new File(firstLevelDir, packageName + "-" + suffix);
     }
 
     static class PackageInstalledInfo {
@@ -17140,12 +17157,6 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             return mSettings.getInternalVersion();
         }
-    }
-
-    private void deleteTempPackageFiles() {
-        // TODO: Is this used?
-        final FilenameFilter filter =
-                (dir, name) -> name.startsWith("vmdl") && name.endsWith(".tmp");
     }
 
     @Override
@@ -21477,7 +21488,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int absoluteCodePathCount = absoluteCodePaths.size();
             for (int i = 0; i < absoluteCodePathCount; i++) {
                 String absoluteCodePath = absoluteCodePaths.get(i);
-                if (absolutePath.startsWith(absoluteCodePath)) {
+                if (absoluteCodePath.startsWith(absolutePath)) {
                     pathValid = true;
                     break;
                 }
@@ -23835,9 +23846,8 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int getRuntimePermissionsVersion(@UserIdInt int userId) {
         Preconditions.checkArgumentNonnegative(userId);
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                "setRuntimePermissionVersion");
+        enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
+                "getRuntimePermissionVersion");
         synchronized (mLock) {
             return mSettings.getDefaultRuntimePermissionsVersionLPr(userId);
         }
@@ -23847,11 +23857,24 @@ public class PackageManagerService extends IPackageManager.Stub
     public void setRuntimePermissionsVersion(int version, @UserIdInt int userId) {
         Preconditions.checkArgumentNonnegative(version);
         Preconditions.checkArgumentNonnegative(userId);
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+        enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
                 "setRuntimePermissionVersion");
         synchronized (mLock) {
             mSettings.setDefaultRuntimePermissionsVersionLPr(version, userId);
+        }
+    }
+
+    private void enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
+            @NonNull String message) {
+        if (mContext.checkCallingOrSelfPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(message + " requires "
+                    + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " or "
+                    + Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS);
         }
     }
 

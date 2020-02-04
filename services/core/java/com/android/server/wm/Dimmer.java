@@ -20,6 +20,7 @@ import static com.android.server.wm.AlphaAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -29,6 +30,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
 
@@ -135,7 +138,7 @@ class Dimmer {
             mDimLayer = dimLayer;
             mDimming = true;
             final DimAnimatable dimAnimatable = new DimAnimatable(dimLayer);
-            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, () -> {
+            mSurfaceAnimator = new SurfaceAnimator(dimAnimatable, (type, anim) -> {
                 if (!mDimming) {
                     dimAnimatable.removeSurface();
                 }
@@ -157,8 +160,8 @@ class Dimmer {
     @VisibleForTesting
     interface SurfaceAnimatorStarter {
         void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
-                AnimationAdapter anim, boolean hidden,
-                @Nullable Runnable animationFinishedCallback);
+                AnimationAdapter anim, boolean hidden, @AnimationType int type,
+                @Nullable OnAnimationFinishedCallback animationFinishedCallback);
     }
 
     Dimmer(WindowContainer host) {
@@ -345,7 +348,7 @@ class Dimmer {
         mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
                 mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */,
-                null /* animationFinishedCallback */);
+                ANIMATION_TYPE_DIMMER, null /* animationFinishedCallback */);
     }
 
     private long getDimDuration(WindowContainer container) {

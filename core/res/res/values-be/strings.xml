@@ -198,10 +198,8 @@
     <string name="factory_reset_warning" msgid="6858705527798047809">"Даныя вашай прылады будуць сцерты"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Немагчыма выкарыстоўваць праграму адміністравання. Звесткі на вашай прыладзе будуць выдалены.\n\nКалі ў вас ёсць пытанні, звярніцеся да адміністратара арганізацыі."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Друк адключаны ўладальнікам праграмы <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
-    <!-- no translation found for personal_apps_suspended_notification_title (6551578720258229430) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_notification_text (8321053338614244297) -->
-    <skip />
+    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"Асабістыя праграмы заблакіраваны адміністратарам"</string>
+    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"Націсніце тут, каб упэўніцца ў адпаведнасці правілам."</string>
     <string name="me" msgid="6207584824693813140">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Параметры планшэта"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Параметры Android TV"</string>
@@ -1657,8 +1655,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%2$d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%3$d</xliff:g> с."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Выдалiць"</string>
-    <!-- no translation found for allow_while_in_use_permission_in_fgs (4101339676785053656) -->
-    <skip />
+    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Запушчаны ў фонавым рэжыме асноўны сэрвіс з пакета \"<xliff:g id="PACKAGENAME">%1$s</xliff:g>\" не будзе мець дазволу while-in-use у будучых зборках на мове R. Наведайце сайт go/r-bg-fgs-restriction і адпраўце справаздачу пра памылку."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Павялiчыць гук вышэй рэкамендаванага ўзроўню?\n\nДоўгае праслухоўванне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Выкарыстоўваць камбінацыю хуткага доступу для спецыяльных магчымасцей?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="8306239551412868396">"Калі камбінацыя хуткага доступу ўключана, вы можаце націснуць абедзве кнопкі гучнасці і ўтрымліваць іх 3 секунды, каб уключыць функцыю спецыяльных магчымасцей.\n\n Бягучая функцыя спецыяльных магчымасцей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Вы можаце змяніць гэту функцыю ў меню \"Налады &gt; Спецыяльныя магчымасці\"."</string>
@@ -1916,8 +1913,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"Праграма недаступная"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Праграма \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" цяпер недаступная. Яна кіруецца праграмай \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Даведацца больш"</string>
-    <!-- no translation found for app_suspended_unsuspend_message (1665438589450555459) -->
-    <skip />
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Скасаваць прыпыненне для праграмы"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Уключыць працоўны профіль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Будуць уключаны вашы рабочыя праграмы, апавяшчэнні, даныя і іншыя функцыі працоўнага профілю"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Уключыць"</string>
@@ -2075,12 +2071,9 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Пераключальнік падзеленага экрана"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Экран блакіроўкі"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Здымак экрана"</string>
-    <!-- no translation found for accessibility_system_action_accessibility_menu_label (8436484650391125184) -->
-    <skip />
+    <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Меню спецыяльных магчымасцей"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Панэль субцітраў праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" дададзены ў АБМЕЖАВАНУЮ групу"</string>
-    <!-- no translation found for resolver_personal_tab (2051260504014442073) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab (2690019516263167035) -->
-    <skip />
+    <string name="resolver_personal_tab" msgid="2051260504014442073">"Асабістыя"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"Працоўныя"</string>
 </resources>

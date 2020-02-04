@@ -38,6 +38,7 @@ import android.app.Dialog;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -450,6 +451,9 @@ public class InputMethodService extends AbstractInputMethodService {
 
     @Nullable
     private InlineSuggestionsRequestInfo mInlineSuggestionsRequestInfo = null;
+
+    private boolean mAutomotiveHideNavBarForKeyboard;
+    private boolean mIsAutomotive;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -1230,6 +1234,11 @@ public class InputMethodService extends AbstractInputMethodService {
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mSettingsObserver = SettingsObserver.createAndRegister(this);
+
+        mIsAutomotive = isAutomotive();
+        mAutomotiveHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
+
         // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
         // for update resources & configuration correctly when show soft input
         // in non-default display.
@@ -1239,12 +1248,16 @@ public class InputMethodService extends AbstractInputMethodService {
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(WindowInsets.Type.statusBars());
 
-        // IME layout should always be inset by navigation bar, no matter it's current visibility.
+        // IME layout should always be inset by navigation bar, no matter its current visibility,
+        // unless automotive requests it, since automotive may hide the navigation bar.
         mWindow.getWindow().getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> v.onApplyWindowInsets(
                         new WindowInsets.Builder(insets).setInsets(
                                 navigationBars(),
-                                insets.getInsetsIgnoringVisibility(navigationBars()))
+                                mIsAutomotive && mAutomotiveHideNavBarForKeyboard
+                                        ? android.graphics.Insets.NONE
+                                        : insets.getInsetsIgnoringVisibility(navigationBars())
+                                )
                                 .build()));
 
         // For ColorView in DecorView to work, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS needs to be set
@@ -3282,6 +3295,11 @@ public class InputMethodService extends AbstractInputMethodService {
                 | (isInputViewShown()
                         ? (mCanPreRender ? (mWindowVisible ? IME_VISIBLE : IME_INVISIBLE)
                         : IME_VISIBLE) : 0);
+    }
+
+    private boolean isAutomotive() {
+        return getApplicationContext().getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     /**

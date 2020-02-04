@@ -18,7 +18,6 @@ package com.android.settingslib.media;
 import android.app.Notification;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
@@ -162,10 +161,8 @@ public class LocalMediaManager implements BluetoothCallback {
         mMediaDevices.clear();
         mBluetoothMediaManager.registerCallback(mMediaDeviceCallback);
         mBluetoothMediaManager.startScan();
-        if (!TextUtils.isEmpty(mPackageName)) {
-            mInfoMediaManager.registerCallback(mMediaDeviceCallback);
-            mInfoMediaManager.startScan();
-        }
+        mInfoMediaManager.registerCallback(mMediaDeviceCallback);
+        mInfoMediaManager.startScan();
     }
 
     private void addPhoneDeviceIfNecessary() {
@@ -208,10 +205,8 @@ public class LocalMediaManager implements BluetoothCallback {
     public void stopScan() {
         mBluetoothMediaManager.unregisterCallback(mMediaDeviceCallback);
         mBluetoothMediaManager.stopScan();
-        if (!TextUtils.isEmpty(mPackageName)) {
-            mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
-            mInfoMediaManager.stopScan();
-        }
+        mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
+        mInfoMediaManager.stopScan();
     }
 
     /**

@@ -21,6 +21,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
+import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
@@ -47,9 +48,10 @@ interface AnimationAdapter {
      *                       component running the animation after {@code finishCallback} has been
      *                       invoked, or after the animation was cancelled.
      * @param t The Transaction to apply the initial frame of the animation.
+     * @param type The type of the animation.
      * @param finishCallback The callback to be invoked when the animation has finished.
      */
-    void startAnimation(SurfaceControl animationLeash, Transaction t,
+    void startAnimation(SurfaceControl animationLeash, Transaction t, @AnimationType int type,
             OnAnimationFinishedCallback finishCallback);
 
     /**

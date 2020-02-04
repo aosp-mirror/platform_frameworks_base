@@ -22,7 +22,6 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 import android.content.Context;
 
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
-import com.android.systemui.car.CarNotificationEntryManager;
 import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
@@ -72,13 +71,6 @@ abstract class CarSystemUIModule {
     static boolean provideAllowNotificationLongPress() {
         return false;
     }
-
-    /**
-     * Use {@link CarNotificationEntryManager}, which does nothing when adding a notification.
-     */
-    @Binds
-    abstract NotificationEntryManager bindNotificationEntryManager(
-            CarNotificationEntryManager notificationEntryManager);
 
     @Singleton
     @Provides

@@ -196,7 +196,14 @@ public class MediaRouterManagerTest {
     public void testRouteFeatures() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_SPECIAL);
 
-        assertEquals(1, routes.size());
+        int routeCount = 0;
+        for (MediaRoute2Info route : routes.values()) {
+            if (!route.isSystemRoute()) {
+                routeCount++;
+            }
+        }
+
+        assertEquals(1, routeCount);
         assertNotNull(routes.get(ROUTE_ID_SPECIAL_FEATURE));
     }
 

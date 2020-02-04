@@ -25,11 +25,15 @@ namespace android {
 namespace stats_log_api_gen {
 
 static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
+    fprintf(out, "static int UNSET_VALUE = INT_MAX;\n");
     fprintf(out, "static int FIRST_UID_IN_CHAIN = 0;\n");
 
     fprintf(out, "struct StateAtomFieldOptions {\n");
     fprintf(out, "  std::vector<int> primaryFields;\n");
     fprintf(out, "  int exclusiveField;\n");
+    fprintf(out, "  int defaultState = UNSET_VALUE;\n");
+    fprintf(out, "  int resetState = UNSET_VALUE;\n");
+    fprintf(out, "  bool nested;\n");
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
@@ -126,7 +130,7 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
             "static std::map<int, StateAtomFieldOptions> "
             "getStateAtomFieldOptions() {\n");
     fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
-    fprintf(out, "    StateAtomFieldOptions opt;\n");
+    fprintf(out, "    StateAtomFieldOptions* opt;\n");
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
          atom != atoms.decls.end(); atom++) {
         if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
@@ -136,14 +140,26 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
                 "\n    // Adding primary and exclusive fields for atom "
                 "(%d)%s\n",
                 atom->code, atom->name.c_str());
-        fprintf(out, "    opt.primaryFields.clear();\n");
+        fprintf(out, "    opt = &(options[static_cast<int>(%s)]);\n",
+                make_constant_name(atom->name).c_str());
+        fprintf(out, "    opt->primaryFields.reserve(%lu);\n", atom->primaryFields.size());
         for (const auto& field : atom->primaryFields) {
-            fprintf(out, "    opt.primaryFields.push_back(%d);\n", field);
+            fprintf(out, "    opt->primaryFields.push_back(%d);\n", field);
         }
 
-        fprintf(out, "    opt.exclusiveField = %d;\n", atom->exclusiveField);
-        fprintf(out, "    options[static_cast<int>(%s)] = opt;\n",
-                make_constant_name(atom->name).c_str());
+        fprintf(out, "    opt->exclusiveField = %d;\n", atom->exclusiveField);
+        if (atom->defaultState != INT_MAX) {
+            fprintf(out, "    opt->defaultState = %d;\n", atom->defaultState);
+        } else {
+            fprintf(out, "    opt->defaultState = UNSET_VALUE;\n");
+        }
+
+        if (atom->resetState != INT_MAX) {
+            fprintf(out, "    opt->resetState = %d;\n", atom->resetState);
+        } else {
+            fprintf(out, "    opt->resetState = UNSET_VALUE;\n");
+        }
+        fprintf(out, "    opt->nested = %d;\n", atom->nested);
     }
 
     fprintf(out, "    return options;\n");
