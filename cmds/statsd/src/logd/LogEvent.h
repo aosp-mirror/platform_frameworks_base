@@ -56,6 +56,9 @@ struct InstallTrainInfo {
     std::string trainName;
     int32_t status;
     std::vector<int64_t> experimentIds;
+    bool requiresStaging;
+    bool rollbackEnabled;
+    bool requiresLowLatencyMonitor;
 };
 
 /**
