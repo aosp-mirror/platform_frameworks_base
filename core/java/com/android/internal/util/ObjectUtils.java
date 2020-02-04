@@ -36,4 +36,12 @@ public class ObjectUtils {
             return (b != null) ? -1 : 0;
         }
     }
+
+    /**
+     * Returns its first argument if non-null, and the second otherwise.
+     */
+    @Nullable
+    public static <T> T getOrElse(@Nullable final T object, @Nullable final T otherwise) {
+        return null != object ? object : otherwise;
+    }
 }
