@@ -7517,9 +7517,6 @@ package android.net.wifi {
     method @Deprecated public boolean isNoInternetAccessExpected();
     method @Deprecated public void setIpConfiguration(@Nullable android.net.IpConfiguration);
     method @Deprecated public void setNetworkSelectionStatus(@NonNull android.net.wifi.WifiConfiguration.NetworkSelectionStatus);
-    field @Deprecated public static final int AP_BAND_2GHZ = 0; // 0x0
-    field @Deprecated public static final int AP_BAND_5GHZ = 1; // 0x1
-    field @Deprecated public static final int AP_BAND_ANY = -1; // 0xffffffff
     field @Deprecated public static final int INVALID_NETWORK_ID = -1; // 0xffffffff
     field @Deprecated public static final int METERED_OVERRIDE_METERED = 1; // 0x1
     field @Deprecated public static final int METERED_OVERRIDE_NONE = 0; // 0x0
@@ -7529,7 +7526,6 @@ package android.net.wifi {
     field @Deprecated public static final int RECENT_FAILURE_AP_UNABLE_TO_HANDLE_NEW_STA = 17; // 0x11
     field @Deprecated public static final int RECENT_FAILURE_NONE = 0; // 0x0
     field @Deprecated public boolean allowAutojoin;
-    field @Deprecated public int apBand;
     field @Deprecated public int carrierId;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
