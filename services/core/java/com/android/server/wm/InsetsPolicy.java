@@ -44,6 +44,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsetsAnimationCallback;
 import android.view.WindowInsetsAnimationControlListener;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.DisplayThread;
 
 /**
@@ -107,11 +108,11 @@ class InsetsPolicy {
             changed = true;
         }
         if (changed) {
-            startAnimation(mShowingTransientTypes, true, () -> {
+            mPolicy.getStatusBarManagerInternal().showTransient(mDisplayContent.getDisplayId(),
+                    mShowingTransientTypes.toArray());
+            updateBarControlTarget(mFocusedWin);
+            startAnimation(true /* show */, () -> {
                 synchronized (mDisplayContent.mWmService.mGlobalLock) {
-                    mPolicy.getStatusBarManagerInternal().showTransient(
-                            mDisplayContent.getDisplayId(),
-                            mShowingTransientTypes.toArray());
                     mStateController.notifyInsetsChanged();
                 }
             });
@@ -122,7 +123,7 @@ class InsetsPolicy {
         if (mShowingTransientTypes.size() == 0) {
             return;
         }
-        startAnimation(mShowingTransientTypes, false, () -> {
+        startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
                 mShowingTransientTypes.clear();
                 mStateController.notifyInsetsChanged();
@@ -268,18 +269,20 @@ class InsetsPolicy {
         return isDockedStackVisible || isFreeformStackVisible || isResizing;
     }
 
-    private void startAnimation(IntArray internalTypes, boolean show, Runnable callback) {
+    @VisibleForTesting
+    void startAnimation(boolean show, Runnable callback) {
         int typesReady = 0;
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
-        updateBarControlTarget(mFocusedWin);
-        for (int i = internalTypes.size() - 1; i >= 0; i--) {
+        final IntArray showingTransientTypes = mShowingTransientTypes;
+        for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
             InsetsSourceProvider provider =
-                    mStateController.getSourceProvider(internalTypes.get(i));
-            if (provider == null) continue;
-            InsetsSourceControl control = provider.getControl(provider.getControlTarget());
-            if (control == null || control.getLeash() == null) continue;
-            typesReady |= InsetsState.toPublicType(internalTypes.get(i));
-            controls.put(control.getType(), control);
+                    mStateController.getSourceProvider(showingTransientTypes.get(i));
+            InsetsSourceControl control = provider.getControl(mTransientControlTarget);
+            if (control == null || control.getLeash() == null) {
+                continue;
+            }
+            typesReady |= InsetsState.toPublicType(showingTransientTypes.get(i));
+            controls.put(control.getType(), new InsetsSourceControl(control));
         }
         controlAnimationUnchecked(typesReady, controls, show, callback);
     }
@@ -335,7 +338,6 @@ class InsetsPolicy {
             private InsetsPolicyAnimationControlListener mListener;
 
             InsetsPolicyAnimationControlCallbacks(InsetsPolicyAnimationControlListener listener) {
-                super();
                 mListener = listener;
             }
 
@@ -353,9 +355,11 @@ class InsetsPolicy {
                         InsetsController.INTERPOLATOR, true,
                         show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
                                 : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
+                SurfaceAnimationThread.getHandler().post(
+                        () -> mListener.onReady(mAnimationControl, typesReady));
             }
 
-            /** Called on SurfaceAnimationThread lock without global WM lock held. */
+            /** Called on SurfaceAnimationThread without global WM lock held. */
             @Override
             public void scheduleApplyChangeInsets() {
                 InsetsState state = getState();
@@ -384,7 +388,7 @@ class InsetsPolicy {
                 return overrideState;
             }
 
-            /** Called on SurfaceAnimationThread lock without global WM lock held. */
+            /** Called on SurfaceAnimationThread without global WM lock held. */
             @Override
             public void applySurfaceParams(
                     final SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
@@ -396,14 +400,12 @@ class InsetsPolicy {
                 t.apply();
             }
 
-            /** Called on SurfaceAnimationThread lock without global WM lock held. */
             @Override
             public void startAnimation(InsetsAnimationControlImpl controller,
                     WindowInsetsAnimationControlListener listener, int types,
                     WindowInsetsAnimationCallback.InsetsAnimation animation,
                     WindowInsetsAnimationCallback.AnimationBounds bounds,
                     int layoutDuringAnimation) {
-                SurfaceAnimationThread.getHandler().post(() -> listener.onReady(controller, types));
             }
         }
     }

@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.WindowInsets.Type.ime;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -148,7 +146,7 @@ public interface WindowInsetsController {
      * @param types The {@link InsetsType}s the application has requested to control.
      * @param durationMillis Duration of animation in
      *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
-     *                       animation doesn't have a predetermined duration.T his value will be
+     *                       animation doesn't have a predetermined duration. This value will be
      *                       passed to {@link InsetsAnimation#getDurationMillis()}
      * @param interpolator The interpolator used for this animation, or {@code null} if this
      *                     animation doesn't follow an interpolation curve. This value will be

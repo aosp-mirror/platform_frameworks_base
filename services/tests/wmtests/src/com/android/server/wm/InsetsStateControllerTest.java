@@ -20,7 +20,9 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,13 +35,13 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
 
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import androidx.test.filters.FlakyTest;
-import androidx.test.filters.SmallTest;
 
 @SmallTest
 @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
@@ -88,6 +90,10 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+
+        // IME cannot be the IME target.
+        ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
@@ -98,6 +104,10 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     public void testImeForDispatch() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+
+        // IME cannot be the IME target.
+        ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+
         InsetsSourceProvider statusBarProvider =
                 getController().getSourceProvider(ITYPE_STATUS_BAR);
         statusBarProvider.setWindow(statusBar, null, ((displayFrames, windowState, rect) ->
