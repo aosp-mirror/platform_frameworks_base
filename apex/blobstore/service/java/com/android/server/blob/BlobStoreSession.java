@@ -21,6 +21,7 @@ import static android.app.blob.XmlTags.ATTR_PACKAGE;
 import static android.app.blob.XmlTags.ATTR_UID;
 import static android.app.blob.XmlTags.TAG_ACCESS_MODE;
 import static android.app.blob.XmlTags.TAG_BLOB_HANDLE;
+import static android.os.Trace.TRACE_TAG_SYSTEM_SERVER;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
@@ -41,6 +42,7 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
+import android.os.Trace;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -382,9 +384,13 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     void verifyBlobData() {
         byte[] actualDigest = null;
         try {
+            Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER,
+                    "computeBlobDigest-i" + mSessionId + "-l" + getSessionFile().length());
             actualDigest = FileUtils.digest(getSessionFile(), mBlobHandle.algorithm);
         } catch (IOException | NoSuchAlgorithmException e) {
             Slog.e(TAG, "Error computing the digest", e);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_SYSTEM_SERVER);
         }
         synchronized (mSessionLock) {
             if (actualDigest != null && Arrays.equals(actualDigest, mBlobHandle.digest)) {
