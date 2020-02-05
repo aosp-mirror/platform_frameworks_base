@@ -4918,6 +4918,10 @@
     <permission android:name="android.permission.ACCESS_TV_TUNER"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
+    <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
+                android:protectionLevel="signature|appPredictor" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

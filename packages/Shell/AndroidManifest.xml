@@ -252,6 +252,9 @@
     <!-- Permission required for CTS test - ShortcutManagerUsageTest -->
     <uses-permission android:name="android.permission.ACCESS_SHORTCUTS"/>
 
+     <!-- Permission required for CTS test - UsageStatsTest -->
+    <uses-permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"/>
+
     <!-- Permissions required to test ambient display. -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
