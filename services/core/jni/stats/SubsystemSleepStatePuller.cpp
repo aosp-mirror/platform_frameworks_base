@@ -55,7 +55,7 @@ namespace android {
 namespace server {
 namespace stats {
 
-static std::function<status_pull_atom_return_t(int32_t atomTag, pulled_stats_event_list* data)>
+static std::function<AStatsManager_PullAtomCallbackReturn(int32_t atomTag, AStatsEventList* data)>
         gPuller = {};
 
 static sp<android::hardware::power::V1_0::IPower> gPowerHalV1_0 = nullptr;
@@ -176,12 +176,12 @@ static bool getPowerStatsHalLocked() {
 }
 
 // The caller must be holding gPowerHalMutex.
-static status_pull_atom_return_t getIPowerStatsDataLocked(int32_t atomTag,
-                                                          pulled_stats_event_list* data) {
+static AStatsManager_PullAtomCallbackReturn getIPowerStatsDataLocked(int32_t atomTag,
+                                                                     AStatsEventList* data) {
     using android::hardware::power::stats::V1_0::Status;
 
     if(!getPowerStatsHalLocked()) {
-        return STATS_PULL_SKIP;
+        return AStatsManager_PULL_SKIP;
     }
     // Get power entity state residency data
     bool success = false;
@@ -194,17 +194,17 @@ static status_pull_atom_return_t getIPowerStatsDataLocked(int32_t atomTag,
                 }
                 for (auto result : results) {
                     for (auto stateResidency : result.stateResidencyData) {
-                        stats_event* event = add_stats_event_to_pull_data(data);
-                        stats_event_set_atom_id(event, android::util::SUBSYSTEM_SLEEP_STATE);
-                        stats_event_write_string8(event,
-                                                  gEntityNames.at(result.powerEntityId).c_str());
-                        stats_event_write_string8(event,
-                                                  gStateNames.at(result.powerEntityId)
-                                                          .at(stateResidency.powerEntityStateId)
-                                                          .c_str());
-                        stats_event_write_int64(event, stateResidency.totalStateEntryCount);
-                        stats_event_write_int64(event, stateResidency.totalTimeInStateMs);
-                        stats_event_build(event);
+                        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+                        AStatsEvent_setAtomId(event, android::util::SUBSYSTEM_SLEEP_STATE);
+                        AStatsEvent_writeString(event,
+                                                gEntityNames.at(result.powerEntityId).c_str());
+                        AStatsEvent_writeString(event,
+                                                gStateNames.at(result.powerEntityId)
+                                                        .at(stateResidency.powerEntityStateId)
+                                                        .c_str());
+                        AStatsEvent_writeInt64(event, stateResidency.totalStateEntryCount);
+                        AStatsEvent_writeInt64(event, stateResidency.totalTimeInStateMs);
+                        AStatsEvent_build(event);
                     }
                 }
                 success = true;
@@ -213,9 +213,9 @@ static status_pull_atom_return_t getIPowerStatsDataLocked(int32_t atomTag,
     // bool success determines if this succeeded or not.
     checkResultLocked(ret, __func__);
     if (!success) {
-        return STATS_PULL_SKIP;
+        return AStatsManager_PULL_SKIP;
     }
-    return STATS_PULL_SUCCESS;
+    return AStatsManager_PULL_SUCCESS;
 }
 
 // The caller must be holding gPowerHalMutex.
@@ -244,12 +244,12 @@ static bool getPowerHalLocked() {
 }
 
 // The caller must be holding gPowerHalMutex.
-static status_pull_atom_return_t getIPowerDataLocked(int32_t atomTag,
-                                                     pulled_stats_event_list* data) {
+static AStatsManager_PullAtomCallbackReturn getIPowerDataLocked(int32_t atomTag,
+                                                                AStatsEventList* data) {
     using android::hardware::power::V1_0::Status;
 
     if(!getPowerHalLocked()) {
-        return STATS_PULL_SKIP;
+        return AStatsManager_PULL_SKIP;
     }
 
         Return<void> ret;
@@ -259,26 +259,26 @@ static status_pull_atom_return_t getIPowerDataLocked(int32_t atomTag,
 
                     for (size_t i = 0; i < states.size(); i++) {
                         const PowerStatePlatformSleepState& state = states[i];
-                        stats_event* event = add_stats_event_to_pull_data(data);
-                        stats_event_set_atom_id(event, android::util::SUBSYSTEM_SLEEP_STATE);
-                        stats_event_write_string8(event, state.name.c_str());
-                        stats_event_write_string8(event, "");
-                        stats_event_write_int64(event, state.totalTransitions);
-                        stats_event_write_int64(event, state.residencyInMsecSinceBoot);
-                        stats_event_build(event);
+                        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+                        AStatsEvent_setAtomId(event, android::util::SUBSYSTEM_SLEEP_STATE);
+                        AStatsEvent_writeString(event, state.name.c_str());
+                        AStatsEvent_writeString(event, "");
+                        AStatsEvent_writeInt64(event, state.totalTransitions);
+                        AStatsEvent_writeInt64(event, state.residencyInMsecSinceBoot);
+                        AStatsEvent_build(event);
 
                         ALOGV("powerstate: %s, %lld, %lld, %d", state.name.c_str(),
                               (long long)state.residencyInMsecSinceBoot,
                               (long long)state.totalTransitions,
                               state.supportedOnlyInSuspend ? 1 : 0);
                         for (const auto& voter : state.voters) {
-                            stats_event* event = add_stats_event_to_pull_data(data);
-                            stats_event_set_atom_id(event, android::util::SUBSYSTEM_SLEEP_STATE);
-                            stats_event_write_string8(event, state.name.c_str());
-                            stats_event_write_string8(event, voter.name.c_str());
-                            stats_event_write_int64(event, voter.totalNumberOfTimesVotedSinceBoot);
-                            stats_event_write_int64(event, voter.totalTimeInMsecVotedForSinceBoot);
-                            stats_event_build(event);
+                            AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+                            AStatsEvent_setAtomId(event, android::util::SUBSYSTEM_SLEEP_STATE);
+                            AStatsEvent_writeString(event, state.name.c_str());
+                            AStatsEvent_writeString(event, voter.name.c_str());
+                            AStatsEvent_writeInt64(event, voter.totalNumberOfTimesVotedSinceBoot);
+                            AStatsEvent_writeInt64(event, voter.totalTimeInMsecVotedForSinceBoot);
+                            AStatsEvent_build(event);
 
                             ALOGV("powerstatevoter: %s, %s, %lld, %lld", state.name.c_str(),
                                   voter.name.c_str(),
@@ -288,7 +288,7 @@ static status_pull_atom_return_t getIPowerDataLocked(int32_t atomTag,
                     }
                 });
         if (!checkResultLocked(ret, __func__)) {
-            return STATS_PULL_SKIP;
+            return AStatsManager_PULL_SKIP;
         }
 
         // Trying to cast to IPower 1.1, this will succeed only for devices supporting 1.1
@@ -305,14 +305,14 @@ static status_pull_atom_return_t getIPowerDataLocked(int32_t atomTag,
                                 for (size_t j = 0; j < subsystem.states.size(); j++) {
                                     const PowerStateSubsystemSleepState& state =
                                             subsystem.states[j];
-                                    stats_event* event = add_stats_event_to_pull_data(data);
-                                    stats_event_set_atom_id(event,
-                                                            android::util::SUBSYSTEM_SLEEP_STATE);
-                                    stats_event_write_string8(event, subsystem.name.c_str());
-                                    stats_event_write_string8(event, state.name.c_str());
-                                    stats_event_write_int64(event, state.totalTransitions);
-                                    stats_event_write_int64(event, state.residencyInMsecSinceBoot);
-                                    stats_event_build(event);
+                                    AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+                                    AStatsEvent_setAtomId(event,
+                                                          android::util::SUBSYSTEM_SLEEP_STATE);
+                                    AStatsEvent_writeString(event, subsystem.name.c_str());
+                                    AStatsEvent_writeString(event, state.name.c_str());
+                                    AStatsEvent_writeInt64(event, state.totalTransitions);
+                                    AStatsEvent_writeInt64(event, state.residencyInMsecSinceBoot);
+                                    AStatsEvent_build(event);
 
                                     ALOGV("subsystemstate: %s, %s, %lld, %lld, %lld",
                                           subsystem.name.c_str(), state.name.c_str(),
@@ -324,14 +324,14 @@ static status_pull_atom_return_t getIPowerDataLocked(int32_t atomTag,
                         }
                     });
         }
-        return STATS_PULL_SUCCESS;
+        return AStatsManager_PULL_SUCCESS;
 }
 
 // The caller must be holding gPowerHalMutex.
-std::function<status_pull_atom_return_t(int32_t atomTag, pulled_stats_event_list* data)>
+std::function<AStatsManager_PullAtomCallbackReturn(int32_t atomTag, AStatsEventList* data)>
 getPullerLocked() {
-    std::function<status_pull_atom_return_t(int32_t atomTag, pulled_stats_event_list * data)> ret =
-            {};
+    std::function<AStatsManager_PullAtomCallbackReturn(int32_t atomTag, AStatsEventList * data)>
+            ret = {};
 
     // First see if power.stats HAL is available. Fall back to power HAL if
     // power.stats HAL is unavailable.
@@ -346,8 +346,8 @@ getPullerLocked() {
     return ret;
 }
 
-status_pull_atom_return_t SubsystemSleepStatePuller::Pull(int32_t atomTag,
-                                                          pulled_stats_event_list* data) {
+AStatsManager_PullAtomCallbackReturn SubsystemSleepStatePuller::Pull(int32_t atomTag,
+                                                                     AStatsEventList* data) {
     std::lock_guard<std::mutex> lock(gPowerHalMutex);
 
     if(!gPuller) {
@@ -359,7 +359,7 @@ status_pull_atom_return_t SubsystemSleepStatePuller::Pull(int32_t atomTag,
     }
 
     ALOGE("Unable to load Power Hal or power.stats HAL");
-    return STATS_PULL_SKIP;
+    return AStatsManager_PULL_SKIP;
 }
 
 } // namespace stats
