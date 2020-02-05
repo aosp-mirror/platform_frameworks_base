@@ -2090,6 +2090,13 @@ public class DevicePolicyManager {
     public static final int LOCK_TASK_FEATURE_KEYGUARD = 1 << 5;
 
     /**
+     * Enable blocking of non-whitelisted activities from being started into a locked task.
+     *
+     * @see #setLockTaskFeatures(ComponentName, int)
+     */
+    public static final int LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK = 1 << 6;
+
+    /**
      * Flags supplied to {@link #setLockTaskFeatures(ComponentName, int)}.
      *
      * @hide
@@ -2102,7 +2109,8 @@ public class DevicePolicyManager {
             LOCK_TASK_FEATURE_HOME,
             LOCK_TASK_FEATURE_OVERVIEW,
             LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
-            LOCK_TASK_FEATURE_KEYGUARD
+            LOCK_TASK_FEATURE_KEYGUARD,
+            LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK
     })
     public @interface LockTaskFeature {}
 
