@@ -598,11 +598,12 @@ public class WifiCondManager {
     }
 
     /**
-     * Tear down a specific client (STA) interface, initially configured using
+     * Tear down a specific client (STA) interface configured using
      * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}.
      *
      * @param ifaceName Name of the interface to tear down.
-     * @return Returns true on success.
+     * @return Returns true on success, false on failure (e.g. when called before an interface was
+     * set up).
      */
     public boolean tearDownClientInterface(@NonNull String ifaceName) {
         if (getClientInterface(ifaceName) == null) {
@@ -676,11 +677,12 @@ public class WifiCondManager {
     }
 
     /**
-     * Tear down a Soft AP interface initially configured using
+     * Tear down a Soft AP interface configured using
      * {@link #setupInterfaceForSoftApMode(String)}.
      *
      * @param ifaceName Name of the interface to tear down.
-     * @return Returns true on success.
+     * @return Returns true on success, false on failure (e.g. when called before an interface was
+     * set up).
      */
     public boolean tearDownSoftApInterface(@NonNull String ifaceName) {
         if (getApInterface(ifaceName) == null) {
@@ -745,9 +747,13 @@ public class WifiCondManager {
     /**
      * Request signal polling.
      *
-     * @param ifaceName Name of the interface on which to poll.
+     * @param ifaceName Name of the interface on which to poll. The interface must have been
+     *                  already set up using
+     *{@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     *                  or {@link #setupInterfaceForSoftApMode(String)}.
+     *
      * @return A {@link SignalPollResult} object containing interface statistics, or a null on
-     * error.
+     * error (e.g. the interface hasn't been set up yet).
      */
     @Nullable public SignalPollResult signalPoll(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
@@ -771,10 +777,14 @@ public class WifiCondManager {
     }
 
     /**
-     * Get current transmit (Tx) packet counters of the specified interface.
+     * Get current transmit (Tx) packet counters of the specified interface. The interface must
+     * have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
      *
      * @param ifaceName Name of the interface.
-     * @return {@link TxPacketCounters} of the current interface or null on error.
+     * @return {@link TxPacketCounters} of the current interface or null on error (e.g. when
+     * called before the interface has been set up).
      */
     @Nullable public TxPacketCounters getTxPacketCounters(@NonNull String ifaceName) {
         IClientInterface iface = getClientInterface(ifaceName);
@@ -808,10 +818,15 @@ public class WifiCondManager {
      * be done using {@link #startScan(String, int, Set, List)} or
      * {@link #startPnoScan(String, PnoSettings, Executor, PnoScanRequestCallback)}.
      *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
+     *
      * @param ifaceName Name of the interface.
      * @param scanType The type of scan result to be returned, can be
      * {@link #SCAN_TYPE_SINGLE_SCAN} or {@link #SCAN_TYPE_PNO_SCAN}.
-     * @return Returns an array of {@link NativeScanResult} or an empty array on failure.
+     * @return Returns an array of {@link NativeScanResult} or an empty array on failure (e.g. when
+     * called before the interface has been set up).
      */
     @NonNull public List<NativeScanResult> getScanResults(@NonNull String ifaceName,
             @ScanResultType int scanType) {
@@ -864,13 +879,19 @@ public class WifiCondManager {
      * The latest scans can be obtained using {@link #getScanResults(String, int)} and using a
      * {@link #SCAN_TYPE_SINGLE_SCAN} for the {@code scanType}.
      *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
+     *
      * @param ifaceName Name of the interface on which to initiate the scan.
      * @param scanType Type of scan to perform, can be any of
      * {@link WifiScanner#SCAN_TYPE_HIGH_ACCURACY}, {@link WifiScanner#SCAN_TYPE_LOW_POWER}, or
      * {@link WifiScanner#SCAN_TYPE_LOW_LATENCY}.
      * @param freqs list of frequencies to scan for, if null scan all supported channels.
-     * @param hiddenNetworkSSIDs List of hidden networks to be scanned for.
-     * @return Returns true on success.
+     * @param hiddenNetworkSSIDs List of hidden networks to be scanned for, a null indicates that
+     *                           no hidden frequencies will be scanned for.
+     * @return Returns true on success, false on failure (e.g. when called before the interface
+     * has been set up).
      */
     public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
             @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs) {
@@ -926,11 +947,16 @@ public class WifiCondManager {
      * The latest PNO scans can be obtained using {@link #getScanResults(String, int)} with the
      * {@code scanType} set to {@link #SCAN_TYPE_PNO_SCAN}.
      *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
+     *
      * @param ifaceName Name of the interface on which to request a PNO.
      * @param pnoSettings PNO scan configuration.
      * @param executor The Executor on which to execute the callback.
      * @param callback Callback for the results of the offload request.
-     * @return true on success.
+     * @return true on success, false on failure (e.g. when called before the interface has been set
+     * up).
      */
     public boolean startPnoScan(@NonNull String ifaceName, @NonNull PnoSettings pnoSettings,
             @NonNull @CallbackExecutor Executor executor,
@@ -964,8 +990,13 @@ public class WifiCondManager {
      * Stop PNO scan configured with
      * {@link #startPnoScan(String, PnoSettings, Executor, PnoScanRequestCallback)}.
      *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
+     *
      * @param ifaceName Name of the interface on which the PNO scan was configured.
-     * @return true on success.
+     * @return true on success, false on failure (e.g. when called before the interface has been
+     * set up).
      */
     public boolean stopPnoScan(@NonNull String ifaceName) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
@@ -982,7 +1013,13 @@ public class WifiCondManager {
     }
 
     /**
-     * Abort ongoing single scan started with {@link #startScan(String, int, Set, List)}.
+     * Abort ongoing single scan started with {@link #startScan(String, int, Set, List)}. No failure
+     * callback, e.g. {@link ScanEventCallback#onScanFailed()}, is triggered by this operation.
+     *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}. If the interface has not been set up then
+     * this method has no impact.
      *
      * @param ifaceName Name of the interface on which the scan was started.
      */
@@ -1050,7 +1087,14 @@ public class WifiCondManager {
     }
 
     /**
-     * Get the device phy capabilities for a given interface
+     * Get the device phy capabilities for a given interface.
+     *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
+     *
+     * @return DeviceWiphyCapabilities or null on error (e.g. when called on an interface which has
+     * not been set up).
      */
     @Nullable public DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String ifaceName) {
         if (mWificond == null) {
@@ -1077,7 +1121,8 @@ public class WifiCondManager {
      * @param ifaceName Name of the interface on which to register the callback.
      * @param executor The Executor on which to execute the callbacks.
      * @param callback Callback for AP events.
-     * @return true on success, false otherwise.
+     * @return true on success, false on failure (e.g. when called on an interface which has not
+     * been set up).
      */
     public boolean registerApCallback(@NonNull String ifaceName,
             @NonNull @CallbackExecutor Executor executor,
@@ -1112,6 +1157,10 @@ public class WifiCondManager {
     /**
      * Send a management frame on the specified interface at the specified rate. Useful for probing
      * the link with arbitrary frames.
+     *
+     * Note: The interface must have been already set up using
+     * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
+     * or {@link #setupInterfaceForSoftApMode(String)}.
      *
      * @param ifaceName The interface on which to send the frame.
      * @param frame The raw byte array of the management frame to tramit.
