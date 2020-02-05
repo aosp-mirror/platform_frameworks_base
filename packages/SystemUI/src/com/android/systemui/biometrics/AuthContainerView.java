@@ -583,11 +583,13 @@ public class AuthContainerView extends LinearLayout
      * @return
      */
     public static WindowManager.LayoutParams getLayoutParams(IBinder windowToken) {
+        final int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                | WindowManager.LayoutParams.FLAG_SECURE;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("BiometricPrompt");
