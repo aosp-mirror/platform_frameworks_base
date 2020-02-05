@@ -67,19 +67,21 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     private static TimeZoneDetectorService create(@NonNull Context context) {
         final TimeZoneDetectorStrategy timeZoneDetectorStrategy =
-                TimeZoneDetectorStrategy.create(context);
+                TimeZoneDetectorStrategyImpl.create(context);
 
         Handler handler = FgThread.getHandler();
+        TimeZoneDetectorService service =
+                new TimeZoneDetectorService(context, handler, timeZoneDetectorStrategy);
+
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
                 new ContentObserver(handler) {
                     public void onChange(boolean selfChange) {
-                        timeZoneDetectorStrategy.handleAutoTimeZoneDetectionChange();
+                        service.handleAutoTimeZoneDetectionChanged();
                     }
                 });
-
-        return new TimeZoneDetectorService(context, handler, timeZoneDetectorStrategy);
+        return service;
     }
 
     @VisibleForTesting
@@ -111,17 +113,25 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        mTimeZoneDetectorStrategy.dumpState(pw, args);
+        mTimeZoneDetectorStrategy.dump(pw, args);
+    }
+
+    /** Internal method for handling the auto time zone setting being changed. */
+    @VisibleForTesting
+    public void handleAutoTimeZoneDetectionChanged() {
+        mHandler.post(mTimeZoneDetectorStrategy::handleAutoTimeZoneDetectionChanged);
     }
 
     private void enforceSuggestPhoneTimeZonePermission() {
         mContext.enforceCallingPermission(
-                android.Manifest.permission.SET_TIME_ZONE, "set time zone");
+                android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE,
+                "suggest phone time and time zone");
     }
 
     private void enforceSuggestManualTimeZonePermission() {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_TIME_ZONE, "set time zone");
+                android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE,
+                "suggest manual time and time zone");
     }
 }
 
