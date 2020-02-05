@@ -267,8 +267,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
         targets.addAll(getAccessibilityServiceTargets(context));
         targets.addAll(getWhiteListingServiceTargets(context));
 
-        final AccessibilityManager ams = (AccessibilityManager) context.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
         final List<String> requiredTargets = ams.getAccessibilityShortcutTargets(shortcutType);
         targets.removeIf(target -> !requiredTargets.contains(target.getId()));
 
@@ -277,8 +276,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private static List<AccessibilityButtonTarget> getAccessibilityServiceTargets(
             @NonNull Context context) {
-        final AccessibilityManager ams = (AccessibilityManager) context.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
         final List<AccessibilityServiceInfo> installedServices =
                 ams.getInstalledAccessibilityServiceList();
         if (installedServices == null) {
@@ -559,8 +557,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private static boolean isAccessibilityServiceEnabled(@NonNull Context context,
             AccessibilityButtonTarget target) {
-        final AccessibilityManager ams = (AccessibilityManager) context.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
         final List<AccessibilityServiceInfo> enabledServices =
                 ams.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
 
@@ -598,8 +595,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private void onLegacyTargetSelected(AccessibilityButtonTarget target) {
         if (mShortcutType == ACCESSIBILITY_BUTTON) {
-            final AccessibilityManager ams = (AccessibilityManager) getSystemService(
-                    Context.ACCESSIBILITY_SERVICE);
+            final AccessibilityManager ams = getSystemService(AccessibilityManager.class);
             ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
         } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
             switchServiceState(target);
@@ -607,9 +603,12 @@ public class AccessibilityButtonChooserActivity extends Activity {
     }
 
     private void onInvisibleTargetSelected(AccessibilityButtonTarget target) {
-        final AccessibilityManager ams = (AccessibilityManager) getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
-        ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
+        final AccessibilityManager ams = getSystemService(AccessibilityManager.class);
+        if (mShortcutType == ACCESSIBILITY_BUTTON) {
+            ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
+        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            ams.performAccessibilityShortcut(target.getId());
+        }
     }
 
     private void onIntuitiveTargetSelected(AccessibilityButtonTarget target) {
