@@ -119,7 +119,7 @@ public class RollbackStoreTest {
 
     @Test
     public void createNonStaged() {
-        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
+        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER, null);
 
         assertThat(rollback.getBackupDir().getAbsolutePath())
                 .isEqualTo(mFolder.getRoot().getAbsolutePath() + "/" + ID);
@@ -132,7 +132,7 @@ public class RollbackStoreTest {
 
     @Test
     public void createStaged() {
-        Rollback rollback = mRollbackStore.createStagedRollback(ID, 897, USER, INSTALLER);
+        Rollback rollback = mRollbackStore.createStagedRollback(ID, 897, USER, INSTALLER, null);
 
         assertThat(rollback.getBackupDir().getAbsolutePath())
                 .isEqualTo(mFolder.getRoot().getAbsolutePath() + "/" + ID);
@@ -147,7 +147,7 @@ public class RollbackStoreTest {
 
     @Test
     public void saveAndLoadRollback() {
-        Rollback origRb = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
+        Rollback origRb = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER, null);
 
         origRb.setRestoreUserDataInProgress(true);
         origRb.info.getCausePackages().add(new VersionedPackage("com.made.up", 2));
@@ -197,7 +197,7 @@ public class RollbackStoreTest {
 
     @Test
     public void loadFromJson() throws Exception {
-        Rollback expectedRb = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
+        Rollback expectedRb = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER, null);
 
         expectedRb.setTimestamp(Instant.parse("2019-10-01T12:29:08.855Z"));
         expectedRb.setRestoreUserDataInProgress(true);
@@ -246,7 +246,7 @@ public class RollbackStoreTest {
 
     @Test
     public void saveAndDelete() {
-        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
+        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER, null);
 
         RollbackStore.saveRollback(rollback);
 
