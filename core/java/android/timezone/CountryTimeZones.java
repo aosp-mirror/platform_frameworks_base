@@ -19,7 +19,6 @@ package android.timezone;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.icu.util.TimeZone;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class CountryTimeZones {
 
     /**
@@ -40,7 +38,6 @@ public final class CountryTimeZones {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class TimeZoneMapping {
 
         @NonNull
@@ -97,7 +94,6 @@ public final class CountryTimeZones {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class OffsetResult {
 
         private final TimeZone mTimeZone;
