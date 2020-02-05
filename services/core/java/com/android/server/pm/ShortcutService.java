@@ -2155,48 +2155,6 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public ParceledListSlice<ShortcutInfo> getDynamicShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isDynamicVisible);
-        }
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getManifestShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isManifestVisible);
-        }
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getPinnedShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isPinnedVisible);
-        }
-    }
-
-    @Override
     public ParceledListSlice<ShortcutInfo> getShortcuts(String packageName,
             @ShortcutManager.ShortcutMatchFlags int matchFlags, @UserIdInt int userId) {
         verifyCaller(packageName, userId);
