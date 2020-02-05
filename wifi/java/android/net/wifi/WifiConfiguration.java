@@ -1304,8 +1304,32 @@ public class WifiConfiguration implements Parcelable {
         public static final int DISABLED_BY_WRONG_PASSWORD = 8;
         /** This network is disabled because service is not subscribed. */
         public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9;
-        /** All other disable reasons should be strictly less than this value. */
+        /**
+         * All other disable reasons should be strictly less than this value.
+         * @hide
+         */
         public static final int NETWORK_SELECTION_DISABLED_MAX = 10;
+
+        /**
+         * Get an integer that is equal to the maximum integer value of all the
+         * DISABLED_* reasons
+         * e.g. {@link #DISABLED_NONE}, {@link #DISABLED_ASSOCIATION_REJECTION}, etc.
+         *
+         * All DISABLED_* constants will be contiguous in the range
+         * 0, 1, 2, 3, ..., getMaxNetworkSelectionDisableReasons()
+         *
+         * <br />
+         * For example, this can be used to iterate through all the network selection
+         * disable reasons like so:
+         * <pre>{@code
+         * for (int reason = 0; reason <= getMaxNetworkSelectionDisableReasons(); reason++) {
+         *     ...
+         * }
+         * }</pre>
+         */
+        public static int getMaxNetworkSelectionDisableReason() {
+            return NETWORK_SELECTION_DISABLED_MAX - 1;
+        }
 
         /**
          * Contains info about disable reasons.
