@@ -36,7 +36,6 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.util.Arrays;
@@ -131,6 +130,8 @@ public abstract class PackageSettingBase extends SettingBase {
     boolean updateAvailable;
 
     IntentFilterVerificationInfo verificationInfo;
+
+    boolean forceQueryableOverride;
 
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
@@ -261,6 +262,7 @@ public abstract class PackageSettingBase extends SettingBase {
                 ? Arrays.copyOf(orig.usesStaticLibrariesVersions,
                        orig.usesStaticLibrariesVersions.length) : null;
         updateAvailable = orig.updateAvailable;
+        forceQueryableOverride = orig.forceQueryableOverride;
     }
 
     @VisibleForTesting
@@ -693,6 +695,7 @@ public abstract class PackageSettingBase extends SettingBase {
         this.categoryHint = other.categoryHint;
         this.updateAvailable = other.updateAvailable;
         this.verificationInfo = other.verificationInfo;
+        this.forceQueryableOverride = other.forceQueryableOverride;
 
         if (mOldCodePaths != null) {
             if (other.mOldCodePaths != null) {

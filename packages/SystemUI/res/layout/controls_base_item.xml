@@ -23,8 +23,8 @@
     android:padding="@dimen/control_padding"
     android:clickable="true"
     android:focusable="true"
-    android:layout_marginLeft="2dp"
-    android:layout_marginRight="2dp"
+    android:layout_marginLeft="@dimen/control_base_item_margin"
+    android:layout_marginRight="@dimen/control_base_item_margin"
     android:background="@drawable/control_background">
 
     <ImageView
@@ -38,10 +38,8 @@
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/control_status_normal"
-        android:textColor="?android:attr/textColorPrimary"
-        android:fontFamily="@*android:string/config_bodyFontFamily"
-        android:paddingLeft="3dp"
+        android:textAppearance="@style/TextAppearance.Control.Status"
+        android:paddingStart="@dimen/control_status_padding"
         app:layout_constraintBottom_toBottomOf="@+id/icon"
         app:layout_constraintStart_toEndOf="@+id/icon" />
 
@@ -49,10 +47,8 @@
         android:id="@+id/status_extra"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/control_status_normal"
-        android:textColor="?android:attr/textColorPrimary"
-        android:fontFamily="@*android:string/config_bodyFontFamily"
-        android:paddingLeft="3dp"
+        android:textAppearance="@style/TextAppearance.Control.Status"
+        android:paddingStart="@dimen/control_status_padding"
         app:layout_constraintBottom_toBottomOf="@+id/icon"
         app:layout_constraintStart_toEndOf="@+id/status" />
 
@@ -60,9 +56,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="@style/TextAppearance.Control.Title"
         app:layout_constraintBottom_toTopOf="@+id/subtitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/icon" />
@@ -71,9 +65,15 @@
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="@style/TextAppearance.Control.Subtitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <CheckBox
+        android:id="@+id/favorite"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

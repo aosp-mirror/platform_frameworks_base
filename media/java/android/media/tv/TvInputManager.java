@@ -358,7 +358,6 @@ public final class TvInputManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int UNKNOWN_CLIENT_PID = -1;
 
     /**
@@ -1588,7 +1587,6 @@ public final class TvInputManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public int getClientPid(@NonNull String sessionId) {
         return getClientPidInternal(sessionId);

@@ -16,15 +16,20 @@
 
 package com.android.systemui.controls.management
 
+import android.graphics.Rect
+import android.graphics.drawable.Icon
+import android.service.controls.DeviceTypes
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.controller.ControlInfo
+import com.android.systemui.controls.ui.RenderInfo
 
 /**
  * Adapter for binding [Control] information to views.
@@ -43,7 +48,12 @@ class ControlAdapter(
     var listOfControls = emptyList<ControlStatus>()
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): Holder {
-        return Holder(layoutInflater.inflate(R.layout.control_item, parent, false))
+        return Holder(layoutInflater.inflate(R.layout.controls_base_item, parent, false).apply {
+            layoutParams.apply {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+            }
+            elevation = 15f
+        })
     }
 
     override fun getItemCount() = listOfControls.size
@@ -56,9 +66,13 @@ class ControlAdapter(
      * Holder for binding views in the [RecyclerView]-
      */
     class Holder(view: View) : RecyclerView.ViewHolder(view) {
+        private val icon: ImageView = itemView.requireViewById(R.id.icon)
         private val title: TextView = itemView.requireViewById(R.id.title)
         private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
-        private val favorite: CheckBox = itemView.requireViewById(R.id.favorite)
+        private val removed: TextView = itemView.requireViewById(R.id.status)
+        private val favorite: CheckBox = itemView.requireViewById<CheckBox>(R.id.favorite).apply {
+            visibility = View.VISIBLE
+        }
 
         /**
          * Bind data to the view
@@ -68,9 +82,11 @@ class ControlAdapter(
          *                 pre-populated with the [Control] information and the new favorite status.
          */
         fun bindData(data: ControlStatus, callback: (ControlInfo.Builder, Boolean) -> Unit) {
+            val renderInfo = getRenderInfo(data.control.deviceType, data.favorite)
             title.text = data.control.title
             subtitle.text = data.control.subtitle
             favorite.isChecked = data.favorite
+            removed.text = if (data.removed) "Removed" else ""
             favorite.setOnClickListener {
                 val infoBuilder = ControlInfo.Builder().apply {
                     controlId = data.control.controlId
@@ -79,11 +95,49 @@ class ControlAdapter(
                 }
                 callback(infoBuilder, favorite.isChecked)
             }
+            itemView.setOnClickListener {
+                favorite.performClick()
+            }
+            applyRenderInfo(renderInfo)
+        }
+
+        private fun getRenderInfo(
+            @DeviceTypes.DeviceType deviceType: Int,
+            favorite: Boolean
+        ): RenderInfo {
+            return RenderInfo.lookup(deviceType, favorite)
+        }
+
+        private fun applyRenderInfo(ri: RenderInfo) {
+            val context = itemView.context
+            val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
+
+            icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
+            icon.setImageTintList(fg)
         }
     }
 
     fun setItems(list: List<ControlStatus>) {
         listOfControls = list
         notifyDataSetChanged()
+    }
+}
+
+class MarginItemDecorator(
+    private val topMargin: Int,
+    private val sideMargins: Int
+) : RecyclerView.ItemDecoration() {
+
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        outRect.apply {
+            top = topMargin
+            left = sideMargins
+            right = sideMargins
+        }
     }
 }

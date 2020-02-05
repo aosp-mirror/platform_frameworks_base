@@ -98,13 +98,12 @@ public class NotifInflaterImpl implements NotifInflater {
             @Override
             public void run() {
                 int dismissalSurface = NotificationStats.DISMISSAL_SHADE;
-                /**
+                /*
                  * TODO: determine dismissal surface (ie: shade / headsup / aod)
                  * see {@link NotificationLogger#logNotificationClear}
                  */
                 mNotifCollection.dismissNotification(
                         entry,
-                        0,
                         new DismissedByUserStats(
                                 dismissalSurface,
                                 DISMISS_SENTIMENT_NEUTRAL,

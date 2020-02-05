@@ -16,7 +16,7 @@
 
 package com.android.server.notification;
 
-import android.util.StatsLog;
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * Standard implementation of NotificationRecordLogger interface.
@@ -31,7 +31,7 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
         if (!p.shouldLog(buzzBeepBlink)) {
             return;
         }
-        StatsLog.write(StatsLog.NOTIFICATION_REPORTED,
+        FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_REPORTED,
                 /* int32 event_id = 1 */ p.getUiEvent().getId(),
                 /* int32 uid = 2 */ r.getUid(),
                 /* string package_name = 3 */ r.sbn.getPackageName(),

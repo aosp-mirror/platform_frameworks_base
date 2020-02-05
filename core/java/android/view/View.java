@@ -14470,7 +14470,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean hasImeFocus() {
-        return mAttachInfo != null && mAttachInfo.mHasImeFocus;
+        return getViewRootImpl() != null && getViewRootImpl().getImeFocusController().hasImeFocus();
     }
 
     /**
@@ -28723,11 +28723,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         @UnsupportedAppUsage
         boolean mHasWindowFocus;
-
-        /**
-         * Indicates whether the view's window has IME focused.
-         */
-        boolean mHasImeFocus;
 
         /**
          * The current visibility of the window.

@@ -118,8 +118,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizePinnedStack(int, android.graphics.Rect, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeTask(int, android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setDisplayToSingleTaskInstance(int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void startSystemLockTaskMode(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void stopSystemLockTaskMode();
     method public static boolean supportsMultiWindow(android.content.Context);
@@ -933,6 +933,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 1048576; // 0x100000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
+    field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_TELEPHONY = 4194304; // 0x400000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
@@ -4977,6 +4978,11 @@ package android.view {
 
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
+  }
+
+  public class SurfaceControlViewHost {
+    method public void addView(@NonNull android.view.View, android.view.WindowManager.LayoutParams);
+    method public void relayout(android.view.WindowManager.LayoutParams);
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {

@@ -26,7 +26,6 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_STATUS_BAR_STATE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-import static com.android.systemui.qs.QSColorControllerKt.colorIcon;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -55,7 +54,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -432,10 +430,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     public abstract CharSequence getTileLabel();
 
     public static int getColorForState(Context context, int state) {
-        return getColorForState(context, state, -1);
-    }
-
-    public static int getColorForState(Context context, int state, int colorActive) {
         switch (state) {
             case Tile.STATE_UNAVAILABLE:
                 return Utils.getDisabled(context,
@@ -443,22 +437,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             case Tile.STATE_INACTIVE:
                 return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
             case Tile.STATE_ACTIVE:
-                return getActiveColor(context, colorActive);
+                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;
-        }
-    }
-
-    private static int getActiveColor(Context context, int colorActive) {
-        if (colorIcon()) {
-            if (colorActive == -1) {
-                return Utils.getColorAccentDefaultColor(context);
-            } else {
-                return colorActive;
-            }
-        } else {
-            return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
         }
     }
 
@@ -644,28 +626,5 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.print("    "); pw.println(getState().toString());
-    }
-
-    @Override
-    public void setColor(@ColorTile int color) {
-        int resId;
-        switch(color) {
-            case COLOR_TILE_RED:
-                resId = R.color.GM2_red_500;
-                break;
-            case COLOR_TILE_BLUE:
-                resId = R.color.GM2_blue_500;
-                break;
-            case COLOR_TILE_GREEN:
-                resId = R.color.GM2_green_500;
-                break;
-            case COLOR_TILE_YELLOW:
-                resId = R.color.GM2_yellow_500;
-                break;
-            default:
-                resId = -1;
-        }
-        mTmpState.colorActive = resId == -1 ? -1 : mContext.getColor(resId);
-        refreshState();
     }
 }

@@ -78,6 +78,10 @@ public class CapInfo implements Parcelable {
     private boolean mChatbotSupported = false;
     /** Chatbot role support. */
     private boolean mChatbotRoleSupported = false;
+    /** Standalone Chatbot communication support. */
+    private boolean mSmChatbotSupported = false;
+    /** MMtel based call composer support. */
+    private boolean mMmtelCallComposerSupported = false;
     /** List of supported extensions. */
     private String[] mExts = new String[10];
     /** Time used to compute when to query again. */
@@ -498,6 +502,34 @@ public class CapInfo implements Parcelable {
         this.mChatbotRoleSupported = chatbotRoleSupported;
     }
 
+    /**
+     * Checks whether standalone chatbot communication is supported.
+     */
+    public boolean isSmChatbotSupported() {
+        return mSmChatbotSupported;
+    }
+
+    /**
+     * Sets standalone chatbot communication as supported or not supported.
+     */
+    public void setSmChatbotSupported(boolean smChatbotSupported) {
+        this.mSmChatbotSupported = smChatbotSupported;
+    }
+
+    /**
+     * Checks whether Mmtel based call composer is supported.
+     */
+    public boolean isMmtelCallComposerSupported() {
+        return mMmtelCallComposerSupported;
+    }
+
+    /**
+     * Sets Mmtel based call composer as supported or not supported.
+     */
+    public void setMmtelCallComposerSupported(boolean mmtelCallComposerSupported) {
+        this.mMmtelCallComposerSupported = mmtelCallComposerSupported;
+    }
+
     /** Gets the list of supported extensions. */
     public String[] getExts() {
         return mExts;
@@ -553,6 +585,8 @@ public class CapInfo implements Parcelable {
         dest.writeInt(mSharedSketchSupported ? 1 : 0);
         dest.writeInt(mChatbotSupported ? 1 : 0);
         dest.writeInt(mChatbotRoleSupported ? 1 : 0);
+        dest.writeInt(mSmChatbotSupported ? 1 : 0);
+        dest.writeInt(mMmtelCallComposerSupported ? 1 : 0);
 
         dest.writeInt(mRcsIpVoiceCallSupported ? 1 : 0);
         dest.writeInt(mRcsIpVideoCallSupported ? 1 : 0);
@@ -602,6 +636,8 @@ public class CapInfo implements Parcelable {
         mSharedSketchSupported = (source.readInt() == 0) ? false : true;
         mChatbotSupported = (source.readInt() == 0) ? false : true;
         mChatbotRoleSupported = (source.readInt() == 0) ? false : true;
+        mSmChatbotSupported = (source.readInt() == 0) ? false : true;
+        mMmtelCallComposerSupported = (source.readInt() == 0) ? false : true;
 
         mRcsIpVoiceCallSupported = (source.readInt() == 0) ? false : true;
         mRcsIpVideoCallSupported = (source.readInt() == 0) ? false : true;

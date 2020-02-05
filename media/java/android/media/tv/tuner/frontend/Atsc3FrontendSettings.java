@@ -327,7 +327,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
      */
     public static class Builder extends FrontendSettings.Builder<Builder> {
         private int mBandwidth;
-        private byte mDemodOutputFormat;
+        private int mDemodOutputFormat;
         private Atsc3PlpSettings[] mPlpSettings;
 
         private Builder() {
@@ -345,7 +345,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
          * Sets Demod Output Format.
          */
         @NonNull
-        public Builder setDemodOutputFormat(byte demodOutputFormat) {
+        public Builder setDemodOutputFormat(@DemodOutputFormat int demodOutputFormat) {
             mDemodOutputFormat = demodOutputFormat;
             return this;
         }

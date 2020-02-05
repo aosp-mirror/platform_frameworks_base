@@ -17,10 +17,16 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.MediumTest;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class BinderProxyTest extends AndroidTestCase {
     private static class CountingListener implements Binder.ProxyTransactListener {
@@ -85,5 +91,42 @@ public class BinderProxyTest extends AndroidTestCase {
 
         // Check it does not throw..
         mPowerManager.isInteractive();
+    }
+
+    private IBinder mRemoteBinder = null;
+
+    @MediumTest
+    public void testGetExtension() throws Exception {
+        final CountDownLatch bindLatch = new CountDownLatch(1);
+        ServiceConnection connection =
+                new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        mRemoteBinder = service;
+                        bindLatch.countDown();
+                    }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {}
+                };
+        try {
+            mContext.bindService(
+                    new Intent(mContext, BinderProxyService.class),
+                    connection,
+                    Context.BIND_AUTO_CREATE);
+            if (!bindLatch.await(500, TimeUnit.MILLISECONDS)) {
+                fail(
+                        "Timed out while binding service: "
+                                + BinderProxyService.class.getSimpleName());
+            }
+            assertTrue(mRemoteBinder instanceof BinderProxy);
+            assertNotNull(mRemoteBinder);
+
+            IBinder extension = mRemoteBinder.getExtension();
+            assertNotNull(extension);
+            assertTrue(extension.pingBinder());
+        } finally {
+            mContext.unbindService(connection);
+        }
     }
 }

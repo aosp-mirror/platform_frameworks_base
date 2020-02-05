@@ -88,6 +88,7 @@ import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -846,7 +847,12 @@ public class AppOpsService extends IAppOpsService.Stub {
          */
         public void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState)
                 throws RemoteException {
-            if (!parent.isRunning()) {
+            started(clientId, uidState, true);
+        }
+
+        private void started(@NonNull IBinder clientId, @AppOpsManager.UidState int uidState,
+                boolean triggerCallbackIfNeeded) throws RemoteException {
+            if (triggerCallbackIfNeeded && !parent.isRunning()) {
                 scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, true);
             }
@@ -965,8 +971,16 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 if (event.getUidState() != newState) {
                     try {
+                        // Remove all but one unfinished start count and then call finished() to
+                        // remove start event object
+                        int numPreviousUnfinishedStarts = event.numUnfinishedStarts;
+                        event.numUnfinishedStarts = 1;
                         finished(event.getClientId(), false);
-                        started(event.getClientId(), newState);
+
+                        // Call started() to add a new start event object and then add the
+                        // previously removed unfinished start counts back
+                        started(event.getClientId(), newState, false);
+                        event.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
                     } catch (RemoteException e) {
                         if (DEBUG) Slog.e(TAG, "Cannot switch to new uidState " + newState);
                     }
@@ -1948,6 +1962,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setUidMode(int code, int uid, int mode) {
+        setUidMode(code, uid, mode, null);
+    }
+
+    private void setUidMode(int code, int uid, int mode,
+            @Nullable IAppOpsCallback callbackToIgnore) {
         if (DEBUG) {
             Slog.i(TAG, "uid " + uid + " OP_" + opToName(code) + " := " + modeToName(mode)
                     + " by uid " + Binder.getCallingUid());
@@ -2031,6 +2050,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
+
+            if (callbackSpecs != null && callbackToIgnore != null) {
+                callbackSpecs.remove(mModeWatchers.get(callbackToIgnore.asBinder()));
+            }
         }
 
         if (callbackSpecs == null) {
@@ -2078,6 +2101,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 continue;
             }
 
+            if (packageManager.checkPermission(permissionName, packageName)
+                    != PackageManager.PERMISSION_GRANTED) {
+                continue;
+            }
+
             PermissionInfo permissionInfo;
             try {
                 permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
@@ -2090,10 +2118,24 @@ public class AppOpsService extends IAppOpsService.Stub {
                 continue;
             }
 
+            PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                    PackageManagerInternal.class);
+            boolean supportsRuntimePermissions = packageManagerInternal.getUidTargetSdkVersion(uid)
+                    >= Build.VERSION_CODES.M;
+
             UserHandle user = UserHandle.getUserHandleForUid(uid);
             boolean isRevokedCompat;
             if (permissionInfo.backgroundPermission != null) {
                 boolean isBackgroundRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+
+                if (isBackgroundRevokedCompat && supportsRuntimePermissions) {
+                    Slog.w(TAG, "setUidMode() called with a mode inconsistent with runtime"
+                            + " permission state, this is discouraged and you should revoke the"
+                            + " runtime permission instead: uid=" + uid + ", switchCode="
+                            + switchCode + ", mode=" + mode + ", permission="
+                            + permissionInfo.backgroundPermission);
+                }
+
                 long identity = Binder.clearCallingIdentity();
                 try {
                     packageManager.updatePermissionFlags(permissionInfo.backgroundPermission,
@@ -2108,6 +2150,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                         && mode != AppOpsManager.MODE_FOREGROUND;
             } else {
                 isRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+            }
+
+            if (isRevokedCompat && supportsRuntimePermissions) {
+                Slog.w(TAG, "setUidMode() called with a mode inconsistent with runtime"
+                        + " permission state, this is discouraged and you should revoke the"
+                        + " runtime permission instead: uid=" + uid + ", switchCode="
+                        + switchCode + ", mode=" + mode + ", permission=" + permissionName);
             }
 
             long identity = Binder.clearCallingIdentity();
@@ -2158,6 +2207,11 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     @Override
     public void setMode(int code, int uid, @NonNull String packageName, int mode) {
+        setMode(code, uid, packageName, mode, null);
+    }
+
+    private void setMode(int code, int uid, @NonNull String packageName, int mode,
+            @Nullable IAppOpsCallback callbackToIgnore) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         ArraySet<ModeCallback> repCbs = null;
@@ -2200,6 +2254,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                             repCbs = new ArraySet<>();
                         }
                         repCbs.addAll(cbs);
+                    }
+                    if (repCbs != null && callbackToIgnore != null) {
+                        repCbs.remove(mModeWatchers.get(callbackToIgnore.asBinder()));
                     }
                     if (mode == AppOpsManager.opToDefaultMode(op.op)) {
                         // If going into the default mode, prune this op
@@ -5586,6 +5643,18 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void updateAppWidgetVisibility(SparseArray<String> uidPackageNames,
                 boolean visible) {
             AppOpsService.this.updateAppWidgetVisibility(uidPackageNames, visible);
+        }
+
+        @Override
+        public void setUidModeIgnoringCallback(int code, int uid, int mode,
+                @Nullable IAppOpsCallback callbackToIgnore) {
+            setUidMode(code, uid, mode, callbackToIgnore);
+        }
+
+        @Override
+        public void setModeIgnoringCallback(int code, int uid, @NonNull String packageName,
+                int mode, @Nullable IAppOpsCallback callbackToIgnore) {
+            setMode(code, uid, packageName, mode, callbackToIgnore);
         }
     }
 }

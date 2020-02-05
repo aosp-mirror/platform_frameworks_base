@@ -71,7 +71,7 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"స్క్రీన్‌కు నింపేలా జూమ్ చేయండి"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"స్క్రీన్‌కు నింపేలా విస్తరించండి"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"స్క్రీన్‌షాట్"</string>
-    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"చిత్రం చొప్పించబడింది"</string>
+    <string name="remote_input_image_insertion_text" msgid="4613177882724332877">"ఇమేజ్ చొప్పించబడింది"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"స్క్రీన్‌షాట్ సేవ్ చేయబడింది"</string>
@@ -390,7 +390,7 @@
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"బ్యాటరీ సేవర్"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> వద్ద"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> కు ఆన్ అవుతుంది"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC నిలిపివేయబడింది"</string>
@@ -964,4 +964,6 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"మాగ్నిఫికేషన్ ఓవర్‌లే విండో"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"మాగ్నిఫికేషన్ విండో"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"మాగ్నిఫికేషన్ నియంత్రణల విండో"</string>
+    <!-- no translation found for quick_controls_title (525285759614231333) -->
+    <skip />
 </resources>

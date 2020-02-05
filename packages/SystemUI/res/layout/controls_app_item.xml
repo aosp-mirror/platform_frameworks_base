@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  Copyright (C) 2019 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|top"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:layout_marginBottom="@dimen/controls_app_bottom_margin">
+
+        <FrameLayout
+            android:id="@+id/icon_frame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:minWidth="56dp"
+            android:orientation="horizontal"
+            android:paddingTop="@dimen/controls_app_icon_frame_top_padding"
+            android:paddingBottom="@dimen/controls_app_icon_frame_top_padding"
+            android:paddingEnd="@dimen/controls_app_icon_frame_side_padding"
+            android:paddingStart="@dimen/controls_app_icon_frame_side_padding" >
+
+            <ImageView
+                android:id="@android:id/icon"
+                android:layout_width="@dimen/controls_app_icon_size"
+                android:layout_height="@dimen/controls_app_icon_size" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/controls_app_text_padding"
+            android:paddingBottom="@dimen/controls_app_text_padding">
+
+            <TextView
+                android:id="@android:id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fadingEdge="horizontal"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="?android:attr/textColorPrimary"/>
+
+            <TextView
+                android:id="@+id/favorites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fadingEdge="horizontal"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/controls_app_divider_height"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginStart="@dimen/controls_app_divider_side_margin"
+        android:layout_marginEnd="@dimen/controls_app_divider_side_margin"
+        android:background="?android:attr/listDivider" />
+</FrameLayout>

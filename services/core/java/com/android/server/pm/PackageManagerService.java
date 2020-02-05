@@ -55,6 +55,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_PROCESS_NOT_DEFINED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
@@ -206,6 +207,7 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ApkParseUtils;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
@@ -1544,6 +1546,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String[] mTelephonyPackages;
     final @NonNull String mServicesExtensionPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
+    final @Nullable String mRetailDemoPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
@@ -3160,6 +3163,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mTelephonyPackages = getTelephonyPackageNames();
+            mRetailDemoPackage = getRetailDemoPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -10572,6 +10576,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkgSetting.sharedUser != null) {
             pkgSetting.sharedUser.addPackage(pkgSetting);
         }
+        if (reconciledPkg.installArgs != null && reconciledPkg.installArgs.forceQueryableOverride) {
+            pkgSetting.forceQueryableOverride = true;
+        }
+
         // TODO(toddke): Consider a method specifically for modifying the Package object
         // post scan; or, moving this stuff out of the Package object since it has nothing
         // to do with the package on disk.
@@ -11248,6 +11256,26 @@ public class PackageManagerService extends IPackageManager.Stub
         return object;
     }
 
+    private <T extends ComponentParseUtils.ParsedMainComponent>
+            void assertPackageProcesses(AndroidPackage pkg, List<T> components,
+            ArrayMap<String, ComponentParseUtils.ParsedProcess> procs, String compName)
+            throws PackageManagerException {
+        if (components == null) {
+            return;
+        }
+        for (int i = components.size() - 1; i >= 0; i--) {
+            final ComponentParseUtils.ParsedMainComponent<?> component = components.get(i);
+            if (!procs.containsKey(component.getProcessName())) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_PROCESS_NOT_DEFINED,
+                        "Can't install because " + compName + " " + component.className
+                                + "'s process attribute " + component.getProcessName()
+                                + " (in package " + pkg.getPackageName()
+                                + ") is not included in the <processes> list");
+            }
+        }
+    }
+
     /**
      * Asserts the parsed package is valid according to the given policy. If the
      * package is invalid, for whatever reason, throws {@link PackageManagerException}.
@@ -11475,6 +11503,24 @@ public class PackageManagerService extends IPackageManager.Stub
             // things that are installed.
             if ((scanFlags & SCAN_NEW_INSTALL) != 0) {
                 mComponentResolver.assertProvidersNotDefined(pkg);
+            }
+
+            // If this package has defined explicit processes, then ensure that these are
+            // the only processes used by its components.
+            final ArrayMap<String, ComponentParseUtils.ParsedProcess> procs = pkg.getProcesses();
+            if (procs != null) {
+                if (!procs.containsKey(pkg.getProcessName())) {
+                    throw new PackageManagerException(
+                            INSTALL_FAILED_PROCESS_NOT_DEFINED,
+                            "Can't install because application tag's process attribute "
+                                    + pkg.getProcessName()
+                                    + " (in package " + pkg.getPackageName()
+                                    + ") is not included in the <processes> list");
+                }
+                assertPackageProcesses(pkg, pkg.getActivities(), procs, "activity");
+                assertPackageProcesses(pkg, pkg.getServices(), procs, "service");
+                assertPackageProcesses(pkg, pkg.getReceivers(), procs, "receiver");
+                assertPackageProcesses(pkg, pkg.getProviders(), procs, "provider");
             }
 
             // Verify that packages sharing a user with a privileged app are marked as privileged.
@@ -14065,6 +14111,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Nullable
         MultiPackageInstallParams mParentInstallParams;
         final long requiredInstalledVersionCode;
+        final boolean forceQueryableOverride;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
@@ -14086,6 +14133,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.signingDetails = signingDetails;
             this.installReason = installReason;
             this.requiredInstalledVersionCode = requiredInstalledVersionCode;
+            this.forceQueryableOverride = false;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -14119,6 +14167,7 @@ public class PackageManagerService extends IPackageManager.Stub
             signingDetails = activeInstallSession.getSigningDetails();
             requiredInstalledVersionCode = activeInstallSession.getSessionParams()
                     .requiredInstalledVersionCode;
+            forceQueryableOverride = activeInstallSession.getSessionParams().forceQueryableOverride;
         }
 
         @Override
@@ -14719,6 +14768,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int traceCookie;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
+        final boolean forceQueryableOverride;
         @Nullable final MultiPackageInstallParams mMultiPackageInstallParams;
 
         // The list of instruction sets supported by this app. This is currently
@@ -14732,7 +14782,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 String abiOverride, String[] installGrantPermissions,
                 List<String> whitelistedRestrictedPermissions,
                 String traceMethod, int traceCookie, SigningDetails signingDetails,
-                int installReason,
+                int installReason, boolean forceQueryableOverride,
                 MultiPackageInstallParams multiPackageInstallParams) {
             this.origin = origin;
             this.move = move;
@@ -14749,6 +14799,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.traceCookie = traceCookie;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
+            this.forceQueryableOverride = forceQueryableOverride;
             this.mMultiPackageInstallParams = multiPackageInstallParams;
         }
 
@@ -14759,7 +14810,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.mParentInstallParams);
+                    params.installReason, params.forceQueryableOverride, params.mParentInstallParams);
         }
 
         abstract int copyApk();
@@ -14850,7 +14901,7 @@ public class PackageManagerService extends IPackageManager.Stub
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, null, 0,
                     PackageParser.SigningDetails.UNKNOWN,
-                    PackageManager.INSTALL_REASON_UNKNOWN, null /* parent */);
+                    PackageManager.INSTALL_REASON_UNKNOWN, false, null /* parent */);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
@@ -19714,6 +19765,41 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Nullable
+    private String getRetailDemoPackageName() {
+        final String predefinedPkgName = mContext.getString(R.string.config_retailDemoPackage);
+        final String predefinedSignature = mContext.getString(
+                R.string.config_retailDemoPackageSignature);
+
+        if (TextUtils.isEmpty(predefinedPkgName) || TextUtils.isEmpty(predefinedSignature)) {
+            return null;
+        }
+
+        final AndroidPackage androidPkg = mPackages.get(predefinedPkgName);
+        if (androidPkg != null) {
+            final SigningDetails signingDetail = androidPkg.getSigningDetails();
+            if (signingDetail != null && signingDetail.signatures != null) {
+                try {
+                    final MessageDigest msgDigest = MessageDigest.getInstance("SHA-256");
+                    for (Signature signature : signingDetail.signatures) {
+                        if (TextUtils.equals(predefinedSignature,
+                                HexEncoding.encodeToString(msgDigest.digest(
+                                        signature.toByteArray()), false))) {
+                            return predefinedPkgName;
+                        }
+                    }
+                } catch (NoSuchAlgorithmException e) {
+                    Slog.e(
+                            TAG,
+                            "Unable to verify signatures as getting the retail demo package name",
+                            e);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
     private String ensureSystemPackageName(@Nullable String packageName) {
         if (packageName == null) {
             return null;
@@ -23001,6 +23087,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     return filterOnlySystemPackages(mTelephonyPackages);
                 case PackageManagerInternal.PACKAGE_COMPANION:
                     return filterOnlySystemPackages("com.android.companiondevicemanager");
+                case PackageManagerInternal.PACKAGE_RETAIL_DEMO:
+                    return TextUtils.isEmpty(mRetailDemoPackage)
+                            ? ArrayUtils.emptyArray(String.class)
+                            : new String[] {mRetailDemoPackage};
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

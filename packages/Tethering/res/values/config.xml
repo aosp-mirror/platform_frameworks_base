@@ -47,6 +47,7 @@
          should be empty.  An example would be "p2p-p2p\\d-.*" -->
     <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
         <item>"p2p-p2p\\d-.*"</item>
+        <item>"p2p\\d"</item>
     </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable

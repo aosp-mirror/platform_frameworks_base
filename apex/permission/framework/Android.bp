@@ -44,23 +44,66 @@ java_library {
     ],
 }
 
+stubs_defaults {
+    name: "framework-permission-stubs-defaults",
+    srcs: [ ":framework-permission-sources" ],
+    libs: [ "framework-annotations-lib" ],
+    sdk_version: "system_current",
+}
+
 droidstubs {
-    name: "framework-permission-stubs-sources",
-    srcs: [
-        ":framework-annotations",
-        ":framework-permission-sources",
+    name: "framework-permission-stubs-srcs-publicapi",
+    sdk_version: "system_current",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi",
+        "framework-permission-stubs-defaults",
     ],
+}
+
+droidstubs {
+    name: "framework-permission-stubs-srcs-systemapi",
     sdk_version: "system_current",
     defaults: [
         "framework-module-stubs-defaults-systemapi",
+        "framework-permission-stubs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-permission-api-module_libs_api",
+    sdk_version: "system_current",
+    defaults: [
+        "framework-module-api-defaults-module_libs_api",
+        "framework-permission-stubs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-permission-stubs-srcs-module_libs_api",
+    sdk_version: "system_current",
+    defaults: [
+        "framework-module-stubs-defaults-module_libs_api",
+        "framework-permission-stubs-defaults",
     ],
 }
 
 java_library {
-    name: "framework-permission-stubs",
-    srcs: [
-        ":framework-permission-stubs-sources",
-    ],
+    name: "framework-permission-stubs-publicapi",
+    srcs: [ ":framework-permission-stubs-srcs-publicapi" ],
+    sdk_version: "system_current",
+    installable: false,
+}
+
+java_library {
+    name: "framework-permission-stubs-systemapi",
+    srcs: [ ":framework-permission-stubs-srcs-systemapi" ],
+    sdk_version: "system_current",
+    installable: false,
+}
+
+java_library {
+    name: "framework-permission-stubs-module_libs_api",
+    srcs: [ ":framework-permission-stubs-srcs-module_libs_api" ],
     sdk_version: "system_current",
     installable: false,
 }

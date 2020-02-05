@@ -54,10 +54,7 @@ public interface NotifCollectionListener {
      * immediately after a user dismisses a notification: we wait until we receive confirmation from
      * system server before considering the notification removed.
      */
-    default void onEntryRemoved(
-            NotificationEntry entry,
-            @CancellationReason int reason,
-            boolean removedByUser) {
+    default void onEntryRemoved(NotificationEntry entry, @CancellationReason int reason) {
     }
 
     /**

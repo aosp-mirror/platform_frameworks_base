@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
@@ -662,6 +663,10 @@ public class TransportClient {
                 referenceLost("TransportConnection.onServiceConnected()");
                 return;
             }
+            // TODO (b/147705255): Remove when binder calls to IBackupTransport are not blocking
+            // In short-term, blocking calls are OK as the transports come from the whitelist at
+            // {@link SystemConfig#getBackupTransportWhitelist()}
+            Binder.allowBlocking(binder);
             transportClient.onServiceConnected(binder);
         }
 

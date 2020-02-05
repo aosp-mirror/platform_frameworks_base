@@ -635,6 +635,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 stageCid = buildExternalStageCid(sessionId);
             }
         }
+
+        // reset the force queryable param if it's not called by an approved caller.
+        if (params.forceQueryableOverride) {
+            if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+                params.forceQueryableOverride = false;
+            }
+        }
         InstallSource installSource = InstallSource.create(installerPackageName,
                 originatingPackageName, requestedInstallerPackageName);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,

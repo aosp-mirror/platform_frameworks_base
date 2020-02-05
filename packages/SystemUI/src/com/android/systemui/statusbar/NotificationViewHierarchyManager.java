@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -81,6 +82,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final BubbleController mBubbleController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
+    private final ForegroundServiceSectionController mFgsSectionController;
     private final Context mContext;
 
     private NotificationPresenter mPresenter;
@@ -101,7 +103,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             NotificationEntryManager notificationEntryManager,
             KeyguardBypassController bypassController,
             BubbleController bubbleController,
-            DynamicPrivacyController privacyController) {
+            DynamicPrivacyController privacyController,
+            ForegroundServiceSectionController fgsSectionController
+    ) {
         mContext = context;
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -110,6 +114,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mEntryManager = notificationEntryManager;
+        mFgsSectionController = fgsSectionController;
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
@@ -140,7 +145,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean hideMedia = Utils.useQsMediaPlayer(mContext);
             if (ent.isRowDismissed() || ent.isRowRemoved()
                     || (ent.isMediaNotification() && hideMedia)
-                    || mBubbleController.isBubbleNotificationSuppressedFromShade(ent)) {
+                    || mBubbleController.isBubbleNotificationSuppressedFromShade(ent)
+                    || mFgsSectionController.hasEntry(ent)) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.
                 continue;

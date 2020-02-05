@@ -159,6 +159,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -261,6 +262,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
+    @Mock
+    StatusBarManagerInternal mStatusBar;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -356,6 +359,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
+        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
+        LocalServices.addService(StatusBarManagerInternal.class, mStatusBar);
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -4483,7 +4488,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAllowForegroundToasts() throws Exception {
+    public void testAllowForegroundCustomToasts() throws Exception {
         final String testPackage = "testPackageName";
         assertEquals(0, mService.mToastQueue.size());
         mService.isSystemUid = false;
@@ -4503,6 +4508,79 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
+    }
+
+    @Test
+    public void testDisallowBackgroundCustomToasts() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        // this app is NOT in the foreground
+        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_NONE);
+
+        // enqueue toast -> no toasts enqueued
+        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
+                new TestableToastCallback(), 2000, 0);
+        assertEquals(0, mService.mToastQueue.size());
+    }
+
+    @Test
+    public void testAllowForegroundTextToasts() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        // this app is in the foreground
+        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_FOREGROUND);
+
+        // enqueue toast -> toast should still enqueue
+        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
+                "Text", 2000, 0, null);
+        assertEquals(1, mService.mToastQueue.size());
+    }
+
+    @Test
+    public void testAllowBackgroundTextToasts() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        // this app is NOT in the foreground
+        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_NONE);
+
+        // enqueue toast -> toast should still enqueue
+        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
+                "Text", 2000, 0, null);
+        assertEquals(1, mService.mToastQueue.size());
+    }
+
+    @Test
+    public void testTextToastsCallStatusBar() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        // enqueue toast -> no toasts enqueued
+        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
+                "Text", 2000, 0, null);
+        verify(mStatusBar).showToast(any(), any(), any(), any(), anyInt(), any());
     }
 
     @Test

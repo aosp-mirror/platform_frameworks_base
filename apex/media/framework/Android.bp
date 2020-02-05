@@ -99,13 +99,10 @@ filegroup {
     path: "java"
 }
 
-droidstubs {
-    name: "updatable-media-stubs",
-    srcs: [
-        ":updatable-media-srcs",
-        ":framework-media-annotation-srcs",
-    ],
-    defaults: [ "framework-module-stubs-defaults-systemapi" ],
+stubs_defaults {
+    name: "framework-media-stubs-srcs-defaults",
+    srcs: [ ":updatable-media-srcs" ],
+    libs: [ "framework_media_annotation" ],
     aidl: {
         // TODO(b/135922046) remove this
         include_dirs: ["frameworks/base/core/java"],
@@ -113,9 +110,53 @@ droidstubs {
     sdk_version: "system_current",
 }
 
+droidstubs {
+    name: "framework-media-stubs-srcs-publicapi",
+    defaults: [
+        "framework-media-stubs-srcs-defaults",
+        "framework-module-stubs-defaults-publicapi",
+    ],
+}
+
+droidstubs {
+    name: "framework-media-stubs-srcs-systemapi",
+    defaults: [
+        "framework-media-stubs-srcs-defaults",
+        "framework-module-stubs-defaults-systemapi",
+    ],
+}
+
+droidstubs {
+    name: "framework-media-api-module_libs_api",
+    defaults: [
+        "framework-media-stubs-srcs-defaults",
+        "framework-module-api-defaults-module_libs_api",
+    ],
+}
+
+droidstubs {
+    name: "framework-media-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-media-stubs-srcs-defaults",
+        "framework-module-stubs-defaults-module_libs_api",
+    ],
+}
+
 java_library {
-    name: "updatable_media_stubs",
-    srcs: [":updatable-media-stubs"],
+    name: "framework-media-stubs-publicapi",
+    srcs: [":framework-media-stubs-srcs-publicapi"],
+    sdk_version: "current",
+}
+
+java_library {
+    name: "framework-media-stubs-systemapi",
+    srcs: [":framework-media-stubs-srcs-systemapi"],
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "framework-media-stubs-module_libs_api",
+    srcs: [":framework-media-stubs-srcs-module_libs_api"],
     sdk_version: "system_current",
 }
 

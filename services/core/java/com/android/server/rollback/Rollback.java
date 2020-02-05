@@ -187,6 +187,14 @@ class Rollback {
     private final int[] mPackageSessionIds;
 
     /**
+     * The number of sessions in the install which are notified with success by
+     * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)}.
+     * This rollback will be enabled only after all child sessions finished with success.
+     */
+    @GuardedBy("mLock")
+    private int mNumPackageSessionsWithSuccess;
+
+    /**
      * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
@@ -838,6 +846,17 @@ class Rollback {
      */
     int getPackageSessionIdCount() {
         return mPackageSessionIds.length;
+    }
+
+    /**
+     * Called when a child session finished with success.
+     * Returns true when all child sessions are notified with success. This rollback will be
+     * enabled only after all child sessions finished with success.
+     */
+    boolean notifySessionWithSuccess() {
+        synchronized (mLock) {
+            return ++mNumPackageSessionsWithSuccess == mPackageSessionIds.length;
+        }
     }
 
     static String rollbackStateToString(@RollbackState int state) {

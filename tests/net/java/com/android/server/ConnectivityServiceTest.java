@@ -5741,6 +5741,40 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(defaultCallback);
     }
 
+    @Test
+    public final void testLoseTrusted() throws Exception {
+        final NetworkRequest trustedRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_TRUSTED)
+                .build();
+        final TestNetworkCallback trustedCallback = new TestNetworkCallback();
+        mCm.requestNetwork(trustedRequest, trustedCallback);
+
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        trustedCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        verify(mNetworkManagementService).setDefaultNetId(eq(mCellNetworkAgent.getNetwork().netId));
+
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        trustedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+        verify(mNetworkManagementService).setDefaultNetId(eq(mWiFiNetworkAgent.getNetwork().netId));
+
+        mWiFiNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
+        // There is currently a bug where losing the TRUSTED capability will send a LOST
+        // callback to requests before the available callback, in spite of the semantics
+        // of the requests dictating this should not happen. This is considered benign, but
+        // ideally should be fixed in the future.
+        trustedCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
+        trustedCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
+        verify(mNetworkManagementService).setDefaultNetId(eq(mCellNetworkAgent.getNetwork().netId));
+
+        mCellNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
+        trustedCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+        verify(mNetworkManagementService).clearDefaultNetId();
+
+        mCm.unregisterNetworkCallback(trustedCallback);
+    }
+
     @Ignore // 40%+ flakiness : figure out why and re-enable.
     @Test
     public final void testBatteryStatsNetworkType() throws Exception {

@@ -253,4 +253,12 @@ public final class ImeFocusController {
     public void setNextServedView(View view) {
         mNextServedView = view;
     }
+
+    /**
+     * Indicates whether the view's window has IME focused.
+     */
+    @UiThread
+    boolean hasImeFocus() {
+        return mHasImeFocus;
+    }
 }

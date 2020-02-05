@@ -2836,6 +2836,9 @@ public final class Settings {
         if (pkg.updateAvailable) {
             serializer.attribute(null, "updateAvailable", "true");
         }
+        if (pkg.forceQueryableOverride) {
+            serializer.attribute(null, "forceQueryable", "true");
+        }
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
@@ -3599,6 +3602,7 @@ public final class Settings {
         PackageSetting packageSetting = null;
         String version = null;
         long versionCode = 0;
+        String installedForceQueryable = null;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3615,6 +3619,7 @@ public final class Settings {
             secondaryCpuAbiString = parser.getAttributeValue(null, "secondaryCpuAbi");
             cpuAbiOverrideString = parser.getAttributeValue(null, "cpuAbiOverride");
             updateAvailable = parser.getAttributeValue(null, "updateAvailable");
+            installedForceQueryable = parser.getAttributeValue(null, "forceQueryable");
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3798,6 +3803,7 @@ public final class Settings {
             packageSetting.primaryCpuAbiString = primaryCpuAbiString;
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
             packageSetting.updateAvailable = "true".equals(updateAvailable);
+            packageSetting.forceQueryableOverride = "true".equals(installedForceQueryable);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -4564,7 +4570,7 @@ public final class Settings {
                 pw.print("anyDensity");
             }
             pw.println("]");
-            List<String> libraryNames = pkg.getLibraryNames();
+            final List<String> libraryNames = pkg.getLibraryNames();
             if (libraryNames != null && libraryNames.size() > 0) {
                 pw.print(prefix); pw.println("  dynamic libraries:");
                 for (int i = 0; i< libraryNames.size(); i++) {
@@ -4579,7 +4585,7 @@ public final class Settings {
                 pw.print(" version:"); pw.println(pkg.getStaticSharedLibVersion());
             }
 
-            List<String> usesLibraries = pkg.getUsesLibraries();
+            final List<String> usesLibraries = pkg.getUsesLibraries();
             if (usesLibraries != null && usesLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesLibraries:");
                 for (int i=0; i< usesLibraries.size(); i++) {
@@ -4587,8 +4593,8 @@ public final class Settings {
                 }
             }
 
-            List<String> usesStaticLibraries = pkg.getUsesStaticLibraries();
-            long[] usesStaticLibrariesVersions = pkg.getUsesStaticLibrariesVersions();
+            final List<String> usesStaticLibraries = pkg.getUsesStaticLibraries();
+            final long[] usesStaticLibrariesVersions = pkg.getUsesStaticLibrariesVersions();
             if (usesStaticLibraries != null
                     && usesStaticLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesStaticLibraries:");
@@ -4599,7 +4605,7 @@ public final class Settings {
                 }
             }
 
-            List<String> usesOptionalLibraries = pkg.getUsesOptionalLibraries();
+            final List<String> usesOptionalLibraries = pkg.getUsesOptionalLibraries();
             if (usesOptionalLibraries != null
                     && usesOptionalLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesOptionalLibraries:");
@@ -4609,12 +4615,26 @@ public final class Settings {
                 }
             }
 
-            String[] usesLibraryFiles = pkg.getUsesLibraryFiles();
+            final String[] usesLibraryFiles = pkg.getUsesLibraryFiles();
             if (usesLibraryFiles != null
                     && usesLibraryFiles.length > 0) {
                 pw.print(prefix); pw.println("  usesLibraryFiles:");
                 for (int i=0; i< usesLibraryFiles.length; i++) {
                     pw.print(prefix); pw.print("    "); pw.println(usesLibraryFiles[i]);
+                }
+            }
+            final ArrayMap<String, ComponentParseUtils.ParsedProcess> procs = pkg.getProcesses();
+            if (procs != null) {
+                pw.print(prefix); pw.println("  processes:");
+                for (int i = 0; i < procs.size(); i++) {
+                    final ComponentParseUtils.ParsedProcess proc = procs.valueAt(i);
+                    pw.print(prefix); pw.print("    "); pw.println(proc.name);
+                    if (proc.deniedPermissions != null) {
+                        for (int j = 0; j < proc.deniedPermissions.size(); j++) {
+                            pw.print(prefix); pw.print("      deny: ");
+                            pw.println(proc.deniedPermissions.valueAt(j));
+                        }
+                    }
                 }
             }
         }

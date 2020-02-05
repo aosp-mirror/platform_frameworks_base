@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -104,7 +105,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(StatusBarStateControllerImpl.class), mEntryManager,
                 mock(KeyguardBypassController.class),
                 mock(BubbleController.class),
-                mock(DynamicPrivacyController.class));
+                mock(DynamicPrivacyController.class),
+                mock(ForegroundServiceSectionController.class));
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 

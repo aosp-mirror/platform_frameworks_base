@@ -18,8 +18,8 @@
 
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
-#include <android/os/incremental/IIncrementalManager.h>
 #include <android/content/pm/DataLoaderParamsParcel.h>
+#include <android/os/incremental/IIncrementalManager.h>
 #include <binder/IServiceManager.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
@@ -90,10 +90,11 @@ public:
         return idFromMetadata({(const uint8_t*)metadata.data(), metadata.size()});
     }
 
+    void onDump(int fd);
+
     std::optional<std::future<void>> onSystemReady();
 
-    StorageId createStorage(std::string_view mountPoint,
-                            DataLoaderParamsParcel&& dataLoaderParams,
+    StorageId createStorage(std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
                             CreateOptions options = CreateOptions::Default);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
@@ -109,8 +110,8 @@ public:
 
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
                  incfs::NewFileParams params);
-    int makeDir(StorageId storage, std::string_view path, int mode = 0555);
-    int makeDirs(StorageId storage, std::string_view path, int mode = 0555);
+    int makeDir(StorageId storage, std::string_view path, int mode = 0755);
+    int makeDirs(StorageId storage, std::string_view path, int mode = 0755);
 
     int link(StorageId sourceStorageId, std::string_view oldPath, StorageId destStorageId,
              std::string_view newPath);
@@ -207,6 +208,8 @@ private:
     void deleteStorage(IncFsMount& ifs);
     void deleteStorageLocked(IncFsMount& ifs, std::unique_lock<std::mutex>&& ifsLock);
     MountMap::iterator getStorageSlotLocked();
+    std::string normalizePathToStorage(const IfsMountPtr incfs, StorageId storage,
+                                       std::string_view path);
 
     // Member variables
     std::unique_ptr<VoldServiceWrapper> mVold;

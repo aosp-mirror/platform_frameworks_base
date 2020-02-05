@@ -23,6 +23,7 @@ import android.content.LocusId;
 import android.text.TextUtils;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /** The data associated with a package. */
 public class PackageData {
@@ -38,15 +39,19 @@ public class PackageData {
     @NonNull
     private final EventStore mEventStore;
 
-    private boolean mIsDefaultDialer;
+    private final Predicate<String> mIsDefaultDialerPredicate;
 
-    private boolean mIsDefaultSmsApp;
+    private final Predicate<String> mIsDefaultSmsAppPredicate;
 
-    PackageData(@NonNull String packageName, @UserIdInt int userId) {
+    PackageData(@NonNull String packageName, @UserIdInt int userId,
+            @NonNull Predicate<String> isDefaultDialerPredicate,
+            @NonNull Predicate<String> isDefaultSmsAppPredicate) {
         mPackageName = packageName;
         mUserId = userId;
         mConversationStore = new ConversationStore();
         mEventStore = new EventStore();
+        mIsDefaultDialerPredicate = isDefaultDialerPredicate;
+        mIsDefaultSmsAppPredicate = isDefaultSmsAppPredicate;
     }
 
     @NonNull
@@ -124,11 +129,11 @@ public class PackageData {
     }
 
     public boolean isDefaultDialer() {
-        return mIsDefaultDialer;
+        return mIsDefaultDialerPredicate.test(mPackageName);
     }
 
     public boolean isDefaultSmsApp() {
-        return mIsDefaultSmsApp;
+        return mIsDefaultSmsAppPredicate.test(mPackageName);
     }
 
     @NonNull
@@ -139,14 +144,6 @@ public class PackageData {
     @NonNull
     EventStore getEventStore() {
         return mEventStore;
-    }
-
-    void setIsDefaultDialer(boolean value) {
-        mIsDefaultDialer = value;
-    }
-
-    void setIsDefaultSmsApp(boolean value) {
-        mIsDefaultSmsApp = value;
     }
 
     void onDestroy() {

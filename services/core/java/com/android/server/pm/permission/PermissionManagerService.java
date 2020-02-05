@@ -55,6 +55,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
+import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
@@ -3355,8 +3357,25 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Special permissions for the system companion device manager.
                 allowed = true;
             }
+            if (!allowed && bp.isRetailDemo()
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM),
+                    pkg.getPackageName()) && isProfileOwner(pkg.getUid())) {
+                // Special permission granted only to the OEM specified retail demo app
+                allowed = true;
+            }
         }
         return allowed;
+    }
+
+    private static boolean isProfileOwner(int uid) {
+        DevicePolicyManagerInternal dpmInternal =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        if (dpmInternal != null) {
+            return dpmInternal
+                    .isActiveAdminWithPolicy(uid, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+        return false;
     }
 
     private static boolean canGrantOemPermission(PackageSetting ps, String permission) {

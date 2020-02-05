@@ -17,6 +17,7 @@
 package com.android.systemui.controls.management
 
 import android.content.ComponentName
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
+import com.android.settingslib.applications.DefaultAppInfo
 import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.R
 import java.util.concurrent.Executor
@@ -46,7 +48,8 @@ class AppAdapter(
     lifecycle: Lifecycle,
     controlsListingController: ControlsListingController,
     private val layoutInflater: LayoutInflater,
-    private val onAppSelected: (ComponentName?) -> Unit = {}
+    private val onAppSelected: (ComponentName?) -> Unit = {},
+    private val favoritesRenderer: FavoritesRenderer
 ) : RecyclerView.Adapter<AppAdapter.Holder>() {
 
     private var listOfServices = emptyList<CandidateInfo>()
@@ -54,7 +57,9 @@ class AppAdapter(
     private val callback = object : ControlsListingController.ControlsListingCallback {
         override fun onServicesUpdated(list: List<CandidateInfo>) {
             uiExecutor.execute {
-                listOfServices = list
+                listOfServices = list.sortedBy {
+                    it.loadLabel().toString()
+                }
                 notifyDataSetChanged()
             }
         }
@@ -65,7 +70,8 @@ class AppAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): Holder {
-        return Holder(layoutInflater.inflate(R.layout.app_item, parent, false))
+        return Holder(layoutInflater.inflate(R.layout.controls_app_item, parent, false),
+                favoritesRenderer)
     }
 
     override fun getItemCount() = listOfServices.size
@@ -80,9 +86,10 @@ class AppAdapter(
     /**
      * Holder for binding views in the [RecyclerView]-
      */
-    class Holder(view: View) : RecyclerView.ViewHolder(view) {
+    class Holder(view: View, val favRenderer: FavoritesRenderer) : RecyclerView.ViewHolder(view) {
         private val icon: ImageView = itemView.requireViewById(com.android.internal.R.id.icon)
         private val title: TextView = itemView.requireViewById(com.android.internal.R.id.title)
+        private val favorites: TextView = itemView.requireViewById(R.id.favorites)
 
         /**
          * Bind data to the view
@@ -91,6 +98,19 @@ class AppAdapter(
         fun bindData(data: CandidateInfo) {
             icon.setImageDrawable(data.loadIcon())
             title.text = data.loadLabel()
+            favorites.text = favRenderer.renderFavoritesForComponent(
+                    (data as DefaultAppInfo).componentName)
         }
+    }
+}
+
+class FavoritesRenderer(
+    private val resources: Resources,
+    private val favoriteFunction: (ComponentName) -> Int
+) {
+
+    fun renderFavoritesForComponent(component: ComponentName): String {
+        val qty = favoriteFunction(component)
+        return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
     }
 }

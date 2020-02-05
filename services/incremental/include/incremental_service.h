@@ -26,6 +26,7 @@ __BEGIN_DECLS
 
 jlong Incremental_IncrementalService_Start();
 void Incremental_IncrementalService_OnSystemReady(jlong self);
+void Incremental_IncrementalService_OnDump(jlong self, jint fd);
 
 __END_DECLS
 

@@ -101,7 +101,6 @@ import android.os.RevocableFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalFileStorages;
-import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings.Secure;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -558,17 +557,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionErrorCode = stagedSessionErrorCode;
         mStagedSessionErrorMessage =
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
-
-        // TODO(b/136132412): sanity check if session should not be incremental
-        if (!params.isStaged && isIncrementalInstallation()) {
-            IncrementalManager incrementalManager = (IncrementalManager) mContext.getSystemService(
-                    Context.INCREMENTAL_SERVICE);
-            if (incrementalManager != null) {
-                mIncrementalFileStorages =
-                        new IncrementalFileStorages(mPackageName, stageDir, incrementalManager,
-                                params.dataLoaderParams);
-            }
-        }
 
         if (isStreamingInstallation()
                 && this.params.dataLoaderParams.getComponentName().getPackageName()
@@ -1040,10 +1028,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (mIncrementalFileStorages != null) {
-            mIncrementalFileStorages.finishSetUp();
-        }
-
         dispatchStreamValidateAndCommit();
     }
 
@@ -1052,11 +1036,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void handleStreamValidateAndCommit() {
-        // TODO(b/136132412): update with new APIs
-        if (mIncrementalFileStorages != null) {
-            mIncrementalFileStorages.startLoading();
-        }
-
         boolean success = streamValidateAndCommit();
 
         if (isMultiPackage()) {
@@ -2476,17 +2455,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (mIncrementalFileStorages != null) {
-            for (InstallationFile file : addedFiles) {
-                try {
-                    mIncrementalFileStorages.addFile(file);
-                } catch (IOException ex) {
-                    // TODO(b/146080380): add incremental-specific error code
-                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Failed to add and configure Incremental File: " + file.getName(), ex);
-                }
+        // TODO(b/136132412): update with new APIs
+        if (isIncrementalInstallation()) {
+            try {
+                mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext,
+                        stageDir, params.dataLoaderParams, addedFiles);
+                return true;
+            } catch (IOException e) {
+                throw new PackageManagerException(e);
             }
-            return true;
         }
 
         final DataLoaderManager dataLoaderManager = mContext.getSystemService(
@@ -2761,13 +2738,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 bridge.forceClose();
             }
         }
+        if (mIncrementalFileStorages != null) {
+            mIncrementalFileStorages.cleanUp();
+            mIncrementalFileStorages = null;
+        }
         // For staged sessions, we don't delete the directory where the packages have been copied,
         // since these packages are supposed to be read on reboot.
         // Those dirs are deleted when the staged session has reached a final state.
         if (stageDir != null && !params.isStaged) {
-            if (mIncrementalFileStorages != null) {
-                mIncrementalFileStorages.cleanUp();
-            }
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
@@ -2783,6 +2761,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } else {
             if (mIncrementalFileStorages != null) {
                 mIncrementalFileStorages.cleanUp();
+                mIncrementalFileStorages = null;
             }
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());

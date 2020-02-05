@@ -428,6 +428,12 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   application_action["meta-data"] = meta_data_action;
 
+  application_action["processes"];
+  application_action["processes"]["deny-permission"];
+  application_action["processes"]["allow-permission"];
+  application_action["processes"]["process"]["deny-permission"];
+  application_action["processes"]["process"]["allow-permission"];
+
   application_action["activity"] = component_action;
   application_action["activity"]["layout"];
 

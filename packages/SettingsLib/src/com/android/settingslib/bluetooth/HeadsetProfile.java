@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
@@ -45,6 +46,7 @@ public class HeadsetProfile implements LocalBluetoothProfile {
 
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     static final ParcelUuid[] UUIDS = {
         BluetoothUuid.HSP,
@@ -99,7 +101,8 @@ public class HeadsetProfile implements LocalBluetoothProfile {
             LocalBluetoothProfileManager profileManager) {
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new HeadsetServiceListener(),
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.getProfileProxy(context, new HeadsetServiceListener(),
                 BluetoothProfile.HEADSET);
     }
 
@@ -134,10 +137,10 @@ public class HeadsetProfile implements LocalBluetoothProfile {
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
-        if (mService == null) {
+        if (mBluetoothAdapter == null) {
             return false;
         }
-        return mService.setActiveDevice(device);
+        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_PHONE_CALL);
     }
 
     public BluetoothDevice getActiveDevice() {

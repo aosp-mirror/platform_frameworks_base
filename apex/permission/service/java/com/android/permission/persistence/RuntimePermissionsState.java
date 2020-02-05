@@ -19,6 +19,7 @@ package com.android.permission.persistence;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.SystemApi.Client;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.Map;
  * TODO(b/147914847): Remove @hide when it becomes the default.
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES, process = SystemApi.Process.SYSTEM_SERVER)
+@SystemApi(client = Client.SYSTEM_SERVER)
 public final class RuntimePermissionsState {
 
     /**

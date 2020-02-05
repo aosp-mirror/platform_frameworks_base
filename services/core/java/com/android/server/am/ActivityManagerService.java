@@ -5143,14 +5143,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {
-            // todo: Yikes!  What should we do?  For now we will try to
-            // start another process, but that could easily get us in
-            // an infinite loop of restarting processes...
+            // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
-
             app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
-            mProcessList.startProcessLocked(app, new HostingRecord("bind-fail", processName));
+            app.kill("error during bind", ApplicationExitInfo.REASON_INITIALIZATION_FAILURE, true);
+            handleAppDiedLocked(app, false, true);
             return false;
         }
 
@@ -18924,19 +18922,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // The arguments here are untyped because the base ActivityManagerInternal class
-        // doesn't have compile-time visiblity into ActivityServiceConnectionHolder or
+        // doesn't have compile-time visibility into ActivityServiceConnectionHolder or
         // ConnectionRecord.
         @Override
-        public void disconnectActivityFromServices(Object connectionHolder, Object conns) {
+        public void disconnectActivityFromServices(Object connectionHolder) {
             // 'connectionHolder' is an untyped ActivityServiceConnectionsHolder
-            // 'conns' is an untyped HashSet<ConnectionRecord>
             final ActivityServiceConnectionsHolder holder =
                     (ActivityServiceConnectionsHolder) connectionHolder;
-            final HashSet<ConnectionRecord> toDisconnect = (HashSet<ConnectionRecord>) conns;
-            synchronized(ActivityManagerService.this) {
-                for (ConnectionRecord cr : toDisconnect) {
-                    mServices.removeConnectionLocked(cr, null, holder);
-                }
+            synchronized (ActivityManagerService.this) {
+                holder.forEachConnection(cr -> mServices.removeConnectionLocked(
+                        (ConnectionRecord) cr, null /* skipApp */, holder /* skipAct */));
             }
         }
 

@@ -222,7 +222,6 @@ package android {
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String SYSTEM_CAMERA = "android.permission.SYSTEM_CAMERA";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
-    field public static final String TUNER_RESOURCE_ACCESS = "android.permission.TUNER_RESOURCE_ACCESS";
     field public static final String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
@@ -2304,6 +2303,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
     field public static final int PROTECTION_FLAG_INCIDENT_REPORT_APPROVER = 1048576; // 0x100000
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
+    field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_TELEPHONY = 4194304; // 0x400000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
@@ -4686,7 +4686,6 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
-    method @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS) public int getClientPid(@NonNull String);
     method @NonNull @RequiresPermission("android.permission.DVB_DEVICE") public java.util.List<android.media.tv.DvbDeviceInfo> getDvbDeviceList();
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public java.util.List<android.media.tv.TvInputHardwareInfo> getHardwareList();
     method @RequiresPermission(android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS) public java.util.List<android.media.tv.TvContentRatingSystemInfo> getTvContentRatingSystemList();
@@ -4698,7 +4697,6 @@ package android.media.tv {
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public void releaseTvInputHardware(int, android.media.tv.TvInputManager.Hardware);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void removeBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void setParentalControlsEnabled(boolean);
-    field public static final int UNKNOWN_CLIENT_PID = -1; // 0xffffffff
   }
 
   public static final class TvInputManager.Hardware {
@@ -5378,7 +5376,7 @@ package android.media.tv.tuner.frontend {
   public static class Atsc3FrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setBandwidth(int);
-    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(byte);
+    method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(int);
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setPlpSettings(@NonNull android.media.tv.tuner.frontend.Atsc3PlpSettings[]);
   }
 
@@ -5432,7 +5430,7 @@ package android.media.tv.tuner.frontend {
 
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder(@NonNull android.content.Context);
-    method public byte getAnnex();
+    method public int getAnnex();
     method public long getFec();
     method public int getModulation();
     method public int getOuterFec();
@@ -5460,7 +5458,7 @@ package android.media.tv.tuner.frontend {
 
   public static class DvbcFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
-    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(byte);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);
@@ -7775,7 +7773,7 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.ScoreChangeCallback {
-    method public void onStatusChange(int, boolean);
+    method public void onScoreChange(int, @NonNull android.net.NetworkScore);
     method public void onTriggerUpdateOfWifiUsabilityStats(int);
   }
 
@@ -8199,6 +8197,7 @@ package android.net.wifi.wificond {
   }
 
   public final class NativeScanResult implements android.os.Parcelable {
+    ctor public NativeScanResult();
     method public int describeContents();
     method @NonNull public byte[] getBssid();
     method @NonNull public java.util.BitSet getCapabilities();
@@ -8214,6 +8213,7 @@ package android.net.wifi.wificond {
   }
 
   public final class NativeWifiClient implements android.os.Parcelable {
+    ctor public NativeWifiClient(@NonNull byte[]);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
@@ -8251,6 +8251,7 @@ package android.net.wifi.wificond {
   }
 
   public final class RadioChainInfo implements android.os.Parcelable {
+    ctor public RadioChainInfo(int, int);
     method public int describeContents();
     method public int getChainId();
     method public int getLevelDbm();
@@ -8261,7 +8262,7 @@ package android.net.wifi.wificond {
   public class WifiCondManager {
     method public void abortScan(@NonNull String);
     method public void enableVerboseLogging(boolean);
-    method @NonNull public int[] getChannelsMhzForBand(int);
+    method @NonNull public java.util.List<java.lang.Integer> getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);

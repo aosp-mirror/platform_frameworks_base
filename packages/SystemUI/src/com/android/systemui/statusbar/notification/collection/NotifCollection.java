@@ -35,15 +35,22 @@ import static android.service.notification.NotificationListenerService.REASON_TI
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 
+import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.DISMISSED;
+import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
+import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
+
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.IntDef;
 import android.annotation.MainThread;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.DumpController;
@@ -172,15 +179,65 @@ public class NotifCollection implements Dumpable {
     /**
      * Dismiss a notification on behalf of the user.
      */
-    void dismissNotification(
-            NotificationEntry entry,
-            @CancellationReason int reason,
-            @NonNull DismissedByUserStats stats) {
+    void dismissNotification(NotificationEntry entry, @NonNull DismissedByUserStats stats) {
         Assert.isMainThread();
-        Objects.requireNonNull(stats);
+        requireNonNull(stats);
         checkForReentrantCall();
 
-        removeNotification(entry.getKey(), null, reason, stats);
+        if (entry != mNotificationSet.get(entry.getKey())) {
+            throw new IllegalStateException("Invalid entry: " + entry.getKey());
+        }
+
+        if (entry.getDismissState() == DISMISSED) {
+            return;
+        }
+
+        // Optimistically mark the notification as dismissed -- we'll wait for the signal from
+        // system server before removing it from our notification set.
+        entry.setDismissState(DISMISSED);
+        mLogger.logNotifDismissed(entry.getKey());
+
+        List<NotificationEntry> canceledEntries = new ArrayList<>();
+
+        if (isCanceled(entry)) {
+            canceledEntries.add(entry);
+        } else {
+            // Ask system server to remove it for us
+            try {
+                mStatusBarService.onNotificationClear(
+                        entry.getSbn().getPackageName(),
+                        entry.getSbn().getTag(),
+                        entry.getSbn().getId(),
+                        entry.getSbn().getUser().getIdentifier(),
+                        entry.getSbn().getKey(),
+                        stats.dismissalSurface,
+                        stats.dismissalSentiment,
+                        stats.notificationVisibility);
+            } catch (RemoteException e) {
+                // system process is dead if we're here.
+            }
+
+            // Also mark any children as dismissed as system server will auto-dismiss them as well
+            if (entry.getSbn().getNotification().isGroupSummary()) {
+                for (NotificationEntry otherEntry : mNotificationSet.values()) {
+                    if (otherEntry.getSbn().getGroupKey().equals(entry.getSbn().getGroupKey())
+                            && otherEntry.getDismissState() != DISMISSED) {
+                        otherEntry.setDismissState(PARENT_DISMISSED);
+                        if (isCanceled(otherEntry)) {
+                            canceledEntries.add(otherEntry);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Immediately remove any dismissed notifs that have already been canceled by system server
+        // (probably due to being lifetime-extended up until this point).
+        for (NotificationEntry canceledEntry : canceledEntries) {
+            tryRemoveNotification(canceledEntry);
+        }
+
+        rebuildList();
     }
 
     private void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
@@ -208,7 +265,15 @@ public class NotifCollection implements Dumpable {
         Assert.isMainThread();
 
         mLogger.logNotifRemoved(sbn.getKey(), reason);
-        removeNotification(sbn.getKey(), rankingMap, reason, null);
+
+        final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
+        if (entry == null) {
+            throw new IllegalStateException("No notification to remove with key " + sbn.getKey());
+        }
+        entry.mCancellationReason = reason;
+        applyRanking(rankingMap);
+        tryRemoveNotification(entry);
+        rebuildList();
     }
 
     private void onNotificationRankingUpdate(RankingMap rankingMap) {
@@ -242,9 +307,12 @@ public class NotifCollection implements Dumpable {
             // Update to an existing entry
             mLogger.logNotifUpdated(sbn.getKey());
 
-            // Notification is updated so it is essentially re-added and thus alive again.  Don't
+            cancelLocalDismissal(entry);
+
+            // Notification is updated so it is essentially re-added and thus alive again. Don't
             // need to keep its lifetime extended.
             cancelLifetimeExtension(entry);
+            entry.mCancellationReason = REASON_NOT_CANCELED;
 
             entry.setSbn(sbn);
             if (rankingMap != null) {
@@ -255,59 +323,42 @@ public class NotifCollection implements Dumpable {
         }
     }
 
-    private void removeNotification(
-            String key,
-            @Nullable RankingMap rankingMap,
-            @CancellationReason int reason,
-            @Nullable DismissedByUserStats dismissedByUserStats) {
-
-        NotificationEntry entry = mNotificationSet.get(key);
-        if (entry == null) {
-            throw new IllegalStateException("No notification to remove with key " + key);
+    /**
+     * Tries to remove a notification from the notification set. This removal may be blocked by
+     * lifetime extenders. Does not trigger a rebuild of the list; caller must do that manually.
+     *
+     * @return True if the notification was removed, false otherwise.
+     */
+    private boolean tryRemoveNotification(NotificationEntry entry) {
+        if (mNotificationSet.get(entry.getKey()) != entry) {
+            throw new IllegalStateException("No notification to remove with key " + entry.getKey());
         }
 
-        entry.mLifetimeExtenders.clear();
-        mAmDispatchingToOtherCode = true;
-        for (NotifLifetimeExtender extender : mLifetimeExtenders) {
-            if (extender.shouldExtendLifetime(entry, reason)) {
-                entry.mLifetimeExtenders.add(extender);
-            }
+        if (!isCanceled(entry)) {
+            throw new IllegalStateException("Cannot remove notification " + entry.getKey()
+                        + ": has not been marked for removal");
         }
-        mAmDispatchingToOtherCode = false;
+
+        if (isDismissedByUser(entry)) {
+            // User-dismissed notifications cannot be lifetime-extended
+            cancelLifetimeExtension(entry);
+        } else {
+            updateLifetimeExtension(entry);
+        }
 
         if (!isLifetimeExtended(entry)) {
             mNotificationSet.remove(entry.getKey());
-
-            if (dismissedByUserStats != null) {
-                try {
-                    mStatusBarService.onNotificationClear(
-                            entry.getSbn().getPackageName(),
-                            entry.getSbn().getTag(),
-                            entry.getSbn().getId(),
-                            entry.getSbn().getUser().getIdentifier(),
-                            entry.getSbn().getKey(),
-                            dismissedByUserStats.dismissalSurface,
-                            dismissedByUserStats.dismissalSentiment,
-                            dismissedByUserStats.notificationVisibility);
-                } catch (RemoteException e) {
-                    // system process is dead if we're here.
-                }
-            }
-
-            if (rankingMap != null) {
-                applyRanking(rankingMap);
-            }
-
-            dispatchOnEntryRemoved(entry, reason, dismissedByUserStats != null /* removedByUser */);
+            dispatchOnEntryRemoved(entry, entry.mCancellationReason);
             dispatchOnEntryCleanUp(entry);
+            return true;
+        } else {
+            return false;
         }
-
-        rebuildList();
     }
 
     private void applyRanking(@NonNull RankingMap rankingMap) {
         for (NotificationEntry entry : mNotificationSet.values()) {
-            if (!isLifetimeExtended(entry)) {
+            if (!isCanceled(entry)) {
 
                 // TODO: (b/148791039) We should crash if we are ever handed a ranking with
                 //  incomplete entries. Right now, there's a race condition in NotificationListener
@@ -355,9 +406,9 @@ public class NotifCollection implements Dumpable {
         }
 
         if (!isLifetimeExtended(entry)) {
-            // TODO: This doesn't need to be undefined -- we can set either EXTENDER_EXPIRED or
-            // save the original reason
-            removeNotification(entry.getKey(), null, REASON_UNKNOWN, null);
+            if (tryRemoveNotification(entry)) {
+                rebuildList();
+            }
         }
     }
 
@@ -374,6 +425,31 @@ public class NotifCollection implements Dumpable {
         return entry.mLifetimeExtenders.size() > 0;
     }
 
+    private void updateLifetimeExtension(NotificationEntry entry) {
+        entry.mLifetimeExtenders.clear();
+        mAmDispatchingToOtherCode = true;
+        for (NotifLifetimeExtender extender : mLifetimeExtenders) {
+            if (extender.shouldExtendLifetime(entry, entry.mCancellationReason)) {
+                entry.mLifetimeExtenders.add(extender);
+            }
+        }
+        mAmDispatchingToOtherCode = false;
+    }
+
+    private void cancelLocalDismissal(NotificationEntry entry) {
+        if (isDismissedByUser(entry)) {
+            entry.setDismissState(NOT_DISMISSED);
+            if (entry.getSbn().getNotification().isGroupSummary()) {
+                for (NotificationEntry otherEntry : mNotificationSet.values()) {
+                    if (otherEntry.getSbn().getGroupKey().equals(entry.getSbn().getGroupKey())
+                            && otherEntry.getDismissState() == PARENT_DISMISSED) {
+                        otherEntry.setDismissState(NOT_DISMISSED);
+                    }
+                }
+            }
+        }
+    }
+
     private void checkForReentrantCall() {
         if (mAmDispatchingToOtherCode) {
             throw new IllegalStateException("Reentrant call detected");
@@ -387,6 +463,19 @@ public class NotifCollection implements Dumpable {
             throw new IllegalArgumentException("Ranking map doesn't contain key: " + key);
         }
         return ranking;
+    }
+
+    /**
+     * True if the notification has been canceled by system server. Usually, such notifications are
+     * immediately removed from the collection, but can sometimes stick around due to lifetime
+     * extenders.
+     */
+    private static boolean isCanceled(NotificationEntry entry) {
+        return entry.mCancellationReason != REASON_NOT_CANCELED;
+    }
+
+    private static boolean isDismissedByUser(NotificationEntry entry) {
+        return entry.getDismissState() != NOT_DISMISSED;
     }
 
     private void dispatchOnEntryInit(NotificationEntry entry) {
@@ -421,13 +510,10 @@ public class NotifCollection implements Dumpable {
         mAmDispatchingToOtherCode = false;
     }
 
-    private void dispatchOnEntryRemoved(
-            NotificationEntry entry,
-            @CancellationReason int reason,
-            boolean removedByUser) {
+    private void dispatchOnEntryRemoved(NotificationEntry entry, @CancellationReason int reason) {
         mAmDispatchingToOtherCode = true;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryRemoved(entry, reason, removedByUser);
+            listener.onEntryRemoved(entry, reason);
         }
         mAmDispatchingToOtherCode = false;
     }
@@ -438,6 +524,20 @@ public class NotifCollection implements Dumpable {
             listener.onEntryCleanUp(entry);
         }
         mAmDispatchingToOtherCode = false;
+    }
+    @Override
+    public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
+        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
+
+        pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
+        if (entries.size() == 0) {
+            pw.println("\t\t None");
+        }
+        pw.println(
+                ListDumper.dumpList(
+                        entries,
+                        true,
+                        "\t\t"));
     }
 
     private final BatchableNotificationHandler mNotifHandler = new BatchableNotificationHandler() {
@@ -494,20 +594,6 @@ public class NotifCollection implements Dumpable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CancellationReason {}
 
+    public static final int REASON_NOT_CANCELED = -1;
     public static final int REASON_UNKNOWN = 0;
-
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
-
-        pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
-        if (entries.size() == 0) {
-            pw.println("\t\t None");
-        }
-        pw.println(
-                ListDumper.dumpList(
-                        entries,
-                        true,
-                        "\t\t"));
-    }
 }

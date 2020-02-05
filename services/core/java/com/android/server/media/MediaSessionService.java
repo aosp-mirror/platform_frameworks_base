@@ -141,6 +141,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     final RemoteCallbackList<IRemoteVolumeController> mRemoteVolumeControllers =
             new RemoteCallbackList<>();
 
+    private SessionPolicyProvider mCustomSessionPolicyProvider;
+    private MediaKeyDispatcher mCustomMediaKeyDispatcher;
+
     public MediaSessionService(Context context) {
         super(context);
         mContext = context;
@@ -179,6 +182,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         mSettingsObserver.observe();
         mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
+
+        // TODO: (jinpark) check if config value for custom MediaKeyDispatcher and
+        //  SessionPolicyProvider have been overlayed and instantiate using reflection.
         updateUser();
     }
 
@@ -555,7 +561,8 @@ public class MediaSessionService extends SystemService implements Monitor {
      * 4. It needs to be added to the relevant user record.
      */
     private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
-            String callerPackageName, ISessionCallback cb, String tag, Bundle sessionInfo) {
+            String callerPackageName, ISessionCallback cb, String tag, Bundle sessionInfo,
+            int policies) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user == null) {
@@ -566,7 +573,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             final MediaSessionRecord session;
             try {
                 session = new MediaSessionRecord(callerPid, callerUid, userId,
-                        callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
+                        callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper(),
+                        policies);
             } catch (RemoteException e) {
                 throw new RuntimeException("Media Session owner died prematurely.", e);
             }
@@ -1127,8 +1135,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
+                int policies = (mCustomSessionPolicyProvider != null)
+                        ? mCustomSessionPolicyProvider.getSessionPoliciesForApplication(
+                                uid, packageName) : 0;
                 return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag,
-                        sessionInfo).getSessionBinder();
+                        sessionInfo, policies).getSessionBinder();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1148,7 +1159,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + " but actually=" + sessionToken.getUid());
                 }
                 MediaSession2Record record = new MediaSession2Record(
-                        sessionToken, MediaSessionService.this, mHandler.getLooper());
+                        sessionToken, MediaSessionService.this, mHandler.getLooper(), 0);
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                     user.mPriorityStack.addSession(record);
@@ -1308,12 +1319,11 @@ public class MediaSessionService extends SystemService implements Monitor {
          * ACTION_MEDIA_BUTTON intent to the rest of the system.
          *
          * @param packageName The caller package
-         * @param asSystemService {@code true} if the event sent to the session as if it was come
-         *          from the system service instead of the app process. This helps sessions to
-         *          distinguish between the key injection by the app and key events from the
-         *          hardware devices. Should be used only when the volume key events aren't handled
-         *          by foreground activity. {@code false} otherwise to tell session about the real
-         *          caller.
+         * @param asSystemService {@code true} if the event sent to the session came from the
+         *          service instead of the app process. This helps sessions to distinguish between
+         *          the key injection by the app and key events from the hardware devices. Should be
+         *          used only when the hardware key events aren't handled by foreground activity.
+         *          {@code false} otherwise to tell session about the real caller.
          * @param keyEvent a non-null KeyEvent whose key code is one of the
          *            supported media buttons
          * @param needWakeLock true if a PARTIAL_WAKE_LOCK needs to be held
@@ -2115,14 +2125,27 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // TODO(jaewan): Implement
                 return;
             }
-            MediaSessionRecord session =
-                    (MediaSessionRecord) mCurrentFullUserRecord.getMediaButtonSessionLocked();
+            MediaSessionRecord session = null;
+
+            // Retrieve custom session for key event if it exists.
+            if (mCustomMediaKeyDispatcher != null) {
+                MediaSession.Token token =
+                        mCustomMediaKeyDispatcher.getSessionForKeyEvent(keyEvent, asSystemService);
+                if (token != null) {
+                    session = getMediaSessionRecordLocked(token);
+                }
+            }
+
+            if (session == null) {
+                session = (MediaSessionRecord) mCurrentFullUserRecord.getMediaButtonSessionLocked();
+            }
+
             if (session != null) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Sending " + keyEvent + " to " + session);
                 }
                 if (needWakeLock) {
-                    mKeyEventReceiver.aquireWakeLockLocked();
+                    mKeyEventReceiver.acquireWakeLockLocked();
                 }
                 // If we don't need a wakelock use -1 as the id so we won't release it later.
                 session.sendMediaButton(packageName, pid, uid, asSystemService, keyEvent,
@@ -2140,7 +2163,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             } else if (mCurrentFullUserRecord.mLastMediaButtonReceiver != null
                     || mCurrentFullUserRecord.mRestoredMediaButtonReceiver != null) {
                 if (needWakeLock) {
-                    mKeyEventReceiver.aquireWakeLockLocked();
+                    mKeyEventReceiver.acquireWakeLockLocked();
                 }
                 Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
                 mediaButtonIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -2349,7 +2372,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
 
-            public void aquireWakeLockLocked() {
+            public void acquireWakeLockLocked() {
                 if (mRefCount == 0) {
                     mMediaEventWakeLock.acquire();
                 }

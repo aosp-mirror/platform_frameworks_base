@@ -169,7 +169,7 @@ public final class NativeScanResult implements Parcelable {
     }
 
     /**
-     * @hide
+     * Construct an empty native scan result.
      */
     public NativeScanResult() { }
 

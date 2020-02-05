@@ -60,13 +60,13 @@ public class WifiEnterpriseConfig implements Parcelable {
             "android.net.wifi.extra.WAPI_AS_CERTIFICATE_DATA";
 
     /**
-     * Intent extra: name for WAPI AS certificates
+     * Intent extra: name for WAPI USER certificates
      */
     public static final String EXTRA_WAPI_USER_CERTIFICATE_NAME =
             "android.net.wifi.extra.WAPI_USER_CERTIFICATE_NAME";
 
     /**
-     * Intent extra: data for WAPI AS certificates
+     * Intent extra: data for WAPI USER certificates
      */
     public static final String EXTRA_WAPI_USER_CERTIFICATE_DATA =
             "android.net.wifi.extra.WAPI_USER_CERTIFICATE_DATA";

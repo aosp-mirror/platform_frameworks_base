@@ -322,6 +322,9 @@ public final class Dataset implements Parcelable {
          * platform needs to fill in the authentication arguments.
          *
          * @param authentication Intent to an activity with your authentication flow.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         *
          * @return this builder.
          *
          * @see android.app.PendingIntent
@@ -348,6 +351,8 @@ public final class Dataset implements Parcelable {
          * </ul>
          *
          * @param id id for this dataset or {@code null} to unset.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
          *
          * @return this builder.
          */
@@ -378,6 +383,9 @@ public final class Dataset implements Parcelable {
          * @param value value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
          *        the dataset needs authentication and you have no access to the value.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         *
          * @return this builder.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value) {
@@ -403,8 +411,10 @@ public final class Dataset implements Parcelable {
          *        but the target view is a logical part of the dataset. For example, if
          *        the dataset needs authentication and you have no access to the value.
          * @param presentation the presentation used to visualize this field.
-         * @return this builder.
          *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         *
+         * @return this builder.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @NonNull RemoteViews presentation) {
@@ -439,7 +449,7 @@ public final class Dataset implements Parcelable {
          *
          * @return this builder.
          * @throws IllegalStateException if the builder was constructed without a
-         *         {@link RemoteViews presentation}.
+         *         {@link RemoteViews presentation} or {@link #build()} was already called.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @Nullable Pattern filter) {
@@ -475,6 +485,8 @@ public final class Dataset implements Parcelable {
          *        such as passwords).
          * @param presentation the presentation used to visualize this field.
          *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         *
          * @return this builder.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
@@ -503,6 +515,8 @@ public final class Dataset implements Parcelable {
          * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
          *        as inline suggestions. If the dataset supports inline suggestions,
          *        this should not be null.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
          *
          * @return this builder.
          */
@@ -544,6 +558,8 @@ public final class Dataset implements Parcelable {
          *        as inline suggestions. If the dataset supports inline suggestions, this
          *        should not be null.
          *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         *
          * @return this builder.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
@@ -575,6 +591,8 @@ public final class Dataset implements Parcelable {
          * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
          *        as inline suggestions. If the dataset supports inline suggestions, this
          *        should not be null.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
          *
          * @return this builder.
          *
@@ -628,7 +646,8 @@ public final class Dataset implements Parcelable {
          * @throws IllegalStateException if no field was set (through
          * {@link #setValue(AutofillId, AutofillValue)} or
          * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} or
-         * {@link #setValue(AutofillId, AutofillValue, RemoteViews, InlinePresentation)}).
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews, InlinePresentation)}),
+         * or if {@link #build()} was already called.
          *
          * @return The built dataset.
          */

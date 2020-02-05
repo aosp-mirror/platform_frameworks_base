@@ -285,7 +285,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
                         | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
                         | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST
-                        | PhoneStateListener.LISTEN_REGISTRATION_FAILURE;
+                        | PhoneStateListener.LISTEN_REGISTRATION_FAILURE
+                        | PhoneStateListener.LISTEN_BARRING_INFO;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE

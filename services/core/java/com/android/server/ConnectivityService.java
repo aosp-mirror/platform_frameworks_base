@@ -109,6 +109,7 @@ import android.net.SocketKeepalive;
 import android.net.TetheringManager;
 import android.net.UidRange;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
@@ -4317,7 +4318,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throwIfLockdownEnabled();
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
-                return vpn.prepare(oldPackage, newPackage, false);
+                return vpn.prepare(oldPackage, newPackage, VpnManager.TYPE_VPN_SERVICE);
             } else {
                 return false;
             }
@@ -4325,26 +4326,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Set whether the VPN package has the ability to launch VPNs without user intervention.
-     * This method is used by system-privileged apps.
-     * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
-     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     * Set whether the VPN package has the ability to launch VPNs without user intervention. This
+     * method is used by system-privileged apps. VPN permissions are checked in the {@link Vpn}
+     * class. If the caller is not {@code userId}, {@link
+     * android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
      *
      * @param packageName The package for which authorization state should change.
      * @param userId User for whom {@code packageName} is installed.
      * @param authorized {@code true} if this app should be able to start a VPN connection without
-     *                   explicit user approval, {@code false} if not.
-     *
+     *     explicit user approval, {@code false} if not.
+     * @param vpnType The {@link VpnManager.VpnType} constant representing what class of VPN
+     *     permissions should be granted. When unauthorizing an app, {@link
+     *     VpnManager.TYPE_VPN_NONE} should be used.
      * @hide
      */
     @Override
-    public void setVpnPackageAuthorization(String packageName, int userId, boolean authorized) {
+    public void setVpnPackageAuthorization(
+            String packageName, int userId, @VpnManager.VpnType int vpnType) {
         enforceCrossUserPermission(userId);
 
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
-                vpn.setPackageAuthorization(packageName, authorized);
+                vpn.setPackageAuthorization(packageName, vpnType);
             }
         }
     }
@@ -6188,12 +6192,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, NetworkAgentInfo nai) {
-        int score = 0;
-        int serial = 0;
+    private void sendUpdatedScoreToFactories(@NonNull NetworkRequest networkRequest,
+            @Nullable NetworkAgentInfo nai) {
+        final int score;
+        final int serial;
         if (nai != null) {
             score = nai.getCurrentScore();
             serial = nai.factorySerialNumber;
+        } else {
+            score = 0;
+            serial = 0;
         }
         if (VDBG || DDBG){
             log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
@@ -6356,20 +6364,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void makeDefault(@NonNull final NetworkAgentInfo newNetwork) {
+    private void makeDefault(@Nullable final NetworkAgentInfo newNetwork) {
         if (DBG) log("Switching to new default network: " + newNetwork);
 
+        mDefaultNetworkNai = newNetwork;
+
         try {
-            mNMS.setDefaultNetId(newNetwork.network.netId);
+            if (null != newNetwork) {
+                mNMS.setDefaultNetId(newNetwork.network.netId);
+            } else {
+                mNMS.clearDefaultNetId();
+            }
         } catch (Exception e) {
             loge("Exception setting default network :" + e);
         }
 
-        mDefaultNetworkNai = newNetwork;
         notifyLockdownVpn(newNetwork);
-        handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
-        updateTcpBufferSizes(newNetwork.linkProperties.getTcpBufferSizes());
-        mDnsManager.setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
+        handleApplyDefaultProxy(null != newNetwork
+                ? newNetwork.linkProperties.getHttpProxy() : null);
+        updateTcpBufferSizes(null != newNetwork
+                ? newNetwork.linkProperties.getTcpBufferSizes() : null);
+        mDnsManager.setDefaultDnsSystemProperties(null != newNetwork
+                ? newNetwork.linkProperties.getDnsServers() : Collections.EMPTY_LIST);
         notifyIfacesChangedForNetworkStats();
         // Fix up the NetworkCapabilities of any VPNs that don't specify underlying networks.
         updateAllVpnsCapabilities();
@@ -6448,6 +6464,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         void addRematchedNetwork(@NonNull final NetworkBgStatePair network) {
             mRematchedNetworks.add(network);
         }
+
+        // Will return null if this reassignment does not change the network assigned to
+        // the passed request.
+        @Nullable
+        private RequestReassignment getReassignment(@NonNull final NetworkRequestInfo nri) {
+            for (final RequestReassignment event : getRequestReassignments()) {
+                if (nri == event.mRequest) return event;
+            }
+            return null;
+        }
     }
 
     private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
@@ -6514,8 +6540,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             @NonNull final NetworkAgentInfo newNetwork, final long now) {
         ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
-        boolean isNewDefault = false;
-        NetworkAgentInfo oldDefaultNetwork = null;
 
         changes.addRematchedNetwork(new NetworkReassignment.NetworkBgStatePair(newNetwork,
                 newNetwork.isBackgroundNetwork()));
@@ -6532,6 +6556,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final NetworkRequestInfo nri = entry.getKey();
             final NetworkAgentInfo previousSatisfier = nri.mSatisfier;
             final NetworkAgentInfo newSatisfier = entry.getValue();
+            changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
+                    nri, previousSatisfier, newSatisfier));
             if (newSatisfier != null) {
                 if (VDBG) log("rematch for " + newSatisfier.name());
                 if (previousSatisfier != null) {
@@ -6544,24 +6570,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (VDBG || DDBG) log("   accepting network in place of null");
                 }
                 newSatisfier.unlingerRequest(nri.request);
-                nri.mSatisfier = newSatisfier;
                 if (!newSatisfier.addRequest(nri.request)) {
                     Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
-                }
-                changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
-                        nri, previousSatisfier, newSatisfier));
-                // Tell NetworkProviders about the new score, so they can stop
-                // trying to connect if they know they cannot match it.
-                // TODO - this could get expensive if we have a lot of requests for this
-                // network.  Think about if there is a way to reduce this.  Push
-                // netid->request mapping to each provider?
-                sendUpdatedScoreToFactories(nri.request, newSatisfier);
-                if (isDefaultRequest(nri)) {
-                    isNewDefault = true;
-                    oldDefaultNetwork = previousSatisfier;
-                    if (previousSatisfier != null) {
-                        mLingerMonitor.noteLingerDefaultNetwork(previousSatisfier, newSatisfier);
-                    }
                 }
             } else {
                 // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
@@ -6576,35 +6586,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             " request " + nri.request.requestId);
                 }
                 newNetwork.removeRequest(nri.request.requestId);
-                if (previousSatisfier == newNetwork) {
-                    nri.mSatisfier = null;
-                    if (isDefaultRequest(nri)) mDefaultNetworkNai = null;
-                    sendUpdatedScoreToFactories(nri.request, null);
-                } else {
-                    Slog.wtf(TAG, "BUG: Removing request " + nri.request.requestId + " from " +
-                            newNetwork.name() +
-                            " without updating mSatisfier or providers!");
-                }
-                // TODO: Technically, sending CALLBACK_LOST here is
-                // incorrect if there is a replacement network currently
-                // connected that can satisfy nri, which is a request
-                // (not a listen). However, the only capability that can both
-                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
-                // so this code is only incorrect for a network that loses
-                // the TRUSTED capability, which is a rare case.
-                callCallbackForRequest(nri, newNetwork, ConnectivityManager.CALLBACK_LOST, 0);
             }
-        }
-
-        if (isNewDefault) {
-            updateDataActivityTracking(newNetwork, oldDefaultNetwork);
-            // Notify system services that this network is up.
-            makeDefault(newNetwork);
-            // Log 0 -> X and Y -> X default network transitions, where X is the new default.
-            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
-                    now, newNetwork, oldDefaultNetwork);
-            // Have a new default network, release the transition wakelock in
-            scheduleReleaseNetworkTransitionWakelock();
+            nri.mSatisfier = newSatisfier;
         }
     }
 
@@ -6632,14 +6615,48 @@ public class ConnectivityService extends IConnectivityManager.Stub
             rematchNetworkAndRequests(changes, nai, now);
         }
 
-        final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
+        final NetworkRequestInfo defaultRequestInfo = mNetworkRequests.get(mDefaultRequest);
+        final NetworkReassignment.RequestReassignment reassignment =
+                changes.getReassignment(defaultRequestInfo);
+        final NetworkAgentInfo newDefaultNetwork =
+                null != reassignment ? reassignment.mNewNetwork : oldDefaultNetwork;
+
+        if (oldDefaultNetwork != newDefaultNetwork) {
+            if (oldDefaultNetwork != null) {
+                mLingerMonitor.noteLingerDefaultNetwork(oldDefaultNetwork, newDefaultNetwork);
+            }
+            updateDataActivityTracking(newDefaultNetwork, oldDefaultNetwork);
+            // Notify system services of the new default.
+            makeDefault(newDefaultNetwork);
+            // Log 0 -> X and Y -> X default network transitions, where X is the new default.
+            mDeps.getMetricsLogger().defaultNetworkMetrics().logDefaultNetworkEvent(
+                    now, newDefaultNetwork, oldDefaultNetwork);
+            // Have a new default network, release the transition wakelock in
+            scheduleReleaseNetworkTransitionWakelock();
+        }
 
         // Notify requested networks are available after the default net is switched, but
         // before LegacyTypeTracker sends legacy broadcasts
         for (final NetworkReassignment.RequestReassignment event :
                 changes.getRequestReassignments()) {
+            // Tell NetworkProviders about the new score, so they can stop
+            // trying to connect if they know they cannot match it.
+            // TODO - this could get expensive if there are a lot of outstanding requests for this
+            // network. Think of a way to reduce this. Push netid->request mapping to each factory?
+            sendUpdatedScoreToFactories(event.mRequest.request, event.mNewNetwork);
+
             if (null != event.mNewNetwork) {
                 notifyNetworkAvailable(event.mNewNetwork, event.mRequest);
+            } else {
+                // TODO: Technically, sending CALLBACK_LOST here is
+                // incorrect if there is a replacement network currently
+                // connected that can satisfy nri, which is a request
+                // (not a listen). However, the only capability that can both
+                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
+                // so this code is only incorrect for a network that loses
+                // the TRUSTED capability, which is a rare case.
+                callCallbackForRequest(event.mRequest, event.mOldNetwork,
+                        ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
 
@@ -7217,7 +7234,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final String alwaysOnPackage = getAlwaysOnVpnPackage(userId);
                 if (alwaysOnPackage != null) {
                     setAlwaysOnVpnPackage(userId, null, false, null);
-                    setVpnPackageAuthorization(alwaysOnPackage, userId, false);
+                    setVpnPackageAuthorization(alwaysOnPackage, userId, VpnManager.TYPE_VPN_NONE);
                 }
 
                 // Turn Always-on VPN off
@@ -7240,7 +7257,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     } else {
                         // Prevent this app (packagename = vpnConfig.user) from initiating
                         // VPN connections in the future without user intervention.
-                        setVpnPackageAuthorization(vpnConfig.user, userId, false);
+                        setVpnPackageAuthorization(
+                                vpnConfig.user, userId, VpnManager.TYPE_VPN_NONE);
 
                         prepareVpn(null, VpnConfig.LEGACY_VPN, userId);
                     }

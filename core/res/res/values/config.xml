@@ -2565,7 +2565,11 @@
     <string name="config_usbResolverActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
 
-    <!-- Name of the dialog that is used to request the user's consent to VPN connection -->
+    <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
+    <string name="config_platformVpnConfirmDialogComponent" translatable="false"
+            >com.android.vpndialogs/com.android.vpndialogs.PlatformVpnConfirmDialog</string>
+
+    <!-- Name of the dialog that is used to request the user's consent for a VpnService VPN -->
     <string name="config_customVpnConfirmDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog</string>
 
@@ -3590,7 +3594,6 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
-
     <!-- The package name for the system telephony apps.
          This package must be trusted, as it will be granted with permissions with special telephony
          protection level. Note, framework by default support multiple telephony apps, each package
@@ -3657,6 +3660,19 @@
          Example: "com.android.contentsuggestions/.ContentSuggestionsService"
     -->
     <string name="config_defaultContentSuggestionsService" translatable="false"></string>
+
+    <!-- The package name for the default retail demo app.
+         This package must be trusted, as it has the permissions to query the usage stats on the
+         device.
+         Example: "com.google.android.retaildemo"
+     -->
+    <string name="config_retailDemoPackage" translatable="false"></string>
+
+    <!-- The package signature hash for the default retail demo app.
+         This package must be trusted, as it has the permissions to query the usage stats on the
+         device.
+     -->
+    <string name="config_retailDemoPackageSignature" translatable="false"></string>
 
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
@@ -4331,4 +4347,9 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- Screen Wake Keys
+         Determines whether the specified key groups can be used to wake up the device. -->
+    <bool name="config_wakeOnDpadKeyPress">true</bool>
+    <bool name="config_wakeOnAssistKeyPress">true</bool>
 </resources>

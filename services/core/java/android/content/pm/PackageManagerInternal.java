@@ -67,6 +67,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_TELEPHONY = 12;
     public static final int PACKAGE_WIFI = 13;
     public static final int PACKAGE_COMPANION = 14;
+    public static final int PACKAGE_RETAIL_DEMO = 15;
 
     @IntDef(value = {
             INTEGRITY_VERIFICATION_ALLOW,
@@ -105,6 +106,7 @@ public abstract class PackageManagerInternal {
         PACKAGE_TELEPHONY,
         PACKAGE_WIFI,
         PACKAGE_COMPANION,
+        PACKAGE_RETAIL_DEMO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {}

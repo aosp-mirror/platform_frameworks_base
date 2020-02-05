@@ -964,4 +964,5 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大重疊視窗"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大視窗"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大視窗控制項"</string>
+    <string name="quick_controls_title" msgid="525285759614231333">"快速控制介面"</string>
 </resources>

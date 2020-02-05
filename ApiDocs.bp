@@ -176,6 +176,7 @@ droiddoc {
     hdf: [
         "android.whichdoc offline",
     ],
+    compat_config: ":global-compat-config",
     proofread_file: "offline-sdk-docs-proofrerad.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
     static_doc_index_redirect: "docs/docs-preview-index.html",
