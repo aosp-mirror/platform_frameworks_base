@@ -67,7 +67,7 @@ public class IorapWorkFlowTest {
   private static final String TEST_ACTIVITY_NAME = "com.android.settings.Settings";
 
   private static final String DB_PATH = "/data/misc/iorapd/sqlite.db";
-  private static final Duration TIMEOUT = Duration.ofSeconds(20L);
+  private static final Duration TIMEOUT = Duration.ofSeconds(300L);
 
   private static final String READAHEAD_INDICATOR =
       "Description = /data/misc/iorapd/com.android.settings/none/com.android.settings.Settings/compiled_traces/compiled_trace.pb";
@@ -88,7 +88,7 @@ public class IorapWorkFlowTest {
     mDevice.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), TIMEOUT.getSeconds());
   }
 
-  @Test
+  @Test (timeout = 300000)
   public void testApp() throws Exception {
     assertThat(mDevice, notNullValue());
 
@@ -247,7 +247,7 @@ public class IorapWorkFlowTest {
       if (supplier.getAsBoolean()) {
         return true;
       }
-      TimeUnit.SECONDS.sleep(totalSleepTimeSeconds);
+      TimeUnit.SECONDS.sleep(sleepIntervalSeconds);
       totalSleepTimeSeconds += sleepIntervalSeconds;
       if (totalSleepTimeSeconds > timeout.getSeconds()) {
         return false;
@@ -367,7 +367,7 @@ public class IorapWorkFlowTest {
    *
    * <p> This should be run as root.</p>
    */
-  private String executeShellCommand(String cmd) throws Exception {
+  private static String executeShellCommand(String cmd) throws Exception {
     Log.i(TAG, "Execute: " + cmd);
     return UiDevice.getInstance(
         InstrumentationRegistry.getInstrumentation()).executeShellCommand(cmd);

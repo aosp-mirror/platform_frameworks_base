@@ -34,6 +34,11 @@
         <option name="run-command" value="rm -r /data/misc/iorapd/*" />
         <option name="run-command" value="sleep 1" />
 
+        <!-- Set system properties to enable perfetto tracing, readahead and detailed logging. -->
+        <option name="run-command" value="setprop iorapd.perfetto.enable true" />
+        <option name="run-command" value="setprop iorapd.readahead.enable true" />
+        <option name="run-command" value="setprop iorapd.log.verbose true" />
+
         <option name="run-command" value="start iorapd" />
 
         <!-- give it some time to restart the service; otherwise the first unit test might fail -->
@@ -44,10 +49,6 @@
         <option name="package" value="com.google.android.startop.iorap.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
     </test>
-
-    <!-- using DeviceSetup again does not work. we simply leave the device in a semi-bad
-         state. there is no way to clean this up as far as I know.
-         -->
 
 </configuration>
 
