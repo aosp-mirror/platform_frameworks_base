@@ -96,6 +96,7 @@ import android.test.MoreAsserts;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -5446,6 +5447,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.isAdminActive(admin1, UserHandle.USER_SYSTEM));
     }
 
+    @FlakyTest(bugId = 148934649)
     public void testRevertDeviceOwnership_adminAndDeviceMigrated() throws Exception {
         DpmTestUtils.writeInputStreamToFile(
                 getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
@@ -5456,6 +5458,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertDeviceOwnershipRevertedWithFakeTransferMetadata();
     }
 
+    @FlakyTest(bugId = 148934649)
     public void testRevertDeviceOwnership_deviceNotMigrated()
             throws Exception {
         DpmTestUtils.writeInputStreamToFile(
@@ -5487,6 +5490,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         UserHandle userHandle = UserHandle.of(DpmMockContext.CALLER_USER_HANDLE);
     }
 
+    @FlakyTest(bugId = 148934649)
     public void testRevertProfileOwnership_adminAndProfileMigrated() throws Exception {
         getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
                 UserManager.USER_TYPE_PROFILE_MANAGED, UserHandle.USER_SYSTEM);
@@ -5499,6 +5503,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertProfileOwnershipRevertedWithFakeTransferMetadata();
     }
 
+    @FlakyTest(bugId = 148934649)
     public void testRevertProfileOwnership_profileNotMigrated() throws Exception {
         getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
                 UserManager.USER_TYPE_PROFILE_MANAGED, UserHandle.USER_SYSTEM);
