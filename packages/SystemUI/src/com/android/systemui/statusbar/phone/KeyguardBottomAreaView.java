@@ -643,9 +643,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (previewBefore != null) {
             mPreviewContainer.removeView(previewBefore);
         }
+
         if (mLeftIsVoiceAssist) {
-            mLeftPreview = mPreviewInflater.inflatePreviewFromService(
-                    Dependency.get(AssistManager.class).getVoiceInteractorComponentName());
+            if (Dependency.get(AssistManager.class).getVoiceInteractorComponentName() != null) {
+                mLeftPreview = mPreviewInflater.inflatePreviewFromService(
+                        Dependency.get(AssistManager.class).getVoiceInteractorComponentName());
+            }
         } else {
             mLeftPreview = mPreviewInflater.inflatePreview(mLeftButton.getIntent());
         }
