@@ -31,7 +31,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -93,7 +92,7 @@ public abstract class AugmentedAutofillService extends Service {
     // Used for metrics / debug only
     private ComponentName mServiceComponentName;
 
-    private final IAugmentedAutofillService mInterface = new IAugmentedAutofillService.Stub() {
+    private final class AugmentedAutofillServiceImpl extends IAugmentedAutofillService.Stub {
 
         @Override
         public void onConnected(boolean debug, boolean verbose) {
@@ -137,7 +136,7 @@ public abstract class AugmentedAutofillService extends Service {
     public final IBinder onBind(Intent intent) {
         mServiceComponentName = intent.getComponent();
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return mInterface.asBinder();
+            return new AugmentedAutofillServiceImpl();
         }
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
         return null;
@@ -352,11 +351,13 @@ public abstract class AugmentedAutofillService extends Service {
         static final int REPORT_EVENT_NO_RESPONSE = 1;
         static final int REPORT_EVENT_UI_SHOWN = 2;
         static final int REPORT_EVENT_UI_DESTROYED = 3;
+        static final int REPORT_EVENT_INLINE_RESPONSE = 4;
 
         @IntDef(prefix = { "REPORT_EVENT_" }, value = {
                 REPORT_EVENT_NO_RESPONSE,
                 REPORT_EVENT_UI_SHOWN,
-                REPORT_EVENT_UI_DESTROYED
+                REPORT_EVENT_UI_DESTROYED,
+                REPORT_EVENT_INLINE_RESPONSE
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface ReportEvent{}
@@ -365,8 +366,8 @@ public abstract class AugmentedAutofillService extends Service {
         private final Object mLock = new Object();
         private final IAugmentedAutofillManagerClient mClient;
         private final int mSessionId;
-        public final int taskId;
-        public final ComponentName componentName;
+        public final int mTaskId;
+        public final ComponentName mComponentName;
         // Used for metrics / debug only
         private String mServicePackageName;
         @GuardedBy("mLock")
@@ -406,8 +407,8 @@ public abstract class AugmentedAutofillService extends Service {
             mSessionId = sessionId;
             mClient = IAugmentedAutofillManagerClient.Stub.asInterface(client);
             mCallback = callback;
-            this.taskId = taskId;
-            this.componentName = componentName;
+            mTaskId = taskId;
+            mComponentName = componentName;
             mServicePackageName = serviceComponentName.getPackageName();
             mFocusedId = focusedId;
             mFocusedValue = focusedValue;
@@ -514,22 +515,24 @@ public abstract class AugmentedAutofillService extends Service {
             }
         }
 
-        public void onInlineSuggestionsDataReady(@NonNull List<Dataset> inlineSuggestionsData,
-                @Nullable Bundle clientState) {
+        void reportResult(@Nullable List<Dataset> inlineSuggestionsData) {
             try {
-                mCallback.onSuccess(inlineSuggestionsData.toArray(new Dataset[]{}), clientState);
+                final Dataset[] inlineSuggestions = (inlineSuggestionsData != null)
+                        ? inlineSuggestionsData.toArray(new Dataset[inlineSuggestionsData.size()])
+                        : null;
+                mCallback.onSuccess(inlineSuggestions);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling back with the inline suggestions data: " + e);
             }
         }
 
-        // Used (mostly) for metrics.
-        public void report(@ReportEvent int event) {
-            if (sVerbose) Log.v(TAG, "report(): " + event);
+        void logEvent(@ReportEvent int event) {
+            if (sVerbose) Log.v(TAG, "returnAndLogResult(): " + event);
             long duration = -1;
             int type = MetricsEvent.TYPE_UNKNOWN;
+
             switch (event) {
-                case REPORT_EVENT_NO_RESPONSE:
+                case REPORT_EVENT_NO_RESPONSE: {
                     type = MetricsEvent.TYPE_SUCCESS;
                     if (mFirstOnSuccessTime == 0) {
                         mFirstOnSuccessTime = SystemClock.elapsedRealtime();
@@ -538,40 +541,49 @@ public abstract class AugmentedAutofillService extends Service {
                             Log.d(TAG, "Service responded nothing in " + formatDuration(duration));
                         }
                     }
-                    try {
-                        mCallback.onSuccess(/* inlineSuggestionsData= */null, /* clientState=*/
-                                null);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error reporting success: " + e);
+                } break;
+
+                case REPORT_EVENT_INLINE_RESPONSE: {
+                    // TODO: Define a constant and log this event
+                    // type = MetricsEvent.TYPE_SUCCESS_INLINE;
+                    if (mFirstOnSuccessTime == 0) {
+                        mFirstOnSuccessTime = SystemClock.elapsedRealtime();
+                        duration = mFirstOnSuccessTime - mFirstRequestTime;
+                        if (sDebug) {
+                            Log.d(TAG, "Service responded nothing in " + formatDuration(duration));
+                        }
                     }
-                    break;
-                case REPORT_EVENT_UI_SHOWN:
+                } break;
+
+                case REPORT_EVENT_UI_SHOWN: {
                     type = MetricsEvent.TYPE_OPEN;
                     if (mUiFirstShownTime == 0) {
                         mUiFirstShownTime = SystemClock.elapsedRealtime();
                         duration = mUiFirstShownTime - mFirstRequestTime;
                         if (sDebug) Log.d(TAG, "UI shown in " + formatDuration(duration));
                     }
-                    break;
-                case REPORT_EVENT_UI_DESTROYED:
+                } break;
+
+                case REPORT_EVENT_UI_DESTROYED: {
                     type = MetricsEvent.TYPE_CLOSE;
                     if (mUiFirstDestroyedTime == 0) {
                         mUiFirstDestroyedTime = SystemClock.elapsedRealtime();
-                        duration =  mUiFirstDestroyedTime - mFirstRequestTime;
+                        duration = mUiFirstDestroyedTime - mFirstRequestTime;
                         if (sDebug) Log.d(TAG, "UI destroyed in " + formatDuration(duration));
                     }
-                    break;
+                } break;
+
                 default:
                     Log.w(TAG, "invalid event reported: " + event);
             }
-            logResponse(type, mServicePackageName, componentName, mSessionId, duration);
+            logResponse(type, mServicePackageName, mComponentName, mSessionId, duration);
         }
 
         public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
             pw.print(prefix); pw.print("sessionId: "); pw.println(mSessionId);
-            pw.print(prefix); pw.print("taskId: "); pw.println(taskId);
+            pw.print(prefix); pw.print("taskId: "); pw.println(mTaskId);
             pw.print(prefix); pw.print("component: ");
-            pw.println(componentName.flattenToShortString());
+            pw.println(mComponentName.flattenToShortString());
             pw.print(prefix); pw.print("focusedId: "); pw.println(mFocusedId);
             if (mFocusedValue != null) {
                 pw.print(prefix); pw.print("focusedValue: "); pw.println(mFocusedValue);

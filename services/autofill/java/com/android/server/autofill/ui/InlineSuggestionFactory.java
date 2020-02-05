@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.autofill;
+package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
 
@@ -32,18 +32,13 @@ import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionInfo;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
+import com.android.internal.util.function.QuadFunction;
 import com.android.internal.view.inline.IInlineContentCallback;
 import com.android.internal.view.inline.IInlineContentProvider;
 import com.android.server.UiThread;
-import com.android.server.autofill.ui.AutoFillUI;
-import com.android.server.autofill.ui.InlineSuggestionUi;
 
 import java.util.ArrayList;
 
-
-/**
- * @hide
- */
 public final class InlineSuggestionFactory {
     private static final String TAG = "InlineSuggestionFactory";
 
@@ -65,28 +60,12 @@ public final class InlineSuggestionFactory {
             @NonNull Dataset[] datasets,
             @NonNull AutofillId autofillId,
             @NonNull Context context,
-            @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback) {
-        if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
-
-        final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
-        final InlineSuggestionUi inlineSuggestionUi = new InlineSuggestionUi(context);
-        for (Dataset dataset : datasets) {
-            final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
-            if (fieldIndex < 0) {
-                Slog.w(TAG, "AutofillId=" + autofillId + " not found in dataset");
-                return null;
-            }
-            final InlinePresentation inlinePresentation = dataset.getFieldInlinePresentation(
-                    fieldIndex);
-            if (inlinePresentation == null) {
-                Slog.w(TAG, "InlinePresentation not found in dataset");
-                return null;
-            }
-            InlineSuggestion inlineSuggestion = createAugmentedInlineSuggestion(dataset,
-                    inlinePresentation, inlineSuggestionUi, inlineSuggestionUiCallback);
-            inlineSuggestions.add(inlineSuggestion);
-        }
-        return new InlineSuggestionsResponse(inlineSuggestions);
+            @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback,
+            @NonNull Runnable onErrorCallback) {
+        return createInlineSuggestionsResponseInternal(datasets, autofillId,
+                context, onErrorCallback, (dataset, inlinePresentation, inlineSuggestionUi,
+                        filedIndex) -> createAugmentedInlineSuggestion(dataset,
+                    inlinePresentation, inlineSuggestionUi, inlineSuggestionUiCallback));
     }
 
     /**
@@ -97,11 +76,26 @@ public final class InlineSuggestionFactory {
             @NonNull Dataset[] datasets,
             @NonNull AutofillId autofillId,
             @NonNull Context context,
-            @NonNull AutoFillUI.AutoFillUiCallback client) {
-        if (sDebug) Slog.d(TAG, "createInlineSuggestionsResponse called");
+            @NonNull AutoFillUI.AutoFillUiCallback client,
+            @NonNull Runnable onErrorCallback) {
+        return createInlineSuggestionsResponseInternal(datasets, autofillId,
+                context, onErrorCallback, (dataset, inlinePresentation, inlineSuggestionUi,
+                        filedIndex) -> createInlineSuggestion(requestId, dataset, filedIndex,
+                        inlinePresentation, inlineSuggestionUi, client));
+    }
+
+    private static InlineSuggestionsResponse createInlineSuggestionsResponseInternal(
+            @NonNull Dataset[] datasets,
+            @NonNull AutofillId autofillId,
+            @NonNull Context context,
+            @NonNull Runnable onErrorCallback,
+            @NonNull QuadFunction<Dataset, InlinePresentation, InlineSuggestionUi,
+                    Integer, InlineSuggestion> suggestionFactory) {
+        if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
 
         final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
-        final InlineSuggestionUi inlineSuggestionUi = new InlineSuggestionUi(context);
+        final InlineSuggestionUi inlineSuggestionUi = new InlineSuggestionUi(context,
+                onErrorCallback);
         for (Dataset dataset : datasets) {
             final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
             if (fieldIndex < 0) {
@@ -114,9 +108,8 @@ public final class InlineSuggestionFactory {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
                 return null;
             }
-            InlineSuggestion inlineSuggestion = createInlineSuggestion(requestId, dataset,
-                    fieldIndex,
-                    inlinePresentation, inlineSuggestionUi, client);
+            InlineSuggestion inlineSuggestion = suggestionFactory.apply(dataset,
+                    inlinePresentation, inlineSuggestionUi, fieldIndex);
             inlineSuggestions.add(inlineSuggestion);
         }
         return new InlineSuggestionsResponse(inlineSuggestions);
@@ -131,9 +124,8 @@ public final class InlineSuggestionFactory {
                 inlinePresentation.getInlinePresentationSpec(),
                 InlineSuggestionInfo.SOURCE_PLATFORM, new String[]{""},
                 InlineSuggestionInfo.TYPE_SUGGESTION);
-        final View.OnClickListener onClickListener = v -> {
+        final View.OnClickListener onClickListener = v ->
             inlineSuggestionUiCallback.autofill(dataset);
-        };
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
                         onClickListener));

@@ -67,10 +67,12 @@ public class InlineSuggestionUi {
     // (int)}. This name is a single string of the form "package:type/entry".
     private static final Pattern RESOURCE_NAME_PATTERN = Pattern.compile("([^:]+):([^/]+)/(\\S+)");
 
-    private final Context mContext;
+    private final @NonNull Context mContext;
+    private final @NonNull Runnable mOnErrorCallback;
 
-    public InlineSuggestionUi(Context context) {
+    InlineSuggestionUi(@NonNull Context context, @NonNull Runnable onErrorCallback) {
         this.mContext = context;
+        mOnErrorCallback = onErrorCallback;
     }
 
     /**
@@ -94,15 +96,17 @@ public class InlineSuggestionUi {
         }
         final View suggestionView = renderSlice(inlinePresentation.getSlice(),
                 contextThemeWrapper);
-        if (onClickListener != null) {
-            suggestionView.setOnClickListener(onClickListener);
-        }
+
+        final InlineSuggestionRoot suggestionRoot = new InlineSuggestionRoot(
+                mContext, mOnErrorCallback);
+        suggestionRoot.addView(suggestionView);
+        suggestionRoot.setOnClickListener(onClickListener);
 
         WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0,
                         PixelFormat.TRANSPARENT);
-        wvr.addView(suggestionView, lp);
+        wvr.addView(suggestionRoot, lp);
         return sc;
     }
 
