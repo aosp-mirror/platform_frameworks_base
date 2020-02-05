@@ -8199,7 +8199,7 @@ package android.net.wifi.wificond {
     ctor public NativeScanResult();
     method public int describeContents();
     method @NonNull public byte[] getBssid();
-    method @NonNull public java.util.BitSet getCapabilities();
+    method @NonNull public int getCapabilities();
     method public int getFrequencyMhz();
     method @NonNull public byte[] getInformationElements();
     method @NonNull public java.util.List<android.net.wifi.wificond.RadioChainInfo> getRadioChainInfos();

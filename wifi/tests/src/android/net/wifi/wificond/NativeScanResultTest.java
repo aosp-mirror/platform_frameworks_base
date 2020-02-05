@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 
 /**
  * Unit tests for {@link android.net.wifi.wificond.NativeScanResult}.
@@ -46,7 +45,7 @@ public class NativeScanResultTest {
     private static final int TEST_FREQUENCY = 2456;
     private static final int TEST_SIGNAL_MBM = -45;
     private static final long TEST_TSF = 34455441;
-    private static final BitSet TEST_CAPABILITY = new BitSet(16) {{ set(2); set(5); }};
+    private static final int TEST_CAPABILITY = (0x1 << 2) | (0x1 << 5);
     private static final boolean TEST_ASSOCIATED = true;
     private static final int[] RADIO_CHAIN_IDS = { 0, 1 };
     private static final int[] RADIO_CHAIN_LEVELS = { -56, -65 };
