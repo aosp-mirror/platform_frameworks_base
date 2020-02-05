@@ -7640,9 +7640,8 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int DEFAULT_PREFERRED_NETWORK_MODE =
-            RILConstants.DEFAULT_PREFERRED_NETWORK_MODE;
+            RILConstants.PREFERRED_NETWORK_MODE;
 
     /**
      * Get the preferred network type.
