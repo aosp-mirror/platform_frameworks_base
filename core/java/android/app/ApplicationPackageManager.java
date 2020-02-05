@@ -3229,18 +3229,18 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getSystemTextClassifierPackageName() {
+    public String getDefaultTextClassifierPackageName() {
         try {
-            return mPM.getSystemTextClassifierPackageName();
+            return mPM.getDefaultTextClassifierPackageName();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
     @Override
-    public String[] getSystemTextClassifierPackages() {
+    public String getSystemTextClassifierPackageName() {
         try {
-            return mPM.getSystemTextClassifierPackages();
+            return mPM.getSystemTextClassifierPackageName();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

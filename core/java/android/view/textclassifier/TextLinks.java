@@ -345,6 +345,7 @@ public final class TextLinks implements Parcelable {
         @Nullable private final ZonedDateTime mReferenceTime;
         @UserIdInt
         private int mUserId = UserHandle.USER_NULL;
+        private boolean mUseDefaultTextClassifier;
 
         private Request(
                 CharSequence text,
@@ -444,6 +445,26 @@ public final class TextLinks implements Parcelable {
         @UserIdInt
         public int getUserId() {
             return mUserId;
+        }
+
+        /**
+         * Sets whether to use the default text classifier to handle this request.
+         * This will be ignored if it is not the system text classifier to handle this request.
+         *
+         * @hide
+         */
+        void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
+            mUseDefaultTextClassifier = useDefaultTextClassifier;
+        }
+
+        /**
+         * Returns whether to use the default text classifier to handle this request. This
+         * will be ignored if it is not the system text classifier to handle this request.
+         *
+         * @hide
+         */
+        public boolean getUseDefaultTextClassifier() {
+            return mUseDefaultTextClassifier;
         }
 
         /**
@@ -568,6 +589,7 @@ public final class TextLinks implements Parcelable {
             dest.writeInt(mUserId);
             dest.writeBundle(mExtras);
             dest.writeString(mReferenceTime == null ? null : mReferenceTime.toString());
+            dest.writeBoolean(mUseDefaultTextClassifier);
         }
 
         private static Request readFromParcel(Parcel in) {
@@ -580,11 +602,13 @@ public final class TextLinks implements Parcelable {
             final String referenceTimeString = in.readString();
             final ZonedDateTime referenceTime = referenceTimeString == null
                     ? null : ZonedDateTime.parse(referenceTimeString);
+            final boolean useDefaultTextClassifier = in.readBoolean();
 
             final Request request = new Request(text, defaultLocales, entityConfig,
                     /* legacyFallback= */ true, referenceTime, extras);
             request.setCallingPackageName(callingPackageName);
             request.setUserId(userId);
+            request.setUseDefaultTextClassifier(useDefaultTextClassifier);
             return request;
         }
 

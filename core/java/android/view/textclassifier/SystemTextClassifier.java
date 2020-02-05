@@ -55,17 +55,20 @@ public final class SystemTextClassifier implements TextClassifier {
     // service will throw a remote exception.
     @UserIdInt
     private final int mUserId;
+    private final boolean mUseDefault;
     private TextClassificationSessionId mSessionId;
 
-    public SystemTextClassifier(Context context, TextClassificationConstants settings)
-                throws ServiceManager.ServiceNotFoundException {
+    public SystemTextClassifier(
+            Context context,
+            TextClassificationConstants settings,
+            boolean useDefault) throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
         mSettings = Objects.requireNonNull(settings);
-        mFallback = context.getSystemService(TextClassificationManager.class)
-                .getTextClassifier(TextClassifier.LOCAL);
+        mFallback = TextClassifier.NO_OP;
         mPackageName = Objects.requireNonNull(context.getOpPackageName());
         mUserId = context.getUserId();
+        mUseDefault = useDefault;
     }
 
     /**
@@ -79,6 +82,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setCallingPackageName(mPackageName);
             request.setUserId(mUserId);
+            request.setUseDefaultTextClassifier(mUseDefault);
             final BlockingCallback<TextSelection> callback =
                     new BlockingCallback<>("textselection");
             mManagerService.onSuggestSelection(mSessionId, request, callback);
@@ -103,6 +107,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setCallingPackageName(mPackageName);
             request.setUserId(mUserId);
+            request.setUseDefaultTextClassifier(mUseDefault);
             final BlockingCallback<TextClassification> callback =
                     new BlockingCallback<>("textclassification");
             mManagerService.onClassifyText(mSessionId, request, callback);
@@ -124,7 +129,9 @@ public final class SystemTextClassifier implements TextClassifier {
     public TextLinks generateLinks(@NonNull TextLinks.Request request) {
         Objects.requireNonNull(request);
         Utils.checkMainThread();
-
+        if (!Utils.checkTextLength(request.getText(), getMaxGenerateLinksTextLength())) {
+            return mFallback.generateLinks(request);
+        }
         if (!mSettings.isSmartLinkifyEnabled() && request.isLegacyFallback()) {
             return Utils.generateLegacyLinks(request);
         }
@@ -132,6 +139,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setCallingPackageName(mPackageName);
             request.setUserId(mUserId);
+            request.setUseDefaultTextClassifier(mUseDefault);
             final BlockingCallback<TextLinks> callback =
                     new BlockingCallback<>("textlinks");
             mManagerService.onGenerateLinks(mSessionId, request, callback);
@@ -152,6 +160,7 @@ public final class SystemTextClassifier implements TextClassifier {
 
         try {
             event.setUserId(mUserId);
+            event.setUseDefaultTextClassifier(mUseDefault);
             mManagerService.onSelectionEvent(mSessionId, event);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error reporting selection event.", e);
@@ -169,6 +178,7 @@ public final class SystemTextClassifier implements TextClassifier {
                             .build()
                     : event.getEventContext();
             tcContext.setUserId(mUserId);
+            tcContext.setUseDefaultTextClassifier(mUseDefault);
             event.setEventContext(tcContext);
             mManagerService.onTextClassifierEvent(mSessionId, event);
         } catch (RemoteException e) {
@@ -184,6 +194,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setCallingPackageName(mPackageName);
             request.setUserId(mUserId);
+            request.setUseDefaultTextClassifier(mUseDefault);
             final BlockingCallback<TextLanguage> callback =
                     new BlockingCallback<>("textlanguage");
             mManagerService.onDetectLanguage(mSessionId, request, callback);
@@ -205,6 +216,7 @@ public final class SystemTextClassifier implements TextClassifier {
         try {
             request.setCallingPackageName(mPackageName);
             request.setUserId(mUserId);
+            request.setUseDefaultTextClassifier(mUseDefault);
             final BlockingCallback<ConversationActions> callback =
                     new BlockingCallback<>("conversation-actions");
             mManagerService.onSuggestConversationActions(mSessionId, request, callback);
@@ -225,7 +237,7 @@ public final class SystemTextClassifier implements TextClassifier {
     @WorkerThread
     public int getMaxGenerateLinksTextLength() {
         // TODO: retrieve this from the bound service.
-        return mFallback.getMaxGenerateLinksTextLength();
+        return mSettings.getGenerateLinksMaxTextLength();
     }
 
     @Override
@@ -247,6 +259,7 @@ public final class SystemTextClassifier implements TextClassifier {
         printWriter.printPair("mPackageName", mPackageName);
         printWriter.printPair("mSessionId", mSessionId);
         printWriter.printPair("mUserId", mUserId);
+        printWriter.printPair("mUseDefault",  mUseDefault);
         printWriter.decreaseIndent();
         printWriter.println();
     }

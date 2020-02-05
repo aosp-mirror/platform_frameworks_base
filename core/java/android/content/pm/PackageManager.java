@@ -7602,14 +7602,15 @@ public abstract class PackageManager {
     }
 
     /**
-     * @return the system defined text classifier package name, or null if there's none.
+     * @return the default text classifier package name, or null if there's none.
      *
      * @hide
      */
     @Nullable
-    public String getSystemTextClassifierPackageName() {
+    @TestApi
+    public String getDefaultTextClassifierPackageName() {
         throw new UnsupportedOperationException(
-                "getSystemTextClassifierPackageName not implemented in subclass");
+                "getDefaultTextClassifierPackageName not implemented in subclass");
     }
 
     /**
@@ -7617,10 +7618,11 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @NonNull
-    public String[] getSystemTextClassifierPackages() {
+    @Nullable
+    @TestApi
+    public String getSystemTextClassifierPackageName() {
         throw new UnsupportedOperationException(
-                "getSystemTextClassifierPackages not implemented in subclass");
+                "getSystemTextClassifierPackageName not implemented in subclass");
     }
 
     /**
