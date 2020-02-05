@@ -55,20 +55,6 @@ public class BluetoothMediaDeviceTest {
     }
 
     @Test
-    public void connect_setActiveSuccess_isConnectedReturnTrue() {
-        when(mDevice.setActive()).thenReturn(true);
-
-        assertThat(mBluetoothMediaDevice.connect()).isTrue();
-    }
-
-    @Test
-    public void connect_setActiveFail_isConnectedReturnFalse() {
-        when(mDevice.setActive()).thenReturn(false);
-
-        assertThat(mBluetoothMediaDevice.connect()).isFalse();
-    }
-
-    @Test
     public void isCachedBluetoothDeviceConnected_deviceConnected_returnTrue() {
         when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(mDevice.isConnected()).thenReturn(true);

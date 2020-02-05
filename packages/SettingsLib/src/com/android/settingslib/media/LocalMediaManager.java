@@ -97,7 +97,8 @@ public class LocalMediaManager implements BluetoothCallback {
             return;
         }
 
-        mInfoMediaManager = new InfoMediaManager(context, packageName, notification);
+        mInfoMediaManager =
+                new InfoMediaManager(context, packageName, notification, mLocalBluetoothManager);
     }
 
     @VisibleForTesting
@@ -235,14 +236,17 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     private MediaDevice updateCurrentConnectedDevice() {
+        MediaDevice phoneMediaDevice = null;
         for (MediaDevice device : mMediaDevices) {
             if (device instanceof  BluetoothMediaDevice) {
                 if (isConnected(((BluetoothMediaDevice) device).getCachedDevice())) {
                     return device;
                 }
+            } else if (device instanceof PhoneMediaDevice) {
+                phoneMediaDevice = device;
             }
         }
-        return mMediaDevices.contains(mPhoneDevice) ? mPhoneDevice : null;
+        return mMediaDevices.contains(phoneMediaDevice) ? phoneMediaDevice : null;
     }
 
     private boolean isConnected(CachedBluetoothDevice device) {
@@ -266,15 +270,7 @@ public class LocalMediaManager implements BluetoothCallback {
             final MediaDevice infoMediaDevice = mInfoMediaManager.getCurrentConnectedDevice();
             mCurrentConnectedDevice = infoMediaDevice != null
                     ? infoMediaDevice : updateCurrentConnectedDevice();
-            updatePhoneMediaDeviceSummary();
             dispatchDeviceListUpdate();
-        }
-
-        private void updatePhoneMediaDeviceSummary() {
-            if (mPhoneDevice != null) {
-                ((PhoneMediaDevice) mPhoneDevice)
-                        .updateSummary(mCurrentConnectedDevice == mPhoneDevice);
-            }
         }
 
         @Override
@@ -300,7 +296,6 @@ public class LocalMediaManager implements BluetoothCallback {
                 return;
             }
             mCurrentConnectedDevice = connectDevice;
-            updatePhoneMediaDeviceSummary();
             dispatchDeviceAttributesChanged();
         }
 

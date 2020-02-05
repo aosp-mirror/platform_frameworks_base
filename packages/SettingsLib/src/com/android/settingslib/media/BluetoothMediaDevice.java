@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
-import android.util.Log;
 import android.util.Pair;
 
 import com.android.settingslib.R;
@@ -66,20 +65,6 @@ public class BluetoothMediaDevice extends MediaDevice {
     @Override
     public String getId() {
         return MediaDeviceUtils.getId(mCachedDevice);
-    }
-
-    @Override
-    public boolean connect() {
-        //TODO(b/117129183): add callback to notify LocalMediaManager connection state.
-        final boolean isConnected = mCachedDevice.setActive();
-        setConnectedRecord();
-        Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
-        return isConnected;
-    }
-
-    @Override
-    public void disconnect() {
-        //TODO(b/117129183): disconnected last select device
     }
 
     /**
