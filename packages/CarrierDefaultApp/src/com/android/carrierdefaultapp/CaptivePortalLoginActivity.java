@@ -36,6 +36,7 @@ import android.net.http.SslError;
 import android.os.Bundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -49,7 +50,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.TrafficStatsConstants;
 
@@ -203,7 +203,7 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private URL getUrlForCaptivePortal() {
-        String url = getIntent().getStringExtra(TelephonyIntents.EXTRA_REDIRECTION_URL_KEY);
+        String url = getIntent().getStringExtra(TelephonyManager.EXTRA_REDIRECTION_URL);
         if (TextUtils.isEmpty(url)) url = mCm.getCaptivePortalServerUrl();
         final CarrierConfigManager configManager = getApplicationContext()
                 .getSystemService(CarrierConfigManager.class);
