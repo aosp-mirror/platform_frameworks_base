@@ -24,9 +24,9 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 
 /**
- * The real implementation of {@link TimeZoneDetectorStrategy.Callback}.
+ * The real implementation of {@link TimeZoneDetectorStrategyImpl.Callback}.
  */
-public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrategy.Callback {
+public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrategyImpl.Callback {
 
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 

@@ -38,7 +38,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * An implementation of TimeDetectorStrategy that passes phone and manual suggestions to
+ * An implementation of {@link TimeDetectorStrategy} that passes phone and manual suggestions to
  * {@link AlarmManager}. When there are multiple phone sources, the one with the lowest ID is used
  * unless the data becomes too stale.
  *
