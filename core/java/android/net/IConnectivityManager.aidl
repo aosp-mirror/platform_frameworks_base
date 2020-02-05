@@ -221,7 +221,7 @@ interface IConnectivityManager
     boolean isCallerCurrentAlwaysOnVpnLockdownApp();
 
     void registerConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback,
-            in NetworkRequest request);
+            in NetworkRequest request, String callingPackageName);
     void unregisterConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback);
 
     IBinder startOrGetTestNetworkService();
