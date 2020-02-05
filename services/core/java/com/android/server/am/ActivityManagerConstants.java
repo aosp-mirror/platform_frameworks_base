@@ -287,7 +287,7 @@ final class ActivityManagerConstants extends ContentObserver {
     // When the restriction is enabled, foreground service started from background will not have
     // while-in-use permissions like location, camera and microphone. (The foreground service can be
     // started, the restriction is on while-in-use permissions.)
-    volatile boolean mFlagBackgroundFgsStartRestrictionEnabled;
+    volatile boolean mFlagBackgroundFgsStartRestrictionEnabled = true;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -582,6 +582,9 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateOomAdjUpdatePolicy() {
+
+
+
         OOMADJ_UPDATE_QUICK = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_OOMADJ_UPDATE_POLICY,
