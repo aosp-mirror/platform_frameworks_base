@@ -265,6 +265,9 @@ public class MockSystemServices {
                             .toArray();
                 }
         );
+        when(userManagerInternal.getUserInfos()).thenReturn(
+                mUserInfos.toArray(new UserInfo[mUserInfos.size()]));
+
         when(accountManager.getAccountsAsUser(anyInt())).thenReturn(new Account[0]);
 
         // Create a data directory.

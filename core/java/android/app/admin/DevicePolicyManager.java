@@ -9975,20 +9975,27 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to control the security logging feature.
+     * Called by device owner or a profile owner of an organization-owned managed profile to
+     * control the security logging feature.
      *
      * <p> Security logs contain various information intended for security auditing purposes.
-     * See {@link SecurityEvent} for details.
+     * When security logging is enabled by a profile owner of
+     * an organization-owned managed profile, certain security logs are not visible (for example
+     * personal app launch events) or they will be redacted (for example, details of the physical
+     * volume mount events). Please see {@link SecurityEvent} for details.
      *
      * <p><strong>Note:</strong> The device owner won't be able to retrieve security logs if there
      * are unaffiliated secondary users or profiles on the device, regardless of whether the
      * feature is enabled. Logs will be discarded if the internal buffer fills up while waiting for
      * all users to become affiliated. Therefore it's recommended that affiliation ids are set for
-     * new users as soon as possible after provisioning via {@link #setAffiliationIds}.
+     * new users as soon as possible after provisioning via {@link #setAffiliationIds}. Profile
+     * owner of organization-owned managed profile is not subject to this restriction since all
+     * privacy-sensitive events happening outside the managed profile would have been redacted
+     * already.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @param enabled whether security logging should be enabled or not.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not allowed to control security logging.
      * @see #setAffiliationIds
      * @see #retrieveSecurityLogs
      */
@@ -10002,14 +10009,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Return whether security logging is enabled or not by the device owner.
+     * Return whether security logging is enabled or not by the admin.
      *
-     * <p>Can only be called by the device owner, otherwise a {@link SecurityException} will be
-     * thrown.
+     * <p>Can only be called by the device owner or a profile owner of an organization-owned
+     * managed profile, otherwise a {@link SecurityException} will be thrown.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @return {@code true} if security logging is enabled by device owner, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not allowed to control security logging.
      */
     public boolean isSecurityLoggingEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isSecurityLoggingEnabled");
@@ -10021,20 +10028,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to retrieve all new security logging entries since the last call to
-     * this API after device boots.
+     * Called by device owner or profile owner of an organization-owned managed profile to retrieve
+     * all new security logging entries since the last call to this API after device boots.
      *
      * <p> Access to the logs is rate limited and it will only return new logs after the device
      * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
      *
-     * <p>If there is any other user or profile on the device, it must be affiliated with the
-     * device. Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
+     * <p> When called by a device owner, if there is any other user or profile on the device,
+     * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
+     * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @return the new batch of security logs which is a list of {@link SecurityEvent},
      * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
-     * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device.
+     * @throws SecurityException if {@code admin} is not allowed to access security logging,
+     * or there is at least one profile or secondary user that is not affiliated with the device.
      * @see #isAffiliatedUser
      * @see DeviceAdminReceiver#onSecurityLogsAvailable
      */
@@ -10167,21 +10175,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners to retrieve device logs from before the device's last reboot.
+     * Called by device owner or profile owner of an organization-owned managed profile to retrieve
+     * device logs from before the device's last reboot.
      * <p>
      * <strong> This API is not supported on all devices. Calling this API on unsupported devices
      * will result in {@code null} being returned. The device logs are retrieved from a RAM region
      * which is not guaranteed to be corruption-free during power cycles, as a result be cautious
      * about data corruption when parsing. </strong>
      *
-     * <p>If there is any other user or profile on the device, it must be affiliated with the
-     * device. Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
+     * <p> When called by a device owner, if there is any other user or profile on the device,
+     * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
+     * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device owner this request is associated with.
+     * @param admin Which device admin this request is associated with.
      * @return Device logs from before the latest reboot of the system, or {@code null} if this API
      *         is not supported on the device.
-     * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device.
+     * @throws SecurityException if {@code admin} is not allowed to access security logging, or
+     * there is at least one profile or secondary user that is not affiliated with the device.
      * @see #isAffiliatedUser
      * @see #retrieveSecurityLogs
      */
