@@ -5447,28 +5447,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpms.isAdminActive(admin1, UserHandle.USER_SYSTEM));
     }
 
-    @FlakyTest(bugId = 148934649)
-    public void testRevertDeviceOwnership_adminAndDeviceMigrated() throws Exception {
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
-                getDeviceOwnerPoliciesFile());
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_migrated),
-                getDeviceOwnerFile());
-        assertDeviceOwnershipRevertedWithFakeTransferMetadata();
-    }
+    // @FlakyTest(bugId = 148934649)
+    // public void testRevertDeviceOwnership_adminAndDeviceMigrated() throws Exception {
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+    //             getDeviceOwnerPoliciesFile());
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_migrated),
+    //             getDeviceOwnerFile());
+    //     assertDeviceOwnershipRevertedWithFakeTransferMetadata();
+    // }
 
-    @FlakyTest(bugId = 148934649)
-    public void testRevertDeviceOwnership_deviceNotMigrated()
-            throws Exception {
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
-                getDeviceOwnerPoliciesFile());
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_not_migrated),
-                getDeviceOwnerFile());
-        assertDeviceOwnershipRevertedWithFakeTransferMetadata();
-    }
+    // @FlakyTest(bugId = 148934649)
+    // public void testRevertDeviceOwnership_deviceNotMigrated()
+    //         throws Exception {
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+    //             getDeviceOwnerPoliciesFile());
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_not_migrated),
+    //             getDeviceOwnerFile());
+    //     assertDeviceOwnershipRevertedWithFakeTransferMetadata();
+    // }
 
     public void testRevertDeviceOwnership_adminAndDeviceNotMigrated()
             throws Exception {
@@ -5490,31 +5490,31 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         UserHandle userHandle = UserHandle.of(DpmMockContext.CALLER_USER_HANDLE);
     }
 
-    @FlakyTest(bugId = 148934649)
-    public void testRevertProfileOwnership_adminAndProfileMigrated() throws Exception {
-        getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
-                UserManager.USER_TYPE_PROFILE_MANAGED, UserHandle.USER_SYSTEM);
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
-                getProfileOwnerPoliciesFile());
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_migrated),
-                getProfileOwnerFile());
-        assertProfileOwnershipRevertedWithFakeTransferMetadata();
-    }
+    // @FlakyTest(bugId = 148934649)
+    // public void testRevertProfileOwnership_adminAndProfileMigrated() throws Exception {
+    //     getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
+    //             UserManager.USER_TYPE_PROFILE_MANAGED, UserHandle.USER_SYSTEM);
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+    //             getProfileOwnerPoliciesFile());
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_migrated),
+    //             getProfileOwnerFile());
+    //     assertProfileOwnershipRevertedWithFakeTransferMetadata();
+    // }
 
-    @FlakyTest(bugId = 148934649)
-    public void testRevertProfileOwnership_profileNotMigrated() throws Exception {
-        getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
-                UserManager.USER_TYPE_PROFILE_MANAGED, UserHandle.USER_SYSTEM);
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
-                getProfileOwnerPoliciesFile());
-        DpmTestUtils.writeInputStreamToFile(
-                getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_not_migrated),
-                getProfileOwnerFile());
-        assertProfileOwnershipRevertedWithFakeTransferMetadata();
-    }
+    // @FlakyTest(bugId = 148934649)
+    // public void testRevertProfileOwnership_profileNotMigrated() throws Exception {
+    //     getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
+    //             UserManager.USER_TYPE_PROFILE_MANAGED, UserHandle.USER_SYSTEM);
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+    //             getProfileOwnerPoliciesFile());
+    //     DpmTestUtils.writeInputStreamToFile(
+    //             getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_not_migrated),
+    //             getProfileOwnerFile());
+    //     assertProfileOwnershipRevertedWithFakeTransferMetadata();
+    // }
 
     public void testRevertProfileOwnership_adminAndProfileNotMigrated() throws Exception {
         getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, 0,
