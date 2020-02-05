@@ -5387,8 +5387,8 @@ public class NotificationManagerService extends SystemService {
         try {
             fixNotification(notification, pkg, tag, id, userId);
 
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Cannot create a context for sending app", e);
+        } catch (Exception e) {
+            Slog.e(TAG, "Cannot fix notification", e);
             return;
         }
 
@@ -9012,59 +9012,64 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         private void notifyPostedLocked(NotificationRecord r, NotificationRecord old,
                 boolean notifyAllListeners) {
-            // Lazily initialized snapshots of the notification.
-            StatusBarNotification sbn = r.getSbn();
-            StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
-            TrimCache trimCache = new TrimCache(sbn);
+            try {
+                // Lazily initialized snapshots of the notification.
+                StatusBarNotification sbn = r.getSbn();
+                StatusBarNotification oldSbn = (old != null) ? old.getSbn() : null;
+                TrimCache trimCache = new TrimCache(sbn);
 
-            for (final ManagedServiceInfo info : getServices()) {
-                boolean sbnVisible = isVisibleToListener(sbn, info);
-                boolean oldSbnVisible = oldSbn != null ? isVisibleToListener(oldSbn, info) : false;
-                // This notification hasn't been and still isn't visible -> ignore.
-                if (!oldSbnVisible && !sbnVisible) {
-                    continue;
-                }
-                // If the notification is hidden, don't notifyPosted listeners targeting < P.
-                // Instead, those listeners will receive notifyPosted when the notification is
-                // unhidden.
-                if (r.isHidden() && info.targetSdkVersion < Build.VERSION_CODES.P) {
-                    continue;
-                }
+                for (final ManagedServiceInfo info : getServices()) {
+                    boolean sbnVisible = isVisibleToListener(sbn, info);
+                    boolean oldSbnVisible = oldSbn != null ? isVisibleToListener(oldSbn, info)
+                            : false;
+                    // This notification hasn't been and still isn't visible -> ignore.
+                    if (!oldSbnVisible && !sbnVisible) {
+                        continue;
+                    }
+                    // If the notification is hidden, don't notifyPosted listeners targeting < P.
+                    // Instead, those listeners will receive notifyPosted when the notification is
+                    // unhidden.
+                    if (r.isHidden() && info.targetSdkVersion < Build.VERSION_CODES.P) {
+                        continue;
+                    }
 
-                // If we shouldn't notify all listeners, this means the hidden state of
-                // a notification was changed.  Don't notifyPosted listeners targeting >= P.
-                // Instead, those listeners will receive notifyRankingUpdate.
-                if (!notifyAllListeners && info.targetSdkVersion >= Build.VERSION_CODES.P) {
-                    continue;
-                }
+                    // If we shouldn't notify all listeners, this means the hidden state of
+                    // a notification was changed.  Don't notifyPosted listeners targeting >= P.
+                    // Instead, those listeners will receive notifyRankingUpdate.
+                    if (!notifyAllListeners && info.targetSdkVersion >= Build.VERSION_CODES.P) {
+                        continue;
+                    }
 
-                final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
+                    final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
 
-                // This notification became invisible -> remove the old one.
-                if (oldSbnVisible && !sbnVisible) {
-                    final StatusBarNotification oldSbnLightClone = oldSbn.cloneLight();
+                    // This notification became invisible -> remove the old one.
+                    if (oldSbnVisible && !sbnVisible) {
+                        final StatusBarNotification oldSbnLightClone = oldSbn.cloneLight();
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyRemoved(
+                                        info, oldSbnLightClone, update, null, REASON_USER_STOPPED);
+                            }
+                        });
+                        continue;
+                    }
+
+                    // Grant access before listener is notified
+                    final int targetUserId = (info.userid == UserHandle.USER_ALL)
+                            ? UserHandle.USER_SYSTEM : info.userid;
+                    updateUriPermissions(r, old, info.component.getPackageName(), targetUserId);
+
+                    final StatusBarNotification sbnToPost = trimCache.ForListener(info);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            notifyRemoved(
-                                    info, oldSbnLightClone, update, null, REASON_USER_STOPPED);
+                            notifyPosted(info, sbnToPost, update);
                         }
                     });
-                    continue;
                 }
-
-                // Grant access before listener is notified
-                final int targetUserId = (info.userid == UserHandle.USER_ALL)
-                        ? UserHandle.USER_SYSTEM : info.userid;
-                updateUriPermissions(r, old, info.component.getPackageName(), targetUserId);
-
-                final StatusBarNotification sbnToPost = trimCache.ForListener(info);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyPosted(info, sbnToPost, update);
-                    }
-                });
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not notify listeners for " + r.getKey(), e);
             }
         }
 
