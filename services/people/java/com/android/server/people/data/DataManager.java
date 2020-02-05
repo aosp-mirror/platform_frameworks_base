@@ -299,7 +299,8 @@ public class DataManager {
 
     private void forAllUnlockedUsers(Consumer<UserData> consumer) {
         for (int i = 0; i < mUserDataArray.size(); i++) {
-            UserData userData = mUserDataArray.get(i);
+            int userId = mUserDataArray.keyAt(i);
+            UserData userData = mUserDataArray.get(userId);
             if (userData.isUnlocked()) {
                 consumer.accept(userData);
             }
