@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A display adapter for the local displays managed by Surface Flinger.
@@ -118,22 +119,28 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         physicalDisplayId);
                 activeColorMode = Display.COLOR_MODE_INVALID;
             }
-            int[] colorModes = SurfaceControl.getDisplayColorModes(displayToken);
             SurfaceControl.DesiredDisplayConfigSpecs configSpecs =
                     SurfaceControl.getDesiredDisplayConfigSpecs(displayToken);
+            int[] colorModes = SurfaceControl.getDisplayColorModes(displayToken);
+            Display.HdrCapabilities hdrCapabilities =
+                    SurfaceControl.getHdrCapabilities(displayToken);
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
                 final boolean isInternal = mDevices.size() == 0;
                 device = new LocalDisplayDevice(displayToken, physicalDisplayId, info,
                         configs, activeConfig, configSpecs, colorModes, activeColorMode,
-                        isInternal);
+                        hdrCapabilities, isInternal);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
-            } else if (device.updateDisplayConfigsLocked(configs, activeConfig, configSpecs,
-                        colorModes, activeColorMode)) {
-                // Display properties changed.
-                sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
+            } else {
+                boolean changed = device.updateDisplayConfigsLocked(configs, activeConfig,
+                        configSpecs);
+                changed |= device.updateColorModesLocked(colorModes, activeColorMode);
+                changed |= device.updateHdrCapabilitiesLocked(hdrCapabilities);
+                if (changed) {
+                    sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
+                }
             }
         } else {
             // The display is no longer available. Ignore the attempt to add it.
@@ -202,16 +209,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         LocalDisplayDevice(IBinder displayToken, long physicalDisplayId,
                 SurfaceControl.DisplayInfo info, SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
-                int[] colorModes, int activeColorMode, boolean isInternal) {
+                int[] colorModes, int activeColorMode, Display.HdrCapabilities hdrCapabilities,
+                boolean isInternal) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
             mPhysicalDisplayId = physicalDisplayId;
             mIsInternal = isInternal;
             mDisplayInfo = info;
 
-            updateDisplayConfigsLocked(configs, activeConfigId, configSpecs, colorModes,
-                    activeColorMode);
+            updateDisplayConfigsLocked(configs, activeConfigId, configSpecs);
             updateColorModesLocked(colorModes, activeColorMode);
-
+            updateHdrCapabilitiesLocked(hdrCapabilities);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mIsInternal) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
@@ -219,7 +226,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             } else {
                 mBacklight = null;
             }
-            mHdrCapabilities = SurfaceControl.getHdrCapabilities(displayToken);
             mAllmSupported = SurfaceControl.getAutoLowLatencyModeSupport(displayToken);
             mGameContentTypeSupported = SurfaceControl.getGameContentTypeSupport(displayToken);
             mHalBrightnessSupport = SurfaceControl.getDisplayBrightnessSupport(displayToken);
@@ -236,11 +242,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         public boolean updateDisplayConfigsLocked(
                 SurfaceControl.DisplayConfig[] configs, int activeConfigId,
-                SurfaceControl.DesiredDisplayConfigSpecs configSpecs, int[] colorModes,
-                int activeColorMode) {
+                SurfaceControl.DesiredDisplayConfigSpecs configSpecs) {
             mDisplayConfigs = Arrays.copyOf(configs, configs.length);
             mActiveConfigId = activeConfigId;
-
             // Build an updated list of all existing modes.
             ArrayList<DisplayModeRecord> records = new ArrayList<DisplayModeRecord>();
             boolean modesAdded = false;
@@ -389,14 +393,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mSystemBrightnessToNits = sysToNits;
         }
 
-        private boolean updateColorModesLocked(int[] colorModes,
-                int activeColorMode) {
-            List<Integer> pendingColorModes = new ArrayList<>();
+        private boolean updateColorModesLocked(int[] colorModes, int activeColorMode) {
+            if (colorModes == null) {
+                return false;
+            }
 
-            if (colorModes == null) return false;
+            List<Integer> pendingColorModes = new ArrayList<>();
             // Build an updated list of all existing color modes.
             boolean colorModesAdded = false;
-            for (int colorMode: colorModes) {
+            for (int colorMode : colorModes) {
                 if (!mSupportedColorModes.contains(colorMode)) {
                     colorModesAdded = true;
                 }
@@ -438,6 +443,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
                 }
             }
+            return true;
+        }
+
+        private boolean updateHdrCapabilitiesLocked(Display.HdrCapabilities newHdrCapabilities) {
+            // If the HDR capabilities haven't changed, then we're done here.
+            if (Objects.equals(mHdrCapabilities, newHdrCapabilities)) {
+                return false;
+            }
+            mHdrCapabilities = newHdrCapabilities;
             return true;
         }
 
