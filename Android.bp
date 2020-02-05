@@ -945,7 +945,7 @@ filegroup {
     name: "incremental_manager_aidl",
     srcs: [
         "core/java/android/os/incremental/IIncrementalManager.aidl",
-        "core/java/android/os/incremental/IIncrementalManagerNative.aidl",
+        "core/java/android/os/incremental/IIncrementalService.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IncrementalSignature.aidl",
     ],

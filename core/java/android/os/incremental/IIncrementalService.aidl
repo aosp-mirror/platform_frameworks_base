@@ -20,7 +20,7 @@ import android.content.pm.DataLoaderParamsParcel;
 import android.os.incremental.IncrementalNewFileParams;
 
 /** @hide */
-interface IIncrementalManagerNative {
+interface IIncrementalService {
     /**
      * A set of flags for the |createMode| parameters when creating a new Incremental storage.
      */
