@@ -266,6 +266,7 @@ public class Toast {
      *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
      *      will not have custom toast views displayed.
      */
+    @Deprecated
     public View getView() {
         return mNextView;
     }
