@@ -25,6 +25,8 @@ import android.os.image.DynamicSystemManager;
 import android.util.Log;
 import android.webkit.URLUtil;
 
+import org.json.JSONException;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +102,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private final Context mContext;
     private final DynamicSystemManager mDynSystem;
     private final ProgressListener mListener;
+    private final boolean mIsNetworkUrl;
     private DynamicSystemManager.Session mInstallationSession;
+    private KeyRevocationList mKeyRevocationList;
 
     private boolean mIsZip;
     private boolean mIsCompleted;
@@ -123,6 +127,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         mContext = context;
         mDynSystem = dynSystem;
         mListener = listener;
+        mIsNetworkUrl = URLUtil.isNetworkUrl(mUrl);
     }
 
     @Override
@@ -152,9 +157,11 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 return null;
             }
 
+            // TODO(yochiang): do post-install public key check (revocation list / boot-ramdisk)
+
             mDynSystem.finishInstallation();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.toString(), e);
             mDynSystem.remove();
             return e;
         } finally {
@@ -220,7 +227,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 String.format(Locale.US, "Unsupported file format: %s", mUrl));
         }
 
-        if (URLUtil.isNetworkUrl(mUrl)) {
+        if (mIsNetworkUrl) {
             mStream = new URL(mUrl).openStream();
         } else if (URLUtil.isFileUrl(mUrl)) {
             if (mIsZip) {
@@ -233,6 +240,25 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         } else {
             throw new UnsupportedUrlException(
                     String.format(Locale.US, "Unsupported URL: %s", mUrl));
+        }
+
+        // TODO(yochiang): Bypass this check if device is unlocked
+        try {
+            String listUrl = mContext.getString(R.string.key_revocation_list_url);
+            mKeyRevocationList = KeyRevocationList.fromUrl(new URL(listUrl));
+        } catch (IOException | JSONException e) {
+            Log.d(TAG, "Failed to fetch Dynamic System Key Revocation List");
+            mKeyRevocationList = new KeyRevocationList();
+            keyRevocationThrowOrWarning(e);
+        }
+    }
+
+    private void keyRevocationThrowOrWarning(Exception e) throws Exception {
+        if (mIsNetworkUrl) {
+            throw e;
+        } else {
+            // If DSU is being installed from a local file URI, then be permissive
+            Log.w(TAG, e.toString());
         }
     }
 

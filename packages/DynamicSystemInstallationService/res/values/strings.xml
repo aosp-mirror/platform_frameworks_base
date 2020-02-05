@@ -35,4 +35,7 @@
     <!-- Toast when we fail to launch into Dynamic System [CHAR LIMIT=64] -->
     <string name="toast_failed_to_reboot_to_dynsystem">Can\u2019t restart or load dynamic system</string>
 
+    <!-- URL of Dynamic System Key Revocation List [DO NOT TRANSLATE] -->
+    <string name="key_revocation_list_url" translatable="false">https://dl.google.com/developers/android/gsi/gsi-keyblacklist.json</string>
+
 </resources>
