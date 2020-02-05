@@ -756,9 +756,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private ListItemAccessibilityDelegate mAccessibilityDelegate;
 
-    private int mLastAccessibilityScrollEventFromIndex;
-    private int mLastAccessibilityScrollEventToIndex;
-
     /**
      * Track the item count from the last time we handled a data change.
      */
@@ -1520,25 +1517,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
     }
 
-    /** @hide */
-    @Override
-    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
-        // Since this class calls onScrollChanged even if the mFirstPosition and the
-        // child count have not changed we will avoid sending duplicate accessibility
-        // events.
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
-            final int firstVisiblePosition = getFirstVisiblePosition();
-            final int lastVisiblePosition = getLastVisiblePosition();
-            if (mLastAccessibilityScrollEventFromIndex == firstVisiblePosition
-                    && mLastAccessibilityScrollEventToIndex == lastVisiblePosition) {
-                return;
-            } else {
-                mLastAccessibilityScrollEventFromIndex = firstVisiblePosition;
-                mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
-            }
-        }
-        super.sendAccessibilityEventUnchecked(event);
-    }
+    /**
+     * A TYPE_VIEW_SCROLLED event should be sent whenever a scroll happens, even if the
+     * mFirstPosition and the child count have not changed.
+     */
 
     @Override
     public CharSequence getAccessibilityClassName() {
