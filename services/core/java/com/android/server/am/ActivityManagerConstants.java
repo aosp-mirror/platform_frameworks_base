@@ -419,6 +419,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 context.getResources().getIntArray(
                 com.android.internal.R.array.config_defaultImperceptibleKillingExemptionProcStates))
                 .boxed().collect(Collectors.toList());
+        IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
+        IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.addAll(mDefaultImperceptibleKillExemptProcStates);
     }
 
     public void start(ContentResolver resolver) {
