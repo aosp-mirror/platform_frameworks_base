@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.extractor.PositionHolder;
 import com.google.android.exoplayer2.extractor.SeekMap.SeekPoints;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.extractor.amr.AmrExtractor;
+import com.google.android.exoplayer2.extractor.flac.FlacExtractor;
 import com.google.android.exoplayer2.extractor.flv.FlvExtractor;
 import com.google.android.exoplayer2.extractor.mkv.MatroskaExtractor;
 import com.google.android.exoplayer2.extractor.mp3.Mp3Extractor;
@@ -914,6 +915,7 @@ public final class MediaParser {
         extractorFactoriesByName.put("exo.Ac4Extractor", Ac4Extractor::new);
         extractorFactoriesByName.put("exo.AdtsExtractor", AdtsExtractor::new);
         extractorFactoriesByName.put("exo.AmrExtractor", AmrExtractor::new);
+        extractorFactoriesByName.put("exo.FlacExtractor", FlacExtractor::new);
         extractorFactoriesByName.put("exo.FlvExtractor", FlvExtractor::new);
         extractorFactoriesByName.put("exo.FragmentedMp4Extractor", FragmentedMp4Extractor::new);
         extractorFactoriesByName.put("exo.MatroskaExtractor", MatroskaExtractor::new);
