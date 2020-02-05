@@ -16,10 +16,15 @@
 
 package com.android.internal.app;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.app.prediction.AppPredictionContext;
+import android.app.prediction.AppPredictionManager;
+import android.app.prediction.AppPredictor;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -39,6 +44,8 @@ import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
+import org.mockito.Mockito;
 
 import java.util.function.Function;
 
@@ -171,6 +178,12 @@ public class ChooserWrapperActivity extends ChooserActivity {
 
     protected UserHandle getCurrentUserHandle() {
         return mMultiProfilePagerAdapter.getCurrentUserHandle();
+    }
+
+    @Override
+    public Context createContextAsUser(UserHandle user, int flags) {
+        // return the current context as a work profile doesn't really exist in these tests
+        return getApplicationContext();
     }
 
     /**
