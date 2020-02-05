@@ -470,7 +470,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         "framework-statsd", // TODO(b/146167933): Use framework-statsd-stubs
         "framework-permission-stubs-systemapi",
-        "framework-wifi-stubs-systemapi",
+        "framework-wifi-stubs",
         "ike-stubs",
     ],
     installable: true,
@@ -521,7 +521,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
         "framework-statsd",
-        "framework-wifi-stubs-systemapi",
+        "framework-wifi-stubs",
         "ike-stubs",
         // TODO(b/147200698): should be the stub of framework-tethering
         "framework-tethering",
