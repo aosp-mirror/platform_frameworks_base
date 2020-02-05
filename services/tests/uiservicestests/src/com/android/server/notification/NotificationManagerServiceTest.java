@@ -70,6 +70,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -3641,6 +3642,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 USER_SYSTEM);
         verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(any(), eq(null),
                 anyInt(), anyInt());
+    }
+
+    @Test
+    public void updateUriPermissions_posterDoesNotOwnUri() throws Exception {
+        NotificationChannel c = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+        c.setSound(null, Notification.AUDIO_ATTRIBUTES_DEFAULT);
+        Message message1 = new Message("", 0, "");
+        message1.setData("",
+                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1));
+
+        Notification.Builder nbA = new Notification.Builder(mContext, c.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.MessagingStyle("")
+                        .addMessage(message1));
+        NotificationRecord recordA = new NotificationRecord(mContext, new StatusBarNotification(
+                PKG, PKG, 0, "tag", mUid, 0, nbA.build(), new UserHandle(mUid), null, 0), c);
+
+        doThrow(new SecurityException("no access")).when(mUgm)
+                .grantUriPermissionFromOwner(
+                        any(), anyInt(), any(), any(), anyInt(), anyInt(), anyInt());
+
+        when(mUgmInternal.newUriPermissionOwner(any())).thenReturn(new Binder());
+        mService.updateUriPermissions(recordA, null, mContext.getPackageName(),  USER_SYSTEM);
+
+        // yay, no crash
     }
 
     @Test

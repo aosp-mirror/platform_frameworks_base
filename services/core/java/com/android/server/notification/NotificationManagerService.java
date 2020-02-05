@@ -7594,7 +7594,7 @@ public class NotificationManagerService extends SystemService {
             for (int i = 0; i < newUris.size(); i++) {
                 final Uri uri = newUris.valueAt(i);
                 if (oldUris == null || !oldUris.contains(uri)) {
-                    if (DBG) Slog.d(TAG, key + ": granting " + uri);
+                    Slog.d(TAG, key + ": granting " + uri);
                     grantUriPermission(permissionOwner, uri, newRecord.getUid(), targetPkg,
                             targetUserId);
                 }
@@ -7631,6 +7631,8 @@ public class NotificationManagerService extends SystemService {
                     targetUserId);
         } catch (RemoteException ignored) {
             // Ignored because we're in same process
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Cannot grant uri access; " + sourceUid + " does not own " + uri);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
