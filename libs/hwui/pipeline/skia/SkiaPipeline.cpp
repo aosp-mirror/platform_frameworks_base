@@ -44,6 +44,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaPipeline::SkiaPipeline(RenderThread& thread) : mRenderThread(thread) {
+    setSurfaceColorProperties(mColorMode);
 }
 
 SkiaPipeline::~SkiaPipeline() {
@@ -584,6 +585,7 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
 }
 
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
+    mColorMode = colorMode;
     if (colorMode == ColorMode::SRGB) {
         mSurfaceColorType = SkColorType::kN32_SkColorType;
         mSurfaceColorSpace = SkColorSpace::MakeSRGB();

@@ -161,9 +161,8 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
         mRenderAheadCapacity = mRenderAheadDepth;
     }
 
-    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
     bool hasSurface = mRenderPipeline->setSurface(
-            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior, colorMode,
+            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior,
             mRenderAheadCapacity);
 
     mFrameNumber = -1;
@@ -225,7 +224,8 @@ void CanvasContext::setOpaque(bool opaque) {
 }
 
 void CanvasContext::setWideGamut(bool wideGamut) {
-    mWideColorGamut = wideGamut;
+    ColorMode colorMode = wideGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
+    mRenderPipeline->setSurfaceColorProperties(colorMode);
 }
 
 bool CanvasContext::makeCurrent() {
