@@ -33,8 +33,8 @@
 
 #include <hwui/MinikinSkia.h>
 #include <hwui/Typeface.h>
-#include <utils/FatVector.h>
 #include <minikin/FontFamily.h>
+#include <ui/FatVector.h>
 
 #include <memory>
 
@@ -157,7 +157,7 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
     sk_sp<SkData> data(SkData::MakeWithProc(fontPtr, fontSize,
             release_global_ref, reinterpret_cast<void*>(fontRef)));
 
-    uirenderer::FatVector<SkFontArguments::Axis, 2> skiaAxes;
+    FatVector<SkFontArguments::Axis, 2> skiaAxes;
     for (const auto& axis : builder->axes) {
         skiaAxes.emplace_back(SkFontArguments::Axis{axis.axisTag, axis.value});
     }
