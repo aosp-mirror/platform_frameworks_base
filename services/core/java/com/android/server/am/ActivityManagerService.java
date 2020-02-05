@@ -6843,7 +6843,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     cpi = cpr.info;
                     if (isSingleton(cpi.processName, cpi.applicationInfo,
                             cpi.name, cpi.flags)
-                            && isValidSingletonCall(r.uid, cpi.applicationInfo.uid)) {
+                            && isValidSingletonCall(r == null ? callingUid : r.uid,
+                                    cpi.applicationInfo.uid)) {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
                     } else {
@@ -6931,7 +6932,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
                         stable);
                 if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
-                    if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                    if (cpr.proc != null
+                            && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                         // If this is a perceptible app accessing the provider,
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
@@ -7003,7 +7005,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Then allow connecting to the singleton provider
                 boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
                         cpi.name, cpi.flags)
-                        && isValidSingletonCall(r.uid, cpi.applicationInfo.uid);
+                        && isValidSingletonCall(r == null ? callingUid : r.uid,
+                                cpi.applicationInfo.uid);
                 if (singleton) {
                     userId = UserHandle.USER_SYSTEM;
                 }
