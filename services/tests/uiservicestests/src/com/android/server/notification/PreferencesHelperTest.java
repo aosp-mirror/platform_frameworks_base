@@ -171,7 +171,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(SOUND_URI);
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
-                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND);
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         resetZenModeHelper();
@@ -1430,7 +1430,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // start notification policy off with mAreChannelsBypassingDnd = true, but
         // RankingHelper should change to false
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
-                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND);
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         assertFalse(mHelper.areChannelsBypassingDnd());
@@ -1441,7 +1441,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testSetupNewZenModeHelper_cannotBypass() {
         // start notification policy off with mAreChannelsBypassingDnd = false
-        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0);
+        mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper);
         assertFalse(mHelper.areChannelsBypassingDnd());

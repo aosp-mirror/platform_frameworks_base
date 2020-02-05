@@ -641,9 +641,11 @@ public class ZenModeHelper {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mZenMode=");
+        pw.print(prefix);
+        pw.print("mZenMode=");
         pw.println(Global.zenModeToString(mZenMode));
-        pw.print("mConsolidatedPolicy=" + mConsolidatedPolicy.toString());
+        pw.print(prefix);
+        pw.println("mConsolidatedPolicy=" + mConsolidatedPolicy.toString());
         final int N = mConfigs.size();
         for (int i = 0; i < N; i++) {
             dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
@@ -665,13 +667,17 @@ public class ZenModeHelper {
             return;
         }
         pw.printf("allow(alarms=%b,media=%b,system=%b,calls=%b,callsFrom=%s,repeatCallers=%b,"
-                + "messages=%b,messagesFrom=%s,events=%b,reminders=%b)\n",
+                + "messages=%b,messagesFrom=%s,conversations=%b,conversationsFrom=%s,"
+                        + "events=%b,reminders=%b)\n",
                 config.allowAlarms, config.allowMedia, config.allowSystem,
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
+                config.allowConversations,
+                ZenPolicy.conversationTypeToString(config.allowConversationsFrom),
                 config.allowEvents, config.allowReminders);
-        pw.printf(" disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
+        pw.print(prefix);
+        pw.printf("  disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();
