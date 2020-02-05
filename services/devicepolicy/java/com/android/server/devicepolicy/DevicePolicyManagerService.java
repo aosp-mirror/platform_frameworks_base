@@ -8520,6 +8520,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void clearOverrideApnUnchecked() {
+        if (!mHasTelephonyFeature) {
+            return;
+        }
         // Disable Override APNs and remove them from database.
         setOverrideApnsEnabledUnchecked(false);
         final List<ApnSetting> apns = getOverrideApnsUnchecked();
