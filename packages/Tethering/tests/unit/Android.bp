@@ -41,7 +41,7 @@ android_test {
         "framework-minus-apex",
         "ext",
         "framework-res",
-        "framework-wifi-stubs",
+        "framework-wifi-stubs-module_libs_api",
         "framework-telephony-stubs",
         "android.test.runner",
         "android.test.base",
