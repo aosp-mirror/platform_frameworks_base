@@ -18,7 +18,6 @@ package android.timezone;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -29,7 +28,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TelephonyLookup {
 
     private static final Object sLock = new Object();

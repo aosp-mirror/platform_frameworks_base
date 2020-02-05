@@ -18,7 +18,6 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 
 import java.util.Objects;
 
@@ -36,7 +35,6 @@ import java.util.Objects;
  * @param <T> the type of the value with an associated timestamp
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TimestampedValue<T> implements Parcelable {
     private final long mReferenceTimeMillis;
     @Nullable
@@ -96,7 +94,6 @@ public final class TimestampedValue<T> implements Parcelable {
     }
 
     /** @hide */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final @NonNull Parcelable.Creator<TimestampedValue<?>> CREATOR =
             new Parcelable.ClassLoaderCreator<TimestampedValue<?>>() {
 

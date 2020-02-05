@@ -18,7 +18,6 @@ package android.timezone;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 
 import java.util.Objects;
 
@@ -27,7 +26,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TelephonyNetworkFinder {
 
     @NonNull
