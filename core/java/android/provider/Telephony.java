@@ -4166,7 +4166,7 @@ public final class Telephony {
          * The subscription which received this cell broadcast message.
          * <P>Type: INTEGER</P>
          */
-        public static final String SUB_ID = "sub_id";
+        public static final String SUBSCRIPTION_ID = "sub_id";
 
         /**
          * The slot which received this cell broadcast message.
@@ -4447,7 +4447,7 @@ public final class Telephony {
         public static final String[] QUERY_COLUMNS_FWK = {
                 _ID,
                 SLOT_INDEX,
-                SUB_ID,
+                SUBSCRIPTION_ID,
                 GEOGRAPHICAL_SCOPE,
                 PLMN,
                 LAC,
