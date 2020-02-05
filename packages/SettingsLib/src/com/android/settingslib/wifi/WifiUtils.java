@@ -17,10 +17,12 @@
 package com.android.settingslib.wifi;
 
 import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLED;
+import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.getMaxNetworkSelectionDisableReason;
 
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.net.wifi.WifiInfo;
 import android.os.SystemClock;
 
@@ -62,15 +64,13 @@ public class WifiUtils {
         }
 
         if (config != null) {
-            WifiConfiguration.NetworkSelectionStatus networkStatus =
-                    config.getNetworkSelectionStatus();
-            for (int index = WifiConfiguration.NetworkSelectionStatus.DISABLED_NONE;
-                    index < WifiConfiguration.NetworkSelectionStatus
-                            .NETWORK_SELECTION_DISABLED_MAX; index++) {
-                if (networkStatus.getDisableReasonCounter(index) != 0) {
-                    summary.append(" " + WifiConfiguration.NetworkSelectionStatus
-                            .getNetworkDisableReasonString(index) + "="
-                            + networkStatus.getDisableReasonCounter(index));
+            NetworkSelectionStatus networkStatus = config.getNetworkSelectionStatus();
+            for (int reason = 0; reason <= getMaxNetworkSelectionDisableReason(); reason++) {
+                if (networkStatus.getDisableReasonCounter(reason) != 0) {
+                    summary.append(" ")
+                            .append(NetworkSelectionStatus.getNetworkDisableReasonString(reason))
+                            .append("=")
+                            .append(networkStatus.getDisableReasonCounter(reason));
                 }
             }
         }
