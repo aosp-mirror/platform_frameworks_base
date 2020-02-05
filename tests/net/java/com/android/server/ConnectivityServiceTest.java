@@ -5753,20 +5753,18 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(true);
         trustedCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         verify(mNetworkManagementService).setDefaultNetId(eq(mCellNetworkAgent.getNetwork().netId));
+        reset(mNetworkManagementService);
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(true);
         trustedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
         verify(mNetworkManagementService).setDefaultNetId(eq(mWiFiNetworkAgent.getNetwork().netId));
+        reset(mNetworkManagementService);
 
         mWiFiNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
-        // There is currently a bug where losing the TRUSTED capability will send a LOST
-        // callback to requests before the available callback, in spite of the semantics
-        // of the requests dictating this should not happen. This is considered benign, but
-        // ideally should be fixed in the future.
-        trustedCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
         trustedCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
         verify(mNetworkManagementService).setDefaultNetId(eq(mCellNetworkAgent.getNetwork().netId));
+        reset(mNetworkManagementService);
 
         mCellNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
         trustedCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
