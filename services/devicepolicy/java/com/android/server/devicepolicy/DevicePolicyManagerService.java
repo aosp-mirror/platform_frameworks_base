@@ -4680,12 +4680,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void ensureMinimumQuality(
             int userId, ActiveAdmin admin, int minimumQuality, String operation) {
-        if (admin.mPasswordPolicy.quality < minimumQuality
-                && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
-                userId)) {
-            throw new IllegalStateException(String.format(
-                    "password quality should be at least %d for %s", minimumQuality, operation));
-        }
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            if (admin.mPasswordPolicy.quality < minimumQuality
+                    && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
+                    userId)) {
+                throw new IllegalStateException(String.format(
+                        "password quality should be at least %d for %s",
+                        minimumQuality, operation));
+            }
+        });
     }
 
     @Override
