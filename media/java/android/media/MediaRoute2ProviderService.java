@@ -370,7 +370,6 @@ public abstract class MediaRoute2ProviderService extends Service {
      *
      * @param preference the new discovery preference
      */
-    // TODO: This method needs tests.
     public void onDiscoveryPreferenceChanged(@NonNull RouteDiscoveryPreference preference) {}
 
     /**
@@ -453,6 +452,16 @@ public abstract class MediaRoute2ProviderService extends Service {
             }
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onReleaseSession,
                     MediaRoute2ProviderService.this, sessionId));
+        }
+
+        @Override
+        public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+            if (!checkCallerisSystem()) {
+                return;
+            }
+            mHandler.sendMessage(obtainMessage(
+                    MediaRoute2ProviderService::onDiscoveryPreferenceChanged,
+                    MediaRoute2ProviderService.this, discoveryPreference));
         }
 
         @Override

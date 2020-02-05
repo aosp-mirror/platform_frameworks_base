@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.media.MediaRoute2ProviderInfo;
+import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 
@@ -54,6 +55,7 @@ abstract class MediaRoute2Provider {
     public abstract void requestCreateSession(String packageName, String routeId, long requestId,
             @Nullable Bundle sessionHints);
     public abstract void releaseSession(String sessionId);
+    public abstract void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference);
 
     public abstract void selectRoute(String sessionId, String routeId);
     public abstract void deselectRoute(String sessionId, String routeId);
