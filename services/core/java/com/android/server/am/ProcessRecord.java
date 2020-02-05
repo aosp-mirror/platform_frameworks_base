@@ -371,6 +371,15 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
         pw.println("}");
+        if (processInfo != null) {
+            pw.print(prefix); pw.println("processInfo:");
+            if (processInfo.deniedPermissions != null) {
+                for (int i = 0; i < processInfo.deniedPermissions.size(); i++) {
+                    pw.print(prefix); pw.print("  deny: ");
+                    pw.println(processInfo.deniedPermissions.valueAt(i));
+                }
+            }
+        }
         pw.print(prefix); pw.print("mRequiredAbi="); pw.print(mRequiredAbi);
                 pw.print(" instructionSet="); pw.println(instructionSet);
         if (info.className != null) {
