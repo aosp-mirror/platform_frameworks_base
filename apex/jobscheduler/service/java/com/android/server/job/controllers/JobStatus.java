@@ -19,6 +19,7 @@ package com.android.server.job.controllers;
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
+import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AppGlobals;
@@ -30,6 +31,7 @@ import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.MediaStore;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -206,6 +208,18 @@ public final class JobStatus {
      * bucket.
      */
     private int mDynamicConstraints = 0;
+
+    /**
+     * Indicates whether the job is responsible for backing up media, so we can be lenient in
+     * applying standby throttling.
+     *
+     * Doesn't exempt jobs with a deadline constraint, as they can be started without any content or
+     * network changes, in which case this exemption does not make sense.
+     *
+     * TODO(b/149519887): Use a more explicit signal, maybe an API flag, that the scheduling package
+     * needs to provide at the time of scheduling a job.
+     */
+    private final boolean mHasMediaBackupExemption;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     public boolean dozeWhitelisted;
@@ -415,9 +429,11 @@ public final class JobStatus {
         this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
 
+        boolean requiresNetwork = false;
         int requiredConstraints = job.getConstraintFlags();
         if (job.getRequiredNetwork() != null) {
             requiredConstraints |= CONSTRAINT_CONNECTIVITY;
+            requiresNetwork = true;
         }
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
@@ -425,8 +441,16 @@ public final class JobStatus {
         if (latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_DEADLINE;
         }
+        boolean mediaOnly = false;
         if (job.getTriggerContentUris() != null) {
             requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
+            mediaOnly = true;
+            for (JobInfo.TriggerContentUri uri : job.getTriggerContentUris()) {
+                if (!MediaStore.AUTHORITY.equals(uri.getUri().getAuthority())) {
+                    mediaOnly = false;
+                    break;
+                }
+            }
         }
         this.requiredConstraints = requiredConstraints;
         mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
@@ -450,6 +474,9 @@ public final class JobStatus {
             // our source UID into place.
             job.getRequiredNetwork().networkCapabilities.setSingleUid(this.sourceUid);
         }
+        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        mHasMediaBackupExemption = !job.hasLateConstraint() && mediaOnly && requiresNetwork
+                && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
@@ -545,7 +572,6 @@ public final class JobStatus {
 
         int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
                 sourceUserId, elapsedNow);
-        JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
         return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
                 standbyBucket, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
@@ -734,7 +760,14 @@ public final class JobStatus {
             // like other ACTIVE apps.
             return ACTIVE_INDEX;
         }
-        return getStandbyBucket();
+        final int actualBucket = getStandbyBucket();
+        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
+                && mHasMediaBackupExemption) {
+            // Cap it at WORKING_INDEX as media back up jobs are important to the user, and the
+            // source package may not have been used directly in a while.
+            return Math.min(WORKING_INDEX, actualBucket);
+        }
+        return actualBucket;
     }
 
     /** Returns the real standby bucket of the job. */
