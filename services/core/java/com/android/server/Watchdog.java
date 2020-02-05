@@ -610,6 +610,8 @@ public class Watchdog extends Thread {
             if (mPhonePid > 0) pids.add(mPhonePid);
 
             long anrTime = SystemClock.uptimeMillis();
+            StringBuilder report = new StringBuilder();
+            report.append(MemoryPressureUtil.currentPsiState());
             ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
             StringWriter tracesFileException = new StringWriter();
             final File stack = ActivityManagerService.dumpStackTraces(
@@ -621,7 +623,6 @@ public class Watchdog extends Thread {
             SystemClock.sleep(5000);
 
             processCpuTracker.update();
-            StringBuilder report = new StringBuilder();
             report.append(processCpuTracker.printCurrentState(anrTime));
             report.append(tracesFileException.getBuffer());
 

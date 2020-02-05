@@ -66,6 +66,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.MemoryPressureUtil;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
@@ -1582,6 +1583,8 @@ class ProcessRecord implements WindowProcessListener {
             info.append("Parent: ").append(parentShortComponentName).append("\n");
         }
 
+        StringBuilder report = new StringBuilder();
+        report.append(MemoryPressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
         // don't dump native PIDs for background ANRs unless it is the process of interest
@@ -1614,7 +1617,6 @@ class ProcessRecord implements WindowProcessListener {
                 (isSilentAnr()) ? null : processCpuTracker, (isSilentAnr()) ? null : lastPids,
                 nativePids, tracesFileException);
 
-        StringBuilder report = new StringBuilder();
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
             synchronized (mService.mProcessCpuTracker) {
