@@ -3534,9 +3534,6 @@
         <item>com.android.dialer</item>
     </string-array>
 
-    <!-- An array of packages which can listen for notifications on low ram devices. -->
-    <string-array translatable="false" name="config_allowedManagedServicesOnLowRamDevices" />
-
     <!-- The default value for transition animation scale found in developer settings.
          1.0 corresponds to 1x animator scale, 0 means that there will be no transition
          animations. Note that this is only a default and will be overridden by a

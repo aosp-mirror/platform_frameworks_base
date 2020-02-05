@@ -6046,21 +6046,18 @@ public class Notification implements Parcelable
 
         /**
          * Removes RemoteViews that were created for compatibility from {@param n}, if they did not
-         * change. Also removes extenders on low ram devices, as
-         * {@link android.service.notification.NotificationListenerService} services are disabled.
+         * change.
          *
          * @return {@param n}, if no stripping is needed, otherwise a stripped clone of {@param n}.
          *
          * @hide
          */
-        public static Notification maybeCloneStrippedForDelivery(Notification n, boolean isLowRam,
-                Context context) {
+        public static Notification maybeCloneStrippedForDelivery(Notification n) {
             String templateClass = n.extras.getString(EXTRA_TEMPLATE);
 
             // Only strip views for known Styles because we won't know how to
             // re-create them otherwise.
-            if (!isLowRam
-                    && !TextUtils.isEmpty(templateClass)
+            if (!TextUtils.isEmpty(templateClass)
                     && getNotificationStyleClass(templateClass) == null) {
                 return n;
             }
@@ -6077,8 +6074,7 @@ public class Notification implements Parcelable
                             n.headsUpContentView.getSequenceNumber();
 
             // Nothing to do here, no need to clone.
-            if (!isLowRam
-                    && !stripContentView && !stripBigContentView && !stripHeadsUpContentView) {
+            if (!stripContentView && !stripBigContentView && !stripHeadsUpContentView) {
                 return n;
             }
 
@@ -6094,15 +6090,6 @@ public class Notification implements Parcelable
             if (stripHeadsUpContentView) {
                 clone.headsUpContentView = null;
                 clone.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
-            }
-            if (isLowRam) {
-                String[] allowedServices = context.getResources().getStringArray(
-                        R.array.config_allowedManagedServicesOnLowRamDevices);
-                if (allowedServices.length == 0) {
-                    clone.extras.remove(Notification.TvExtender.EXTRA_TV_EXTENDER);
-                    clone.extras.remove(WearableExtender.EXTRA_WEARABLE_EXTENSIONS);
-                    clone.extras.remove(CarExtender.EXTRA_CAR_EXTENDER);
-                }
             }
             return clone;
         }
