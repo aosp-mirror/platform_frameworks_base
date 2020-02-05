@@ -20628,8 +20628,13 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
-        if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
-            return null;
+        long token = Binder.clearCallingIdentity();
+        try {
+            if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
+                return null;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return packageName;
     }
