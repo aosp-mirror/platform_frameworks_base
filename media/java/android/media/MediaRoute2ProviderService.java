@@ -122,16 +122,25 @@ public abstract class MediaRoute2ProviderService extends Service {
      * @hide
      */
     //TODO: Discuss what to use for request (e.g., Intent? Request class?)
-    public abstract void onControlRequest(@NonNull String routeId, @NonNull Intent request);
+    public void onControlRequest(@NonNull String routeId, @NonNull Intent request) {}
 
     /**
-     * Called when requestSetVolume is called on a route of the provider.
+     * Called when a volume setting is requested on a route of the provider
      *
      * @param routeId the id of the route
      * @param volume the target volume
      * @see MediaRoute2Info#getVolumeMax()
      */
-    public abstract void onSetVolume(@NonNull String routeId, int volume);
+    public abstract void onSetRouteVolume(@NonNull String routeId, int volume);
+
+    /**
+     * Called when {@link MediaRouter2.RoutingController#setVolume(int)} is called on
+     * a routing session of the provider
+     *
+     * @param sessionId the id of the routing session
+     * @param volume the target volume
+     */
+    public abstract void onSetSessionVolume(@NonNull String sessionId, int volume);
 
     /**
      * Gets information of the session with the given id.
@@ -513,12 +522,21 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void requestSetVolume(String routeId, int volume) {
+        public void setRouteVolume(String routeId, int volume) {
             if (!checkCallerisSystem()) {
                 return;
             }
-            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetVolume,
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetRouteVolume,
                     MediaRoute2ProviderService.this, routeId, volume));
+        }
+
+        @Override
+        public void setSessionVolume(String sessionId, int volume) {
+            if (!checkCallerisSystem()) {
+                return;
+            }
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetSessionVolume,
+                    MediaRoute2ProviderService.this, sessionId, volume));
         }
     }
 }
