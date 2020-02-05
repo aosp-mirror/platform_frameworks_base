@@ -2795,6 +2795,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    // TODO(148895075): deprecate and replace with task equivalents
     @Override
     public List<ActivityManager.StackInfo> getAllStackInfos() {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
@@ -2821,6 +2822,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    // TODO(148895075): deprecate and replace with task equivalents
     @Override
     public List<ActivityManager.StackInfo> getAllStackInfosOnDisplay(int displayId) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
