@@ -2126,24 +2126,27 @@ public class AppOpsService extends IAppOpsService.Stub {
             UserHandle user = UserHandle.getUserHandleForUid(uid);
             boolean isRevokedCompat;
             if (permissionInfo.backgroundPermission != null) {
-                boolean isBackgroundRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+                if (packageManager.checkPermission(permissionInfo.backgroundPermission, packageName)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    boolean isBackgroundRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
 
-                if (isBackgroundRevokedCompat && supportsRuntimePermissions) {
-                    Slog.w(TAG, "setUidMode() called with a mode inconsistent with runtime"
-                            + " permission state, this is discouraged and you should revoke the"
-                            + " runtime permission instead: uid=" + uid + ", switchCode="
-                            + switchCode + ", mode=" + mode + ", permission="
-                            + permissionInfo.backgroundPermission);
-                }
+                    if (isBackgroundRevokedCompat && supportsRuntimePermissions) {
+                        Slog.w(TAG, "setUidMode() called with a mode inconsistent with runtime"
+                                + " permission state, this is discouraged and you should revoke the"
+                                + " runtime permission instead: uid=" + uid + ", switchCode="
+                                + switchCode + ", mode=" + mode + ", permission="
+                                + permissionInfo.backgroundPermission);
+                    }
 
-                long identity = Binder.clearCallingIdentity();
-                try {
-                    packageManager.updatePermissionFlags(permissionInfo.backgroundPermission,
-                            packageName, PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
-                            isBackgroundRevokedCompat
-                                    ? PackageManager.FLAG_PERMISSION_REVOKED_COMPAT : 0, user);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+                    long identity = Binder.clearCallingIdentity();
+                    try {
+                        packageManager.updatePermissionFlags(permissionInfo.backgroundPermission,
+                                packageName, PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
+                                isBackgroundRevokedCompat
+                                        ? PackageManager.FLAG_PERMISSION_REVOKED_COMPAT : 0, user);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
 
                 isRevokedCompat = mode != AppOpsManager.MODE_ALLOWED
