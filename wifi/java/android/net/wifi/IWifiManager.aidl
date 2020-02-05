@@ -266,4 +266,8 @@ interface IWifiManager
      * Return the Map of {@link WifiNetworkSuggestion} and the list of <ScanResult>
      */
     Map getMatchingScanResults(in List<WifiNetworkSuggestion> networkSuggestions, in List<ScanResult> scanResults, String callingPackage, String callingFeatureId);
+
+    void setScanThrottleEnabled(boolean enable);
+
+    boolean isScanThrottleEnabled();
 }

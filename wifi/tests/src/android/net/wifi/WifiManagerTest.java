@@ -2380,4 +2380,14 @@ public class WifiManagerTest {
         verify(mWifiConnectedNetworkScorer).start(0);
         verify(mWifiConnectedNetworkScorer).stop(10);
     }
+
+    @Test
+    public void testScanThrottle() throws Exception {
+        mWifiManager.setScanThrottleEnabled(true);
+        verify(mWifiService).setScanThrottleEnabled(true);
+
+        when(mWifiService.isScanThrottleEnabled()).thenReturn(false);
+        assertFalse(mWifiManager.isScanThrottleEnabled());
+        verify(mWifiService).isScanThrottleEnabled();
+    }
 }
