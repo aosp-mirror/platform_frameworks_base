@@ -1485,9 +1485,8 @@ public final class BluetoothAdapter {
      * <p>The Bluetooth scan mode determines if the local adapter is
      * connectable and/or discoverable from remote Bluetooth devices.
      * <p>For privacy reasons, discoverable mode is automatically turned off
-     * after <code>duration</code> seconds. For example, 120 seconds should be
-     * enough for a remote device to initiate and complete its discovery
-     * process.
+     * after <code>durationMillis</code> milliseconds. For example, 120000 milliseconds should be
+     * enough for a remote device to initiate and complete its discovery process.
      * <p>Valid scan mode values are:
      * {@link #SCAN_MODE_NONE},
      * {@link #SCAN_MODE_CONNECTABLE},
@@ -1502,24 +1501,29 @@ public final class BluetoothAdapter {
      * </code>instead.
      *
      * @param mode valid scan mode
-     * @param duration time in seconds to apply scan mode, only used for {@link
+     * @param durationMillis time in milliseconds to apply scan mode, only used for {@link
      * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public boolean setScanMode(@ScanMode int mode, int duration) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setScanMode(@ScanMode int mode, long durationMillis) {
         if (getState() != STATE_ON) {
             return false;
         }
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.setScanMode(mode, duration);
+                int durationSeconds = Math.toIntExact(durationMillis / 1000);
+                return mService.setScanMode(mode, durationSeconds);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
+        } catch (ArithmeticException ex) {
+            Log.e(TAG, "setScanMode: Duration in seconds outside of the bounds of an int");
+            throw new IllegalArgumentException("Duration not in bounds. In seconds, the "
+                    + "durationMillis must be in the range of an int");
         } finally {
             mServiceLock.readLock().unlock();
         }
@@ -1552,13 +1556,22 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setScanMode(@ScanMode int mode) {
         if (getState() != STATE_ON) {
             return false;
         }
-        /* getDiscoverableTimeout() to use the latest from NV than use 0 */
-        return setScanMode(mode, getDiscoverableTimeout());
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.setScanMode(mode, getDiscoverableTimeout());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
     }
 
     /** @hide */
