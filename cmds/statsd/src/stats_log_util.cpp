@@ -21,6 +21,8 @@
 #include <set>
 #include <utils/SystemClock.h>
 
+#include "statscompanion_util.h"
+
 using android::util::AtomsInfo;
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -582,6 +584,21 @@ int64_t NanoToMillis(const int64_t nano) {
 
 int64_t MillisToNano(const int64_t millis) {
     return millis * 1000000;
+}
+
+bool checkPermissionForIds(const char* permission, pid_t pid, uid_t uid) {
+    sp<IStatsCompanionService> scs = getStatsCompanionService();
+    if (scs == nullptr) {
+        return false;
+    }
+
+    bool success;
+    binder::Status status = scs->checkPermission(String16(permission), pid, uid, &success);
+    if (!status.isOk()) {
+        return false;
+    }
+
+    return success;
 }
 
 }  // namespace statsd

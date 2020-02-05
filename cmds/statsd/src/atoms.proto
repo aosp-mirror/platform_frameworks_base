@@ -3709,6 +3709,7 @@ message FlagFlipUpdateOccurred {
 
 /**
  * Potential experiment ids that goes with a train install.
+ * Should be kept in sync with experiment_ids.proto.
  */
 message TrainExperimentIds {
     repeated int64 experiment_id = 1;
