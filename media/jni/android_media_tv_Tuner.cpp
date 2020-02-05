@@ -377,12 +377,48 @@ int JTuner::tune(const FrontendSettings& settings) {
     return (int)result;
 }
 
+int JTuner::stopTune() {
+    if (mFe == NULL) {
+        ALOGE("frontend is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFe->stopTune();
+    return (int)result;
+}
+
 int JTuner::scan(const FrontendSettings& settings, FrontendScanType scanType) {
     if (mFe == NULL) {
         ALOGE("frontend is not initialized");
         return (int)Result::INVALID_STATE;
     }
     Result result = mFe->scan(settings, scanType);
+    return (int)result;
+}
+
+int JTuner::stopScan() {
+    if (mFe == NULL) {
+        ALOGE("frontend is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFe->stopScan();
+    return (int)result;
+}
+
+int JTuner::setLnb(int id) {
+    if (mFe == NULL) {
+        ALOGE("frontend is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFe->setLnb(id);
+    return (int)result;
+}
+
+int JTuner::setLna(bool enable) {
+    if (mFe == NULL) {
+        ALOGE("frontend is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFe->setLna(enable);
     return (int)result;
 }
 
@@ -1079,8 +1115,9 @@ static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, job
     return tuner->tune(getFrontendSettings(env, type, settings));
 }
 
-static int android_media_tv_Tuner_stop_tune(JNIEnv*, jobject) {
-    return 0;
+static int android_media_tv_Tuner_stop_tune(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->stopTune();
 }
 
 static int android_media_tv_Tuner_scan(
@@ -1090,16 +1127,19 @@ static int android_media_tv_Tuner_scan(
             env, settingsType, settings), static_cast<FrontendScanType>(scanType));
 }
 
-static int android_media_tv_Tuner_stop_scan(JNIEnv*, jobject) {
-    return 0;
+static int android_media_tv_Tuner_stop_scan(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->stopScan();
 }
 
-static int android_media_tv_Tuner_set_lnb(JNIEnv*, jobject, jint) {
-    return 0;
+static int android_media_tv_Tuner_set_lnb(JNIEnv *env, jobject thiz, jint id) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->setLnb(id);
 }
 
-static int android_media_tv_Tuner_set_lna(JNIEnv*, jobject, jint, jboolean) {
-    return 0;
+static int android_media_tv_Tuner_set_lna(JNIEnv *env, jobject thiz, jboolean enable) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->setLna(enable);
 }
 
 static jobject android_media_tv_Tuner_get_frontend_status(JNIEnv, jobject, jintArray) {

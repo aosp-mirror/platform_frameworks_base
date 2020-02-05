@@ -133,7 +133,11 @@ struct JTuner : public RefBase {
     jobject getFrontendIds();
     jobject openFrontendById(int id);
     int tune(const FrontendSettings& settings);
+    int stopTune();
     int scan(const FrontendSettings& settings, FrontendScanType scanType);
+    int stopScan();
+    int setLnb(int id);
+    int setLna(bool enable);
     jobject getLnbIds();
     jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
