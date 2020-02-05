@@ -19,7 +19,6 @@ package android.app.timezonedetector;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -57,11 +56,9 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class PhoneTimeZoneSuggestion implements Parcelable {
 
     /** @hide */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @NonNull
     public static final Creator<PhoneTimeZoneSuggestion> CREATOR =
             new Creator<PhoneTimeZoneSuggestion>() {
@@ -297,7 +294,6 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class Builder {
         private final int mSlotIndex;
         @Nullable private String mZoneId;
