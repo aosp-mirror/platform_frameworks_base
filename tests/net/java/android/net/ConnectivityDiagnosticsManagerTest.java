@@ -38,6 +38,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.content.Context;
 import android.os.PersistableBundle;
 
+import androidx.test.InstrumentationRegistry;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,21 +60,26 @@ public class ConnectivityDiagnosticsManagerTest {
 
     private static final Executor INLINE_EXECUTOR = x -> x.run();
 
-    @Mock private Context mContext;
     @Mock private IConnectivityManager mService;
     @Mock private ConnectivityDiagnosticsCallback mCb;
 
+    private Context mContext;
     private ConnectivityDiagnosticsBinder mBinder;
     private ConnectivityDiagnosticsManager mManager;
 
+    private String mPackageName;
+
     @Before
     public void setUp() {
-        mContext = mock(Context.class);
+        mContext = InstrumentationRegistry.getContext();
+
         mService = mock(IConnectivityManager.class);
         mCb = mock(ConnectivityDiagnosticsCallback.class);
 
         mBinder = new ConnectivityDiagnosticsBinder(mCb, INLINE_EXECUTOR);
         mManager = new ConnectivityDiagnosticsManager(mContext, mService);
+
+        mPackageName = mContext.getOpPackageName();
     }
 
     @After
@@ -271,7 +278,7 @@ public class ConnectivityDiagnosticsManagerTest {
         mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
 
         verify(mService).registerConnectivityDiagnosticsCallback(
-                any(ConnectivityDiagnosticsBinder.class), eq(request));
+                any(ConnectivityDiagnosticsBinder.class), eq(request), eq(mPackageName));
         assertTrue(ConnectivityDiagnosticsManager.sCallbacks.containsKey(mCb));
     }
 
@@ -302,7 +309,7 @@ public class ConnectivityDiagnosticsManagerTest {
         // verify that re-registering is successful
         mManager.registerConnectivityDiagnosticsCallback(request, INLINE_EXECUTOR, mCb);
         verify(mService, times(2)).registerConnectivityDiagnosticsCallback(
-                any(ConnectivityDiagnosticsBinder.class), eq(request));
+                any(ConnectivityDiagnosticsBinder.class), eq(request), eq(mPackageName));
         assertTrue(ConnectivityDiagnosticsManager.sCallbacks.containsKey(mCb));
     }
 
