@@ -4267,6 +4267,7 @@ package android.media {
 
   public class AudioManager {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @IntRange(from=0) public int getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
@@ -4283,6 +4284,7 @@ package android.media {
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDeviceForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean removePreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int) throws java.lang.IllegalArgumentException;
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.MODIFY_AUDIO_ROUTING}) public int requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, @NonNull android.media.AudioAttributes, int, int, android.media.audiopolicy.AudioPolicy) throws java.lang.IllegalArgumentException;
@@ -4307,6 +4309,10 @@ package android.media {
     ctor public AudioManager.AudioServerStateCallback();
     method public void onAudioServerDown();
     method public void onAudioServerUp();
+  }
+
+  public static interface AudioManager.OnPreferredDeviceForStrategyChangedListener {
+    method public void onPreferredDeviceForStrategyChanged(@NonNull android.media.audiopolicy.AudioProductStrategy, @Nullable android.media.AudioDevice);
   }
 
   public abstract static class AudioManager.VolumeGroupCallback {
