@@ -46,6 +46,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.security.net.config.NetworkSecurityConfigProvider;
 import android.sysprop.VndkProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
@@ -1202,6 +1203,9 @@ public final class LoadedApk {
             }
 
             ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
+            // The network security config needs to be aware of multiple
+            // applications in the same process to handle discrepancies
+            NetworkSecurityConfigProvider.handleNewApplication(appContext);
             app = mActivityThread.mInstrumentation.newApplication(
                     cl, appClass, appContext);
             appContext.setOuterContext(app);
