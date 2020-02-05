@@ -3081,8 +3081,7 @@
 
     <!-- Allows SystemUI to request third party controls.
          <p>Should only be requested by the System and required by
-         ControlsService declarations.
-         @hide
+         {@link android.service.controls.ControlsProviderService} declarations.
     -->
     <permission android:name="android.permission.BIND_CONTROLS"
         android:protectionLevel="signature" />
