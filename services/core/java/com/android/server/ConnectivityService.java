@@ -6456,18 +6456,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         @NonNull private final Set<NetworkBgStatePair> mRematchedNetworks = new ArraySet<>();
-        @NonNull private final List<RequestReassignment> mReassignments = new ArrayList<>();
+        @NonNull private final Map<NetworkRequestInfo, RequestReassignment> mReassignments =
+                new ArrayMap<>();
 
         @NonNull Iterable<NetworkBgStatePair> getRematchedNetworks() {
             return mRematchedNetworks;
         }
 
         @NonNull Iterable<RequestReassignment> getRequestReassignments() {
-            return mReassignments;
+            return mReassignments.values();
         }
 
         void addRequestReassignment(@NonNull final RequestReassignment reassignment) {
-            mReassignments.add(reassignment);
+            final RequestReassignment oldChange = mReassignments.get(reassignment.mRequest);
+            if (null == oldChange) {
+                mReassignments.put(reassignment.mRequest, reassignment);
+                return;
+            }
+            if (oldChange.mNewNetwork != reassignment.mOldNetwork) {
+                throw new IllegalArgumentException("Reassignment <" + reassignment.mRequest + "> ["
+                        + reassignment.mOldNetwork + " -> " + reassignment.mNewNetwork
+                        + "] conflicts with ["
+                        + oldChange.mOldNetwork + " -> " + oldChange.mNewNetwork + "]");
+            }
+            // There was already a note to reassign this request from a network A to a network B,
+            // and a reassignment is added from network B to some other network C. The following
+            // synthesizes the merged reassignment that goes A -> C. An interesting (but not
+            // special) case to think about is when B is null, which can happen when the rematch
+            // loop notices the current satisfier doesn't satisfy the request any more, but
+            // hasn't yet encountered another network that could.
+            mReassignments.put(reassignment.mRequest, new RequestReassignment(reassignment.mRequest,
+                    oldChange.mOldNetwork, reassignment.mNewNetwork));
         }
 
         void addRematchedNetwork(@NonNull final NetworkBgStatePair network) {
@@ -6483,6 +6502,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             return null;
         }
+    }
+
+    // TODO : remove this when it's useless
+    @NonNull private NetworkReassignment computeInitialReassignment() {
+        final NetworkReassignment change = new NetworkReassignment();
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            change.addRequestReassignment(new NetworkReassignment.RequestReassignment(nri,
+                    nri.mSatisfier, nri.mSatisfier));
+        }
+        return change;
     }
 
     private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
@@ -6513,7 +6542,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
                     reassignedRequests.put(nri, newNetwork);
                 }
-            } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
+            } else if (newNetwork == currentNetwork) {
                 reassignedRequests.put(nri, null);
             }
         }
@@ -6526,18 +6555,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //   satisfied by newNetwork, and reassigns to newNetwork
     //   any such requests for which newNetwork is the best.
     //
-    // - Lingers any validated Networks that as a result are no longer
-    //   needed. A network is needed if it is the best network for
-    //   one or more NetworkRequests, or if it is a VPN.
-    //
     // - Writes into the passed reassignment object all changes that should be done for
     //   rematching this network with all requests, to be applied later.
-    //
-    // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
-    // it does not remove NetworkRequests that other Networks could better satisfy.
-    // If you need to handle decreases in score, use {@link rematchAllNetworksAndRequests}.
-    // This function should be used when possible instead of {@code rematchAllNetworksAndRequests}
-    // as it performs better by a factor of the number of Networks.
     //
     // TODO : stop writing to the passed reassignment. This is temporarily more useful, but
     // it's unidiomatic Java and it's hard to read.
@@ -6619,7 +6638,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // scoring network and then a higher scoring network, which could produce multiple
         // callbacks.
         Arrays.sort(nais);
-        final NetworkReassignment changes = new NetworkReassignment();
+        final NetworkReassignment changes = computeInitialReassignment();
         for (final NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(changes, nai, now);
         }
@@ -6648,6 +6667,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // before LegacyTypeTracker sends legacy broadcasts
         for (final NetworkReassignment.RequestReassignment event :
                 changes.getRequestReassignments()) {
+            if (event.mOldNetwork == event.mNewNetwork) continue;
+
             // Tell NetworkProviders about the new score, so they can stop
             // trying to connect if they know they cannot match it.
             // TODO - this could get expensive if there are a lot of outstanding requests for this
@@ -6657,13 +6678,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (null != event.mNewNetwork) {
                 notifyNetworkAvailable(event.mNewNetwork, event.mRequest);
             } else {
-                // TODO: Technically, sending CALLBACK_LOST here is
-                // incorrect if there is a replacement network currently
-                // connected that can satisfy nri, which is a request
-                // (not a listen). However, the only capability that can both
-                // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
-                // so this code is only incorrect for a network that loses
-                // the TRUSTED capability, which is a rare case.
                 callCallbackForRequest(event.mRequest, event.mOldNetwork,
                         ConnectivityManager.CALLBACK_LOST, 0);
             }
