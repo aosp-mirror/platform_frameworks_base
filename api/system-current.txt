@@ -4317,7 +4317,7 @@ package android.media {
   }
 
   public final class AudioRecordingConfiguration implements android.os.Parcelable {
-    method public int getClientUid();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getClientUid();
   }
 
   public class HwAudioSource {
