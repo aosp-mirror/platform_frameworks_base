@@ -17,6 +17,7 @@
 package android.view.textclassifier;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.provider.DeviceConfig;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -167,6 +168,16 @@ public final class TextClassificationConstants {
     static final String TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE =
             "textclassifier_service_package_override";
 
+    /**
+     * Whether to use the default system text classifier as the default text classifier
+     * implementation. The local text classifier is used if it is {@code false}.
+     *
+     * @see android.service.textclassifier.TextClassifierService#getDefaultTextClassifierImplementation(Context)
+     */
+    // TODO: Once the system health experiment is done, remove this together with local TC.
+    private static final String USE_DEFAULT_SYSTEM_TEXT_CLASSIFIER_AS_DEFAULT_IMPL =
+            "use_default_system_text_classifier_as_default_impl";
+
     private static final String DEFAULT_TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE = null;
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
@@ -209,7 +220,8 @@ public final class TextClassificationConstants {
     private static final boolean TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT = true;
     private static final boolean TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT = true;
     private static final boolean DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT = true;
-    private static final float[] LANG_ID_CONTEXT_SETTINGS_DEFAULT = new float[] {20f, 1.0f, 0.4f};
+    private static final float[] LANG_ID_CONTEXT_SETTINGS_DEFAULT = new float[]{20f, 1.0f, 0.4f};
+    private static final boolean USE_DEFAULT_SYSTEM_TEXT_CLASSIFIER_AS_DEFAULT_IMPL_DEFAULT = true;
 
     @Nullable
     public String getTextClassifierServicePackageOverride() {
@@ -331,6 +343,13 @@ public final class TextClassificationConstants {
                 LANG_ID_CONTEXT_SETTINGS, LANG_ID_CONTEXT_SETTINGS_DEFAULT);
     }
 
+    public boolean getUseDefaultTextClassifierAsDefaultImplementation() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                USE_DEFAULT_SYSTEM_TEXT_CLASSIFIER_AS_DEFAULT_IMPL,
+                USE_DEFAULT_SYSTEM_TEXT_CLASSIFIER_AS_DEFAULT_IMPL_DEFAULT);
+    }
+
     void dump(IndentingPrintWriter pw) {
         pw.println("TextClassificationConstants:");
         pw.increaseIndent();
@@ -378,6 +397,8 @@ public final class TextClassificationConstants {
                 .println();
         pw.printPair("textclassifier_service_package_override",
                 getTextClassifierServicePackageOverride()).println();
+        pw.printPair("use_default_system_text_classifier_as_default_impl",
+                getUseDefaultTextClassifierAsDefaultImplementation()).println();
         pw.decreaseIndent();
     }
 
