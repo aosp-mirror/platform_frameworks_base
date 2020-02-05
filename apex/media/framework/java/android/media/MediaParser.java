@@ -15,6 +15,7 @@
  */
 package android.media;
 
+import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.Uri;
@@ -382,6 +383,7 @@ public final class MediaParser {
          * parse the input.
          */
         @NonNull
+        @CheckResult
         private static UnrecognizedInputFormatException createForExtractors(
                 @NonNull String... extractorNames) {
             StringBuilder builder = new StringBuilder();
@@ -536,7 +538,7 @@ public final class MediaParser {
                 }
             }
             if (mExtractor == null) {
-                UnrecognizedInputFormatException.createForExtractors(mExtractorNamesPool);
+                throw UnrecognizedInputFormatException.createForExtractors(mExtractorNamesPool);
             }
             return true;
         }
