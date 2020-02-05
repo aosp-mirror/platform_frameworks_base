@@ -2424,6 +2424,10 @@ public class ChooserActivity extends ResolverActivity implements
                     offset += findViewById(R.id.content_preview_container).getHeight();
                 }
 
+                if (hasWorkProfile() && ENABLE_TABBED_VIEW) {
+                    offset += findViewById(R.id.tabs).getHeight();
+                }
+
                 int directShareHeight = 0;
                 rowsToShow = Math.min(4, rowsToShow);
                 for (int i = 0, childCount = recyclerView.getChildCount();
