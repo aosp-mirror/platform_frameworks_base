@@ -420,6 +420,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
     }
 
+    @Override
+    public boolean isClosed() {
+        synchronized (mLock) {
+            return mDestroyed;
+        }
+    }
+
     /**
      * Sends media button.
      *
