@@ -124,7 +124,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testNoInternetIcon_withDefaultSub() {
         setupNetworkController();
-        when(mMockTm.isDataCapable()).thenReturn(false);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED, 0);
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
@@ -138,7 +138,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testDataDisabledIcon_withDefaultSub() {
         setupNetworkController();
-        when(mMockTm.isDataCapable()).thenReturn(false);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
@@ -152,7 +152,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testNonDefaultSIM_showsFullSignal_connected() {
         setupNetworkController();
-        when(mMockTm.isDataCapable()).thenReturn(false);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(false);
         setupDefaultSignal();
         setDefaultSubId(mSubId + 1);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED, 0);
@@ -167,7 +167,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testNonDefaultSIM_showsFullSignal_disconnected() {
         setupNetworkController();
-        when(mMockTm.isDataCapable()).thenReturn(false);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(false);
         setupDefaultSignal();
         setDefaultSubId(mSubId + 1);
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
@@ -438,7 +438,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testDataDisabledIcon_UserNotSetup() {
         setupNetworkController();
-        when(mMockTm.isDataCapable()).thenReturn(false);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(false);
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
@@ -453,7 +453,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     @Test
     public void testAlwaysShowDataRatIcon() {
         setupDefaultSignal();
-        when(mMockTm.isDataCapable()).thenReturn(false);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(false);
         updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED,
                 TelephonyManager.NETWORK_TYPE_GSM);
 
