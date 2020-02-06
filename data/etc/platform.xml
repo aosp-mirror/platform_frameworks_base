@@ -72,6 +72,11 @@
         <group gid="net_admin" />
     </permission>
 
+    <permission name="android.permission.MAINLINE_NETWORK_STACK" >
+        <group gid="net_admin" />
+        <group gid="net_raw" />
+    </permission>
+
     <!-- The group that /cache belongs to, linked to the permission
          set on the applications that can access /cache -->
     <permission name="android.permission.ACCESS_CACHE_FILESYSTEM" >
