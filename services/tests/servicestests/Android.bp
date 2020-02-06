@@ -63,7 +63,6 @@ android_test {
         "libbacktrace",
         "libbase",
         "libbinder",
-        "libbinderthreadstate",
         "libc++",
         "libcutils",
         "liblog",
