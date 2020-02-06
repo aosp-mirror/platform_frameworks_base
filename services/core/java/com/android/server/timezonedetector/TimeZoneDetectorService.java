@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.PhoneTimeZoneSuggestion;
+import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -101,11 +101,11 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     }
 
     @Override
-    public void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion) {
-        enforceSuggestPhoneTimeZonePermission();
+    public void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion) {
+        enforceSuggestTelephonyTimeZonePermission();
         Objects.requireNonNull(timeZoneSuggestion);
 
-        mHandler.post(() -> mTimeZoneDetectorStrategy.suggestPhoneTimeZone(timeZoneSuggestion));
+        mHandler.post(() -> mTimeZoneDetectorStrategy.suggestTelephonyTimeZone(timeZoneSuggestion));
     }
 
     @Override
@@ -122,10 +122,10 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         mHandler.post(mTimeZoneDetectorStrategy::handleAutoTimeZoneDetectionChanged);
     }
 
-    private void enforceSuggestPhoneTimeZonePermission() {
+    private void enforceSuggestTelephonyTimeZonePermission() {
         mContext.enforceCallingPermission(
-                android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE,
-                "suggest phone time and time zone");
+                android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE,
+                "suggest telephony time and time zone");
     }
 
     private void enforceSuggestManualTimeZonePermission() {
