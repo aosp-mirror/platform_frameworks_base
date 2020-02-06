@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.tv.tuner.V1_0.Constants;
@@ -140,6 +141,34 @@ public final class TunerUtils {
         }
         throw new IllegalArgumentException(
                 "Invalid filter types. Main type=" + mainType + ", subtype=" + subtype);
+    }
+
+    /**
+     * Gets an throwable instance for the corresponding result.
+     */
+    @Nullable
+    public static void throwExceptionForResult(
+            @TunerConstants.Result int r, @Nullable String msg) {
+        if (msg == null) {
+            msg = "";
+        }
+        switch (r) {
+            case TunerConstants.RESULT_INVALID_ARGUMENT:
+                throw new IllegalArgumentException(msg);
+            case TunerConstants.RESULT_INVALID_STATE:
+                throw new IllegalStateException(msg);
+            case TunerConstants.RESULT_NOT_INITIALIZED:
+                throw new IllegalStateException("Invalid state: not initialized. " + msg);
+            case TunerConstants.RESULT_OUT_OF_MEMORY:
+                throw new OutOfMemoryError(msg);
+            case TunerConstants.RESULT_UNAVAILABLE:
+                throw new IllegalStateException("Invalid state: resource unavailable. " + msg);
+            case TunerConstants.RESULT_UNKNOWN_ERROR:
+                throw new RuntimeException("Unknown error" + msg);
+            default:
+                break;
+        }
+        throw new RuntimeException("Unexpected result " + r + ".  " + msg);
     }
 
     private TunerUtils() {}

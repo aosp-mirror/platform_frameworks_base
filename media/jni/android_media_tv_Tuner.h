@@ -54,6 +54,7 @@ using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::IFrontendCallback;
 using ::android::hardware::tv::tuner::V1_0::ILnb;
 using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
+using ::android::hardware::tv::tuner::V1_0::ITimeFilter;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::LnbEventType;
 using ::android::hardware::tv::tuner::V1_0::LnbId;
@@ -128,6 +129,14 @@ struct Filter : public RefBase {
     jweak mFilterObj;
 };
 
+struct TimeFilter : public RefBase {
+    TimeFilter(sp<ITimeFilter> sp, jweak obj);
+    ~TimeFilter();
+    sp<ITimeFilter> getITimeFilter();
+    sp<ITimeFilter> mTimeFilterSp;
+    jweak mTimeFilterObj;
+};
+
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
     sp<ITuner> getTunerService();
@@ -143,6 +152,7 @@ struct JTuner : public RefBase {
     jobject getLnbIds();
     jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
+    jobject openTimeFilter();
     jobject openDescrambler();
     jobject openDvr(DvrType type, int bufferSize);
 
