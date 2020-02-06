@@ -27,10 +27,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking
 import com.android.systemui.statusbar.NotificationMediaManager
+import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
-import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
@@ -62,7 +62,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
                 mock(NotificationGroupManager::class.java),
                 mock(HeadsUpManager::class.java),
                 mock(NotificationFilter::class.java),
-                mock(NotifLog::class.java),
+                mock(NotificationEntryManagerLogger::class.java),
                 mock(NotificationSectionsFeatureManager::class.java),
                 personNotificationIdentifier,
                 HighPriorityProvider(personNotificationIdentifier)
@@ -189,7 +189,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         groupManager: NotificationGroupManager,
         headsUpManager: HeadsUpManager,
         filter: NotificationFilter,
-        notifLog: NotifLog,
+        logger: NotificationEntryManagerLogger,
         sectionsFeatureManager: NotificationSectionsFeatureManager,
         peopleNotificationIdentifier: PeopleNotificationIdentifier,
         highPriorityProvider: HighPriorityProvider
@@ -198,7 +198,7 @@ class NotificationRankingManagerTest : SysuiTestCase() {
         groupManager,
         headsUpManager,
         filter,
-        notifLog,
+        logger,
         sectionsFeatureManager,
         peopleNotificationIdentifier,
         highPriorityProvider
