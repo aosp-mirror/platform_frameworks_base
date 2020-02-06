@@ -3863,4 +3863,7 @@
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
   <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />
+
+  <!-- Whether to expand the lock screen user switcher by default -->
+  <java-symbol type="bool" name="config_expandLockScreenUserSwitcher" />
 </resources>
