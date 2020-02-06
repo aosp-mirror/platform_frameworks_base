@@ -162,6 +162,11 @@ public class NotificationEntryBuilder {
         return this;
     }
 
+    public NotificationEntryBuilder setFlag(Context context, int mask, boolean value) {
+        mSbnBuilder.setFlag(context, mask, value);
+        return this;
+    }
+
     /* Delegated to RankingBuilder */
 
     public NotificationEntryBuilder setRank(int rank) {
