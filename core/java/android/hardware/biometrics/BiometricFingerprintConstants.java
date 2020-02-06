@@ -183,6 +183,18 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     public static final int FINGERPRINT_ACQUIRED_VENDOR = 6;
+
+    /**
+     * This message represents the earliest message sent at the beginning of the authentication
+     * pipeline. It is expected to be used to measure latency. Note this should be sent whenever
+     * authentication is restarted.
+     * The framework will measure latency based on the time between the last START message and the
+     * onAuthenticated callback.
+     *
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_START = 7;
+
     /**
      * @hide
      */
