@@ -1985,7 +1985,6 @@ public class ShortcutService extends IShortcutService.Stub {
             // Verify if caller is the shortcut owner, only if caller doesn't have ACCESS_SHORTCUTS.
             verifyShortcutInfoPackage(callingPackage, shortcut);
         }
-        final String shortcutPackage = shortcut.getPackage();
 
         final boolean ret;
         synchronized (mLock) {
@@ -1999,6 +1998,7 @@ public class ShortcutService extends IShortcutService.Stub {
             // someone already), then we just replace the existing one with this new one,
             // and then proceed the rest of the process.
             if (shortcut != null) {
+                final String shortcutPackage = shortcut.getPackage();
                 final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(
                         shortcutPackage, userId);
                 final String id = shortcut.getId();
