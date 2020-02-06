@@ -6561,6 +6561,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
+            @NonNull final NetworkReassignment changes,
             @NonNull final NetworkAgentInfo newNetwork) {
         final int score = newNetwork.getCurrentScore();
         final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests = new ArrayMap<>();
@@ -6571,7 +6572,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // requests or not, and doesn't affect the network's score.
             if (nri.request.isListen()) continue;
 
-            final NetworkAgentInfo currentNetwork = nri.mSatisfier;
+            // The reassignment has been seeded with the initial assignment, therefore
+            // getReassignment can't be null and mNewNetwork is only null if there was no
+            // satisfier in the first place or there was an explicit reassignment to null.
+            final NetworkAgentInfo currentNetwork = changes.getReassignment(nri).mNewNetwork;
             final boolean satisfies = newNetwork.satisfies(nri.request);
             if (newNetwork == currentNetwork && satisfies) continue;
 
@@ -6621,7 +6625,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (VDBG || DDBG) log("rematching " + newNetwork.name());
 
         final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests =
-                computeRequestReassignmentForNetwork(newNetwork);
+                computeRequestReassignmentForNetwork(changes, newNetwork);
 
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
