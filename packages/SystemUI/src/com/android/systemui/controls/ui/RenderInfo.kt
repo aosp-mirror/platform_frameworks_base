@@ -108,10 +108,18 @@ private val deviceIconMap = mapOf<Int, IconState>(
     DeviceTypes.TYPE_OUTLET to IconState(
         R.drawable.ic_power_off_gm2_24px,
         R.drawable.ic_power_gm2_24px
+    ),
+    DeviceTypes.TYPE_VACUUM to IconState(
+        R.drawable.ic_vacuum_gm2_24px,
+        R.drawable.ic_vacuum_gm2_24px
+    ),
+    DeviceTypes.TYPE_MOP to IconState(
+        R.drawable.ic_vacuum_gm2_24px,
+        R.drawable.ic_vacuum_gm2_24px
     )
 ).withDefault {
     IconState(
-        R.drawable.ic_light_off_gm2_24px,
-        R.drawable.ic_lightbulb_outline_gm2_24px
+        R.drawable.ic_device_unknown_gm2_24px,
+        R.drawable.ic_device_unknown_gm2_24px
     )
 }
