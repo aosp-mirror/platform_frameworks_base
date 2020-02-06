@@ -48,8 +48,8 @@ class TestableNotificationEntryManager(
 
     public var countDownLatch: CountDownLatch = CountDownLatch(1)
 
-    override fun onAsyncInflationFinished(entry: NotificationEntry?, inflatedFlags: Int) {
-        super.onAsyncInflationFinished(entry, inflatedFlags)
+    override fun onAsyncInflationFinished(entry: NotificationEntry) {
+        super.onAsyncInflationFinished(entry)
         countDownLatch.countDown()
     }
 
