@@ -13978,9 +13978,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final int appId;
         final String seinfo;
         final int targetSdkVersion;
+        final String fromCodePath;
 
         public MoveInfo(int moveId, String fromUuid, String toUuid, String packageName,
-                String dataAppName, int appId, String seinfo, int targetSdkVersion) {
+                String dataAppName, int appId, String seinfo, int targetSdkVersion,
+                String fromCodePath) {
             this.moveId = moveId;
             this.fromUuid = fromUuid;
             this.toUuid = toUuid;
@@ -13989,6 +13991,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.appId = appId;
             this.seinfo = seinfo;
             this.targetSdkVersion = targetSdkVersion;
+            this.fromCodePath = fromCodePath;
         }
     }
 
@@ -15104,7 +15107,8 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mInstaller) {
                 try {
                     mInstaller.moveCompleteApp(move.fromUuid, move.toUuid, move.packageName,
-                            move.dataAppName, move.appId, move.seinfo, move.targetSdkVersion);
+                            move.dataAppName, move.appId, move.seinfo, move.targetSdkVersion,
+                            move.fromCodePath);
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to move app", e);
                     return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -22054,6 +22058,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageFreezer freezer;
         final int[] installedUserIds;
         final boolean isCurrentLocationExternal;
+        final String fromCodePath;
 
         // reader
         synchronized (mLock) {
@@ -22110,6 +22115,7 @@ public class PackageManagerService extends IPackageManager.Stub
             targetSdkVersion = pkg.getTargetSdkVersion();
             freezer = freezePackage(packageName, "movePackageInternal");
             installedUserIds = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
+            fromCodePath = pkg.getCodePath();
         }
 
         final Bundle extras = new Bundle();
@@ -22238,7 +22244,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final String dataAppName = codeFile.getName();
             move = new MoveInfo(moveId, currentVolumeUuid, volumeUuid, packageName,
-                    dataAppName, appId, seinfo, targetSdkVersion);
+                    dataAppName, appId, seinfo, targetSdkVersion, fromCodePath);
         } else {
             move = null;
         }
