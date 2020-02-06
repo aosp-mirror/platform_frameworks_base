@@ -332,9 +332,12 @@ public abstract class AtomicFormula extends IntegrityFormula {
          * Constructs a new {@link StringAtomicFormula} together with handling the necessary
          * hashing for the given key.
          *
-         * <p> The value will be hashed with SHA256 and the hex digest will be computed; for
-         * all cases except when the key is PACKAGE_NAME or INSTALLER_NAME and the value
-         * is less than 33 characters.
+         * <p> The value will be automatically hashed with SHA256 and the hex digest will be
+         * computed when the key is PACKAGE_NAME or INSTALLER_NAME and the value is more than 32
+         * characters.
+         *
+         * <p> The APP_CERTIFICATES and INSTALLER_CERTIFICATES are always delivered in hashed
+         * form. So the isHashedValue is set to true by default.
          *
          * @throws IllegalArgumentException if {@code key} cannot be used with string value.
          */
@@ -348,7 +351,10 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     String.format(
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = hashValue(key, value);
-            mIsHashedValue = !mValue.equals(value);
+            mIsHashedValue =
+                    key == APP_CERTIFICATE || key == INSTALLER_CERTIFICATE
+                            ? true
+                            : !mValue.equals(value);
         }
 
         StringAtomicFormula(Parcel in) {
