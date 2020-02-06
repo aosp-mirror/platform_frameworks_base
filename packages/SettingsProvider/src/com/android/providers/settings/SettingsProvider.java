@@ -2193,7 +2193,7 @@ public class SettingsProvider extends ContentProvider {
         if (prefix == null) {
             return;
         }
-        String callingPackage = getCallingPackage();
+        String callingPackage = resolveCallingPackage();
         String namespace = prefix.replace("/", "");
         if (DeviceConfig.getPublicNamespaces().contains(namespace)) {
             return;
