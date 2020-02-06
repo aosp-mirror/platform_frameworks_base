@@ -244,6 +244,10 @@ message SystemMessage {
     // Package: android
     NOTE_SOFTAP_AUTO_DISABLED = 58;
 
+    // Notify the user that their admin has changed location settings.
+    // Package: android
+    NOTE_LOCATION_CHANGED = 59;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
