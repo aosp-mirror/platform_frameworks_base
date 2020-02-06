@@ -101,9 +101,8 @@ public class AppOpsServiceTest {
     private StaticMockitoSession mMockingSession;
 
     private void setupAppOpsService() {
-        mAppOpsService = new AppOpsService(mAppOpsFile, mHandler);
+        mAppOpsService = new AppOpsService(mAppOpsFile, mHandler, spy(sContext));
         mAppOpsService.mHistoricalRegistry.systemReady(sContext.getContentResolver());
-        mAppOpsService.mContext = spy(sContext);
 
         // Always approve all permission checks
         doNothing().when(mAppOpsService.mContext).enforcePermission(anyString(), anyInt(),

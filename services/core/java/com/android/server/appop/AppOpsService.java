@@ -225,7 +225,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     //TODO: remove this when development is done.
     private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
 
-    Context mContext;
+    final Context mContext;
     final AtomicFile mFile;
     final Handler mHandler;
 
@@ -1353,7 +1353,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         featureOp.onClientDeath(clientId);
     }
 
-    public AppOpsService(File storagePath, Handler handler) {
+    public AppOpsService(File storagePath, Handler handler, Context context) {
+        mContext = context;
+
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
         mFile = new AtomicFile(storagePath, "appops");
         mHandler = handler;
@@ -1367,8 +1369,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public void publish(Context context) {
-        mContext = context;
+    public void publish() {
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
         LocalServices.addService(AppOpsManagerInternal.class, mAppOpsManagerInternal);
     }
@@ -2143,6 +2144,12 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void updatePermissionRevokedCompat(int uid, int switchCode, int mode) {
         PackageManager packageManager = mContext.getPackageManager();
+        if (packageManager == null) {
+            // This can only happen during early boot. At this time the permission state and appop
+            // state are in sync
+            return;
+        }
+
         String[] packageNames = packageManager.getPackagesForUid(uid);
         if (ArrayUtils.isEmpty(packageNames)) {
             return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,17 @@ package com.android.server.appop;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -133,10 +141,24 @@ public class AppOpsUpgradeTest {
         AppOpsDataParser parser = new AppOpsDataParser(mAppOpsFile);
         assertTrue(parser.parse());
         assertEquals(AppOpsDataParser.NO_VERSION, parser.mVersion);
-        AppOpsService testService = new AppOpsService(mAppOpsFile, mHandler); // trigger upgrade
+
+        // Use mock context and package manager to fake permision package manager calls.
+        Context testContext = spy(mContext);
+
+        // Pretent everybody has all permissions
+        doNothing().when(testContext).enforcePermission(anyString(), anyInt(), anyInt(),
+                nullable(String.class));
+
+        PackageManager testPM = mock(PackageManager.class);
+        when(testContext.getPackageManager()).thenReturn(testPM);
+
+        // Stub out package calls to disable AppOpsService#updatePermissionRevokedCompat
+        when(testPM.getPackagesForUid(anyInt())).thenReturn(null);
+
+        AppOpsService testService = spy(
+                new AppOpsService(mAppOpsFile, mHandler, testContext)); // trigger upgrade
         assertSameModes(testService.mUidStates, AppOpsManager.OP_RUN_IN_BACKGROUND,
                 AppOpsManager.OP_RUN_ANY_IN_BACKGROUND);
-        testService.mContext = mContext;
         mHandler.removeCallbacks(testService.mWriteRunner);
         testService.writeState();
         assertTrue(parser.parse());
