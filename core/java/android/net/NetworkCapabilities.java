@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -115,7 +117,7 @@ public final class NetworkCapabilities implements Parcelable {
         mTransportInfo = nc.mTransportInfo;
         mSignalStrength = nc.mSignalStrength;
         setUids(nc.mUids); // Will make the defensive copy
-        setAdministratorUids(nc.mAdministratorUids);
+        setAdministratorUids(nc.getAdministratorUids());
         mOwnerUid = nc.mOwnerUid;
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
         mSSID = nc.mSSID;
@@ -881,6 +883,9 @@ public final class NetworkCapabilities implements Parcelable {
      * <p>For NetworkCapability instances being sent from the System Server, this value MUST be
      * empty unless the destination is 1) the System Server, or 2) Telephony. In either case, the
      * receiving entity must have the ACCESS_FINE_LOCATION permission and target R+.
+     *
+     * <p>When received from an app in a NetworkRequest this is always cleared out by the system
+     * server. This field is never used for matching NetworkRequests to NetworkAgents.
      */
     @NonNull private int[] mAdministratorUids = new int[0];
 
@@ -889,10 +894,11 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * <p>UIDs included in administratorUids gain administrator privileges over this Network.
      * Examples of UIDs that should be included in administratorUids are:
+     *
      * <ul>
-     *     <li>Carrier apps with privileges for the relevant subscription
-     *     <li>Active VPN apps
-     *     <li>Other application groups with a particular Network-related role
+     *   <li>Carrier apps with privileges for the relevant subscription
+     *   <li>Active VPN apps
+     *   <li>Other application groups with a particular Network-related role
      * </ul>
      *
      * <p>In general, user-supplied networks (such as WiFi networks) do not have an administrator.
@@ -900,7 +906,10 @@ public final class NetworkCapabilities implements Parcelable {
      * <p>An app is granted owner privileges over Networks that it supplies. The owner UID MUST
      * always be included in administratorUids.
      *
+     * <p>The administrator UIDs are set by network agents.
+     *
      * @param administratorUids the UIDs to be set as administrators of this Network.
+     * @see #mAdministratorUids
      * @hide
      */
     @NonNull
@@ -913,13 +922,52 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Retrieves the UIDs that are administrators of this Network.
      *
+     * <p>This is only populated in NetworkCapabilities objects that come from network agents for
+     * networks that are managed by specific apps on the system, such as carrier privileged apps or
+     * wifi suggestion apps. This will include the network owner.
+     *
      * @return the int[] of UIDs that are administrators of this Network
+     * @see #mAdministratorUids
      * @hide
      */
     @NonNull
     @SystemApi
     public int[] getAdministratorUids() {
         return Arrays.copyOf(mAdministratorUids, mAdministratorUids.length);
+    }
+
+    /**
+     * Tests if the set of administrator UIDs of this network is the same as that of the passed one.
+     *
+     * <p>The administrator UIDs must be in sorted order.
+     *
+     * <p>nc is assumed non-null. Else, NPE.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = PRIVATE)
+    public boolean equalsAdministratorUids(@NonNull final NetworkCapabilities nc) {
+        return Arrays.equals(mAdministratorUids, nc.mAdministratorUids);
+    }
+
+    /**
+     * Combine the administrator UIDs of the capabilities.
+     *
+     * <p>This is only legal if either of the administrators lists are empty, or if they are equal.
+     * Combining administrator UIDs is only possible for combining non-overlapping sets of UIDs.
+     *
+     * <p>If both administrator lists are non-empty but not equal, they conflict with each other. In
+     * this case, it would not make sense to add them together.
+     */
+    private void combineAdministratorUids(@NonNull final NetworkCapabilities nc) {
+        if (nc.mAdministratorUids.length == 0) return;
+        if (mAdministratorUids.length == 0) {
+            mAdministratorUids = Arrays.copyOf(nc.mAdministratorUids, nc.mAdministratorUids.length);
+            return;
+        }
+        if (!equalsAdministratorUids(nc)) {
+            throw new IllegalStateException("Can't combine two different administrator UID lists");
+        }
     }
 
     /**
@@ -1426,6 +1474,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineUids(nc);
         combineSSIDs(nc);
         combineRequestor(nc);
+        combineAdministratorUids(nc);
     }
 
     /**
@@ -1539,7 +1588,8 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsUids(that)
                 && equalsSSID(that)
                 && equalsPrivateDnsBroken(that)
-                && equalsRequestor(that);
+                && equalsRequestor(that)
+                && equalsAdministratorUids(that);
     }
 
     @Override
@@ -1559,7 +1609,8 @@ public final class NetworkCapabilities implements Parcelable {
                 + Objects.hashCode(mTransportInfo) * 41
                 + Objects.hashCode(mPrivateDnsBroken) * 43
                 + Objects.hashCode(mRequestorUid) * 47
-                + Objects.hashCode(mRequestorPackageName) * 53;
+                + Objects.hashCode(mRequestorPackageName) * 53
+                + Arrays.hashCode(mAdministratorUids) * 59;
     }
 
     @Override
@@ -1580,7 +1631,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeArraySet(mUids);
         dest.writeString(mSSID);
         dest.writeBoolean(mPrivateDnsBroken);
-        dest.writeIntArray(mAdministratorUids);
+        dest.writeIntArray(getAdministratorUids());
         dest.writeInt(mOwnerUid);
         dest.writeInt(mRequestorUid);
         dest.writeString(mRequestorPackageName);
