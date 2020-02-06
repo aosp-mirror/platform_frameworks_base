@@ -74,11 +74,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state = mTaskOrganizerStates.get(mTaskOrganizer);
-                for (int i = 0; i < state.mOrganizedTasks.size(); i++) {
-                    state.mOrganizedTasks.get(i).taskOrganizerDied();
-                }
-                mTaskOrganizerStates.remove(mTaskOrganizer);
+                final TaskOrganizerState state =
+                    mTaskOrganizerStates.get(mTaskOrganizer.asBinder());
+                state.releaseTasks();
+                mTaskOrganizerStates.remove(mTaskOrganizer.asBinder());
                 if (mTaskOrganizersForWindowingMode.get(mWindowingMode) == mTaskOrganizer) {
                     mTaskOrganizersForWindowingMode.remove(mWindowingMode);
                 }
@@ -89,26 +88,76 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     class TaskOrganizerState {
         ITaskOrganizer mOrganizer;
         DeathRecipient mDeathRecipient;
+        int mWindowingMode;
 
         ArrayList<Task> mOrganizedTasks = new ArrayList<>();
 
+        // Save the TaskOrganizer which we replaced registration for
+        // so it can be re-registered if we unregister.
+        TaskOrganizerState mReplacementFor;
+        boolean mDisposed = false;
+
+
+        TaskOrganizerState(ITaskOrganizer organizer, int windowingMode,
+                TaskOrganizerState replacing) {
+            mOrganizer = organizer;
+            mDeathRecipient = new DeathRecipient(organizer, windowingMode);
+            try {
+                organizer.asBinder().linkToDeath(mDeathRecipient, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "TaskOrganizer failed to register death recipient");
+            }
+            mWindowingMode = windowingMode;
+            mReplacementFor = replacing;
+        }
+
         void addTask(Task t) {
             mOrganizedTasks.add(t);
+            try {
+                mOrganizer.taskAppeared(t.getTaskInfo());
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception sending taskAppeared callback" + e);
+            }
         }
 
         void removeTask(Task t) {
+            try {
+                mOrganizer.taskVanished(t.getRemoteToken());
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception sending taskVanished callback" + e);
+            }
             mOrganizedTasks.remove(t);
         }
 
-        TaskOrganizerState(ITaskOrganizer organizer, DeathRecipient deathRecipient) {
-            mOrganizer = organizer;
-            mDeathRecipient = deathRecipient;
+        void dispose() {
+            mDisposed = true;
+            releaseTasks();
+            handleReplacement();
+        }
+
+        void releaseTasks() {
+            for (int i = mOrganizedTasks.size() - 1; i >= 0; i--) {
+                final Task t = mOrganizedTasks.get(i);
+                t.taskOrganizerDied();
+                removeTask(t);
+            }
+        }
+
+        void handleReplacement() {
+            if (mReplacementFor != null && !mReplacementFor.mDisposed) {
+                mTaskOrganizersForWindowingMode.put(mWindowingMode, mReplacementFor);
+            }
+        }
+
+        void unlinkDeath() {
+            mDisposed = true;
+            mOrganizer.asBinder().unlinkToDeath(mDeathRecipient, 0);
         }
     };
 
 
     final HashMap<Integer, TaskOrganizerState> mTaskOrganizersForWindowingMode = new HashMap();
-    final HashMap<ITaskOrganizer, TaskOrganizerState> mTaskOrganizerStates = new HashMap();
+    final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap();
 
     final HashMap<Integer, ITaskOrganizer> mTaskOrganizersByPendingSyncId = new HashMap();
 
@@ -128,17 +177,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         mService.mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, func);
     }
 
-    private void clearIfNeeded(int windowingMode) {
-        final TaskOrganizerState oldState = mTaskOrganizersForWindowingMode.get(windowingMode);
-        if (oldState != null) {
-            oldState.mOrganizer.asBinder().unlinkToDeath(oldState.mDeathRecipient, 0);
-        }
-    }
-
     /**
      * Register a TaskOrganizer to manage tasks as they enter the given windowing mode.
      * If there was already a TaskOrganizer for this windowing mode it will be evicted
-     * and receive taskVanished callbacks in the process.
+     * but will continue to organize it's existing tasks.
      */
     @Override
     public void registerTaskOrganizer(ITaskOrganizer organizer, int windowingMode) {
@@ -153,22 +195,23 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                clearIfNeeded(windowingMode);
-                DeathRecipient dr = new DeathRecipient(organizer, windowingMode);
-                try {
-                    organizer.asBinder().linkToDeath(dr, 0);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "TaskOrganizer failed to register death recipient");
-                }
-
-                final TaskOrganizerState state = new TaskOrganizerState(organizer, dr);
+                final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode,
+                        mTaskOrganizersForWindowingMode.get(windowingMode));
                 mTaskOrganizersForWindowingMode.put(windowingMode, state);
-
-                mTaskOrganizerStates.put(organizer, state);
+                mTaskOrganizerStates.put(organizer.asBinder(), state);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    void unregisterTaskOrganizer(ITaskOrganizer organizer) {
+        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+        state.unlinkDeath();
+        if (mTaskOrganizersForWindowingMode.get(state.mWindowingMode) == state) {
+            mTaskOrganizersForWindowingMode.remove(state.mWindowingMode);
+        }
+        state.dispose();
     }
 
     ITaskOrganizer getTaskOrganizer(int windowingMode) {
@@ -179,35 +222,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return state.mOrganizer;
     }
 
-    private void sendTaskAppeared(ITaskOrganizer organizer, Task task) {
-        try {
-            organizer.taskAppeared(task.getTaskInfo());
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception sending taskAppeared callback" + e);
-        }
-    }
-
-    private void sendTaskVanished(ITaskOrganizer organizer, Task task) {
-        try {
-            organizer.taskVanished(task.getRemoteToken());
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception sending taskVanished callback" + e);
-        }
-    }
-
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
-        TaskOrganizerState state = mTaskOrganizerStates.get(organizer);
-
+        TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.addTask(task);
-        sendTaskAppeared(organizer, task);
     }
 
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
-        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer);
-        sendTaskVanished(organizer, task);
-
-        // This could trigger TaskAppeared for other tasks in the same stack so make sure
-        // we do this AFTER sending taskVanished.
+        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.removeTask(task);
     }
 
