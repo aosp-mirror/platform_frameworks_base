@@ -39,7 +39,7 @@ import com.android.systemui.R
 
 const val MIN_LEVEL = 0
 const val MAX_LEVEL = 10000
-private const val UPDATE_DELAY_IN_MILLIS = 2000L
+private const val UPDATE_DELAY_IN_MILLIS = 3000L
 
 class ControlViewHolder(
     val layout: ViewGroup,
