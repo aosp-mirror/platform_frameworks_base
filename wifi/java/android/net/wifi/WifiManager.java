@@ -2625,8 +2625,8 @@ public class WifiManager {
     public void getWifiActivityEnergyInfoAsync(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnWifiActivityEnergyInfoListener listener) {
-        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
-        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         try {
             mService.getWifiActivityEnergyInfoAsync(
                     new OnWifiActivityEnergyInfoProxy(executor, listener));
