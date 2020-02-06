@@ -2505,7 +2505,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState win = windowForClientLocked(session, client, false);
                 ProtoLog.d(WM_DEBUG_ADD_REMOVE, "finishDrawingWindow: %s mDrawState=%s",
                         win, (win != null ? win.mWinAnimator.drawStateToString() : "null"));
-                if (win != null && win.mWinAnimator.finishDrawingLocked(postDrawTransaction)) {
+                if (win != null && win.finishDrawing(postDrawTransaction)) {
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         win.getDisplayContent().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
