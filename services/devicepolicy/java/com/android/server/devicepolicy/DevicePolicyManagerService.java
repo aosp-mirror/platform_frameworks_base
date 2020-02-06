@@ -11583,6 +11583,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 millis, "DevicePolicyManagerService: setTime");
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getTimeDetector().suggestManualTime(manualTimeSuggestion));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_TIME)
+                .setAdmin(who)
+                .write();
         return true;
     }
 
@@ -11599,6 +11604,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         timeZone, "DevicePolicyManagerService: setTimeZone");
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getTimeZoneDetector().suggestManualTimeZone(manualTimeZoneSuggestion));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_TIME_ZONE)
+                .setAdmin(who)
+                .write();
         return true;
     }
 
