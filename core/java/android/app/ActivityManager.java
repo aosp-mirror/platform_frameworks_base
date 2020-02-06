@@ -1472,7 +1472,7 @@ public class ActivityManager {
                 dest.writeInt(1);
                 dest.writeString(mLabel);
             }
-            if (mIcon == null) {
+            if (mIcon == null || mIcon.isRecycled()) {
                 dest.writeInt(0);
             } else {
                 dest.writeInt(1);
