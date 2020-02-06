@@ -121,9 +121,9 @@ cc_defaults {
         "android.frameworks.stats@1.0",
         "libbase",
         "libcutils",
-        "liblog",
         "libprotoutil",
         "libstatslog",
+        "libstatsmetadata",
         "libstatssocket",
         "libsysutils",
     ],
@@ -132,8 +132,8 @@ cc_defaults {
         "libgraphicsenv",
         "libhidlbase",
         "libincident",
+        "liblog",
         "libservices",
-        "libstatsmetadata",
         "libutils",
     ],
 }
@@ -160,7 +160,7 @@ genrule {
     ],
 }
 
-cc_library_shared {
+cc_library_static {
     name: "libstatsmetadata",
     host_supported: true,
     generated_sources: [
