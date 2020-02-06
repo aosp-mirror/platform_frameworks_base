@@ -1457,6 +1457,9 @@ public class ExifInterface {
     private int mRw2JpgFromRawOffset;
     private boolean mIsSupportedFile;
     private boolean mModified;
+    // XMP data can be contained as either part of the EXIF data (tag number 700), or as a
+    // separate data marker (a separate MARKER_APP1).
+    private boolean mXmpIsFromSeparateMarker;
 
     // Pattern to check non zero timestamp
     private static final Pattern sNonZeroTimePattern = Pattern.compile(".*[1-9].*");
@@ -2837,10 +2840,12 @@ public class ExifInterface {
                         final long offset = start + IDENTIFIER_XMP_APP1.length;
                         final byte[] value = Arrays.copyOfRange(bytes,
                                 IDENTIFIER_XMP_APP1.length, bytes.length);
-
+                        // TODO: check if ignoring separate XMP data when tag 700 already exists is
+                        //  valid.
                         if (getAttribute(TAG_XMP) == null) {
                             mAttributes[IFD_TYPE_PRIMARY].put(TAG_XMP, new ExifAttribute(
                                     IFD_FORMAT_BYTE, value.length, offset, value));
+                            mXmpIsFromSeparateMarker = true;
                         }
                     }
                     break;
@@ -3445,10 +3450,23 @@ public class ExifInterface {
         }
         dataOutputStream.writeByte(MARKER_SOI);
 
+        // Remove XMP data if it is from a separate marker (IDENTIFIER_XMP_APP1, not
+        // IDENTIFIER_EXIF_APP1)
+        // Will re-add it later after the rest of the file is written
+        ExifAttribute xmpAttribute = null;
+        if (getAttribute(TAG_XMP) != null && mXmpIsFromSeparateMarker) {
+            xmpAttribute = (ExifAttribute) mAttributes[IFD_TYPE_PRIMARY].remove(TAG_XMP);
+        }
+
         // Write EXIF APP1 segment
         dataOutputStream.writeByte(MARKER);
         dataOutputStream.writeByte(MARKER_APP1);
         writeExifSegment(dataOutputStream);
+
+        // Re-add previously removed XMP data.
+        if (xmpAttribute != null) {
+            mAttributes[IFD_TYPE_PRIMARY].put(TAG_XMP, xmpAttribute);
+        }
 
         byte[] bytes = new byte[4096];
 
