@@ -21,6 +21,7 @@ import static android.Manifest.permission.OVERRIDE_COMPAT_CHANGE_CONFIG;
 import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -107,7 +108,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
-    public boolean isChangeEnabledByPackageName(long changeId, String packageName, int userId) {
+    public boolean isChangeEnabledByPackageName(long changeId, String packageName,
+            @UserIdInt int userId) {
         checkCompatChangeReadAndLogPermission();
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo == null) {
