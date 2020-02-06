@@ -5328,6 +5328,10 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
+        <service android:name="com.android.server.blob.BlobStoreIdleJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
         <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader">
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA" />

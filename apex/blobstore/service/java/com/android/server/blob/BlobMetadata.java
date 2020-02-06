@@ -64,9 +64,9 @@ class BlobMetadata {
 
     private final Context mContext;
 
-    public final long blobId;
-    public final BlobHandle blobHandle;
-    public final int userId;
+    private final long mBlobId;
+    private final BlobHandle mBlobHandle;
+    private final int mUserId;
 
     @GuardedBy("mMetadataLock")
     private final ArraySet<Committer> mCommitters = new ArraySet<>();
@@ -90,9 +90,21 @@ class BlobMetadata {
 
     BlobMetadata(Context context, long blobId, BlobHandle blobHandle, int userId) {
         mContext = context;
-        this.blobId = blobId;
-        this.blobHandle = blobHandle;
-        this.userId = userId;
+        this.mBlobId = blobId;
+        this.mBlobHandle = blobHandle;
+        this.mUserId = userId;
+    }
+
+    long getBlobId() {
+        return mBlobId;
+    }
+
+    BlobHandle getBlobHandle() {
+        return mBlobHandle;
+    }
+
+    int getUserId() {
+        return mUserId;
     }
 
     void addCommitter(@NonNull Committer committer) {
@@ -159,7 +171,7 @@ class BlobMetadata {
 
     boolean hasLeases() {
         synchronized (mMetadataLock) {
-            return mLeasees.isEmpty();
+            return !mLeasees.isEmpty();
         }
     }
 
@@ -196,7 +208,7 @@ class BlobMetadata {
 
     File getBlobFile() {
         if (mBlobFile == null) {
-            mBlobFile = BlobStoreConfig.getBlobFile(blobId);
+            mBlobFile = BlobStoreConfig.getBlobFile(mBlobId);
         }
         return mBlobFile;
     }
@@ -244,7 +256,7 @@ class BlobMetadata {
     void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
         fout.println("blobHandle:");
         fout.increaseIndent();
-        blobHandle.dump(fout, dumpArgs.shouldDumpFull());
+        mBlobHandle.dump(fout, dumpArgs.shouldDumpFull());
         fout.decreaseIndent();
 
         fout.println("Committers:");
@@ -274,11 +286,11 @@ class BlobMetadata {
 
     void writeToXml(XmlSerializer out) throws IOException {
         synchronized (mMetadataLock) {
-            XmlUtils.writeLongAttribute(out, ATTR_ID, blobId);
-            XmlUtils.writeIntAttribute(out, ATTR_USER_ID, userId);
+            XmlUtils.writeLongAttribute(out, ATTR_ID, mBlobId);
+            XmlUtils.writeIntAttribute(out, ATTR_USER_ID, mUserId);
 
             out.startTag(null, TAG_BLOB_HANDLE);
-            blobHandle.writeToXml(out);
+            mBlobHandle.writeToXml(out);
             out.endTag(null, TAG_BLOB_HANDLE);
 
             for (int i = 0, count = mCommitters.size(); i < count; ++i) {

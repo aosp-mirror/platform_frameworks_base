@@ -257,6 +257,11 @@ public final class BlobHandle implements Parcelable {
         return Base64.encodeToString(digest, Base64.NO_WRAP);
     }
 
+    /** @hide */
+    public boolean isExpired() {
+        return expiryTimeMillis != 0 && expiryTimeMillis < System.currentTimeMillis();
+    }
+
     public static final @NonNull Creator<BlobHandle> CREATOR = new Creator<BlobHandle>() {
         @Override
         public @NonNull BlobHandle createFromParcel(@NonNull Parcel source) {
