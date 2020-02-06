@@ -16,6 +16,10 @@
 
 package android.content.integrity;
 
+import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Map;
 
 /**
@@ -25,7 +29,29 @@ import java.util.Map;
  *
  * @hide
  */
-public class InstallerAllowedByManifestFormula extends IntegrityFormula {
+public class InstallerAllowedByManifestFormula extends IntegrityFormula implements Parcelable {
+
+    public static final String INSTALLER_CERTIFICATE_NOT_EVALUATED = "";
+
+    public InstallerAllowedByManifestFormula() {
+    }
+
+    private InstallerAllowedByManifestFormula(Parcel in) {
+    }
+
+    @NonNull
+    public static final Creator<InstallerAllowedByManifestFormula> CREATOR =
+            new Creator<InstallerAllowedByManifestFormula>() {
+                @Override
+                public InstallerAllowedByManifestFormula createFromParcel(Parcel in) {
+                    return new InstallerAllowedByManifestFormula(in);
+                }
+
+                @Override
+                public InstallerAllowedByManifestFormula[] newArray(int size) {
+                    return new InstallerAllowedByManifestFormula[size];
+                }
+            };
 
     @Override
     public int getTag() {
@@ -54,10 +80,30 @@ public class InstallerAllowedByManifestFormula extends IntegrityFormula {
     private static boolean installerInAllowedInstallersFromManifest(
             AppInstallMetadata appInstallMetadata,
             Map<String, String> allowedInstallersAndCertificates) {
-        return allowedInstallersAndCertificates.containsKey(appInstallMetadata.getInstallerName())
-                && appInstallMetadata.getInstallerCertificates()
-                .contains(
-                        allowedInstallersAndCertificates
-                        .get(appInstallMetadata.getInstallerName()));
+        String installerPackage = appInstallMetadata.getInstallerName();
+
+        if (!allowedInstallersAndCertificates.containsKey(installerPackage)) {
+            return false;
+        }
+
+        // If certificate is not specified in the manifest, we do not check it.
+        if (!allowedInstallersAndCertificates.get(installerPackage)
+                .equals(INSTALLER_CERTIFICATE_NOT_EVALUATED)) {
+            return appInstallMetadata.getInstallerCertificates()
+                    .contains(
+                            allowedInstallersAndCertificates
+                                    .get(appInstallMetadata.getInstallerName()));
+        }
+
+        return true;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
     }
 }

@@ -23,6 +23,7 @@ import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.integrity.AppIntegrityManager.EXTRA_STATUS;
 import static android.content.integrity.AppIntegrityManager.STATUS_FAILURE;
 import static android.content.integrity.AppIntegrityManager.STATUS_SUCCESS;
+import static android.content.integrity.InstallerAllowedByManifestFormula.INSTALLER_CERTIFICATE_NOT_EVALUATED;
 import static android.content.integrity.IntegrityUtils.getHexDigest;
 import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 
@@ -95,7 +96,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
      * This string will be used as the "installer" for formula evaluation when the app is being
      * installed via ADB.
      */
-    private static final String ADB_INSTALLER = "adb";
+    public static final String ADB_INSTALLER = "adb";
 
     private static final String TAG = "AppIntegrityManagerServiceImpl";
 
@@ -105,8 +106,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private static final String ALLOWED_INSTALLERS_METADATA_NAME = "allowed-installers";
     private static final String ALLOWED_INSTALLER_DELIMITER = ",";
     private static final String INSTALLER_PACKAGE_CERT_DELIMITER = "\\|";
-
-    private static final String INSTALLER_CERT_NOT_APPLICABLE = "";
 
     // Access to files inside mRulesDir is protected by mRulesLock;
     private final Context mContext;
@@ -282,15 +281,16 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             builder.setInstallerName(getPackageNameNormalized(installerPackageName));
             builder.setInstallerCertificates(installerCertificates);
             builder.setIsPreInstalled(isSystemApp(packageName));
+            builder.setAllowedInstallersAndCert(getAllowedInstallers(packageInfo));
 
             AppInstallMetadata appInstallMetadata = builder.build();
-            Map<String, String> allowedInstallers = getAllowedInstallers(packageInfo);
 
             Slog.i(
                     TAG,
-                    "To be verified: " + appInstallMetadata + " installers " + allowedInstallers);
+                    "To be verified: " + appInstallMetadata + " installers " + getAllowedInstallers(
+                            packageInfo));
             IntegrityCheckResult result =
-                    mEvaluationEngine.evaluate(appInstallMetadata, allowedInstallers);
+                    mEvaluationEngine.evaluate(appInstallMetadata);
             Slog.i(
                     TAG,
                     "Integrity check result: "
@@ -449,9 +449,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                         String packageName = getPackageNameNormalized(packageAndCert[0]);
                         String cert = packageAndCert[1];
                         packageCertMap.put(packageName, cert);
-                    } else if (packageAndCert.length == 1
-                            && packageAndCert[0].equals(ADB_INSTALLER)) {
-                        packageCertMap.put(ADB_INSTALLER, INSTALLER_CERT_NOT_APPLICABLE);
+                    } else if (packageAndCert.length == 1) {
+                        packageCertMap.put(getPackageNameNormalized(packageAndCert[0]),
+                                INSTALLER_CERTIFICATE_NOT_EVALUATED);
                     }
                 }
             }

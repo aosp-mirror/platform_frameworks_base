@@ -214,6 +214,8 @@ public abstract class IntegrityFormula {
                 return LongAtomicFormula.CREATOR.createFromParcel(in);
             case BOOLEAN_ATOMIC_FORMULA_TAG:
                 return BooleanAtomicFormula.CREATOR.createFromParcel(in);
+            case INSTALLER_ALLOWED_BY_MANIFEST_FORMULA_TAG:
+                return InstallerAllowedByManifestFormula.CREATOR.createFromParcel(in);
             default:
                 throw new IllegalArgumentException("Unknown formula tag " + tag);
         }

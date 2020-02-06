@@ -17,9 +17,6 @@
 package com.android.server.integrity.engine;
 
 import android.content.integrity.AppInstallMetadata;
-import android.content.integrity.AtomicFormula;
-import android.content.integrity.CompoundFormula;
-import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 import android.util.Slog;
 
@@ -28,10 +25,8 @@ import com.android.server.integrity.IntegrityFileManager;
 import com.android.server.integrity.model.IntegrityCheckResult;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * The engine used to evaluate rules against app installs.
@@ -69,16 +64,15 @@ public class RuleEvaluationEngine {
      * @return result of the integrity check
      */
     public IntegrityCheckResult evaluate(
-            AppInstallMetadata appInstallMetadata, Map<String, String> allowedInstallers) {
+            AppInstallMetadata appInstallMetadata) {
         List<Rule> rules = loadRules(appInstallMetadata);
-        allowedInstallersRule(allowedInstallers).ifPresent(rules::add);
         return RuleEvaluator.evaluateRules(rules, appInstallMetadata);
     }
 
     private List<Rule> loadRules(AppInstallMetadata appInstallMetadata) {
         if (!mIntegrityFileManager.initialized()) {
-            Slog.w(TAG, "Integrity rule files are not available. Evaluating only manifest rules.");
-            return new ArrayList<>();
+            Slog.w(TAG, "Integrity rule files are not available.");
+            return Collections.emptyList();
         }
 
         try {
@@ -87,42 +81,5 @@ public class RuleEvaluationEngine {
             Slog.e(TAG, "Error loading rules.", e);
             return new ArrayList<>();
         }
-    }
-
-    private static Optional<Rule> allowedInstallersRule(Map<String, String> allowedInstallers) {
-        if (allowedInstallers.isEmpty()) {
-            return Optional.empty();
-        }
-
-        List<IntegrityFormula> formulas = new ArrayList<>(allowedInstallers.size());
-        allowedInstallers.forEach(
-                (installer, cert) -> {
-                    formulas.add(allowedInstallerFormula(installer, cert));
-                });
-
-        // We need this special case since OR-formulas require at least two operands.
-        IntegrityFormula allInstallersFormula =
-                formulas.size() == 1
-                        ? formulas.get(0)
-                        : new CompoundFormula(CompoundFormula.OR, formulas);
-
-        return Optional.of(
-                new Rule(
-                        new CompoundFormula(
-                                CompoundFormula.NOT, Arrays.asList(allInstallersFormula)),
-                        Rule.DENY));
-    }
-
-    private static IntegrityFormula allowedInstallerFormula(String installer, String cert) {
-        return new CompoundFormula(
-                CompoundFormula.AND,
-                Arrays.asList(
-                        new AtomicFormula.StringAtomicFormula(
-                                AtomicFormula.INSTALLER_NAME,
-                                installer,
-                                /* isHashedValue= */ false),
-                        new AtomicFormula.StringAtomicFormula(
-                                AtomicFormula.INSTALLER_CERTIFICATE, cert, /* isHashedValue= */
-                                false)));
     }
 }
