@@ -449,9 +449,8 @@ public class WifiInfo implements Parcelable {
      * <p>
      * If the SSID can be decoded as UTF-8, it will be returned surrounded by double
      * quotation marks. Otherwise, it is returned as a string of hex digits.
-     * The SSID may be
-     * <lt>&lt;unknown ssid&gt;, if there is no network currently connected or if the caller has
-     * insufficient permissions to access the SSID.<lt>
+     * The SSID may be {@link WifiManager#UNKNOWN_SSID}, if there is no network currently connected
+     * or if the caller has insufficient permissions to access the SSID.
      * </p>
      * <p>
      * Prior to {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}, this method
