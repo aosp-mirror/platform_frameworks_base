@@ -1726,11 +1726,11 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * @return true if pinned but neither static nor dynamic.
+     * @return true if pinned or cached, but neither static nor dynamic.
      * @hide
      */
     public boolean isFloating() {
-        return isPinned() && !(isDynamic() || isManifestShortcut());
+        return (isPinned() || isCached()) && !(isDynamic() || isManifestShortcut());
     }
 
     /** @hide */

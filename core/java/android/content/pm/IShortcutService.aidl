@@ -76,4 +76,6 @@ interface IShortcutService {
     void removeLongLivedShortcuts(String packageName, in List shortcutIds, int userId);
 
     ParceledListSlice getShortcuts(String packageName, int matchFlags, int userId);
+
+    void pushDynamicShortcut(String packageName, in ShortcutInfo shortcut, int userId);
 }

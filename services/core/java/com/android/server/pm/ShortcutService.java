@@ -133,6 +133,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -1943,6 +1944,50 @@ public class ShortcutService extends IShortcutService.Stub {
         verifyStates();
 
         return true;
+    }
+
+    @Override
+    public void pushDynamicShortcut(String packageName, ShortcutInfo shortcut,
+            @UserIdInt int userId) {
+        verifyCaller(packageName, userId);
+        verifyShortcutInfoPackage(packageName, shortcut);
+
+        final boolean unlimited = injectHasUnlimitedShortcutsApiCallsPermission(
+                injectBinderCallingPid(), injectBinderCallingUid());
+
+        synchronized (mLock) {
+            throwIfUserLockedL(userId);
+
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
+
+            ps.ensureNotImmutable(shortcut.getId(), /*ignoreInvisible=*/ true);
+            fillInDefaultActivity(Arrays.asList(shortcut));
+
+            if (!shortcut.hasRank()) {
+                shortcut.setRank(0);
+            }
+            // Initialize the implicit ranks for ShortcutPackage.adjustRanks().
+            ps.clearAllImplicitRanks();
+            shortcut.setImplicitRank(0);
+
+            // Validate the shortcut.
+            fixUpIncomingShortcutInfo(shortcut, /* forUpdate= */ false);
+
+            // When ranks are changing, we need to insert between ranks, so set the
+            // "rank changed" flag.
+            shortcut.setRankChanged();
+
+            // Push it.
+            if (!ps.pushDynamicShortcut(shortcut)) {
+                return;
+            }
+
+            // Lastly, adjust the ranks.
+            ps.adjustRanks();
+        }
+        packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
     }
 
     @Override
