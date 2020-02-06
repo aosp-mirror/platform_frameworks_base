@@ -68,7 +68,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final NotifRemoteViewCache mRemoteViewCache;
 
     @Inject
-    public NotificationContentInflater(
+    NotificationContentInflater(
             NotifRemoteViewCache remoteViewCache,
             NotificationRemoteInputManager remoteInputManager) {
         mRemoteViewCache = remoteViewCache;
@@ -575,7 +575,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             entry.headsUpStatusBarText = result.headsUpStatusBarText;
             entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
             if (endListener != null) {
-                endListener.onAsyncInflationFinished(entry, reInflateFlags);
+                endListener.onAsyncInflationFinished(entry);
             }
             return true;
         }
@@ -641,7 +641,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private final boolean mUsesIncreasedHeight;
         private final InflationCallback mCallback;
         private final boolean mUsesIncreasedHeadsUpHeight;
-        private @InflationFlag int mReInflateFlags;
+        private final @InflationFlag int mReInflateFlags;
         private final NotifRemoteViewCache mRemoteViewCache;
         private ExpandableNotificationRow mRow;
         private Exception mError;
@@ -739,25 +739,16 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         }
 
         @Override
-        public void supersedeTask(InflationTask task) {
-            if (task instanceof AsyncInflationTask) {
-                // We want to inflate all flags of the previous task as well
-                mReInflateFlags |= ((AsyncInflationTask) task).mReInflateFlags;
-            }
-        }
-
-        @Override
         public void handleInflationException(NotificationEntry entry, Exception e) {
             handleError(e);
         }
 
         @Override
-        public void onAsyncInflationFinished(NotificationEntry entry,
-                @InflationFlag int inflatedFlags) {
+        public void onAsyncInflationFinished(NotificationEntry entry) {
             mEntry.onInflationTaskFinished();
             mRow.onNotificationUpdated();
             if (mCallback != null) {
-                mCallback.onAsyncInflationFinished(mEntry, inflatedFlags);
+                mCallback.onAsyncInflationFinished(mEntry);
             }
 
             // Notify the resolver that the inflation task has finished,

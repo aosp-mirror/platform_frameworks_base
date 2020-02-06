@@ -398,7 +398,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setAnomalyAlarm(long timestampMs) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) Slog.d(TAG, "Setting anomaly alarm for " + timestampMs);
         final long callingToken = Binder.clearCallingIdentity();
         try {
@@ -414,7 +414,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void cancelAnomalyAlarm() {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) Slog.d(TAG, "Cancelling anomaly alarm");
         final long callingToken = Binder.clearCallingIdentity();
         try {
@@ -426,7 +426,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setAlarmForSubscriberTriggering(long timestampMs) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) {
             Slog.d(TAG,
                     "Setting periodic alarm in about " + (timestampMs
@@ -445,7 +445,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void cancelAlarmForSubscriberTriggering() {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) {
             Slog.d(TAG, "Cancelling periodic alarm");
         }
@@ -459,7 +459,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void setPullingAlarm(long nextPullTimeMs) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) {
             Slog.d(TAG, "Setting pulling alarm in about "
                     + (nextPullTimeMs - SystemClock.elapsedRealtime()));
@@ -477,7 +477,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void cancelPullingAlarm() {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) {
             Slog.d(TAG, "Cancelling pulling alarm");
         }
@@ -491,7 +491,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public void statsdReady() {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         if (DEBUG) {
             Slog.d(TAG, "learned that statsdReady");
         }
@@ -503,7 +503,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override
     public void triggerUidSnapshot() {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         synchronized (sStatsdLock) {
             final long token = Binder.clearCallingIdentity();
             try {
@@ -518,7 +518,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override // Binder call
     public boolean checkPermission(String permission, int pid, int uid) {
-        StatsCompanion.enforceStatsCompanionPermission(mContext);
+        StatsCompanion.enforceStatsdCallingUid();
         return mContext.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_GRANTED;
     }
 

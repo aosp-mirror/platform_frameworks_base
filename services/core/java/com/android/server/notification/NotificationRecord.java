@@ -91,7 +91,7 @@ public final class NotificationRecord {
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     // the period after which a notification is updated where it can make sound
     private static final int MAX_SOUND_DELAY_MS = 2000;
-    final StatusBarNotification sbn;
+    private final StatusBarNotification sbn;
     IActivityManager mAm;
     UriGrantsManagerInternal mUgmInternal;
     final int mTargetSdkVersion;
@@ -229,7 +229,7 @@ public final class NotificationRecord {
     }
 
     private Uri calculateSound() {
-        final Notification n = sbn.getNotification();
+        final Notification n = getSbn().getNotification();
 
         // No notification sounds on tv
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
@@ -265,7 +265,7 @@ public final class NotificationRecord {
         if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_LIGHTS) == 0) {
-            final Notification notification = sbn.getNotification();
+            final Notification notification = getSbn().getNotification();
             if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
                 light = new Light(notification.ledARGB, notification.ledOnMS,
                         notification.ledOffMS);
@@ -296,7 +296,7 @@ public final class NotificationRecord {
         if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
-            final Notification notification = sbn.getNotification();
+            final Notification notification = getSbn().getNotification();
             final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
             if (useDefaultVibrate) {
@@ -309,7 +309,7 @@ public final class NotificationRecord {
     }
 
     private AudioAttributes calculateAttributes() {
-        final Notification n = sbn.getNotification();
+        final Notification n = getSbn().getNotification();
         AudioAttributes attributes = getChannel().getAudioAttributes();
         if (attributes == null) {
             attributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
@@ -335,7 +335,7 @@ public final class NotificationRecord {
     }
 
     private int calculateInitialImportance() {
-        final Notification n = sbn.getNotification();
+        final Notification n = getSbn().getNotification();
         int importance = getChannel().getImportance();  // Post-channels notifications use this
         mInitialImportanceExplanationCode = getChannel().hasUserSetImportance()
                 ? MetricsEvent.IMPORTANCE_EXPLANATION_USER
@@ -406,31 +406,31 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
-        if (previous.sbn.getOverrideGroupKey() != null && !sbn.isAppGroup()) {
-            sbn.setOverrideGroupKey(previous.sbn.getOverrideGroupKey());
+        if (previous.getSbn().getOverrideGroupKey() != null && !getSbn().isAppGroup()) {
+            getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
         }
         // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
-    public Notification getNotification() { return sbn.getNotification(); }
-    public int getFlags() { return sbn.getNotification().flags; }
-    public UserHandle getUser() { return sbn.getUser(); }
-    public String getKey() { return sbn.getKey(); }
+    public Notification getNotification() { return getSbn().getNotification(); }
+    public int getFlags() { return getSbn().getNotification().flags; }
+    public UserHandle getUser() { return getSbn().getUser(); }
+    public String getKey() { return getSbn().getKey(); }
     /** @deprecated Use {@link #getUser()} instead. */
-    public int getUserId() { return sbn.getUserId(); }
-    public int getUid() { return sbn.getUid(); }
+    public int getUserId() { return getSbn().getUserId(); }
+    public int getUid() { return getSbn().getUid(); }
 
     void dump(ProtoOutputStream proto, long fieldId, boolean redact, int state) {
         final long token = proto.start(fieldId);
 
-        proto.write(NotificationRecordProto.KEY, sbn.getKey());
+        proto.write(NotificationRecordProto.KEY, getSbn().getKey());
         proto.write(NotificationRecordProto.STATE, state);
         if (getChannel() != null) {
             proto.write(NotificationRecordProto.CHANNEL_ID, getChannel().getId());
         }
         proto.write(NotificationRecordProto.CAN_SHOW_LIGHT, getLight() != null);
         proto.write(NotificationRecordProto.CAN_VIBRATE, getVibration() != null);
-        proto.write(NotificationRecordProto.FLAGS, sbn.getNotification().flags);
+        proto.write(NotificationRecordProto.FLAGS, getSbn().getNotification().flags);
         proto.write(NotificationRecordProto.GROUP_KEY, getGroupKey());
         proto.write(NotificationRecordProto.IMPORTANCE, getImportance());
         if (getSound() != null) {
@@ -439,8 +439,8 @@ public final class NotificationRecord {
         if (getAudioAttributes() != null) {
             getAudioAttributes().dumpDebug(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
         }
-        proto.write(NotificationRecordProto.PACKAGE, sbn.getPackageName());
-        proto.write(NotificationRecordProto.DELEGATE_PACKAGE, sbn.getOpPkg());
+        proto.write(NotificationRecordProto.PACKAGE, getSbn().getPackageName());
+        proto.write(NotificationRecordProto.DELEGATE_PACKAGE, getSbn().getOpPkg());
 
         proto.end(token);
     }
@@ -452,15 +452,15 @@ public final class NotificationRecord {
     }
 
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
-        final Notification notification = sbn.getNotification();
+        final Notification notification = getSbn().getNotification();
         pw.println(prefix + this);
         prefix = prefix + "  ";
-        pw.println(prefix + "uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
-        pw.println(prefix + "opPkg=" + sbn.getOpPkg());
+        pw.println(prefix + "uid=" + getSbn().getUid() + " userId=" + getSbn().getUserId());
+        pw.println(prefix + "opPkg=" + getSbn().getOpPkg());
         pw.println(prefix + "icon=" + notification.getSmallIcon());
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
         pw.println(prefix + "pri=" + notification.priority);
-        pw.println(prefix + "key=" + sbn.getKey());
+        pw.println(prefix + "key=" + getSbn().getKey());
         pw.println(prefix + "seen=" + mStats.hasSeen());
         pw.println(prefix + "groupKey=" + getGroupKey());
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
@@ -594,9 +594,9 @@ public final class NotificationRecord {
                 "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s" +
                         ": %s)",
                 System.identityHashCode(this),
-                this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
-                this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
-                this.sbn.getNotification());
+                this.getSbn().getPackageName(), this.getSbn().getUser(), this.getSbn().getId(),
+                this.getSbn().getTag(), this.mImportance, this.getSbn().getKey(),
+                this.getSbn().getNotification());
     }
 
     public boolean hasAdjustment(String key) {
@@ -936,7 +936,7 @@ public final class NotificationRecord {
     private long calculateRankingTimeMs(long previousRankingTimeMs) {
         Notification n = getNotification();
         // Take developer provided 'when', unless it's in the future.
-        if (n.when != 0 && n.when <= sbn.getPostTime()) {
+        if (n.when != 0 && n.when <= getSbn().getPostTime()) {
             return n.when;
         }
         // If we've ranked a previous instance with a timestamp, inherit it. This case is
@@ -944,7 +944,7 @@ public final class NotificationRecord {
         if (previousRankingTimeMs > 0) {
             return previousRankingTimeMs;
         }
-        return sbn.getPostTime();
+        return getSbn().getPostTime();
     }
 
     public void setGlobalSortKey(String globalSortKey) {
@@ -977,11 +977,11 @@ public final class NotificationRecord {
     }
 
     public String getGroupKey() {
-        return sbn.getGroupKey();
+        return getSbn().getGroupKey();
     }
 
     public void setOverrideGroupKey(String overrideGroupKey) {
-        sbn.setOverrideGroupKey(overrideGroupKey);
+        getSbn().setOverrideGroupKey(overrideGroupKey);
     }
 
     public NotificationChannel getChannel() {
@@ -1202,7 +1202,7 @@ public final class NotificationRecord {
      * Returns whether this notification was posted by a secondary app
      */
     public boolean isProxied() {
-        return !Objects.equals(sbn.getPackageName(), sbn.getOpPkg());
+        return !Objects.equals(getSbn().getPackageName(), getSbn().getOpPkg());
     }
 
     /**
@@ -1245,7 +1245,7 @@ public final class NotificationRecord {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         // We can't grant Uri permissions from system
-        final int sourceUid = sbn.getUid();
+        final int sourceUid = getSbn().getUid();
         if (sourceUid == android.os.Process.SYSTEM_UID) return;
 
         final long ident = Binder.clearCallingIdentity();
@@ -1274,7 +1274,7 @@ public final class NotificationRecord {
     }
 
     public LogMaker getLogMaker(long now) {
-        LogMaker lm = sbn.getLogMaker()
+        LogMaker lm = getSbn().getLogMaker()
                 .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE, mImportance)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
@@ -1349,6 +1349,10 @@ public final class NotificationRecord {
         }
         // STOPSHIP b/137397357: Check shortcut to make a further decision
         return true;
+    }
+
+    StatusBarNotification getSbn() {
+        return sbn;
     }
 
     @VisibleForTesting

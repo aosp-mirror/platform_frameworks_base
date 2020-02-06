@@ -276,7 +276,7 @@ public class NotificationUsageStats {
 
     // Locked by this.
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
-        return getAggregatedStatsLocked(record.sbn.getPackageName());
+        return getAggregatedStatsLocked(record.getSbn().getPackageName());
     }
 
     // Locked by this.
@@ -1142,7 +1142,7 @@ public class NotificationUsageStats {
                     long nowMs = System.currentTimeMillis();
                     switch (msg.what) {
                         case MSG_POST:
-                            writeEvent(r.sbn.getPostTime(), EVENT_TYPE_POST, r);
+                            writeEvent(r.getSbn().getPostTime(), EVENT_TYPE_POST, r);
                             break;
                         case MSG_CLICK:
                             writeEvent(nowMs, EVENT_TYPE_CLICK, r);
@@ -1287,7 +1287,7 @@ public class NotificationUsageStats {
 
         private void writeEvent(long eventTimeMs, int eventType, NotificationRecord r) {
             ContentValues cv = new ContentValues();
-            cv.put(COL_EVENT_USER_ID, r.sbn.getUser().getIdentifier());
+            cv.put(COL_EVENT_USER_ID, r.getSbn().getUser().getIdentifier());
             cv.put(COL_EVENT_TIME, eventTimeMs);
             cv.put(COL_EVENT_TYPE, eventType);
             putNotificationIdentifiers(r, cv);
@@ -1324,16 +1324,16 @@ public class NotificationUsageStats {
         }
 
         private static void putNotificationIdentifiers(NotificationRecord r, ContentValues outCv) {
-            outCv.put(COL_KEY, r.sbn.getKey());
-            outCv.put(COL_PKG, r.sbn.getPackageName());
+            outCv.put(COL_KEY, r.getSbn().getKey());
+            outCv.put(COL_PKG, r.getSbn().getPackageName());
         }
 
         private static void putNotificationDetails(NotificationRecord r, ContentValues outCv) {
-            outCv.put(COL_NOTIFICATION_ID, r.sbn.getId());
-            if (r.sbn.getTag() != null) {
-                outCv.put(COL_TAG, r.sbn.getTag());
+            outCv.put(COL_NOTIFICATION_ID, r.getSbn().getId());
+            if (r.getSbn().getTag() != null) {
+                outCv.put(COL_TAG, r.getSbn().getTag());
             }
-            outCv.put(COL_WHEN_MS, r.sbn.getPostTime());
+            outCv.put(COL_WHEN_MS, r.getSbn().getPostTime());
             outCv.put(COL_FLAGS, r.getNotification().flags);
             final int before = r.stats.requestedImportance;
             final int after = r.getImportance();

@@ -95,6 +95,9 @@ bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
 // Returns the truncated timestamp to the nearest 5 minutes if needed.
 int64_t truncateTimestampIfNecessary(int atomId, int64_t timestampNs);
 
+// Checks permission for given pid and uid.
+bool checkPermissionForIds(const char* permission, pid_t pid, uid_t uid);
+
 inline bool isVendorPulledAtom(int atomId) {
     return atomId >= StatsdStats::kVendorPulledAtomStartTag && atomId < StatsdStats::kMaxAtomTag;
 }

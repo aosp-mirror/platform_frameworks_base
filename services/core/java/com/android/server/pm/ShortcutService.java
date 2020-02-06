@@ -1985,7 +1985,6 @@ public class ShortcutService extends IShortcutService.Stub {
             // Verify if caller is the shortcut owner, only if caller doesn't have ACCESS_SHORTCUTS.
             verifyShortcutInfoPackage(callingPackage, shortcut);
         }
-        final String shortcutPackage = shortcut.getPackage();
 
         final boolean ret;
         synchronized (mLock) {
@@ -1999,6 +1998,7 @@ public class ShortcutService extends IShortcutService.Stub {
             // someone already), then we just replace the existing one with this new one,
             // and then proceed the rest of the process.
             if (shortcut != null) {
+                final String shortcutPackage = shortcut.getPackage();
                 final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(
                         shortcutPackage, userId);
                 final String id = shortcut.getId();
@@ -2152,48 +2152,6 @@ public class ShortcutService extends IShortcutService.Stub {
         packageShortcutsChanged(packageName, userId);
 
         verifyStates();
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getDynamicShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isDynamicVisible);
-        }
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getManifestShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isManifestVisible);
-        }
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getPinnedShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isPinnedVisible);
-        }
     }
 
     @Override

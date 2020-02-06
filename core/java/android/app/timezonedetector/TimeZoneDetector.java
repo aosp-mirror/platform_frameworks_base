@@ -18,7 +18,6 @@ package android.app.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 
@@ -27,7 +26,6 @@ import android.content.Context;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.TIME_ZONE_DETECTOR_SERVICE)
 public interface TimeZoneDetector {
 
@@ -49,7 +47,6 @@ public interface TimeZoneDetector {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
     void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion);
 

@@ -21,7 +21,6 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,7 +50,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
@@ -144,15 +142,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
 
         assertNull(row.getPrivateLayout().getHeadsUpChild());
-    }
-
-    @Test
-    public void setNeedsRedactionSetsInflationFlag() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
-
-        row.setNeedsRedaction(true);
-
-        assertTrue(row.isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
     }
 
     @Test

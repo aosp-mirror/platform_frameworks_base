@@ -33,13 +33,12 @@ import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
 import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.timezonedetector.TestHandler;
 
 import org.junit.After;
 import org.junit.Before;
@@ -108,7 +107,7 @@ public class TimeDetectorServiceTest {
                 eq(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE),
                 anyString());
 
-        mTestHandler.waitForEmptyQueue();
+        mTestHandler.waitForMessagesToBeProcessed();
         mStubbedTimeDetectorStrategy.verifySuggestPhoneTimeCalled(phoneTimeSuggestion);
     }
 
@@ -140,7 +139,7 @@ public class TimeDetectorServiceTest {
                 eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
                 anyString());
 
-        mTestHandler.waitForEmptyQueue();
+        mTestHandler.waitForMessagesToBeProcessed();
         mStubbedTimeDetectorStrategy.verifySuggestManualTimeCalled(manualTimeSuggestion);
     }
 
@@ -170,7 +169,7 @@ public class TimeDetectorServiceTest {
         verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SET_TIME), anyString());
 
-        mTestHandler.waitForEmptyQueue();
+        mTestHandler.waitForMessagesToBeProcessed();
         mStubbedTimeDetectorStrategy.verifySuggestNetworkTimeCalled(NetworkTimeSuggestion);
     }
 
@@ -187,21 +186,23 @@ public class TimeDetectorServiceTest {
 
     @Test
     public void testAutoTimeDetectionToggle() throws Exception {
-        mTimeDetectorService.handleAutoTimeDetectionToggle();
+        mTimeDetectorService.handleAutoTimeDetectionChanged();
         mTestHandler.assertTotalMessagesEnqueued(1);
-        mTestHandler.waitForEmptyQueue();
-        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled();
+        mTestHandler.waitForMessagesToBeProcessed();
+        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionChangedCalled();
 
-        mTimeDetectorService.handleAutoTimeDetectionToggle();
+        mStubbedTimeDetectorStrategy.resetCallTracking();
+
+        mTimeDetectorService.handleAutoTimeDetectionChanged();
         mTestHandler.assertTotalMessagesEnqueued(2);
-        mTestHandler.waitForEmptyQueue();
-        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled();
+        mTestHandler.waitForMessagesToBeProcessed();
+        mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionChangedCalled();
     }
 
     private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
-        int phoneId = 1234;
+        int slotIndex = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new PhoneTimeSuggestion.Builder(phoneId)
+        return new PhoneTimeSuggestion.Builder(slotIndex)
                 .setUtcTime(timeValue)
                 .build();
     }
@@ -222,7 +223,7 @@ public class TimeDetectorServiceTest {
         private PhoneTimeSuggestion mLastPhoneSuggestion;
         private ManualTimeSuggestion mLastManualSuggestion;
         private NetworkTimeSuggestion mLastNetworkSuggestion;
-        private boolean mLastAutoTimeDetectionToggleCalled;
+        private boolean mHandleAutoTimeDetectionChangedCalled;
         private boolean mDumpCalled;
 
         @Override
@@ -231,31 +232,26 @@ public class TimeDetectorServiceTest {
 
         @Override
         public void suggestPhoneTime(PhoneTimeSuggestion timeSuggestion) {
-            resetCallTracking();
             mLastPhoneSuggestion = timeSuggestion;
         }
 
         @Override
         public void suggestManualTime(ManualTimeSuggestion timeSuggestion) {
-            resetCallTracking();
             mLastManualSuggestion = timeSuggestion;
         }
 
         @Override
         public void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion) {
-            resetCallTracking();
             mLastNetworkSuggestion = timeSuggestion;
         }
 
         @Override
         public void handleAutoTimeDetectionChanged() {
-            resetCallTracking();
-            mLastAutoTimeDetectionToggleCalled = true;
+            mHandleAutoTimeDetectionChangedCalled = true;
         }
 
         @Override
         public void dump(PrintWriter pw, String[] args) {
-            resetCallTracking();
             mDumpCalled = true;
         }
 
@@ -263,7 +259,7 @@ public class TimeDetectorServiceTest {
             mLastPhoneSuggestion = null;
             mLastManualSuggestion = null;
             mLastNetworkSuggestion = null;
-            mLastAutoTimeDetectionToggleCalled = false;
+            mHandleAutoTimeDetectionChangedCalled = false;
             mDumpCalled = false;
         }
 
@@ -279,45 +275,12 @@ public class TimeDetectorServiceTest {
             assertEquals(expectedSuggestion, mLastNetworkSuggestion);
         }
 
-        void verifyHandleAutoTimeDetectionToggleCalled() {
-            assertTrue(mLastAutoTimeDetectionToggleCalled);
+        void verifyHandleAutoTimeDetectionChangedCalled() {
+            assertTrue(mHandleAutoTimeDetectionChangedCalled);
         }
 
         void verifyDumpCalled() {
             assertTrue(mDumpCalled);
-        }
-    }
-
-    /**
-     * A Handler that can track posts/sends and wait for work to be completed.
-     */
-    private static class TestHandler extends Handler {
-
-        private int mMessagesSent;
-
-        TestHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
-            mMessagesSent++;
-            return super.sendMessageAtTime(msg, uptimeMillis);
-        }
-
-        /** Asserts the number of messages posted or sent is as expected. */
-        void assertTotalMessagesEnqueued(int expected) {
-            assertEquals(expected, mMessagesSent);
-        }
-
-        /**
-         * Waits for all currently enqueued work due to be processed to be completed before
-         * returning.
-         */
-        void waitForEmptyQueue() throws InterruptedException {
-            while (!getLooper().getQueue().isIdle()) {
-                Thread.sleep(100);
-            }
         }
     }
 }

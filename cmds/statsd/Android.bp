@@ -64,6 +64,7 @@ cc_defaults {
         "src/config/ConfigKey.cpp",
         "src/config/ConfigListener.cpp",
         "src/config/ConfigManager.cpp",
+        "src/experiment_ids.proto",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
         "src/external/PullResultReceiver.cpp",
@@ -110,7 +111,7 @@ cc_defaults {
     ],
 
     cflags: [
-        "-DNEW_ENCODING_SCHEME",
+        // "-DNEW_ENCODING_SCHEME",
     ],
 
     local_include_dirs: [

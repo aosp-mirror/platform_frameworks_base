@@ -568,14 +568,12 @@ public class WifiConfiguration implements Parcelable {
      * 2GHz band.
      * @hide
      */
-    @SystemApi
     public static final int AP_BAND_2GHZ = 0;
 
     /**
      * 5GHz band.
      * @hide
      */
-    @SystemApi
     public static final int AP_BAND_5GHZ = 1;
 
     /**
@@ -583,7 +581,6 @@ public class WifiConfiguration implements Parcelable {
      * operating country code and current radio conditions.
      * @hide
      */
-    @SystemApi
     public static final int AP_BAND_ANY = -1;
 
     /**
@@ -593,7 +590,7 @@ public class WifiConfiguration implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @ApBand
     public int apBand = AP_BAND_2GHZ;
 

@@ -32,10 +32,10 @@ import android.widget.RemoteViews;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class NotifRemoteViewCacheImplTest extends SysuiTestCase {
 
     private NotifRemoteViewCacheImpl mNotifRemoteViewCache;
     private NotificationEntry mEntry;
-    private NotificationEntryListener mEntryListener;
+    private NotifCollectionListener mEntryListener;
     @Mock private RemoteViews mRemoteViews;
 
     @Before
@@ -58,19 +58,17 @@ public class NotifRemoteViewCacheImplTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mEntry = new NotificationEntryBuilder().build();
 
-        NotificationEntryManager entryManager = mock(NotificationEntryManager.class);
-        mNotifRemoteViewCache = new NotifRemoteViewCacheImpl(entryManager);
-        ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
-                ArgumentCaptor.forClass(NotificationEntryListener.class);
-        verify(entryManager).addNotificationEntryListener(entryListenerCaptor.capture());
+        CommonNotifCollection collection = mock(CommonNotifCollection.class);
+        mNotifRemoteViewCache = new NotifRemoteViewCacheImpl(collection);
+        ArgumentCaptor<NotifCollectionListener> entryListenerCaptor =
+                ArgumentCaptor.forClass(NotifCollectionListener.class);
+        verify(collection).addCollectionListener(entryListenerCaptor.capture());
         mEntryListener = entryListenerCaptor.getValue();
+        mEntryListener.onEntryInit(mEntry);
     }
 
     @Test
     public void testPutCachedView() {
-        // GIVEN an initialized cache for an entry.
-        mEntryListener.onPendingEntryAdded(mEntry);
-
         // WHEN a notification's cached remote views is put in.
         mNotifRemoteViewCache.putCachedView(mEntry, FLAG_CONTENT_VIEW_CONTRACTED, mRemoteViews);
 
@@ -85,7 +83,6 @@ public class NotifRemoteViewCacheImplTest extends SysuiTestCase {
     @Test
     public void testRemoveCachedView() {
         // GIVEN a cache with a cached view.
-        mEntryListener.onPendingEntryAdded(mEntry);
         mNotifRemoteViewCache.putCachedView(mEntry, FLAG_CONTENT_VIEW_CONTRACTED, mRemoteViews);
 
         // WHEN we remove the cached view.
@@ -98,7 +95,6 @@ public class NotifRemoteViewCacheImplTest extends SysuiTestCase {
     @Test
     public void testClearCache() {
         // GIVEN a non-empty cache.
-        mEntryListener.onPendingEntryAdded(mEntry);
         mNotifRemoteViewCache.putCachedView(mEntry, FLAG_CONTENT_VIEW_CONTRACTED, mRemoteViews);
         mNotifRemoteViewCache.putCachedView(mEntry, FLAG_CONTENT_VIEW_EXPANDED, mRemoteViews);
 

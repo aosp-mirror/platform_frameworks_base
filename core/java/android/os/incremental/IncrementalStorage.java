@@ -40,10 +40,10 @@ import java.util.UUID;
 public final class IncrementalStorage {
     private static final String TAG = "IncrementalStorage";
     private final int mId;
-    private final IIncrementalManagerNative mService;
+    private final IIncrementalService mService;
 
 
-    public IncrementalStorage(@NonNull IIncrementalManagerNative is, int id) {
+    public IncrementalStorage(@NonNull IIncrementalService is, int id) {
         mService = is;
         mId = id;
     }
@@ -74,7 +74,7 @@ public final class IncrementalStorage {
             throws IOException {
         try {
             int res = mService.makeBindMount(mId, sourcePath, targetPath,
-                    IIncrementalManagerNative.BIND_TEMPORARY);
+                    IIncrementalService.BIND_TEMPORARY);
             if (res < 0) {
                 throw new IOException("bind() failed with errno " + -res);
             }
@@ -105,7 +105,7 @@ public final class IncrementalStorage {
             throws IOException {
         try {
             int res = mService.makeBindMount(mId, sourcePath, targetPath,
-                    IIncrementalManagerNative.BIND_PERMANENT);
+                    IIncrementalService.BIND_PERMANENT);
             if (res < 0) {
                 throw new IOException("bind() permanent failed with errno " + -res);
             }
@@ -293,7 +293,7 @@ public final class IncrementalStorage {
         }
         try {
             int res = mService.makeBindMount(mId, sourcePath, destPath,
-                    IIncrementalManagerNative.BIND_PERMANENT);
+                    IIncrementalService.BIND_PERMANENT);
             if (res < 0) {
                 throw new IOException("moveDir() failed at making bind mount, errno " + -res);
             }

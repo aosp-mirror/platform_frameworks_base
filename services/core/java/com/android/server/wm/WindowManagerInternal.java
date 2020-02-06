@@ -562,4 +562,14 @@ public abstract class WindowManagerInternal {
      */
     public abstract void setAccessibilityIdToSurfaceMetadata(
             IBinder windowToken, int accessibilityWindowId);
+
+    /**
+     * Transfers input focus from a given input token to that of the IME window.
+     *
+     * @param sourceInputToken The source token.
+     * @param displayId The display hosting the IME window.
+     * @return Whether transfer was successful.
+     */
+    public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
+            int displayId);
 }

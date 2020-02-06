@@ -434,9 +434,14 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (DEBUG) {
             Log.d(TAG, "Destroying " + session);
         }
+        if (session.isClosed()) {
+            Log.w(TAG, "Destroying already destroyed session. Ignoring.");
+            return;
+        }
+
         FullUserRecord user = getFullUserRecordLocked(session.getUserId());
 
-        if (user != null) {
+        if (user != null && session instanceof MediaSessionRecord) {
             final int uid = session.getUid();
             final int sessionCount = user.mUidToSessionCount.get(uid, 0);
             if (sessionCount <= 0) {
@@ -570,6 +575,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                 throw new RuntimeException("Session request from invalid user.");
             }
 
+            final int sessionCount = user.mUidToSessionCount.get(callerUid, 0);
+            if (sessionCount >= SESSION_CREATION_LIMIT_PER_UID
+                    && !hasMediaControlPermission(callerPid, callerUid)) {
+                throw new RuntimeException("Created too many sessions. count="
+                        + sessionCount + ")");
+            }
+
             final MediaSessionRecord session;
             try {
                 session = new MediaSessionRecord(callerPid, callerUid, userId,
@@ -579,12 +591,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 throw new RuntimeException("Media Session owner died prematurely.", e);
             }
 
-            final int sessionCount = user.mUidToSessionCount.get(callerUid, 0);
-            if (sessionCount >= SESSION_CREATION_LIMIT_PER_UID
-                    && !hasMediaControlPermission(callerPid, callerUid)) {
-                throw new RuntimeException("Created too many sessions. count="
-                        + sessionCount + ")");
-            }
             user.mUidToSessionCount.put(callerUid, sessionCount + 1);
 
             user.mPriorityStack.addSession(session);

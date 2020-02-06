@@ -38,6 +38,10 @@ class CredstoreIdentityCredentialStore extends IdentityCredentialStore {
         ICredentialStoreFactory storeFactory =
                 ICredentialStoreFactory.Stub.asInterface(
                     ServiceManager.getService("android.security.identity"));
+        if (storeFactory == null) {
+            // This can happen if credstore is not running or not installed.
+            return null;
+        }
 
         ICredentialStore credStore = null;
         try {

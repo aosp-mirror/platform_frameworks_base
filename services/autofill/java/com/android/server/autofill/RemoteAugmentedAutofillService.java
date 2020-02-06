@@ -55,6 +55,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
+import com.android.server.autofill.ui.InlineSuggestionFactory;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
@@ -144,7 +145,8 @@ final class RemoteAugmentedAutofillService
             int taskId, @NonNull ComponentName activityComponent, @NonNull AutofillId focusedId,
             @Nullable AutofillValue focusedValue,
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
-            @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback) {
+            @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
+            @NonNull Runnable onErrorCallback) {
         long requestTime = SystemClock.elapsedRealtime();
         AtomicReference<ICancellationSignal> cancellationRef = new AtomicReference<>();
 
@@ -161,12 +163,12 @@ final class RemoteAugmentedAutofillService
                             focusedId, focusedValue, requestTime, inlineSuggestionsRequest,
                             new IFillCallback.Stub() {
                                 @Override
-                                public void onSuccess(@Nullable Dataset[] inlineSuggestionsData,
-                                        @Nullable Bundle clientState) {
+                                public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsData, focusedId,
-                                            inlineSuggestionsCallback, client, clientState);
+                                            inlineSuggestionsCallback, client,
+                                            onErrorCallback);
                                     requestAutofill.complete(null);
                                 }
 
@@ -231,29 +233,31 @@ final class RemoteAugmentedAutofillService
     private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable Dataset[] inlineSuggestionsData, @NonNull AutofillId focusedId,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
-            @NonNull IAutoFillManagerClient client, @Nullable Bundle clientState) {
+            @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback) {
         if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null) {
             return;
         }
         mCallbacks.setLastResponse(sessionId);
+
         try {
             inlineSuggestionsCallback.onInlineSuggestionsResponse(
                     InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
                             inlineSuggestionsData, focusedId, mContext,
                             dataset -> {
                                 mCallbacks.logAugmentedAutofillSelected(sessionId,
-                                        dataset.getId(), clientState);
+                                        dataset.getId());
                                 try {
                                     client.autofill(sessionId, dataset.getFieldIds(),
                                             dataset.getFieldValues());
                                 } catch (RemoteException e) {
                                     Slog.w(TAG, "Encounter exception autofilling the values");
                                 }
-                            }));
+                            }, onErrorCallback));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception sending inline suggestions response back to IME.");
         }
-        mCallbacks.logAugmentedAutofillShown(sessionId, clientState);
+
+        mCallbacks.logAugmentedAutofillShown(sessionId);
     }
 
     @Override
@@ -275,9 +279,8 @@ final class RemoteAugmentedAutofillService
 
         void setLastResponse(int sessionId);
 
-        void logAugmentedAutofillShown(int sessionId, @Nullable Bundle clientState);
+        void logAugmentedAutofillShown(int sessionId);
 
-        void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
-                @Nullable Bundle clientState);
+        void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId);
     }
 }

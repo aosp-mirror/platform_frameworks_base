@@ -953,24 +953,24 @@ binder::Status FakeSubsystemSleepCallback::onPullAtom(
     // Convert stats_events into StatsEventParcels.
     std::vector<android::util::StatsEventParcel> parcels;
     for (int i = 1; i < 3; i++) {
-        stats_event* event = stats_event_obtain();
-        stats_event_set_atom_id(event, atomTag);
+        AStatsEvent* event = AStatsEvent_obtain();
+        AStatsEvent_setAtomId(event, atomTag);
         std::string subsystemName = "subsystem_name_";
         subsystemName = subsystemName + std::to_string(i);
-        stats_event_write_string8(event, subsystemName.c_str());
-        stats_event_write_string8(event, "subsystem_subname foo");
-        stats_event_write_int64(event, /*count= */ i);
-        stats_event_write_int64(event, /*time_millis= */ i * 100);
-        stats_event_build(event);
+        AStatsEvent_writeString(event, subsystemName.c_str());
+        AStatsEvent_writeString(event, "subsystem_subname foo");
+        AStatsEvent_writeInt64(event, /*count= */ i);
+        AStatsEvent_writeInt64(event, /*time_millis= */ i * 100);
+        AStatsEvent_build(event);
         size_t size;
-        uint8_t* buffer = stats_event_get_buffer(event, &size);
+        uint8_t* buffer = AStatsEvent_getBuffer(event, &size);
 
         android::util::StatsEventParcel p;
         // vector.assign() creates a copy, but this is inevitable unless
         // stats_event.h/c uses a vector as opposed to a buffer.
         p.buffer.assign(buffer, buffer + size);
         parcels.push_back(std::move(p));
-        stats_event_release(event);
+        AStatsEvent_write(event);
     }
     resultReceiver->pullFinished(atomTag, /*success=*/true, parcels);
     return binder::Status::ok();

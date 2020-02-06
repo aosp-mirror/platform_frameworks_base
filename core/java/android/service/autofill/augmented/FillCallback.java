@@ -54,13 +54,15 @@ public final class FillCallback {
         if (sDebug) Log.d(TAG, "onSuccess(): " + response);
 
         if (response == null) {
-            mProxy.report(AutofillProxy.REPORT_EVENT_NO_RESPONSE);
+            mProxy.logEvent(AutofillProxy.REPORT_EVENT_NO_RESPONSE);
+            mProxy.reportResult(null /*inlineSuggestions*/);
             return;
         }
 
         List<Dataset> inlineSuggestions = response.getInlineSuggestions();
         if (inlineSuggestions != null && !inlineSuggestions.isEmpty()) {
-            mProxy.onInlineSuggestionsDataReady(inlineSuggestions, response.getClientState());
+            mProxy.logEvent(AutofillProxy.REPORT_EVENT_INLINE_RESPONSE);
+            mProxy.reportResult(inlineSuggestions);
             return;
         }
 

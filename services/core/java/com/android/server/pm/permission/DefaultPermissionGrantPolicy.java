@@ -720,12 +720,9 @@ public final class DefaultPermissionGrantPolicy {
                 userId, STORAGE_PERMISSIONS);
 
         // TextClassifier Service
-        final String[] packages = mContext.getPackageManager().getSystemTextClassifierPackages();
-        if (packages.length > 0) {
-            // We have a list of supported system TextClassifier package names, the first one
-            // package is the default system TextClassifier service. Grant permissions to default
-            // TextClassifier Service.
-            grantPermissionsToSystemPackage(packages[0], userId,
+        for (String textClassifierPackage :
+                getKnownPackages(PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER, userId)) {
+            grantPermissionsToSystemPackage(textClassifierPackage, userId,
                     COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
         }
 

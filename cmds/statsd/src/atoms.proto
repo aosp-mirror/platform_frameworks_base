@@ -202,7 +202,8 @@ message Atom {
         DocsUIStartupMsReported docs_ui_startup_ms = 111 [(module) = "docsui"];
         DocsUIUserActionReported docs_ui_user_action_reported = 112 [(module) = "docsui"];
         WifiEnabledStateChanged wifi_enabled_state_changed = 113 [(module) = "framework"];
-        WifiRunningStateChanged wifi_running_state_changed = 114 [(module) = "framework"];
+        WifiRunningStateChanged wifi_running_state_changed = 114
+                [(module) = "framework", deprecated = true];
         AppCompacted app_compacted = 115 [(module) = "framework"];
         NetworkDnsEventReported network_dns_event_reported = 116 [(module) = "resolv"];
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported =
@@ -1258,6 +1259,8 @@ message WifiEnabledStateChanged {
 }
 
 /**
+ * This atom is deprecated starting in R.
+ *
  * Logs when an app causes Wifi to run. In this context, 'to run' means to use Wifi Client Mode.
  * TODO: Include support for Hotspot, perhaps by using an extra field to denote 'mode'.
  * Note that Wifi Scanning is monitored separately in WifiScanStateChanged.
@@ -3706,6 +3709,7 @@ message FlagFlipUpdateOccurred {
 
 /**
  * Potential experiment ids that goes with a train install.
+ * Should be kept in sync with experiment_ids.proto.
  */
 message TrainExperimentIds {
     repeated int64 experiment_id = 1;

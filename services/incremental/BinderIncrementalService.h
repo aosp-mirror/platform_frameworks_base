@@ -20,12 +20,12 @@
 #include <binder/IServiceManager.h>
 
 #include "IncrementalService.h"
-#include "android/os/incremental/BnIncrementalManagerNative.h"
+#include "android/os/incremental/BnIncrementalService.h"
 #include "incremental_service.h"
 
 namespace android::os::incremental {
 
-class BinderIncrementalService : public BnIncrementalManagerNative,
+class BinderIncrementalService : public BnIncrementalService,
                                  public BinderService<BinderIncrementalService> {
 public:
     BinderIncrementalService(const sp<IServiceManager> &sm);

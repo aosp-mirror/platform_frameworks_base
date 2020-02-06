@@ -46,15 +46,15 @@ static void init() {
     }
 }
 
-static status_pull_atom_return_t pullAtomCallback(int32_t atomTag, pulled_stats_event_list* data,
-                                                  void* /*cookie*/) {
+static AStatsManager_PullAtomCallbackReturn pullAtomCallback(int32_t atomTag, AStatsEventList* data,
+                                                             void* /*cookie*/) {
     sNumPulls++;
     sleep_for(std::chrono::milliseconds(sLatencyMillis));
     for (int i = 0; i < sAtomsPerPull; i++) {
-        stats_event* event = add_stats_event_to_pull_data(data);
-        stats_event_set_atom_id(event, atomTag);
-        stats_event_write_int64(event, (int64_t) sNumPulls);
-        stats_event_build(event);
+        AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+        AStatsEvent_setAtomId(event, atomTag);
+        AStatsEvent_writeInt64(event, (int64_t) sNumPulls);
+        AStatsEvent_build(event);
     }
     return sPullReturnVal;
 }
@@ -71,11 +71,12 @@ Java_com_android_internal_os_statsd_libstats_LibStatsPullTests_registerStatsPull
     sLatencyMillis = latencyMillis;
     sAtomsPerPull = atomsPerPull;
     sNumPulls = 0;
-    pull_atom_metadata metadata = {.cool_down_ns = coolDownNs,
-                                   .timeout_ns = timeoutNs,
-                                   .additive_fields = nullptr,
-                                   .additive_fields_size = 0};
-    register_stats_pull_atom_callback(sAtomTag, &pullAtomCallback, &metadata, nullptr);
+    AStatsManager_PullAtomMetadata* metadata = AStatsManager_PullAtomMetadata_obtain();
+    AStatsManager_PullAtomMetadata_setCoolDownNs(metadata, coolDownNs);
+    AStatsManager_PullAtomMetadata_setTimeoutNs(metadata, timeoutNs);
+
+    AStatsManager_registerPullAtomCallback(sAtomTag, &pullAtomCallback, metadata, nullptr);
+    AStatsManager_PullAtomMetadata_release(metadata);
 }
 
 extern "C"
@@ -83,6 +84,6 @@ JNIEXPORT void JNICALL
 Java_com_android_internal_os_statsd_libstats_LibStatsPullTests_unregisterStatsPuller(
         JNIEnv* /*env*/, jobject /* this */, jint /*atomTag*/)
 {
-    unregister_stats_pull_atom_callback(sAtomTag);
+    AStatsManager_unregisterPullAtomCallback(sAtomTag);
 }
 } // namespace

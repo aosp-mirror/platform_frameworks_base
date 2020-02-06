@@ -139,6 +139,52 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUnregisterOrganizer() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer).taskAppeared(any());
+        assertTrue(stack.isControlledByTaskOrganizer());
+
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
+        verify(organizer).taskVanished(any());
+        assertFalse(stack.isControlledByTaskOrganizer());
+    }
+
+    @Test
+    public void testUnregisterOrganizerReturnsRegistrationToPrevious() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ActivityStack stack2 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task2 = createTaskInStack(stack2, 0 /* userId */);
+        final ActivityStack stack3 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task3 = createTaskInStack(stack3, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+
+        // First organizer is registered, verify a task appears when changing windowing mode
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer, times(1)).taskAppeared(any());
+        assertTrue(stack.isControlledByTaskOrganizer());
+
+        // Now we replace the registration and1 verify the new organizer receives tasks
+        // newly entering the windowing mode.
+        final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer2).taskAppeared(any());
+        assertTrue(stack2.isControlledByTaskOrganizer());
+
+        // Now we unregister the second one, the first one should automatically be reregistered
+        // so we verify that it's now seeing changes.
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
+
+        stack3.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer, times(2)).taskAppeared(any());
+        assertTrue(stack3.isControlledByTaskOrganizer());
+    }
+
+    @Test
     public void testRegisterTaskOrganizerStackWindowingModeChanges() throws RemoteException {
         final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_PINNED);
 

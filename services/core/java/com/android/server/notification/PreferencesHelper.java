@@ -1380,7 +1380,8 @@ public class PreferencesHelper implements RankingConfig {
                 policy.priorityCategories, policy.priorityCallSenders,
                 policy.priorityMessageSenders, policy.suppressedVisualEffects,
                 (areChannelsBypassingDnd ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND
-                        : 0)));
+                        : 0),
+                policy.priorityConversationSenders));
     }
 
     public boolean areChannelsBypassingDnd() {

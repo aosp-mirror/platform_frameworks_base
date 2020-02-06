@@ -24,12 +24,12 @@ import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_MULTI
 import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.PhoneTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
 
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_HIGH;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_HIGHEST;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_LOW;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_MEDIUM;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_NONE;
-import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.PHONE_SCORE_USAGE_THRESHOLD;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.PHONE_SCORE_HIGH;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.PHONE_SCORE_HIGHEST;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.PHONE_SCORE_LOW;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.PHONE_SCORE_MEDIUM;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.PHONE_SCORE_NONE;
+import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.PHONE_SCORE_USAGE_THRESHOLD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,7 +41,7 @@ import android.app.timezonedetector.PhoneTimeZoneSuggestion;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.PhoneTimeZoneSuggestion.Quality;
 
-import com.android.server.timezonedetector.TimeZoneDetectorStrategy.QualifiedPhoneTimeZoneSuggestion;
+import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedPhoneTimeZoneSuggestion;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,9 +52,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 /**
- * White-box unit tests for {@link TimeZoneDetectorStrategy}.
+ * White-box unit tests for {@link TimeZoneDetectorStrategyImpl}.
  */
-public class TimeZoneDetectorStrategyTest {
+public class TimeZoneDetectorStrategyImplTest {
 
     /** A time zone used for initialization that does not occur elsewhere in tests. */
     private static final String ARBITRARY_TIME_ZONE_ID = "Etc/UTC";
@@ -78,14 +78,14 @@ public class TimeZoneDetectorStrategyTest {
             newTestCase(MATCH_TYPE_EMULATOR_ZONE_ID, QUALITY_SINGLE_ZONE, PHONE_SCORE_HIGHEST),
     };
 
-    private TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
+    private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
     private FakeTimeZoneDetectorStrategyCallback mFakeTimeZoneDetectorStrategyCallback;
 
     @Before
     public void setUp() {
         mFakeTimeZoneDetectorStrategyCallback = new FakeTimeZoneDetectorStrategyCallback();
         mTimeZoneDetectorStrategy =
-                new TimeZoneDetectorStrategy(mFakeTimeZoneDetectorStrategyCallback);
+                new TimeZoneDetectorStrategyImpl(mFakeTimeZoneDetectorStrategyCallback);
     }
 
     @Test
@@ -364,7 +364,7 @@ public class TimeZoneDetectorStrategyTest {
     }
 
     /**
-     * The {@link TimeZoneDetectorStrategy.Callback} is left to detect whether changing the time
+     * The {@link TimeZoneDetectorStrategyImpl.Callback} is left to detect whether changing the time
      * zone is actually necessary. This test proves that the service doesn't assume it knows the
      * current setting.
      */
@@ -441,7 +441,8 @@ public class TimeZoneDetectorStrategyTest {
         return new PhoneTimeZoneSuggestion.Builder(PHONE2_ID).build();
     }
 
-    static class FakeTimeZoneDetectorStrategyCallback implements TimeZoneDetectorStrategy.Callback {
+    static class FakeTimeZoneDetectorStrategyCallback
+            implements TimeZoneDetectorStrategyImpl.Callback {
 
         private boolean mAutoTimeZoneDetectionEnabled;
         private TestState<String> mTimeZoneId = new TestState<>();
@@ -560,7 +561,7 @@ public class TimeZoneDetectorStrategyTest {
 
         Script autoTimeZoneDetectionEnabled(boolean enabled) {
             mFakeTimeZoneDetectorStrategyCallback.setAutoTimeZoneDetectionEnabled(enabled);
-            mTimeZoneDetectorStrategy.handleAutoTimeZoneDetectionChange();
+            mTimeZoneDetectorStrategy.handleAutoTimeZoneDetectionChanged();
             return this;
         }
 

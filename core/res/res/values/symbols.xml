@@ -3048,6 +3048,9 @@
   <java-symbol type="string" name="app_suspended_unsuspend_message" />
   <java-symbol type="string" name="app_suspended_default_message" />
 
+  <java-symbol type="string" name="app_blocked_title" />
+  <java-symbol type="string" name="app_blocked_message" />
+
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
 
@@ -3390,7 +3393,6 @@
   <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultTextClassifierPackage" />
-  <java-symbol type="array" name="config_defaultTextClassifierPackages" />
   <java-symbol type="string" name="config_defaultWellbeingPackage" />
   <java-symbol type="string" name="config_telephonyPackages" />
   <java-symbol type="string" name="config_defaultContentCaptureService" />

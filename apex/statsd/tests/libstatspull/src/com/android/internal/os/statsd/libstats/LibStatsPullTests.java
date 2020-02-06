@@ -71,7 +71,6 @@ public class LibStatsPullTests {
      */
     @Before
     public void setup() {
-//        Debug.waitForDebugger();
         mContext = InstrumentationRegistry.getTargetContext();
         assertThat(InstrumentationRegistry.getInstrumentation()).isNotNull();
         sPullReturnValue = StatsManager.PULL_SUCCESS;

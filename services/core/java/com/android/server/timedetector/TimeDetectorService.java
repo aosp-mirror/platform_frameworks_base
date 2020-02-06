@@ -37,6 +37,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 
+/**
+ * The implementation of ITimeDetectorService.aidl.
+ */
 public final class TimeDetectorService extends ITimeDetectorService.Stub {
     private static final String TAG = "TimeDetectorService";
 
@@ -75,7 +78,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME), true,
                 new ContentObserver(handler) {
                     public void onChange(boolean selfChange) {
-                        timeDetectorService.handleAutoTimeDetectionToggle();
+                        timeDetectorService.handleAutoTimeDetectionChanged();
                     }
                 });
 
@@ -114,8 +117,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
     }
 
+    /** Internal method for handling the auto time setting being changed. */
     @VisibleForTesting
-    public void handleAutoTimeDetectionToggle() {
+    public void handleAutoTimeDetectionChanged() {
         mHandler.post(mTimeDetectorStrategy::handleAutoTimeDetectionChanged);
     }
 

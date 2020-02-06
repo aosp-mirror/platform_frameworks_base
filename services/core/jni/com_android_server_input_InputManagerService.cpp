@@ -1563,20 +1563,17 @@ static void nativeSetSystemUiVisibility(JNIEnv* /* env */,
 }
 
 static jboolean nativeTransferTouchFocus(JNIEnv* env,
-        jclass /* clazz */, jlong ptr, jobject fromChannelObj, jobject toChannelObj) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    sp<InputChannel> fromChannel =
-            android_view_InputChannel_getInputChannel(env, fromChannelObj);
-    sp<InputChannel> toChannel =
-            android_view_InputChannel_getInputChannel(env, toChannelObj);
-
-    if (fromChannel == nullptr || toChannel == nullptr) {
+        jclass /* clazz */, jlong ptr, jobject fromChannelTokenObj, jobject toChannelTokenObj) {
+    if (fromChannelTokenObj == nullptr || toChannelTokenObj == nullptr) {
         return JNI_FALSE;
     }
 
+    sp<IBinder> fromChannelToken = ibinderForJavaObject(env, fromChannelTokenObj);
+    sp<IBinder> toChannelToken = ibinderForJavaObject(env, toChannelTokenObj);
+
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     if (im->getInputManager()->getDispatcher()->transferTouchFocus(
-            fromChannel->getConnectionToken(), toChannel->getConnectionToken())) {
+            fromChannelToken, toChannelToken)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -1784,7 +1781,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetInputDispatchMode },
     { "nativeSetSystemUiVisibility", "(JI)V",
             (void*) nativeSetSystemUiVisibility },
-    { "nativeTransferTouchFocus", "(JLandroid/view/InputChannel;Landroid/view/InputChannel;)Z",
+    { "nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
             (void*) nativeTransferTouchFocus },
     { "nativeSetPointerSpeed", "(JI)V",
             (void*) nativeSetPointerSpeed },

@@ -18,7 +18,6 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.SystemClock;
@@ -29,7 +28,6 @@ import android.os.TimestampedValue;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.TIME_DETECTOR_SERVICE)
 public interface TimeDetector {
 

@@ -49,9 +49,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
@@ -200,8 +198,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                     }
 
                     @Override
-                    public void onAsyncInflationFinished(NotificationEntry entry,
-                            @InflationFlag int inflatedFlags) {
+                    public void onAsyncInflationFinished(NotificationEntry entry) {
                         countDownLatch.countDown();
                     }
                 }, mRow.getPrivateLayout(), null, null, new HashMap<>(),
@@ -217,34 +214,6 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                     }
                 });
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
-    }
-
-    /* Cancelling requires us to be on the UI thread otherwise we might have a race */
-    @Test
-    public void testSupersedesExistingTask() {
-        mNotificationInflater.bindContent(
-                mRow.getEntry(),
-                mRow,
-                FLAG_CONTENT_VIEW_ALL,
-                new BindParams(),
-                false /* forceInflate */,
-                null /* callback */);
-
-        // Trigger inflation of contracted only.
-        mNotificationInflater.bindContent(
-                mRow.getEntry(),
-                mRow,
-                FLAG_CONTENT_VIEW_CONTRACTED,
-                new BindParams(),
-                false /* forceInflate */,
-                null /* callback */);
-
-        InflationTask runningTask = mRow.getEntry().getRunningTask();
-        NotificationContentInflater.AsyncInflationTask asyncInflationTask =
-                (NotificationContentInflater.AsyncInflationTask) runningTask;
-        assertEquals("Successive inflations don't inherit the previous flags!",
-                FLAG_CONTENT_VIEW_ALL, asyncInflationTask.getReInflateFlags());
-        runningTask.abort();
     }
 
     @Test
@@ -349,8 +318,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
             }
 
             @Override
-            public void onAsyncInflationFinished(NotificationEntry entry,
-                    @InflationFlag int inflatedFlags) {
+            public void onAsyncInflationFinished(NotificationEntry entry) {
                 if (expectingException) {
                     exceptionHolder.setException(new RuntimeException(
                             "Inflation finished even though there should be an error"));

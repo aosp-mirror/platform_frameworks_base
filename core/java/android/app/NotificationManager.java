@@ -46,6 +46,7 @@ import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenPolicy;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -1555,19 +1556,24 @@ public class NotificationManager {
         public static final int PRIORITY_CATEGORY_MEDIA = 1 << 6;
         /**System (catch-all for non-never suppressible sounds) are prioritized */
         public static final int PRIORITY_CATEGORY_SYSTEM = 1 << 7;
+        /**
+         * Conversations are allowed through DND.
+         */
+        public static final int PRIORITY_CATEGORY_CONVERSATIONS = 1 << 8;
 
         /**
          * @hide
          */
         public static final int[] ALL_PRIORITY_CATEGORIES = {
-            PRIORITY_CATEGORY_ALARMS,
-            PRIORITY_CATEGORY_MEDIA,
-            PRIORITY_CATEGORY_SYSTEM,
-            PRIORITY_CATEGORY_REMINDERS,
-            PRIORITY_CATEGORY_EVENTS,
-            PRIORITY_CATEGORY_MESSAGES,
-            PRIORITY_CATEGORY_CALLS,
-            PRIORITY_CATEGORY_REPEAT_CALLERS,
+                PRIORITY_CATEGORY_ALARMS,
+                PRIORITY_CATEGORY_MEDIA,
+                PRIORITY_CATEGORY_SYSTEM,
+                PRIORITY_CATEGORY_REMINDERS,
+                PRIORITY_CATEGORY_EVENTS,
+                PRIORITY_CATEGORY_MESSAGES,
+                PRIORITY_CATEGORY_CALLS,
+                PRIORITY_CATEGORY_REPEAT_CALLERS,
+                PRIORITY_CATEGORY_CONVERSATIONS,
         };
 
         /** Any sender is prioritized. */
@@ -1576,6 +1582,31 @@ public class NotificationManager {
         public static final int PRIORITY_SENDERS_CONTACTS = 1;
         /** Only starred contacts are prioritized. */
         public static final int PRIORITY_SENDERS_STARRED = 2;
+
+
+        /** @hide */
+        @IntDef(prefix = { "CONVERSATION_SENDERS_" }, value = {
+                CONVERSATION_SENDERS_ANYONE,
+                CONVERSATION_SENDERS_IMPORTANT,
+                CONVERSATION_SENDERS_NONE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ConversationSenders {}
+        /**
+         * Used to indicate all conversations can bypass dnd.
+         */
+        public static final int CONVERSATION_SENDERS_ANYONE = ZenPolicy.CONVERSATION_SENDERS_ANYONE;
+
+        /**
+         * Used to indicate important conversations can bypass dnd.
+         */
+        public static final int CONVERSATION_SENDERS_IMPORTANT =
+                ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
+
+        /**
+         * Used to indicate no conversations can bypass dnd.
+         */
+        public static final int CONVERSATION_SENDERS_NONE = ZenPolicy.CONVERSATION_SENDERS_NONE;
 
         /** Notification categories to prioritize. Bitmask of PRIORITY_CATEGORY_* constants. */
         public final int priorityCategories;
@@ -1587,6 +1618,18 @@ public class NotificationManager {
         /** Notification senders to prioritize for messages. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
         public final int priorityMessageSenders;
+
+        /**
+         * Notification senders to prioritize for conversations. One of:
+         * {@link #CONVERSATION_SENDERS_NONE}, {@link #CONVERSATION_SENDERS_IMPORTANT},
+         * {@link #CONVERSATION_SENDERS_ANYONE}.
+         */
+        public final int priorityConversationSenders;
+
+        /**
+         * @hide
+         */
+        public static final int CONVERSATION_SENDERS_UNSET = -1;
 
         /**
          * @hide
@@ -1665,21 +1708,6 @@ public class NotificationManager {
                 SUPPRESSED_EFFECT_NOTIFICATION_LIST
         };
 
-        private static final int[] SCREEN_OFF_SUPPRESSED_EFFECTS = {
-                SUPPRESSED_EFFECT_SCREEN_OFF,
-                SUPPRESSED_EFFECT_FULL_SCREEN_INTENT,
-                SUPPRESSED_EFFECT_LIGHTS,
-                SUPPRESSED_EFFECT_AMBIENT,
-        };
-
-        private static final int[] SCREEN_ON_SUPPRESSED_EFFECTS = {
-                SUPPRESSED_EFFECT_SCREEN_ON,
-                SUPPRESSED_EFFECT_PEEK,
-                SUPPRESSED_EFFECT_STATUS_BAR,
-                SUPPRESSED_EFFECT_BADGE,
-                SUPPRESSED_EFFECT_NOTIFICATION_LIST
-        };
-
         /**
          * Visual effects to suppress for a notification that is filtered by Do Not Disturb mode.
          * Bitmask of SUPPRESSED_EFFECT_* constants.
@@ -1718,17 +1746,16 @@ public class NotificationManager {
          */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders) {
             this(priorityCategories, priorityCallSenders, priorityMessageSenders,
-                    SUPPRESSED_EFFECTS_UNSET, STATE_UNSET);
+                    SUPPRESSED_EFFECTS_UNSET, STATE_UNSET, CONVERSATION_SENDERS_UNSET);
         }
 
         /**
          * Constructs a policy for Do Not Disturb priority mode behavior.
          *
          * <p>
-         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     Apps that target API levels below {@link Build.VERSION_CODES#R} cannot
          *     change user-designated values to allow or disallow
-         *     {@link Policy#PRIORITY_CATEGORY_ALARMS}, {@link Policy#PRIORITY_CATEGORY_SYSTEM}, and
-         *     {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd.
+         *     {@link Policy#PRIORITY_CATEGORY_CONVERSATIONS}, from bypassing dnd.
          * <p>
          *     Additionally, apps that target API levels below {@link Build.VERSION_CODES#P} can
          *     only modify the {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
@@ -1752,27 +1779,68 @@ public class NotificationManager {
          */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
                 int suppressedVisualEffects) {
-            this.priorityCategories = priorityCategories;
-            this.priorityCallSenders = priorityCallSenders;
-            this.priorityMessageSenders = priorityMessageSenders;
-            this.suppressedVisualEffects = suppressedVisualEffects;
-            this.state = STATE_UNSET;
+            this(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                    suppressedVisualEffects, STATE_UNSET, CONVERSATION_SENDERS_UNSET);
+        }
+
+        /**
+         * Constructs a policy for Do Not Disturb priority mode behavior.
+         *
+         * <p>
+         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     change user-designated values to allow or disallow
+         *     {@link Policy#PRIORITY_CATEGORY_CONVERSATIONS} from bypassing dnd. If you do need
+         *     to change them, use a {@link ZenPolicy} associated with an {@link AutomaticZenRule}
+         *     instead of changing the global setting.
+         * <p>
+         *     Apps that target API levels below {@link Build.VERSION_CODES#P} cannot
+         *     change user-designated values to allow or disallow
+         *     {@link Policy#PRIORITY_CATEGORY_ALARMS},
+         *     {@link Policy#PRIORITY_CATEGORY_SYSTEM}, and
+         *     {@link Policy#PRIORITY_CATEGORY_MEDIA} from bypassing dnd.
+         * <p>
+         *     Additionally, apps that target API levels below {@link Build.VERSION_CODES#P} can
+         *     only modify the {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_OFF} bits of the suppressed visual effects field.
+         *     All other suppressed effects will be ignored and reconstituted from the screen on
+         *     and screen off values.
+         * <p>
+         *     Apps that target {@link Build.VERSION_CODES#P} or above can set any
+         *     suppressed visual effects. However, if any suppressed effects >
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_ON} are set, {@link #SUPPRESSED_EFFECT_SCREEN_ON}
+         *     and {@link #SUPPRESSED_EFFECT_SCREEN_OFF} will be ignored and reconstituted from
+         *     the more specific suppressed visual effect bits. Apps should migrate to targeting
+         *     specific effects instead of the deprecated {@link #SUPPRESSED_EFFECT_SCREEN_ON} and
+         *     {@link #SUPPRESSED_EFFECT_SCREEN_OFF} effects.
+         *
+         * @param priorityCategories bitmask of categories of notifications that can bypass DND.
+         * @param priorityCallSenders which callers can bypass DND.
+         * @param priorityMessageSenders which message senders can bypass DND.
+         * @param suppressedVisualEffects which visual interruptions should be suppressed from
+         *                                notifications that are filtered by DND.
+         */
+        public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
+                int suppressedVisualEffects, int priorityConversationSenders) {
+            this(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                    suppressedVisualEffects, STATE_UNSET, priorityConversationSenders);
         }
 
         /** @hide */
         public Policy(int priorityCategories, int priorityCallSenders, int priorityMessageSenders,
-                int suppressedVisualEffects, int state) {
+                int suppressedVisualEffects, int state, int priorityConversationSenders) {
             this.priorityCategories = priorityCategories;
             this.priorityCallSenders = priorityCallSenders;
             this.priorityMessageSenders = priorityMessageSenders;
             this.suppressedVisualEffects = suppressedVisualEffects;
             this.state = state;
+            this.priorityConversationSenders = priorityConversationSenders;
         }
+
 
         /** @hide */
         public Policy(Parcel source) {
             this(source.readInt(), source.readInt(), source.readInt(), source.readInt(),
-                    source.readInt());
+                    source.readInt(), source.readInt());
         }
 
         @Override
@@ -1782,6 +1850,7 @@ public class NotificationManager {
             dest.writeInt(priorityMessageSenders);
             dest.writeInt(suppressedVisualEffects);
             dest.writeInt(state);
+            dest.writeInt(priorityConversationSenders);
         }
 
         @Override
@@ -1792,7 +1861,7 @@ public class NotificationManager {
         @Override
         public int hashCode() {
             return Objects.hash(priorityCategories, priorityCallSenders, priorityMessageSenders,
-                    suppressedVisualEffects, state);
+                    suppressedVisualEffects, state, priorityConversationSenders);
         }
 
         @Override
@@ -1805,7 +1874,8 @@ public class NotificationManager {
                     && other.priorityMessageSenders == priorityMessageSenders
                     && suppressedVisualEffectsEqual(suppressedVisualEffects,
                     other.suppressedVisualEffects)
-                    && other.state == this.state;
+                    && other.state == this.state
+                    && other.priorityConversationSenders == this.priorityConversationSenders;
         }
 
         private boolean suppressedVisualEffectsEqual(int suppressedEffects,
@@ -1867,6 +1937,8 @@ public class NotificationManager {
                     + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
                     + ",priorityCallSenders=" + prioritySendersToString(priorityCallSenders)
                     + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
+                    + ",priorityConvSenders="
+                    + conversationSendersToString(priorityConversationSenders)
                     + ",suppressedVisualEffects="
                     + suppressedEffectsToString(suppressedVisualEffects)
                     + ",areChannelsBypassingDnd=" + (((state & STATE_CHANNELS_BYPASSING_DND) != 0)
@@ -2003,6 +2075,7 @@ public class NotificationManager {
                 case PRIORITY_CATEGORY_ALARMS: return "PRIORITY_CATEGORY_ALARMS";
                 case PRIORITY_CATEGORY_MEDIA: return "PRIORITY_CATEGORY_MEDIA";
                 case PRIORITY_CATEGORY_SYSTEM: return "PRIORITY_CATEGORY_SYSTEM";
+                case PRIORITY_CATEGORY_CONVERSATIONS: return "PRIORITY_CATEGORY_CONVERSATIONS";
                 default: return "PRIORITY_CATEGORY_UNKNOWN_" + priorityCategory;
             }
         }
@@ -2016,7 +2089,25 @@ public class NotificationManager {
             }
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<Policy> CREATOR = new Parcelable.Creator<Policy>() {
+        /**
+         * @hide
+         */
+        public static @NonNull String conversationSendersToString(int priorityConversationSenders) {
+            switch (priorityConversationSenders) {
+                case CONVERSATION_SENDERS_ANYONE:
+                    return "anyone";
+                case CONVERSATION_SENDERS_IMPORTANT:
+                    return "important";
+                case CONVERSATION_SENDERS_NONE:
+                    return "none";
+                case CONVERSATION_SENDERS_UNSET:
+                    return "unset";
+            }
+            return "invalidConversationType{" + priorityConversationSenders + "}";
+        }
+
+        public static final @android.annotation.NonNull Parcelable.Creator<Policy> CREATOR
+                = new Parcelable.Creator<Policy>() {
             @Override
             public Policy createFromParcel(Parcel in) {
                 return new Policy(in);
@@ -2054,6 +2145,11 @@ public class NotificationManager {
         }
 
         /** @hide **/
+        public boolean allowConversations() {
+            return (priorityCategories & PRIORITY_CATEGORY_CONVERSATIONS) != 0;
+        }
+
+        /** @hide **/
         public boolean allowMessages() {
             return (priorityCategories & PRIORITY_CATEGORY_MESSAGES) != 0;
         }
@@ -2076,6 +2172,11 @@ public class NotificationManager {
         /** @hide **/
         public int allowMessagesFrom() {
             return priorityMessageSenders;
+        }
+
+        /** @hide **/
+        public int allowConversationsFrom() {
+            return priorityConversationSenders;
         }
 
         /** @hide **/

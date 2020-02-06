@@ -47,22 +47,14 @@ public @interface SystemApi {
         /**
          * Specifies that the intended clients of a SystemApi are privileged apps.
          * This is the default value for {@link #client}.
-         * TODO Update the javadoc according to the final spec
          */
         PRIVILEGED_APPS,
 
         /**
-         * DO NOT USE. Use PRIVILEGED_APPS instead.
-         * (This would provide no further protection over PRIVILEGED_APPS; do not rely on it)
-         * @deprecated Use #PRIVILEGED_APPS instead
-         */
-        @Deprecated
-        MODULE_APPS,
-
-        /**
-         * Specifies that the intended clients of a SystemApi are modules implemented
-         * as libraries, like the conscrypt.jar in the conscrypt APEX.
-         * TODO Update the javadoc according to the final spec
+         * Specifies that the intended clients of a SystemApi are used by classes in
+         * <pre>BOOTCLASSPATH</pre> in mainline modules. Mainline modules can also expose
+         * this type of system APIs too when they're used only by the non-updatable
+         * platform code.
          */
         MODULE_LIBRARIES,
 
@@ -70,19 +62,6 @@ public @interface SystemApi {
          * Specifies that the system API is available only in the system server process.
          * Use this to expose APIs from code loaded by the system server process <em>but</em>
          * not in <pre>BOOTCLASSPATH</pre>.
-         * TODO(b/148177503) Update "services-stubs" and actually use it.
-         */
-        SYSTEM_SERVER
-    }
-
-    /** @deprecated do not use */
-    @Deprecated
-    enum Process {
-        /** @deprecated do not use */
-        ALL,
-
-        /**
-         * @deprecated use Client#SYSTEM_SERVER instead
          */
         SYSTEM_SERVER
     }
@@ -91,13 +70,6 @@ public @interface SystemApi {
      * The intended client of this SystemAPI.
      */
     Client client() default android.annotation.SystemApi.Client.PRIVILEGED_APPS;
-
-    /**
-     * @deprecated use Client#SYSTEM_SERVER instead for system_server APIs
-     */
-    @Deprecated
-    Process process() default android.annotation.SystemApi.Process.ALL;
-
 
     /**
      * Container for {@link SystemApi} that allows it to be applied repeatedly to types.

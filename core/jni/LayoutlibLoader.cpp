@@ -75,10 +75,12 @@ extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
+extern int register_android_text_AndroidCharacter(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
+extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
@@ -90,58 +92,66 @@ struct RegJNIRec {
 
 // Map of all possible class names to register to their corresponding JNI registration function pointer
 // The actual list of registered classes will be determined at runtime via the 'native_classes' System property
-static const std::unordered_map<std::string, RegJNIRec>  gRegJNIMap = {
-    {"android.animation.PropertyValuesHolder", REG_JNI(register_android_animation_PropertyValuesHolder)},
+static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
+        {"android.animation.PropertyValuesHolder",
+         REG_JNI(register_android_animation_PropertyValuesHolder)},
 #ifdef __linux__
-    {"android.content.AssetManager", REG_JNI(register_android_content_AssetManager)},
-    {"android.content.StringBlock", REG_JNI(register_android_content_StringBlock)},
-    {"android.content.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
-    {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
+        {"android.content.res.ApkAssets", REG_JNI(register_android_content_res_ApkAssets)},
+        {"android.content.res.AssetManager", REG_JNI(register_android_content_AssetManager)},
 #endif
-    {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
-    {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
-    {"android.graphics.ByteBufferStreamAdaptor", REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
-    {"android.graphics.Canvas", REG_JNI(register_android_graphics_Canvas)},
-    {"android.graphics.RenderNode", REG_JNI(register_android_view_RenderNode)},
-    {"android.graphics.ColorFilter", REG_JNI(register_android_graphics_ColorFilter)},
-    {"android.graphics.ColorSpace", REG_JNI(register_android_graphics_ColorSpace)},
-    {"android.graphics.CreateJavaOutputStreamAdaptor", REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor)},
-    {"android.graphics.DrawFilter", REG_JNI(register_android_graphics_DrawFilter)},
-    {"android.graphics.FontFamily", REG_JNI(register_android_graphics_FontFamily)},
-    {"android.graphics.Graphics", REG_JNI(register_android_graphics_Graphics)},
-    {"android.graphics.ImageDecoder", REG_JNI(register_android_graphics_ImageDecoder)},
-    {"android.graphics.MaskFilter", REG_JNI(register_android_graphics_MaskFilter)},
-    {"android.graphics.Matrix", REG_JNI(register_android_graphics_Matrix)},
-    {"android.graphics.NinePatch", REG_JNI(register_android_graphics_NinePatch)},
-    {"android.graphics.Paint", REG_JNI(register_android_graphics_Paint)},
-    {"android.graphics.Path", REG_JNI(register_android_graphics_Path)},
-    {"android.graphics.PathEffect", REG_JNI(register_android_graphics_PathEffect)},
-    {"android.graphics.PathMeasure", REG_JNI(register_android_graphics_PathMeasure)},
-    {"android.graphics.Picture", REG_JNI(register_android_graphics_Picture)},
-    {"android.graphics.RecordingCanvas", REG_JNI(register_android_view_DisplayListCanvas)},
-    {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
-    {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
-    {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
-    {"android.graphics.drawable.AnimatedVectorDrawable", REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable)},
-    {"android.graphics.drawable.VectorDrawable", REG_JNI(register_android_graphics_drawable_VectorDrawable)},
-    {"android.graphics.fonts.Font", REG_JNI(register_android_graphics_fonts_Font)},
-    {"android.graphics.fonts.FontFamily", REG_JNI(register_android_graphics_fonts_FontFamily)},
-    {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
-    {"android.graphics.text.MeasuredText", REG_JNI(register_android_graphics_text_MeasuredText)},
+        {"android.content.res.StringBlock", REG_JNI(register_android_content_StringBlock)},
+        {"android.content.res.XmlBlock", REG_JNI(register_android_content_XmlBlock)},
+        {"android.graphics.Bitmap", REG_JNI(register_android_graphics_Bitmap)},
+        {"android.graphics.BitmapFactory", REG_JNI(register_android_graphics_BitmapFactory)},
+        {"android.graphics.ByteBufferStreamAdaptor",
+         REG_JNI(register_android_graphics_ByteBufferStreamAdaptor)},
+        {"android.graphics.Canvas", REG_JNI(register_android_graphics_Canvas)},
+        {"android.graphics.RenderNode", REG_JNI(register_android_view_RenderNode)},
+        {"android.graphics.ColorFilter", REG_JNI(register_android_graphics_ColorFilter)},
+        {"android.graphics.ColorSpace", REG_JNI(register_android_graphics_ColorSpace)},
+        {"android.graphics.CreateJavaOutputStreamAdaptor",
+         REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor)},
+        {"android.graphics.DrawFilter", REG_JNI(register_android_graphics_DrawFilter)},
+        {"android.graphics.FontFamily", REG_JNI(register_android_graphics_FontFamily)},
+        {"android.graphics.Graphics", REG_JNI(register_android_graphics_Graphics)},
+        {"android.graphics.ImageDecoder", REG_JNI(register_android_graphics_ImageDecoder)},
+        {"android.graphics.MaskFilter", REG_JNI(register_android_graphics_MaskFilter)},
+        {"android.graphics.Matrix", REG_JNI(register_android_graphics_Matrix)},
+        {"android.graphics.NinePatch", REG_JNI(register_android_graphics_NinePatch)},
+        {"android.graphics.Paint", REG_JNI(register_android_graphics_Paint)},
+        {"android.graphics.Path", REG_JNI(register_android_graphics_Path)},
+        {"android.graphics.PathEffect", REG_JNI(register_android_graphics_PathEffect)},
+        {"android.graphics.PathMeasure", REG_JNI(register_android_graphics_PathMeasure)},
+        {"android.graphics.Picture", REG_JNI(register_android_graphics_Picture)},
+        {"android.graphics.RecordingCanvas", REG_JNI(register_android_view_DisplayListCanvas)},
+        {"android.graphics.Region", REG_JNI(register_android_graphics_Region)},
+        {"android.graphics.Shader", REG_JNI(register_android_graphics_Shader)},
+        {"android.graphics.Typeface", REG_JNI(register_android_graphics_Typeface)},
+        {"android.graphics.drawable.AnimatedVectorDrawable",
+         REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable)},
+        {"android.graphics.drawable.VectorDrawable",
+         REG_JNI(register_android_graphics_drawable_VectorDrawable)},
+        {"android.graphics.fonts.Font", REG_JNI(register_android_graphics_fonts_Font)},
+        {"android.graphics.fonts.FontFamily", REG_JNI(register_android_graphics_fonts_FontFamily)},
+        {"android.graphics.text.LineBreaker", REG_JNI(register_android_graphics_text_LineBreaker)},
+        {"android.graphics.text.MeasuredText",
+         REG_JNI(register_android_graphics_text_MeasuredText)},
 #ifdef __linux__
-    {"android.os.FileObserver", REG_JNI(register_android_os_FileObserver)},
-    {"android.os.MessageQueue", REG_JNI(register_android_os_MessageQueue)},
+        {"android.os.FileObserver", REG_JNI(register_android_os_FileObserver)},
+        {"android.os.MessageQueue", REG_JNI(register_android_os_MessageQueue)},
 #endif
-    {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
-    {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
-#ifdef __linux__
-    {"android.os.Trace", REG_JNI(register_android_os_Trace)},
-#endif
-    {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
-    {"android.util.Log", REG_JNI(register_android_util_Log)},
-    {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
-    {"com.android.internal.util.VirtualRefBasePtr", REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
-    {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper", REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper)},
+        {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
+        {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
+        {"android.os.Trace", REG_JNI(register_android_os_Trace)},
+        {"android.text.AndroidCharacter", REG_JNI(register_android_text_AndroidCharacter)},
+        {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
+        {"android.util.Log", REG_JNI(register_android_util_Log)},
+        {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
+        {"android.view.RenderNodeAnimator", REG_JNI(register_android_view_RenderNodeAnimator)},
+        {"com.android.internal.util.VirtualRefBasePtr",
+         REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
+        {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper",
+         REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper)},
 };
 // Vector to store the names of classes that need delegates of their native methods
 static vector<string> classesToDelegate;
@@ -159,7 +169,6 @@ static int register_jni_procs(const std::unordered_map<std::string, RegJNIRec>& 
 
 int AndroidRuntime::registerNativeMethods(JNIEnv* env,
         const char* className, const JNINativeMethod* gMethods, int numMethods) {
-
     string classNameString = string(className);
     if (find(classesToDelegate.begin(), classesToDelegate.end(), classNameString)
             != classesToDelegate.end()) {

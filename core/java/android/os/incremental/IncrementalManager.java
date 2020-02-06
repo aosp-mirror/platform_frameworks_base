@@ -37,7 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Provides operations to open or create an IncrementalStorage, using IIncrementalManagerNative
+ * Provides operations to open or create an IncrementalStorage, using IIncrementalService
  * service. Example Usage:
  *
  * <blockquote><pre>
@@ -52,13 +52,13 @@ public final class IncrementalManager {
     private static final String TAG = "IncrementalManager";
 
     public static final int CREATE_MODE_TEMPORARY_BIND =
-            IIncrementalManagerNative.CREATE_MODE_TEMPORARY_BIND;
+            IIncrementalService.CREATE_MODE_TEMPORARY_BIND;
     public static final int CREATE_MODE_PERMANENT_BIND =
-            IIncrementalManagerNative.CREATE_MODE_PERMANENT_BIND;
+            IIncrementalService.CREATE_MODE_PERMANENT_BIND;
     public static final int CREATE_MODE_CREATE =
-            IIncrementalManagerNative.CREATE_MODE_CREATE;
+            IIncrementalService.CREATE_MODE_CREATE;
     public static final int CREATE_MODE_OPEN_EXISTING =
-            IIncrementalManagerNative.CREATE_MODE_OPEN_EXISTING;
+            IIncrementalService.CREATE_MODE_OPEN_EXISTING;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CREATE_MODE_"}, value = {
@@ -70,12 +70,12 @@ public final class IncrementalManager {
     public @interface CreateMode {
     }
 
-    private final @Nullable IIncrementalManagerNative mNativeService;
+    private final @Nullable IIncrementalService mService;
     @GuardedBy("mStorages")
     private final SparseArray<IncrementalStorage> mStorages = new SparseArray<>();
 
-    public IncrementalManager(IIncrementalManagerNative nativeService) {
-        mNativeService = nativeService;
+    public IncrementalManager(IIncrementalService service) {
+        mService = service;
     }
 
     /**
@@ -108,11 +108,11 @@ public final class IncrementalManager {
             @NonNull DataLoaderParams params, @CreateMode int createMode,
             boolean autoStartDataLoader) {
         try {
-            final int id = mNativeService.createStorage(path, params.getData(), createMode);
+            final int id = mService.createStorage(path, params.getData(), createMode);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mNativeService, id);
+            final IncrementalStorage storage = new IncrementalStorage(mService, id);
             synchronized (mStorages) {
                 mStorages.put(id, storage);
             }
@@ -135,11 +135,11 @@ public final class IncrementalManager {
     @Nullable
     public IncrementalStorage openStorage(@NonNull String path) {
         try {
-            final int id = mNativeService.openStorage(path);
+            final int id = mService.openStorage(path);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mNativeService, id);
+            final IncrementalStorage storage = new IncrementalStorage(mService, id);
             synchronized (mStorages) {
                 mStorages.put(id, storage);
             }
@@ -158,12 +158,12 @@ public final class IncrementalManager {
     public IncrementalStorage createStorage(@NonNull String path,
             @NonNull IncrementalStorage linkedStorage, @CreateMode int createMode) {
         try {
-            final int id = mNativeService.createLinkedStorage(
+            final int id = mService.createLinkedStorage(
                     path, linkedStorage.getId(), createMode);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mNativeService, id);
+            final IncrementalStorage storage = new IncrementalStorage(mService, id);
             synchronized (mStorages) {
                 mStorages.put(id, storage);
             }
@@ -311,11 +311,11 @@ public final class IncrementalManager {
      */
     public void closeStorage(@NonNull String path) {
         try {
-            final int id = mNativeService.openStorage(path);
+            final int id = mService.openStorage(path);
             if (id < 0) {
                 return;
             }
-            mNativeService.deleteStorage(id);
+            mService.deleteStorage(id);
             synchronized (mStorages) {
                 mStorages.remove(id);
             }

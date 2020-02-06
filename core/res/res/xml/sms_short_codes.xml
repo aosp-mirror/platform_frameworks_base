@@ -39,6 +39,9 @@
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
 
+    <!-- Argentia: 5 digits, known short codes listed -->
+    <shortcode country="ar" pattern="\\d{5}" free="11711|28291" />
+
     <!-- Armenia: 3-4 digits, emergency numbers 10[123] -->
     <shortcode country="am" pattern="\\d{3,4}" premium="11[2456]1|3024" free="10[123]" />
 
@@ -80,7 +83,7 @@
     <shortcode country="cn" premium="1066.*" free="1065.*" />
 
     <!-- Colombia: 1-6 digits (not confirmed) -->
-    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160" />
+    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960" />
 
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />

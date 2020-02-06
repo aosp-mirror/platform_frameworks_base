@@ -35,6 +35,34 @@ using android::util::ProtoOutputStream;
 using std::string;
 using std::vector;
 
+// stats_event.h socket types. Keep in sync.
+/* ERRORS */
+#define ERROR_NO_TIMESTAMP 0x1
+#define ERROR_NO_ATOM_ID 0x2
+#define ERROR_OVERFLOW 0x4
+#define ERROR_ATTRIBUTION_CHAIN_TOO_LONG 0x8
+#define ERROR_TOO_MANY_KEY_VALUE_PAIRS 0x10
+#define ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD 0x20
+#define ERROR_INVALID_ANNOTATION_ID 0x40
+#define ERROR_ANNOTATION_ID_TOO_LARGE 0x80
+#define ERROR_TOO_MANY_ANNOTATIONS 0x100
+#define ERROR_TOO_MANY_FIELDS 0x200
+#define ERROR_INVALID_VALUE_TYPE 0x400
+#define ERROR_STRING_NOT_NULL_TERMINATED 0x800
+
+/* TYPE IDS */
+#define INT32_TYPE 0x00
+#define INT64_TYPE 0x01
+#define STRING_TYPE 0x02
+#define LIST_TYPE 0x03
+#define FLOAT_TYPE 0x04
+#define BOOL_TYPE 0x05
+#define BYTE_ARRAY_TYPE 0x06
+#define OBJECT_TYPE 0x07
+#define KEY_VALUE_PAIRS_TYPE 0x08
+#define ATTRIBUTION_CHAIN_TYPE 0x09
+#define ERROR_TYPE 0x0F
+
 // Msg is expected to begin at the start of the serialized atom -- it should not
 // include the android_log_header_t or the StatsEventTag.
 LogEvent::LogEvent(uint8_t* msg, uint32_t len, int32_t uid, int32_t pid)
@@ -807,6 +835,26 @@ float LogEvent::GetFloat(size_t key, status_t* err) const {
 
     *err = BAD_INDEX;
     return 0.0;
+}
+
+std::vector<uint8_t> LogEvent::GetStorage(size_t key, status_t* err) const {
+    int field = getSimpleField(key);
+    for (const auto& value : mValues) {
+      if (value.mField.getField() == field) {
+        if (value.mValue.getType() == STORAGE) {
+          return value.mValue.storage_value;
+        } else {
+          *err = BAD_TYPE;
+          return vector<uint8_t>();
+        }
+      }
+      if ((size_t)value.mField.getPosAtDepth(0) > key) {
+        break;
+      }
+    }
+
+    *err = BAD_INDEX;
+    return vector<uint8_t>();
 }
 
 string LogEvent::ToString() const {
