@@ -171,17 +171,15 @@ static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
 }
 
 bool SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
-                                    ColorMode colorMode, uint32_t extraBuffers) {
+                                    uint32_t extraBuffers) {
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
     }
 
-    setSurfaceColorProperties(colorMode);
-
     if (surface) {
         mRenderThread.requireGlContext();
-        auto newSurface = mEglManager.createSurface(surface, colorMode, mSurfaceColorSpace);
+        auto newSurface = mEglManager.createSurface(surface, mColorMode, mSurfaceColorSpace);
         if (!newSurface) {
             return false;
         }
