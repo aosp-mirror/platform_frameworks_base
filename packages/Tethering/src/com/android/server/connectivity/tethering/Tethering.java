@@ -1943,13 +1943,25 @@ public class Tethering {
             parcel.tetheringSupported = mDeps.isTetheringSupported();
             parcel.upstreamNetwork = mTetherUpstream;
             parcel.config = mConfig.toStableParcelable();
-            parcel.states = mTetherStatesParcel;
+            parcel.states =
+                    mTetherStatesParcel != null ? mTetherStatesParcel : emptyTetherStatesParcel();
             try {
                 callback.onCallbackStarted(parcel);
             } catch (RemoteException e) {
                 // Not really very much to do here.
             }
         });
+    }
+
+    private TetherStatesParcel emptyTetherStatesParcel() {
+        final TetherStatesParcel parcel = new TetherStatesParcel();
+        parcel.availableList = new String[0];
+        parcel.tetheredList = new String[0];
+        parcel.localOnlyList = new String[0];
+        parcel.erroredIfaceList = new String[0];
+        parcel.lastErrorList = new int[0];
+
+        return parcel;
     }
 
     /** Unregister tethering event callback */
