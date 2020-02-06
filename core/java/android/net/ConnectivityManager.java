@@ -2423,14 +2423,14 @@ public class ConnectivityManager {
     /**
      * Get the set of tethered dhcp ranges.
      *
-     * @return an array of 0 or more {@code String} of tethered dhcp ranges.
-     * @deprecated This API just return the default value which is not used in DhcpServer.
+     * @deprecated This method is not supported.
+     * TODO: remove this function when all of clients are removed.
      * {@hide}
      */
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     @Deprecated
     public String[] getTetheredDhcpRanges() {
-        return getTetheringManager().getTetheredDhcpRanges();
+        throw new UnsupportedOperationException("getTetheredDhcpRanges is not supported");
     }
 
     /**
