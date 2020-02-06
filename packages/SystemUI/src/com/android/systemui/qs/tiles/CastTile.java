@@ -183,6 +183,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.contentDescription = state.label;
+        state.stateDescription = "";
         state.value = false;
         final List<CastDevice> devices = mController.getCastDevices();
         boolean connecting = false;
@@ -192,8 +193,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
             if (device.state == CastDevice.STATE_CONNECTED) {
                 state.value = true;
                 state.secondaryLabel = getDeviceName(device);
-                state.contentDescription = state.contentDescription + ","
-                        + mContext.getString(R.string.accessibility_cast_name, state.label);
+                state.stateDescription = state.stateDescription + ","
+                        + mContext.getString(
+                                R.string.accessibility_cast_name, state.label);
                 connecting = false;
                 break;
             } else if (device.state == CastDevice.STATE_CONNECTING) {
@@ -217,9 +219,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_UNAVAILABLE;
             String noWifi = mContext.getString(R.string.quick_settings_cast_no_wifi);
             state.secondaryLabel = noWifi;
-            state.contentDescription = state.contentDescription + ", " + mContext.getString(
-                    R.string.accessibility_quick_settings_not_available, noWifi);
         }
+        state.stateDescription = state.stateDescription + ", " + state.secondaryLabel;
         mDetailAdapter.updateItems(devices);
     }
 
