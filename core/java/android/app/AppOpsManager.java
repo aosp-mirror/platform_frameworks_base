@@ -2808,7 +2808,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no access
          *
          * @see #getLastAccessForegroundTime(int)
          * @see #getLastAccessBackgroundTime(int)
@@ -2825,7 +2825,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no foreground access
          *
          * @see #getLastAccessTime(int)
          * @see #getLastAccessBackgroundTime(int)
@@ -2843,7 +2843,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no background access
          *
          * @see #getLastAccessTime(int)
          * @see #getLastAccessForegroundTime(int)
@@ -2860,7 +2860,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the last access event of {@code null}
+         * @return the last access event of {@code null} if there was no access
          */
         private @Nullable NoteOpEvent getLastAccessEvent(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
@@ -2875,7 +2875,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no access
          *
          * @see #getLastAccessTime(int)
          * @see #getLastAccessForegroundTime(int)
@@ -2898,7 +2898,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no rejection
          *
          * @see #getLastRejectForegroundTime(int)
          * @see #getLastRejectBackgroundTime(int)
@@ -2915,7 +2915,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no foreground rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectBackgroundTime(int)
@@ -2933,7 +2933,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no background rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectForegroundTime(int)
@@ -2950,8 +2950,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * @return the last rejection event of {@code null} if there was no rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectForegroundTime(int)
@@ -2970,7 +2969,8 @@ public class AppOpsManager {
          * @param toUidState The highest UID state for which to query (inclusive)
          * @param flags The op flags
          *
-         * @return the last access time (in milliseconds since epoch) or {@code -1}
+         * @return the last access time (in milliseconds since epoch) or {@code -1} if there was no
+         * rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectForegroundTime(int)
@@ -2993,7 +2993,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no rejection
          *
          * @see #getLastForegroundDuration(int)
          * @see #getLastBackgroundDuration(int)
@@ -3009,7 +3009,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no foreground rejection
          *
          * @see #getLastDuration(int)
          * @see #getLastBackgroundDuration(int)
@@ -3026,7 +3026,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no background rejection
          *
          * @see #getLastDuration(int)
          * @see #getLastForegroundDuration(int)
@@ -3045,7 +3045,7 @@ public class AppOpsManager {
          * @param toUidState The highest UID state for which to query (inclusive)
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no rejection
          *
          * @see #getLastDuration(int)
          * @see #getLastForegroundDuration(int)
@@ -3069,7 +3069,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no proxy access
          *
          * @see #getLastForegroundProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
@@ -3086,7 +3086,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no proxy access
          *
          * @see #getLastProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
@@ -3104,7 +3104,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no proxy background access
          *
          * @see #getLastProxyInfo(int)
          * @see #getLastForegroundProxyInfo(int)
@@ -3124,7 +3124,7 @@ public class AppOpsManager {
          * @param toUidState The highest UID state for which to query (inclusive)
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no proxy foreground access
          *
          * @see #getLastProxyInfo(int)
          * @see #getLastForegroundProxyInfo(int)
@@ -3380,7 +3380,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no access
          *
          * @see #getLastAccessForegroundTime(int)
          * @see #getLastAccessBackgroundTime(int)
@@ -3397,7 +3397,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no foreground access
          *
          * @see #getLastAccessTime(int)
          * @see #getLastAccessBackgroundTime(int)
@@ -3415,7 +3415,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no background access
          *
          * @see #getLastAccessTime(int)
          * @see #getLastAccessForegroundTime(int)
@@ -3432,7 +3432,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the last access event of {@code null}
+         * @return the last access event of {@code null} if there was no access
          */
         private @Nullable NoteOpEvent getLastAccessEvent(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
@@ -3458,7 +3458,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last access time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no access
          *
          * @see #getLastAccessTime(int)
          * @see #getLastAccessForegroundTime(int)
@@ -3494,7 +3494,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no rejection
          *
          * @see #getLastRejectForegroundTime(int)
          * @see #getLastRejectBackgroundTime(int)
@@ -3511,7 +3511,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no foreground rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectBackgroundTime(int)
@@ -3529,7 +3529,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no background rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectForegroundTime(int)
@@ -3546,7 +3546,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the last reject event of {@code null}
+         * @return the last reject event of {@code null} if there was no rejection
          */
         private @Nullable NoteOpEvent getLastRejectEvent(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
@@ -3572,7 +3572,7 @@ public class AppOpsManager {
          * @param flags The op flags
          *
          * @return the last rejection time (in milliseconds since epoch start (January 1, 1970
-         * 00:00:00.000 GMT - Gregorian)) or {@code -1}
+         * 00:00:00.000 GMT - Gregorian)) or {@code -1} if there was no rejection
          *
          * @see #getLastRejectTime(int)
          * @see #getLastRejectForegroundTime(int)
@@ -3616,7 +3616,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no access
          *
          * @see #getLastForegroundDuration(int)
          * @see #getLastBackgroundDuration(int)
@@ -3632,7 +3632,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no foreground access
          *
          * @see #getLastDuration(int)
          * @see #getLastBackgroundDuration(int)
@@ -3649,7 +3649,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no background access
          *
          * @see #getLastDuration(int)
          * @see #getLastForegroundDuration(int)
@@ -3668,7 +3668,7 @@ public class AppOpsManager {
          * @param toUidState The highest UID state for which to query (inclusive)
          * @param flags The op flags
          *
-         * @return the duration in milliseconds or {@code -1}
+         * @return the duration in milliseconds or {@code -1} if there was no access
          *
          * @see #getLastDuration(int)
          * @see #getLastForegroundDuration(int)
@@ -3743,7 +3743,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no proxy access
          *
          * @see #getLastForegroundProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
@@ -3760,7 +3760,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no foreground proxy access
          *
          * @see #getLastProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
@@ -3778,7 +3778,7 @@ public class AppOpsManager {
          *
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no background proxy access
          *
          * @see #getLastProxyInfo(int)
          * @see #getLastForegroundProxyInfo(int)
@@ -3798,7 +3798,7 @@ public class AppOpsManager {
          * @param toUidState The highest UID state for which to query (inclusive)
          * @param flags The op flags
          *
-         * @return The proxy name or {@code null}
+         * @return The proxy info or {@code null} if there was no proxy access
          *
          * @see #getLastProxyInfo(int)
          * @see #getLastForegroundProxyInfo(int)
