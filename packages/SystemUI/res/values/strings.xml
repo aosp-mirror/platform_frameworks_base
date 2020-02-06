@@ -1774,6 +1774,12 @@
     <!-- [CHAR LIMIT=150] Notification Importance title: bubble level summary -->
     <string name="notification_channel_summary_bubble">Keeps your attention with a floating shortcut to this content.</string>
 
+    <!-- [CHAR LIMIT=NONE] Empty overflow title -->
+    <string name="bubble_overflow_empty_title">No recent bubbles</string>
+
+    <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
+    <string name="bubble_overflow_empty_subtitle">Recently dismissed bubbles will appear here for easy retrieval.</string>
+
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
 
