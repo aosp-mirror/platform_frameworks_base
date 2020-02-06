@@ -15,13 +15,13 @@
  */
 package android.app.admin;
 
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 
 /**
  * Internal IPC interface for informing the keyguard of events on the secondary lockscreen.
  * @hide
  */
 interface IKeyguardCallback {
-    oneway void onSurfaceControlCreated(in SurfaceControl remoteSurfaceControl);
+    oneway void onRemoteContentReady(in SurfaceControlViewHost.SurfacePackage surfacePackage);
     oneway void onDismiss();
 }
