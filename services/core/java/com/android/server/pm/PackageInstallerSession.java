@@ -129,6 +129,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.security.VerityUtils;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -212,7 +213,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SIGNATURE = "signature";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
-    private static final int[] EMPTY_CHILD_SESSION_ARRAY = {};
+    private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
+    private static final FileInfo[] EMPTY_FILE_INFO_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
 
@@ -374,8 +376,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     // TODO(b/146080380): merge file list with Callback installation.
     private IncrementalFileStorages mIncrementalFileStorages;
-
-    private static final String[] EMPTY_STRING_ARRAY = new String[]{};
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
@@ -731,7 +731,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (!isDataLoaderInstallation()) {
             String[] result = stageDir.list();
             if (result == null) {
-                result = EMPTY_STRING_ARRAY;
+                result = EmptyArray.STRING;
             }
             return result;
         }
@@ -3120,7 +3120,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (grantedRuntimePermissions.size() > 0) {
-            params.grantedRuntimePermissions = (String[]) grantedRuntimePermissions.toArray();
+            params.grantedRuntimePermissions =
+                    grantedRuntimePermissions.toArray(EmptyArray.STRING);
         }
 
         if (whitelistedRestrictedPermissions.size() > 0) {
@@ -3139,7 +3140,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         FileInfo[] fileInfosArray = null;
         if (!files.isEmpty()) {
-            fileInfosArray = (FileInfo[]) files.toArray();
+            fileInfosArray = files.toArray(EMPTY_FILE_INFO_ARRAY);
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
