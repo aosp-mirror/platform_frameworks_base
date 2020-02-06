@@ -153,11 +153,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     public void requestSetVolume(String routeId, int volume) {
     }
 
-    //TODO: implement method
-    @Override
-    public void requestUpdateVolume(String routeId, int delta) {
-    }
-
     private void initializeDefaultRoute() {
         mDefaultRoute = new MediaRoute2Info.Builder(
                 DEFAULT_ROUTE_ID,

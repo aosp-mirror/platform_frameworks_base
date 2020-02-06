@@ -462,31 +462,6 @@ public class MediaRouter2 {
         }
     }
 
-    /**
-     * Requests an incremental volume update  for the route asynchronously.
-     * <p>
-     * It may have no effect if the route is currently not selected.
-     * </p>
-     *
-     * @param delta The delta to add to the current volume.
-     * @hide
-     */
-    public void requestUpdateVolume(@NonNull MediaRoute2Info route, int delta) {
-        Objects.requireNonNull(route, "route must not be null");
-
-        Client2 client;
-        synchronized (sRouterLock) {
-            client = mClient;
-        }
-        if (client != null) {
-            try {
-                mMediaRouterService.requestUpdateVolume2(client, route, delta);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to send control request.", ex);
-            }
-        }
-    }
-
     void addRoutesOnHandler(List<MediaRoute2Info> routes) {
         // TODO: When onRoutesAdded is first called,
         //  1) clear mRoutes before adding the routes

@@ -63,7 +63,6 @@ abstract class MediaRoute2Provider {
 
     public abstract void sendControlRequest(String routeId, Intent request);
     public abstract void requestSetVolume(String routeId, int volume);
-    public abstract void requestUpdateVolume(String routeId, int delta);
 
     @NonNull
     public String getUniqueId() {
