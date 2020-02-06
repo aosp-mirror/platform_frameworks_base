@@ -31,6 +31,7 @@ import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE_LOCATION;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
+import static android.app.AppOpsManager.WATCH_FOREGROUND_CHANGES;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
@@ -1293,6 +1294,18 @@ public class AppOpsService extends IAppOpsService.Stub {
             uidState.evalForegroundOps(mOpModeWatchers);
         }
 
+        notifyOpChangedForAllPkgsInUid(code, uid, false);
+        notifyOpChangedSync(code, uid, null, mode);
+    }
+
+    /**
+     * Notify that an op changed for all packages in an uid.
+     *
+     * @param code The op that changed
+     * @param uid The uid the op was changed for
+     * @param onlyForeground Only notify watchers that watch for foreground changes
+     */
+    private void notifyOpChangedForAllPkgsInUid(int code, int uid, boolean onlyForeground) {
         String[] uidPackageNames = getPackagesForUid(uid);
         ArrayMap<ModeCallback, ArraySet<String>> callbackSpecs = null;
 
@@ -1302,6 +1315,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int callbackCount = callbacks.size();
                 for (int i = 0; i < callbackCount; i++) {
                     ModeCallback callback = callbacks.valueAt(i);
+                    if (onlyForeground && (callback.mFlags & WATCH_FOREGROUND_CHANGES) == 0) {
+                        continue;
+                    }
+
                     ArraySet<String> changedPackages = new ArraySet<>();
                     Collections.addAll(changedPackages, uidPackageNames);
                     if (callbackSpecs == null) {
@@ -1320,6 +1337,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     final int callbackCount = callbacks.size();
                     for (int i = 0; i < callbackCount; i++) {
                         ModeCallback callback = callbacks.valueAt(i);
+                        if (onlyForeground && (callback.mFlags & WATCH_FOREGROUND_CHANGES) == 0) {
+                            continue;
+                        }
+
                         ArraySet<String> changedPackages = callbackSpecs.get(callback);
                         if (changedPackages == null) {
                             changedPackages = new ArraySet<>();
@@ -1332,7 +1353,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (callbackSpecs == null) {
-            notifyOpChangedSync(code, uid, null, mode);
             return;
         }
 
@@ -1354,8 +1374,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
-
-        notifyOpChangedSync(code, uid, null, mode);
     }
 
     private void notifyOpChangedSync(int code, int uid, @NonNull String packageName, int mode) {
@@ -2501,24 +2519,28 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (resolvedLastFg == resolvedNowFg) {
                     continue;
                 }
-                final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(code);
-                if (callbacks != null) {
-                    for (int cbi = callbacks.size() - 1; cbi >= 0; cbi--) {
-                        final ModeCallback callback = callbacks.valueAt(cbi);
-                        if ((callback.mFlags & AppOpsManager.WATCH_FOREGROUND_CHANGES) == 0
-                                || !callback.isWatchingUid(uidState.uid)) {
-                            continue;
-                        }
-                        boolean doAllPackages = uidState.opModes != null
-                                && uidState.opModes.indexOfKey(code) >= 0
-                                && uidState.opModes.get(code) == AppOpsManager.MODE_FOREGROUND;
-                        if (uidState.pkgOps != null) {
+
+                if (uidState.opModes != null
+                        && uidState.opModes.indexOfKey(code) >= 0
+                        && uidState.opModes.get(code) == AppOpsManager.MODE_FOREGROUND) {
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            AppOpsService::notifyOpChangedForAllPkgsInUid,
+                            this, code, uidState.uid, true));
+                } else {
+                    final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(code);
+                    if (callbacks != null) {
+                        for (int cbi = callbacks.size() - 1; cbi >= 0; cbi--) {
+                            final ModeCallback callback = callbacks.valueAt(cbi);
+                            if ((callback.mFlags & AppOpsManager.WATCH_FOREGROUND_CHANGES) == 0
+                                    || !callback.isWatchingUid(uidState.uid)) {
+                                continue;
+                            }
                             for (int pkgi = uidState.pkgOps.size() - 1; pkgi >= 0; pkgi--) {
                                 final Op op = uidState.pkgOps.valueAt(pkgi).get(code);
                                 if (op == null) {
                                     continue;
                                 }
-                                if (doAllPackages || op.mode == AppOpsManager.MODE_FOREGROUND) {
+                                if (op.mode == AppOpsManager.MODE_FOREGROUND) {
                                     mHandler.sendMessage(PooledLambda.obtainMessage(
                                             AppOpsService::notifyOpChanged,
                                             this, callback, code, uidState.uid,
