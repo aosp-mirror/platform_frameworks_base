@@ -5745,7 +5745,6 @@ package android.media.tv.tuner.frontend {
     method public int getFreqOffset();
     method public int getHierarchy();
     method @NonNull public boolean[] getLayerErrors();
-    method public int getLberCn();
     method public int getLnbVoltage();
     method public int getMer();
     method public int getModulation();
@@ -5757,37 +5756,32 @@ package android.media.tv.tuner.frontend {
     method public int getSnr();
     method public int getSpectralInversion();
     method public int getSymbolRate();
-    method public int getVberCn();
-    method public int getXerCn();
     method public boolean isDemodLocked();
     method public boolean isEwbs();
     method public boolean isLnaOn();
     method public boolean isRfLock();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
-    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 24; // 0x18
+    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BER = 2; // 0x2
     field public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK = 0; // 0x0
     field public static final int FRONTEND_STATUS_TYPE_EWBS = 13; // 0xd
     field public static final int FRONTEND_STATUS_TYPE_FEC = 8; // 0x8
-    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 21; // 0x15
-    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 22; // 0x16
+    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 18; // 0x12
+    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
-    field public static final int FRONTEND_STATUS_TYPE_LBER_CN = 18; // 0x12
     field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
     field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
-    field public static final int FRONTEND_STATUS_TYPE_MER = 20; // 0x14
+    field public static final int FRONTEND_STATUS_TYPE_MER = 17; // 0x11
     field public static final int FRONTEND_STATUS_TYPE_MODULATION = 9; // 0x9
     field public static final int FRONTEND_STATUS_TYPE_PER = 3; // 0x3
     field public static final int FRONTEND_STATUS_TYPE_PLP_ID = 12; // 0xc
     field public static final int FRONTEND_STATUS_TYPE_PRE_BER = 4; // 0x4
-    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 23; // 0x17
+    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 20; // 0x14
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY = 5; // 0x5
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
-    field public static final int FRONTEND_STATUS_TYPE_VBER_CN = 17; // 0x11
-    field public static final int FRONTEND_STATUS_TYPE_XER_CN = 19; // 0x13
   }
 
   public static class FrontendStatus.Atsc3PlpInfo {
