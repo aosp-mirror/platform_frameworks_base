@@ -102,7 +102,7 @@ public class BlobStorePerfTests {
 
                 durations.clear();
                 collectDigestDurationsFromTrace(parser, durations);
-                // get and delete blobId
+                // TODO: get and delete blobId before next iteration.
             }
         } finally {
             mAtraceUtils.stopTrace();
