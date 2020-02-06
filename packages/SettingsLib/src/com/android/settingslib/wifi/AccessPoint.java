@@ -16,6 +16,9 @@
 
 package com.android.settingslib.wifi;
 
+import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLED;
+import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED;
+
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
@@ -1144,11 +1147,15 @@ public class AccessPoint implements Comparable<AccessPoint> {
                     mInfo != null ? mInfo.getRequestingPackageName() : null));
         } else { // not active
             if (mConfig != null && mConfig.hasNoInternetAccess()) {
-                int messageID = mConfig.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()
+                int messageID =
+                        mConfig.getNetworkSelectionStatus().getNetworkSelectionStatus()
+                                == NETWORK_SELECTION_PERMANENTLY_DISABLED
                         ? R.string.wifi_no_internet_no_reconnect
                         : R.string.wifi_no_internet;
                 summary.append(mContext.getString(messageID));
-            } else if (mConfig != null && !mConfig.getNetworkSelectionStatus().isNetworkEnabled()) {
+            } else if (mConfig != null
+                    && (mConfig.getNetworkSelectionStatus().getNetworkSelectionStatus()
+                            != NETWORK_SELECTION_ENABLED)) {
                 WifiConfiguration.NetworkSelectionStatus networkStatus =
                         mConfig.getNetworkSelectionStatus();
                 switch (networkStatus.getNetworkSelectionDisableReason()) {
