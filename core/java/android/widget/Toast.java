@@ -263,9 +263,14 @@ public class Toast {
     /**
      * Return the view.
      *
-     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
-     * targeting API level {@link Build.VERSION_CODES#R} or higher that haven't called {@link
-     * #setView(View)} with a non-{@code null} view, this method will return {@code null}.
+     * <p>Toasts constructed with {@link #Toast(Context)} that haven't called {@link #setView(View)}
+     * with a non-{@code null} view will return {@code null} here.
+     *
+     * <p>Starting from Android {@link Build.VERSION_CODES#R}, in apps targeting API level {@link
+     * Build.VERSION_CODES#R} or higher, toasts constructed with {@link #makeText(Context,
+     * CharSequence, int)} or its variants will also return {@code null} here unless they had called
+     * {@link #setView(View)} with a non-{@code null} view. If you want to be notified when the
+     * toast is shown or hidden, use {@link #addCallback(Callback)}.
      *
      * @see #setView
      * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
@@ -276,7 +281,7 @@ public class Toast {
      *      will not have custom toast views displayed.
      */
     @Deprecated
-    public View getView() {
+    @Nullable public View getView() {
         return mNextView;
     }
 
