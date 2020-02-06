@@ -596,6 +596,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int MODULE_APEX_NAME = 0x00000001;
 
     /** @hide */
