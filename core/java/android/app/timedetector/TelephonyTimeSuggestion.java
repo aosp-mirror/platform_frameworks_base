@@ -50,17 +50,17 @@ import java.util.Objects;
  *
  * @hide
  */
-public final class PhoneTimeSuggestion implements Parcelable {
+public final class TelephonyTimeSuggestion implements Parcelable {
 
     /** @hide */
-    public static final @NonNull Parcelable.Creator<PhoneTimeSuggestion> CREATOR =
-            new Parcelable.Creator<PhoneTimeSuggestion>() {
-                public PhoneTimeSuggestion createFromParcel(Parcel in) {
-                    return PhoneTimeSuggestion.createFromParcel(in);
+    public static final @NonNull Parcelable.Creator<TelephonyTimeSuggestion> CREATOR =
+            new Parcelable.Creator<TelephonyTimeSuggestion>() {
+                public TelephonyTimeSuggestion createFromParcel(Parcel in) {
+                    return TelephonyTimeSuggestion.createFromParcel(in);
                 }
 
-                public PhoneTimeSuggestion[] newArray(int size) {
-                    return new PhoneTimeSuggestion[size];
+                public TelephonyTimeSuggestion[] newArray(int size) {
+                    return new TelephonyTimeSuggestion[size];
                 }
             };
 
@@ -68,15 +68,15 @@ public final class PhoneTimeSuggestion implements Parcelable {
     @Nullable private final TimestampedValue<Long> mUtcTime;
     @Nullable private ArrayList<String> mDebugInfo;
 
-    private PhoneTimeSuggestion(Builder builder) {
+    private TelephonyTimeSuggestion(Builder builder) {
         mSlotIndex = builder.mSlotIndex;
         mUtcTime = builder.mUtcTime;
         mDebugInfo = builder.mDebugInfo != null ? new ArrayList<>(builder.mDebugInfo) : null;
     }
 
-    private static PhoneTimeSuggestion createFromParcel(Parcel in) {
+    private static TelephonyTimeSuggestion createFromParcel(Parcel in) {
         int slotIndex = in.readInt();
-        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion.Builder(slotIndex)
+        TelephonyTimeSuggestion suggestion = new TelephonyTimeSuggestion.Builder(slotIndex)
                 .setUtcTime(in.readParcelable(null /* classLoader */))
                 .build();
         @SuppressWarnings("unchecked")
@@ -102,7 +102,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
     /**
      * Returns an identifier for the source of this suggestion.
      *
-     * <p>See {@link PhoneTimeSuggestion} for more information about {@code slotIndex}.
+     * <p>See {@link TelephonyTimeSuggestion} for more information about {@code slotIndex}.
      */
     public int getSlotIndex() {
         return mSlotIndex;
@@ -111,7 +111,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
     /**
      * Returns the suggested time or {@code null} if there isn't one.
      *
-     * <p>See {@link PhoneTimeSuggestion} for more information about {@code utcTime}.
+     * <p>See {@link TelephonyTimeSuggestion} for more information about {@code utcTime}.
      */
     @Nullable
     public TimestampedValue<Long> getUtcTime() {
@@ -121,7 +121,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
     /**
      * Returns debug metadata for the suggestion.
      *
-     * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
+     * <p>See {@link TelephonyTimeSuggestion} for more information about {@code debugInfo}.
      */
     @NonNull
     public List<String> getDebugInfo() {
@@ -132,7 +132,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
     /**
      * Associates information with the instance that can be useful for debugging / logging.
      *
-     * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
+     * <p>See {@link TelephonyTimeSuggestion} for more information about {@code debugInfo}.
      */
     public void addDebugInfo(@NonNull String debugInfo) {
         if (mDebugInfo == null) {
@@ -144,7 +144,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
     /**
      * Associates information with the instance that can be useful for debugging / logging.
      *
-     * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
+     * <p>See {@link TelephonyTimeSuggestion} for more information about {@code debugInfo}.
      */
     public void addDebugInfo(@NonNull List<String> debugInfo) {
         if (mDebugInfo == null) {
@@ -161,7 +161,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PhoneTimeSuggestion that = (PhoneTimeSuggestion) o;
+        TelephonyTimeSuggestion that = (TelephonyTimeSuggestion) o;
         return mSlotIndex == that.mSlotIndex
                 && Objects.equals(mUtcTime, that.mUtcTime);
     }
@@ -173,7 +173,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
 
     @Override
     public String toString() {
-        return "PhoneTimeSuggestion{"
+        return "TelephonyTimeSuggestion{"
                 + "mSlotIndex='" + mSlotIndex + '\''
                 + ", mUtcTime=" + mUtcTime
                 + ", mDebugInfo=" + mDebugInfo
@@ -181,7 +181,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
     }
 
     /**
-     * Builds {@link PhoneTimeSuggestion} instances.
+     * Builds {@link TelephonyTimeSuggestion} instances.
      *
      * @hide
      */
@@ -193,7 +193,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
         /**
          * Creates a builder with the specified {@code slotIndex}.
          *
-         * <p>See {@link PhoneTimeSuggestion} for more information about {@code slotIndex}.
+         * <p>See {@link TelephonyTimeSuggestion} for more information about {@code slotIndex}.
          */
         public Builder(int slotIndex) {
             mSlotIndex = slotIndex;
@@ -202,7 +202,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
         /**
          * Returns the builder for call chaining.
          *
-         * <p>See {@link PhoneTimeSuggestion} for more information about {@code utcTime}.
+         * <p>See {@link TelephonyTimeSuggestion} for more information about {@code utcTime}.
          */
         @NonNull
         public Builder setUtcTime(@Nullable TimestampedValue<Long> utcTime) {
@@ -218,7 +218,7 @@ public final class PhoneTimeSuggestion implements Parcelable {
         /**
          * Returns the builder for call chaining.
          *
-         * <p>See {@link PhoneTimeSuggestion} for more information about {@code debugInfo}.
+         * <p>See {@link TelephonyTimeSuggestion} for more information about {@code debugInfo}.
          */
         @NonNull
         public Builder addDebugInfo(@NonNull String debugInfo) {
@@ -229,10 +229,10 @@ public final class PhoneTimeSuggestion implements Parcelable {
             return this;
         }
 
-        /** Returns the {@link PhoneTimeSuggestion}. */
+        /** Returns the {@link TelephonyTimeSuggestion}. */
         @NonNull
-        public PhoneTimeSuggestion build() {
-            return new PhoneTimeSuggestion(this);
+        public TelephonyTimeSuggestion build() {
+            return new TelephonyTimeSuggestion(this);
         }
     }
 }

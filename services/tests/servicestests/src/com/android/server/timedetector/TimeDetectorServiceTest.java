@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.HandlerThread;
@@ -80,35 +80,35 @@ public class TimeDetectorServiceTest {
     }
 
     @Test(expected = SecurityException.class)
-    public void testSuggestPhoneTime_withoutPermission() {
+    public void testSuggestTelephonyTime_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
-        PhoneTimeSuggestion phoneTimeSuggestion = createPhoneTimeSuggestion();
+        TelephonyTimeSuggestion timeSuggestion = createTelephonyTimeSuggestion();
 
         try {
-            mTimeDetectorService.suggestPhoneTime(phoneTimeSuggestion);
+            mTimeDetectorService.suggestTelephonyTime(timeSuggestion);
             fail();
         } finally {
             verify(mMockContext).enforceCallingPermission(
-                    eq(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE),
+                    eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
                     anyString());
         }
     }
 
     @Test
-    public void testSuggestPhoneTime() throws Exception {
+    public void testSuggestTelephonyTime() throws Exception {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        PhoneTimeSuggestion phoneTimeSuggestion = createPhoneTimeSuggestion();
-        mTimeDetectorService.suggestPhoneTime(phoneTimeSuggestion);
+        TelephonyTimeSuggestion timeSuggestion = createTelephonyTimeSuggestion();
+        mTimeDetectorService.suggestTelephonyTime(timeSuggestion);
         mTestHandler.assertTotalMessagesEnqueued(1);
 
         verify(mMockContext).enforceCallingPermission(
-                eq(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE),
+                eq(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE),
                 anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
-        mStubbedTimeDetectorStrategy.verifySuggestPhoneTimeCalled(phoneTimeSuggestion);
+        mStubbedTimeDetectorStrategy.verifySuggestTelephonyTimeCalled(timeSuggestion);
     }
 
     @Test(expected = SecurityException.class)
@@ -199,10 +199,10 @@ public class TimeDetectorServiceTest {
         mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionChangedCalled();
     }
 
-    private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
+    private static TelephonyTimeSuggestion createTelephonyTimeSuggestion() {
         int slotIndex = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new PhoneTimeSuggestion.Builder(slotIndex)
+        return new TelephonyTimeSuggestion.Builder(slotIndex)
                 .setUtcTime(timeValue)
                 .build();
     }
@@ -220,7 +220,7 @@ public class TimeDetectorServiceTest {
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {
 
         // Call tracking.
-        private PhoneTimeSuggestion mLastPhoneSuggestion;
+        private TelephonyTimeSuggestion mLastTelephonySuggestion;
         private ManualTimeSuggestion mLastManualSuggestion;
         private NetworkTimeSuggestion mLastNetworkSuggestion;
         private boolean mHandleAutoTimeDetectionChangedCalled;
@@ -231,8 +231,8 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void suggestPhoneTime(PhoneTimeSuggestion timeSuggestion) {
-            mLastPhoneSuggestion = timeSuggestion;
+        public void suggestTelephonyTime(TelephonyTimeSuggestion timeSuggestion) {
+            mLastTelephonySuggestion = timeSuggestion;
         }
 
         @Override
@@ -256,15 +256,15 @@ public class TimeDetectorServiceTest {
         }
 
         void resetCallTracking() {
-            mLastPhoneSuggestion = null;
+            mLastTelephonySuggestion = null;
             mLastManualSuggestion = null;
             mLastNetworkSuggestion = null;
             mHandleAutoTimeDetectionChangedCalled = false;
             mDumpCalled = false;
         }
 
-        void verifySuggestPhoneTimeCalled(PhoneTimeSuggestion expectedSuggestion) {
-            assertEquals(expectedSuggestion, mLastPhoneSuggestion);
+        void verifySuggestTelephonyTimeCalled(TelephonyTimeSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastTelephonySuggestion);
         }
 
         public void verifySuggestManualTimeCalled(ManualTimeSuggestion expectedSuggestion) {

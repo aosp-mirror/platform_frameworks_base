@@ -16,4 +16,4 @@
 
 package android.app.timezonedetector;
 
-parcelable PhoneTimeZoneSuggestion;
+parcelable TelephonyTimeZoneSuggestion;
