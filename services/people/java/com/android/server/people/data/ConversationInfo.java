@@ -35,7 +35,7 @@ import java.util.Objects;
  */
 public class ConversationInfo {
 
-    private static final int FLAG_VIP = 1;
+    private static final int FLAG_IMPORTANT = 1;
 
     private static final int FLAG_NOTIFICATION_SILENCED = 1 << 1;
 
@@ -50,7 +50,7 @@ public class ConversationInfo {
     private static final int FLAG_DEMOTED = 1 << 6;
 
     @IntDef(flag = true, prefix = {"FLAG_"}, value = {
-            FLAG_VIP,
+            FLAG_IMPORTANT,
             FLAG_NOTIFICATION_SILENCED,
             FLAG_BUBBLED,
             FLAG_PERSON_IMPORTANT,
@@ -129,9 +129,9 @@ public class ConversationInfo {
         return hasShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED);
     }
 
-    /** Whether this conversation is marked as VIP by the user. */
-    public boolean isVip() {
-        return hasConversationFlags(FLAG_VIP);
+    /** Whether this conversation is marked as important by the user. */
+    public boolean isImportant() {
+        return hasConversationFlags(FLAG_IMPORTANT);
     }
 
     /** Whether the notifications for this conversation should be silenced. */
@@ -208,8 +208,8 @@ public class ConversationInfo {
         sb.append("]");
         sb.append(", conversationFlags=0x").append(Integer.toHexString(mConversationFlags));
         sb.append(" [");
-        if (isVip()) {
-            sb.append("Vip");
+        if (isImportant()) {
+            sb.append("Imp");
         }
         if (isNotificationSilenced()) {
             sb.append("Sil");
@@ -221,7 +221,7 @@ public class ConversationInfo {
             sb.append("Dem");
         }
         if (isPersonImportant()) {
-            sb.append("Imp");
+            sb.append("PIm");
         }
         if (isPersonBot()) {
             sb.append("Bot");
@@ -318,8 +318,8 @@ public class ConversationInfo {
             return this;
         }
 
-        Builder setVip(boolean value) {
-            return setConversationFlag(FLAG_VIP, value);
+        Builder setImportant(boolean value) {
+            return setConversationFlag(FLAG_IMPORTANT, value);
         }
 
         Builder setNotificationSilenced(boolean value) {

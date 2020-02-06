@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Person;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
@@ -157,8 +159,8 @@ public class DataManager {
         mNotificationListeners.put(userId, notificationListener);
         try {
             notificationListener.registerAsSystemService(mContext,
-                    new ComponentName(PLATFORM_PACKAGE_NAME, getClass().getSimpleName()),
-                    UserHandle.myUserId());
+                    new ComponentName(PLATFORM_PACKAGE_NAME, getClass().getCanonicalName()),
+                    userId);
         } catch (RemoteException e) {
             // Should never occur for local calls.
         }
@@ -570,6 +572,44 @@ public class DataManager {
             }
             long currentTime = System.currentTimeMillis();
             eventHistory.addEvent(new Event(currentTime, Event.TYPE_NOTIFICATION_OPENED));
+        }
+
+        @Override
+        public void onNotificationChannelModified(String pkg, UserHandle user,
+                NotificationChannel channel, int modificationType) {
+            PackageData packageData = getPackage(pkg, user.getIdentifier());
+            String shortcutId = channel.getConversationId();
+            if (packageData == null || shortcutId == null) {
+                return;
+            }
+            ConversationStore conversationStore = packageData.getConversationStore();
+            ConversationInfo conversationInfo = conversationStore.getConversation(shortcutId);
+            if (conversationInfo == null) {
+                return;
+            }
+            ConversationInfo.Builder builder = new ConversationInfo.Builder(conversationInfo);
+            switch (modificationType) {
+                case NOTIFICATION_CHANNEL_OR_GROUP_ADDED:
+                case NOTIFICATION_CHANNEL_OR_GROUP_UPDATED:
+                    builder.setNotificationChannelId(channel.getId());
+                    builder.setImportant(channel.isImportantConversation());
+                    builder.setDemoted(channel.isDemoted());
+                    builder.setNotificationSilenced(
+                            channel.getImportance() <= NotificationManager.IMPORTANCE_LOW);
+                    builder.setBubbled(channel.canBubble());
+                    break;
+                case NOTIFICATION_CHANNEL_OR_GROUP_DELETED:
+                    // If the notification channel is deleted, revert all the notification settings
+                    // to the default value.
+                    builder.setNotificationChannelId(null);
+                    builder.setImportant(false);
+                    builder.setDemoted(false);
+                    builder.setNotificationSilenced(false);
+                    builder.setBubbled(false);
+                    break;
+            }
+            conversationStore.addOrUpdate(builder.build());
+            // TODO: Cache the shortcut when a conversation's notification setting is changed.
         }
     }
 
