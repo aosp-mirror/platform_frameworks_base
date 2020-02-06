@@ -17,8 +17,6 @@
 syntax = "proto2";
 package com.android.server.notification;
 
-import "frameworks/base/core/proto/android/server/enums.proto";
-
 option java_multiple_files = true;
 
 // On disk data store for historical notifications

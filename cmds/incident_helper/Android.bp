@@ -44,7 +44,7 @@ cc_defaults {
         "src/ih_util.cpp",
     ],
 
-    generated_headers: ["gen-platform-proto-constants"],
+    generated_headers: ["framework-cppstream-protos"],
 
     shared_libs: [
         "libbase",
