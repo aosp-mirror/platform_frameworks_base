@@ -56,18 +56,18 @@ import java.util.Objects;
  *
  * @hide
  */
-public final class PhoneTimeZoneSuggestion implements Parcelable {
+public final class TelephonyTimeZoneSuggestion implements Parcelable {
 
     /** @hide */
     @NonNull
-    public static final Creator<PhoneTimeZoneSuggestion> CREATOR =
-            new Creator<PhoneTimeZoneSuggestion>() {
-                public PhoneTimeZoneSuggestion createFromParcel(Parcel in) {
-                    return PhoneTimeZoneSuggestion.createFromParcel(in);
+    public static final Creator<TelephonyTimeZoneSuggestion> CREATOR =
+            new Creator<TelephonyTimeZoneSuggestion>() {
+                public TelephonyTimeZoneSuggestion createFromParcel(Parcel in) {
+                    return TelephonyTimeZoneSuggestion.createFromParcel(in);
                 }
 
-                public PhoneTimeZoneSuggestion[] newArray(int size) {
-                    return new PhoneTimeZoneSuggestion[size];
+                public TelephonyTimeZoneSuggestion[] newArray(int size) {
+                    return new TelephonyTimeZoneSuggestion[size];
                 }
             };
 
@@ -76,7 +76,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
      * the same {@code slotIndex}.
      */
     @NonNull
-    public static PhoneTimeZoneSuggestion createEmptySuggestion(
+    public static TelephonyTimeZoneSuggestion createEmptySuggestion(
             int slotIndex, @NonNull String debugInfo) {
         return new Builder(slotIndex).addDebugInfo(debugInfo).build();
     }
@@ -144,7 +144,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     @Quality private final int mQuality;
     @Nullable private List<String> mDebugInfo;
 
-    private PhoneTimeZoneSuggestion(Builder builder) {
+    private TelephonyTimeZoneSuggestion(Builder builder) {
         mSlotIndex = builder.mSlotIndex;
         mZoneId = builder.mZoneId;
         mMatchType = builder.mMatchType;
@@ -153,15 +153,16 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     }
 
     @SuppressWarnings("unchecked")
-    private static PhoneTimeZoneSuggestion createFromParcel(Parcel in) {
+    private static TelephonyTimeZoneSuggestion createFromParcel(Parcel in) {
         // Use the Builder so we get validation during build().
         int slotIndex = in.readInt();
-        PhoneTimeZoneSuggestion suggestion = new Builder(slotIndex)
+        TelephonyTimeZoneSuggestion suggestion = new Builder(slotIndex)
                 .setZoneId(in.readString())
                 .setMatchType(in.readInt())
                 .setQuality(in.readInt())
                 .build();
-        List<String> debugInfo = in.readArrayList(PhoneTimeZoneSuggestion.class.getClassLoader());
+        List<String> debugInfo =
+                in.readArrayList(TelephonyTimeZoneSuggestion.class.getClassLoader());
         if (debugInfo != null) {
             suggestion.addDebugInfo(debugInfo);
         }
@@ -185,7 +186,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     /**
      * Returns an identifier for the source of this suggestion.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code slotIndex}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code slotIndex}.
      */
     public int getSlotIndex() {
         return mSlotIndex;
@@ -195,7 +196,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
      * Returns the suggested time zone Olson ID, e.g. "America/Los_Angeles". {@code null} means that
      * the caller is no longer sure what the current time zone is.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code zoneId}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code zoneId}.
      */
     @Nullable
     public String getZoneId() {
@@ -206,7 +207,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
      * Returns information about how the suggestion was determined which could be used to rank
      * suggestions when several are available from different sources.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code matchType}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code matchType}.
      */
     @MatchType
     public int getMatchType() {
@@ -216,7 +217,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     /**
      * Returns information about the likelihood of the suggested zone being correct.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code quality}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code quality}.
      */
     @Quality
     public int getQuality() {
@@ -226,7 +227,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     /**
      * Returns debug metadata for the suggestion.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code debugInfo}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code debugInfo}.
      */
     @NonNull
     public List<String> getDebugInfo() {
@@ -237,7 +238,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     /**
      * Associates information with the instance that can be useful for debugging / logging.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code debugInfo}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code debugInfo}.
      */
     public void addDebugInfo(@NonNull String debugInfo) {
         if (mDebugInfo == null) {
@@ -249,7 +250,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     /**
      * Associates information with the instance that can be useful for debugging / logging.
      *
-     * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code debugInfo}.
+     * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code debugInfo}.
      */
     public void addDebugInfo(@NonNull List<String> debugInfo) {
         if (mDebugInfo == null) {
@@ -266,7 +267,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PhoneTimeZoneSuggestion that = (PhoneTimeZoneSuggestion) o;
+        TelephonyTimeZoneSuggestion that = (TelephonyTimeZoneSuggestion) o;
         return mSlotIndex == that.mSlotIndex
                 && mMatchType == that.mMatchType
                 && mQuality == that.mQuality
@@ -280,7 +281,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
 
     @Override
     public String toString() {
-        return "PhoneTimeZoneSuggestion{"
+        return "TelephonyTimeZoneSuggestion{"
                 + "mSlotIndex=" + mSlotIndex
                 + ", mZoneId='" + mZoneId + '\''
                 + ", mMatchType=" + mMatchType
@@ -290,7 +291,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
     }
 
     /**
-     * Builds {@link PhoneTimeZoneSuggestion} instances.
+     * Builds {@link TelephonyTimeZoneSuggestion} instances.
      *
      * @hide
      */
@@ -304,7 +305,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
         /**
          * Creates a builder with the specified {@code slotIndex}.
          *
-         * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code slotIndex}.
+         * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code slotIndex}.
          */
         public Builder(int slotIndex) {
             mSlotIndex = slotIndex;
@@ -313,7 +314,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
         /**
          * Returns the builder for call chaining.
          *
-         * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code zoneId}.
+         * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code zoneId}.
          */
         @NonNull
         public Builder setZoneId(@Nullable String zoneId) {
@@ -324,7 +325,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
         /**
          * Returns the builder for call chaining.
          *
-         * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code matchType}.
+         * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code matchType}.
          */
         @NonNull
         public Builder setMatchType(@MatchType int matchType) {
@@ -335,7 +336,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
         /**
          * Returns the builder for call chaining.
          *
-         * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code quality}.
+         * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code quality}.
          */
         @NonNull
         public Builder setQuality(@Quality int quality) {
@@ -346,7 +347,7 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
         /**
          * Returns the builder for call chaining.
          *
-         * <p>See {@link PhoneTimeZoneSuggestion} for more information about {@code debugInfo}.
+         * <p>See {@link TelephonyTimeZoneSuggestion} for more information about {@code debugInfo}.
          */
         @NonNull
         public Builder addDebugInfo(@NonNull String debugInfo) {
@@ -384,11 +385,11 @@ public final class PhoneTimeZoneSuggestion implements Parcelable {
             }
         }
 
-        /** Returns the {@link PhoneTimeZoneSuggestion}. */
+        /** Returns the {@link TelephonyTimeZoneSuggestion}. */
         @NonNull
-        public PhoneTimeZoneSuggestion build() {
+        public TelephonyTimeZoneSuggestion build() {
             validate();
-            return new PhoneTimeZoneSuggestion(this);
+            return new TelephonyTimeZoneSuggestion(this);
         }
     }
 }

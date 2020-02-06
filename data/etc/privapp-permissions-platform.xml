@@ -159,7 +159,7 @@ applications that come with the platform
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
-        <permission name="android.permission.SUGGEST_PHONE_TIME_AND_ZONE"/>
+        <permission name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
         <permission name="android.permission.UPDATE_LOCK"/>
