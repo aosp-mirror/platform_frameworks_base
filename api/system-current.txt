@@ -1922,18 +1922,22 @@ package android.content.integrity {
   public abstract class IntegrityFormula {
     method @NonNull public static android.content.integrity.IntegrityFormula all(@NonNull android.content.integrity.IntegrityFormula...);
     method @NonNull public static android.content.integrity.IntegrityFormula any(@NonNull android.content.integrity.IntegrityFormula...);
-    method @NonNull public android.content.integrity.IntegrityFormula equalTo(@NonNull String);
-    method @NonNull public android.content.integrity.IntegrityFormula equalTo(boolean);
-    method @NonNull public android.content.integrity.IntegrityFormula equalTo(long);
-    method @NonNull public android.content.integrity.IntegrityFormula greaterThan(long);
-    method @NonNull public android.content.integrity.IntegrityFormula greaterThanOrEquals(long);
     method @NonNull public static android.content.integrity.IntegrityFormula not(@NonNull android.content.integrity.IntegrityFormula);
-    field @NonNull public static final android.content.integrity.IntegrityFormula APP_CERTIFICATE;
-    field @NonNull public static final android.content.integrity.IntegrityFormula INSTALLER_CERTIFICATE;
-    field @NonNull public static final android.content.integrity.IntegrityFormula INSTALLER_NAME;
-    field @NonNull public static final android.content.integrity.IntegrityFormula PACKAGE_NAME;
-    field @NonNull public static final android.content.integrity.IntegrityFormula PRE_INSTALLED;
-    field @NonNull public static final android.content.integrity.IntegrityFormula VERSION_CODE;
+  }
+
+  public static final class IntegrityFormula.Application {
+    method @NonNull public static android.content.integrity.IntegrityFormula certificatesContain(@NonNull String);
+    method @NonNull public static android.content.integrity.IntegrityFormula isPreInstalled();
+    method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
+    method @NonNull public static android.content.integrity.IntegrityFormula versionCodeEquals(@NonNull long);
+    method @NonNull public static android.content.integrity.IntegrityFormula versionCodeGreaterThan(@NonNull long);
+    method @NonNull public static android.content.integrity.IntegrityFormula versionCodeGreaterThanOrEqualTo(@NonNull long);
+  }
+
+  public static final class IntegrityFormula.Installer {
+    method @NonNull public static android.content.integrity.IntegrityFormula certificatesContain(@NonNull String);
+    method @NonNull public static android.content.integrity.IntegrityFormula notAllowedByManifest();
+    method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
   }
 
   public final class Rule implements android.os.Parcelable {
