@@ -25,6 +25,7 @@ import static android.system.OsConstants.S_IRWXU;
 import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -32,7 +33,12 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.SELinux;
+import android.os.ServiceManager;
+import android.os.incremental.IIncrementalService;
+import android.os.incremental.IncrementalManager;
+import android.os.incremental.IncrementalStorage;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Slog;
@@ -44,6 +50,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -481,8 +488,54 @@ public class NativeLibraryHelper {
      */
     private static int incrementalConfigureNativeBinariesForSupportedAbi(Handle handle,
             File libSubDir, String abi) {
-        // TODO(b/136132412): implement this
-        return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        final String[] apkPaths = handle.apkPaths;
+        if (apkPaths == null || apkPaths.length == 0) {
+            Slog.e(TAG, "No apks to extract native libraries from.");
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        }
+
+        final IBinder incrementalService = ServiceManager.getService(Context.INCREMENTAL_SERVICE);
+        if (incrementalService == null) {
+            //TODO(b/133435829): add incremental specific error codes
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        }
+        final IncrementalManager incrementalManager = new IncrementalManager(
+                IIncrementalService.Stub.asInterface(incrementalService));
+        final File apkParent = new File(apkPaths[0]).getParentFile();
+        IncrementalStorage incrementalStorage =
+                incrementalManager.openStorage(apkParent.getAbsolutePath());
+        if (incrementalStorage == null) {
+            Slog.e(TAG, "Failed to find incremental storage");
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        }
+
+        String libRelativeDir = getRelativePath(apkParent, libSubDir);
+        if (libRelativeDir == null) {
+            return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+        }
+
+        for (int i = 0; i < apkPaths.length; i++) {
+            if (!incrementalStorage.configureNativeBinaries(apkPaths[i], libRelativeDir, abi)) {
+                return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            }
+        }
+        return PackageManager.INSTALL_SUCCEEDED;
+    }
+
+    private static String getRelativePath(File base, File target) {
+        try {
+            final Path basePath = base.toPath();
+            final Path targetPath = target.toPath();
+            final Path relativePath = basePath.relativize(targetPath);
+            if (relativePath.toString().isEmpty()) {
+                return "";
+            }
+            return relativePath.toString();
+        } catch (IllegalArgumentException ex) {
+            Slog.e(TAG, "Failed to find relative path between: " + base.getAbsolutePath()
+                    + " and: " + target.getAbsolutePath());
+            return null;
+        }
     }
 
     // We don't care about the other return values for now.

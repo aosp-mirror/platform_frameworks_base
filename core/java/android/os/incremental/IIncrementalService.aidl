@@ -103,4 +103,9 @@ interface IIncrementalService {
      * Deletes a storage given its ID. Deletes its bind mounts and unmount it. Stop its data loader.
      */
     void deleteStorage(int storageId);
+
+    /**
+     * Setting up native library directories and extract native libs onto a storage.
+     */
+    boolean configureNativeBinaries(int storageId, in @utf8InCpp String apkFullPath, in @utf8InCpp String libDirRelativePath, in @utf8InCpp String abi);
 }

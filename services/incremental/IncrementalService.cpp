@@ -60,6 +60,9 @@ struct Constants {
     static constexpr auto storagePrefix = "st"sv;
     static constexpr auto mountpointMdPrefix = ".mountpoint."sv;
     static constexpr auto infoMdName = ".info"sv;
+    static constexpr auto libDir = "lib"sv;
+    static constexpr auto libSuffix = ".so"sv;
+    static constexpr auto blockSize = 4096;
 };
 
 static const Constants& constants() {
@@ -259,16 +262,18 @@ IncrementalService::~IncrementalService() = default;
 
 inline const char* toString(TimePoint t) {
     using SystemClock = std::chrono::system_clock;
-    time_t time = SystemClock::to_time_t(SystemClock::now() + std::chrono::duration_cast<SystemClock::duration>(t - Clock::now()));
+    time_t time = SystemClock::to_time_t(
+            SystemClock::now() +
+            std::chrono::duration_cast<SystemClock::duration>(t - Clock::now()));
     return std::ctime(&time);
 }
 
 inline const char* toString(IncrementalService::BindKind kind) {
     switch (kind) {
-    case IncrementalService::BindKind::Temporary:
-        return "Temporary";
-    case IncrementalService::BindKind::Permanent:
-        return "Permanent";
+        case IncrementalService::BindKind::Temporary:
+            return "Temporary";
+        case IncrementalService::BindKind::Permanent:
+            return "Permanent";
     }
 }
 
@@ -1122,6 +1127,122 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     }
     ifs.savedDataLoaderParams.reset();
     return true;
+}
+
+// Extract lib filse from zip, create new files in incfs and write data to them
+bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
+                                                 std::string_view libDirRelativePath,
+                                                 std::string_view abi) {
+    const auto ifs = getIfs(storage);
+    // First prepare target directories if they don't exist yet
+    if (auto res = makeDirs(storage, libDirRelativePath, 0755)) {
+        LOG(ERROR) << "Failed to prepare target lib directory " << libDirRelativePath
+                   << " errno: " << res;
+        return false;
+    }
+
+    std::unique_ptr<ZipFileRO> zipFile(ZipFileRO::open(apkFullPath.data()));
+    if (!zipFile) {
+        LOG(ERROR) << "Failed to open zip file at " << apkFullPath;
+        return false;
+    }
+    void* cookie = nullptr;
+    const auto libFilePrefix = path::join(constants().libDir, abi);
+    if (!zipFile.get()->startIteration(&cookie, libFilePrefix.c_str() /* prefix */,
+                                       constants().libSuffix.data() /* suffix */)) {
+        LOG(ERROR) << "Failed to start zip iteration for " << apkFullPath;
+        return false;
+    }
+    ZipEntryRO entry = nullptr;
+    bool success = true;
+    while ((entry = zipFile.get()->nextEntry(cookie)) != nullptr) {
+        char fileName[PATH_MAX];
+        if (zipFile.get()->getEntryFileName(entry, fileName, sizeof(fileName))) {
+            continue;
+        }
+        const auto libName = path::basename(fileName);
+        const auto targetLibPath = path::join(libDirRelativePath, libName);
+        const auto targetLibPathAbsolute = normalizePathToStorage(ifs, storage, targetLibPath);
+        // If the extract file already exists, skip
+        struct stat st;
+        if (stat(targetLibPathAbsolute.c_str(), &st) == 0) {
+            LOG(INFO) << "Native lib file already exists: " << targetLibPath
+                      << "; skipping extraction";
+            continue;
+        }
+
+        uint32_t uncompressedLen;
+        if (!zipFile.get()->getEntryInfo(entry, nullptr, &uncompressedLen, nullptr, nullptr,
+                                         nullptr, nullptr)) {
+            LOG(ERROR) << "Failed to read native lib entry: " << fileName;
+            success = false;
+            break;
+        }
+
+        // Create new lib file without signature info
+        incfs::NewFileParams libFileParams;
+        libFileParams.size = uncompressedLen;
+        libFileParams.verification.hashAlgorithm = INCFS_HASH_NONE;
+        // Metadata of the new lib file is its relative path
+        IncFsSpan libFileMetadata;
+        libFileMetadata.data = targetLibPath.c_str();
+        libFileMetadata.size = targetLibPath.size();
+        libFileParams.metadata = libFileMetadata;
+        incfs::FileId libFileId = idFromMetadata(targetLibPath);
+        if (auto res = makeFile(storage, targetLibPath, 0777, libFileId, libFileParams)) {
+            LOG(ERROR) << "Failed to make file for: " << targetLibPath << " errno: " << res;
+            success = false;
+            // If one lib file fails to be created, abort others as well
+            break;
+        }
+
+        // Write extracted data to new file
+        std::vector<uint8_t> libData(uncompressedLen);
+        if (!zipFile.get()->uncompressEntry(entry, &libData[0], uncompressedLen)) {
+            LOG(ERROR) << "Failed to extract native lib zip entry: " << fileName;
+            success = false;
+            break;
+        }
+        android::base::unique_fd writeFd(mIncFs->openWrite(ifs->control, libFileId));
+        if (writeFd < 0) {
+            LOG(ERROR) << "Failed to open write fd for: " << targetLibPath << " errno: " << writeFd;
+            success = false;
+            break;
+        }
+        const int numBlocks = uncompressedLen / constants().blockSize + 1;
+        std::vector<IncFsDataBlock> instructions;
+        auto remainingData = std::span(libData);
+        for (int i = 0; i < numBlocks - 1; i++) {
+            auto inst = IncFsDataBlock{
+                    .fileFd = writeFd,
+                    .pageIndex = static_cast<IncFsBlockIndex>(i),
+                    .compression = INCFS_COMPRESSION_KIND_NONE,
+                    .kind = INCFS_BLOCK_KIND_DATA,
+                    .dataSize = static_cast<uint16_t>(constants().blockSize),
+                    .data = reinterpret_cast<const char*>(remainingData.data()),
+            };
+            instructions.push_back(inst);
+            remainingData = remainingData.subspan(constants().blockSize);
+        }
+        // Last block
+        auto inst = IncFsDataBlock{
+                .fileFd = writeFd,
+                .pageIndex = static_cast<IncFsBlockIndex>(numBlocks - 1),
+                .compression = INCFS_COMPRESSION_KIND_NONE,
+                .kind = INCFS_BLOCK_KIND_DATA,
+                .dataSize = static_cast<uint16_t>(remainingData.size()),
+                .data = reinterpret_cast<const char*>(remainingData.data()),
+        };
+        instructions.push_back(inst);
+        size_t res = mIncFs->writeBlocks(instructions);
+        if (res != instructions.size()) {
+            LOG(ERROR) << "Failed to write data into: " << targetLibPath;
+            success = false;
+        }
+        instructions.clear();
+    }
+    zipFile.get()->endIteration(cookie);
+    return success;
 }
 
 binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChanged(MountId mountId,
