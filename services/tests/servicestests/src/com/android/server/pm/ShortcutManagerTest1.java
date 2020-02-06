@@ -1372,7 +1372,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         setCaller(CALLING_PACKAGE_1);
         final ShortcutInfo s1_1 = makeShortcut("s1");
-        final ShortcutInfo s1_2 = makeShortcut("s2");
+        final ShortcutInfo s1_2 = makeShortcutWithLocusId("s2", makeLocusId("l1"));
 
         assertTrue(mManager.setDynamicShortcuts(list(s1_1, s1_2)));
 
@@ -1394,7 +1394,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         getCallerShortcut("s4").setTimestamp(500);
 
         setCaller(CALLING_PACKAGE_3);
-        final ShortcutInfo s3_2 = makeShortcut("s3");
+        final ShortcutInfo s3_2 = makeShortcutWithLocusId("s3", makeLocusId("l2"));
         assertTrue(mManager.setDynamicShortcuts(list(s3_2)));
 
         getCallerShortcut("s3").setTimestamp(START_TIME + 5000);
@@ -1446,7 +1446,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // With ID.
         assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
                 assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
-                        /* time =*/ 1000, CALLING_PACKAGE_2, list("s3"),
+                        /* time =*/ 1000, CALLING_PACKAGE_2, list("s3"), /* locusIds =*/ null,
                         /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
                         getCallingUser())),
@@ -1454,20 +1454,51 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
                 assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
                         /* time =*/ 1000, CALLING_PACKAGE_2, list("s3", "s2", "ss"),
-                        /* activity =*/ null,
+                        /* locusIds =*/ null, /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
                         getCallingUser())),
                 "s2", "s3"))));
         assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
                 assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
                         /* time =*/ 1000, CALLING_PACKAGE_2, list("s3x", "s2x"),
-                        /* activity =*/ null,
+                        /* locusIds =*/ null, /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
                         getCallingUser()))
                 /* empty */))));
         assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
                 assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
-                        /* time =*/ 1000, CALLING_PACKAGE_2, list(),
+                        /* time =*/ 1000, CALLING_PACKAGE_2, list(), /* locusIds =*/ null,
+                        /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser()))
+                /* empty */))));
+
+        // With locus ID.
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_3, /* shortcutIds =*/ null,
+                        list(makeLocusId("l2")), /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser())),
+                "s3"))));
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_1, /* shortcutIds =*/ null,
+                        list(makeLocusId("l1"), makeLocusId("l2"), makeLocusId("l3")),
+                        /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser())),
+                "s2"))));
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_1, /* shortcutIds =*/ null,
+                        list(makeLocusId("lx1"), makeLocusId("lx2")), /* activity =*/ null,
+                        ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
+                        getCallingUser()))
+                /* empty */))));
+        assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 1000, CALLING_PACKAGE_3, /* shortcutIds =*/ null, list(),
                         /* activity =*/ null,
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
                         getCallingUser()))
@@ -1498,7 +1529,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertExpectException(
                 IllegalArgumentException.class, "package name must also be set", () -> {
                     mLauncherApps.getShortcuts(buildQuery(
-                    /* time =*/ 0, /* package= */ null, list("id"),
+                    /* time =*/ 0, /* package= */ null, list("id"), /* locusIds =*/ null,
                     /* activity =*/ null, /* flags */ 0), getCallingUser());
                 });
 
@@ -1537,7 +1568,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertExpectException(
                 IllegalArgumentException.class, "package name must also be set", () -> {
                     mLauncherApps.getShortcuts(buildQuery(
-                            /* time =*/ 0, /* package= */ null, list("id"),
+                            /* time =*/ 0, /* package= */ null, list("id"), /* locusIds= */ null,
                             /* activity =*/ null, /* flags */ 0), getCallingUser());
                 });
 

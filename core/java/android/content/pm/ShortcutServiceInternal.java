@@ -23,6 +23,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -45,8 +46,8 @@ public abstract class ShortcutServiceInternal {
             getShortcuts(int launcherUserId,
             @NonNull String callingPackage, long changedSince,
             @Nullable String packageName, @Nullable List<String> shortcutIds,
-            @Nullable ComponentName componentName, @ShortcutQuery.QueryFlags int flags,
-            int userId, int callingPid, int callingUid);
+            @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
+            @ShortcutQuery.QueryFlags int flags, int userId, int callingPid, int callingUid);
 
     public abstract boolean
             isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,

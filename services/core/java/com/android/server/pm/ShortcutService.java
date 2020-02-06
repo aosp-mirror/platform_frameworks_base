@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -2589,7 +2590,7 @@ public class ShortcutService extends IShortcutService.Stub {
         public List<ShortcutInfo> getShortcuts(int launcherUserId,
                 @NonNull String callingPackage, long changedSince,
                 @Nullable String packageName, @Nullable List<String> shortcutIds,
-                @Nullable ComponentName componentName,
+                @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
                 int queryFlags, int userId, int callingPid, int callingUid) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
@@ -2610,15 +2611,16 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 if (packageName != null) {
                     getShortcutsInnerLocked(launcherUserId,
-                            callingPackage, packageName, shortcutIds, changedSince,
+                            callingPackage, packageName, shortcutIds, locusIds, changedSince,
                             componentName, queryFlags, userId, ret, cloneFlag,
                             callingPid, callingUid);
                 } else {
                     final List<String> shortcutIdsF = shortcutIds;
+                    final List<LocusId> locusIdsF = locusIds;
                     getUserShortcutsLocked(userId).forAllPackages(p -> {
                         getShortcutsInnerLocked(launcherUserId,
-                                callingPackage, p.getPackageName(), shortcutIdsF, changedSince,
-                                componentName, queryFlags, userId, ret, cloneFlag,
+                                callingPackage, p.getPackageName(), shortcutIdsF, locusIdsF,
+                                changedSince, componentName, queryFlags, userId, ret, cloneFlag,
                                 callingPid, callingUid);
                     });
                 }
@@ -2628,12 +2630,15 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @GuardedBy("ShortcutService.this.mLock")
         private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,
-                @Nullable String packageName, @Nullable List<String> shortcutIds, long changedSince,
+                @Nullable String packageName, @Nullable List<String> shortcutIds,
+                @Nullable List<LocusId> locusIds, long changedSince,
                 @Nullable ComponentName componentName, int queryFlags,
                 int userId, ArrayList<ShortcutInfo> ret, int cloneFlag,
                 int callingPid, int callingUid) {
             final ArraySet<String> ids = shortcutIds == null ? null
                     : new ArraySet<>(shortcutIds);
+            final ArraySet<LocusId> locIds = locusIds == null ? null
+                    : new ArraySet<>(locusIds);
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
             final ShortcutPackage p = user.getPackageShortcutsIfExists(packageName);
@@ -2658,6 +2663,9 @@ public class ShortcutService extends IShortcutService.Stub {
                             return false;
                         }
                         if (ids != null && !ids.contains(si.getId())) {
+                            return false;
+                        }
+                        if (locIds != null && !locIds.contains(si.getLocusId())) {
                             return false;
                         }
                         if (componentName != null) {
