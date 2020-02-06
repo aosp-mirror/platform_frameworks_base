@@ -289,6 +289,20 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDeleteNotificationHistoryItem_userUnlocked() {
+        String pkg = "pkg";
+        long time = 235;
+        NotificationHistoryDatabase userHistory = mock(NotificationHistoryDatabase.class);
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistory);
+
+        mHistoryManager.deleteNotificationHistoryItem(pkg, 1, time);
+
+        verify(userHistory, times(1)).deleteNotificationHistoryItem(pkg, time);
+    }
+
+    @Test
     public void testTriggerWriteToDisk() {
         NotificationHistoryDatabase userHistorySystem = mock(NotificationHistoryDatabase.class);
         NotificationHistoryDatabase userHistoryAll = mock(NotificationHistoryDatabase.class);

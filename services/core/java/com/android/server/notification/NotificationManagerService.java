@@ -2780,7 +2780,7 @@ public class NotificationManagerService extends SystemService {
                         if (!isSystemToast) {
                             int count = 0;
                             final int N = mToastQueue.size();
-                            for (int i=0; i<N; i++) {
+                            for (int i = 0; i < N; i++) {
                                 final ToastRecord r = mToastQueue.get(i);
                                 if (r.pkg.equals(pkg)) {
                                     count++;
@@ -2820,7 +2820,7 @@ public class NotificationManagerService extends SystemService {
 
             if (pkg == null || token == null) {
                 Slog.e(TAG, "Not cancelling notification. pkg=" + pkg + " token=" + token);
-                return ;
+                return;
             }
 
             synchronized (mToastQueue) {
@@ -2933,14 +2933,14 @@ public class NotificationManagerService extends SystemService {
 
         /**
          * Updates the enabled state for notifications for the given package (and uid).
-         * Additionally, this method marks the app importance as locked by the user, which means
+         * Additionally, this method marks the app importance as locked by the user, which
+         * means
          * that notifications from the app will <b>not</b> be considered for showing a
          * blocking helper.
          *
-         * @param pkg package that owns the notifications to update
-         * @param uid uid of the app providing notifications
+         * @param pkg     package that owns the notifications to update
+         * @param uid     uid of the app providing notifications
          * @param enabled whether notifications should be enabled for the app
-         *
          * @see #setNotificationsEnabledForPackage(String, int, boolean)
          */
         @Override
@@ -3028,6 +3028,12 @@ public class NotificationManagerService extends SystemService {
             handleSavePolicyFile();
 
             mListeners.onStatusBarIconsBehaviorChanged(hide);
+        }
+
+        @Override
+        public void deleteNotificationHistoryItem(String pkg, int uid, long postedTime) {
+            checkCallerIsSystem();
+            mHistoryManager.deleteNotificationHistoryItem(pkg, uid, postedTime);
         }
 
         @Override
