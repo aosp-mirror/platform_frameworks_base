@@ -411,6 +411,15 @@ public abstract class AccessibilityService extends Service {
     /** The user has performed a four-finger triple tap gesture on the touch screen. */
     public static final int GESTURE_4_FINGER_TRIPLE_TAP = 39;
 
+    /** The user has performed a two-finger double tap and hold gesture on the touch screen. */
+    public static final int GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD = 40;
+
+    /** The user has performed a three-finger double tap and hold gesture on the touch screen. */
+    public static final int GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD = 41;
+
+    /** The user has performed a two-finger double tap and hold gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_DOUBLE_TAP_AND_HOLD = 42;
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
