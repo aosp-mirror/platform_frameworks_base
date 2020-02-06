@@ -115,6 +115,7 @@ public class AppStandbyControllerTests {
     private static final long WORKING_SET_THRESHOLD = 12 * HOUR_MS;
     private static final long FREQUENT_THRESHOLD = 24 * HOUR_MS;
     private static final long RARE_THRESHOLD = 48 * HOUR_MS;
+    private static final long RESTRICTED_THRESHOLD = 96 * HOUR_MS;
 
     /** Mock variable used in {@link MyInjector#isPackageInstalled(String, int, int)} */
     private static boolean isPackageInstalled = true;
@@ -232,9 +233,8 @@ public class AppStandbyControllerTests {
         @Override
         String getAppIdleSettings() {
             return "screen_thresholds=0/0/0/" + HOUR_MS + ",elapsed_thresholds=0/"
-                    + WORKING_SET_THRESHOLD + "/"
-                    + FREQUENT_THRESHOLD + "/"
-                    + RARE_THRESHOLD;
+                    + WORKING_SET_THRESHOLD + "/" + FREQUENT_THRESHOLD + "/" + RARE_THRESHOLD
+                    + "/" + RESTRICTED_THRESHOLD;
         }
 
         @Override
@@ -372,12 +372,15 @@ public class AppStandbyControllerTests {
         // RARE bucket
         assertTimeout(mController, RARE_THRESHOLD + 1, STANDBY_BUCKET_RARE);
 
+        // RESTRICTED bucket
+        assertTimeout(mController, RESTRICTED_THRESHOLD + 1, STANDBY_BUCKET_RESTRICTED);
+
         reportEvent(mController, USER_INTERACTION, RARE_THRESHOLD + 1, PACKAGE_1);
 
         assertTimeout(mController, RARE_THRESHOLD + 1, STANDBY_BUCKET_ACTIVE);
 
-        // RARE bucket
-        assertTimeout(mController, RARE_THRESHOLD * 2 + 2, STANDBY_BUCKET_RARE);
+        // RESTRICTED bucket
+        assertTimeout(mController, RESTRICTED_THRESHOLD * 2 + 2, STANDBY_BUCKET_RESTRICTED);
     }
 
     @Test
@@ -437,7 +440,7 @@ public class AppStandbyControllerTests {
         assertNotEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
 
         mInjector.setDisplayOn(true);
-        assertTimeout(mController, RARE_THRESHOLD * 2 + 2, STANDBY_BUCKET_RARE);
+        assertTimeout(mController, RARE_THRESHOLD + 2 * HOUR_MS + 1, STANDBY_BUCKET_RARE);
     }
 
     @Test
@@ -642,7 +645,7 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_FREQUENT);
 
         // Way past prediction timeout, use system thresholds
-        mInjector.mElapsedRealtime = RARE_THRESHOLD * 4;
+        mInjector.mElapsedRealtime = RARE_THRESHOLD;
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RARE);
     }
@@ -669,7 +672,7 @@ public class AppStandbyControllerTests {
         assertBucket(STANDBY_BUCKET_RESTRICTED);
 
         // Way past all timeouts. Make sure timeout processing doesn't raise bucket.
-        mInjector.mElapsedRealtime += RARE_THRESHOLD * 4;
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
@@ -694,6 +697,22 @@ public class AppStandbyControllerTests {
         Thread.sleep(6000);
         // Enough time has passed. The app should automatically be put into the RESTRICTED bucket.
         assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    @Test
+    public void testPredictionRaiseFromRestrictedTimeout() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Way past all timeouts. App times out into RESTRICTED bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Since the app timed out into RESTRICTED, prediction should be able to remove from the
+        // bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_PREDICTED);
     }
 
     @Test
