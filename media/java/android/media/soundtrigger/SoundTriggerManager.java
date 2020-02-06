@@ -173,8 +173,13 @@ public final class SoundTriggerManager {
         }
 
         /**
-         * Factory constructor to create a SoundModel instance for use with methods in this
-         * class.
+         * Factory constructor to a voice model to be used with {@link SoundTriggerManager}
+         *
+         * @param modelUuid Unique identifier associated with the model.
+         * @param vendorUuid Unique identifier associated the calling vendor.
+         * @param data Model's data.
+         * @param version Version identifier for the model.
+         * @return Voice model
          */
         @NonNull
         public static Model create(@NonNull UUID modelUuid, @NonNull UUID vendorUuid,
@@ -186,8 +191,12 @@ public final class SoundTriggerManager {
         }
 
         /**
-         * Factory constructor to create a SoundModel instance for use with methods in this
-         * class.
+         * Factory constructor to a voice model to be used with {@link SoundTriggerManager}
+         *
+         * @param modelUuid Unique identifier associated with the model.
+         * @param vendorUuid Unique identifier associated the calling vendor.
+         * @param data Model's data.
+         * @return Voice model
          */
         @NonNull
         public static Model create(@NonNull UUID modelUuid, @NonNull UUID vendorUuid,
@@ -195,20 +204,40 @@ public final class SoundTriggerManager {
             return create(modelUuid, vendorUuid, data, -1);
         }
 
+        /**
+         * Get the model's unique identifier
+         *
+         * @return UUID associated with the model
+         */
         @NonNull
         public UUID getModelUuid() {
             return mGenericSoundModel.uuid;
         }
 
+        /**
+         * Get the model's vendor identifier
+         *
+         * @return UUID associated with the vendor of the model
+         */
         @NonNull
         public UUID getVendorUuid() {
             return mGenericSoundModel.vendorUuid;
         }
 
+        /**
+         * Get the model's version
+         *
+         * @return Version associated with the model
+         */
         public int getVersion() {
             return mGenericSoundModel.version;
         }
 
+        /**
+         * Get the underlying model data
+         *
+         * @return Backing data of the model
+         */
         @Nullable
         public byte[] getModelData() {
             return mGenericSoundModel.data;
