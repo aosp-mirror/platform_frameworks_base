@@ -40,6 +40,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -201,6 +203,9 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private ArrayMapWithHistory<Integer, QualifiedTelephonyTimeZoneSuggestion>
             mSuggestionBySlotIndex = new ArrayMapWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    @GuardedBy("this")
+    private final List<Dumpable> mDumpables = new ArrayList<>();
+
     /**
      * Creates a new instance of {@link TimeZoneDetectorStrategyImpl}.
      */
@@ -281,6 +286,16 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private static boolean containsAutoTimeDetectionProperties(
             @NonNull TimeZoneConfiguration configuration) {
         return configuration.hasProperty(PROPERTY_AUTO_DETECTION_ENABLED);
+    }
+
+    @Override
+    public synchronized void suggestGeolocationTimeZone(
+            @NonNull GeolocationTimeZoneSuggestion suggestion) {
+        Objects.requireNonNull(suggestion);
+
+        // TODO Implement this.
+        throw new UnsupportedOperationException(
+                "Geo-location time zone detection is not currently implemented");
     }
 
     @Override
@@ -501,6 +516,11 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         }
     }
 
+    @Override
+    public synchronized void addDumpable(Dumpable dumpable) {
+        mDumpables.add(dumpable);
+    }
+
     /**
      * Dumps internal state such as field values.
      */
@@ -525,6 +545,10 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         mSuggestionBySlotIndex.dump(ipw);
         ipw.decreaseIndent(); // level 2
         ipw.decreaseIndent(); // level 1
+
+        for (Dumpable dumpable : mDumpables) {
+            dumpable.dump(ipw, args);
+        }
         ipw.flush();
     }
 

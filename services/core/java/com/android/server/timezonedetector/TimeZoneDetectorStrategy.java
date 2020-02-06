@@ -37,7 +37,7 @@ import java.io.PrintWriter;
  *
  * @hide
  */
-public interface TimeZoneDetectorStrategy {
+public interface TimeZoneDetectorStrategy extends Dumpable.Dumpee {
 
     /** A listener for strategy events. */
     interface StrategyListener {
@@ -67,11 +67,13 @@ public interface TimeZoneDetectorStrategy {
             @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration);
 
     /**
-     * Suggests a time zone for the device, determined from the user's manually entered information.
-     * Returns {@code false} if the suggestion was invalid, or the device configuration prevented
-     * the suggestion being used, {@code true} if the suggestion was accepted. A suggestion that is
-     * valid but does not change the time zone because it matches the current device time zone is
-     * considered accepted.
+     * Suggests zero, one or more time zones for the device, or withdraws a previous suggestion if
+     * {@link GeolocationTimeZoneSuggestion#getZoneIds()} is {@code null}.
+     */
+    void suggestGeolocationTimeZone(@NonNull GeolocationTimeZoneSuggestion suggestion);
+
+    /**
+     * Suggests a time zone for the device using manually-entered (i.e. user sourced) information.
      */
     boolean suggestManualTimeZone(
             @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion);

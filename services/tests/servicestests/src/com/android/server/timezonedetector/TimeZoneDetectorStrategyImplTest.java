@@ -54,11 +54,14 @@ import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.Qualifie
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategyImpl}.
@@ -71,21 +74,23 @@ public class TimeZoneDetectorStrategyImplTest {
     private static final int SLOT_INDEX1 = 10000;
     private static final int SLOT_INDEX2 = 20000;
 
-    // Suggestion test cases are ordered so that each successive one is of the same or higher score
+    // Telephony test cases are ordered so that each successive one is of the same or higher score
     // than the previous.
-    private static final SuggestionTestCase[] TEST_CASES = new SuggestionTestCase[] {
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
+    private static final TelephonyTestCase[] TELEPHONY_TEST_CASES = new TelephonyTestCase[] {
+            newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                     QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, TELEPHONY_SCORE_LOW),
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY, QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET,
-                    TELEPHONY_SCORE_MEDIUM),
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET,
+            newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                     QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, TELEPHONY_SCORE_MEDIUM),
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY, QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGH),
-            newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+            newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET,
+                    QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, TELEPHONY_SCORE_MEDIUM),
+            newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY, QUALITY_SINGLE_ZONE,
                     TELEPHONY_SCORE_HIGH),
-            newTestCase(MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY,
+            newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    TELEPHONY_SCORE_HIGH),
+            newTelephonyTestCase(MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY,
                     QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET, TELEPHONY_SCORE_HIGHEST),
-            newTestCase(MATCH_TYPE_EMULATOR_ZONE_ID, QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGHEST),
+            newTelephonyTestCase(MATCH_TYPE_EMULATOR_ZONE_ID, QUALITY_SINGLE_ZONE,
+                    TELEPHONY_SCORE_HIGHEST),
     };
 
     private static final TimeZoneConfiguration CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED =
@@ -300,9 +305,9 @@ public class TimeZoneDetectorStrategyImplTest {
     public void testTelephonySuggestionsWhenTimeZoneUninitialized() {
         assertTrue(TELEPHONY_SCORE_LOW < TELEPHONY_SCORE_USAGE_THRESHOLD);
         assertTrue(TELEPHONY_SCORE_HIGH >= TELEPHONY_SCORE_USAGE_THRESHOLD);
-        SuggestionTestCase testCase = newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
+        TelephonyTestCase testCase = newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                 QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, TELEPHONY_SCORE_LOW);
-        SuggestionTestCase testCase2 = newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
+        TelephonyTestCase testCase2 = newTelephonyTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                 QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGH);
 
         Script script = new Script()
@@ -369,7 +374,7 @@ public class TimeZoneDetectorStrategyImplTest {
     public void testTogglingAutoTimeZoneDetection() {
         Script script = new Script();
 
-        for (SuggestionTestCase testCase : TEST_CASES) {
+        for (TelephonyTestCase testCase : TELEPHONY_TEST_CASES) {
             // Start with the device in a known state.
             script.initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
                     .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
@@ -425,7 +430,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
 
-        for (SuggestionTestCase testCase : TEST_CASES) {
+        for (TelephonyTestCase testCase : TELEPHONY_TEST_CASES) {
             makeSlotIndex1SuggestionAndCheckState(script, testCase);
         }
 
@@ -436,16 +441,16 @@ public class TimeZoneDetectorStrategyImplTest {
          */
 
         // Each test case will have the same or lower score than the last.
-        ArrayList<SuggestionTestCase> descendingCasesByScore =
-                new ArrayList<>(Arrays.asList(TEST_CASES));
+        ArrayList<TelephonyTestCase> descendingCasesByScore =
+                new ArrayList<>(Arrays.asList(TELEPHONY_TEST_CASES));
         Collections.reverse(descendingCasesByScore);
 
-        for (SuggestionTestCase testCase : descendingCasesByScore) {
+        for (TelephonyTestCase testCase : descendingCasesByScore) {
             makeSlotIndex1SuggestionAndCheckState(script, testCase);
         }
     }
 
-    private void makeSlotIndex1SuggestionAndCheckState(Script script, SuggestionTestCase testCase) {
+    private void makeSlotIndex1SuggestionAndCheckState(Script script, TelephonyTestCase testCase) {
         // Give the next suggestion a different zone from the currently set device time zone;
         String currentZoneId = mFakeCallback.getDeviceTimeZone();
         String suggestionZoneId =
@@ -476,7 +481,7 @@ public class TimeZoneDetectorStrategyImplTest {
      * suggestion is of sufficient quality.
      */
     @Test
-    public void testMultipleSlotIndexSuggestionScoringAndSlotIndexBias() {
+    public void testTelephonySuggestionMultipleSlotIndexSuggestionScoringAndSlotIndexBias() {
         String[] zoneIds = { "Europe/London", "Europe/Paris" };
         TelephonyTimeZoneSuggestion emptySlotIndex1Suggestion = createEmptySlotIndex1Suggestion();
         TelephonyTimeZoneSuggestion emptySlotIndex2Suggestion = createEmptySlotIndex2Suggestion();
@@ -496,7 +501,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .simulateTelephonyTimeZoneSuggestion(emptySlotIndex2Suggestion)
                 .resetConfigurationTracking();
 
-        for (SuggestionTestCase testCase : TEST_CASES) {
+        for (TelephonyTestCase testCase : TELEPHONY_TEST_CASES) {
             TelephonyTimeZoneSuggestion zoneSlotIndex1Suggestion =
                     testCase.createSuggestion(SLOT_INDEX1, zoneIds[0]);
             TelephonyTimeZoneSuggestion zoneSlotIndex2Suggestion =
@@ -572,13 +577,12 @@ public class TimeZoneDetectorStrategyImplTest {
      * knows the current setting.
      */
     @Test
-    public void testTimeZoneDetectorStrategyDoesNotAssumeCurrentSetting() {
+    public void testTelephonySuggestionTimeZoneDetectorStrategyDoesNotAssumeCurrentSetting() {
         Script script = new Script()
                 .initializeUser(USER_ID, UserCase.OWNER, CONFIG_AUTO_TIME_ZONE_DETECTION_ENABLED);
 
-        SuggestionTestCase testCase =
-                newTestCase(MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
-                        TELEPHONY_SCORE_HIGH);
+        TelephonyTestCase testCase = newTelephonyTestCase(
+                MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGH);
         TelephonyTimeZoneSuggestion losAngelesSuggestion =
                 testCase.createSuggestion(SLOT_INDEX1, "America/Los_Angeles");
         TelephonyTimeZoneSuggestion newYorkSuggestion =
@@ -617,7 +621,7 @@ public class TimeZoneDetectorStrategyImplTest {
         // Auto time zone detection is enabled so the manual suggestion should be ignored.
         script.simulateManualTimeZoneSuggestion(
                 USER_ID, createManualSuggestion("Europe/Paris"), false /* expectedResult */)
-            .verifyTimeZoneNotChanged();
+                .verifyTimeZoneNotChanged();
     }
 
     @Test
@@ -686,6 +690,29 @@ public class TimeZoneDetectorStrategyImplTest {
         script.simulateManualTimeZoneSuggestion(
                 USER_ID, manualSuggestion, true /* expectedResult */)
                 .verifyTimeZoneChangedAndReset(manualSuggestion);
+    }
+
+    @Test
+    public void testAddDumpable() {
+        new Script()
+                .initializeUser(USER_ID, UserCase.OWNER,
+                        CONFIG_AUTO_TIME_ZONE_DETECTION_DISABLED)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID);
+
+        AtomicBoolean dumpCalled = new AtomicBoolean(false);
+        class FakeDumpable implements Dumpable {
+            @Override
+            public void dump(PrintWriter pw, String[] args) {
+                dumpCalled.set(true);
+            }
+        }
+
+        mTimeZoneDetectorStrategy.addDumpable(new FakeDumpable());
+        PrintWriter pw = new PrintWriter(new StringWriter());
+        String[] args = {"ArgOne", "ArgTwo"};
+        mTimeZoneDetectorStrategy.dump(pw, args);
+
+        assertTrue(dumpCalled.get());
     }
 
     private static ManualTimeZoneSuggestion createManualSuggestion(String zoneId) {
@@ -1031,12 +1058,12 @@ public class TimeZoneDetectorStrategyImplTest {
         }
     }
 
-    private static class SuggestionTestCase {
+    private static class TelephonyTestCase {
         public final int matchType;
         public final int quality;
         public final int expectedScore;
 
-        SuggestionTestCase(int matchType, int quality, int expectedScore) {
+        TelephonyTestCase(int matchType, int quality, int expectedScore) {
             this.matchType = matchType;
             this.quality = quality;
             this.expectedScore = expectedScore;
@@ -1051,9 +1078,9 @@ public class TimeZoneDetectorStrategyImplTest {
         }
     }
 
-    private static SuggestionTestCase newTestCase(
+    private static TelephonyTestCase newTelephonyTestCase(
             @MatchType int matchType, @Quality int quality, int expectedScore) {
-        return new SuggestionTestCase(matchType, quality, expectedScore);
+        return new TelephonyTestCase(matchType, quality, expectedScore);
     }
 
     private static class MockStrategyListener implements TimeZoneDetectorStrategy.StrategyListener {
