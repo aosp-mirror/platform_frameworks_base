@@ -266,6 +266,9 @@ public class BlobStoreManager {
      * <p> This lease information is persisted and calling this more than once will result in
      * latest lease overriding any previous lease.
      *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param descriptionResId the resource id for a short description string that can be surfaced
@@ -319,6 +322,9 @@ public class BlobStoreManager {
      * <p> This lease information is persisted and calling this more than once will result in
      * latest lease overriding any previous lease.
      *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param description a short description string that can be surfaced
@@ -371,6 +377,9 @@ public class BlobStoreManager {
      * <p> This lease information is persisted and calling this more than once will result in
      * latest lease overriding any previous lease.
      *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
+     *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
      * @param descriptionResId the resource id for a short description string that can be surfaced
@@ -411,6 +420,9 @@ public class BlobStoreManager {
      *
      * <p> This lease information is persisted and calling this more than once will result in
      * latest lease overriding any previous lease.
+     *
+     * <p> When an app acquires a lease on a blob, the System will try to keep this
+     * blob around but note that it can still be deleted if it was requested by the user.
      *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
      *                   acquire a lease for.
