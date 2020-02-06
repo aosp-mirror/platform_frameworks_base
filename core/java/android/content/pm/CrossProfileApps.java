@@ -323,6 +323,7 @@ public class CrossProfileApps {
      */
     @RequiresPermission(
             allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
+                    android.Manifest.permission.UPDATE_APP_OPS_STATS,
                     android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void setInteractAcrossProfilesAppOp(@NonNull String packageName, @Mode int newMode) {
         try {
@@ -363,6 +364,7 @@ public class CrossProfileApps {
      */
     @RequiresPermission(
             allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
+                    android.Manifest.permission.UPDATE_APP_OPS_STATS,
                     android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void resetInteractAcrossProfilesAppOps(
             @NonNull Collection<String> previousCrossProfilePackages,
