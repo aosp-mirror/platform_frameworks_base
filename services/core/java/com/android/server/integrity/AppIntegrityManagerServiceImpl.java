@@ -39,13 +39,20 @@ import android.content.integrity.Rule;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
+import android.content.pm.parsing.ApkParseUtils;
+import android.content.pm.parsing.PackageInfoUtils;
+import android.content.pm.parsing.ParsedPackage;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
@@ -67,6 +74,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -121,11 +129,11 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 IntegrityFileManager.getInstance(),
                 handlerThread.getThreadHandler(),
                 Settings.Global.getInt(
-                                    context.getContentResolver(),
-                                    Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
-                                    0)
-                            == 1
-                );
+                        context.getContentResolver(),
+                        Settings.Global.INTEGRITY_CHECK_INCLUDES_RULE_PROVIDER,
+                        0)
+                        == 1
+        );
     }
 
     @VisibleForTesting
@@ -260,16 +268,25 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 return;
             }
 
-            String appCert = getCertificateFingerprint(packageInfo);
+            List<String> appCertificates = getCertificateFingerprint(packageInfo);
+            List<String> installerCertificates =
+                    getInstallerCertificateFingerprint(installerPackageName);
+
+            // TODO (b/148373316): Figure out what field contains which fields are populated for
+            // rotated and the multiple signers. Until then, return the first certificate.
+            String appCert = appCertificates.isEmpty() ? "" : appCertificates.get(0);
+            String installerCert =
+                    installerCertificates.isEmpty() ? "" : installerCertificates.get(0);
+
+            Slog.w(TAG, appCertificates.toString());
 
             AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
 
             builder.setPackageName(getPackageNameNormalized(packageName));
-            builder.setAppCertificate(appCert == null ? "" : appCert);
+            builder.setAppCertificate(appCert);
             builder.setVersionCode(intent.getLongExtra(EXTRA_LONG_VERSION_CODE, -1));
             builder.setInstallerName(getPackageNameNormalized(installerPackageName));
-            builder.setInstallerCertificate(
-                    getInstallerCertificateFingerprint(installerPackageName));
+            builder.setInstallerCertificate(installerCert);
             builder.setIsPreInstalled(isSystemApp(packageName));
 
             AppInstallMetadata appInstallMetadata = builder.build();
@@ -320,7 +337,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
      * Verify the UID and return the installer package name.
      *
      * @return the package name of the installer, or null if it cannot be determined or it is
-     *     installed via adb.
+     * installed via adb.
      */
     @Nullable
     private String getInstallerPackageName(Intent intent) {
@@ -399,23 +416,27 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         }
     }
 
-    private String getCertificateFingerprint(@NonNull PackageInfo packageInfo) {
-        return getFingerprint(getSignature(packageInfo));
-    }
-
-    private String getInstallerCertificateFingerprint(String installer) {
+    private List<String> getInstallerCertificateFingerprint(String installer) {
         if (installer.equals(ADB_INSTALLER) || installer.equals(UNKNOWN_INSTALLER)) {
-            return INSTALLER_CERT_NOT_APPLICABLE;
+            return Collections.emptyList();
         }
         try {
             PackageInfo installerInfo =
                     mContext.getPackageManager()
-                            .getPackageInfo(installer, PackageManager.GET_SIGNATURES);
+                            .getPackageInfo(installer, PackageManager.GET_SIGNING_CERTIFICATES);
             return getCertificateFingerprint(installerInfo);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.i(TAG, "Installer package " + installer + " not found.");
-            return "";
+            return Collections.emptyList();
         }
+    }
+
+    private List<String> getCertificateFingerprint(@NonNull PackageInfo packageInfo) {
+        ArrayList<String> certificateFingerprints = new ArrayList();
+        for (Signature signature : getSignatures(packageInfo)) {
+            certificateFingerprints.add(getFingerprint(signature));
+        }
+        return certificateFingerprints;
     }
 
     /** Get the allowed installers and their associated certificate hashes from <meta-data> tag. */
@@ -445,12 +466,15 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return packageCertMap;
     }
 
-    private static Signature getSignature(@NonNull PackageInfo packageInfo) {
-        if (packageInfo.signatures == null || packageInfo.signatures.length < 1) {
+    private static Signature[] getSignatures(@NonNull PackageInfo packageInfo) {
+        SigningInfo signingInfo = packageInfo.signingInfo;
+
+        if (signingInfo == null || signingInfo.getApkContentsSigners().length < 1) {
             throw new IllegalArgumentException("Package signature not found in " + packageInfo);
         }
-        // Only the first element is guaranteed to be present.
-        return packageInfo.signatures[0];
+
+        // We are only interested in evaluating the active signatures.
+        return signingInfo.getApkContentsSigners();
     }
 
     private static String getFingerprint(Signature cert) {
@@ -489,20 +513,14 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         if (installationPath == null) {
             throw new IllegalArgumentException("Installation path is null, package not found");
         }
-        PackageInfo packageInfo;
+
+        PackageParser parser = new PackageParser();
         try {
-            // The installation path will be a directory for a multi-apk install on L+
-            if (installationPath.isDirectory()) {
-                packageInfo = getMultiApkInfo(installationPath);
-            } else {
-                packageInfo =
-                        mContext.getPackageManager()
-                                .getPackageArchiveInfo(
-                                        installationPath.getPath(),
-                                        PackageManager.GET_SIGNATURES
-                                                | PackageManager.GET_META_DATA);
-            }
-            return packageInfo;
+            ParsedPackage pkg = parser.parseParsedPackage(installationPath, 0, false);
+            int flags = PackageManager.GET_SIGNING_CERTIFICATES | PackageManager.GET_META_DATA;
+            ApkParseUtils.collectCertificates(pkg, false);
+            return PackageInfoUtils.generate(pkg, null, flags, 0, 0, null, new PackageUserState(),
+                    UserHandle.getCallingUserId());
         } catch (Exception e) {
             throw new IllegalArgumentException("Exception reading " + dataUri, e);
         }
@@ -515,7 +533,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 mContext.getPackageManager()
                         .getPackageArchiveInfo(
                                 baseFile.getAbsolutePath(),
-                                PackageManager.GET_SIGNATURES | PackageManager.GET_META_DATA);
+                                PackageManager.GET_SIGNING_CERTIFICATES
+                                        | PackageManager.GET_META_DATA);
 
         if (basePackageInfo == null) {
             for (File apkFile : multiApkDirectory.listFiles()) {
