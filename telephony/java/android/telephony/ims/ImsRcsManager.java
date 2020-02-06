@@ -59,6 +59,7 @@ public class ImsRcsManager implements RegistrationManager {
      * @see #isAvailable(int)
      * @see #registerRcsAvailabilityCallback(Executor, AvailabilityCallback)
      * @see #unregisterRcsAvailabilityCallback(AvailabilityCallback)
+     * @hide
      */
     public static class AvailabilityCallback {
 
@@ -141,14 +142,16 @@ public class ImsRcsManager implements RegistrationManager {
     /**
      * @return A {@link RcsUceAdapter} used for User Capability Exchange (UCE) operations for
      * this subscription.
-     * @hide
      */
     @NonNull
     public RcsUceAdapter getUceAdapter() {
         return new RcsUceAdapter(mSubId);
     }
 
-    /**{@inheritDoc}*/
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
     @Override
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(
@@ -177,7 +180,10 @@ public class ImsRcsManager implements RegistrationManager {
         }
     }
 
-    /**{@inheritDoc}*/
+    /**
+     * {@inheritDoc
+     * @hide
+     */
     @Override
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(
@@ -199,7 +205,10 @@ public class ImsRcsManager implements RegistrationManager {
         }
     }
 
-    /**{@inheritDoc}*/
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
     @Override
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
@@ -229,7 +238,10 @@ public class ImsRcsManager implements RegistrationManager {
         }
     }
 
-    /**{@inheritDoc}*/
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
     @Override
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void getRegistrationTransportType(@NonNull @CallbackExecutor Executor executor,
@@ -280,6 +292,7 @@ public class ImsRcsManager implements RegistrationManager {
      * {@link ImsRcsManager} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerRcsAvailabilityCallback(@NonNull @CallbackExecutor Executor executor,
@@ -319,6 +332,7 @@ public class ImsRcsManager implements RegistrationManager {
      * @throws ImsException if the IMS service is not available when calling this method
      * {@link ImsRcsController#unregisterRcsAvailabilityCallback()}.
      * See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterRcsAvailabilityCallback(@NonNull AvailabilityCallback c)
@@ -361,6 +375,7 @@ public class ImsRcsManager implements RegistrationManager {
      * @throws ImsException if the IMS service is not available when calling this method
      * {@link ImsRcsController#isCapable(int, int)}.
      * See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isCapable(@RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability,
@@ -395,6 +410,7 @@ public class ImsRcsManager implements RegistrationManager {
      * @throws ImsException if the IMS service is not available when calling this method
      * {@link ImsRcsController#isAvailable(int, int)}.
      * See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isAvailable(@RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag int capability)

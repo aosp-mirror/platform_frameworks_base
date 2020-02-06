@@ -19,8 +19,6 @@ package android.telephony.ims.stub;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.telephony.ims.ImsException;
@@ -37,8 +35,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@SystemApi
-@TestApi
 public class RcsSipOptionsImplBase extends RcsCapabilityExchange {
 
     private static final String LOG_TAG = "RcsSipOptionsImplBase";
