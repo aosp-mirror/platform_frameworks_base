@@ -383,36 +383,38 @@ public final class TvInputManagerService extends SystemService {
             if (mCurrentUserId == userId) {
                 return;
             }
-            UserState userState = mUserStates.get(mCurrentUserId);
-            List<SessionState> sessionStatesToRelease = new ArrayList<>();
-            for (SessionState sessionState : userState.sessionStateMap.values()) {
-                if (sessionState.session != null && !sessionState.isRecordingSession) {
-                    sessionStatesToRelease.add(sessionState);
-                }
-            }
-            for (SessionState sessionState : sessionStatesToRelease) {
-                try {
-                    sessionState.session.release();
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "error in release", e);
-                }
-                clearSessionAndNotifyClientLocked(sessionState);
-            }
-
-            for (Iterator<ComponentName> it = userState.serviceStateMap.keySet().iterator();
-                 it.hasNext(); ) {
-                ComponentName component = it.next();
-                ServiceState serviceState = userState.serviceStateMap.get(component);
-                if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
-                    if (serviceState.callback != null) {
-                        try {
-                            serviceState.service.unregisterCallback(serviceState.callback);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "error in unregisterCallback", e);
-                        }
+            if (mUserStates.contains(mCurrentUserId)) {
+                UserState userState = mUserStates.get(mCurrentUserId);
+                List<SessionState> sessionStatesToRelease = new ArrayList<>();
+                for (SessionState sessionState : userState.sessionStateMap.values()) {
+                    if (sessionState.session != null && !sessionState.isRecordingSession) {
+                        sessionStatesToRelease.add(sessionState);
                     }
-                    mContext.unbindService(serviceState.connection);
-                    it.remove();
+                }
+                for (SessionState sessionState : sessionStatesToRelease) {
+                    try {
+                        sessionState.session.release();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in release", e);
+                    }
+                    clearSessionAndNotifyClientLocked(sessionState);
+                }
+
+                for (Iterator<ComponentName> it = userState.serviceStateMap.keySet().iterator();
+                    it.hasNext(); ) {
+                    ComponentName component = it.next();
+                    ServiceState serviceState = userState.serviceStateMap.get(component);
+                    if (serviceState != null && serviceState.sessionTokens.isEmpty()) {
+                        if (serviceState.callback != null) {
+                            try {
+                                serviceState.service.unregisterCallback(serviceState.callback);
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "error in unregisterCallback", e);
+                            }
+                        }
+                        mContext.unbindService(serviceState.connection);
+                        it.remove();
+                    }
                 }
             }
 
@@ -490,6 +492,10 @@ public final class TvInputManagerService extends SystemService {
             userState.mainSessionToken = null;
 
             mUserStates.remove(userId);
+
+            if (userId == mCurrentUserId) {
+                switchUser(UserHandle.USER_SYSTEM);
+            }
         }
     }
 
