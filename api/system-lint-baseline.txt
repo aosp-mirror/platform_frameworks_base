@@ -64,10 +64,6 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     
 
 
-HeavyBitSet: android.net.wifi.wificond.NativeScanResult#getCapabilities():
-    
-
-
 IntentBuilderName: android.content.Context#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
     Methods creating an Intent should be named `create<Foo>Intent()`, was `registerReceiverForAllUsers`
 

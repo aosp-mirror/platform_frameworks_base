@@ -24,7 +24,6 @@ import android.os.Parcelable;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -34,8 +33,6 @@ import java.util.List;
  */
 @SystemApi
 public final class NativeScanResult implements Parcelable {
-    private static final int CAPABILITY_SIZE = 16;
-
     /** @hide */
     @VisibleForTesting
     public byte[] ssid;
@@ -56,7 +53,7 @@ public final class NativeScanResult implements Parcelable {
     public long tsf;
     /** @hide */
     @VisibleForTesting
-    public BitSet capability;
+    public int capability;
     /** @hide */
     @VisibleForTesting
     public boolean associated;
@@ -134,7 +131,7 @@ public final class NativeScanResult implements Parcelable {
      *  Returns the capabilities of the AP repseresented by this scan result as advertised in the
      *  received probe response or beacon.
      *
-     *  This is a bit mask describing the capabilities of a BSS. See IEEE Std 802.11: 8.4.1.4:
+     *  This is a bit mask describing the capabilities of a BSS. See IEEE Std 802.11: 9.4.1.4:
      *    Bit 0 - ESS
      *    Bit 1 - IBSS
      *    Bit 2 - CF Pollable
@@ -143,7 +140,7 @@ public final class NativeScanResult implements Parcelable {
      *    Bit 5 - Short Preamble
      *    Bit 6 - PBCC
      *    Bit 7 - Channel Agility
-     *    Bit 8 - Spectrum Mgmt
+     *    Bit 8 - Spectrum Management
      *    Bit 9 - QoS
      *    Bit 10 - Short Slot Time
      *    Bit 11 - APSD
@@ -154,7 +151,7 @@ public final class NativeScanResult implements Parcelable {
      *
      * @return a bit mask of capabilities.
      */
-    @NonNull public BitSet getCapabilities() {
+    @NonNull public int getCapabilities() {
         return capability;
     }
 
@@ -188,13 +185,7 @@ public final class NativeScanResult implements Parcelable {
         out.writeInt(frequency);
         out.writeInt(signalMbm);
         out.writeLong(tsf);
-        int capabilityInt = 0;
-        for (int i = 0; i < CAPABILITY_SIZE; i++) {
-            if (capability.get(i)) {
-                capabilityInt |= 1 << i;
-            }
-        }
-        out.writeInt(capabilityInt);
+        out.writeInt(capability);
         out.writeInt(associated ? 1 : 0);
         out.writeTypedList(radioChainInfos);
     }
@@ -220,13 +211,7 @@ public final class NativeScanResult implements Parcelable {
             result.frequency = in.readInt();
             result.signalMbm = in.readInt();
             result.tsf = in.readLong();
-            int capabilityInt = in.readInt();
-            result.capability = new BitSet(CAPABILITY_SIZE);
-            for (int i = 0; i < CAPABILITY_SIZE; i++) {
-                if ((capabilityInt & (1 << i)) != 0) {
-                    result.capability.set(i);
-                }
-            }
+            result.capability = in.readInt();
             result.associated = (in.readInt() != 0);
             result.radioChainInfos = new ArrayList<>();
             in.readTypedList(result.radioChainInfos, RadioChainInfo.CREATOR);
