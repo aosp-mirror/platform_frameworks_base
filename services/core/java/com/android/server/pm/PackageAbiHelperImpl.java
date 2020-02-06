@@ -344,18 +344,10 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                 int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
                 if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
                     if (extractLibs) {
-                        if (onIncremental) {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
-                                    "incrementalNativeBinaries");
-                            abi32 = NativeLibraryHelper.configureNativeBinariesForSupportedAbi(pkg,
-                                    handle, nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        } else {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                            abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                    nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        }
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
+                        abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                                nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
+                                useIsaSpecificSubdirs, onIncremental);
                     } else {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi32 = NativeLibraryHelper.findSupportedAbi(
@@ -375,18 +367,10 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
                     if (extractLibs) {
-                        if (onIncremental) {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
-                                    "incrementalNativeBinaries");
-                            abi64 = NativeLibraryHelper.configureNativeBinariesForSupportedAbi(pkg,
-                                    handle, nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        } else {
-                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                            abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                    nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
-                                    useIsaSpecificSubdirs);
-                        }
+                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
+                        abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                                nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
+                                useIsaSpecificSubdirs, onIncremental);
                     } else {
                         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                         abi64 = NativeLibraryHelper.findSupportedAbi(
@@ -437,15 +421,9 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
                 final int copyRet;
                 if (extractLibs) {
-                    if (onIncremental) {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "incrementalNativeBinaries");
-                        copyRet = NativeLibraryHelper.configureNativeBinariesForSupportedAbi(pkg,
-                                handle, nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
-                    } else {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                        copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
-                    }
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
+                    copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
+                            nativeLibraryRoot, abiList, useIsaSpecificSubdirs, onIncremental);
                 } else {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
                     copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
