@@ -34,14 +34,17 @@ import android.widget.ImageView
 import android.widget.TextView
 
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.R
 
 const val MIN_LEVEL = 0
 const val MAX_LEVEL = 10000
+private const val UPDATE_DELAY_IN_MILLIS = 2000L
 
 class ControlViewHolder(
     val layout: ViewGroup,
-    val controlsController: ControlsController
+    val controlsController: ControlsController,
+    val uiExecutor: DelayableExecutor
 ) {
     val icon: ImageView = layout.requireViewById(R.id.icon)
     val status: TextView = layout.requireViewById(R.id.status)
@@ -52,6 +55,7 @@ class ControlViewHolder(
     val clipLayer: ClipDrawable
     val gd: GradientDrawable
     lateinit var cws: ControlWithState
+    var cancelUpdate: Runnable? = null
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -62,6 +66,8 @@ class ControlViewHolder(
 
     fun bindData(cws: ControlWithState) {
         this.cws = cws
+
+        cancelUpdate?.run()
 
         val (status, template) = cws.control?.let {
             title.setText(it.getTitle())
@@ -84,6 +90,27 @@ class ControlViewHolder(
         }
 
         findBehavior(status, template).apply(this, cws)
+    }
+
+    fun actionResponse(@ControlAction.ResponseResult response: Int) {
+        val text = when (response) {
+            ControlAction.RESPONSE_OK -> "Success"
+            ControlAction.RESPONSE_FAIL -> "Error"
+            else -> ""
+        }
+
+        if (!text.isEmpty()) {
+            val previousText = status.getText()
+            val previousTextExtra = statusExtra.getText()
+
+            cancelUpdate = uiExecutor.executeDelayed({
+                    status.setText(previousText)
+                    statusExtra.setText(previousTextExtra)
+                }, UPDATE_DELAY_IN_MILLIS)
+
+            status.setText(text)
+            statusExtra.setText("")
+        }
     }
 
     fun action(action: ControlAction) {

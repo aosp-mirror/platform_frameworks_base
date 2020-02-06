@@ -38,10 +38,10 @@ import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.R
+import com.android.systemui.util.concurrency.DelayableExecutor
 
 import dagger.Lazy
 
-import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -104,16 +104,18 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
     }
 }
 
+private data class ControlKey(val componentName: ComponentName, val controlId: String)
+
 @Singleton
 class ControlsUiControllerImpl @Inject constructor (
     val controlsController: Lazy<ControlsController>,
     val context: Context,
-    @Main val uiExecutor: Executor
+    @Main val uiExecutor: DelayableExecutor
 ) : ControlsUiController {
 
     private lateinit var controlInfos: List<ControlInfo>
-    private val controlsById = mutableMapOf<Pair<ComponentName, String>, ControlWithState>()
-    private val controlViewsById = mutableMapOf<String, ControlViewHolder>()
+    private val controlsById = mutableMapOf<ControlKey, ControlWithState>()
+    private val controlViewsById = mutableMapOf<ControlKey, ControlViewHolder>()
     private lateinit var parent: ViewGroup
 
     override fun show(parent: ViewGroup) {
@@ -125,7 +127,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         controlInfos.map {
             ControlWithState(it, null)
-        }.associateByTo(controlsById) { Pair(it.ci.component, it.ci.controlId) }
+        }.associateByTo(controlsById) { ControlKey(it.ci.component, it.ci.controlId) }
 
         if (controlInfos.isEmpty()) {
             showInitialSetupView()
@@ -178,9 +180,10 @@ class ControlsUiControllerImpl @Inject constructor (
             val item = inflater.inflate(
                 R.layout.controls_base_item, lastRow, false) as ViewGroup
             lastRow.addView(item)
-            val cvh = ControlViewHolder(item, controlsController.get())
-            cvh.bindData(controlsById.get(Pair(it.component, it.controlId))!!)
-            controlViewsById.put(it.controlId, cvh)
+            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor)
+            val key = ControlKey(it.component, it.controlId)
+            cvh.bindData(controlsById.getValue(key))
+            controlViewsById.put(key, cvh)
         }
 
         if ((controlInfos.size % 2) == 1) {
@@ -205,21 +208,24 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
         Log.d(TAG, "onRefreshState()")
         controls.forEach { c ->
-            controlsById.get(Pair(componentName, c.getControlId()))?.let {
+            controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
                 Log.d(TAG, "onRefreshState() for id: " + c.getControlId())
                 val cws = ControlWithState(it.ci, c)
-                controlsById.put(Pair(componentName, c.getControlId()), cws)
+                val key = ControlKey(componentName, c.getControlId())
+                controlsById.put(key, cws)
 
                 uiExecutor.execute {
-                    controlViewsById.get(c.getControlId())?.bindData(cws)
+                    controlViewsById.get(key)?.bindData(cws)
                 }
             }
         }
     }
 
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {
-        Log.d(TAG, "onActionResponse()")
-        TODO("not implemented")
+        val key = ControlKey(componentName, controlId)
+        uiExecutor.execute {
+            controlViewsById.get(key)?.actionResponse(response)
+        }
     }
 
     private fun createRow(inflater: LayoutInflater, parent: ViewGroup): ViewGroup {
