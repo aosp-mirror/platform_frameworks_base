@@ -25,7 +25,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.media.AudioDeviceAddress;
+import android.media.AudioDevice;
 import android.media.AudioDeviceInfo;
 import android.media.AudioSystem;
 import android.os.Build;
@@ -476,12 +476,12 @@ public class AudioEffect {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
-    public AudioEffect(@NonNull UUID uuid, @NonNull AudioDeviceAddress device) {
+    public AudioEffect(@NonNull UUID uuid, @NonNull AudioDevice device) {
         this(EFFECT_TYPE_NULL, Objects.requireNonNull(uuid), 0, -2, Objects.requireNonNull(device));
     }
 
     private AudioEffect(UUID type, UUID uuid, int priority,
-            int audioSession, @Nullable AudioDeviceAddress device)
+            int audioSession, @Nullable AudioDevice device)
             throws IllegalArgumentException, UnsupportedOperationException,
             RuntimeException {
         int[] id = new int[1];
