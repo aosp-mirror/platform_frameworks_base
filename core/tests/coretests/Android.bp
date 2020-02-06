@@ -37,6 +37,7 @@ android_test {
         "mockito-target-minus-junit4",
         "ub-uiautomator",
         "platform-test-annotations",
+        "platform-compat-test-rules",
         "truth-prebuilt",
         "print-test-util-lib",
         "testng",
