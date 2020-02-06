@@ -3,6 +3,7 @@ package com.android.settingslib;
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -13,6 +14,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -27,8 +29,11 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
+import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.drawable.UserIconDrawable;
 
 import java.text.NumberFormat;
@@ -422,6 +427,19 @@ public class Utils {
             }
         }
         return state;
+    }
+
+    /**
+     * Get the {@link Drawable} that represents the app icon
+     */
+    public static @NonNull Drawable getBadgedIcon(
+            @NonNull Context context, @NonNull ApplicationInfo appInfo) {
+        final UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
+        try (IconFactory iconFactory = IconFactory.obtain(context)) {
+            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
+                    appInfo.loadUnbadgedIcon(context.getPackageManager()), user, false).icon;
+            return new BitmapDrawable(context.getResources(), iconBmp);
+        }
     }
 
     private static boolean isNotInIwlan(ServiceState serviceState) {
