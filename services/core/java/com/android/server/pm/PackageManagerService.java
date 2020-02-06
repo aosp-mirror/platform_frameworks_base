@@ -14999,9 +14999,7 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 makeDirRecursive(afterCodeFile.getParentFile(), 0775);
                 if (onIncremental) {
-                    // TODO(b/147371381): fix incremental installation
-                    mIncrementalManager.rename(beforeCodeFile.getAbsolutePath(),
-                            afterCodeFile.getAbsolutePath());
+                    mIncrementalManager.renameCodePath(beforeCodeFile, afterCodeFile);
                 } else {
                     Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
                 }
