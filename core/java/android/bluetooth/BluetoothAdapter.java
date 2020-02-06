@@ -1861,15 +1861,19 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Connects all enabled and supported bluetooth profiles between the local and remote device
+     * Connects all enabled and supported bluetooth profiles between the local and remote device.
+     * Connection is asynchronous and you should listen to each profile's broadcast intent
+     * ACTION_CONNECTION_STATE_CHANGED to verify whether connection was successful. For example,
+     * to verify a2dp is connected, you would listen for
+     * {@link BluetoothA2dp#ACTION_CONNECTION_STATE_CHANGED}
      *
      * @param device is the remote device with which to connect these profiles
-     * @return true if all profiles successfully connected, false if an error occurred
+     * @return true if message sent to try to connect all profiles, false if an error occurred
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean connectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
             mServiceLock.readLock().lock();
@@ -1886,15 +1890,19 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Disconnects all enabled and supported bluetooth profiles between the local and remote device
+     * Disconnects all enabled and supported bluetooth profiles between the local and remote device.
+     * Disconnection is asynchronous and you should listen to each profile's broadcast intent
+     * ACTION_CONNECTION_STATE_CHANGED to verify whether disconnection was successful. For example,
+     * to verify a2dp is disconnected, you would listen for
+     * {@link BluetoothA2dp#ACTION_CONNECTION_STATE_CHANGED}
      *
      * @param device is the remote device with which to disconnect these profiles
-     * @return true if all profiles successfully disconnected, false if an error occurred
+     * @return true if message sent to try to disconnect all profiles, false if an error occurred
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean disconnectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
             mServiceLock.readLock().lock();
