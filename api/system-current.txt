@@ -7838,23 +7838,23 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
   }
 
-  public final class WifiOemConfigStoreMigrationHook {
-    method @Nullable public static android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData load();
+  public final class WifiOemMigrationHook {
+    method @Nullable public static android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData loadFromConfigStore();
   }
 
-  public static final class WifiOemConfigStoreMigrationHook.MigrationData implements android.os.Parcelable {
+  public static final class WifiOemMigrationHook.ConfigStoreMigrationData implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
     method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData> CREATOR;
   }
 
-  public static final class WifiOemConfigStoreMigrationHook.MigrationData.Builder {
-    ctor public WifiOemConfigStoreMigrationHook.MigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData build();
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  public static final class WifiOemMigrationHook.ConfigStoreMigrationData.Builder {
+    ctor public WifiOemMigrationHook.ConfigStoreMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData build();
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
   }
 
   public class WifiScanner {
