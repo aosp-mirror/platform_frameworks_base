@@ -81,7 +81,6 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -151,8 +150,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private ShadeController mShadeController;
-    @Mock
-    private RemoteInputUriController mRemoteInputUriController;
     @Mock
     private NotificationRowComponent mNotificationRowComponent;
 
@@ -226,8 +223,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mZenModeController,
                 mLockscreenUserManager,
                 mNotificationGroupManager,
-                mNotificationEntryManager,
-                mRemoteInputUriController);
+                mNotificationEntryManager);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -783,13 +779,11 @@ public class BubbleControllerTest extends SysuiTestCase {
                 ZenModeController zenModeController,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 NotificationGroupManager groupManager,
-                NotificationEntryManager entryManager,
-                RemoteInputUriController remoteInputUriController) {
+                NotificationEntryManager entryManager) {
             super(context,
                     notificationShadeWindowController, statusBarStateController, shadeController,
                     data, Runnable::run, configurationController, interruptionStateProvider,
-                    zenModeController, lockscreenUserManager, groupManager, entryManager,
-                    remoteInputUriController);
+                    zenModeController, lockscreenUserManager, groupManager, entryManager);
             setInflateSynchronously(true);
         }
     }
@@ -806,7 +800,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     /**
-     * Sets the bubble metadata flags for this entry. These flags are normally set by
+     * Sets the bubble metadata flags for this entry. These ]flags are normally set by
      * NotificationManagerService when the notification is sent, however, these tests do not
      * go through that path so we set them explicitly when testing.
      */
