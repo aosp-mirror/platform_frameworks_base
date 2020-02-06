@@ -18,7 +18,6 @@
 
 #include "FieldValue.h"
 
-#include <android/frameworks/stats/1.0/types.h>
 #include <android/util/ProtoOutputStream.h>
 #include <private/android_logger.h>
 #include <stats_event_list.h>
@@ -26,8 +25,6 @@
 
 #include <string>
 #include <vector>
-
-using namespace android::frameworks::stats::V1_0;
 
 namespace android {
 namespace os {
@@ -101,9 +98,6 @@ public:
     explicit LogEvent(const std::string& trainName, int64_t trainVersionCode, bool requiresStaging,
                       bool rollbackEnabled, bool requiresLowLatencyMonitor, int32_t state,
                       const std::vector<uint8_t>& experimentIds, int32_t userId);
-
-    explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                      const VendorAtom& vendorAtom);
 
     explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                       const InstallTrainInfo& installTrainInfo);

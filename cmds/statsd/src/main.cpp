@@ -23,7 +23,6 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
-#include <hidl/HidlTransportSupport.h>
 #include <utils/Looper.h>
 
 #include <stdio.h>
@@ -75,8 +74,6 @@ int main(int /*argc*/, char** /*argv*/) {
     ps->giveThreadPoolName();
     IPCThreadState::self()->disableBackgroundScheduling(true);
 
-    ::android::hardware::configureRpcThreadpool(4 /*threads*/, false /*willJoin*/);
-
     std::shared_ptr<LogEventQueue> eventQueue =
             std::make_shared<LogEventQueue>(2000 /*buffer limit. Buffer is NOT pre-allocated*/);
 
@@ -87,12 +84,6 @@ int main(int /*argc*/, char** /*argv*/) {
             != 0) {
         ALOGE("Failed to add service as AIDL service");
         return -1;
-    }
-
-    auto ret = gStatsService->registerAsService();
-    if (ret != ::android::OK) {
-        ALOGE("Failed to add service as HIDL service");
-        return 1; // or handle error
     }
 
     registerSigHandler();
