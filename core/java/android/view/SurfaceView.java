@@ -1570,7 +1570,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void reparentSurfacePackage(SurfaceControl.Transaction t,
             SurfaceControlViewHost.SurfacePackage p) {
         // TODO: Link accessibility IDs here.
-        t.reparent(p.getSurfaceControl(), mSurfaceControl);
+        final SurfaceControl sc = p.getSurfaceControl();
+        t.reparent(sc, mSurfaceControl).show(sc);
     }
 
     /**
