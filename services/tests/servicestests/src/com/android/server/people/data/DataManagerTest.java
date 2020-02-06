@@ -263,6 +263,7 @@ public final class DataManagerTest {
     @Test
     public void testContactsChanged() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -289,6 +290,7 @@ public final class DataManagerTest {
     @Test
     public void testNotificationListener() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -341,6 +343,7 @@ public final class DataManagerTest {
     @Test
     public void testCallLogContentObserver() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -368,6 +371,7 @@ public final class DataManagerTest {
     @Test
     public void testMmsSmsContentObserver() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
