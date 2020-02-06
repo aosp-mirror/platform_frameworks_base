@@ -40,7 +40,7 @@ import java.util.List;
  */
 public final class GestureDescription {
     /** Gestures may contain no more than this many strokes */
-    private static final int MAX_STROKE_COUNT = 10;
+    private static final int MAX_STROKE_COUNT = 20;
 
     /**
      * Upper bound on total gesture duration. Nearly all gestures will be much shorter.
@@ -194,7 +194,10 @@ public final class GestureDescription {
         public Builder addStroke(@NonNull StrokeDescription strokeDescription) {
             if (mStrokes.size() >= MAX_STROKE_COUNT) {
                 throw new IllegalStateException(
-                        "Attempting to add too many strokes to a gesture");
+                        "Attempting to add too many strokes to a gesture. Maximum is "
+                                + MAX_STROKE_COUNT
+                                + ", got "
+                                + mStrokes.size());
             }
 
             mStrokes.add(strokeDescription);
