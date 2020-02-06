@@ -25,6 +25,7 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.SynchronousUserSwitchObserver;
@@ -95,6 +96,7 @@ import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.lights.LightsManager;
@@ -3153,7 +3155,10 @@ public final class PowerManagerService extends SystemService
     }
 
     private void shutdownOrRebootInternal(final @HaltMode int haltMode, final boolean confirm,
-            final String reason, boolean wait) {
+            @Nullable final String reason, boolean wait) {
+        if (PowerManager.REBOOT_USERSPACE.equals(reason)) {
+            UserspaceRebootLogger.noteUserspaceRebootWasRequested();
+        }
         if (mHandler == null || !mSystemReady) {
             if (RescueParty.isAttemptingFactoryReset()) {
                 // If we're stuck in a really low-level reboot loop, and a
@@ -5038,7 +5043,7 @@ public final class PowerManagerService extends SystemService
          * @param wait If true, this call waits for the reboot to complete and does not return.
          */
         @Override // Binder call
-        public void reboot(boolean confirm, String reason, boolean wait) {
+        public void reboot(boolean confirm, @Nullable String reason, boolean wait) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
             if (PowerManager.REBOOT_RECOVERY.equals(reason)
                     || PowerManager.REBOOT_RECOVERY_UPDATE.equals(reason)) {

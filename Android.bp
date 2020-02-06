@@ -372,6 +372,7 @@ java_library {
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
+        "com.android.sysprop.init",
         "PlatformProperties",
     ],
     sdk_version: "core_platform",

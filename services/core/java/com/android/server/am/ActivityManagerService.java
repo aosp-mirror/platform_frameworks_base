@@ -278,6 +278,7 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.server.ServerProtoEnums;
+import android.sysprop.InitProperties;
 import android.sysprop.VoldProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -347,6 +348,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
+import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.appop.AppOpsService;
@@ -2279,6 +2281,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ActivityManagerService getService() {
             return mService;
         }
+    }
+
+    private void maybeLogUserspaceRebootEvent() {
+        if (!UserspaceRebootLogger.shouldLogUserspaceRebootEvent()) {
+            return;
+        }
+        final int userId = mUserController.getCurrentUserId();
+        if (userId != UserHandle.USER_SYSTEM) {
+            // Only log for user0.
+            return;
+        }
+        // TODO(b/148767783): should we check all profiles under user0?
+        UserspaceRebootLogger.logEventAsync(StorageManager.isUserKeyUnlocked(userId),
+                BackgroundThread.getExecutor());
     }
 
     /**
@@ -5327,6 +5343,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Start looking for apps that are abusing wake locks.
             Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_POWER_USE_MSG);
             mHandler.sendMessageDelayed(nmsg, mConstants.POWER_CHECK_INTERVAL);
+            // Check if we are performing userspace reboot before setting sys.boot_completed to
+            // avoid race with init reseting sys.init.userspace_reboot.in_progress once sys
+            // .boot_completed is 1.
+            if (InitProperties.userspace_reboot_in_progress().orElse(false)) {
+                UserspaceRebootLogger.noteUserspaceRebootSuccess();
+            }
             // Tell anyone interested that we are done booting!
             SystemProperties.set("sys.boot_completed", "1");
 
@@ -5347,6 +5369,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             }
                         }
                     });
+            maybeLogUserspaceRebootEvent();
             mUserController.scheduleStartProfiles();
         }
         // UART is on if init's console service is running, send a warning notification.
