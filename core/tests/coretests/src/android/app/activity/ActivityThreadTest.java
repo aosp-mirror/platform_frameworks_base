@@ -504,15 +504,17 @@ public class ActivityThreadTest {
         }
 
         @Override
-        public void onPictureInPictureRequested() {
+        public boolean onPictureInPictureRequested() {
             mPipRequested = true;
             if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_ENTER, false)) {
                 enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
                 mPipEntered = true;
+                return true;
             } else if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_SKIP, false)) {
                 mPipEnterSkipped = true;
+                return false;
             }
-            super.onPictureInPictureRequested();
+            return super.onPictureInPictureRequested();
         }
 
         boolean pipRequested() {
