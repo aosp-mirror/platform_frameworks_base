@@ -749,7 +749,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     void promoteBubbleFromOverflow(Bubble bubble) {
-        mBubbleData.promoteBubbleFromOverflow(bubble);
+        bubble.setInflateSynchronously(mInflateSynchronously);
+        mBubbleData.promoteBubbleFromOverflow(bubble, mStackView, mBubbleIconFactory);
     }
 
     /**

@@ -199,16 +199,21 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    public void promoteBubbleFromOverflow(Bubble bubble) {
+    public void promoteBubbleFromOverflow(Bubble bubble, BubbleStackView stack,
+            BubbleIconFactory factory) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "promoteBubbleFromOverflow: " + bubble);
         }
-        mOverflowBubbles.remove(bubble);
-        doAdd(bubble);
-        setSelectedBubbleInternal(bubble);
+
         // Preserve new order for next repack, which sorts by last updated time.
         bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
-        trim();
+        setSelectedBubbleInternal(bubble);
+        mOverflowBubbles.remove(bubble);
+
+        bubble.inflate(
+                b -> notificationEntryUpdated(bubble, /* suppressFlyout */
+                        false, /* showInShade */ true),
+                mContext, stack, factory);
         dispatchPendingChanges();
     }
 
@@ -445,6 +450,10 @@ public class BubbleData {
             mOverflowBubbles.add(0, bubbleToRemove);
             if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
                 // Remove oldest bubble.
+                if (DEBUG_BUBBLE_DATA) {
+                    Log.d(TAG, "Overflow full. Remove bubble: " + mOverflowBubbles.get(
+                            mOverflowBubbles.size() - 1));
+                }
                 mOverflowBubbles.remove(mOverflowBubbles.size() - 1);
             }
         }
@@ -511,7 +520,7 @@ public class BubbleData {
         if (Objects.equals(bubble, mSelectedBubble)) {
             return;
         }
-        if (bubble != null && !mBubbles.contains(bubble)) {
+        if (bubble != null && !mBubbles.contains(bubble) && !mOverflowBubbles.contains(bubble)) {
             Log.e(TAG, "Cannot select bubble which doesn't exist!"
                     + " (" + bubble + ") bubbles=" + mBubbles);
             return;
