@@ -2562,7 +2562,7 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     OPEN_SUPPORTED_LINKS = 1824;
-    
+
     // OPEN: Settings > Display > Dark theme > Set start time dialog
     DIALOG_DARK_THEME_SET_START_TIME = 1825;
 
@@ -2573,4 +2573,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     VIBRATE_FOR_CALLS = 1827;
+
+    // OPEN: Settings > Connected devices > Connection preferences > NFC
+    // CATEGORY: SETTINGS
+    // OS: R
+    CONNECTION_DEVICE_ADVANCED_NFC = 1828;
 }
