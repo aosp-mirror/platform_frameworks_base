@@ -27,6 +27,8 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.usage.UsageStatsManager;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -101,6 +103,18 @@ import java.util.function.Supplier;
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
     /**
+     * This is a subtle behavior change to {@link #startWatchingMode}.
+     *
+     * Before this change the system called back for the switched op. After the change the system
+     * will call back for the actually requested op or all switched ops if no op is specified.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    public static final long CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE = 148180766L;
+
+    /**
      * <p>App ops allows callers to:</p>
      *
      * <ul>
@@ -146,6 +160,38 @@ public class AppOpsManager {
     private static @Nullable AppOpsCollector sNotedAppOpsCollector;
 
     static IBinder sClientId;
+
+    /**
+     * How many seconds we want for a drop in uid state from top to settle before applying it.
+     *
+     * <>Set a parameter to {@link android.provider.Settings.Global#APP_OPS_CONSTANTS}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
+
+    /**
+     * How many second we want for a drop in uid state from foreground to settle before applying it.
+     *
+     * <>Set a parameter to {@link android.provider.Settings.Global#APP_OPS_CONSTANTS}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME =
+            "fg_service_state_settle_time";
+
+    /**
+     * How many seconds we want for a drop in uid state from background to settle before applying
+     * it.
+     *
+     * <>Set a parameter to {@link android.provider.Settings.Global#APP_OPS_CONSTANTS}
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
