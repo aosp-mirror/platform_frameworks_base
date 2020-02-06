@@ -476,7 +476,7 @@ public final class StatsManager {
     /**
      * Registers a callback for an atom when that atom is to be pulled. The stats service will
      * invoke pullData in the callback when the stats service determines that this atom needs to be
-     * pulled.
+     * pulled. This method should not be called by third-party apps.
      *
      * @param atomTag           The tag of the atom for this puller callback.
      * @param metadata          Optional metadata specifying the timeout, cool down time, and
@@ -485,6 +485,7 @@ public final class StatsManager {
      * @param executor          The executor in which to run the callback.
      *
      */
+    @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM)
     public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull StatsPullAtomCallback callback) {
@@ -510,11 +511,12 @@ public final class StatsManager {
 
     /**
      * Unregisters a callback for an atom when that atom is to be pulled. Note that any ongoing
-     * pulls will still occur.
+     * pulls will still occur. This method should not be called by third-party apps.
      *
      * @param atomTag           The tag of the atom of which to unregister
      *
      */
+    @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM)
     public void unregisterPullAtomCallback(int atomTag) {
         synchronized (sLock) {
             try {
