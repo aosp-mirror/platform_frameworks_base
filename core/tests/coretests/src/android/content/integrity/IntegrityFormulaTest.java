@@ -54,7 +54,7 @@ public class IntegrityFormulaTest {
 
         assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.APP_CERTIFICATE);
         assertThat(stringAtomicFormula.getValue()).matches(appCertificate);
-        assertThat(stringAtomicFormula.getIsHashedValue()).isFalse();
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
     }
 
     @Test
@@ -82,7 +82,7 @@ public class IntegrityFormulaTest {
 
         assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.INSTALLER_CERTIFICATE);
         assertThat(stringAtomicFormula.getValue()).matches(installerCertificate);
-        assertThat(stringAtomicFormula.getIsHashedValue()).isFalse();
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
     }
 
     @Test

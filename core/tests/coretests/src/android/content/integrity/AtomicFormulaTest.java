@@ -97,7 +97,7 @@ public class AtomicFormulaTest {
 
         assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.APP_CERTIFICATE);
         assertThat(stringAtomicFormula.getValue()).matches(appCert);
-        assertThat(stringAtomicFormula.getIsHashedValue()).isFalse();
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
     }
 
     @Test
@@ -110,7 +110,7 @@ public class AtomicFormulaTest {
         assertThat(stringAtomicFormula.getKey()).isEqualTo(
                 AtomicFormula.INSTALLER_CERTIFICATE);
         assertThat(stringAtomicFormula.getValue()).matches(installerCert);
-        assertThat(stringAtomicFormula.getIsHashedValue()).isFalse();
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
     }
 
     @Test
