@@ -124,7 +124,6 @@ cc_defaults {
         "libprotoutil",
         "libstatslog",
         "libstatsmetadata",
-        "libstatssocket",
         "libsysutils",
     ],
     shared_libs: [
@@ -134,6 +133,7 @@ cc_defaults {
         "libincident",
         "liblog",
         "libservices",
+        "libstatssocket",
         "libutils",
     ],
 }
