@@ -26,44 +26,45 @@ import android.os.TimestampedValue;
 
 import org.junit.Test;
 
-public class PhoneTimeSuggestionTest {
+public class TelephonyTimeSuggestionTest {
     private static final int SLOT_INDEX = 99999;
 
     @Test
     public void testEquals() {
-        PhoneTimeSuggestion.Builder builder1 = new PhoneTimeSuggestion.Builder(SLOT_INDEX);
+        TelephonyTimeSuggestion.Builder builder1 = new TelephonyTimeSuggestion.Builder(SLOT_INDEX);
         {
-            PhoneTimeSuggestion one = builder1.build();
+            TelephonyTimeSuggestion one = builder1.build();
             assertEquals(one, one);
         }
 
-        PhoneTimeSuggestion.Builder builder2 = new PhoneTimeSuggestion.Builder(SLOT_INDEX);
+        TelephonyTimeSuggestion.Builder builder2 = new TelephonyTimeSuggestion.Builder(SLOT_INDEX);
         {
-            PhoneTimeSuggestion one = builder1.build();
-            PhoneTimeSuggestion two = builder2.build();
+            TelephonyTimeSuggestion one = builder1.build();
+            TelephonyTimeSuggestion two = builder2.build();
             assertEquals(one, two);
             assertEquals(two, one);
         }
 
         builder1.setUtcTime(new TimestampedValue<>(1111L, 2222L));
         {
-            PhoneTimeSuggestion one = builder1.build();
+            TelephonyTimeSuggestion one = builder1.build();
             assertEquals(one, one);
         }
 
         builder2.setUtcTime(new TimestampedValue<>(1111L, 2222L));
         {
-            PhoneTimeSuggestion one = builder1.build();
-            PhoneTimeSuggestion two = builder2.build();
+            TelephonyTimeSuggestion one = builder1.build();
+            TelephonyTimeSuggestion two = builder2.build();
             assertEquals(one, two);
             assertEquals(two, one);
         }
 
-        PhoneTimeSuggestion.Builder builder3 = new PhoneTimeSuggestion.Builder(SLOT_INDEX + 1);
+        TelephonyTimeSuggestion.Builder builder3 =
+                new TelephonyTimeSuggestion.Builder(SLOT_INDEX + 1);
         builder3.setUtcTime(new TimestampedValue<>(1111L, 2222L));
         {
-            PhoneTimeSuggestion one = builder1.build();
-            PhoneTimeSuggestion three = builder3.build();
+            TelephonyTimeSuggestion one = builder1.build();
+            TelephonyTimeSuggestion three = builder3.build();
             assertNotEquals(one, three);
             assertNotEquals(three, one);
         }
@@ -72,15 +73,15 @@ public class PhoneTimeSuggestionTest {
         builder1.addDebugInfo("Debug info 1");
         builder2.addDebugInfo("Debug info 2");
         {
-            PhoneTimeSuggestion one = builder1.build();
-            PhoneTimeSuggestion two = builder2.build();
+            TelephonyTimeSuggestion one = builder1.build();
+            TelephonyTimeSuggestion two = builder2.build();
             assertEquals(one, two);
         }
     }
 
     @Test
     public void testParcelable() {
-        PhoneTimeSuggestion.Builder builder = new PhoneTimeSuggestion.Builder(SLOT_INDEX);
+        TelephonyTimeSuggestion.Builder builder = new TelephonyTimeSuggestion.Builder(SLOT_INDEX);
         assertRoundTripParcelable(builder.build());
 
         builder.setUtcTime(new TimestampedValue<>(1111L, 2222L));
@@ -88,9 +89,9 @@ public class PhoneTimeSuggestionTest {
 
         // DebugInfo should also be stored (but is not checked by equals()
         {
-            PhoneTimeSuggestion suggestion1 = builder.build();
+            TelephonyTimeSuggestion suggestion1 = builder.build();
             builder.addDebugInfo("This is debug info");
-            PhoneTimeSuggestion rtSuggestion1 = roundTripParcelable(suggestion1);
+            TelephonyTimeSuggestion rtSuggestion1 = roundTripParcelable(suggestion1);
             assertEquals(suggestion1.getDebugInfo(), rtSuggestion1.getDebugInfo());
         }
     }
