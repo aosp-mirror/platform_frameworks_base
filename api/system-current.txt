@@ -3695,10 +3695,10 @@ package android.hardware.soundtrigger {
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
+    method public int getEnd();
+    method public int getStart();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModelParamRange> CREATOR;
-    field public final int end;
-    field public final int start;
   }
 
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
