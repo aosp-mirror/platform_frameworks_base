@@ -2812,6 +2812,11 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     boolean navigateUpTo(ActivityRecord srec, Intent destIntent, int resultCode,
             Intent resultData) {
+        if (!srec.attachedToProcess()) {
+            // Nothing to do if the caller is not attached, because this method should be called
+            // from an alive activity.
+            return false;
+        }
         final Task task = srec.getTask();
 
         if (!mChildren.contains(task) || !task.hasChild(srec)) {
@@ -2873,14 +2878,14 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         resultData = resultDataHolder[0];
 
         if (parent != null && foundParentInTask) {
+            final int callingUid = srec.info.applicationInfo.uid;
             final int parentLaunchMode = parent.info.launchMode;
             final int destIntentFlags = destIntent.getFlags();
             if (parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent,
-                        srec.packageName);
+                parent.deliverNewIntentLocked(callingUid, destIntent, srec.packageName);
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
@@ -2893,11 +2898,11 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                             .setActivityInfo(aInfo)
                             .setResultTo(parent.appToken)
                             .setCallingPid(-1)
-                            .setCallingUid(parent.launchedFromUid)
-                            .setCallingPackage(parent.launchedFromPackage)
+                            .setCallingUid(callingUid)
+                            .setCallingPackage(srec.packageName)
                             .setCallingFeatureId(parent.launchedFromFeatureId)
                             .setRealCallingPid(-1)
-                            .setRealCallingUid(parent.launchedFromUid)
+                            .setRealCallingUid(callingUid)
                             .setComponentSpecified(true)
                             .execute();
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
