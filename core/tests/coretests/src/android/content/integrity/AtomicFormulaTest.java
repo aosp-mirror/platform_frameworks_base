@@ -90,18 +90,18 @@ public class AtomicFormulaTest {
     }
 
     @Test
-    public void testValidAtomicFormula_stringValue_appCertificateAutoHashed() {
+    public void testValidAtomicFormula_stringValue_appCertificateIsNotAutoHashed() {
         String appCert = "cert";
         StringAtomicFormula stringAtomicFormula =
                 new StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, appCert);
 
         assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.APP_CERTIFICATE);
-        assertThat(stringAtomicFormula.getValue()).doesNotMatch(appCert);
-        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
+        assertThat(stringAtomicFormula.getValue()).matches(appCert);
+        assertThat(stringAtomicFormula.getIsHashedValue()).isFalse();
     }
 
     @Test
-    public void testValidAtomicFormula_stringValue_installerCertificateAutoHashed() {
+    public void testValidAtomicFormula_stringValue_installerCertificateIsNotAutoHashed() {
         String installerCert = "cert";
         StringAtomicFormula stringAtomicFormula =
                 new StringAtomicFormula(AtomicFormula.INSTALLER_CERTIFICATE,
@@ -109,8 +109,8 @@ public class AtomicFormulaTest {
 
         assertThat(stringAtomicFormula.getKey()).isEqualTo(
                 AtomicFormula.INSTALLER_CERTIFICATE);
-        assertThat(stringAtomicFormula.getValue()).doesNotMatch(installerCert);
-        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
+        assertThat(stringAtomicFormula.getValue()).matches(installerCert);
+        assertThat(stringAtomicFormula.getIsHashedValue()).isFalse();
     }
 
     @Test
