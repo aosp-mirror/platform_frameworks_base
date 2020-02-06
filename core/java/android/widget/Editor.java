@@ -454,15 +454,17 @@ public class Editor {
             aspectRatio = 5.5f;
         }
 
-        final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
-        final float sourceHeight = fontMetrics.descent - fontMetrics.ascent;
+        final Layout layout = mTextView.getLayout();
+        final int line = layout.getLineForOffset(mTextView.getSelectionStart());
+        final int sourceHeight =
+            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
         // Slightly increase the height to avoid tooLargeTextForMagnifier() returns true.
         int height = (int)(sourceHeight * zoom) + 2;
         int width = (int)(aspectRatio * height);
 
         params.setFishEyeStyle()
                 .setSize(width, height)
-                .setSourceSize(width, Math.round(sourceHeight))
+                .setSourceSize(width, sourceHeight)
                 .setElevation(0)
                 .setInitialZoom(zoom)
                 .setClippingEnabled(false);
@@ -5041,7 +5043,7 @@ public class Editor {
 
             // Vertically snap to middle of current line.
             showPosInView.y = ((mTextView.getLayout().getLineTop(lineNumber)
-                    + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
+                    + mTextView.getLayout().getLineBottomWithoutSpacing(lineNumber)) / 2.0f
                     + mTextView.getTotalPaddingTop() - mTextView.getScrollY()) * mTextViewScaleY;
             return true;
         }
