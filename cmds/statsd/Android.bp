@@ -65,7 +65,6 @@ cc_defaults {
         "src/config/ConfigListener.cpp",
         "src/config/ConfigManager.cpp",
         "src/experiment_ids.proto",
-        "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
         "src/external/PullResultReceiver.cpp",
         "src/external/puller_util.cpp",
@@ -130,7 +129,6 @@ cc_defaults {
     ],
     shared_libs: [
         "libbinder",
-        "libgraphicsenv",
         "libhidlbase",
         "libincident",
         "liblog",
@@ -278,7 +276,6 @@ cc_test {
         "tests/e2e/PartialBucket_e2e_test.cpp",
         "tests/e2e/ValueMetric_pull_e2e_test.cpp",
         "tests/e2e/WakelockDuration_e2e_test.cpp",
-        "tests/external/GpuStatsPuller_test.cpp",
         "tests/external/puller_util_test.cpp",
         "tests/external/StatsCallbackPuller_test.cpp",
         "tests/external/StatsPuller_test.cpp",
