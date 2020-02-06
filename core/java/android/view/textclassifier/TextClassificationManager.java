@@ -25,7 +25,6 @@ import android.content.Context;
 import android.os.ServiceManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
-import android.util.SparseArray;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
 import com.android.internal.annotations.GuardedBy;
@@ -61,8 +60,6 @@ public final class TextClassificationManager {
     @GuardedBy("mLock")
     @Nullable
     private TextClassifier mLocalTextClassifier;
-    @GuardedBy("mLock")
-    private SparseArray<TextClassifier> mSystemTextClassifiers = new SparseArray<>();
     @GuardedBy("mLock")
     private TextClassificationSessionFactory mSessionFactory;
     @GuardedBy("mLock")
@@ -207,22 +204,16 @@ public final class TextClassificationManager {
     /** @hide */
     private TextClassifier getSystemTextClassifier(@TextClassifierType int type) {
         synchronized (mLock) {
-            if (mSystemTextClassifiers.get(type) == null
-                    && getSettings().isSystemTextClassifierEnabled()) {
+            if (getSettings().isSystemTextClassifierEnabled()) {
                 try {
-                    mSystemTextClassifiers.put(
-                            type,
-                            new SystemTextClassifier(
-                                    mContext,
-                                    getSettings(),
-                                    /* useDefault= */ type == TextClassifier.DEFAULT_SERVICE));
-                    Log.d(LOG_TAG, "Initialized SystemTextClassifier, type = " + type);
+                    Log.d(LOG_TAG, "Initializing SystemTextClassifier, type = " + type);
+                    return new SystemTextClassifier(
+                            mContext,
+                            getSettings(),
+                            /* useDefault= */ type == TextClassifier.DEFAULT_SERVICE);
                 } catch (ServiceManager.ServiceNotFoundException e) {
                     Log.e(LOG_TAG, "Could not initialize SystemTextClassifier", e);
                 }
-            }
-            if (mSystemTextClassifiers.get(type) != null) {
-                return mSystemTextClassifiers.get(type);
             }
             return TextClassifier.NO_OP;
         }
@@ -263,7 +254,6 @@ public final class TextClassificationManager {
     private void invalidateTextClassifiers() {
         synchronized (mLock) {
             mLocalTextClassifier = null;
-            mSystemTextClassifiers.clear();
         }
     }
 
