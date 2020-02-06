@@ -215,6 +215,20 @@ public class StorageManager {
     public static final String ACTION_MANAGE_STORAGE = "android.os.storage.action.MANAGE_STORAGE";
 
     /**
+     * Activity Action: Allows the user to free up space by clearing app external cache directories.
+     * The intent doesn't automatically clear cache, but shows a dialog and lets the user decide.
+     * <p>
+     * This intent should be launched using
+     * {@link Activity#startActivityForResult(Intent, int)} so that the user
+     * knows which app is requesting to clear cache. The returned result will
+     * be {@link Activity#RESULT_OK} if the activity was launched and the user accepted to clear
+     * cache, or {@link Activity#RESULT_CANCELED} otherwise.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CLEAR_APP_CACHE = "android.os.storage.action.CLEAR_APP_CACHE";
+
+    /**
      * Extra {@link UUID} used to indicate the storage volume where an
      * application is interested in allocating or managing disk space.
      *
