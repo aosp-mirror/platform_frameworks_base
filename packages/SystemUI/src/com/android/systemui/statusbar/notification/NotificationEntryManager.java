@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
 
+import static com.android.systemui.statusbar.notification.collection.NotifCollection.REASON_UNKNOWN;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
 
 import android.annotation.NonNull;
@@ -44,6 +45,8 @@ import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.logging.NotifEvent;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -96,6 +99,7 @@ import dagger.Lazy;
  */
 @Singleton
 public class NotificationEntryManager implements
+        CommonNotifCollection,
         Dumpable,
         InflationCallback,
         VisualStabilityManager.Callback {
@@ -130,6 +134,7 @@ public class NotificationEntryManager implements
     private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
     private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
     private final LeakDetector mLeakDetector;
+    private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
 
     private final KeyguardEnvironment mKeyguardEnvironment;
     private final NotificationGroupManager mGroupManager;
@@ -488,6 +493,13 @@ public class NotificationEntryManager implements
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryRemoved(entry, visibility, removedByUser);
                 }
+                for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                    // NEM doesn't have a good knowledge of reasons so defaulting to unknown.
+                    listener.onEntryRemoved(entry, REASON_UNKNOWN);
+                }
+                for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                    listener.onEntryCleanUp(entry);
+                }
             }
         }
     }
@@ -553,6 +565,10 @@ public class NotificationEntryManager implements
 
         mLeakDetector.trackInstance(entry);
 
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryInit(entry);
+        }
+
         // Construct the expanded view.
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             mNotificationRowBinderLazy.get()
@@ -565,6 +581,9 @@ public class NotificationEntryManager implements
         mNotifLog.log(NotifEvent.NOTIF_ADDED, entry);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPendingEntryAdded(entry);
+        }
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryAdded(entry);
         }
     }
 
@@ -599,6 +618,9 @@ public class NotificationEntryManager implements
         mNotifLog.log(NotifEvent.NOTIF_UPDATED, entry);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
+        }
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryUpdated(entry);
         }
 
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
@@ -673,6 +695,9 @@ public class NotificationEntryManager implements
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onNotificationRankingUpdated(rankingMap);
+        }
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onRankingUpdate(rankingMap);
         }
     }
 
@@ -860,6 +885,11 @@ public class NotificationEntryManager implements
      */
     public boolean hasActiveNotifications() {
         return mReadOnlyNotifications.size() != 0;
+    }
+
+    @Override
+    public void addCollectionListener(NotifCollectionListener listener) {
+        mNotifCollectionListeners.add(listener);
     }
 
     /*
