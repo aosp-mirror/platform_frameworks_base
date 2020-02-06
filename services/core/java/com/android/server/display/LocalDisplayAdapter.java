@@ -65,8 +65,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
-    private final LongSparseArray<LocalDisplayDevice> mDevices =
-            new LongSparseArray<LocalDisplayDevice>();
+    private static final int NO_DISPLAY_MODE_ID = 0;
+
+    private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
     @SuppressWarnings("unused")  // Becomes active at instantiation time.
     private PhysicalDisplayEventReceiver mPhysicalDisplayEventReceiver;
@@ -133,14 +134,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         hdrCapabilities, isInternal);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
-            } else {
-                boolean changed = device.updateDisplayConfigsLocked(configs, activeConfig,
-                        configSpecs);
-                changed |= device.updateColorModesLocked(colorModes, activeColorMode);
-                changed |= device.updateHdrCapabilitiesLocked(hdrCapabilities);
-                if (changed) {
-                    sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
-                }
+            } else if (device.updateDisplayProperties(configs, activeConfig,
+                    configSpecs, colorModes, activeColorMode, hdrCapabilities)) {
+                sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             }
         } else {
             // The display is no longer available. Ignore the attempt to add it.
@@ -215,10 +211,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mPhysicalDisplayId = physicalDisplayId;
             mIsInternal = isInternal;
             mDisplayInfo = info;
-
-            updateDisplayConfigsLocked(configs, activeConfigId, configSpecs);
-            updateColorModesLocked(colorModes, activeColorMode);
-            updateHdrCapabilitiesLocked(hdrCapabilities);
+            updateDisplayProperties(configs, activeConfigId, configSpecs, colorModes,
+                    activeColorMode, hdrCapabilities);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mIsInternal) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
@@ -240,13 +234,25 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
+        /**
+         * Returns true if there is a change.
+         **/
+        public boolean updateDisplayProperties(SurfaceControl.DisplayConfig[] configs,
+                int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
+                int[] colorModes, int activeColorMode, Display.HdrCapabilities hdrCapabilities) {
+            boolean changed = updateDisplayConfigsLocked(configs, activeConfigId, configSpecs);
+            changed |= updateColorModesLocked(colorModes, activeColorMode);
+            changed |= updateHdrCapabilitiesLocked(hdrCapabilities);
+            return changed;
+        }
+
         public boolean updateDisplayConfigsLocked(
                 SurfaceControl.DisplayConfig[] configs, int activeConfigId,
                 SurfaceControl.DesiredDisplayConfigSpecs configSpecs) {
             mDisplayConfigs = Arrays.copyOf(configs, configs.length);
             mActiveConfigId = activeConfigId;
             // Build an updated list of all existing modes.
-            ArrayList<DisplayModeRecord> records = new ArrayList<DisplayModeRecord>();
+            ArrayList<DisplayModeRecord> records = new ArrayList<>();
             boolean modesAdded = false;
             for (int i = 0; i < configs.length; i++) {
                 SurfaceControl.DisplayConfig config = configs[i];
@@ -286,7 +292,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // Check whether surface flinger spontaneously changed modes out from under us.
             // Schedule traversals to ensure that the correct state is reapplied if necessary.
-            if (mActiveModeId != 0
+            if (mActiveModeId != NO_DISPLAY_MODE_ID
                     && mActiveModeId != activeRecord.mMode.getModeId()) {
                 mActiveModeInvalid = true;
                 sendTraversalRequestLocked();
@@ -294,12 +300,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // Check whether surface flinger spontaneously changed display config specs out from
             // under us. If so, schedule a traversal to reapply our display config specs.
-            if (mDisplayModeSpecs.baseModeId != 0) {
+            if (mDisplayModeSpecs.baseModeId != NO_DISPLAY_MODE_ID) {
                 int activeBaseMode = findMatchingModeIdLocked(configSpecs.defaultConfig);
                 // If we can't map the defaultConfig index to a mode, then the physical display
                 // configs must have changed, and the code below for handling changes to the
                 // list of available modes will take care of updating display config specs.
-                if (activeBaseMode != 0) {
+                if (activeBaseMode != NO_DISPLAY_MODE_ID) {
                     if (mDisplayModeSpecs.baseModeId != activeBaseMode
                             || mDisplayModeSpecs.refreshRateRange.min != configSpecs.minRefreshRate
                             || mDisplayModeSpecs.refreshRateRange.max
@@ -323,18 +329,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mSupportedModes.put(record.mMode.getModeId(), record);
             }
 
-            // Update the default mode, if needed.
-            if (findDisplayConfigIdLocked(mDefaultModeId) < 0) {
-                if (mDefaultModeId != 0) {
-                    Slog.w(TAG, "Default display mode no longer available, using currently"
-                            + " active mode as default.");
-                }
+            // For a new display, we need to initialize the default mode ID.
+            if (mDefaultModeId == NO_DISPLAY_MODE_ID) {
+                mDefaultModeId = activeRecord.mMode.getModeId();
+            } else if (modesAdded && mActiveModeId != activeRecord.mMode.getModeId()) {
+                Slog.d(TAG, "New display modes are added and the active mode has changed, "
+                        + "use active mode as default mode.");
+                mActiveModeId = activeRecord.mMode.getModeId();
+                mDefaultModeId = activeRecord.mMode.getModeId();
+            } else if (findDisplayConfigIdLocked(mDefaultModeId) < 0) {
+                Slog.w(TAG, "Default display mode no longer available, using currently"
+                        + " active mode as default.");
                 mDefaultModeId = activeRecord.mMode.getModeId();
             }
 
             // Determine whether the display mode specs' base mode is still there.
             if (mSupportedModes.indexOfKey(mDisplayModeSpecs.baseModeId) < 0) {
-                if (mDisplayModeSpecs.baseModeId != 0) {
+                if (mDisplayModeSpecs.baseModeId != NO_DISPLAY_MODE_ID) {
                     Slog.w(TAG,
                             "DisplayModeSpecs base mode no longer available, using currently"
                                     + " active mode.");
@@ -345,7 +356,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
             // Determine whether the active mode is still there.
             if (mSupportedModes.indexOfKey(mActiveModeId) < 0) {
-                if (mActiveModeId != 0) {
+                if (mActiveModeId != NO_DISPLAY_MODE_ID) {
                     Slog.w(TAG, "Active display mode no longer available, reverting to default"
                             + " mode.");
                 }
@@ -797,7 +808,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
             mActiveConfigId = activeConfigId;
             mActiveModeId = findMatchingModeIdLocked(activeConfigId);
-            mActiveModeInvalid = mActiveModeId == 0;
+            mActiveModeInvalid = mActiveModeId == NO_DISPLAY_MODE_ID;
             if (mActiveModeInvalid) {
                 Slog.w(TAG, "In unknown mode after setting allowed configs"
                         + ", activeConfigId=" + mActiveConfigId);
@@ -922,7 +933,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     return record.mMode.getModeId();
                 }
             }
-            return 0;
+            return NO_DISPLAY_MODE_ID;
         }
 
         private void updateDeviceInfoLocked() {
