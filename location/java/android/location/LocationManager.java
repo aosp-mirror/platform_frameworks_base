@@ -33,6 +33,9 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -50,7 +53,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ProviderProperties;
@@ -80,6 +82,36 @@ import java.util.function.Consumer;
 public class LocationManager {
 
     private static final String TAG = "LocationManager";
+
+    /**
+     * For apps targeting Android K and above, supplied {@link PendingIntent}s must be targeted to a
+     * specific package.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.JELLY_BEAN)
+    public static final long TARGETED_PENDING_INTENT = 148963590L;
+
+    /**
+     * For apps targeting Android K and above, incomplete locations may not be passed to
+     * {@link #setTestProviderLocation}.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.JELLY_BEAN)
+    private static final long INCOMPLETE_LOCATION = 148964793L;
+
+    /**
+     * For apps targeting Android S and above, all {@link GpsStatus} API usage must be replaced with
+     * {@link GnssStatus} APIs.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    private static final long GPS_STATUS_USAGE = 144027538L;
 
     /**
      * Name of the network location provider.
@@ -771,7 +803,6 @@ public class LocationManager {
     public void requestSingleUpdate(@NonNull String provider,
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
-        checkPendingIntent(pendingIntent);
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
@@ -800,7 +831,6 @@ public class LocationManager {
     public void requestSingleUpdate(@NonNull Criteria criteria,
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
-        checkPendingIntent(pendingIntent);
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
@@ -1021,7 +1051,6 @@ public class LocationManager {
     public void requestLocationUpdates(@NonNull String provider, long minTimeMs, float minDistanceM,
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
-        checkPendingIntent(pendingIntent);
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, minTimeMs, minDistanceM, false);
@@ -1048,7 +1077,6 @@ public class LocationManager {
     public void requestLocationUpdates(long minTimeMs, float minDistanceM,
             @NonNull Criteria criteria, @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(criteria != null, "invalid null criteria");
-        checkPendingIntent(pendingIntent);
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, minTimeMs, minDistanceM, false);
@@ -1164,9 +1192,9 @@ public class LocationManager {
             @NonNull PendingIntent pendingIntent) {
         Preconditions.checkArgument(locationRequest != null, "invalid null location request");
         Preconditions.checkArgument(pendingIntent != null, "invalid null pending intent");
-        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN) {
+        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
             Preconditions.checkArgument(pendingIntent.isTargetedToPackage(),
-                    "pending intent must be targeted to package");
+                    "pending intent must be targeted to a package");
         }
 
         try {
@@ -1198,15 +1226,9 @@ public class LocationManager {
      */
     @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_FINE_LOCATION})
     public boolean injectLocation(@NonNull Location location) {
-        if (location == null) {
-            IllegalArgumentException e = new IllegalArgumentException("invalid null location");
-            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
-                throw e;
-            } else {
-                Log.w(TAG, e);
-                return false;
-            }
-        }
+        Preconditions.checkArgument(location != null, "invalid null location");
+        Preconditions.checkArgument(location.isComplete(),
+                "incomplete location object, missing timestamp or accuracy?");
 
         try {
             return mService.injectLocation(location);
@@ -1487,15 +1509,11 @@ public class LocationManager {
         Preconditions.checkArgument(provider != null, "invalid null provider");
         Preconditions.checkArgument(location != null, "invalid null location");
 
-        if (!location.isComplete()) {
-            IllegalArgumentException e = new IllegalArgumentException(
-                    "Incomplete location object, missing timestamp or accuracy? " + location);
-            if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN) {
-                Log.w(TAG, e);
-                location.makeComplete();
-            } else {
-                throw e;
-            }
+        if (Compatibility.isChangeEnabled(INCOMPLETE_LOCATION)) {
+            Preconditions.checkArgument(location.isComplete(),
+                    "incomplete location object, missing timestamp or accuracy?");
+        } else {
+            location.makeComplete();
         }
 
         try {
@@ -1629,7 +1647,11 @@ public class LocationManager {
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void addProximityAlert(double latitude, double longitude, float radius, long expiration,
             @NonNull PendingIntent intent) {
-        checkPendingIntent(intent);
+        Preconditions.checkArgument(intent != null, "invalid null pending intent");
+        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
+            Preconditions.checkArgument(intent.isTargetedToPackage(),
+                    "pending intent must be targeted to a package");
+        }
         if (expiration < 0) expiration = Long.MAX_VALUE;
 
         Geofence fence = Geofence.createCircle(latitude, longitude, radius);
@@ -1659,7 +1681,11 @@ public class LocationManager {
      * permission is not present
      */
     public void removeProximityAlert(@NonNull PendingIntent intent) {
-        checkPendingIntent(intent);
+        Preconditions.checkArgument(intent != null, "invalid null pending intent");
+        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
+            Preconditions.checkArgument(intent.isTargetedToPackage(),
+                    "pending intent must be targeted to a package");
+        }
 
         try {
             mService.removeGeofence(null, intent, mContext.getPackageName());
@@ -1709,8 +1735,13 @@ public class LocationManager {
             @NonNull LocationRequest request,
             @NonNull Geofence fence,
             @NonNull PendingIntent intent) {
-        checkPendingIntent(intent);
+        Preconditions.checkArgument(request != null, "invalid null location request");
         Preconditions.checkArgument(fence != null, "invalid null geofence");
+        Preconditions.checkArgument(intent != null, "invalid null pending intent");
+        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
+            Preconditions.checkArgument(intent.isTargetedToPackage(),
+                    "pending intent must be targeted to a package");
+        }
 
         try {
             mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
@@ -1737,8 +1768,12 @@ public class LocationManager {
      * @hide
      */
     public void removeGeofence(@NonNull Geofence fence, @NonNull PendingIntent intent) {
-        checkPendingIntent(intent);
         Preconditions.checkArgument(fence != null, "invalid null geofence");
+        Preconditions.checkArgument(intent != null, "invalid null pending intent");
+        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
+            Preconditions.checkArgument(intent.isTargetedToPackage(),
+                    "pending intent must be targeted to a package");
+        }
 
         try {
             mService.removeGeofence(fence, intent, mContext.getPackageName());
@@ -1759,7 +1794,11 @@ public class LocationManager {
      * @hide
      */
     public void removeAllGeofences(@NonNull PendingIntent intent) {
-        checkPendingIntent(intent);
+        Preconditions.checkArgument(intent != null, "invalid null pending intent");
+        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
+            Preconditions.checkArgument(intent.isTargetedToPackage(),
+                    "pending intent must be targeted to a package");
+        }
 
         try {
             mService.removeGeofence(null, intent, mContext.getPackageName());
@@ -1833,14 +1872,15 @@ public class LocationManager {
      * @param status object containing GPS status details, or null.
      * @return status object containing updated GPS status.
      *
-     * @deprecated GpsStatus APIs are deprecated, use {@link GnssStatus} APIs instead.
+     * @deprecated GpsStatus APIs are deprecated, use {@link GnssStatus} APIs instead. No longer
+     * supported in apps targeting S and above.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public @Nullable GpsStatus getGpsStatus(@Nullable GpsStatus status) {
-        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
+        if (Compatibility.isChangeEnabled(GPS_STATUS_USAGE)) {
             throw new UnsupportedOperationException(
-                    "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+                    "GpsStatus APIs not supported, please use GnssStatus APIs instead");
         }
 
         GnssStatus gnssStatus = mGnssStatusListenerManager.getGnssStatus();
@@ -1863,17 +1903,14 @@ public class LocationManager {
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      *
      * @deprecated use {@link #registerGnssStatusCallback(GnssStatus.Callback)} instead. No longer
-     * supported in apps targeting R and above.
+     * supported in apps targeting S and above.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
-        UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
-        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
-            throw ex;
-        } else {
-            Log.w(TAG, ex);
+        if (Compatibility.isChangeEnabled(GPS_STATUS_USAGE)) {
+            throw new UnsupportedOperationException(
+                    "GpsStatus APIs not supported, please use GnssStatus APIs instead");
         }
 
         try {
@@ -1889,16 +1926,13 @@ public class LocationManager {
      * @param listener GPS status listener object to remove
      *
      * @deprecated use {@link #unregisterGnssStatusCallback(GnssStatus.Callback)} instead. No longer
-     * supported in apps targeting R and above.
+     * supported in apps targeting S and above.
      */
     @Deprecated
     public void removeGpsStatusListener(GpsStatus.Listener listener) {
-        UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
-        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
-            throw ex;
-        } else {
-            Log.w(TAG, ex);
+        if (Compatibility.isChangeEnabled(GPS_STATUS_USAGE)) {
+            throw new UnsupportedOperationException(
+                    "GpsStatus APIs not supported, please use GnssStatus APIs instead");
         }
 
         try {
@@ -2393,19 +2427,6 @@ public class LocationManager {
                 return true;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    private void checkPendingIntent(PendingIntent pendingIntent) {
-        Preconditions.checkArgument(pendingIntent != null, "invalid null pending intent");
-        if (!pendingIntent.isTargetedToPackage()) {
-            IllegalArgumentException e = new IllegalArgumentException(
-                    "invalid pending intent - must be targeted to package");
-            if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN) {
-                throw e;
-            } else {
-                Log.w(TAG, e);
             }
         }
     }
