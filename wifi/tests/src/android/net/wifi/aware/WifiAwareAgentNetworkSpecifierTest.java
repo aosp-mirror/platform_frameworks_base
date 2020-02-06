@@ -162,17 +162,6 @@ public class WifiAwareAgentNetworkSpecifierTest {
         collector.checkThat("Match unexpected", oldNs.satisfiedBy(newNs), equalTo(false));
     }
 
-    /**
-     * Validate that agent network specifier cannot be used as in network requests - i.e. that
-     * throws an exception when queried for UID validity.
-     */
-    @Test(expected = SecurityException.class)
-    public void testNoUsageInRequest() {
-        WifiAwareAgentNetworkSpecifier dut = new WifiAwareAgentNetworkSpecifier();
-
-        dut.assertValidFromUid(0);
-    }
-
     // utilities
 
     /**
@@ -182,6 +171,6 @@ public class WifiAwareAgentNetworkSpecifierTest {
     WifiAwareNetworkSpecifier getDummyNetworkSpecifier(int clientId) {
         return new WifiAwareNetworkSpecifier(WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_OOB,
                 WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR, clientId, 0, 0, new byte[6],
-                null, null, 10, 5, 0);
+                null, null, 10, 5);
     }
 }

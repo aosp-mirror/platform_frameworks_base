@@ -27,7 +27,6 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -41,33 +40,10 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
      */
     private final WifiConfiguration mWifiConfiguration;
 
-    /**
-     * The UID of the app that requested a specific wifi network using {@link WifiNetworkSpecifier}.
-     *
-     * Will only be filled when the device connects to a wifi network as a result of a
-     * {@link NetworkRequest} with {@link WifiNetworkSpecifier}. Will be set to -1 if the device
-     * auto-connected to a wifi network.
-     */
-    private final int mOriginalRequestorUid;
-
-    /**
-     * The package name of the app that requested a specific wifi network using
-     * {@link WifiNetworkSpecifier}.
-     *
-     * Will only be filled when the device connects to a wifi network as a result of a
-     * {@link NetworkRequest} with {@link WifiNetworkSpecifier}. Will be set to null if the device
-     * auto-connected to a wifi network.
-     */
-    private final String mOriginalRequestorPackageName;
-
-    public WifiNetworkAgentSpecifier(@NonNull WifiConfiguration wifiConfiguration,
-                                     int originalRequestorUid,
-                                     @Nullable String originalRequestorPackageName) {
+    public WifiNetworkAgentSpecifier(@NonNull WifiConfiguration wifiConfiguration) {
         checkNotNull(wifiConfiguration);
 
         mWifiConfiguration = wifiConfiguration;
-        mOriginalRequestorUid = originalRequestorUid;
-        mOriginalRequestorPackageName = originalRequestorPackageName;
     }
 
     /**
@@ -78,10 +54,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
                 @Override
                 public WifiNetworkAgentSpecifier createFromParcel(@NonNull Parcel in) {
                     WifiConfiguration wifiConfiguration = in.readParcelable(null);
-                    int originalRequestorUid = in.readInt();
-                    String originalRequestorPackageName = in.readString();
-                    return new WifiNetworkAgentSpecifier(
-                            wifiConfiguration, originalRequestorUid, originalRequestorPackageName);
+                    return new WifiNetworkAgentSpecifier(wifiConfiguration);
                 }
 
                 @Override
@@ -98,8 +71,6 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(mWifiConfiguration, flags);
-        dest.writeInt(mOriginalRequestorUid);
-        dest.writeString(mOriginalRequestorPackageName);
     }
 
     @Override
@@ -149,12 +120,6 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
                 this.mWifiConfiguration.allowedKeyManagement)) {
             return false;
         }
-        if (ns.requestorUid != this.mOriginalRequestorUid) {
-            return false;
-        }
-        if (!TextUtils.equals(ns.requestorPackageName, this.mOriginalRequestorPackageName)) {
-            return false;
-        }
         return true;
     }
 
@@ -163,9 +128,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
         return Objects.hash(
                 mWifiConfiguration.SSID,
                 mWifiConfiguration.BSSID,
-                mWifiConfiguration.allowedKeyManagement,
-                mOriginalRequestorUid,
-                mOriginalRequestorPackageName);
+                mWifiConfiguration.allowedKeyManagement);
     }
 
     @Override
@@ -180,10 +143,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
         return Objects.equals(this.mWifiConfiguration.SSID, lhs.mWifiConfiguration.SSID)
                 && Objects.equals(this.mWifiConfiguration.BSSID, lhs.mWifiConfiguration.BSSID)
                 && Objects.equals(this.mWifiConfiguration.allowedKeyManagement,
-                    lhs.mWifiConfiguration.allowedKeyManagement)
-                && mOriginalRequestorUid == lhs.mOriginalRequestorUid
-                && TextUtils.equals(mOriginalRequestorPackageName,
-                lhs.mOriginalRequestorPackageName);
+                    lhs.mWifiConfiguration.allowedKeyManagement);
     }
 
     @Override
@@ -192,16 +152,8 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
         sb.append("WifiConfiguration=")
                 .append(", SSID=").append(mWifiConfiguration.SSID)
                 .append(", BSSID=").append(mWifiConfiguration.BSSID)
-                .append(", mOriginalRequestorUid=").append(mOriginalRequestorUid)
-                .append(", mOriginalRequestorPackageName=").append(mOriginalRequestorPackageName)
                 .append("]");
         return sb.toString();
-    }
-
-    @Override
-    public void assertValidFromUid(int requestorUid) {
-        throw new IllegalStateException("WifiNetworkAgentSpecifier should never be used "
-                + "for requests.");
     }
 
     @Override
