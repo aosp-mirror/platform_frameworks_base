@@ -175,9 +175,7 @@ int write_java_methods_q_schema(
                         indent.c_str());
                 fprintf(out,
                         "%s    android.util.SparseArray<Float> floatMap = null;\n", indent.c_str());
-                fprintf(out,
-                        "%s    int keyValuePairSize = LIST_TYPE_OVERHEAD * 5;\n",
-                        indent.c_str());
+                fprintf(out, "%s    int keyValuePairSize = LIST_TYPE_OVERHEAD;\n", indent.c_str());
                 fprintf(out,
                         "%s    for (int i = 0; i < count; i++) {\n", indent.c_str());
                 fprintf(out,
@@ -360,8 +358,9 @@ int write_java_methods_q_schema(
                 requiredHelpers |= JAVA_MODULE_REQUIRES_FLOAT;
                 requiredHelpers |= JAVA_MODULE_REQUIRES_KEY_VALUE_PAIRS;
                 fprintf(out,
-                        "%s    writeKeyValuePairs(buff, pos, intMap, longMap, stringMap, "
-                        "floatMap);\n", indent.c_str());
+                        "%s    writeKeyValuePairs(buff, pos, (byte) count, intMap, longMap, "
+                        "stringMap, floatMap);\n",
+                        indent.c_str());
                 fprintf(out, "%s    pos += keyValuePairSize;\n", indent.c_str());
                 break;
             default:
@@ -472,7 +471,8 @@ void write_java_helpers_for_q_schema_methods(
     }
 
     if (requiredHelpers & JAVA_MODULE_REQUIRES_KEY_VALUE_PAIRS) {
-        fprintf(out, "%sprivate static void writeKeyValuePairs(byte[] buff, int pos,\n",
+        fprintf(out,
+                "%sprivate static void writeKeyValuePairs(byte[] buff, int pos, byte numPairs,\n",
                 indent.c_str());
         fprintf(out, "%s        final android.util.SparseIntArray intMap,\n", indent.c_str());
         fprintf(out, "%s        final android.util.SparseLongArray longMap,\n", indent.c_str());
@@ -483,15 +483,12 @@ void write_java_helpers_for_q_schema_methods(
 
         // Start list of lists.
         fprintf(out, "%s    buff[pos] = LIST_TYPE;\n", indent.c_str());
-        fprintf(out, "%s    buff[pos + 1] = (byte) 4;\n", indent.c_str());
+        fprintf(out, "%s    buff[pos + 1] = (byte) numPairs;\n", indent.c_str());
         fprintf(out, "%s    pos += LIST_TYPE_OVERHEAD;\n", indent.c_str());
 
         // Write integers.
         fprintf(out, "%s    final int intMapSize = null == intMap ? 0 : intMap.size();\n",
                 indent.c_str());
-        fprintf(out, "%s    buff[pos] = LIST_TYPE;\n", indent.c_str());
-        fprintf(out, "%s    buff[pos + 1] = (byte) intMapSize;\n", indent.c_str());
-        fprintf(out, "%s    pos += LIST_TYPE_OVERHEAD;\n", indent.c_str());
         fprintf(out, "%s    for (int i = 0; i < intMapSize; i++) {\n", indent.c_str());
         fprintf(out, "%s        buff[pos] = LIST_TYPE;\n", indent.c_str());
         fprintf(out, "%s        buff[pos + 1] = (byte) 2;\n", indent.c_str());
@@ -509,9 +506,6 @@ void write_java_helpers_for_q_schema_methods(
         // Write longs.
         fprintf(out, "%s    final int longMapSize = null == longMap ? 0 : longMap.size();\n",
                 indent.c_str());
-        fprintf(out, "%s    buff[pos] = LIST_TYPE;\n", indent.c_str());
-        fprintf(out, "%s    buff[pos + 1] = (byte) longMapSize;\n", indent.c_str());
-        fprintf(out, "%s    pos += LIST_TYPE_OVERHEAD;\n", indent.c_str());
         fprintf(out, "%s    for (int i = 0; i < longMapSize; i++) {\n", indent.c_str());
         fprintf(out, "%s        buff[pos] = LIST_TYPE;\n", indent.c_str());
         fprintf(out, "%s        buff[pos + 1] = (byte) 2;\n", indent.c_str());
@@ -529,9 +523,6 @@ void write_java_helpers_for_q_schema_methods(
         // Write Strings.
         fprintf(out, "%s    final int stringMapSize = null == stringMap ? 0 : stringMap.size();\n",
                 indent.c_str());
-        fprintf(out, "%s    buff[pos] = LIST_TYPE;\n", indent.c_str());
-        fprintf(out, "%s    buff[pos + 1] = (byte) stringMapSize;\n", indent.c_str());
-        fprintf(out, "%s    pos += LIST_TYPE_OVERHEAD;\n", indent.c_str());
         fprintf(out, "%s    for (int i = 0; i < stringMapSize; i++) {\n", indent.c_str());
         fprintf(out, "%s        buff[pos] = LIST_TYPE;\n", indent.c_str());
         fprintf(out, "%s        buff[pos + 1] = (byte) 2;\n", indent.c_str());
@@ -556,9 +547,6 @@ void write_java_helpers_for_q_schema_methods(
         // Write floats.
         fprintf(out, "%s    final int floatMapSize = null == floatMap ? 0 : floatMap.size();\n",
                 indent.c_str());
-        fprintf(out, "%s    buff[pos] = LIST_TYPE;\n", indent.c_str());
-        fprintf(out, "%s    buff[pos + 1] = (byte) floatMapSize;\n", indent.c_str());
-        fprintf(out, "%s    pos += LIST_TYPE_OVERHEAD;\n", indent.c_str());
         fprintf(out, "%s    for (int i = 0; i < floatMapSize; i++) {\n", indent.c_str());
         fprintf(out, "%s        buff[pos] = LIST_TYPE;\n", indent.c_str());
         fprintf(out, "%s        buff[pos + 1] = (byte) 2;\n", indent.c_str());
