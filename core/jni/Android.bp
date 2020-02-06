@@ -360,7 +360,6 @@ cc_library_static {
         "android_view_RenderNode.cpp",
         "android_util_PathParser.cpp",
 
-        "android/graphics/AnimatedImageDrawable.cpp",
         "android/graphics/Bitmap.cpp",
         "android/graphics/BitmapFactory.cpp",
         "android/graphics/ByteBufferStreamAdaptor.cpp",
@@ -436,6 +435,7 @@ cc_library_static {
 
                 "android_view_TextureLayer.cpp",
                 "android_view_ThreadedRenderer.cpp",
+                "android/graphics/AnimatedImageDrawable.cpp",
                 "android/graphics/BitmapRegionDecoder.cpp",
                 "android/graphics/GIFMovie.cpp",
                 "android/graphics/Movie.cpp",
