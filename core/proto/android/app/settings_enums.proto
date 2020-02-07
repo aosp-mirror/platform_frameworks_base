@@ -708,6 +708,12 @@ enum Action {
 
     // ACTION: Deny "Access all files" for an app
     APP_SPECIAL_PERMISSION_MANAGE_EXT_STRG_DENY = 1731;
+
+    // ACTION: Battery feature usage
+    ACTION_BATTERY_OPTION_FEATURE_USAGE = 1732;
+
+    // ACTION: Battery feature runtime event
+    ACTION_BATTERY_OPTION_RUNTIME_EVENT = 1733;
 }
 
 /**
