@@ -43,6 +43,7 @@ import com.android.server.blob.BlobStoreManagerService.Injector;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -209,6 +210,7 @@ public class BlobStoreManagerServiceTest {
         verify(file3, never()).delete();
     }
 
+    @Ignore
     @Test
     public void testHandleIdleMaintenance_deleteStaleSessions() throws Exception {
         // Setup sessions
