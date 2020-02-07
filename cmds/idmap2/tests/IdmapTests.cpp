@@ -247,6 +247,43 @@ TEST(IdmapTests, CreateIdmapDataFromApkAssets) {
   ASSERT_OVERLAY_ENTRY(overlay_entries[3], 0x7f020002, 0x7f02000f);
 }
 
+TEST(IdmapTests, CreateIdmapDataFromApkAssetsSharedLibOverlay) {
+  std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
+  std::string overlay_apk_path = GetTestDataPath() + "/overlay/overlay-shared.apk";
+
+  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
+  ASSERT_THAT(target_apk, NotNull());
+
+  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+  ASSERT_THAT(overlay_apk, NotNull());
+
+  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+                                           /* enforce_overlayable */ true);
+  ASSERT_TRUE(idmap_result) << idmap_result.GetErrorMessage();
+  auto& idmap = *idmap_result;
+  ASSERT_THAT(idmap, NotNull());
+
+  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
+  ASSERT_EQ(dataBlocks.size(), 1U);
+
+  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
+  ASSERT_THAT(data, NotNull());
+
+  const auto& target_entries = data->GetTargetEntries();
+  ASSERT_EQ(target_entries.size(), 4U);
+  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00010000);
+  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020000);
+  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020001);
+  ASSERT_TARGET_ENTRY(target_entries[3], 0x7f02000f, Res_value::TYPE_DYNAMIC_REFERENCE, 0x00020002);
+
+  const auto& overlay_entries = data->GetOverlayEntries();
+  ASSERT_EQ(target_entries.size(), 4U);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x00010000, 0x7f010000);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x00020000, 0x7f02000c);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x00020001, 0x7f02000e);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[3], 0x00020002, 0x7f02000f);
+}
+
 TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {
   OverlayManifestInfo info{};
   info.target_package = "test.target";

@@ -33,6 +33,10 @@ using android::util::Utf16ToUtf8;
 
 namespace android::idmap2::utils {
 
+bool IsReference(uint8_t data_type) {
+  return data_type == Res_value::TYPE_REFERENCE || data_type == Res_value::TYPE_DYNAMIC_REFERENCE;
+}
+
 StringPiece DataTypeToString(uint8_t data_type) {
   switch (data_type) {
     case Res_value::TYPE_NULL:
@@ -133,7 +137,7 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
   }
 
   if (auto result_value = overlay_it->GetAttributeValue("resourcesMap")) {
-    if ((*result_value).dataType == Res_value::TYPE_REFERENCE) {
+    if (IsReference((*result_value).dataType)) {
       info.resource_mapping = (*result_value).data;
     } else {
       return Error("android:resourcesMap is not a reference in AndroidManifest.xml of %s",
