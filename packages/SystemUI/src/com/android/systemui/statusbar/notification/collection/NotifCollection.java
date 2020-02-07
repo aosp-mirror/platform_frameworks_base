@@ -237,6 +237,7 @@ public class NotifCollection implements Dumpable {
                             stats.notificationVisibility);
                 } catch (RemoteException e) {
                     // system process is dead if we're here.
+                    mLogger.logRemoteExceptionOnNotificationClear(entry.getKey(), e);
                 }
             }
         }
@@ -251,8 +252,7 @@ public class NotifCollection implements Dumpable {
     public void dismissNotification(
             NotificationEntry entry,
             @NonNull DismissedByUserStats stats) {
-        dismissNotifications(List.of(
-                new Pair<NotificationEntry, DismissedByUserStats>(entry, stats)));
+        dismissNotifications(List.of(new Pair<>(entry, stats)));
     }
 
     /**
@@ -266,9 +266,10 @@ public class NotifCollection implements Dumpable {
             mStatusBarService.onClearAllNotifications(userId);
         } catch (RemoteException e) {
             // system process is dead if we're here.
+            mLogger.logRemoteExceptionOnClearAllNotifications(e);
         }
 
-        final List<NotificationEntry> entries = new ArrayList(getActiveNotifs());
+        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
         for (int i = entries.size() - 1; i >= 0; i--) {
             NotificationEntry entry = entries.get(i);
             if (!shouldDismissOnClearAll(entry, userId)) {
@@ -777,6 +778,6 @@ public class NotifCollection implements Dumpable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CancellationReason {}
 
-    public static final int REASON_NOT_CANCELED = -1;
+    static final int REASON_NOT_CANCELED = -1;
     public static final int REASON_UNKNOWN = 0;
 }
