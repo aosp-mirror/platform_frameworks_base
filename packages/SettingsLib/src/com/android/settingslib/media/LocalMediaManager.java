@@ -227,6 +227,22 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Find the MediaDevice from all media devices by id.
+     *
+     * @param id the unique id of MediaDevice
+     * @return MediaDevice
+     */
+    public MediaDevice getMediaDeviceById(String id) {
+        for (MediaDevice mediaDevice : mMediaDevices) {
+            if (mediaDevice.getId().equals(id)) {
+                return mediaDevice;
+            }
+        }
+        Log.i(TAG, "Unable to find device " + id);
+        return null;
+    }
+
+    /**
      * Find the current connected MediaDevice.
      *
      * @return MediaDevice
