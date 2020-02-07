@@ -631,6 +631,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
     char foregroundHeapGrowthMultiplierOptsBuf[
             sizeof("-XX:ForegroundHeapGrowthMultiplier=")-1 + PROPERTY_VALUE_MAX];
+    char finalizerTimeoutMsOptsBuf[sizeof("-XX:FinalizerTimeoutMs=")-1 + PROPERTY_VALUE_MAX];
+    char threadSuspendTimeoutOptsBuf[sizeof("-XX:ThreadSuspendTimeout=")-1 + PROPERTY_VALUE_MAX];
     char cachePruneBuf[sizeof("-Xzygote-max-boot-retry=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmsImageFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmxImageFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
@@ -784,7 +786,15 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseRuntimeOption("dalvik.vm.foreground-heap-growth-multiplier",
                        foregroundHeapGrowthMultiplierOptsBuf,
                        "-XX:ForegroundHeapGrowthMultiplier=");
-
+    /*
+     * Finalizer and thread suspend timeouts.
+     */
+    parseRuntimeOption("dalvik.vm.finalizer-timeout-ms",
+                       finalizerTimeoutMsOptsBuf,
+                       "-XX:FinalizerTimeoutMs=");
+    parseRuntimeOption("dalvik.vm.thread-suspend-timeout-ms",
+                       threadSuspendTimeoutOptsBuf,
+                       "-XX:ThreadSuspendTimeout=");
     /*
      * JIT related options.
      */
