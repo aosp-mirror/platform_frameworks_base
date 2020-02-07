@@ -6118,4 +6118,48 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Enable/disable wifi scan throttling from 3rd party apps.
+     *
+     * <p>
+     * The throttling limits for apps are described in
+     * <a href="Wi-Fi Scan Throttling">
+     * https://developer.android.com/guide/topics/connectivity/wifi-scan#wifi-scan-throttling</a>
+     * </p>
+     *
+     * @param enable true to allow scan throttling, false to disallow scan throttling.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setScanThrottleEnabled(boolean enable) {
+        try {
+            mService.setScanThrottleEnabled(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the persisted Wi-Fi scan throttle state. Defaults to true, unless changed by the user via
+     * Developer options.
+     *
+     * <p>
+     * The throttling limits for apps are described in
+     * <a href="Wi-Fi Scan Throttling">
+     * https://developer.android.com/guide/topics/connectivity/wifi-scan#wifi-scan-throttling</a>
+     * </p>
+     *
+     * @return true to indicate that scan throttling is enabled, false to indicate that scan
+     * throttling is disabled.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public boolean isScanThrottleEnabled() {
+        try {
+            return mService.isScanThrottleEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
