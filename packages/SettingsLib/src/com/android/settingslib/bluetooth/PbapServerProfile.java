@@ -16,6 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -96,8 +98,10 @@ public class PbapServerProfile implements LocalBluetoothProfile {
     }
 
     public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.disconnect(device);
+        if (mService == null) {
+            return false;
+        }
+        return mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
     }
 
     public int getConnectionStatus(BluetoothDevice device) {
