@@ -229,16 +229,41 @@ public final class IncrementalManager {
         if (linkedApkStorage == null) {
             throw new IOException("Failed to create linked storage at dir: " + afterCodePathParent);
         }
-        linkedApkStorage.makeDirectory(afterCodePathName);
-        File[] files = beforeCodeFile.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].isFile()) {
-                String fileName = files[i].getName();
-                apkStorage.makeLink(
-                        fileName, linkedApkStorage, afterCodePathName + "/" + fileName);
+        linkFiles(apkStorage, beforeCodeFile, "", linkedApkStorage, afterCodePathName);
+        apkStorage.unBind(beforeCodePath);
+    }
+
+    /**
+     * Recursively set up directories and link all the files from source storage to target storage.
+     *
+     * @param sourceStorage The storage that has all the files and directories underneath.
+     * @param sourceAbsolutePath The absolute path of the directory that holds all files and dirs.
+     * @param sourceRelativePath The relative path on the source directory, e.g., "" or "lib".
+     * @param targetStorage The target storage that will have the same files and directories.
+     * @param targetRelativePath The relative path to the directory on the target storage that
+     *                           should have all the files and dirs underneath,
+     *                           e.g., "packageName-random".
+     * @throws IOException When makeDirectory or makeLink fails on the Incremental File System.
+     */
+    private void linkFiles(IncrementalStorage sourceStorage, File sourceAbsolutePath,
+            String sourceRelativePath, IncrementalStorage targetStorage,
+            String targetRelativePath) throws IOException {
+        targetStorage.makeDirectory(targetRelativePath);
+        final File[] entryList = sourceAbsolutePath.listFiles();
+        for (int i = 0; i < entryList.length; i++) {
+            final File entry = entryList[i];
+            final String entryName = entryList[i].getName();
+            final String sourceEntryRelativePath =
+                    sourceRelativePath.isEmpty() ? entryName : sourceRelativePath + "/" + entryName;
+            final String targetEntryRelativePath = targetRelativePath + "/" + entryName;
+            if (entry.isFile()) {
+                sourceStorage.makeLink(
+                        sourceEntryRelativePath, targetStorage, targetEntryRelativePath);
+            } else if (entry.isDirectory()) {
+                linkFiles(sourceStorage, entry, sourceEntryRelativePath, targetStorage,
+                        targetEntryRelativePath);
             }
         }
-        apkStorage.unBind(beforeCodePath);
     }
 
     /**

@@ -126,7 +126,8 @@ public:
 
     std::vector<std::string> listFiles(StorageId storage) const;
     bool startLoading(StorageId storage) const;
-
+    bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
+                                 std::string_view libDirRelativePath, std::string_view abi);
     class IncrementalDataLoaderListener : public android::content::pm::BnDataLoaderStatusListener {
     public:
         IncrementalDataLoaderListener(IncrementalService& incrementalService)
