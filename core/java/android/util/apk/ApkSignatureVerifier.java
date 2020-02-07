@@ -74,8 +74,7 @@ public class ApkSignatureVerifier {
      * This method is dangerous and should not be used, unless the caller is absolutely certain the
      * APK is trusted.
      *
-     * @throws PackageParserException if the APK's signature failed to verify.
-     * or greater is not found, except in the case of no JAR signature.
+     * @throws PackageParserException if there was a problem collecting certificates.
      */
     public static PackageParser.SigningDetails unsafeGetCertsWithoutVerification(
             String apkPath, int minSignatureSchemeVersion)
@@ -147,7 +146,7 @@ public class ApkSignatureVerifier {
      *
      * @param verifyFull whether to verify all contents of this APK or just collect certificates.
      * @return the certificates associated with each signer.
-     * @throws SignatureNotFoundException is there are no V3 signatures in the APK
+     * @throws SignatureNotFoundException if there are no V3 signatures in the APK
      * @throws PackageParserException     if there was a problem collecting certificates
      */
     private static PackageParser.SigningDetails verifyV3Signature(String apkPath,
@@ -188,7 +187,7 @@ public class ApkSignatureVerifier {
      *
      * @param verifyFull whether to verify all contents of this APK or just collect certificates.
      * @return the certificates associated with each signer.
-     * @throws SignatureNotFoundException is there are no V2 signatures in the APK
+     * @throws SignatureNotFoundException if there are no V2 signatures in the APK
      * @throws PackageParserException     if there was a problem collecting certificates
      */
     private static PackageParser.SigningDetails verifyV2Signature(String apkPath,
