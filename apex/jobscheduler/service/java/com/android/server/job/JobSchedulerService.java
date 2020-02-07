@@ -1371,18 +1371,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Effective standby bucket can change after this in some situations so use
                     // the real bucket so that the job is tracked by the controllers.
                     if (js.getStandbyBucket() == RESTRICTED_INDEX) {
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
-
                         mRestrictiveControllers.get(j).startTrackingRestrictedJobLocked(js);
                     } else {
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
-
                         mRestrictiveControllers.get(j).stopTrackingRestrictedJobLocked(js);
                     }
                 }
