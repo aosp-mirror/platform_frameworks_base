@@ -1487,7 +1487,6 @@ public class ResolverActivity extends Activity implements
         for (int i = 0; i < tabWidget.getChildCount(); i++) {
             TextView title = tabWidget.getChildAt(i).findViewById(android.R.id.title);
             title.setTextColor(getColor(R.color.resolver_tabs_inactive_color));
-            title.setAllCaps(false);
         }
     }
 
