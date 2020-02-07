@@ -295,6 +295,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         }
         //TODO: Replace this API with RowContentBindParams directly
         row.setNeedsRedaction(mNotificationLockscreenUserManager.needsRedaction(entry));
+        params.rebindAllContentViews();
         mRowContentBindStage.requestRebind(entry, en -> {
             row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
             row.setUsesIncreasedHeadsUpHeight(useIncreasedHeadsUp);
