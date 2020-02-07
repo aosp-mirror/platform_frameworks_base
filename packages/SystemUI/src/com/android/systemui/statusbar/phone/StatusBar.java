@@ -4262,4 +4262,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mTransientShown;
     }
 
+    @Override
+    public void suppressAmbientDisplay(boolean suppressed) {
+        mDozeServiceHost.setDozeSuppressed(suppressed);
+    }
 }

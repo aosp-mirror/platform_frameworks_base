@@ -134,6 +134,7 @@ public class DozeMachine {
     private final AmbientDisplayConfiguration mConfig;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final BatteryController mBatteryController;
+    private final DozeHost mDozeHost;
     private Part[] mParts;
 
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
@@ -144,7 +145,7 @@ public class DozeMachine {
 
     public DozeMachine(Service service, AmbientDisplayConfiguration config, WakeLock wakeLock,
             WakefulnessLifecycle wakefulnessLifecycle, BatteryController batteryController,
-            DozeLog dozeLog, DockManager dockManager) {
+            DozeLog dozeLog, DockManager dockManager, DozeHost dozeHost) {
         mDozeService = service;
         mConfig = config;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -152,6 +153,7 @@ public class DozeMachine {
         mBatteryController = batteryController;
         mDozeLog = dozeLog;
         mDockManager = dockManager;
+        mDozeHost = dozeHost;
     }
 
     /** Initializes the set of {@link Part}s. Must be called exactly once after construction. */
@@ -328,7 +330,7 @@ public class DozeMachine {
         if (mState == State.FINISH) {
             return State.FINISH;
         }
-        if (mConfig.dozeSuppressed(UserHandle.USER_CURRENT) && requestedState.isAlwaysOn()) {
+        if (mDozeHost.isDozeSuppressed() && requestedState.isAlwaysOn()) {
             Log.i(TAG, "Doze is suppressed. Suppressing state: " + requestedState);
             mDozeLog.traceDozeSuppressed(requestedState);
             return State.DOZE;

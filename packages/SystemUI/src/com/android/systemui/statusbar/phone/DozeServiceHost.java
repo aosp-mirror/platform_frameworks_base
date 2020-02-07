@@ -93,6 +93,7 @@ public final class DozeServiceHost implements DozeHost {
     private NotificationPanelViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
     private StatusBar mStatusBar;
+    private boolean mSuppressed;
 
     @Inject
     public DozeServiceHost(DozeLog dozeLog, PowerManager powerManager,
@@ -448,5 +449,19 @@ public final class DozeServiceHost implements DozeHost {
 
     boolean getIgnoreTouchWhilePulsing() {
         return mIgnoreTouchWhilePulsing;
+    }
+
+    void setDozeSuppressed(boolean suppressed) {
+        if (suppressed == mSuppressed) {
+            return;
+        }
+        mSuppressed = suppressed;
+        for (Callback callback : mCallbacks) {
+            callback.onDozeSuppressedChanged(suppressed);
+        }
+    }
+
+    public boolean isDozeSuppressed() {
+        return mSuppressed;
     }
 }

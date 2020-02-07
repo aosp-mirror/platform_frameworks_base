@@ -125,6 +125,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int MSG_SHOW_TOAST                        = 53 << MSG_SHIFT;
     private static final int MSG_HIDE_TOAST                        = 54 << MSG_SHIFT;
     private static final int MSG_TRACING_STATE_CHANGED             = 55 << MSG_SHIFT;
+    private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 56 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -315,6 +316,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * due to prolonged user inactivity should be dismissed.
          */
         default void dismissInattentiveSleepWarning(boolean animated) { }
+
+        /** Called to suppress ambient display. */
+        default void suppressAmbientDisplay(boolean suppress) { }
 
         /**
          * @see IStatusBar#showToast(String, IBinder, CharSequence, IBinder, int,
@@ -950,6 +954,13 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         }
     }
 
+    @Override
+    public void suppressAmbientDisplay(boolean suppress) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SUPPRESS_AMBIENT_DISPLAY, suppress).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1280,6 +1291,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                 case MSG_TRACING_STATE_CHANGED:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onTracingStateChanged((Boolean) msg.obj);
+                    }
+                    break;
+                case MSG_SUPPRESS_AMBIENT_DISPLAY:
+                    for (Callbacks callbacks: mCallbacks) {
+                        callbacks.suppressAmbientDisplay((boolean) msg.obj);
                     }
                     break;
             }
