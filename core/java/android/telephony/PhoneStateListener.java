@@ -412,23 +412,23 @@ public class PhoneStateListener {
      * domain. This indication does not necessarily indicate a change of service state, which should
      * be tracked via {@link #LISTEN_SERVICE_STATE}.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
+     * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onRegistrationFailed()
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_REGISTRATION_FAILURE = 0x40000000;
 
     /**
      * Listen for Barring Information for the current registered / camped cell.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
-     * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
+     * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
      * @see #onBarringInfoChanged()
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int LISTEN_BARRING_INFO = 0x80000000;
 
     /*
