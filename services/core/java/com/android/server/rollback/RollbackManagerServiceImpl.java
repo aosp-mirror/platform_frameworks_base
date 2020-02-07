@@ -1148,24 +1148,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
 
             if (success) {
-                Rollback newRollback;
+                Rollback rollback;
                 synchronized (mLock) {
-                    newRollback = getNewRollbackForPackageSessionLocked(sessionId);
-                    if (newRollback != null && newRollback.notifySessionWithSuccess()) {
-                        mRollbacks.remove(newRollback);
-                        newRollback.setIsNewRollback(false);
-                    } else {
-                        // Not all child sessions finished with success.
-                        // Don't enable the rollback yet.
-                        newRollback = null;
+                    rollback = getRollbackForSessionLocked(sessionId);
+                    if (rollback == null || rollback.isStaged() || !rollback.isEnabling()
+                            || !rollback.notifySessionWithSuccess()) {
+                        return;
                     }
+                    // All child sessions finished with success. We can enable this rollback now.
+                    // TODO: refactor #completeEnableRollback so we won't remove 'rollback' from
+                    // mRollbacks here and add it back in #completeEnableRollback later.
+                    mRollbacks.remove(rollback);
+                    rollback.setIsNewRollback(false);
                 }
-
-                if (newRollback != null) {
-                    Rollback rollback = completeEnableRollback(newRollback);
-                    if (rollback != null && !rollback.isStaged()) {
-                        makeRollbackAvailable(rollback);
-                    }
+                // TODO: Now #completeEnableRollback returns the same rollback object as the
+                // parameter on success. It would be more readable to return a boolean to indicate
+                // success or failure.
+                if (completeEnableRollback(rollback) != null) {
+                    makeRollbackAvailable(rollback);
                 }
             } else {
                 synchronized (mLock) {
