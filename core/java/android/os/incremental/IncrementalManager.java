@@ -261,6 +261,13 @@ public final class IncrementalManager {
     }
 
     /**
+     * Checks if Incremental is enabled
+     */
+    public static boolean isEnabled() {
+        return nativeIsEnabled();
+    }
+
+    /**
      * Checks if path is mounted on Incremental File System.
      */
     public static boolean isIncrementalPath(@NonNull String path) {
@@ -268,5 +275,6 @@ public final class IncrementalManager {
     }
 
     /* Native methods */
+    private static native boolean nativeIsEnabled();
     private static native boolean nativeIsIncrementalPath(@NonNull String path);
 }
