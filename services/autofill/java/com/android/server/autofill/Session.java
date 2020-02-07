@@ -2540,6 +2540,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             ViewState viewState, int flags) {
         viewState.setCurrentValue(value);
 
+        final String filterText;
+        if (value == null || !value.isText()) {
+            filterText = null;
+        } else {
+            final CharSequence text = value.getTextValue();
+            // Text should never be null, but it doesn't hurt to check to avoid a
+            // system crash...
+            filterText = (text == null) ? null : text.toString();
+        }
+
         final AutofillValue filledValue = viewState.getAutofilledValue();
         if (filledValue != null) {
             if (filledValue.equals(value)) {
@@ -2560,18 +2570,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final ViewState currentView = mViewStates.get(mCurrentViewId);
                 currentView.maybeCallOnFillReady(flags);
             }
+        } else if (viewState.id.equals(this.mCurrentViewId)
+                && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
+            requestShowInlineSuggestionsLocked(viewState.getResponse(), filterText);
         }
 
         viewState.setState(ViewState.STATE_CHANGED);
-        final String filterText;
-        if (value == null || !value.isText()) {
-            filterText = null;
-        } else {
-            final CharSequence text = value.getTextValue();
-            // Text should never be null, but it doesn't hurt to check to avoid a
-            // system crash...
-            filterText = (text == null) ? null : text.toString();
-        }
         getUiForShowing().filterFillUi(filterText, this);
     }
 
@@ -2604,7 +2608,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         if (response.supportsInlineSuggestions()) {
             synchronized (mLock) {
-                if (requestShowInlineSuggestionsLocked(response)) {
+                if (requestShowInlineSuggestionsLocked(response, filterText)) {
+                    final ViewState currentView = mViewStates.get(mCurrentViewId);
+                    currentView.setState(ViewState.STATE_INLINE_SHOWN);
                     //TODO(b/137800469): Fix it to log showed only when IME asks for inflation,
                     // rather than here where framework sends back the response.
                     mService.logDatasetShown(id, mClientState);
@@ -2647,7 +2653,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Returns whether we made a request to show inline suggestions.
      */
-    private boolean requestShowInlineSuggestionsLocked(@NonNull FillResponse response) {
+    private boolean requestShowInlineSuggestionsLocked(@NonNull FillResponse response,
+            @Nullable String filterText) {
         final List<Dataset> datasets = response.getDatasets();
         if (datasets == null) {
             Log.w(TAG, "response returned null datasets");
@@ -2665,7 +2672,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(request,
                         response.getRequestId(),
-                        datasets.toArray(new Dataset[]{}), response.getInlineActions(),
+                        datasets.toArray(new Dataset[]{}), filterText, response.getInlineActions(),
                         mCurrentViewId, mContext, this, () -> {
                             synchronized (mLock) {
                                 requestHideFillUi(mCurrentViewId);

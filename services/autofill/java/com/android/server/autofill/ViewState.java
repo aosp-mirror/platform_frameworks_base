@@ -74,6 +74,8 @@ final class ViewState {
     public static final int STATE_AUTOFILLED_ONCE = 0x800;
     /** View triggered the latest augmented autofill request. */
     public static final int STATE_TRIGGERED_AUGMENTED_AUTOFILL = 0x1000;
+    /** Inline suggestions were shown for this View. */
+    public static final int STATE_INLINE_SHOWN = 0x2000;
 
     public final AutofillId id;
 
