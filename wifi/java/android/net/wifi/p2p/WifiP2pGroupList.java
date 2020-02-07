@@ -22,7 +22,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.LruCache;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 
@@ -78,8 +80,8 @@ public final class WifiP2pGroupList implements Parcelable {
      * Get the list of P2P groups.
      */
     @NonNull
-    public Collection<WifiP2pGroup> getGroupList() {
-        return mGroups.snapshot().values();
+    public List<WifiP2pGroup> getGroupList() {
+        return new ArrayList<>(mGroups.snapshot().values());
     }
 
     /**
