@@ -349,6 +349,8 @@ static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorage
 enum RuntimeFlags : uint32_t {
   DEBUG_ENABLE_JDWP = 1,
   PROFILE_FROM_SHELL = 1 << 15,
+  MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
+  MEMORY_TAG_LEVEL_TBI = 1 << 19,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1626,6 +1628,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 1) failed");
     }
   }
+
+  HeapTaggingLevel heap_tagging_level;
+  switch (runtime_flags & RuntimeFlags::MEMORY_TAG_LEVEL_MASK) {
+    case RuntimeFlags::MEMORY_TAG_LEVEL_TBI:
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
+      break;
+    default:
+      heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
+  }
+  android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
 
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).
