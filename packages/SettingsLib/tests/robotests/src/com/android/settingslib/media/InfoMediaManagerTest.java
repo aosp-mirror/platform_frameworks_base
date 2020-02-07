@@ -27,6 +27,8 @@ import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +48,8 @@ public class InfoMediaManagerTest {
 
     @Mock
     private MediaRouter2Manager mRouterManager;
+    @Mock
+    private LocalBluetoothManager mLocalBluetoothManager;
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
@@ -55,7 +59,8 @@ public class InfoMediaManagerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        mInfoMediaManager = new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null);
+        mInfoMediaManager =
+                new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
         mInfoMediaManager.mRouterManager = mRouterManager;
     }
 

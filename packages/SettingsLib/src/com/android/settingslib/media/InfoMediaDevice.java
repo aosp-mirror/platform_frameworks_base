@@ -63,13 +63,6 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
-    public boolean connect() {
-        setConnectedRecord();
-        mRouterManager.selectRoute(mPackageName, mRouteInfo);
-        return true;
-    }
-
-    @Override
     public void requestSetVolume(int volume) {
         mRouterManager.requestSetVolume(mRouteInfo, volume);
     }
@@ -109,12 +102,6 @@ public class InfoMediaDevice extends MediaDevice {
         return mContext.getResources().getString(R.string.unknown);
     }
 
-    @Override
-    public void disconnect() {
-        //TODO(b/144535188): disconnected last select device
-    }
-
-    @Override
     public boolean isConnected() {
         return true;
     }
