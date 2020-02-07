@@ -45,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -2058,11 +2057,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
-        final int type = attrs.type;
-        final boolean isRoundedCornerOverlay =
-                (attrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
-
+    public int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
+            int[] outAppOp) {
         if (isRoundedCornerOverlay && mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
                 != PERMISSION_GRANTED) {
             return ADD_PERMISSION_DENIED;
@@ -2119,7 +2115,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ApplicationInfo appInfo;
         try {
             appInfo = mPackageManager.getApplicationInfoAsUser(
-                            attrs.packageName,
+                            packageName,
                             0 /* flags */,
                             UserHandle.getUserId(callingUid));
         } catch (PackageManager.NameNotFoundException e) {
@@ -2139,7 +2135,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // check if user has enabled this operation. SecurityException will be thrown if this app
         // has not been allowed by the user
-        final int mode = mAppOpsManager.noteOpNoThrow(outAppOp[0], callingUid, attrs.packageName);
+        final int mode = mAppOpsManager.noteOpNoThrow(outAppOp[0], callingUid, packageName);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
             case AppOpsManager.MODE_IGNORED:
