@@ -33,16 +33,9 @@ public class InfoMediaDevice extends MediaDevice {
 
     private static final String TAG = "InfoMediaDevice";
 
-    private final MediaRoute2Info mRouteInfo;
-    private final MediaRouter2Manager mRouterManager;
-    private final String mPackageName;
-
     InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
             String packageName) {
-        super(context, MediaDeviceType.TYPE_CAST_DEVICE);
-        mRouterManager = routerManager;
-        mRouteInfo = info;
-        mPackageName = packageName;
+        super(context, MediaDeviceType.TYPE_CAST_DEVICE, routerManager, info, packageName);
         initDeviceRecord();
     }
 

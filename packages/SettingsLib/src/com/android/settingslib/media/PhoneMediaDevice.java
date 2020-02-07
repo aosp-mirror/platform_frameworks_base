@@ -17,6 +17,8 @@ package com.android.settingslib.media;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 import android.util.Log;
 
 import com.android.settingslib.R;
@@ -39,8 +41,9 @@ public class PhoneMediaDevice extends MediaDevice {
     private LocalBluetoothManager mLocalBluetoothManager;
     private String mSummary = "";
 
-    PhoneMediaDevice(Context context, LocalBluetoothManager localBluetoothManager) {
-        super(context, MediaDeviceType.TYPE_PHONE_DEVICE);
+    PhoneMediaDevice(Context context, LocalBluetoothManager localBluetoothManager,
+            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
+        super(context, MediaDeviceType.TYPE_PHONE_DEVICE, routerManager, info, packageName);
 
         mLocalBluetoothManager = localBluetoothManager;
         mProfileManager = mLocalBluetoothManager.getProfileManager();

@@ -133,9 +133,12 @@ public class MediaDeviceTest {
         when(mProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
         when(mA2dpProfile.getActiveDevice()).thenReturn(mDevice);
 
-        mBluetoothMediaDevice1 = new BluetoothMediaDevice(mContext, mCachedDevice1);
-        mBluetoothMediaDevice2 = new BluetoothMediaDevice(mContext, mCachedDevice2);
-        mBluetoothMediaDevice3 = new BluetoothMediaDevice(mContext, mCachedDevice3);
+        mBluetoothMediaDevice1 =
+                new BluetoothMediaDevice(mContext, mCachedDevice1, null, null, null);
+        mBluetoothMediaDevice2 =
+                new BluetoothMediaDevice(mContext, mCachedDevice2, null, null, null);
+        mBluetoothMediaDevice3 =
+                new BluetoothMediaDevice(mContext, mCachedDevice3, null, null, null);
         mMediaRouter2Manager = MediaRouter2Manager.getInstance(mContext);
         mInfoMediaDevice1 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo1,
                 TEST_PACKAGE_NAME);
@@ -143,7 +146,8 @@ public class MediaDeviceTest {
                 TEST_PACKAGE_NAME);
         mInfoMediaDevice3 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo3,
                 TEST_PACKAGE_NAME);
-        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mLocalBluetoothManager);
+        mPhoneMediaDevice =
+                new PhoneMediaDevice(mContext, mLocalBluetoothManager, null, null, null);
     }
 
     @Test

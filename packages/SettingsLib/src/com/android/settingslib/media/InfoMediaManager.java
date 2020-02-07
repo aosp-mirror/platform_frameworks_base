@@ -19,6 +19,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.RoutingSessionInfo;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -111,6 +112,23 @@ public class InfoMediaManager extends MediaManager {
         }
     }
 
+    /**
+     * Transfer MediaDevice for media without package name.
+     */
+    public boolean connectDeviceWithoutPackageName(MediaDevice device) {
+        boolean isConnected = false;
+        final List<RoutingSessionInfo> infos = mRouterManager.getActiveSessions();
+        if (infos.size() > 0) {
+            final RoutingSessionInfo info = infos.get(0);
+            final MediaRouter2Manager.RoutingController controller =
+                    mRouterManager.getControllerForSession(info);
+
+            controller.transferToRoute(device.mRouteInfo);
+            isConnected = true;
+        }
+        return isConnected;
+    }
+
     class RouterManagerCallback extends MediaRouter2Manager.Callback {
 
         @Override
@@ -123,6 +141,11 @@ public class InfoMediaManager extends MediaManager {
             if (TextUtils.equals(mPackageName, packageName)) {
                 refreshDevices();
             }
+        }
+
+        @Override
+        public void onRoutesChanged(List<MediaRoute2Info> routes) {
+            refreshDevices();
         }
     }
 }

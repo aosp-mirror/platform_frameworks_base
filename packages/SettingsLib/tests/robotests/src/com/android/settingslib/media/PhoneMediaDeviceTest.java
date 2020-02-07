@@ -64,7 +64,8 @@ public class PhoneMediaDeviceTest {
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
         when(mA2dpProfile.getActiveDevice()).thenReturn(mDevice);
 
-        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mLocalBluetoothManager);
+        mPhoneMediaDevice =
+                new PhoneMediaDevice(mContext, mLocalBluetoothManager, null, null, null);
     }
 
     @Test
