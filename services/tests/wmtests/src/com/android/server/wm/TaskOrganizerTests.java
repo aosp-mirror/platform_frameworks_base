@@ -29,10 +29,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,8 +45,10 @@ import android.app.ActivityManager.StackInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
 import android.view.Display;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
@@ -355,6 +357,78 @@ public class TaskOrganizerTests extends WindowTestsBase {
         tile1.removeAllChildren();
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_UNDEFINED, lastReportedTiles.get(0).topActivityType);
+    }
+
+    @Test
+    public void testHierarchyTransaction() {
+        final ArrayMap<IBinder, RunningTaskInfo> lastReportedTiles = new ArrayMap<>();
+        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
+            @Override
+            public void taskAppeared(RunningTaskInfo taskInfo) { }
+
+            @Override
+            public void taskVanished(IWindowContainer container) { }
+
+            @Override
+            public void transactionReady(int id, SurfaceControl.Transaction t) { }
+
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) {
+                lastReportedTiles.put(info.token.asBinder(), info);
+            }
+        };
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(
+                listener, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+
+        final ActivityStack stack = createTaskStackOnDisplay(
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
+        final ActivityStack stack2 = createTaskStackOnDisplay(
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, mDisplayContent);
+
+        lastReportedTiles.clear();
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(stack.mRemoteToken, info1.token, true /* onTop */);
+        wct.reparent(stack2.mRemoteToken, info2.token, true /* onTop */);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
+                null /* organizer */);
+        assertFalse(lastReportedTiles.isEmpty());
+        assertEquals(ACTIVITY_TYPE_STANDARD,
+                lastReportedTiles.get(info1.token.asBinder()).topActivityType);
+        assertEquals(ACTIVITY_TYPE_HOME,
+                lastReportedTiles.get(info2.token.asBinder()).topActivityType);
+
+        lastReportedTiles.clear();
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack2.mRemoteToken, info1.token, false /* onTop */);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
+                null /* organizer */);
+        assertFalse(lastReportedTiles.isEmpty());
+        // Standard should still be on top of tile 1, so no change there
+        assertFalse(lastReportedTiles.containsKey(info1.token.asBinder()));
+        // But tile 2 has no children, so should become undefined
+        assertEquals(ACTIVITY_TYPE_UNDEFINED,
+                lastReportedTiles.get(info2.token.asBinder()).topActivityType);
+
+        // Check the getChildren call
+        List<RunningTaskInfo> children =
+                mWm.mAtmService.mTaskOrganizerController.getChildTasks(info1.token);
+        assertEquals(2, children.size());
+        children = mWm.mAtmService.mTaskOrganizerController.getChildTasks(info2.token);
+        assertEquals(0, children.size());
+
+        lastReportedTiles.clear();
+        wct = new WindowContainerTransaction();
+        wct.reorder(stack2.mRemoteToken, true /* onTop */);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
+                null /* organizer */);
+        // Home should now be on top. No change occurs in second tile, so not reported
+        assertEquals(1, lastReportedTiles.size());
+        assertEquals(ACTIVITY_TYPE_HOME,
+                lastReportedTiles.get(info1.token.asBinder()).topActivityType);
     }
 
     private List<TaskTile> getTaskTiles(DisplayContent dc) {
