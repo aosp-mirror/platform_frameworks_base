@@ -7898,6 +7898,7 @@ package android.net.wifi {
 
   public final class WifiOemMigrationHook {
     method @Nullable public static android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData loadFromConfigStore();
+    method @NonNull public static android.net.wifi.WifiOemMigrationHook.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
   }
 
   public static final class WifiOemMigrationHook.ConfigStoreMigrationData implements android.os.Parcelable {
@@ -7913,6 +7914,31 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData build();
     method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
     method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  }
+
+  public static final class WifiOemMigrationHook.SettingsMigrationData implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getP2pDeviceName();
+    method public boolean isP2pFactoryResetPending();
+    method public boolean isScanAlwaysAvailable();
+    method public boolean isScanThrottleEnabled();
+    method public boolean isSoftApTimeoutEnabled();
+    method public boolean isVerboseLoggingEnabled();
+    method public boolean isWakeUpEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.SettingsMigrationData> CREATOR;
+  }
+
+  public static final class WifiOemMigrationHook.SettingsMigrationData.Builder {
+    ctor public WifiOemMigrationHook.SettingsMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData build();
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setP2pDeviceName(@Nullable String);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setP2pFactoryResetPending(boolean);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setScanAlwaysAvailable(boolean);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setScanThrottleEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setSoftApTimeoutEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setVerboseLoggingEnabled(boolean);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.SettingsMigrationData.Builder setWakeUpEnabled(boolean);
   }
 
   public class WifiScanner {
@@ -9721,18 +9747,11 @@ package android.provider {
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
-    field public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
     field public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
     field public static final String TETHER_SUPPORTED = "tether_supported";
     field public static final String THEATER_MODE_ON = "theater_mode_on";
     field public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
     field public static final String WIFI_BADGING_THRESHOLDS = "wifi_badging_thresholds";
-    field public static final String WIFI_P2P_DEVICE_NAME = "wifi_p2p_device_name";
-    field public static final String WIFI_P2P_PENDING_FACTORY_RESET = "wifi_p2p_pending_factory_reset";
-    field public static final String WIFI_SCAN_ALWAYS_AVAILABLE = "wifi_scan_always_enabled";
-    field public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
-    field public static final String WIFI_SCORE_PARAMS = "wifi_score_params";
-    field public static final String WIFI_VERBOSE_LOGGING_ENABLED = "wifi_verbose_logging_enabled";
     field @Deprecated public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
   }
 
