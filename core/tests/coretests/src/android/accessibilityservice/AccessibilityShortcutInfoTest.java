@@ -84,6 +84,22 @@ public class AccessibilityShortcutInfoTest {
     }
 
     @Test
+    public void testAnimatedImageRes() {
+        assertThat("Animated image resource id is not correct",
+                mShortcutInfo.getAnimatedImageRes(), is(R.drawable.bitmap_drawable));
+    }
+
+    @Test
+    public void testHtmlDescription() {
+        final String htmlDescription = mTargetContext.getResources()
+                .getString(R.string.accessibility_shortcut_html_description);
+
+        assertNotNull("Can't find html description string", htmlDescription);
+        assertThat("Html description is not correct",
+                mShortcutInfo.loadHtmlDescription(mPackageManager), is(htmlDescription));
+    }
+
+    @Test
     public void testEquals() {
         assertTrue(mShortcutInfo.equals(mShortcutInfo));
         assertFalse(mShortcutInfo.equals(null));
