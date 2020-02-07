@@ -18,7 +18,6 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -62,17 +61,6 @@ public class HidDeviceProfileTest {
                 mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.HID_DEVICE, mService);
-    }
-
-    @Test
-    public void connect_shouldReturnFalse() {
-        assertThat(mProfile.connect(mBluetoothDevice)).isFalse();
-    }
-
-    @Test
-    public void disconnect_shouldDisconnectBluetoothHidDevice() {
-        mProfile.disconnect(mBluetoothDevice);
-        verify(mService).disconnect(mBluetoothDevice);
     }
 
     @Test
