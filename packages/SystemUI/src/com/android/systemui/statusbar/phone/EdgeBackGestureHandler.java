@@ -422,9 +422,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
     }
 
     private void updateDisplaySize() {
-        mContext.getSystemService(DisplayManager.class)
-                .getDisplay(mDisplayId)
-                .getRealSize(mDisplaySize);
+        mContext.getDisplay().getRealSize(mDisplaySize);
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setDisplaySize(mDisplaySize);
         }
