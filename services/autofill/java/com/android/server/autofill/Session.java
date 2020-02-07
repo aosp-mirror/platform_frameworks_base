@@ -424,6 +424,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         suggestionsRequest);
             }
 
+            if (mActivityToken != null) {
+                mService.sendActivityAssistDataToContentCapture(mActivityToken, resultData);
+            }
             mRemoteFillService.onFillRequest(request);
         }
 

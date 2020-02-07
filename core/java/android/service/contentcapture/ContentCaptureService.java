@@ -345,9 +345,11 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Notifies the service of {@link SnapshotData snapshot data} associated with a session.
+     * Notifies the service of {@link SnapshotData snapshot data} associated with an activity.
      *
-     * @param sessionId the session's Id
+     * @param sessionId the session's Id. This may also be
+     *                  {@link ContentCaptureSession#NO_SESSION_ID} if no content capture session
+     *                  exists for the activity being snapshotted
      * @param snapshotData the data
      */
     public void onActivitySnapshot(@NonNull ContentCaptureSessionId sessionId,

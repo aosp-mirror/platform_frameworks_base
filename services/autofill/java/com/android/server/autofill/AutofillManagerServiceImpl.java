@@ -82,6 +82,7 @@ import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
@@ -180,6 +181,8 @@ final class AutofillManagerServiceImpl
 
     private final InputMethodManagerInternal mInputMethodManagerInternal;
 
+    private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
+
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState,
@@ -192,8 +195,20 @@ final class AutofillManagerServiceImpl
         mFieldClassificationStrategy = new FieldClassificationStrategy(getContext(), userId);
         mAutofillCompatState = autofillCompatState;
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
+        mContentCaptureManagerInternal = LocalServices.getService(
+                ContentCaptureManagerInternal.class);
 
         updateLocked(disabled);
+    }
+
+    boolean sendActivityAssistDataToContentCapture(@NonNull IBinder activityToken,
+            @NonNull Bundle data) {
+        if (mContentCaptureManagerInternal != null) {
+            mContentCaptureManagerInternal.sendActivityAssistData(getUserId(), activityToken, data);
+            return true;
+        }
+
+        return false;
     }
 
     @GuardedBy("mLock")

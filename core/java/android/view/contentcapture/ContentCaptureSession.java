@@ -22,6 +22,7 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.view.View;
@@ -50,7 +51,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final Random sIdGenerator = new Random();
 
-    /** @hide */
+    /**
+    *  ID used to indicate that a session does not exist
+    *  @hide
+    */
+    @SystemApi
     public static final int NO_SESSION_ID = 0;
 
     /**
