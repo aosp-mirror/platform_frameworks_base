@@ -16,9 +16,7 @@
 
 package com.android.server.biometrics;
 
-import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
-import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
@@ -32,7 +30,6 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -318,7 +315,10 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleCancelAuthentication(
                             (IBinder) args.arg1 /* token */,
-                            (String) args.arg2 /* opPackageName */);
+                            (String) args.arg2 /* opPackageName */,
+                            args.argi1 /* callingUid */,
+                            args.argi2 /* callingPid */,
+                            args.argi3 /* callingUserId */);
                     args.recycle();
                     break;
                 }
@@ -543,8 +543,7 @@ public class BiometricService extends SystemService {
     final IBiometricServiceReceiverInternal mInternalReceiver =
             new IBiometricServiceReceiverInternal.Stub() {
         @Override
-        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token)
-                throws RemoteException {
+        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = requireConfirmation;
             args.arg2 = token;
@@ -552,8 +551,7 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onAuthenticationFailed()
-                throws RemoteException {
+        public void onAuthenticationFailed() {
             Slog.v(TAG, "onAuthenticationFailed");
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_REJECTED).sendToTarget();
         }
@@ -624,22 +622,9 @@ public class BiometricService extends SystemService {
 
         @Override // Binder call
         public void authenticate(IBinder token, long sessionId, int userId,
-                IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle)
-                throws RemoteException {
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int callingUserId = UserHandle.getCallingUserId();
-
-            // In the BiometricServiceBase, check do the AppOps and foreground check.
-            if (userId == callingUserId) {
-                // Check the USE_BIOMETRIC permission here.
-                checkPermission();
-            } else {
-                // Only allow internal clients to authenticate with a different userId
-                Slog.w(TAG, "User " + callingUserId + " is requesting authentication of userid: "
-                        + userId);
-                checkInternalPermission();
-            }
+                IBiometricServiceReceiver receiver, String opPackageName, Bundle bundle,
+                int callingUid, int callingPid, int callingUserId) {
+            checkInternalPermission();
 
             if (token == null || receiver == null || opPackageName == null || bundle == null) {
                 Slog.e(TAG, "Unable to authenticate, one or more null arguments");
@@ -650,19 +635,10 @@ public class BiometricService extends SystemService {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
-            if (bundle.getBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS)) {
-                checkInternalPermission();
-            }
-
             Utils.combineAuthenticatorBundles(bundle);
 
-            // Check the usage of this in system server. Need to remove this check if it becomes a
-            // public API.
-            final boolean useDefaultTitle =
-                    bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false);
-            if (useDefaultTitle) {
-                checkInternalPermission();
-                // Set the default title if necessary
+            // Set the default title if necessary.
+            if (bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
                 if (TextUtils.isEmpty(bundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
                     bundle.putCharSequence(BiometricPrompt.KEY_TITLE,
                             getContext().getString(R.string.biometric_dialog_default_title));
@@ -684,28 +660,27 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void cancelAuthentication(IBinder token, String opPackageName)
-                throws RemoteException {
-            checkPermission();
+        public void cancelAuthentication(IBinder token, String opPackageName,
+                int callingUid, int callingPid, int callingUserId) {
+            checkInternalPermission();
 
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = token;
             args.arg2 = opPackageName;
+            args.argi1 = callingUid;
+            args.argi2 = callingPid;
+            args.argi3 = callingUserId;
             mHandler.obtainMessage(MSG_CANCEL_AUTHENTICATION, args).sendToTarget();
         }
 
         @Override // Binder call
-        public int canAuthenticate(String opPackageName, int userId,
+        public int canAuthenticate(String opPackageName, int userId, int callingUserId,
                 @Authenticators.Types int authenticators) {
-            Slog.d(TAG, "canAuthenticate: User=" + userId
-                    + ", Caller=" + UserHandle.getCallingUserId()
-                    + ", Authenticators=" + authenticators);
+            checkInternalPermission();
 
-            if (userId != UserHandle.getCallingUserId()) {
-                checkInternalPermission();
-            } else {
-                checkPermission();
-            }
+            Slog.d(TAG, "canAuthenticate: User=" + userId
+                    + ", Caller=" + callingUserId
+                    + ", Authenticators=" + authenticators);
 
             if (!Utils.isValidAuthenticatorConfig(authenticators)) {
                 throw new SecurityException("Invalid authenticator configuration");
@@ -715,14 +690,11 @@ public class BiometricService extends SystemService {
             bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
 
             int biometricConstantsResult = BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
-            final long ident = Binder.clearCallingIdentity();
             try {
                 biometricConstantsResult = checkAndGetAuthenticators(userId, bundle, opPackageName,
                         false /* checkDevicePolicyManager */).second;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
 
             return Utils.biometricConstantsToBiometricManager(biometricConstantsResult);
@@ -732,7 +704,6 @@ public class BiometricService extends SystemService {
         public boolean hasEnrolledBiometrics(int userId, String opPackageName) {
             checkInternalPermission();
 
-            final long ident = Binder.clearCallingIdentity();
             try {
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     if (authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
@@ -741,9 +712,8 @@ public class BiometricService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+
             return false;
         }
 
@@ -791,14 +761,14 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
-                throws RemoteException {
+        public void registerEnabledOnKeyguardCallback(
+                IBiometricEnabledOnKeyguardCallback callback, int callingUserId) {
             checkInternalPermission();
+
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
                 callback.onChanged(BiometricSourceType.FACE,
-                        mSettingObserver.getFaceEnabledOnKeyguard(),
-                        UserHandle.getCallingUserId());
+                        mSettingObserver.getFaceEnabledOnKeyguard(), callingUserId);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }
@@ -807,30 +777,26 @@ public class BiometricService extends SystemService {
         @Override // Binder call
         public void setActiveUser(int userId) {
             checkInternalPermission();
-            final long ident = Binder.clearCallingIdentity();
+
             try {
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     authenticator.impl.setActiveUser(userId);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
 
         @Override // Binder call
         public void resetLockout(byte[] token) {
             checkInternalPermission();
-            final long ident = Binder.clearCallingIdentity();
+
             try {
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
                     authenticator.impl.resetLockout(token);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
         }
     }
@@ -838,14 +804,6 @@ public class BiometricService extends SystemService {
     private void checkInternalPermission() {
         getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
                 "Must have USE_BIOMETRIC_INTERNAL permission");
-    }
-
-    private void checkPermission() {
-        if (getContext().checkCallingOrSelfPermission(USE_FINGERPRINT)
-                != PackageManager.PERMISSION_GRANTED) {
-            getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC,
-                    "Must have USE_BIOMETRIC permission");
-        }
     }
 
     /**
@@ -1440,7 +1398,9 @@ public class BiometricService extends SystemService {
                     mCurrentAuthSession.mClientReceiver.onDialogDismissed(reason);
                     // Cancel authentication. Skip the token/package check since we are cancelling
                     // from system server. The interface is permission protected so this is fine.
-                    cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+                    cancelInternal(null /* token */, null /* package */,
+                            mCurrentAuthSession.mCallingUid, mCurrentAuthSession.mCallingPid,
+                            mCurrentAuthSession.mCallingUserId, false /* fromClient */);
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
@@ -1451,7 +1411,9 @@ public class BiometricService extends SystemService {
                     );
                     // Cancel authentication. Skip the token/package check since we are cancelling
                     // from system server. The interface is permission protected so this is fine.
-                    cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+                    cancelInternal(null /* token */, null /* package */, Binder.getCallingUid(),
+                            Binder.getCallingPid(), UserHandle.getCallingUserId(),
+                            false /* fromClient */);
                     break;
 
                 case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
@@ -1501,7 +1463,9 @@ public class BiometricService extends SystemService {
 
         // Cancel authentication. Skip the token/package check since we are cancelling
         // from system server. The interface is permission protected so this is fine.
-        cancelInternal(null /* token */, null /* package */, false /* fromClient */);
+        cancelInternal(null /* token */, null /* package */, Binder.getCallingUid(),
+                Binder.getCallingPid(), UserHandle.getCallingUserId(),
+                false /* fromClient */);
 
         mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
     }
@@ -1671,7 +1635,8 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleCancelAuthentication(IBinder token, String opPackageName) {
+    private void handleCancelAuthentication(IBinder token, String opPackageName, int callingUid,
+            int callingPid, int callingUserId) {
         if (token == null || opPackageName == null) {
             Slog.e(TAG, "Unable to cancel, one or more null arguments");
             return;
@@ -1694,14 +1659,13 @@ public class BiometricService extends SystemService {
                 Slog.e(TAG, "Remote exception", e);
             }
         } else {
-            cancelInternal(token, opPackageName, true /* fromClient */);
+            cancelInternal(token, opPackageName, callingUid, callingPid, callingUserId,
+                    true /* fromClient */);
         }
     }
 
-    void cancelInternal(IBinder token, String opPackageName, boolean fromClient) {
-        final int callingUid = Binder.getCallingUid();
-        final int callingPid = Binder.getCallingPid();
-        final int callingUserId = UserHandle.getCallingUserId();
+    void cancelInternal(IBinder token, String opPackageName, int callingUid, int callingPid,
+            int callingUserId, boolean fromClient) {
 
         if (mCurrentAuthSession == null) {
             Slog.w(TAG, "Skipping cancelInternal");
