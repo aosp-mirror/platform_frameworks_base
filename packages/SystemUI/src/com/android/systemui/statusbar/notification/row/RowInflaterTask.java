@@ -26,7 +26,6 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 
 import javax.inject.Inject;
 
@@ -37,7 +36,6 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
 
     private static final String TAG = "RowInflaterTask";
     private static final boolean TRACE_ORIGIN = true;
-    private final NotificationRowComponent.Builder mNotificationRowComponentBuilder;
 
     private RowInflationFinishedListener mListener;
     private NotificationEntry mEntry;
@@ -45,10 +43,7 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     private Throwable mInflateOrigin;
 
     @Inject
-    public RowInflaterTask(
-            NotificationRowComponent.Builder notificationRowComponentBuilder) {
-        super();
-        mNotificationRowComponentBuilder = notificationRowComponentBuilder;
+    public RowInflaterTask() {
     }
 
     /**
@@ -75,12 +70,6 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     public void onInflateFinished(View view, int resid, ViewGroup parent) {
         if (!mCancelled) {
             try {
-                // Setup the controller for the view.
-                NotificationRowComponent component = mNotificationRowComponentBuilder
-                        .activatableNotificationView((ActivatableNotificationView) view)
-                        .build();
-                component.getActivatableNotificationViewController().init();
-
                 mEntry.onInflationTaskFinished();
                 mListener.onInflationFinished((ExpandableNotificationRow) view);
             } catch (Throwable t) {

@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
@@ -153,6 +154,7 @@ public final class NotificationEntry extends ListEntry {
 
     private NotificationEntry parent; // our parent (if we're in a group)
     private ExpandableNotificationRow row; // the outer expanded view
+    private ExpandableNotificationRowController mRowController;
 
     private int mCachedContrastColor = COLOR_INVALID;
     private int mCachedContrastColorIsFor = COLOR_INVALID;
@@ -422,6 +424,14 @@ public final class NotificationEntry extends ListEntry {
     //TODO: This will go away when we have a way to bind an entry to a row
     public void setRow(ExpandableNotificationRow row) {
         this.row = row;
+    }
+
+    public ExpandableNotificationRowController getRowController() {
+        return mRowController;
+    }
+
+    public void setRowController(ExpandableNotificationRowController controller) {
+        mRowController = controller;
     }
 
     @Nullable
