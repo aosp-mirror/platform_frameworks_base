@@ -3018,6 +3018,7 @@
       <!-- @hide @SystemApi -->
       <public name="isAutofillInlineSuggestionTheme" />
       <public name="allowNativeHeapPointerTagging" />
+      <public name="preserveLegacyExternalStorage" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
