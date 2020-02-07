@@ -124,8 +124,8 @@ public class TileServiceManager {
         return mStateManager.isActiveTile();
     }
 
-    public boolean isBooleanTile() {
-        return mStateManager.isBooleanTile();
+    public boolean isToggleableTile() {
+        return mStateManager.isToggleableTile();
     }
 
     public void setShowingDialog(boolean dialog) {
