@@ -174,12 +174,12 @@ public class ApplicationExitInfoTest {
         final int app1ConnectiongGroup = 10;
         final int app1UidUser2 = 1010123;
         final int app1PidUser2 = 12347;
-        final int app1Pss1 = 34567;
-        final int app1Rss1 = 45678;
-        final int app1Pss2 = 34568;
-        final int app1Rss2 = 45679;
-        final int app1Pss3 = 34569;
-        final int app1Rss3 = 45680;
+        final long app1Pss1 = 34567;
+        final long app1Rss1 = 45678;
+        final long app1Pss2 = 34568;
+        final long app1Rss2 = 45679;
+        final long app1Pss3 = 34569;
+        final long app1Rss3 = 45680;
         final String app1ProcessName = "com.android.test.stub1:process";
         final String app1PackageName = "com.android.test.stub1";
 
@@ -344,8 +344,8 @@ public class ApplicationExitInfoTest {
         // Case 4: Create a process from another package with kill from lmkd
         final int app2UidUser2 = 1010234;
         final int app2PidUser2 = 12348;
-        final int app2Pss1 = 54321;
-        final int app2Rss1 = 65432;
+        final long app2Pss1 = 54321;
+        final long app2Rss1 = 65432;
         final String app2ProcessName = "com.android.test.stub2:process";
         final String app2PackageName = "com.android.test.stub2";
 
@@ -402,8 +402,8 @@ public class ApplicationExitInfoTest {
         final int app3UidUser2 = 1010345;
         final int app3PidUser2 = 12349;
         final int app3ConnectiongGroup = 4;
-        final int app3Pss1 = 54320;
-        final int app3Rss1 = 65430;
+        final long app3Pss1 = 54320;
+        final long app3Rss1 = 65430;
         final String app3ProcessName = "com.android.test.stub3:process";
         final String app3PackageName = "com.android.test.stub3";
         final String app3Description = "native crash";
@@ -529,8 +529,8 @@ public class ApplicationExitInfoTest {
         final int app3Uid = 10345;
         final int app3IsolatedUid = 99001; // it's an isolated process
         final int app3Pid = 12350;
-        final int app3Pss2 = 23232;
-        final int app3Rss2 = 32323;
+        final long app3Pss2 = 23232;
+        final long app3Rss2 = 32323;
         final String app3Description2 = "force close";
 
         sleep(1);
@@ -618,8 +618,8 @@ public class ApplicationExitInfoTest {
 
         sleep(1);
         final int app1IsolatedUidUser2 = 1099002; // isolated uid
-        final int app1Pss4 = 34343;
-        final int app1Rss4 = 43434;
+        final long app1Pss4 = 34343;
+        final long app1Rss4 = 43434;
         final long now8 = System.currentTimeMillis();
         sigNum = OsConstants.SIGKILL;
         doReturn(new Pair<Long, Object>(now8, makeSignalStatus(sigNum)))
@@ -673,8 +673,8 @@ public class ApplicationExitInfoTest {
         sleep(1);
         final int app1Pid2User2 = 56565;
         final int app1IsolatedUid2User2 = 1099003; // isolated uid
-        final int app1Pss5 = 34344;
-        final int app1Rss5 = 43435;
+        final long app1Pss5 = 34344;
+        final long app1Rss5 = 43435;
         final long now9 = System.currentTimeMillis();
         sigNum = OsConstants.SIGKILL;
         doReturn(new Pair<Long, Object>(now9, makeSignalStatus(sigNum)))
@@ -831,7 +831,7 @@ public class ApplicationExitInfoTest {
     }
 
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, Integer definingUid,
-            int connectionGroup, int procState, int pss, int rss,
+            int connectionGroup, int procState, long pss, long rss,
             String processName, String packageName) {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
@@ -847,8 +847,8 @@ public class ApplicationExitInfoTest {
         app.connectionGroup = connectionGroup;
         app.setProcState = procState;
         app.lastMemInfo = spy(new Debug.MemoryInfo());
-        doReturn(pss).when(app.lastMemInfo).getTotalPss();
-        doReturn(rss).when(app.lastMemInfo).getTotalRss();
+        doReturn((int) pss).when(app.lastMemInfo).getTotalPss();
+        doReturn((int) rss).when(app.lastMemInfo).getTotalRss();
         return app;
     }
 
@@ -856,7 +856,7 @@ public class ApplicationExitInfoTest {
             Long timestamp, Integer pid, Integer uid, Integer packageUid,
             Integer definingUid, String processName, Integer connectionGroup,
             Integer reason, Integer subReason, Integer status,
-            Integer pss, Integer rss, Integer importance, String description) {
+            Long pss, Long rss, Integer importance, String description) {
         assertNotNull(info);
 
         if (timestamp != null) {
@@ -892,10 +892,10 @@ public class ApplicationExitInfoTest {
             assertEquals(status.intValue(), info.getStatus());
         }
         if (pss != null) {
-            assertEquals(pss.intValue(), info.getPss());
+            assertEquals(pss.longValue(), info.getPss());
         }
         if (rss != null) {
-            assertEquals(rss.intValue(), info.getRss());
+            assertEquals(rss.longValue(), info.getRss());
         }
         if (importance != null) {
             assertEquals(importance.intValue(), info.getImportance());

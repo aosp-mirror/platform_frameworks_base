@@ -94,6 +94,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -3555,13 +3556,13 @@ public class ActivityManager {
      * @return a list of {@link ApplicationExitInfo} records matching the criteria, sorted in
      *         the order from most recent to least recent.
      */
-    @Nullable
+    @NonNull
     public List<ApplicationExitInfo> getHistoricalProcessExitReasons(@Nullable String packageName,
             @IntRange(from = 0) int pid, @IntRange(from = 0) int maxNum) {
         try {
             ParceledListSlice<ApplicationExitInfo> r = getService().getHistoricalProcessExitReasons(
                     packageName, pid, maxNum, mContext.getUserId());
-            return r == null ? null : r.getList();
+            return r == null ? Collections.emptyList() : r.getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
