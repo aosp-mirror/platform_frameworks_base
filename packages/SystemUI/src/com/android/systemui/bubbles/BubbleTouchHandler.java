@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 
 /**
  * Handles interpreting touches on a {@link BubbleStackView}. This includes expanding, collapsing,
@@ -109,6 +110,10 @@ class BubbleTouchHandler implements View.OnTouchListener {
         if (!(mTouchedView instanceof BadgedImageView)
                 && !(mTouchedView instanceof BubbleStackView)
                 && !(mTouchedView instanceof BubbleFlyoutView)) {
+
+            if (mTouchedView.getId() == R.id.bubble_overflow_button) {
+                mStack.showOverflow();
+            }
             // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
             // of expanded view).
             mStack.hideBubbleMenu();

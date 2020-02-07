@@ -161,9 +161,8 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
         mRenderAheadCapacity = mRenderAheadDepth;
     }
 
-    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
     bool hasSurface = mRenderPipeline->setSurface(
-            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior, colorMode,
+            mNativeSurface ? mNativeSurface->getNativeWindow() : nullptr, mSwapBehavior,
             mRenderAheadCapacity);
 
     mFrameNumber = -1;
@@ -174,7 +173,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface, bool enableTimeout) {
         // Enable frame stats after the surface has been bound to the appropriate graphics API.
         // Order is important when new and old surfaces are the same, because old surface has
         // its frame stats disabled automatically.
-        mNativeSurface->enableFrameTimestamps(true);
+        native_window_enable_frame_timestamps(mNativeSurface->getNativeWindow(), true);
     } else {
         mRenderThread.removeFrameCallback(this);
         mGenerationID++;
@@ -225,7 +224,8 @@ void CanvasContext::setOpaque(bool opaque) {
 }
 
 void CanvasContext::setWideGamut(bool wideGamut) {
-    mWideColorGamut = wideGamut;
+    ColorMode colorMode = wideGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
+    mRenderPipeline->setSurfaceColorProperties(colorMode);
 }
 
 bool CanvasContext::makeCurrent() {
@@ -556,8 +556,9 @@ void CanvasContext::draw() {
         FrameInfo* forthBehind = mLast4FrameInfos.front().first;
         int64_t composedFrameId = mLast4FrameInfos.front().second;
         nsecs_t acquireTime = -1;
-        mNativeSurface->getFrameTimestamps(composedFrameId, nullptr, &acquireTime, nullptr, nullptr,
-            nullptr, nullptr, nullptr, nullptr, nullptr);
+        native_window_get_frame_timestamps(mNativeSurface->getNativeWindow(), composedFrameId,
+                                           nullptr, &acquireTime, nullptr, nullptr, nullptr,
+                                           nullptr, nullptr, nullptr, nullptr);
         // Ignore default -1, NATIVE_WINDOW_TIMESTAMP_INVALID and NATIVE_WINDOW_TIMESTAMP_PENDING
         forthBehind->set(FrameInfoIndex::GpuCompleted) = acquireTime > 0 ? acquireTime : -1;
         mJankTracker.finishGpuDraw(*forthBehind);

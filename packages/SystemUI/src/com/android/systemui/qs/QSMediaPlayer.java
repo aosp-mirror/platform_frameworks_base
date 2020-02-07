@@ -36,6 +36,7 @@ import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -370,6 +371,13 @@ public class QSMediaPlayer {
         if (mSeamless == null) {
             return;
         }
+        Handler handler = mSeamless.getHandler();
+        handler.post(() -> {
+            updateChipInternal(device);
+        });
+    }
+
+    private void updateChipInternal(MediaDevice device) {
         ColorStateList fgTintList = ColorStateList.valueOf(mForegroundColor);
 
         // Update the outline color

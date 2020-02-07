@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -94,11 +94,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSignal) {
-        enforceSuggestPhoneTimePermission();
+    public void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSignal) {
+        enforceSuggestTelephonyTimePermission();
         Objects.requireNonNull(timeSignal);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestPhoneTime(timeSignal));
+        mHandler.post(() -> mTimeDetectorStrategy.suggestTelephonyTime(timeSignal));
     }
 
     @Override
@@ -131,10 +131,10 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mTimeDetectorStrategy.dump(pw, args);
     }
 
-    private void enforceSuggestPhoneTimePermission() {
+    private void enforceSuggestTelephonyTimePermission() {
         mContext.enforceCallingPermission(
-                android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE,
-                "suggest phone time and time zone");
+                android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE,
+                "suggest telephony time and time zone");
     }
 
     private void enforceSuggestManualTimePermission() {

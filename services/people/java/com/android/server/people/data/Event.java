@@ -18,14 +18,12 @@ package com.android.server.people.data;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.Set;
 
 /** An event representing the interaction with a specific conversation or app. */
@@ -55,6 +53,8 @@ public class Event {
 
     public static final int TYPE_CALL_MISSED = 12;
 
+    public static final int TYPE_IN_APP_CONVERSATION = 13;
+
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_SHORTCUT_INVOCATION,
             TYPE_NOTIFICATION_POSTED,
@@ -68,6 +68,7 @@ public class Event {
             TYPE_CALL_OUTGOING,
             TYPE_CALL_INCOMING,
             TYPE_CALL_MISSED,
+            TYPE_IN_APP_CONVERSATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
@@ -95,6 +96,7 @@ public class Event {
         CALL_EVENT_TYPES.add(TYPE_CALL_MISSED);
 
         ALL_EVENT_TYPES.add(TYPE_SHORTCUT_INVOCATION);
+        ALL_EVENT_TYPES.add(TYPE_IN_APP_CONVERSATION);
         ALL_EVENT_TYPES.addAll(NOTIFICATION_EVENT_TYPES);
         ALL_EVENT_TYPES.addAll(SHARE_EVENT_TYPES);
         ALL_EVENT_TYPES.addAll(SMS_EVENT_TYPES);
@@ -105,18 +107,18 @@ public class Event {
 
     private final int mType;
 
-    private final CallDetails mCallDetails;
+    private final int mDurationSeconds;
 
     Event(long timestamp, @EventType int type) {
         mTimestamp = timestamp;
         mType = type;
-        mCallDetails = null;
+        mDurationSeconds = 0;
     }
 
     private Event(@NonNull Builder builder) {
         mTimestamp = builder.mTimestamp;
         mType = builder.mType;
-        mCallDetails = builder.mCallDetails;
+        mDurationSeconds = builder.mDurationSeconds;
     }
 
     public long getTimestamp() {
@@ -128,12 +130,35 @@ public class Event {
     }
 
     /**
-     * Gets the {@link CallDetails} of the event. It is only available if the event type is one of
-     * {@code CALL_EVENT_TYPES}, otherwise, it's always {@code null}.
+     * Gets the duration of the event in seconds. It is only available for these events:
+     * <ul>
+     *     <li>{@link #TYPE_CALL_INCOMING}
+     *     <li>{@link #TYPE_CALL_OUTGOING}
+     *     <li>{@link #TYPE_IN_APP_CONVERSATION}
+     * </ul>
+     * <p>For the other event types, it always returns {@code 0}.
      */
-    @Nullable
-    public CallDetails getCallDetails() {
-        return mCallDetails;
+    public int getDurationSeconds() {
+        return mDurationSeconds;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Event)) {
+            return false;
+        }
+        Event other = (Event) obj;
+        return mTimestamp == other.mTimestamp
+                && mType == other.mType
+                && mDurationSeconds == other.mDurationSeconds;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mTimestamp, mType, mDurationSeconds);
     }
 
     @Override
@@ -142,30 +167,11 @@ public class Event {
         sb.append("Event {");
         sb.append("timestamp=").append(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimestamp));
         sb.append(", type=").append(mType);
-        if (mCallDetails != null) {
-            sb.append(", callDetails=").append(mCallDetails);
+        if (mDurationSeconds > 0) {
+            sb.append(", durationSeconds=").append(mDurationSeconds);
         }
         sb.append("}");
         return sb.toString();
-    }
-
-    /** Type-specific details of a call event. */
-    public static class CallDetails {
-
-        private final long mDurationSeconds;
-
-        CallDetails(long durationSeconds) {
-            mDurationSeconds = durationSeconds;
-        }
-
-        public long getDurationSeconds() {
-            return mDurationSeconds;
-        }
-
-        @Override
-        public String toString() {
-            return "CallDetails {durationSeconds=" + mDurationSeconds + "}";
-        }
     }
 
     /** Builder class for {@link Event} objects. */
@@ -175,16 +181,15 @@ public class Event {
 
         private final int mType;
 
-        private CallDetails mCallDetails;
+        private int mDurationSeconds;
 
         Builder(long timestamp, @EventType int type) {
             mTimestamp = timestamp;
             mType = type;
         }
 
-        Builder setCallDetails(CallDetails callDetails) {
-            Preconditions.checkArgument(CALL_EVENT_TYPES.contains(mType));
-            mCallDetails = callDetails;
+        Builder setDurationSeconds(int durationSeconds) {
+            mDurationSeconds = durationSeconds;
             return this;
         }
 

@@ -123,14 +123,6 @@ public final class RowContentBindParams {
     }
 
     /**
-     * Request that all content views be rebound. This may happen if, for example, the underlying
-     * layout has changed.
-     */
-    public void rebindAllContentViews() {
-        mDirtyContentViews = mContentViews;
-    }
-
-    /**
      * Clears all dirty content views so that they no longer need to be rebound.
      */
     void clearDirtyContentViews() {

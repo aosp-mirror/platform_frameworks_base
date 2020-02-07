@@ -157,7 +157,7 @@ public class HardwareRenderer {
     public HardwareRenderer() {
         mRootNode = RenderNode.adopt(nCreateRootRenderNode());
         mRootNode.setClipToBounds(false);
-        mNativeProxy = nCreateProxy(!mOpaque, mRootNode.mNativeRenderNode);
+        mNativeProxy = nCreateProxy(!mOpaque, mIsWideGamut, mRootNode.mNativeRenderNode);
         if (mNativeProxy == 0) {
             throw new OutOfMemoryError("Unable to create hardware renderer");
         }
@@ -1085,7 +1085,8 @@ public class HardwareRenderer {
 
     private static native long nCreateRootRenderNode();
 
-    private static native long nCreateProxy(boolean translucent, long rootRenderNode);
+    private static native long nCreateProxy(boolean translucent, boolean isWideGamut,
+            long rootRenderNode);
 
     private static native void nDeleteProxy(long nativeProxy);
 

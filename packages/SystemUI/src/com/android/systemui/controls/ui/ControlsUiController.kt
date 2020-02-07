@@ -22,6 +22,8 @@ import android.service.controls.actions.ControlAction
 import android.view.ViewGroup
 
 interface ControlsUiController {
+    val available: Boolean
+
     fun show(parent: ViewGroup)
     fun hide()
     fun onRefreshState(componentName: ComponentName, controls: List<Control>)

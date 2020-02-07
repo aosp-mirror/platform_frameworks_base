@@ -16,6 +16,8 @@
 
 package com.android.server.compat;
 
+import android.annotation.UserIdInt;
+
 import com.android.internal.compat.IPlatformCompatNative;
 
 /**
@@ -39,7 +41,8 @@ public class PlatformCompatNative extends IPlatformCompatNative.Stub {
     }
 
     @Override
-    public boolean isChangeEnabledByPackageName(long changeId, String packageName, int userId) {
+    public boolean isChangeEnabledByPackageName(long changeId, String packageName,
+            @UserIdInt int userId) {
         return mPlatformCompat.isChangeEnabledByPackageName(changeId, packageName, userId);
     }
 

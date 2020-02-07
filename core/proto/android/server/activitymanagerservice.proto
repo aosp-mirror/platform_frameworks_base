@@ -27,7 +27,6 @@ import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/content/configuration.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
 import "frameworks/base/core/proto/android/content/package_item_info.proto";
-import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/internal/processstats.proto";
 import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";

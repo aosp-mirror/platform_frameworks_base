@@ -653,6 +653,33 @@ gensrcs {
     output_extension: "srcjar",
 }
 
+gensrcs {
+    name: "framework-cppstream-protos",
+    depfile: true,
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-cppstream",
+    ],
+
+    cmd: "mkdir -p $(genDir) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-cppstream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --cppstream_out=$(genDir) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in)",
+
+    srcs: [
+        ":ipconnectivity-proto-src",
+        "core/proto/**/*.proto",
+        "libs/incident/**/*.proto",
+    ],
+
+    output_extension: "proto.h",
+}
+
 filegroup {
     name: "framework-annotations",
     srcs: [
@@ -1008,43 +1035,6 @@ aidl_interface {
             enabled: false,
         },
     },
-}
-
-gensrcs {
-    name: "gen-platform-proto-constants",
-    depfile: true,
-
-    tools: [
-        "aprotoc",
-        "protoc-gen-cppstream",
-    ],
-
-    srcs: [
-        "core/proto/android/os/backtrace.proto",
-        "core/proto/android/os/batterytype.proto",
-        "core/proto/android/os/cpufreq.proto",
-        "core/proto/android/os/cpuinfo.proto",
-        "core/proto/android/os/data.proto",
-        "core/proto/android/os/kernelwake.proto",
-        "core/proto/android/os/pagetypeinfo.proto",
-        "core/proto/android/os/procrank.proto",
-        "core/proto/android/os/ps.proto",
-        "core/proto/android/os/system_properties.proto",
-        "core/proto/android/util/event_log_tags.proto",
-        "core/proto/android/util/log.proto",
-    ],
-
-    // Append protoc-gen-cppstream tool's PATH otherwise aprotoc can't find the plugin tool
-    cmd: "mkdir -p $(genDir) " +
-        "&& $(location aprotoc) " +
-        "  --plugin=$(location protoc-gen-cppstream) " +
-        "  --dependency_out=$(depfile) " +
-        "  --cppstream_out=$(genDir) " +
-        "  -Iexternal/protobuf/src " +
-        "  -I . " +
-        "  $(in)",
-
-    output_extension: "proto.h",
 }
 
 

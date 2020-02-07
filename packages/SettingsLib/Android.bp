@@ -10,6 +10,7 @@ android_library {
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
         "androidx.mediarouter_mediarouter-nodeps",
+        "iconloader",
 
         "SettingsLibHelpUtils",
         "SettingsLibRestrictedLockUtils",

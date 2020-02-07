@@ -129,6 +129,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.security.VerityUtils;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -212,7 +213,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_SIGNATURE = "signature";
 
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
-    private static final int[] EMPTY_CHILD_SESSION_ARRAY = {};
+    private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
+    private static final FileInfo[] EMPTY_FILE_INFO_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
 
@@ -374,8 +376,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     // TODO(b/146080380): merge file list with Callback installation.
     private IncrementalFileStorages mIncrementalFileStorages;
-
-    private static final String[] EMPTY_STRING_ARRAY = new String[]{};
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
@@ -558,10 +558,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionErrorMessage =
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
 
-        if (isStreamingInstallation()
-                && this.params.dataLoaderParams.getComponentName().getPackageName()
-                == SYSTEM_DATA_LOADER_PACKAGE) {
-            assertShellOrSystemCalling("System data loaders");
+        if (isDataLoaderInstallation()) {
+            if (isApexInstallation()) {
+                throw new IllegalArgumentException(
+                        "DataLoader installation of APEX modules is not allowed.");
+            }
+        }
+
+        if (isStreamingInstallation()) {
+            if (!isIncrementalInstallationAllowed(mPackageName)) {
+                throw new IllegalArgumentException(
+                        "Incremental installation of this package is not allowed.");
+            }
+            if (this.params.dataLoaderParams.getComponentName().getPackageName()
+                    == SYSTEM_DATA_LOADER_PACKAGE) {
+                assertShellOrSystemCalling("System data loaders");
+            }
         }
     }
 
@@ -719,7 +731,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (!isDataLoaderInstallation()) {
             String[] result = stageDir.list();
             if (result == null) {
-                result = EMPTY_STRING_ARRAY;
+                result = EmptyArray.STRING;
             }
             return result;
         }
@@ -1174,6 +1186,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
+     * Checks if the package can be installed on IncFs.
+     */
+    private static boolean isIncrementalInstallationAllowed(String packageName) {
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final AndroidPackage existingPackage = pmi.getPackage(packageName);
+        if (existingPackage == null) {
+            return true;
+        }
+
+        return !PackageManagerService.isSystemApp(existingPackage);
+    }
+
+    /**
      * If this was not already called, the session will be sealed.
      *
      * This method may be called multiple times to update the status receiver validate caller
@@ -1362,14 +1387,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     return false;
                 }
 
-                final PackageInfo pkgInfo = mPm.getPackageInfo(
-                        params.appPackageName, PackageManager.GET_SIGNATURES
-                                | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
-
                 if (isApexInstallation()) {
                     validateApexInstallLocked();
                 } else {
-                    validateApkInstallLocked(pkgInfo);
+                    validateApkInstallLocked();
                 }
             }
 
@@ -1786,8 +1807,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link PackageManagerService}.
      */
     @GuardedBy("mLock")
-    private void validateApkInstallLocked(@Nullable PackageInfo pkgInfo)
-            throws PackageManagerException {
+    private void validateApkInstallLocked() throws PackageManagerException {
         ApkLite baseApk = null;
         mPackageName = null;
         mVersionCode = -1;
@@ -1796,6 +1816,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mResolvedBaseFile = null;
         mResolvedStagedFiles.clear();
         mResolvedInheritedFiles.clear();
+
+        final PackageInfo pkgInfo = mPm.getPackageInfo(
+                params.appPackageName, PackageManager.GET_SIGNATURES
+                        | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
 
         // Partial installs must be consistent with existing install
         if (params.mode == SessionParams.MODE_INHERIT_EXISTING
@@ -3096,7 +3120,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (grantedRuntimePermissions.size() > 0) {
-            params.grantedRuntimePermissions = (String[]) grantedRuntimePermissions.toArray();
+            params.grantedRuntimePermissions =
+                    grantedRuntimePermissions.toArray(EmptyArray.STRING);
         }
 
         if (whitelistedRestrictedPermissions.size() > 0) {
@@ -3115,7 +3140,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         FileInfo[] fileInfosArray = null;
         if (!files.isEmpty()) {
-            fileInfosArray = (FileInfo[]) files.toArray();
+            fileInfosArray = files.toArray(EMPTY_FILE_INFO_ARRAY);
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,

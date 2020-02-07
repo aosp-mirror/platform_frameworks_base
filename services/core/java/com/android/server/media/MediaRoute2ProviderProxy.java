@@ -138,14 +138,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    @Override
-    public void requestUpdateVolume(String routeId, int delta) {
-        if (mConnectionReady) {
-            mActiveConnection.requestUpdateVolume(routeId, delta);
-            updateBinding();
-        }
-    }
-
     public boolean hasComponentName(String packageName, String className) {
         return mComponentName.getPackageName().equals(packageName)
                 && mComponentName.getClassName().equals(className);
@@ -515,14 +507,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                 mProvider.requestSetVolume(routeId, volume);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to request set volume.", ex);
-            }
-        }
-
-        public void requestUpdateVolume(String routeId, int delta) {
-            try {
-                mProvider.requestUpdateVolume(routeId, delta);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to request update volume.", ex);
             }
         }
 

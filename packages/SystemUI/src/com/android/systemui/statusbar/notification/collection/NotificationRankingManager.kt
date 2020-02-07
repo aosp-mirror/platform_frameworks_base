@@ -22,11 +22,10 @@ import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.NotificationMediaManager
+import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger
 import com.android.systemui.statusbar.notification.NotificationFilter
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
-import com.android.systemui.statusbar.notification.logging.NotifEvent
-import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
@@ -53,7 +52,7 @@ open class NotificationRankingManager @Inject constructor(
     private val groupManager: NotificationGroupManager,
     private val headsUpManager: HeadsUpManager,
     private val notifFilter: NotificationFilter,
-    private val notifLog: NotifLog,
+    private val logger: NotificationEntryManagerLogger,
     sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
     private val highPriorityProvider: HighPriorityProvider
@@ -134,7 +133,7 @@ open class NotificationRankingManager @Inject constructor(
         entries: Sequence<NotificationEntry>,
         reason: String
     ): Sequence<NotificationEntry> {
-        notifLog.log(NotifEvent.FILTER_AND_SORT, reason)
+        logger.logFilterAndSort(reason)
 
         return entries.filter { !notifFilter.shouldFilterOut(it) }
                 .sortedWith(rankingComparator)

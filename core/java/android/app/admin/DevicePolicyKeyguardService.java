@@ -22,7 +22,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 
 /**
  * Client interface for providing the SystemUI with secondary lockscreen information.
@@ -43,14 +43,14 @@ public class DevicePolicyKeyguardService extends Service {
         @Override
         public void onSurfaceReady(@Nullable IBinder hostInputToken, IKeyguardCallback callback) {
             mCallback = callback;
-            SurfaceControl surfaceControl =
+            SurfaceControlViewHost.SurfacePackage surfacePackage =
                     DevicePolicyKeyguardService.this.onSurfaceReady(hostInputToken);
 
             if (mCallback != null) {
                 try {
-                    mCallback.onSurfaceControlCreated(surfaceControl);
+                    mCallback.onRemoteContentReady(surfacePackage);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to return created SurfaceControl", e);
+                    Log.e(TAG, "Failed to return created SurfacePackage", e);
                 }
             }
         }
@@ -65,11 +65,11 @@ public class DevicePolicyKeyguardService extends Service {
     /**
      * Called by keyguard once the host surface for the secondary lockscreen is ready to display
      * remote content.
-     * @return the {@link SurfaceControl} for the Surface the secondary lockscreen content is
-     *      attached to.
+     * @return the {@link SurfaceControlViewHost.SurfacePackage} for the Surface the
+     *      secondary lockscreen content is attached to.
      */
     @Nullable
-    public SurfaceControl onSurfaceReady(@Nullable IBinder hostInputToken) {
+    public SurfaceControlViewHost.SurfacePackage onSurfaceReady(@Nullable IBinder hostInputToken) {
         return null;
     }
 

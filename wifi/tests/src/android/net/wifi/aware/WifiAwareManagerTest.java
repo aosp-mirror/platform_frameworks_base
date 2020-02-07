@@ -1564,7 +1564,7 @@ public class WifiAwareManagerTest {
         WifiAwareNetworkSpecifier ns = new WifiAwareNetworkSpecifier(NETWORK_SPECIFIER_TYPE_IB,
                 WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER, 5, 568, 334,
                 HexEncoding.decode("000102030405".toCharArray(), false),
-                "01234567890123456789012345678901".getBytes(), "blah blah", 666, 4, 10001);
+                "01234567890123456789012345678901".getBytes(), "blah blah", 666, 4);
 
         Parcel parcelW = Parcel.obtain();
         ns.writeToParcel(parcelW, 0);

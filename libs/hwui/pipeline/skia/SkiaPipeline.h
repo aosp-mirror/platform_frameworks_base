@@ -50,6 +50,7 @@ public:
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                              ErrorHandler* errorHandler) override;
 
+    void setSurfaceColorProperties(renderthread::ColorMode colorMode) override;
     SkColorType getSurfaceColorType() const override { return mSurfaceColorType; }
     sk_sp<SkColorSpace> getSurfaceColorSpace() override { return mSurfaceColorSpace; }
 
@@ -72,9 +73,10 @@ public:
 
 protected:
     void dumpResourceCacheUsage() const;
-    void setSurfaceColorProperties(renderthread::ColorMode colorMode);
 
     renderthread::RenderThread& mRenderThread;
+
+    renderthread::ColorMode mColorMode = renderthread::ColorMode::SRGB;
     SkColorType mSurfaceColorType;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
 

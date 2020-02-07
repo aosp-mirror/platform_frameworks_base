@@ -336,6 +336,20 @@ public class WifiConfigurationTest {
     }
 
     /**
+     * Ensure that {@link NetworkSelectionStatus#getMaxNetworkSelectionDisableReason()} returns
+     * the maximum disable reason.
+     */
+    @Test
+    public void testNetworkSelectionGetMaxNetworkSelectionDisableReason() {
+        int maxReason = Integer.MIN_VALUE;
+        for (int i = 0; i < NetworkSelectionStatus.DISABLE_REASON_INFOS.size(); i++) {
+            int reason = NetworkSelectionStatus.DISABLE_REASON_INFOS.keyAt(i);
+            maxReason = Math.max(maxReason, reason);
+        }
+        assertEquals(maxReason, NetworkSelectionStatus.getMaxNetworkSelectionDisableReason());
+    }
+
+    /**
      * Ensure that {@link WifiConfiguration#setSecurityParams(int)} sets up the
      * {@link WifiConfiguration} object correctly for SAE security type.
      * @throws Exception

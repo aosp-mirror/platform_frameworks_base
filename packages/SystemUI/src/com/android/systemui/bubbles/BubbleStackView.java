@@ -533,10 +533,6 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.addView(mOverflowBtn, 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
 
-        mOverflowBtn.setOnClickListener(v -> {
-            setSelectedBubble(null);
-        });
-
         TypedArray ta = mContext.obtainStyledAttributes(
                 new int[]{android.R.attr.colorBackgroundFloating});
         int bgColor = ta.getColor(0, Color.WHITE /* default */);
@@ -856,6 +852,10 @@ public class BubbleStackView extends FrameLayout {
         updateBubbleZOrdersAndDotPosition(false /* animate */);
     }
 
+    void showOverflow() {
+        setSelectedBubble(null);
+    }
+
     /**
      * Changes the currently selected bubble. If the stack is already expanded, the newly selected
      * bubble will be shown immediately. This does not change the expanded state or change the
@@ -950,6 +950,10 @@ public class BubbleStackView extends FrameLayout {
         }
         if (mIsExpanded) {
             if (isIntersecting(mBubbleContainer, x, y)) {
+                if (BubbleExperimentConfig.allowBubbleOverflow(mContext)
+                        && isIntersecting(mOverflowBtn, x, y)) {
+                    return mOverflowBtn;
+                }
                 // Could be tapping or dragging a bubble while expanded
                 for (int i = 0; i < getBubbleCount(); i++) {
                     BadgedImageView view = (BadgedImageView) mBubbleContainer.getChildAt(i);

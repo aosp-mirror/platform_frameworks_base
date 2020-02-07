@@ -24,6 +24,7 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.content.pm.PackageInstaller;
+import android.platform.test.annotations.Presubmit;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -57,6 +58,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
+@Presubmit
 public class PackageInstallerSessionTest {
     @Rule
     public TemporaryFolder mTemporaryFolder = new TemporaryFolder();

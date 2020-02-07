@@ -107,6 +107,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -305,6 +306,7 @@ public class ConnectivityServiceTest {
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
     private static final String WIFI_IFNAME = "test_wlan0";
     private static final String WIFI_WOL_IFNAME = "test_wlan_wol";
+    private static final String TEST_PACKAGE_NAME = "com.android.test.package";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private MockContext mServiceContext;
@@ -654,7 +656,7 @@ public class ConnectivityServiceTest {
 
             if (mNmValidationRedirectUrl != null) {
                 mNmCallbacks.showProvisioningNotification(
-                        "test_provisioning_notif_action", "com.android.test.package");
+                        "test_provisioning_notif_action", TEST_PACKAGE_NAME);
                 mNmProvNotificationRequested = true;
             }
         }
@@ -2972,7 +2974,7 @@ public class ConnectivityServiceTest {
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, null, 0, null,
-                    ConnectivityManager.TYPE_WIFI);
+                    ConnectivityManager.TYPE_WIFI, TEST_PACKAGE_NAME);
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
@@ -3011,31 +3013,12 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testNetworkSpecifierUidSpoofSecurityException() throws Exception {
-        class UidAwareNetworkSpecifier extends NetworkSpecifier implements Parcelable {
-            @Override
-            public boolean satisfiedBy(NetworkSpecifier other) {
-                return true;
-            }
-
-            @Override
-            public void assertValidFromUid(int requestorUid) {
-                throw new SecurityException("failure");
-            }
-
-            @Override
-            public int describeContents() { return 0; }
-            @Override
-            public void writeToParcel(Parcel dest, int flags) {}
-        }
-
+    public void testNetworkRequestUidSpoofSecurityException() throws Exception {
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-
-        UidAwareNetworkSpecifier networkSpecifier = new UidAwareNetworkSpecifier();
-        NetworkRequest networkRequest = newWifiRequestBuilder().setNetworkSpecifier(
-                networkSpecifier).build();
+        NetworkRequest networkRequest = newWifiRequestBuilder().build();
         TestNetworkCallback networkCallback = new TestNetworkCallback();
+        doThrow(new SecurityException()).when(mAppOpsManager).checkPackage(anyInt(), anyString());
         assertThrows(SecurityException.class, () -> {
             mCm.requestNetwork(networkRequest, networkCallback);
         });
@@ -6446,14 +6429,16 @@ public class ConnectivityServiceTest {
     public void testRegisterUnregisterConnectivityDiagnosticsCallback() throws Exception {
         final NetworkRequest wifiRequest =
                 new NetworkRequest.Builder().addTransportType(TRANSPORT_WIFI).build();
-
         when(mConnectivityDiagnosticsCallback.asBinder()).thenReturn(mIBinder);
 
         mService.registerConnectivityDiagnosticsCallback(
                 mConnectivityDiagnosticsCallback, wifiRequest, mContext.getPackageName());
 
-        verify(mIBinder, timeout(TIMEOUT_MS))
-                .linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
+        verify(mConnectivityDiagnosticsCallback).asBinder();
         assertTrue(
                 mService.mConnectivityDiagnosticsCallbacks.containsKey(
                         mConnectivityDiagnosticsCallback));
@@ -6476,8 +6461,10 @@ public class ConnectivityServiceTest {
         mService.registerConnectivityDiagnosticsCallback(
                 mConnectivityDiagnosticsCallback, wifiRequest, mContext.getPackageName());
 
-        verify(mIBinder, timeout(TIMEOUT_MS))
-                .linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        verify(mIBinder).linkToDeath(any(ConnectivityDiagnosticsCallbackInfo.class), anyInt());
         verify(mConnectivityDiagnosticsCallback).asBinder();
         assertTrue(
                 mService.mConnectivityDiagnosticsCallbacks.containsKey(
@@ -6635,8 +6622,11 @@ public class ConnectivityServiceTest {
     public void testConnectivityDiagnosticsCallbackOnConnectivityReport() throws Exception {
         setUpConnectivityDiagnosticsCallback();
 
-        // Wait for onConnectivityReport to fire
-        verify(mConnectivityDiagnosticsCallback, timeout(TIMEOUT_MS))
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        // Verify onConnectivityReport fired
+        verify(mConnectivityDiagnosticsCallback)
                 .onConnectivityReport(any(ConnectivityReport.class));
     }
 
@@ -6648,9 +6638,11 @@ public class ConnectivityServiceTest {
         // cellular network agent
         mCellNetworkAgent.notifyDataStallSuspected();
 
-        // Wait for onDataStallSuspected to fire
-        verify(mConnectivityDiagnosticsCallback, timeout(TIMEOUT_MS))
-                .onDataStallSuspected(any(DataStallReport.class));
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        // Verify onDataStallSuspected fired
+        verify(mConnectivityDiagnosticsCallback).onDataStallSuspected(any(DataStallReport.class));
     }
 
     @Test
@@ -6661,15 +6653,21 @@ public class ConnectivityServiceTest {
         final boolean hasConnectivity = true;
         mService.reportNetworkConnectivity(n, hasConnectivity);
 
-        // Wait for onNetworkConnectivityReported to fire
-        verify(mConnectivityDiagnosticsCallback, timeout(TIMEOUT_MS))
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
+        // Verify onNetworkConnectivityReported fired
+        verify(mConnectivityDiagnosticsCallback)
                 .onNetworkConnectivityReported(eq(n), eq(hasConnectivity));
 
         final boolean noConnectivity = false;
         mService.reportNetworkConnectivity(n, noConnectivity);
 
+        // Block until all other events are done processing.
+        HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+
         // Wait for onNetworkConnectivityReported to fire
-        verify(mConnectivityDiagnosticsCallback, timeout(TIMEOUT_MS))
+        verify(mConnectivityDiagnosticsCallback)
                 .onNetworkConnectivityReported(eq(n), eq(noConnectivity));
     }
 }

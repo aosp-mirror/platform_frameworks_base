@@ -724,18 +724,21 @@ status_t JMediaCodec::getOutputFrame(
     }
 
     if (buffer->size() > 0) {
-        // asC2Buffer clears internal reference, so set the reference again.
         std::shared_ptr<C2Buffer> c2Buffer = buffer->asC2Buffer();
-        buffer->copy(c2Buffer);
         if (c2Buffer) {
+            // asC2Buffer clears internal reference, so set the reference again.
+            buffer->copy(c2Buffer);
             switch (c2Buffer->data().type()) {
                 case C2BufferData::LINEAR: {
                     std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
                     context->mBuffer = c2Buffer;
                     ScopedLocalRef<jobject> linearBlock{env, env->NewObject(
                             gLinearBlockInfo.clazz, gLinearBlockInfo.ctorId)};
-                    env->SetLongField(
-                            linearBlock.get(), gLinearBlockInfo.contextId, (jlong)context.release());
+                    env->CallVoidMethod(
+                            linearBlock.get(),
+                            gLinearBlockInfo.setInternalStateId,
+                            (jlong)context.release(),
+                            true);
                     env->SetObjectField(frame, gFields.outputFrameLinearBlockID, linearBlock.get());
                     break;
                 }
@@ -744,8 +747,11 @@ status_t JMediaCodec::getOutputFrame(
                     context->mBuffer = c2Buffer;
                     ScopedLocalRef<jobject> graphicBlock{env, env->NewObject(
                             gGraphicBlockInfo.clazz, gGraphicBlockInfo.ctorId)};
-                    env->SetLongField(
-                            graphicBlock.get(), gGraphicBlockInfo.contextId, (jlong)context.release());
+                    env->CallVoidMethod(
+                            graphicBlock.get(),
+                            gGraphicBlockInfo.setInternalStateId,
+                            (jlong)context.release(),
+                            true);
                     env->SetObjectField(frame, gFields.outputFrameGraphicBlockID, graphicBlock.get());
                     break;
                 }
@@ -761,16 +767,22 @@ status_t JMediaCodec::getOutputFrame(
                 context->mLegacyBuffer = buffer;
                 ScopedLocalRef<jobject> linearBlock{env, env->NewObject(
                         gLinearBlockInfo.clazz, gLinearBlockInfo.ctorId)};
-                env->SetLongField(
-                        linearBlock.get(), gLinearBlockInfo.contextId, (jlong)context.release());
+                env->CallVoidMethod(
+                        linearBlock.get(),
+                        gLinearBlockInfo.setInternalStateId,
+                        (jlong)context.release(),
+                        true);
                 env->SetObjectField(frame, gFields.outputFrameLinearBlockID, linearBlock.get());
             } else {
                 std::unique_ptr<JMediaCodecGraphicBlock> context{new JMediaCodecGraphicBlock};
                 context->mLegacyBuffer = buffer;
                 ScopedLocalRef<jobject> graphicBlock{env, env->NewObject(
                         gGraphicBlockInfo.clazz, gGraphicBlockInfo.ctorId)};
-                env->SetLongField(
-                        graphicBlock.get(), gGraphicBlockInfo.contextId, (jlong)context.release());
+                env->CallVoidMethod(
+                        graphicBlock.get(),
+                        gGraphicBlockInfo.setInternalStateId,
+                        (jlong)context.release(),
+                        true);
                 env->SetObjectField(frame, gFields.outputFrameGraphicBlockID, graphicBlock.get());
             }
         }

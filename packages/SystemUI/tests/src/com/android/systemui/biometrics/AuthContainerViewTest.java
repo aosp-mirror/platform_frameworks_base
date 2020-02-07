@@ -178,6 +178,20 @@ public class AuthContainerViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCredentialUI_disablesClickingOnBackground() {
+        // In the credential view, clicking on the background (to cancel authentication) is not
+        // valid. Thus, the listener should be null, and it should not be in the accessibility
+        // hierarchy.
+        initializeContainer(Authenticators.DEVICE_CREDENTIAL);
+
+        mAuthContainer.onAttachedToWindowInternal();
+
+        verify(mAuthContainer.mBackgroundView).setOnClickListener(eq(null));
+        verify(mAuthContainer.mBackgroundView).setImportantForAccessibility(
+                eq(View.IMPORTANT_FOR_ACCESSIBILITY_NO));
+    }
+
+    @Test
     public void testLayoutParams_hasSecureWindowFlag() {
         final IBinder windowToken = mock(IBinder.class);
         final WindowManager.LayoutParams layoutParams =

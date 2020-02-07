@@ -52,6 +52,7 @@ public class VpnConfig implements Parcelable {
 
     public static final String DIALOGS_PACKAGE = "com.android.vpndialogs";
 
+    // TODO: Rename this to something that encompasses Settings-based Platform VPNs as well.
     public static final String LEGACY_VPN = "[Legacy VPN]";
 
     public static Intent getIntentForConfirmation() {

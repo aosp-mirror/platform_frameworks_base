@@ -19,10 +19,6 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import android.animation.AnimationHandler;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.TimeAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
@@ -36,6 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Choreographer;
 
 import androidx.dynamicanimation.animation.SpringForce;
 
@@ -88,9 +85,11 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     /** PIP's current bounds on the screen. */
     private final Rect mBounds = new Rect();
 
+    private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider =
+            new SfVsyncFrameCallbackProvider();
+
     /**
-     * Bounds that are animated using the physics animator. PIP is moved to these bounds whenever
-     * the {@link #mVsyncTimeAnimator} ticks.
+     * Bounds that are animated using the physics animator.
      */
     private final Rect mAnimatedBounds = new Rect();
 
@@ -100,12 +99,16 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
     private PhysicsAnimator<Rect> mAnimatedBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
             mAnimatedBounds);
 
+    /** Callback that re-sizes PIP to the animated bounds. */
+    private final Choreographer.FrameCallback mResizePipVsyncCallback =
+            l -> resizePipUnchecked(mAnimatedBounds);
+
     /**
-     * Time animator whose frame timing comes from the SurfaceFlinger vsync frame provider. At each
-     * frame, PIP is moved to {@link #mAnimatedBounds}, which are animated asynchronously using
-     * physics animations.
+     * Update listener that posts a vsync frame callback to resize PIP to {@link #mAnimatedBounds}.
      */
-    private TimeAnimator mVsyncTimeAnimator;
+    private final PhysicsAnimator.UpdateListener<Rect> mResizePipVsyncUpdateListener =
+            (target, values) ->
+                    mSfVsyncFrameProvider.postFrameCallback(mResizePipVsyncCallback);
 
     /** FlingConfig instances provided to PhysicsAnimator for fling gestures. */
     private PhysicsAnimator.FlingConfig mFlingConfigX;
@@ -126,39 +129,7 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
-        final AnimationHandler vsyncFrameCallbackProvider = new AnimationHandler();
-        vsyncFrameCallbackProvider.setProvider(new SfVsyncFrameCallbackProvider());
-
         onConfigurationChanged();
-
-        // Construct a time animator that uses the vsync frame provider. Physics animations can't
-        // use custom frame providers, since they rely on constant time between frames to run the
-        // physics simulations. To work around this, we physically-animate a second set of bounds,
-        // and apply those animating bounds to the PIP in-sync via this TimeAnimator.
-        mVsyncTimeAnimator = new TimeAnimator() {
-            @Override
-            public AnimationHandler getAnimationHandler() {
-                return vsyncFrameCallbackProvider;
-            }
-        };
-
-        // When the time animator ticks, move PIP to the animated bounds.
-        mVsyncTimeAnimator.setTimeListener(
-                (animation, totalTime, deltaTime) ->
-                        resizePipUnchecked(mAnimatedBounds));
-
-        // Add a listener for cancel/end events that moves PIP to the final animated bounds.
-        mVsyncTimeAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                resizePipUnchecked(mAnimatedBounds);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                resizePipUnchecked(mAnimatedBounds);
-            }
-        });
     }
 
     /**
@@ -429,7 +400,6 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
      */
     private void cancelAnimations() {
         mAnimatedBoundsPhysicsAnimator.cancel();
-        mVsyncTimeAnimator.cancel();
     }
 
     /**
@@ -457,10 +427,8 @@ public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Call
         cancelAnimations();
 
         mAnimatedBoundsPhysicsAnimator
-                .withEndActions(
-                        mVsyncTimeAnimator::cancel)
+                .addUpdateListener(mResizePipVsyncUpdateListener)
                 .start();
-        mVsyncTimeAnimator.start();
     }
 
     /**

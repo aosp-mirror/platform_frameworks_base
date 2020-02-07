@@ -107,7 +107,7 @@ class CallLogQueryHelper {
         }
         @Event.EventType int eventType  = CALL_TYPE_TO_EVENT_TYPE.get(callType);
         Event event = new Event.Builder(date, eventType)
-                .setCallDetails(new Event.CallDetails(durationSeconds))
+                .setDurationSeconds((int) durationSeconds)
                 .build();
         mEventConsumer.accept(phoneNumber, event);
         return true;

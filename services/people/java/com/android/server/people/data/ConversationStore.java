@@ -40,6 +40,9 @@ class ConversationStore {
     // Phone Number -> Shortcut ID
     private final Map<String, String> mPhoneNumberToShortcutIdMap = new ArrayMap<>();
 
+    // Notification Channel ID -> Shortcut ID
+    private final Map<String, String> mNotifChannelIdToShortcutIdMap = new ArrayMap<>();
+
     void addOrUpdate(@NonNull ConversationInfo conversationInfo) {
         mConversationInfoMap.put(conversationInfo.getShortcutId(), conversationInfo);
 
@@ -56,6 +59,11 @@ class ConversationStore {
         String phoneNumber = conversationInfo.getContactPhoneNumber();
         if (phoneNumber != null) {
             mPhoneNumberToShortcutIdMap.put(phoneNumber, conversationInfo.getShortcutId());
+        }
+
+        String notifChannelId = conversationInfo.getNotificationChannelId();
+        if (notifChannelId != null) {
+            mNotifChannelIdToShortcutIdMap.put(notifChannelId, conversationInfo.getShortcutId());
         }
     }
 
@@ -78,6 +86,11 @@ class ConversationStore {
         String phoneNumber = conversationInfo.getContactPhoneNumber();
         if (phoneNumber != null) {
             mPhoneNumberToShortcutIdMap.remove(phoneNumber);
+        }
+
+        String notifChannelId = conversationInfo.getNotificationChannelId();
+        if (notifChannelId != null) {
+            mNotifChannelIdToShortcutIdMap.remove(notifChannelId);
         }
     }
 
@@ -105,5 +118,10 @@ class ConversationStore {
     @Nullable
     ConversationInfo getConversationByPhoneNumber(@NonNull String phoneNumber) {
         return getConversation(mPhoneNumberToShortcutIdMap.get(phoneNumber));
+    }
+
+    @Nullable
+    ConversationInfo getConversationByNotificationChannelId(@NonNull String notifChannelId) {
+        return getConversation(mNotifChannelIdToShortcutIdMap.get(notifChannelId));
     }
 }

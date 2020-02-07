@@ -32,7 +32,6 @@
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
 #include "../statscompanion_util.h"
-#include "GpuStatsPuller.h"
 #include "StatsCallbackPuller.h"
 #include "TrainInfoPuller.h"
 #include "statslog.h"
@@ -51,15 +50,6 @@ StatsPullerManager::StatsPullerManager()
     : kAllPullAtomInfo({
               // TrainInfo.
               {{.atomTag = android::util::TRAIN_INFO}, new TrainInfoPuller()},
-
-              // GpuStatsGlobalInfo
-              {{.atomTag = android::util::GPU_STATS_GLOBAL_INFO},
-               new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)},
-
-              // GpuStatsAppInfo
-              {{.atomTag = android::util::GPU_STATS_APP_INFO},
-               new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)},
-
       }),
       mNextPullTimeNs(NO_ALARM_UPDATE) {
 }

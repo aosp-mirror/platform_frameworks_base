@@ -17,7 +17,7 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.PhoneTimeZoneSuggestion;
+import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 
 import java.io.PrintWriter;
 
@@ -38,13 +38,13 @@ public interface TimeZoneDetectorStrategy {
 
     /**
      * Suggests a time zone for the device, or withdraws a previous suggestion if
-     * {@link PhoneTimeZoneSuggestion#getZoneId()} is {@code null}. The suggestion is scoped to a
-     * specific {@link PhoneTimeZoneSuggestion#getSlotIndex() phone}.
-     * See {@link PhoneTimeZoneSuggestion} for an explanation of the metadata associated with a
+     * {@link TelephonyTimeZoneSuggestion#getZoneId()} is {@code null}. The suggestion is scoped to
+     * a specific {@link TelephonyTimeZoneSuggestion#getSlotIndex() slotIndex}.
+     * See {@link TelephonyTimeZoneSuggestion} for an explanation of the metadata associated with a
      * suggestion. The strategy uses suggestions to decide whether to modify the device's time zone
      * setting and what to set it to.
      */
-    void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion suggestion);
+    void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion suggestion);
 
     /**
      * Called when there has been a change to the automatic time zone detection setting.

@@ -39,6 +39,7 @@ using ::android::hardware::tv::tuner::V1_0::DemuxPid;
 using ::android::hardware::tv::tuner::V1_0::DvrType;
 using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
+using ::android::hardware::tv::tuner::V1_0::FrontendInfo;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
@@ -132,6 +133,7 @@ struct JTuner : public RefBase {
     sp<ITuner> getTunerService();
     jobject getFrontendIds();
     jobject openFrontendById(int id);
+    jobject getFrontendInfo(int id);
     int tune(const FrontendSettings& settings);
     int stopTune();
     int scan(const FrontendSettings& settings, FrontendScanType scanType);
@@ -158,6 +160,15 @@ private:
     sp<ILnb> mLnb;
     sp<IDemux> mDemux;
     int mDemuxId;
+    static jobject getAnalogFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getAtsc3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getAtscFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getDvbcFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getDvbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getDvbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getIsdbs3FrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getIsdbsFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
+    static jobject getIsdbtFrontendCaps(JNIEnv *env, FrontendInfo::FrontendCapabilities caps);
 };
 
 }  // namespace android

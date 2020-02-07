@@ -47,6 +47,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -703,14 +704,20 @@ public class AbstractAccessibilityServiceConnectionTest {
 
     @Test
     public void takeScreenshot_returnNull() {
-        // no canTakeScreenshot, should return null.
-        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(false);
-        assertThat(mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY), is(nullValue()));
-
         // no checkAccessibilityAccess, should return null.
         when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(true);
         when(mMockSecurityPolicy.checkAccessibilityAccess(mServiceConnection)).thenReturn(false);
-        assertThat(mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY), is(nullValue()));
+        mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY, new RemoteCallback((result) -> {
+            assertNull(result);
+        }));
+    }
+
+    @Test (expected = SecurityException.class)
+    public void takeScreenshot_throwSecurityException() {
+        // no canTakeScreenshot, should throw security exception.
+        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(false);
+        mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY, new RemoteCallback((result) -> {
+        }));
     }
 
     private void updateServiceInfo(AccessibilityServiceInfo serviceInfo, int eventType,
@@ -852,8 +859,5 @@ public class AbstractAccessibilityServiceConnectionTest {
 
         @Override
         public void onFingerprintGesture(int gesture) {}
-
-        @Override
-        public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {}
     }
 }

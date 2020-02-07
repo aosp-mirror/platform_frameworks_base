@@ -334,20 +334,6 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void requestUpdateVolume2(IMediaRouter2Client client, MediaRoute2Info route, int delta) {
-        Objects.requireNonNull(client, "client must not be null");
-        Objects.requireNonNull(route, "route must not be null");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                requestUpdateVolumeLocked(client, route, delta);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     public void requestCreateClientSession(IMediaRouter2Manager manager, String packageName,
             MediaRoute2Info route, int requestId) {
         final long token = Binder.clearCallingIdentity();
@@ -369,21 +355,6 @@ class MediaRouter2ServiceImpl {
         try {
             synchronized (mLock) {
                 requestSetVolumeLocked(manager, route, volume);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    public void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
-            MediaRoute2Info route, int delta) {
-        Objects.requireNonNull(manager, "manager must not be null");
-        Objects.requireNonNull(route, "route must not be null");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                requestUpdateVolumeLocked(manager, route, delta);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -628,18 +599,6 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void requestUpdateVolumeLocked(IMediaRouter2Client client, MediaRoute2Info route,
-            int delta) {
-        final IBinder binder = client.asBinder();
-        Client2Record clientRecord = mAllClientRecords.get(binder);
-
-        if (clientRecord != null) {
-            clientRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::requestUpdateVolume,
-                            clientRecord.mUserRecord.mHandler, route, delta));
-        }
-    }
-
     private void registerManagerLocked(IMediaRouter2Manager manager,
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = manager.asBinder();
@@ -710,18 +669,6 @@ class MediaRouter2ServiceImpl {
             managerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::requestSetVolume,
                             managerRecord.mUserRecord.mHandler, route, volume));
-        }
-    }
-
-    private void requestUpdateVolumeLocked(IMediaRouter2Manager manager, MediaRoute2Info route,
-            int delta) {
-        final IBinder binder = manager.asBinder();
-        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
-
-        if (managerRecord != null) {
-            managerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::requestUpdateVolume,
-                            managerRecord.mUserRecord.mHandler, route, delta));
         }
     }
 
@@ -1456,13 +1403,6 @@ class MediaRouter2ServiceImpl {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider != null) {
                 provider.requestSetVolume(route.getOriginalId(), volume);
-            }
-        }
-
-        private void requestUpdateVolume(MediaRoute2Info route, int delta) {
-            final MediaRoute2Provider provider = findProvider(route.getProviderId());
-            if (provider != null) {
-                provider.requestUpdateVolume(route.getOriginalId(), delta);
             }
         }
 

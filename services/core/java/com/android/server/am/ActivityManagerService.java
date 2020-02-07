@@ -2617,7 +2617,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessCpuThread.start();
 
         mBatteryStatsService.publish();
-        mAppOpsService.publish(mContext);
+        mAppOpsService.publish();
         Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, mInternal);
         mActivityTaskManager.onActivityManagerInternalAdded();
@@ -19510,7 +19510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         public AppOpsService getAppOpsService(File file, Handler handler) {
-            return new AppOpsService(file, handler);
+            return new AppOpsService(file, handler, getContext());
         }
 
         public Handler getUiHandler(ActivityManagerService service) {

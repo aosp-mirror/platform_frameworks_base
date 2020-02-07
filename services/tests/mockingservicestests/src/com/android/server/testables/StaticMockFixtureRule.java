@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -97,6 +98,11 @@ public class StaticMockFixtureRule implements TestRule {
             @Override
             protected void succeeded(Description description) {
                 tearDown(null);
+            }
+
+            @Override
+            protected void skipped(AssumptionViolatedException e, Description description) {
+                tearDown(e);
             }
 
             @Override

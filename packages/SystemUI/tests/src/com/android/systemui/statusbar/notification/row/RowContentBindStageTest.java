@@ -67,7 +67,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRequireContentViews() {
+    public void testSetShouldContentViewsBeBound_bindsContent() {
         // WHEN inflation flags are set and pipeline is invalidated.
         final int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
@@ -85,7 +85,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
     }
 
     @Test
-    public void testFreeContentViews() {
+    public void testSetShouldContentViewsBeBound_unbindsContent() {
         // GIVEN a view with all content bound.
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
         params.requireContentViews(FLAG_CONTENT_VIEW_ALL);
@@ -97,28 +97,6 @@ public class RowContentBindStageTest extends SysuiTestCase {
 
         // THEN binder unbinds flags.
         verify(mBinder).unbindContent(eq(mEntry), any(), eq(flags));
-    }
-
-    @Test
-    public void testRebindAllContentViews() {
-        // GIVEN a view with content bound.
-        RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
-        final int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
-        params.requireContentViews(flags);
-        params.clearDirtyContentViews();
-
-        // WHEN we request rebind and stage executed.
-        params.rebindAllContentViews();
-        mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
-
-        // THEN binder binds inflation flags.
-        verify(mBinder).bindContent(
-                eq(mEntry),
-                any(),
-                eq(flags),
-                any(),
-                anyBoolean(),
-                any());
     }
 
     @Test

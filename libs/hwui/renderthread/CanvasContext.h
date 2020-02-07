@@ -251,7 +251,6 @@ private:
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
-    bool mWideColorGamut = false;
     bool mUseForceDark = false;
     LightInfo mLightInfo;
     LightGeometry mLightGeometry = {{0, 0, 0}, 0};

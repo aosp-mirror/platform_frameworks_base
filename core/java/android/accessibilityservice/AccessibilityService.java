@@ -28,7 +28,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -388,6 +390,27 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GESTURE_3_FINGER_SWIPE_RIGHT = 32;
 
+    /** The user has performed a four-finger swipe up gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_SWIPE_UP = 33;
+
+    /** The user has performed a four-finger swipe down gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_SWIPE_DOWN = 34;
+
+    /** The user has performed a four-finger swipe left gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_SWIPE_LEFT = 35;
+
+    /** The user has performed a four-finger swipe right gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_SWIPE_RIGHT = 36;
+
+    /** The user has performed a four-finger single tap gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_SINGLE_TAP = 37;
+
+    /** The user has performed a four-finger double tap gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_DOUBLE_TAP = 38;
+
+    /** The user has performed a four-finger triple tap gesture on the touch screen. */
+    public static final int GESTURE_4_FINGER_TRIPLE_TAP = 39;
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
@@ -564,7 +587,12 @@ public abstract class AccessibilityService extends Service {
     private FingerprintGestureController mFingerprintGestureController;
 
     /** @hide */
-    public static final String KEY_ACCESSIBILITY_SCREENSHOT = "screenshot";
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER =
+            "screenshot_hardwareBuffer";
+
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID =
+            "screenshot_colorSpaceId";
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -1867,8 +1895,9 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Takes a screenshot of the specified display and returns it by {@link Bitmap.Config#HARDWARE}
-     * format.
+     * Takes a screenshot of the specified display and returns it via an
+     * {@link AccessibilityService.ScreenshotResult}. You can use {@link Bitmap#wrapHardwareBuffer}
+     * to construct the bitmap from the ScreenshotResult's payload.
      * <p>
      * <strong>Note:</strong> In order to take screenshot your service has
      * to declare the capability to take screenshot by setting the
@@ -1886,7 +1915,7 @@ public abstract class AccessibilityService extends Service {
      * @return {@code true} if the taking screenshot accepted, {@code false} if not.
      */
     public boolean takeScreenshot(int displayId, @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Bitmap> callback) {
+            @NonNull Consumer<ScreenshotResult> callback) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
         final IAccessibilityServiceConnection connection =
@@ -1896,14 +1925,22 @@ public abstract class AccessibilityService extends Service {
             return false;
         }
         try {
-            connection.takeScreenshotWithCallback(displayId, new RemoteCallback((result) -> {
-                final Bitmap screenshot = result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    executor.execute(() -> callback.accept(screenshot));
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+            connection.takeScreenshot(displayId, new RemoteCallback((result) -> {
+                if (result == null) {
+                    sendScreenshotResult(executor, callback, null);
+                    return;
                 }
+                final HardwareBuffer hardwareBuffer =
+                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER);
+                final int colorSpaceId =
+                        result.getInt(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID);
+                ColorSpace colorSpace = null;
+                if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
+                    colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
+                }
+                ScreenshotResult screenshot = new ScreenshotResult(hardwareBuffer,
+                        colorSpace, System.currentTimeMillis());
+                sendScreenshotResult(executor, callback, screenshot);
             }));
         } catch (RemoteException re) {
             throw new RuntimeException(re);
@@ -2301,5 +2338,68 @@ public abstract class AccessibilityService extends Service {
             this.callback = callback;
             this.handler = handler;
         }
+    }
+
+    private void sendScreenshotResult(Executor executor, Consumer<ScreenshotResult> callback,
+            ScreenshotResult screenshot) {
+        final ScreenshotResult result = screenshot;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            executor.execute(() -> callback.accept(result));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Class including hardwareBuffer, colorSpace, and timestamp to be the result for
+     * {@link AccessibilityService#takeScreenshot} API.
+     * <p>
+     * <strong>Note:</strong> colorSpace would be null if the name of this colorSpace isn't at
+     * {@link ColorSpace.Named}.
+     * </p>
+     */
+    public static final class ScreenshotResult {
+        private final @NonNull HardwareBuffer mHardwareBuffer;
+        private final @Nullable ColorSpace mColorSpace;
+        private final long mTimestamp;
+
+        private ScreenshotResult(@NonNull HardwareBuffer hardwareBuffer,
+                @Nullable ColorSpace colorSpace, long timestamp) {
+            Preconditions.checkNotNull(hardwareBuffer, "hardwareBuffer cannot be null");
+            mHardwareBuffer = hardwareBuffer;
+            mColorSpace = colorSpace;
+            mTimestamp = timestamp;
+        }
+
+        /**
+         * Gets the colorSpace identifying a specific organization of colors of the screenshot.
+         *
+         * @return the colorSpace or {@code null} if the name of colorSpace isn't at
+         * {@link ColorSpace.Named}
+         */
+        @Nullable
+        public ColorSpace getColorSpace() {
+            return mColorSpace;
+        }
+
+        /**
+         * Gets the hardwareBuffer representing a memory buffer of the screenshot.
+         *
+         * @return the hardwareBuffer
+         */
+        @NonNull
+        public HardwareBuffer getHardwareBuffer() {
+            return mHardwareBuffer;
+        }
+
+        /**
+         * Gets the timestamp of taking the screenshot.
+         *
+         * @return the timestamp from {@link System#currentTimeMillis()}
+         */
+        public long getTimestamp() {
+            return mTimestamp;
+        };
     }
 }
