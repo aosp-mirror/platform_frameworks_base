@@ -216,8 +216,8 @@ public class BlobStoreManagerServiceTest {
         doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MILLIS + 1000)
                 .when(sessionFile1).lastModified();
         final long sessionId1 = 342;
-        final BlobHandle blobHandle1 = mock(BlobHandle.class);
-        doReturn(System.currentTimeMillis() - 1000).when(blobHandle1).getExpiryTimeMillis();
+        final BlobHandle blobHandle1 = BlobHandle.createWithSha256("digest1".getBytes(),
+                "label1", System.currentTimeMillis() - 1000, "tag1");
         final BlobStoreSession session1 = createBlobStoreSessionMock(TEST_PKG1, TEST_UID1,
                 sessionId1, sessionFile1, blobHandle1);
         mUserSessions.append(sessionId1, session1);
@@ -226,8 +226,8 @@ public class BlobStoreManagerServiceTest {
         doReturn(System.currentTimeMillis() - 20000)
                 .when(sessionFile2).lastModified();
         final long sessionId2 = 4597;
-        final BlobHandle blobHandle2 = mock(BlobHandle.class);
-        doReturn(System.currentTimeMillis() + 20000).when(blobHandle2).getExpiryTimeMillis();
+        final BlobHandle blobHandle2 = BlobHandle.createWithSha256("digest2".getBytes(),
+                "label2", System.currentTimeMillis() + 20000, "tag2");
         final BlobStoreSession session2 = createBlobStoreSessionMock(TEST_PKG2, TEST_UID2,
                 sessionId2, sessionFile2, blobHandle2);
         mUserSessions.append(sessionId2, session2);
@@ -236,8 +236,8 @@ public class BlobStoreManagerServiceTest {
         doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MILLIS - 2000)
                 .when(sessionFile3).lastModified();
         final long sessionId3 = 9484;
-        final BlobHandle blobHandle3 = mock(BlobHandle.class);
-        doReturn(System.currentTimeMillis() + 30000).when(blobHandle3).getExpiryTimeMillis();
+        final BlobHandle blobHandle3 = BlobHandle.createWithSha256("digest3".getBytes(),
+                "label3", System.currentTimeMillis() + 30000, "tag3");
         final BlobStoreSession session3 = createBlobStoreSessionMock(TEST_PKG3, TEST_UID3,
                 sessionId3, sessionFile3, blobHandle3);
         mUserSessions.append(sessionId3, session3);
