@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
 import java.util.Collection;
@@ -97,10 +98,18 @@ public class NotifPipeline implements CommonNotifCollection {
 
     /**
      * Registers a lifetime extender. Lifetime extenders can cause notifications that have been
-     * dismissed or retracted to be temporarily retained in the collection.
+     * dismissed or retracted by system server to be temporarily retained in the collection.
      */
     public void addNotificationLifetimeExtender(NotifLifetimeExtender extender) {
         mNotifCollection.addNotificationLifetimeExtender(extender);
+    }
+
+    /**
+     * Registers a dismiss interceptor. Dismiss interceptors can cause notifications that have been
+     * dismissed by the user to be retained (won't send a dismissal to system server).
+     */
+    public void addNotificationDismissInterceptor(NotifDismissInterceptor interceptor) {
+        mNotifCollection.addNotificationDismissInterceptor(interceptor);
     }
 
     /**
