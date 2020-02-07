@@ -118,4 +118,10 @@ public abstract class StorageManagerInternal {
      * @param userId the userId for which to reset storage
      */
     public abstract void resetUser(int userId);
+
+    /**
+     * Returns {@code true} if the immediate last installed version of an app with {@code uid} had
+     * legacy storage, {@code false} otherwise.
+     */
+    public abstract boolean hasLegacyExternalStorage(int uid);
 }
