@@ -29,7 +29,7 @@
         <service android:enabled="true"
                  android:name="com.android.incremental.nativeadb.NativeAdbDataLoaderService"
                  android:label="@string/app_name"
-                 android:exported="true">
+                 android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA" />
            </intent-filter>
