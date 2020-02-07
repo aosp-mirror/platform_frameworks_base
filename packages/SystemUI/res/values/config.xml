@@ -487,9 +487,6 @@
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
 
-    <!-- Package name for controls plugin -->
-    <string name="config_controlsPluginPackageName" translatable="false">com.android.systemui.controls.panel</string>
-
     <!-- Defines the blacklist for system icons.  That is to say, the icons in the status bar that
          are part of the blacklist are never displayed. Each item in the blacklist must be a string
          defined in core/res/res/config.xml to properly blacklist the icon.
