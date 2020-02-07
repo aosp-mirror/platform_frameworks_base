@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.GET_SIGNATURES;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
@@ -46,11 +47,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manager for creating and modifying network policy rules.
  *
- * {@hide}
+ * @hide
  */
 @SystemService(Context.NETWORK_POLICY_SERVICE)
 @SystemApi
@@ -89,6 +92,7 @@ public class NetworkPolicyManager {
      *
      * See network-policy-restrictions.md for more info.
      */
+
     /**
      * No specific rule was set
      * @hide
@@ -120,6 +124,7 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int RULE_REJECT_ALL = 1 << 6;
+
     /**
      * Mask used to get the {@code RULE_xxx_METERED} rules
      * @hide
@@ -133,7 +138,6 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int FIREWALL_RULE_DEFAULT = 0;
-
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_NONE = "none";
     /** @hide */
@@ -179,6 +183,9 @@ public class NetworkPolicyManager {
     private final Context mContext;
     @UnsupportedAppUsage
     private INetworkPolicyManager mService;
+
+    private final Map<SubscriptionCallback, SubscriptionCallbackProxy>
+            mCallbackMap = new ConcurrentHashMap<>();
 
     /** @hide */
     public NetworkPolicyManager(Context context, INetworkPolicyManager service) {
@@ -283,6 +290,35 @@ public class NetworkPolicyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** @hide */
+    @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
+    @SystemApi
+    public void registerSubscriptionCallback(@NonNull SubscriptionCallback callback) {
+        if (callback == null) {
+            throw new NullPointerException("Callback cannot be null.");
+        }
+
+        final SubscriptionCallbackProxy callbackProxy = new SubscriptionCallbackProxy(callback);
+        if (null != mCallbackMap.putIfAbsent(callback, callbackProxy)) {
+            throw new IllegalArgumentException("Callback is already registered.");
+        }
+        registerListener(callbackProxy);
+    }
+
+    /** @hide */
+    @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY)
+    @SystemApi
+    public void unregisterSubscriptionCallback(@NonNull SubscriptionCallback callback) {
+        if (callback == null) {
+            throw new NullPointerException("Callback cannot be null.");
+        }
+
+        final SubscriptionCallbackProxy callbackProxy = mCallbackMap.remove(callback);
+        if (callbackProxy == null) return;
+
+        unregisterListener(callbackProxy);
     }
 
     /** @hide */
@@ -510,6 +546,51 @@ public class NetworkPolicyManager {
     /** @hide */
     public static String resolveNetworkId(String ssid) {
         return WifiInfo.sanitizeSsid(ssid);
+    }
+
+    /** @hide */
+    @SystemApi
+    public static class SubscriptionCallback {
+        /**
+         * Notify clients of a new override about a given subscription.
+         *
+         * @param subId the subscriber this override applies to.
+         * @param overrideMask a bitmask that specifies which of the overrides is set.
+         * @param overrideValue a bitmask that specifies the override values.
+         */
+        public void onSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
+                @SubscriptionOverrideMask int overrideValue) {}
+
+        /**
+         * Notify of subscription plans change about a given subscription.
+         *
+         * @param subId the subscriber id that got subscription plans change.
+         * @param plans the list of subscription plans.
+         */
+        public void onSubscriptionPlansChanged(int subId, @NonNull SubscriptionPlan[] plans) {}
+    }
+
+    /**
+     * SubscriptionCallback proxy for SubscriptionCallback object.
+     * @hide
+     */
+    public class SubscriptionCallbackProxy extends Listener {
+        private final SubscriptionCallback mCallback;
+
+        SubscriptionCallbackProxy(SubscriptionCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
+                @SubscriptionOverrideMask int overrideValue) {
+            mCallback.onSubscriptionOverride(subId, overrideMask, overrideValue);
+        }
+
+        @Override
+        public void onSubscriptionPlansChanged(int subId, SubscriptionPlan[] plans) {
+            mCallback.onSubscriptionPlansChanged(subId, plans);
+        }
     }
 
     /** {@hide} */
