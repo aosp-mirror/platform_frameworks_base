@@ -30,6 +30,7 @@ filegroup {
         ":services.usb-sources",
         ":services.voiceinteraction-sources",
         ":service-permission-sources",
+        ":service-statsd-sources",
     ],
     visibility: ["//visibility:private"],
 }
