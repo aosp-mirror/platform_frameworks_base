@@ -3957,7 +3957,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     void handleStartUser(int userId) {
         updateScreenCaptureDisabled(userId,
-                getScreenCaptureDisabled(null, userId));
+                getScreenCaptureDisabled(null, userId, false));
         pushUserRestrictions(userId);
         // When system user is started (device boot), load cache for all users.
         // This is to mitigate the potential race between loading the cache and keyguard
@@ -7566,7 +7566,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Set whether the screen capture is disabled for the user managed by the specified admin.
      */
     @Override
-    public void setScreenCaptureDisabled(ComponentName who, boolean disabled) {
+    public void setScreenCaptureDisabled(ComponentName who, boolean disabled, boolean parent) {
         if (!mHasFeature) {
             return;
         }
@@ -7574,11 +7574,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
+            if (parent) {
+                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
+            }
             if (ap.disableScreenCapture != disabled) {
                 ap.disableScreenCapture = disabled;
                 saveSettingsLocked(userHandle);
-                updateScreenCaptureDisabled(userHandle, disabled);
+                final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
+                updateScreenCaptureDisabled(affectedUserId, disabled);
             }
         }
         DevicePolicyEventLogger
@@ -7593,20 +7597,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * active admin (if given admin is null).
      */
     @Override
-    public boolean getScreenCaptureDisabled(ComponentName who, int userHandle) {
+    public boolean getScreenCaptureDisabled(ComponentName who, int userHandle, boolean parent) {
         if (!mHasFeature) {
             return false;
         }
         synchronized (getLockObject()) {
+            if (parent) {
+                final ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                        DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER, parent);
+                enforceProfileOwnerOfOrganizationOwnedDevice(ap);
+            }
             if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
-                return (admin != null) ? admin.disableScreenCapture : false;
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
+                return (admin != null) && admin.disableScreenCapture;
             }
 
-            DevicePolicyData policy = getUserData(userHandle);
-            final int N = policy.mAdminList.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = policy.mAdminList.get(i);
+            boolean includeParent = isOrganizationOwnedDeviceWithManagedProfile()
+                    && !isManagedProfile(userHandle);
+            List<ActiveAdmin> admins = getActiveAdminsForAffectedUser(userHandle, includeParent);
+            for (ActiveAdmin admin: admins) {
                 if (admin.disableScreenCapture) {
                     return true;
                 }
@@ -7617,14 +7626,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateScreenCaptureDisabled(int userHandle, boolean disabled) {
         mPolicyCache.setScreenCaptureDisabled(userHandle, disabled);
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mInjector.getIWindowManager().refreshScreenCaptureDisabled(userHandle);
-                } catch (RemoteException e) {
-                    Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
-                }
+        mHandler.post(() -> {
+            try {
+                mInjector.getIWindowManager().refreshScreenCaptureDisabled(userHandle);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
             }
         });
     }
