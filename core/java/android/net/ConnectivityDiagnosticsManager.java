@@ -202,7 +202,7 @@ public class ConnectivityDiagnosticsManager {
          */
         @NetworkProbe
         public static final String KEY_NETWORK_PROBES_ATTEMPTED_BITMASK =
-                "networkProbesAttemped";
+                "networkProbesAttempted";
 
         /** @hide */
         @StringDef(prefix = {"KEY_"}, value = {
