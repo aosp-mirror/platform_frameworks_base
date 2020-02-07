@@ -60,12 +60,12 @@ public class WindowContext extends ContextWrapper {
         if (token != null && !isWindowToken(token)) {
             throw new IllegalArgumentException("Token must be registered to server.");
         }
+        mToken = token != null ? token : new Binder();
 
-        final ContextImpl contextImpl = createBaseWindowContext(base, token);
+        final ContextImpl contextImpl = createBaseWindowContext(base, mToken);
         attachBaseContext(contextImpl);
         contextImpl.setOuterContext(this);
 
-        mToken = token != null ? token : new Binder();
         mDisplayId = getDisplayId();
         mWindowManager = new WindowManagerImpl(this);
         mWindowManager.setDefaultToken(mToken);
