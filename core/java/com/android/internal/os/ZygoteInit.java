@@ -782,6 +782,10 @@ public class ZygoteInit {
             Zygote.applyDebuggerSystemProperty(parsedArgs);
             Zygote.applyInvokeWithSystemProperty(parsedArgs);
 
+            /* Enable pointer tagging in the system server unconditionally. Hardware support for
+             * this is present in all ARMv8 CPUs; this flag has no effect on other platforms. */
+            parsedArgs.mRuntimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
+
             if (shouldProfileSystemServer()) {
                 parsedArgs.mRuntimeFlags |= Zygote.PROFILE_SYSTEM_SERVER;
             }
