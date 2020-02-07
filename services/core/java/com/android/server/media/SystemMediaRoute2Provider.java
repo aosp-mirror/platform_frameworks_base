@@ -20,9 +20,11 @@ import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
 import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
 
 import android.annotation.NonNull;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioRoutesObserver;
@@ -107,6 +109,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             }
         });
         initializeSessionInfo();
+
+        mContext.registerReceiver(new VolumeChangeReceiver(),
+                new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
     }
 
     @Override
@@ -277,5 +282,45 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             sessionInfo = mSessionInfos.get(0);
         }
         mCallback.onSessionUpdated(this, sessionInfo);
+    }
+
+    private class VolumeChangeReceiver extends BroadcastReceiver {
+        // This will be called in the main thread.
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!intent.getAction().equals(AudioManager.VOLUME_CHANGED_ACTION)) {
+                return;
+            }
+
+            final int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            if (streamType != AudioManager.STREAM_MUSIC) {
+                return;
+            }
+
+            final int newVolume = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
+            final int oldVolume = intent.getIntExtra(
+                    AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, 0);
+
+            if (newVolume != oldVolume) {
+                String activeBtDeviceAddress = mBtRouteProvider.getActiveDeviceAddress();
+                if (!TextUtils.isEmpty(activeBtDeviceAddress)) {
+                    for (int i = mBluetoothRoutes.size() - 1; i >= 0; i--) {
+                        MediaRoute2Info route = mBluetoothRoutes.get(i);
+                        if (TextUtils.equals(activeBtDeviceAddress, route.getId())) {
+                            mBluetoothRoutes.set(i,
+                                    new MediaRoute2Info.Builder(route)
+                                            .setVolume(newVolume)
+                                            .build());
+                            break;
+                        }
+                    }
+                } else {
+                    mDefaultRoute = new MediaRoute2Info.Builder(mDefaultRoute)
+                            .setVolume(newVolume)
+                            .build();
+                }
+                publishRoutes();
+            }
+        }
     }
 }
