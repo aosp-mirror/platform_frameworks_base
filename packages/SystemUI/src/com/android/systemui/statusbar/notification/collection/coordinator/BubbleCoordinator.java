@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static android.service.notification.NotificationStats.DISMISSAL_OTHER;
-import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_UNKNOWN;
+import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.bubbles.BubbleController;
@@ -153,10 +153,10 @@ public class BubbleCoordinator implements Coordinator {
     private DismissedByUserStats createDismissedByUserStats(NotificationEntry entry) {
         return new DismissedByUserStats(
                 DISMISSAL_OTHER,
-                DISMISS_SENTIMENT_UNKNOWN,
+                DISMISS_SENTIMENT_NEUTRAL,
                 NotificationVisibility.obtain(entry.getKey(),
                         entry.getRanking().getRank(),
-                        mNotifPipeline.getActiveNotifs().size(),
+                        mNotifPipeline.getShadeListCount(),
                         true, // was visible as a bubble
                         NotificationLogger.getNotificationLocation(entry))
         );

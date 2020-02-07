@@ -58,6 +58,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -67,6 +68,8 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -114,6 +117,12 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private BubbleController mBubbleController;
     @Mock
     private ShadeControllerImpl mShadeController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
+    @Mock
+    private NotifPipeline mNotifPipeline;
+    @Mock
+    private NotifCollection mNotifCollection;
 
     @Mock
     private ActivityIntentHelper mActivityIntentHelper;
@@ -162,6 +171,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mActiveNotifications.add(mBubbleNotificationRow.getEntry());
         when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+        when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
 
         mNotificationActivityStarter = (new StatusBarNotificationActivityStarter.Builder(
                 getContext(), mock(CommandQueue.class), () -> mAssistManager,
@@ -175,11 +185,12 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
                 mock(LockPatternUtils.class), mHandler, mHandler, mUiBgExecutor,
-                mActivityIntentHelper, mBubbleController, mShadeController))
+                mActivityIntentHelper, mBubbleController, mShadeController, mFeatureFlags,
+                mNotifPipeline, mNotifCollection)
                 .setStatusBar(mStatusBar)
                 .setNotificationPanelViewController(mock(NotificationPanelViewController.class))
                 .setNotificationPresenter(mock(NotificationPresenter.class))
-                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
+                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class)))
         .build();
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg

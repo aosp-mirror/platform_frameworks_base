@@ -195,4 +195,27 @@ public class NotifPipeline implements CommonNotifCollection {
     public List<ListEntry> getShadeList() {
         return mShadeListBuilder.getShadeList();
     }
+
+    /**
+     * Returns the number of notifications currently shown in the shade. This includes all
+     * children and summary notifications. If this method is called during pipeline execution it
+     * will return the number of notifications in its current state, which will likely be only
+     * partially-generated.
+     */
+    public int getShadeListCount() {
+        final List<ListEntry> entries = getShadeList();
+        int numNotifs = 0;
+        for (int i = 0; i < entries.size(); i++) {
+            final ListEntry entry = entries.get(i);
+            if (entry instanceof GroupEntry) {
+                final GroupEntry parentEntry = (GroupEntry) entry;
+                numNotifs++; // include the summary in the count
+                numNotifs += parentEntry.getChildren().size();
+            } else {
+                numNotifs++;
+            }
+        }
+
+        return numNotifs;
+    }
 }

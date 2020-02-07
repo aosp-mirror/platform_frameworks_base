@@ -77,6 +77,14 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
+    fun logNotifClearAllDismissalIntercepted(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+        }, {
+            "CLEAR ALL DISMISSAL INTERCEPTED $str1"
+        })
+    }
+
     fun logRankingMissing(key: String, rankingMap: RankingMap) {
         buffer.log(TAG, WARNING, { str1 = key }, { "Ranking update is missing ranking for $str1" })
         buffer.log(TAG, DEBUG, {}, { "Ranking map contents:" })

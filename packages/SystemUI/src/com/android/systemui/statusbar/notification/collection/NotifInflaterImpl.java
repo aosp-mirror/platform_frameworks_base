@@ -44,6 +44,7 @@ public class NotifInflaterImpl implements NotifInflater {
     private final IStatusBarService mStatusBarService;
     private final NotifCollection mNotifCollection;
     private final NotifInflationErrorManager mNotifErrorManager;
+    private final NotifPipeline mNotifPipeline;
 
     private NotificationRowBinderImpl mNotificationRowBinder;
     private InflationCallback mExternalInflationCallback;
@@ -52,10 +53,12 @@ public class NotifInflaterImpl implements NotifInflater {
     public NotifInflaterImpl(
             IStatusBarService statusBarService,
             NotifCollection notifCollection,
-            NotifInflationErrorManager errorManager) {
+            NotifInflationErrorManager errorManager,
+            NotifPipeline notifPipeline) {
         mStatusBarService = statusBarService;
         mNotifCollection = notifCollection;
         mNotifErrorManager = errorManager;
+        mNotifPipeline = notifPipeline;
     }
 
     /**
@@ -110,7 +113,7 @@ public class NotifInflaterImpl implements NotifInflater {
                                 DISMISS_SENTIMENT_NEUTRAL,
                                 NotificationVisibility.obtain(entry.getKey(),
                                         entry.getRanking().getRank(),
-                                        mNotifCollection.getActiveNotifs().size(),
+                                        mNotifPipeline.getShadeListCount(),
                                         true,
                                         NotificationLogger.getNotificationLocation(entry))
                         ));
