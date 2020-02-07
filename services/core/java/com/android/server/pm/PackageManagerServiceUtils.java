@@ -794,6 +794,7 @@ public class PackageManagerServiceUtils {
         ret.verifiers = pkg.verifiers;
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.multiArch;
+        ret.debuggable = pkg.debuggable;
 
         return ret;
     }

@@ -2757,6 +2757,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--no-wait":
                     params.mWaitForStagedSessionReady = false;
                     break;
+                case "--skip-verification":
+                    sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
