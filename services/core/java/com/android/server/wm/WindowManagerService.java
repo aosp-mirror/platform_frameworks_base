@@ -413,6 +413,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowTracing mWindowTracing;
 
+    final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
+
     final private KeyguardDisableHandler mKeyguardDisableHandler;
     // TODO: eventually unify all keyguard state in a common place instead of having it spread over
     // AM's KeyguardController and the policy's KeyguardServiceDelegate.
@@ -1255,6 +1257,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         mEmbeddedWindowController = new EmbeddedWindowController(mGlobalLock);
+
+        mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
+                mContext.getResources());
+
         setGlobalShadowSettings();
     }
 

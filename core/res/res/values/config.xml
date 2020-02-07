@@ -3792,6 +3792,10 @@
          or empty if the default should be used. -->
     <string translatable="false" name="config_deviceSpecificAudioService"></string>
 
+    <!-- Class name of the device specific implementation of DisplayAreaPolicy.Provider
+         or empty if the default should be used. -->
+    <string translatable="false" name="config_deviceSpecificDisplayAreaPolicyProvider"></string>
+
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
