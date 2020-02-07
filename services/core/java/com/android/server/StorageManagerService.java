@@ -1300,13 +1300,6 @@ class StorageManagerService extends IStorageManager.Stub
                     vol.state = newState;
                     onVolumeStateChangedLocked(vol, oldState, newState);
                 }
-                try {
-                    if (vol.type == VolumeInfo.TYPE_PRIVATE && state == VolumeInfo.STATE_MOUNTED) {
-                        mInstaller.onPrivateVolumeMounted(vol.getFsUuid());
-                    }
-                } catch (Installer.InstallerException e) {
-                    Slog.i(TAG, "Failed when private volume mounted " + vol, e);
-                }
             }
         }
 
@@ -3110,6 +3103,15 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            // After preparing user storage, we should check if we should mount data mirror again,
+            // and we do it for user 0 only as we only need to do once for all users.
+            if (volumeUuid != null) {
+                final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                VolumeInfo info = storage.findVolumeByUuid(volumeUuid);
+                if (info != null && userId == 0 && info.type == VolumeInfo.TYPE_PRIVATE) {
+                    mInstaller.tryMountDataMirror(volumeUuid);
+                }
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
