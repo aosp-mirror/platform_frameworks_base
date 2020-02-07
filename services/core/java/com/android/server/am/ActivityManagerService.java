@@ -19370,6 +19370,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Force the settings cache to be loaded
+     */
+    void refreshSettingsCache() {
+        mCoreSettingsObserver.onChange(true);
+    }
+
+    /**
      * Kill processes for the user with id userId and that depend on the package named packageName
      */
     @Override
