@@ -27,6 +27,8 @@ import android.service.controls.actions.ControlActionWrapper;
 oneway interface IControlsProvider {
     void load(IControlsLoadCallback cb);
 
+    void loadSuggested(int maxNumber, IControlsLoadCallback cb);
+
     void subscribe(in List<String> controlIds,
              IControlsSubscriber subscriber);
 
