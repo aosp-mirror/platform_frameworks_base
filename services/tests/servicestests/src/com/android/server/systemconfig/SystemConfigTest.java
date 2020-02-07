@@ -144,6 +144,40 @@ public class SystemConfigTest {
         assertEquals("Incorrect blacklist", expectedBlack, actualBlack);
     }
 
+    @Test
+    public void testComponentOverride() throws Exception {
+        final String contents =
+                "<permissions>"
+                + "    <component-override package=\"com.android.package1\">\n"
+                + "        <component class=\"com.android.package1.Full\" enabled=\"true\"/>"
+                + "        <component class=\".Relative\" enabled=\"false\" />\n"
+                + "    </component-override>"
+                + "    <component-override package=\"com.android.package2\" >\n"
+                + "        <component class=\"com.android.package3.Relative2\" enabled=\"yes\" />\n"
+                + "    </component-override>\n"
+                + "</permissions>";
+
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "component-override.xml", contents);
+
+        mSysConfig.readPermissions(folder, /* No permission needed anyway */ 0);
+
+        final ArrayMap<String, Boolean>  packageOneExpected = new ArrayMap<>();
+        packageOneExpected.put("com.android.package1.Full", true);
+        packageOneExpected.put("com.android.package1.Relative", false);
+
+        final ArrayMap<String, Boolean> packageTwoExpected = new ArrayMap<>();
+        packageTwoExpected.put("com.android.package3.Relative2", true);
+
+        final Map<String, Boolean> packageOne = mSysConfig.getComponentsEnabledStates(
+                "com.android.package1");
+        assertEquals(packageOneExpected, packageOne);
+
+        final Map<String, Boolean> packageTwo = mSysConfig.getComponentsEnabledStates(
+                "com.android.package2");
+        assertEquals(packageTwoExpected, packageTwo);
+    }
+
     /**
      * Creates folderName/fileName in the mTemporaryFolder and fills it with the contents.
      * @param folderName subdirectory of mTemporaryFolder to put the file, creating if needed

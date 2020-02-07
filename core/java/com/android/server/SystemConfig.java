@@ -902,7 +902,6 @@ public class SystemConfig {
                     } break;
                     case "component-override": {
                         readComponentOverrides(parser, permFile);
-                        XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "backup-transport-whitelisted-service": {
                         if (allowFeatures) {
@@ -1398,8 +1397,7 @@ public class SystemConfig {
 
         final int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
-            String name = parser.getName();
-            if ("component".equals(name)) {
+            if ("component".equals(parser.getName())) {
                 String clsname = parser.getAttributeValue(null, "class");
                 String enabled = parser.getAttributeValue(null, "enabled");
                 if (clsname == null) {
@@ -1427,8 +1425,6 @@ public class SystemConfig {
                 }
 
                 componentEnabledStates.put(clsname, !"false".equals(enabled));
-            } else {
-                XmlUtils.skipCurrentTag(parser);
             }
         }
     }
