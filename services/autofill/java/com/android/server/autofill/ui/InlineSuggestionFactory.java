@@ -28,16 +28,20 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.autofill.AutofillId;
+import android.view.inline.InlinePresentationSpec;
 import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionInfo;
+import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
+import android.widget.Toast;
 
-import com.android.internal.util.function.QuadFunction;
 import com.android.internal.view.inline.IInlineContentCallback;
 import com.android.internal.view.inline.IInlineContentProvider;
 import com.android.server.UiThread;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
 
 public final class InlineSuggestionFactory {
     private static final String TAG = "InlineSuggestionFactory";
@@ -57,46 +61,47 @@ public final class InlineSuggestionFactory {
      * augmented autofill service.
      */
     public static InlineSuggestionsResponse createAugmentedInlineSuggestionsResponse(
+            @NonNull InlineSuggestionsRequest request,
             @NonNull Dataset[] datasets,
             @NonNull AutofillId autofillId,
             @NonNull Context context,
             @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback,
             @NonNull Runnable onErrorCallback) {
-        return createInlineSuggestionsResponseInternal(datasets, autofillId,
-                context, onErrorCallback, (dataset, inlinePresentation, inlineSuggestionUi,
-                        filedIndex) -> createAugmentedInlineSuggestion(dataset,
-                    inlinePresentation, inlineSuggestionUi, inlineSuggestionUiCallback));
+        if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
+        return createInlineSuggestionsResponseInternal(/* isAugmented= */ true, request,
+                datasets, /* inlineActions= */ null, autofillId, context, onErrorCallback,
+                (dataset, filedIndex) -> (v -> inlineSuggestionUiCallback.autofill(dataset)));
     }
 
     /**
      * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by the
      * autofill service.
      */
-    public static InlineSuggestionsResponse createInlineSuggestionsResponse(int requestId,
+    public static InlineSuggestionsResponse createInlineSuggestionsResponse(
+            @NonNull InlineSuggestionsRequest request, int requestId,
             @NonNull Dataset[] datasets,
+            @Nullable List<InlinePresentation> inlineActions,
             @NonNull AutofillId autofillId,
             @NonNull Context context,
             @NonNull AutoFillUI.AutoFillUiCallback client,
             @NonNull Runnable onErrorCallback) {
-        return createInlineSuggestionsResponseInternal(datasets, autofillId,
-                context, onErrorCallback, (dataset, inlinePresentation, inlineSuggestionUi,
-                        filedIndex) -> createInlineSuggestion(requestId, dataset, filedIndex,
-                        inlinePresentation, inlineSuggestionUi, client));
+        if (sDebug) Slog.d(TAG, "createInlineSuggestionsResponse called");
+        return createInlineSuggestionsResponseInternal(/* isAugmented= */ false, request, datasets,
+                inlineActions, autofillId, context, onErrorCallback,
+                (dataset, filedIndex) -> (v -> client.fill(requestId, filedIndex, dataset)));
     }
 
     private static InlineSuggestionsResponse createInlineSuggestionsResponseInternal(
-            @NonNull Dataset[] datasets,
-            @NonNull AutofillId autofillId,
-            @NonNull Context context,
+            boolean isAugmented, @NonNull InlineSuggestionsRequest request,
+            @NonNull Dataset[] datasets, @Nullable List<InlinePresentation> inlineActions,
+            @NonNull AutofillId autofillId, @NonNull Context context,
             @NonNull Runnable onErrorCallback,
-            @NonNull QuadFunction<Dataset, InlinePresentation, InlineSuggestionUi,
-                    Integer, InlineSuggestion> suggestionFactory) {
-        if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
-
+            @NonNull BiFunction<Dataset, Integer, View.OnClickListener> onClickListenerFactory) {
         final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
         final InlineSuggestionUi inlineSuggestionUi = new InlineSuggestionUi(context,
                 onErrorCallback);
-        for (Dataset dataset : datasets) {
+        for (int i = 0; i < datasets.length; i++) {
+            final Dataset dataset = datasets[i];
             final int fieldIndex = dataset.getFieldIds().indexOf(autofillId);
             if (fieldIndex < 0) {
                 Slog.w(TAG, "AutofillId=" + autofillId + " not found in dataset");
@@ -108,48 +113,80 @@ public final class InlineSuggestionFactory {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
                 return null;
             }
-            InlineSuggestion inlineSuggestion = suggestionFactory.apply(dataset,
-                    inlinePresentation, inlineSuggestionUi, fieldIndex);
+            InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
+                    fieldIndex, mergedInlinePresentation(request, i, inlinePresentation),
+                    inlineSuggestionUi, onClickListenerFactory);
             inlineSuggestions.add(inlineSuggestion);
+        }
+        if (inlineActions != null) {
+            for (InlinePresentation inlinePresentation : inlineActions) {
+                final InlineSuggestion inlineAction = createInlineAction(isAugmented, context,
+                        mergedInlinePresentation(request, 0, inlinePresentation),
+                        inlineSuggestionUi);
+                inlineSuggestions.add(inlineAction);
+            }
         }
         return new InlineSuggestionsResponse(inlineSuggestions);
     }
 
-    private static InlineSuggestion createAugmentedInlineSuggestion(@NonNull Dataset dataset,
+    private static InlineSuggestion createInlineAction(boolean isAugmented,
+            @NonNull Context context,
             @NonNull InlinePresentation inlinePresentation,
-            @NonNull InlineSuggestionUi inlineSuggestionUi,
-            @NonNull InlineSuggestionUiCallback inlineSuggestionUiCallback) {
+            @NonNull InlineSuggestionUi inlineSuggestionUi) {
         // TODO(b/146453195): fill in the autofill hint properly.
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
-                InlineSuggestionInfo.SOURCE_PLATFORM, new String[]{""},
+                isAugmented ? InlineSuggestionInfo.SOURCE_PLATFORM
+                        : InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""},
+                InlineSuggestionInfo.TYPE_ACTION);
+        final View.OnClickListener onClickListener = v -> {
+            // TODO(b/148567875): Launch the intent provided through the slice. This
+            //  should be part of the UI renderer therefore will be moved to the support
+            //  library.
+            Toast.makeText(context, "icon clicked", Toast.LENGTH_SHORT).show();
+        };
+        return new InlineSuggestion(inlineSuggestionInfo,
+                createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
+                        onClickListener));
+    }
+
+    private static InlineSuggestion createInlineSuggestion(boolean isAugmented,
+            @NonNull Dataset dataset,
+            int fieldIndex, @NonNull InlinePresentation inlinePresentation,
+            @NonNull InlineSuggestionUi inlineSuggestionUi,
+            @NonNull BiFunction<Dataset, Integer, View.OnClickListener> onClickListenerFactory) {
+        // TODO(b/146453195): fill in the autofill hint properly.
+        final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
+                inlinePresentation.getInlinePresentationSpec(),
+                isAugmented ? InlineSuggestionInfo.SOURCE_PLATFORM
+                        : InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""},
                 InlineSuggestionInfo.TYPE_SUGGESTION);
-        final View.OnClickListener onClickListener = v ->
-            inlineSuggestionUiCallback.autofill(dataset);
+        final View.OnClickListener onClickListener = onClickListenerFactory.apply(dataset,
+                fieldIndex);
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
                         onClickListener));
         return inlineSuggestion;
     }
 
-    private static InlineSuggestion createInlineSuggestion(int requestId,
-            @NonNull Dataset dataset,
-            int fieldIndex,
-            @NonNull InlinePresentation inlinePresentation,
-            @NonNull InlineSuggestionUi inlineSuggestionUi,
-            @NonNull AutoFillUI.AutoFillUiCallback client) {
-        // TODO(b/146453195): fill in the autofill hint properly.
-        final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
-                inlinePresentation.getInlinePresentationSpec(),
-                InlineSuggestionInfo.SOURCE_AUTOFILL, new String[]{""},
-                InlineSuggestionInfo.TYPE_SUGGESTION);
-        final View.OnClickListener onClickListener = v -> {
-            client.fill(requestId, fieldIndex, dataset);
-        };
-        final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
-                createInlineContentProvider(inlinePresentation, inlineSuggestionUi,
-                        onClickListener));
-        return inlineSuggestion;
+    /**
+     * Returns an {@link InlinePresentation} with the style spec from the request/host, and
+     * everything else from the provided {@code inlinePresentation}.
+     */
+    private static InlinePresentation mergedInlinePresentation(
+            @NonNull InlineSuggestionsRequest request,
+            int index, @NonNull InlinePresentation inlinePresentation) {
+        final List<InlinePresentationSpec> specs = request.getPresentationSpecs();
+        if (specs.isEmpty()) {
+            return inlinePresentation;
+        }
+        InlinePresentationSpec specFromHost = specs.get(Math.min(specs.size() - 1, index));
+        InlinePresentationSpec mergedInlinePresentation = new InlinePresentationSpec.Builder(
+                inlinePresentation.getInlinePresentationSpec().getMinSize(),
+                inlinePresentation.getInlinePresentationSpec().getMaxSize()).setStyle(
+                specFromHost.getStyle()).build();
+        return new InlinePresentation(inlinePresentation.getSlice(), mergedInlinePresentation,
+                inlinePresentation.isPinned());
     }
 
     private static IInlineContentProvider.Stub createInlineContentProvider(
