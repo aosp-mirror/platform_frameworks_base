@@ -90,6 +90,7 @@ class NotificationsControllerImpl @Inject constructor(
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,
+                headsUpManager,
                 bindRowCallback)
 
         if (featureFlags.isNewNotifPipelineEnabled) {
