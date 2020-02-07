@@ -17,6 +17,9 @@
 package com.android.internal.widget;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;
@@ -27,6 +30,8 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
+import android.widget.RichContentReceiver;
 import android.widget.TextView;
 
 public class EditableInputConnection extends BaseInputConnection {
@@ -178,6 +183,28 @@ public class EditableInputConnection extends BaseInputConnection {
         mTextView.hideErrorIfUnchanged();
 
         return success;
+    }
+
+    @Override
+    public boolean commitContent(InputContentInfo content, int flags, Bundle opts) {
+        int targetSdkVersion = mTextView.getContext().getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion <= Build.VERSION_CODES.R) {
+            return false;
+        }
+
+        final ClipDescription description = content.getDescription();
+        final RichContentReceiver<TextView> receiver = mTextView.getRichContentReceiver();
+        if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+            try {
+                content.requestPermission();
+            } catch (Exception e) {
+                // TODO(b/147299828): Can we catch SecurityException instead?
+                Log.w(TAG, "Can't insert content from IME; requestPermission() failed: " + e);
+                return false; // Can't insert the content if we don't have permission to read it
+            }
+        }
+        ClipData clip = new ClipData(description, new ClipData.Item(content.getContentUri()));
+        return receiver.onReceive(mTextView, clip, RichContentReceiver.SOURCE_INPUT_METHOD, 0);
     }
 
     @Override
