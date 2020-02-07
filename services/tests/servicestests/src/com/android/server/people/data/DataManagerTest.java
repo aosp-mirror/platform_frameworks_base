@@ -16,10 +16,15 @@
 
 package com.android.server.people.data;
 
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -33,6 +38,8 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Person;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
@@ -88,6 +95,7 @@ public final class DataManagerTest {
     private static final String TEST_SHORTCUT_ID = "sc";
     private static final String CONTACT_URI = "content://com.android.contacts/contacts/lookup/123";
     private static final String PHONE_NUMBER = "+1234567890";
+    private static final String NOTIFICATION_CHANNEL_ID = "test : sc";
     private static final long MILLIS_PER_MINUTE = 1000L * 60L;
 
     @Mock private Context mContext;
@@ -103,6 +111,7 @@ public final class DataManagerTest {
     @Mock private StatusBarNotification mStatusBarNotification;
     @Mock private Notification mNotification;
 
+    private NotificationChannel mNotificationChannel;
     private DataManager mDataManager;
     private int mCallingUserId;
     private TestInjector mInjector;
@@ -151,6 +160,10 @@ public final class DataManagerTest {
         when(mStatusBarNotification.getPackageName()).thenReturn(TEST_PKG_NAME);
         when(mStatusBarNotification.getUser()).thenReturn(UserHandle.of(USER_ID_PRIMARY));
         when(mNotification.getShortcutId()).thenReturn(TEST_SHORTCUT_ID);
+
+        mNotificationChannel = new NotificationChannel(
+                NOTIFICATION_CHANNEL_ID, "test channel", NotificationManager.IMPORTANCE_DEFAULT);
+        mNotificationChannel.setConversationId("test", TEST_SHORTCUT_ID);
 
         mCallingUserId = USER_ID_PRIMARY;
 
@@ -284,9 +297,8 @@ public final class DataManagerTest {
     }
 
     @Test
-    public void testNotificationListener() {
+    public void testNotificationOpened() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
-        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -305,6 +317,83 @@ public final class DataManagerTest {
                                 .getEventIndex(Event.TYPE_NOTIFICATION_OPENED)
                                 .getActiveTimeSlots()));
         assertEquals(1, activeNotificationOpenTimeSlots.size());
+    }
+
+    @Test
+    public void testNotificationChannelCreated() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.onShortcutAddedOrUpdated(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
+                mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
+
+        ConversationInfo conversationInfo = mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID);
+        assertEquals(NOTIFICATION_CHANNEL_ID, conversationInfo.getNotificationChannelId());
+        assertFalse(conversationInfo.isImportant());
+        assertFalse(conversationInfo.isNotificationSilenced());
+        assertFalse(conversationInfo.isDemoted());
+    }
+
+    @Test
+    public void testNotificationChannelModified() {
+        mNotificationChannel.setImportantConversation(true);
+
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.onShortcutAddedOrUpdated(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
+                mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        ConversationInfo conversationInfo = mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID);
+        assertEquals(NOTIFICATION_CHANNEL_ID, conversationInfo.getNotificationChannelId());
+        assertTrue(conversationInfo.isImportant());
+        assertFalse(conversationInfo.isNotificationSilenced());
+        assertFalse(conversationInfo.isDemoted());
+    }
+
+    @Test
+    public void testNotificationChannelDeleted() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.onShortcutAddedOrUpdated(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+        listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
+                mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
+        ConversationInfo conversationInfo = mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID);
+        assertEquals(NOTIFICATION_CHANNEL_ID, conversationInfo.getNotificationChannelId());
+
+        listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
+                mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+        conversationInfo = mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID);
+        assertNull(conversationInfo.getNotificationChannelId());
+        assertFalse(conversationInfo.isImportant());
+        assertFalse(conversationInfo.isNotificationSilenced());
+        assertFalse(conversationInfo.isDemoted());
     }
 
     @Test

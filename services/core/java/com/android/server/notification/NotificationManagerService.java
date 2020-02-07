@@ -9256,7 +9256,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 BackgroundThread.getHandler().post(() -> {
-                    if (hasCompanionDevice(serviceInfo)) {
+                    if (serviceInfo.isSystem || hasCompanionDevice(serviceInfo)) {
                         notifyNotificationChannelChanged(
                                 serviceInfo, pkg, user, channel, modificationType);
                     }
@@ -9276,7 +9276,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 BackgroundThread.getHandler().post(() -> {
-                    if (hasCompanionDevice(serviceInfo)) {
+                    if (serviceInfo.isSystem || hasCompanionDevice(serviceInfo)) {
                         notifyNotificationChannelGroupChanged(
                                 serviceInfo, pkg, user, group, modificationType);
                     }

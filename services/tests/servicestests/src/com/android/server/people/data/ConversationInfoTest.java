@@ -47,7 +47,7 @@ public final class ConversationInfoTest {
                 .setContactPhoneNumber(PHONE_NUMBER)
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
-                .setVip(true)
+                .setImportant(true)
                 .setNotificationSilenced(true)
                 .setBubbled(true)
                 .setDemoted(true)
@@ -62,7 +62,7 @@ public final class ConversationInfoTest {
         assertEquals(PHONE_NUMBER, conversationInfo.getContactPhoneNumber());
         assertEquals(NOTIFICATION_CHANNEL_ID, conversationInfo.getNotificationChannelId());
         assertTrue(conversationInfo.isShortcutLongLived());
-        assertTrue(conversationInfo.isVip());
+        assertTrue(conversationInfo.isImportant());
         assertTrue(conversationInfo.isNotificationSilenced());
         assertTrue(conversationInfo.isBubbled());
         assertTrue(conversationInfo.isDemoted());
@@ -83,7 +83,7 @@ public final class ConversationInfoTest {
         assertNull(conversationInfo.getContactPhoneNumber());
         assertNull(conversationInfo.getNotificationChannelId());
         assertFalse(conversationInfo.isShortcutLongLived());
-        assertFalse(conversationInfo.isVip());
+        assertFalse(conversationInfo.isImportant());
         assertFalse(conversationInfo.isNotificationSilenced());
         assertFalse(conversationInfo.isBubbled());
         assertFalse(conversationInfo.isDemoted());
@@ -101,7 +101,7 @@ public final class ConversationInfoTest {
                 .setContactPhoneNumber(PHONE_NUMBER)
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
-                .setVip(true)
+                .setImportant(true)
                 .setNotificationSilenced(true)
                 .setBubbled(true)
                 .setPersonImportant(true)
@@ -110,7 +110,7 @@ public final class ConversationInfoTest {
                 .build();
 
         ConversationInfo destination = new ConversationInfo.Builder(source)
-                .setVip(false)
+                .setImportant(false)
                 .setContactStarred(false)
                 .build();
 
@@ -120,7 +120,7 @@ public final class ConversationInfoTest {
         assertEquals(PHONE_NUMBER, destination.getContactPhoneNumber());
         assertEquals(NOTIFICATION_CHANNEL_ID, destination.getNotificationChannelId());
         assertTrue(destination.isShortcutLongLived());
-        assertFalse(destination.isVip());
+        assertFalse(destination.isImportant());
         assertTrue(destination.isNotificationSilenced());
         assertTrue(destination.isBubbled());
         assertTrue(destination.isPersonImportant());
