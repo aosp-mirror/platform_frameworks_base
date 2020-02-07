@@ -80,7 +80,6 @@ public final class InlineSuggestionInfo implements Parcelable {
             @NonNull InlinePresentationSpec presentationSpec,
             @NonNull @Source String source,
             @Nullable String[] autofillHints) {
-        // TODO(b/147394280): Add CTS test for the type field.
         return new InlineSuggestionInfo(presentationSpec, source, autofillHints, TYPE_SUGGESTION);
     }
 
