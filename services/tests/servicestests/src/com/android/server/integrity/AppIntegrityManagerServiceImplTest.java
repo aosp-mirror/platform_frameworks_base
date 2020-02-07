@@ -281,9 +281,9 @@ public class AppIntegrityManagerServiceImplTest {
         AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
         allowedInstallers = allowedInstallersCaptor.getValue();
         assertEquals(PACKAGE_NAME, appInstallMetadata.getPackageName());
-        assertEquals(APP_CERT, appInstallMetadata.getAppCertificate());
+        assertThat(appInstallMetadata.getAppCertificates()).containsExactly(APP_CERT);
         assertEquals(INSTALLER_SHA256, appInstallMetadata.getInstallerName());
-        assertEquals(INSTALLER_CERT, appInstallMetadata.getInstallerCertificate());
+        assertThat(appInstallMetadata.getInstallerCertificates()).containsExactly(INSTALLER_CERT);
         assertEquals(VERSION_CODE, appInstallMetadata.getVersionCode());
         assertFalse(appInstallMetadata.isPreInstalled());
         // These are hardcoded in the test apk android manifest

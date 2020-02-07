@@ -30,6 +30,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -387,7 +389,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
             if (mValue == null || mIsHashedValue == null) {
                 return false;
             }
-            return getStringMetadataValue(appInstallMetadata, getKey()).equals(mValue);
+            return getMetadataValue(appInstallMetadata, getKey()).contains(mValue);
         }
 
         @Override
@@ -448,17 +450,17 @@ public abstract class AtomicFormula extends IntegrityFormula {
             return mIsHashedValue;
         }
 
-        private static String getStringMetadataValue(
+        private static List<String> getMetadataValue(
                 AppInstallMetadata appInstallMetadata, int key) {
             switch (key) {
                 case AtomicFormula.PACKAGE_NAME:
-                    return appInstallMetadata.getPackageName();
+                    return Collections.singletonList(appInstallMetadata.getPackageName());
                 case AtomicFormula.APP_CERTIFICATE:
-                    return appInstallMetadata.getAppCertificate();
+                    return appInstallMetadata.getAppCertificates();
                 case AtomicFormula.INSTALLER_CERTIFICATE:
-                    return appInstallMetadata.getInstallerCertificate();
+                    return appInstallMetadata.getInstallerCertificates();
                 case AtomicFormula.INSTALLER_NAME:
-                    return appInstallMetadata.getInstallerName();
+                    return Collections.singletonList(appInstallMetadata.getInstallerName());
                 default:
                     throw new IllegalStateException(
                             "Unexpected key in StringAtomicFormula: " + key);
