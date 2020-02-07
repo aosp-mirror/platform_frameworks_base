@@ -901,6 +901,23 @@ class PhysicsAnimator<T> private constructor (val target: T) {
             verboseLogging = debug
         }
 
+        /**
+         * Estimates the end value of a fling that starts at the given value using the provided
+         * start velocity and fling configuration.
+         *
+         * This is only an estimate. Fling animations use a timing-based physics simulation that is
+         * non-deterministic, so this exact value may not be reached.
+         */
+        @JvmStatic
+        fun estimateFlingEndValue(
+            startValue: Float,
+            startVelocity: Float,
+            flingConfig: FlingConfig
+        ): Float {
+            val distance = startVelocity / (flingConfig.friction * FLING_FRICTION_SCALAR_MULTIPLIER)
+            return Math.min(flingConfig.max, Math.max(flingConfig.min, startValue + distance))
+        }
+
         @JvmStatic
         fun getReadablePropertyName(property: FloatPropertyCompat<*>): String {
             return when (property) {
