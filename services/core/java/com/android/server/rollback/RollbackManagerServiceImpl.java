@@ -795,7 +795,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (newRollback == null) {
                 newRollback = createNewRollbackLocked(parentSession);
                 mRollbacks.add(newRollback);
-                newRollback.setIsNewRollback(true);
             }
         }
         newRollback.addToken(token);
@@ -1159,7 +1158,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     // TODO: refactor #completeEnableRollback so we won't remove 'rollback' from
                     // mRollbacks here and add it back in #completeEnableRollback later.
                     mRollbacks.remove(rollback);
-                    rollback.setIsNewRollback(false);
                 }
                 // TODO: Now #completeEnableRollback returns the same rollback object as the
                 // parameter on success. It would be more readable to return a boolean to indicate
@@ -1349,24 +1347,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Rollback rollback = mRollbacks.get(i);
             if (rollback.getStagedSessionId() == sessionId
                     || rollback.containsSessionId(sessionId)) {
-                return rollback;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the NewRollback associated with the given package session.
-     * Returns null if no NewRollback is found for the given package
-     * session.
-     */
-    @WorkerThread
-    @GuardedBy("mLock")
-    Rollback getNewRollbackForPackageSessionLocked(int packageSessionId) {
-        // We expect mRollbacks to be a very small list; linear search
-        // should be plenty fast.
-        for (Rollback rollback: mRollbacks) {
-            if (rollback.isNewRollback() && rollback.containsSessionId(packageSessionId)) {
                 return rollback;
             }
         }
