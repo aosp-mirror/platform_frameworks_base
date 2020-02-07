@@ -16,6 +16,9 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -126,7 +129,7 @@ final class HfpClientProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return false;
         }
-        return mService.connect(device);
+        return mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
     }
 
     @Override
@@ -134,11 +137,8 @@ final class HfpClientProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return false;
         }
-        // Downgrade priority as user is disconnecting the headset.
-        if (mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
-        }
-        return mService.disconnect(device);
+
+        return mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
     }
 
     @Override
@@ -154,13 +154,13 @@ final class HfpClientProfile implements LocalBluetoothProfile {
         if (mService == null) {
             return false;
         }
-        return mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
     @Override
     public int getPreferred(BluetoothDevice device) {
         if (mService == null) {
-            return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            return CONNECTION_POLICY_FORBIDDEN;
         }
         return mService.getConnectionPolicy(device);
     }
@@ -171,11 +171,11 @@ final class HfpClientProfile implements LocalBluetoothProfile {
             return;
         }
         if (preferred) {
-            if (mService.getConnectionPolicy(device) < BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-                mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_FORBIDDEN);
+            mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
     }
 
