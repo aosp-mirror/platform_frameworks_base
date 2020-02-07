@@ -19,7 +19,6 @@ package android.view.accessibility;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.content.pm.ParceledListSlice;
-import android.graphics.Bitmap;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -157,9 +156,5 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return -1;
     }
 
-    public Bitmap takeScreenshot(int displayId) {
-        return null;
-    }
-
-    public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {}
+    public void takeScreenshot(int displayId, RemoteCallback callback) {}
 }

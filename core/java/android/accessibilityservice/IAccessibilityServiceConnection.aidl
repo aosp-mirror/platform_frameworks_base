@@ -110,7 +110,5 @@ interface IAccessibilityServiceConnection {
 
     int getWindowIdForLeashToken(IBinder token);
 
-    Bitmap takeScreenshot(int displayId);
-
-    void takeScreenshotWithCallback(int displayId, in RemoteCallback callback);
+    void takeScreenshot(int displayId, in RemoteCallback callback);
 }

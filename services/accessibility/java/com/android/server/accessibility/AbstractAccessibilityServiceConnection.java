@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID;
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER;
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
@@ -36,10 +38,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
-import android.graphics.Bitmap;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
@@ -50,6 +53,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -71,6 +75,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -105,6 +110,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private final DisplayManager mDisplayManager;
     private final PowerManager mPowerManager;
     private final IPlatformCompat mIPlatformCompat;
+
+    private final Handler mMainHandler;
 
     // Handler for scheduling method invocations on the main thread.
     public final InvocationHandler mInvocationHandler;
@@ -238,6 +245,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mSecurityPolicy = securityPolicy;
         mSystemActionPerformer = systemActionPerfomer;
         mSystemSupport = systemSupport;
+        mMainHandler = mainHandler;
         mInvocationHandler = new InvocationHandler(mainHandler.getLooper());
         mA11yWindowManager = a11yWindowManager;
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
@@ -959,52 +967,72 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mInvocationHandler.setSoftKeyboardCallbackEnabled(enabled);
     }
 
-    @Nullable
     @Override
-    public Bitmap takeScreenshot(int displayId) {
+    public void takeScreenshot(int displayId, RemoteCallback callback) {
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
-                return null;
+                sendScreenshotResult(true, null, callback);
+                return;
             }
 
             if (!mSecurityPolicy.canTakeScreenshotLocked(this)) {
-                return null;
+                sendScreenshotResult(true, null, callback);
+                throw new SecurityException("Services don't have the capability of taking"
+                        + " the screenshot.");
             }
         }
 
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
-            return null;
+            sendScreenshotResult(true, null, callback);
+            return;
         }
 
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(displayId);
         if (display == null) {
-            return null;
+            sendScreenshotResult(true, null, callback);
+            return;
         }
-        final Point displaySize = new Point();
-        display.getRealSize(displaySize);
 
-        final int rotation = display.getRotation();
-        Bitmap screenShot = null;
+        sendScreenshotResult(false, display, callback);
+    }
 
+    private void sendScreenshotResult(boolean noResult, Display display, RemoteCallback callback) {
+        final boolean noScreenshot = noResult;
         final long identity = Binder.clearCallingIdentity();
         try {
-            final Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
-            // TODO (b/145893483): calling new API with the display as a parameter
-            // when surface control supported.
-            screenShot = SurfaceControl.screenshot(crop, displaySize.x, displaySize.y,
-                    rotation);
-            if (screenShot != null) {
-                // Optimization for telling the bitmap that all of the pixels are known to be
-                // opaque (false). This is meant as a drawing hint, as in some cases a bitmap
-                // that is known to be opaque can take a faster drawing case than one that may
-                // have non-opaque per-pixel alpha values.
-                screenShot.setHasAlpha(false);
-            }
+            mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
+                if (noScreenshot) {
+                    callback.sendResult(null);
+                    return;
+                }
+                final Point displaySize = new Point();
+                // TODO (b/145893483): calling new API with the display as a parameter
+                // when surface control supported.
+                final IBinder token = SurfaceControl.getInternalDisplayToken();
+                final Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
+                final int rotation = display.getRotation();
+                display.getRealSize(displaySize);
+
+                final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
+                        SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, crop,
+                                displaySize.x, displaySize.y, false,
+                                rotation);
+                final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
+                final HardwareBuffer hardwareBuffer =
+                        HardwareBuffer.createFromGraphicBuffer(graphicBuffer);
+                final int colorSpaceId = screenshotBuffer.getColorSpace().getId();
+
+                // Send back the result.
+                final Bundle payload = new Bundle();
+                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
+                        hardwareBuffer);
+                payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID, colorSpaceId);
+                callback.sendResult(payload);
+            }, null).recycleOnUse());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return screenShot;
     }
 
     @Override
