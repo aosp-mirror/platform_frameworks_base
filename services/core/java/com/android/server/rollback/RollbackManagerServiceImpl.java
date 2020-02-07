@@ -788,10 +788,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         Rollback newRollback;
         synchronized (mLock) {
-            // See if we already have a NewRollback that contains this package
-            // session. If not, create a NewRollback for the parent session
+            // See if we already have a Rollback that contains this package
+            // session. If not, create a new Rollback for the parent session
             // that we will use for all the packages in the session.
-            newRollback = getNewRollbackForPackageSessionLocked(packageSession.getSessionId());
+            newRollback = getRollbackForSessionLocked(packageSession.getSessionId());
             if (newRollback == null) {
                 newRollback = createNewRollbackLocked(parentSession);
                 mRollbacks.add(newRollback);
