@@ -316,14 +316,21 @@ public class CrossProfileApps {
      *
      * <p>If other changes could have affected the app's ability to interact across profiles, as
      * defined by the return value of {@link #canInteractAcrossProfiles()}, such as changes to the
-     * admin or OEM consent whitelists, then {@link
-     * #resetInteractAcrossProfilesAppOpsIfInvalid(List)} should be used.
+     * admin or OEM consent whitelists, then {@link #resetInteractAcrossProfilesAppOps(Collection,
+     * Set)} should be used.
+     *
+     * <p>If the caller does not have the {@link android.Manifest.permission
+     * #CONFIGURE_INTERACT_ACROSS_PROFILES} permission, then they must have the permissions that
+     * would have been required to call {@link android.app.AppOpsManager#setMode(int, int, String,
+     * int)}, which includes {@link android.Manifest.permission#MANAGE_APP_OPS_MODES}.
+     *
+     * <p>Also requires either {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
      *
      * @hide
      */
     @RequiresPermission(
-            allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                    android.Manifest.permission.UPDATE_APP_OPS_STATS,
+            allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
                     android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void setInteractAcrossProfilesAppOp(@NonNull String packageName, @Mode int newMode) {
         try {
@@ -360,11 +367,18 @@ public class CrossProfileApps {
      * have changed as a result of non-user actions, such as changes to admin or OEM consent
      * whitelists.
      *
+     * <p>If the caller does not have the {@link android.Manifest.permission
+     * #CONFIGURE_INTERACT_ACROSS_PROFILES} permission, then they must have the permissions that
+     * would have been required to call {@link android.app.AppOpsManager#setMode(int, int, String,
+     * int)}, which includes {@link android.Manifest.permission#MANAGE_APP_OPS_MODES}.
+     *
+     * <p>Also requires either {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     *
      * @hide
      */
     @RequiresPermission(
-            allOf={android.Manifest.permission.MANAGE_APP_OPS_MODES,
-                    android.Manifest.permission.UPDATE_APP_OPS_STATS,
+            allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
                     android.Manifest.permission.INTERACT_ACROSS_USERS})
     public void resetInteractAcrossProfilesAppOps(
             @NonNull Collection<String> previousCrossProfilePackages,

@@ -70,6 +70,7 @@ applications that come with the platform
     <privapp-permissions package="com.android.managedprovisioning">
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
+        <permission name="android.permission.CONFIGURE_INTERACT_ACROSS_PROFILES"/>
         <permission name="android.permission.CRYPT_KEEPER"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
