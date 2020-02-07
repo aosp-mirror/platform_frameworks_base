@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * @hide
- * Class to represent device type (speaker, headset...), address and role (input, output)
+ * Class to represent device type (speaker, headset...), address (if known) and role (input, output)
  * of an audio device.
  * <p>Unlike {@link AudioDeviceInfo}, the device
  * doesn't need to be connected to be uniquely identified, it can
@@ -39,7 +39,7 @@ import java.util.Objects;
  * permission, APIs using one rely on MODIFY_AUDIO_ROUTING.
  */
 @SystemApi
-public final class AudioDeviceAddress implements Parcelable {
+public final class AudioDevice implements Parcelable {
 
     /**
      * A role identifying input devices, such as microphones.
@@ -78,7 +78,7 @@ public final class AudioDeviceAddress implements Parcelable {
      *                   type and address.
      */
     @SystemApi
-    public AudioDeviceAddress(@NonNull AudioDeviceInfo deviceInfo) {
+    public AudioDevice(@NonNull AudioDeviceInfo deviceInfo) {
         Objects.requireNonNull(deviceInfo);
         mRole = deviceInfo.isSink() ? ROLE_OUTPUT : ROLE_INPUT;
         mType = deviceInfo.getType();
@@ -93,7 +93,7 @@ public final class AudioDeviceAddress implements Parcelable {
      * @param address the address of the device, or an empty string for devices without one
      */
     @SystemApi
-    public AudioDeviceAddress(@Role int role, @AudioDeviceInfo.AudioDeviceType int type,
+    public AudioDevice(@Role int role, @AudioDeviceInfo.AudioDeviceType int type,
                               @NonNull String address) {
         Objects.requireNonNull(address);
         if (role != ROLE_OUTPUT && role != ROLE_INPUT) {
@@ -111,7 +111,7 @@ public final class AudioDeviceAddress implements Parcelable {
         mAddress = address;
     }
 
-    /*package*/ AudioDeviceAddress(int nativeType, @NonNull String address) {
+    /*package*/ AudioDevice(int nativeType, @NonNull String address) {
         mRole = (nativeType & AudioSystem.DEVICE_BIT_IN) != 0 ? ROLE_INPUT : ROLE_OUTPUT;
         mType = AudioDeviceInfo.convertInternalDeviceToDeviceType(nativeType);
         mAddress = address;
@@ -157,7 +157,7 @@ public final class AudioDeviceAddress implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AudioDeviceAddress that = (AudioDeviceAddress) o;
+        AudioDevice that = (AudioDevice) o;
         return ((mRole == that.mRole)
                 && (mType == that.mType)
                 && mAddress.equals(that.mAddress));
@@ -170,7 +170,7 @@ public final class AudioDeviceAddress implements Parcelable {
 
     @Override
     public String toString() {
-        return new String("AudioDeviceAddress:"
+        return new String("AudioDevice:"
                 + " role:" + roleToString(mRole)
                 + " type:" + (mRole == ROLE_OUTPUT ? AudioSystem.getOutputDeviceName(
                         AudioDeviceInfo.convertDeviceTypeToInternalDevice(mType))
@@ -191,25 +191,25 @@ public final class AudioDeviceAddress implements Parcelable {
         dest.writeString(mAddress);
     }
 
-    private AudioDeviceAddress(@NonNull Parcel in) {
+    private AudioDevice(@NonNull Parcel in) {
         mRole = in.readInt();
         mType = in.readInt();
         mAddress = in.readString();
     }
 
-    public static final @NonNull Parcelable.Creator<AudioDeviceAddress> CREATOR =
-            new Parcelable.Creator<AudioDeviceAddress>() {
+    public static final @NonNull Parcelable.Creator<AudioDevice> CREATOR =
+            new Parcelable.Creator<AudioDevice>() {
         /**
-         * Rebuilds an AudioDeviceAddress previously stored with writeToParcel().
-         * @param p Parcel object to read the AudioDeviceAddress from
-         * @return a new AudioDeviceAddress created from the data in the parcel
+         * Rebuilds an AudioDevice previously stored with writeToParcel().
+         * @param p Parcel object to read the AudioDevice from
+         * @return a new AudioDevice created from the data in the parcel
          */
-        public AudioDeviceAddress createFromParcel(Parcel p) {
-            return new AudioDeviceAddress(p);
+        public AudioDevice createFromParcel(Parcel p) {
+            return new AudioDevice(p);
         }
 
-        public AudioDeviceAddress[] newArray(int size) {
-            return new AudioDeviceAddress[size];
+        public AudioDevice[] newArray(int size) {
+            return new AudioDevice[size];
         }
     };
 }

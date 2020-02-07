@@ -24,7 +24,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioDeviceAddress;
+import android.media.AudioDevice;
 import android.media.AudioManager;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
@@ -402,7 +402,7 @@ import java.io.PrintWriter;
     }
 
     /*package*/ int setPreferredDeviceForStrategySync(int strategy,
-                                                      @NonNull AudioDeviceAddress device) {
+                                                      @NonNull AudioDevice device) {
         return mDeviceInventory.setPreferredDeviceForStrategySync(strategy, device);
     }
 
@@ -543,7 +543,7 @@ import java.io.PrintWriter;
         sendLMsgNoDelay(MSG_L_SCOCLIENT_DIED, SENDMSG_QUEUE, obj);
     }
 
-    /*package*/ void postSaveSetPreferredDeviceForStrategy(int strategy, AudioDeviceAddress device)
+    /*package*/ void postSaveSetPreferredDeviceForStrategy(int strategy, AudioDevice device)
     {
         sendILMsgNoDelay(MSG_IL_SAVE_PREF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy, device);
     }
@@ -904,7 +904,7 @@ import java.io.PrintWriter;
                 } break;
                 case MSG_IL_SAVE_PREF_DEVICE_FOR_STRATEGY: {
                     final int strategy = msg.arg1;
-                    final AudioDeviceAddress device = (AudioDeviceAddress) msg.obj;
+                    final AudioDevice device = (AudioDevice) msg.obj;
                     mDeviceInventory.onSaveSetPreferredDevice(strategy, device);
                 } break;
                 case MSG_I_SAVE_REMOVE_PREF_DEVICE_FOR_STRATEGY: {

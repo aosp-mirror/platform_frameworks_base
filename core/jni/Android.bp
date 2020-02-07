@@ -153,7 +153,7 @@ cc_library_shared {
                 "android_util_MemoryIntArray.cpp",
                 "android_util_Process.cpp",
                 "android_util_jar_StrictJarFile.cpp",
-                "android_media_AudioDeviceAddress.cpp",
+                "android_media_AudioDevice.cpp",
                 "android_media_AudioEffectDescriptor.cpp",
                 "android_media_AudioRecord.cpp",
                 "android_media_AudioSystem.cpp",
