@@ -8282,9 +8282,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (getKeyListener() != null && !mSingleLine && mEditor != null
                 && (mEditor.mInputType & EditorInfo.TYPE_MASK_CLASS)
                         == EditorInfo.TYPE_CLASS_TEXT) {
-            int variation = mEditor.mInputType & EditorInfo.TYPE_MASK_VARIATION;
-            if (variation == EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
-                    || variation == EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE) {
+            int multilineFlags = EditorInfo.TYPE_TEXT_FLAG_IME_MULTI_LINE
+                    | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
+            if ((mEditor.mInputType & multilineFlags) != 0) {
                 return false;
             }
         }
