@@ -12729,12 +12729,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return findViewInsideOutShouldExist(root, mNextFocusForwardId);
             case FOCUS_BACKWARD: {
                 if (mID == View.NO_ID) return null;
-                return root.findViewByPredicateInsideOut(this, new Predicate<View>() {
-                    @Override
-                    public boolean test(View t) {
-                        return t.findViewById(t.mNextFocusForwardId) == View.this;
-                    }
-                });
+                final View rootView = root;
+                final View startView = this;
+                // Since we have forward links but no backward links, we need to find the view that
+                // forward links to this view. We can't just find the view with the specified ID
+                // because view IDs need not be unique throughout the tree.
+                return root.findViewByPredicateInsideOut(startView,
+                    t -> findViewInsideOutShouldExist(rootView, t, t.mNextFocusForwardId)
+                            == startView);
             }
         }
         return null;
@@ -12764,11 +12766,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private View findViewInsideOutShouldExist(View root, int id) {
+        return findViewInsideOutShouldExist(root, this, id);
+    }
+
+    private View findViewInsideOutShouldExist(View root, View start, int id) {
         if (mMatchIdPredicate == null) {
             mMatchIdPredicate = new MatchIdPredicate();
         }
         mMatchIdPredicate.mId = id;
-        View result = root.findViewByPredicateInsideOut(this, mMatchIdPredicate);
+        View result = root.findViewByPredicateInsideOut(start, mMatchIdPredicate);
         if (result == null) {
             Log.w(VIEW_LOG_TAG, "couldn't find view with id " + id);
         }
