@@ -135,8 +135,7 @@ public class PluginInstanceManager<T extends Plugin> {
         ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
         for (PluginInfo info : plugins) {
             if (className.startsWith(info.mPackage)) {
-                disable(info, PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH);
-                disableAny = true;
+                disableAny |= disable(info, PluginEnabler.DISABLED_FROM_EXPLICIT_CRASH);
             }
         }
         return disableAny;
@@ -144,10 +143,11 @@ public class PluginInstanceManager<T extends Plugin> {
 
     public boolean disableAll() {
         ArrayList<PluginInfo> plugins = new ArrayList<PluginInfo>(mPluginHandler.mPlugins);
+        boolean disabledAny = false;
         for (int i = 0; i < plugins.size(); i++) {
-            disable(plugins.get(i), PluginEnabler.DISABLED_FROM_SYSTEM_CRASH);
+            disabledAny |= disable(plugins.get(i), PluginEnabler.DISABLED_FROM_SYSTEM_CRASH);
         }
-        return plugins.size() != 0;
+        return disabledAny;
     }
 
     private boolean isPluginWhitelisted(ComponentName pluginName) {
@@ -166,7 +166,7 @@ public class PluginInstanceManager<T extends Plugin> {
         return false;
     }
 
-    private void disable(PluginInfo info, @PluginEnabler.DisableReason int reason) {
+    private boolean disable(PluginInfo info, @PluginEnabler.DisableReason int reason) {
         // Live by the sword, die by the sword.
         // Misbehaving plugins get disabled and won't come back until uninstall/reinstall.
 
@@ -176,10 +176,12 @@ public class PluginInstanceManager<T extends Plugin> {
         // assuming one of them must be bad.
         if (isPluginWhitelisted(pluginComponent)) {
             // Don't disable whitelisted plugins as they are a part of the OS.
-            return;
+            return false;
         }
         Log.w(TAG, "Disabling plugin " + pluginComponent.flattenToShortString());
         mManager.getPluginEnabler().setDisabled(pluginComponent, reason);
+
+        return true;
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
