@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -34,6 +36,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
+@SystemApi(client = MODULE_LIBRARIES)
 @TestApi
 public final class TetheredClient implements Parcelable {
     @NonNull

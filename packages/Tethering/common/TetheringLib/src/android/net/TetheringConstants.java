@@ -16,6 +16,9 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
+import android.annotation.SystemApi;
 import android.os.ResultReceiver;
 
 /**
@@ -28,39 +31,30 @@ import android.os.ResultReceiver;
  * symbols from framework-tethering even when they are in a non-hidden class.
  * @hide
  */
+@SystemApi(client = MODULE_LIBRARIES)
 public class TetheringConstants {
     /**
      * Extra used for communicating with the TetherService. Includes the type of tethering to
      * enable if any.
-     *
-     * {@hide}
      */
     public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
     /**
      * Extra used for communicating with the TetherService. Includes the type of tethering for
      * which to cancel provisioning.
-     *
-     * {@hide}
      */
     public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
     /**
      * Extra used for communicating with the TetherService. True to schedule a recheck of tether
      * provisioning.
-     *
-     * {@hide}
      */
     public static final String EXTRA_SET_ALARM = "extraSetAlarm";
     /**
      * Tells the TetherService to run a provision check now.
-     *
-     * {@hide}
      */
     public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
     /**
      * Extra used for communicating with the TetherService. Contains the {@link ResultReceiver}
      * which will receive provisioning results. Can be left empty.
-     *
-     * {@hide}
      */
     public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
 }

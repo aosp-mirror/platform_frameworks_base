@@ -403,7 +403,6 @@ java_defaults {
         "unsupportedappusage",
         "framework-media-stubs-systemapi",
         "framework-mediaprovider-stubs-systemapi",
-        "framework-tethering",
         "framework-telephony-stubs",
     ],
 
@@ -472,6 +471,7 @@ java_library {
         "framework-permission-stubs-systemapi",
         "framework-wifi-stubs",
         "ike-stubs",
+        "framework-tethering-stubs",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -496,6 +496,7 @@ java_library {
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
         "//frameworks/base/apex/statsd/service",
+        "//frameworks/base/packages/Tethering/tests/unit",
     ],
 }
 
@@ -523,8 +524,7 @@ java_library {
         "framework-statsd",
         "framework-wifi-stubs",
         "ike-stubs",
-        // TODO(b/147200698): should be the stub of framework-tethering
-        "framework-tethering",
+        "framework-tethering-stubs",
         // TODO (b/147688669) should be framework-telephony-stubs
         "framework-telephony",
         // TODO(jiyong): add stubs for APEXes here
