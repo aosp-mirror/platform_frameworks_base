@@ -2325,10 +2325,12 @@ public class UserManager {
      * @param restrictionKey the string key representing the restriction
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      */
+    @TestApi
     @UnsupportedAppUsage
-    @RequiresPermission(Manifest.permission.MANAGE_USERS)
-    public boolean hasBaseUserRestriction(@UserRestrictionKey String restrictionKey,
-            UserHandle userHandle) {
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    public boolean hasBaseUserRestriction(@UserRestrictionKey @NonNull String restrictionKey,
+            @NonNull UserHandle userHandle) {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
