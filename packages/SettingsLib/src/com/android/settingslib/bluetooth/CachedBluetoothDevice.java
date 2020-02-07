@@ -136,7 +136,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         synchronized (mProfileLock) {
             if (newProfileState == BluetoothProfile.STATE_CONNECTED) {
                 if (profile instanceof MapProfile) {
-                    profile.setPreferred(mDevice, true);
+                    profile.setEnabled(mDevice, true);
                 }
                 if (!mProfiles.contains(profile)) {
                     mRemovedProfiles.remove(profile);
@@ -149,7 +149,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 }
             } else if (profile instanceof MapProfile
                     && newProfileState == BluetoothProfile.STATE_DISCONNECTED) {
-                profile.setPreferred(mDevice, false);
+                profile.setEnabled(mDevice, false);
             } else if (mLocalNapRoleConnected && profile instanceof PanProfile
                     && ((PanProfile) profile).isLocalRoleNap(mDevice)
                     && newProfileState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -173,12 +173,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         PbapServerProfile PbapProfile = mProfileManager.getPbapProfile();
         if (PbapProfile != null && isConnectedProfile(PbapProfile))
         {
-            PbapProfile.disconnect(mDevice);
+            PbapProfile.setEnabled(mDevice, false);
         }
     }
 
     public void disconnect(LocalBluetoothProfile profile) {
-        if (profile.disconnect(mDevice)) {
+        if (profile.setEnabled(mDevice, false)) {
             if (BluetoothUtils.D) {
                 Log.d(TAG, "Command sent successfully:DISCONNECT " + describe(profile));
             }
@@ -265,7 +265,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (!ensurePaired()) {
             return;
         }
-        if (profile.connect(mDevice)) {
+        if (profile.setEnabled(mDevice, true)) {
             if (BluetoothUtils.D) {
                 Log.d(TAG, "Command sent successfully:CONNECT " + describe(profile));
             }
