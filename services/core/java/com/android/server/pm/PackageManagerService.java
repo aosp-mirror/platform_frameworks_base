@@ -3627,7 +3627,7 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 handle = NativeLibraryHelper.Handle.create(dstCodePath);
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                        null /*abiOverride*/);
+                        null /*abiOverride*/, false /*isIncremental*/);
             } catch (IOException e) {
                 logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
                         + "; pkg: " + packageName);
@@ -14970,12 +14970,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 return ret;
             }
 
+            final boolean isIncremental = isIncrementalPath(codeFile.getAbsolutePath());
             final File libraryRoot = new File(codeFile, LIB_DIR_NAME);
             NativeLibraryHelper.Handle handle = null;
             try {
                 handle = NativeLibraryHelper.Handle.create(codeFile);
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                        abiOverride);
+                        abiOverride, isIncremental);
             } catch (IOException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
