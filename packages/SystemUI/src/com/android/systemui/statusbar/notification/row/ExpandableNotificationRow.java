@@ -72,7 +72,6 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -2189,7 +2188,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param allowChildExpansion whether a call to this method allows expanding children
      */
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
-        Dependency.get(FalsingManager.class).setNotificationExpanded();
+        getFalsingManager().setNotificationExpanded();
         if (mIsSummaryWithChildren && !shouldShowPublic() && allowChildExpansion
                 && !mChildrenContainer.showingAsLowPriority()) {
             final boolean wasExpanded = mGroupManager.isGroupExpanded(mEntry.getSbn());
