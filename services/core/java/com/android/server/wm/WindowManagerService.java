@@ -187,6 +187,7 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -308,6 +309,8 @@ import java.util.function.Supplier;
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowManagerService" : TAG_WM;
+
+    private static final String WM_USE_BLAST_ADAPTER_FLAG = "wm_use_blast_adapter";
 
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
@@ -622,6 +625,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // The root of the device window hierarchy.
     RootWindowContainer mRoot;
+
+    // Whether the system should use BLAST for ViewRootImpl
+    final boolean mUseBLAST;
 
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
@@ -1136,6 +1142,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
+
+        mUseBLAST = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
+                    WM_USE_BLAST_ADAPTER_FLAG, false);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -5048,6 +5058,11 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public IWindowSession openSession(IWindowSessionCallback callback) {
         return new Session(this, callback);
+    }
+
+    @Override
+    public boolean useBLAST() {
+        return mUseBLAST;
     }
 
     @Override
