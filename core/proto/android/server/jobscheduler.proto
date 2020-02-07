@@ -219,12 +219,8 @@ message ConstantsProto {
     // The maximum number of background jobs we allow when the system is in a
     // critical memory state.
     optional int32 bg_critical_job_count = 14;
-    // The maximum number of times we allow a job to have itself rescheduled
-    // before giving up on it, for standard jobs.
-    optional int32 max_standard_reschedule_count = 15;
-    // The maximum number of times we allow a job to have itself rescheduled
-    // before giving up on it, for jobs that are executing work.
-    optional int32 max_work_reschedule_count = 16;
+    reserved 15; // max_standard_reschedule_count
+    reserved 16; // max_work_reschedule_count
     // The minimum backoff time to allow for linear backoff.
     optional int64 min_linear_backoff_time_ms = 17;
     // The minimum backoff time to allow for exponential backoff.
