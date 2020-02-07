@@ -105,7 +105,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
             defaultServiceInfo = new ServiceInfo();
             defaultServiceInfo.metaData = new Bundle();
             defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, true);
-            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_BOOLEAN_TILE, true);
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_TOGGLEABLE_TILE, true);
         }
         when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), anyInt()))
                 .thenReturn(defaultServiceInfo);
@@ -244,7 +244,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBooleanTile() throws Exception {
-        assertTrue(mStateManager.isBooleanTile());
+    public void testToggleableTile() throws Exception {
+        assertTrue(mStateManager.isToggleableTile());
     }
 }
