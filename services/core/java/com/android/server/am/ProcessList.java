@@ -1768,7 +1768,10 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
-            if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
+            // Enable heap pointer tagging, unless disabled by the app manifest, target sdk level,
+            // or the compat feature.
+            if (app.info.allowsNativeHeapPointerTagging()
+                    && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
                 runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
             }
 
