@@ -24,8 +24,6 @@ import android.app.Notification;
 import android.app.Person;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
-import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -69,6 +67,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A class manages the lifecycle of the conversations and associated data, and exposes the methods
@@ -96,7 +95,6 @@ public class DataManager {
     private final ContentObserver mMmsSmsContentObserver;
 
     private ShortcutServiceInternal mShortcutServiceInternal;
-    private UsageStatsManagerInternal mUsageStatsManagerInternal;
     private ShortcutManager mShortcutManager;
     private UserManager mUserManager;
 
@@ -118,7 +116,6 @@ public class DataManager {
     /** Initialization. Called when the system services are up running. */
     public void initialize() {
         mShortcutServiceInternal = LocalServices.getService(ShortcutServiceInternal.class);
-        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
         mShortcutManager = mContext.getSystemService(ShortcutManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
 
@@ -386,36 +383,6 @@ public class DataManager {
     }
 
     @VisibleForTesting
-    @WorkerThread
-    void queryUsageStatsService(@UserIdInt int userId, long currentTime, long lastQueryTime) {
-        UsageEvents usageEvents = mUsageStatsManagerInternal.queryEventsForUser(
-                userId, lastQueryTime, currentTime, false, false);
-        if (usageEvents == null) {
-            return;
-        }
-        while (usageEvents.hasNextEvent()) {
-            UsageEvents.Event e = new UsageEvents.Event();
-            usageEvents.getNextEvent(e);
-
-            String packageName = e.getPackageName();
-            PackageData packageData = getPackage(packageName, userId);
-            if (packageData == null) {
-                continue;
-            }
-            if (e.getEventType() == UsageEvents.Event.SHORTCUT_INVOCATION) {
-                String shortcutId = e.getShortcutId();
-                if (packageData.getConversationStore().getConversation(shortcutId) != null) {
-                    EventHistoryImpl eventHistory =
-                            packageData.getEventStore().getOrCreateShortcutEventHistory(
-                                    shortcutId);
-                    eventHistory.addEvent(
-                            new Event(e.getTimeStamp(), Event.TYPE_SHORTCUT_INVOCATION));
-                }
-            }
-        }
-    }
-
-    @VisibleForTesting
     ContentObserver getContactsContentObserverForTesting(@UserIdInt int userId) {
         return mContactsContentObservers.get(userId);
     }
@@ -612,19 +579,20 @@ public class DataManager {
      */
     private class UsageStatsQueryRunnable implements Runnable {
 
-        private final int mUserId;
-        private long mLastQueryTime;
+        private final UsageStatsQueryHelper mUsageStatsQueryHelper;
+        private long mLastEventTimestamp;
 
         private UsageStatsQueryRunnable(int userId) {
-            mUserId = userId;
-            mLastQueryTime = System.currentTimeMillis() - QUERY_EVENTS_MAX_AGE_MS;
+            mUsageStatsQueryHelper = mInjector.createUsageStatsQueryHelper(userId,
+                    (packageName) -> getPackage(packageName, userId));
+            mLastEventTimestamp = System.currentTimeMillis() - QUERY_EVENTS_MAX_AGE_MS;
         }
 
         @Override
         public void run() {
-            long currentTime = System.currentTimeMillis();
-            queryUsageStatsService(mUserId, currentTime, mLastQueryTime);
-            mLastQueryTime = currentTime;
+            if (mUsageStatsQueryHelper.querySince(mLastEventTimestamp)) {
+                mLastEventTimestamp = mUsageStatsQueryHelper.getLastEventTimestamp();
+            }
         }
     }
 
@@ -678,6 +646,11 @@ public class DataManager {
         SmsQueryHelper createSmsQueryHelper(Context context,
                 BiConsumer<String, Event> eventConsumer) {
             return new SmsQueryHelper(context, eventConsumer);
+        }
+
+        UsageStatsQueryHelper createUsageStatsQueryHelper(@UserIdInt int userId,
+                Function<String, PackageData> packageDataGetter) {
+            return new UsageStatsQueryHelper(userId, packageDataGetter);
         }
 
         int getCallingUserId() {
