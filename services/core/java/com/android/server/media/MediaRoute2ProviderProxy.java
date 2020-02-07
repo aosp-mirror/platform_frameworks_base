@@ -411,6 +411,12 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             mActiveConnection.dispose();
             mActiveConnection = null;
             setAndNotifyProviderState(null);
+            synchronized (mLock) {
+                for (RoutingSessionInfo sessionInfo : mSessionInfos) {
+                    mCallback.onSessionReleased(this, sessionInfo);
+                }
+                mSessionInfos.clear();
+            }
         }
     }
 
