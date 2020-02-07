@@ -59,7 +59,7 @@ public class NotifBindPipelineTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(collection);
+        mBindPipeline = new NotifBindPipeline(collection, mock(NotifBindPipelineLogger.class));
         mBindPipeline.setStage(mStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =

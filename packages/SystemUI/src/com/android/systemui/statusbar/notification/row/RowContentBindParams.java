@@ -157,6 +157,15 @@ public final class RowContentBindParams {
         return mViewsNeedReinflation;
     }
 
+    @Override
+    public String toString() {
+        return String.format("RowContentBindParams[mContentViews=%x mDirtyContentViews=%x "
+                + "mUseLowPriority=%b mUseChildInGroup=%b mUseIncreasedHeight=%b "
+                + "mUseIncreasedHeadsUpHeight=%b mViewsNeedReinflation=%b]",
+                mContentViews, mDirtyContentViews, mUseLowPriority, mUseChildInGroup,
+                mUseIncreasedHeight, mUseIncreasedHeadsUpHeight, mViewsNeedReinflation);
+    }
+
     /**
      * Content views that should be inflated by default for all notifications.
      */
