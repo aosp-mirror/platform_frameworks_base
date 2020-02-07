@@ -2391,4 +2391,14 @@ public class WifiManagerTest {
         assertFalse(mWifiManager.isScanThrottleEnabled());
         verify(mWifiService).isScanThrottleEnabled();
     }
+
+    @Test
+    public void testAutoWakeup() throws Exception {
+        mWifiManager.setAutoWakeupEnabled(true);
+        verify(mWifiService).setAutoWakeupEnabled(true);
+
+        when(mWifiService.isAutoWakeupEnabled()).thenReturn(false);
+        assertFalse(mWifiManager.isAutoWakeupEnabled());
+        verify(mWifiService).isAutoWakeupEnabled();
+    }
 }
