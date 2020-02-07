@@ -81,6 +81,9 @@ public interface DozeHost {
      */
     void stopPulsing();
 
+    /** Returns whether doze is suppressed. */
+    boolean isDozeSuppressed();
+
     interface Callback {
         /**
          * Called when a high priority notification is added.
@@ -94,6 +97,9 @@ public interface DozeHost {
          * @param active whether power save is active or not
          */
         default void onPowerSaveChanged(boolean active) {}
+
+        /** Called when the doze suppression state changes. */
+        default void onDozeSuppressedChanged(boolean suppressed) {}
     }
 
     interface PulseCallback {

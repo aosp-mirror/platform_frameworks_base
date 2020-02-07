@@ -859,6 +859,18 @@ public class StatusBarTest extends SysuiTestCase {
                 any(UserHandle.class));
     }
 
+    @Test
+    public void testSuppressAmbientDisplay_suppress() {
+        mStatusBar.suppressAmbientDisplay(true);
+        verify(mDozeServiceHost).setDozeSuppressed(true);
+    }
+
+    @Test
+    public void testSuppressAmbientDisplay_unsuppress() {
+        mStatusBar.suppressAmbientDisplay(false);
+        verify(mDozeServiceHost).setDozeSuppressed(false);
+    }
+
     public static class TestableNotificationInterruptionStateProvider extends
             NotificationInterruptionStateProvider {
 

@@ -842,66 +842,6 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testSuppressAmbientDisplay_suppressed() throws Exception {
-        createService();
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
-
-        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
-            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(1);
-    }
-
-    @Test
-    public void testSuppressAmbientDisplay_multipleCallers_suppressed() throws Exception {
-        createService();
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test1", true);
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test2", false);
-
-        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
-            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(1);
-    }
-
-    @Test
-    public void testSuppressAmbientDisplay_suppressTwice_suppressed() throws Exception {
-        createService();
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
-
-        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
-            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(1);
-    }
-
-    @Test
-    public void testSuppressAmbientDisplay_suppressTwiceThenUnsuppress_notSuppressed()
-            throws Exception {
-        createService();
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", true);
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
-
-        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
-            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(0);
-    }
-
-    @Test
-    public void testSuppressAmbientDisplay_notSuppressed() throws Exception {
-        createService();
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
-
-        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
-            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(0);
-    }
-
-    @Test
-    public void testSuppressAmbientDisplay_unsuppressTwice_notSuppressed() throws Exception {
-        createService();
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
-        mService.getBinderServiceInstance().suppressAmbientDisplay("test", false);
-
-        assertThat(Settings.Secure.getInt(mContextSpy.getContentResolver(),
-            Settings.Secure.SUPPRESS_DOZE)).isEqualTo(0);
-    }
-
-    @Test
     public void testIsAmbientDisplaySuppressed_default_notSuppressed() throws Exception {
         createService();
 
