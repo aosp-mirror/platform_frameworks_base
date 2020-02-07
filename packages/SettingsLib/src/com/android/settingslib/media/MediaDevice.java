@@ -22,8 +22,7 @@ import android.media.MediaRouter2Manager;
 import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
-
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
