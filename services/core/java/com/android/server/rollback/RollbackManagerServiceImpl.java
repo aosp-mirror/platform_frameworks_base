@@ -235,16 +235,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         Slog.v(TAG, "broadcast=ACTION_CANCEL_ENABLE_ROLLBACK token=" + token);
                     }
                     synchronized (mLock) {
-                        Rollback found = null;
-                        for (Rollback rollback : mRollbacks) {
-                            if (rollback.isNewRollback() && rollback.hasToken(token)) {
-                                found = rollback;
+                        for (int i = 0; i < mRollbacks.size(); ++i) {
+                            Rollback rollback = mRollbacks.get(i);
+                            if (rollback.hasToken(token) && rollback.isEnabling()) {
+                                mRollbacks.remove(i);
+                                rollback.delete(mAppDataRollbackHelper);
                                 break;
                             }
-                        }
-                        if (found != null) {
-                            mRollbacks.remove(found);
-                            found.delete(mAppDataRollbackHelper);
                         }
                     }
                 }
