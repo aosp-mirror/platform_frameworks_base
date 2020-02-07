@@ -19,6 +19,7 @@ package com.android.server.rollback;
 import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.AppOpsManager;
@@ -802,28 +803,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         return enableRollbackForPackageSession(newRollback, packageSession);
     }
 
-    @WorkerThread
-    private void removeRollbackForPackageSessionId(int sessionId) {
-        if (LOCAL_LOGV) {
-            Slog.v(TAG, "removeRollbackForPackageSessionId=" + sessionId);
-        }
-
-        synchronized (mLock) {
-            Iterator<Rollback> iter = mRollbacks.iterator();
-            while (iter.hasNext()) {
-                Rollback rollback = iter.next();
-                if (rollback.getStagedSessionId() == sessionId
-                        || (rollback.isNewRollback() && rollback.containsSessionId(sessionId))) {
-                    Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
-                            + " for session id=" + sessionId);
-                    iter.remove();
-                    rollback.delete(mAppDataRollbackHelper);
-                    break;
-                }
-            }
-        }
-    }
-
     /**
      * Do code and userdata backups to enable rollback of the given session.
      * In case of multiPackage sessions, <code>session</code> should be one of
@@ -1189,7 +1168,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
                 }
             } else {
-                removeRollbackForPackageSessionId(sessionId);
+                synchronized (mLock) {
+                    Rollback rollback = getRollbackForSessionLocked(sessionId);
+                    if (rollback != null && rollback.isEnabling()) {
+                        Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
+                                + " for failed session id=" + sessionId);
+                        mRollbacks.remove(rollback);
+                        rollback.delete(mAppDataRollbackHelper);
+                    }
+                }
             }
         }
     }
@@ -1347,6 +1334,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         return rollback;
+    }
+
+    /**
+     * Returns the Rollback associated with the given session if parent or child session id matches.
+     * Returns null if not found.
+     */
+    @WorkerThread
+    @GuardedBy("mLock")
+    @Nullable
+    private Rollback getRollbackForSessionLocked(int sessionId) {
+        // We expect mRollbacks to be a very small list; linear search should be plenty fast.
+        for (int i = 0; i < mRollbacks.size(); ++i) {
+            Rollback rollback = mRollbacks.get(i);
+            if (rollback.getStagedSessionId() == sessionId
+                    || rollback.containsSessionId(sessionId)) {
+                return rollback;
+            }
+        }
+        return null;
     }
 
     /**
