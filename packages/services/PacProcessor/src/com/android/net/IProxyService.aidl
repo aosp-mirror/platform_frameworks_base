@@ -21,7 +21,4 @@ interface IProxyService
     String resolvePacFile(String host, String url);
 
     oneway void setPacFile(String scriptContents);
-
-    oneway void startPacSystem();
-    oneway void stopPacSystem();
 }
