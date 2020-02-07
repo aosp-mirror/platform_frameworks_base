@@ -3496,7 +3496,9 @@ public final class PowerManagerService extends SystemService
         }
 
         // Control light outside of lock.
-        light.setFlashing(color, LogicalLight.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
+        if (light != null) {
+            light.setFlashing(color, LogicalLight.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
+        }
     }
 
     private void setDozeAfterScreenOffInternal(boolean on) {
