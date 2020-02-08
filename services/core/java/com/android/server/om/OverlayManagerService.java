@@ -913,9 +913,9 @@ public final class OverlayManagerService extends SystemService {
                 }
 
                 try {
-                    ActivityManager.getService().broadcastIntent(null, intent, null, null, 0,
-                            null, null, null, android.app.AppOpsManager.OP_NONE, null, false, false,
-                            userId);
+                    ActivityManager.getService().broadcastIntentWithFeature(null, null, intent,
+                            null, null, 0, null, null, null, android.app.AppOpsManager.OP_NONE,
+                            null, false, false, userId);
                 } catch (RemoteException e) {
                     // Intentionally left empty.
                 }

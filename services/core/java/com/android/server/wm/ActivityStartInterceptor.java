@@ -34,6 +34,7 @@ import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -85,6 +86,7 @@ class ActivityStartInterceptor {
     private int mUserId;
     private int mStartFlags;
     private String mCallingPackage;
+    private @Nullable String mCallingFeatureId;
 
     /*
      * Per-intent states that were load from ActivityStarter and are subject to modifications
@@ -120,19 +122,20 @@ class ActivityStartInterceptor {
      * method should not be changed during intercept.
      */
     void setStates(int userId, int realCallingPid, int realCallingUid, int startFlags,
-            String callingPackage) {
+            String callingPackage, @Nullable String callingFeatureId) {
         mRealCallingPid = realCallingPid;
         mRealCallingUid = realCallingUid;
         mUserId = userId;
         mStartFlags = startFlags;
         mCallingPackage = callingPackage;
+        mCallingFeatureId = callingFeatureId;
     }
 
     private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
         Bundle activityOptions = deferCrossProfileAppsAnimationIfNecessary();
         final IIntentSender target = mService.getIntentSenderLocked(
-                INTENT_SENDER_ACTIVITY, mCallingPackage, callingUid, mUserId, null /*token*/,
-                null /*resultCode*/, 0 /*requestCode*/,
+                INTENT_SENDER_ACTIVITY, mCallingPackage, mCallingFeatureId, callingUid, mUserId,
+                null /*token*/, null /*resultCode*/, 0 /*requestCode*/,
                 new Intent[] { mIntent }, new String[] { mResolvedType },
                 flags, activityOptions);
         return new IntentSender(target);

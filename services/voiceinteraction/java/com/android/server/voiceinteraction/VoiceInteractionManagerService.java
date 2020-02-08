@@ -747,7 +747,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startVoiceActivity(IBinder token, Intent intent, String resolvedType) {
+        public int startVoiceActivity(IBinder token, Intent intent, String resolvedType,
+                String callingFeatureId) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startVoiceActivity without running voice interaction service");
@@ -757,8 +758,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startVoiceActivityLocked(callingPid, callingUid, token,
-                            intent, resolvedType);
+                    return mImpl.startVoiceActivityLocked(callingFeatureId, callingPid, callingUid,
+                            token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -766,7 +767,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startAssistantActivity(IBinder token, Intent intent, String resolvedType) {
+        public int startAssistantActivity(IBinder token, Intent intent, String resolvedType,
+                String callingFeatureId) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startAssistantActivity without running voice interaction service");
@@ -776,8 +778,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startAssistantActivityLocked(callingPid, callingUid, token,
-                            intent, resolvedType);
+                    return mImpl.startAssistantActivityLocked(callingFeatureId, callingPid,
+                            callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
