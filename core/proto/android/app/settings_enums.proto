@@ -2587,4 +2587,8 @@ enum PageId {
 
     // OPEN: Settings -> Apps & Notifications -> Special App Access
     INTERACT_ACROSS_PROFILES = 1829;
+
+    // OPEN: Settings > Notifications > (app or conversations) > conversation
+    NOTIFICATION_CONVERSATION_SETTINGS = 1830;
+
 }

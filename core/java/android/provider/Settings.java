@@ -1830,6 +1830,17 @@ public final class Settings {
     public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
 
     /**
+     * Activity Extra: The {@link NotificationChannel#getConversationId()} of the notification
+     * conversation settings to display.
+     * <p>
+     * This is an optional extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}. If
+     * included the system will first look up notification settings by channel and conversation id,
+     * and will fall back to channel id if a specialized channel for this conversation doesn't
+     * exist, similar to {@link NotificationManager#getNotificationChannel(String, String)}.
+     */
+    public static final String EXTRA_CONVERSATION_ID = "android.provider.extra.CONVERSATION_ID";
+
+    /**
      * Activity Action: Show notification redaction settings.
      *
      * @hide

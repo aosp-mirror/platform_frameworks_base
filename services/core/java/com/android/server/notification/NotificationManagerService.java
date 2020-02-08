@@ -193,6 +193,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
+import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
@@ -3221,9 +3222,10 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public NotificationChannel getNotificationChannelForPackage(String pkg, int uid,
-                String channelId, boolean includeDeleted) {
+                String channelId, String conversationId, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mPreferencesHelper.getNotificationChannel(pkg, uid, channelId, includeDeleted);
+            return mPreferencesHelper.getConversationNotificationChannel(
+                    pkg, uid, channelId, conversationId, true, includeDeleted);
         }
 
         @Override
@@ -3357,6 +3359,27 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("getNotificationChannelGroupsForPackage");
             return mPreferencesHelper.getNotificationChannelGroups(
                     pkg, uid, includeDeleted, true, false);
+        }
+
+        @Override
+        public ParceledListSlice<ConversationChannelWrapper> getConversationsForPackage(String pkg,
+                int uid) {
+            enforceSystemOrSystemUI("getConversationsForPackage");
+            ArrayList<ConversationChannelWrapper> conversations =
+                    mPreferencesHelper.getConversations(pkg, uid);
+            for (ConversationChannelWrapper conversation : conversations) {
+                LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery()
+                        .setPackage(pkg)
+                        .setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED)
+                        .setShortcutIds(Arrays.asList(
+                                conversation.getNotificationChannel().getConversationId()));
+                List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(
+                        query, UserHandle.of(UserHandle.getUserId(uid)));
+                if (shortcuts != null && !shortcuts.isEmpty()) {
+                    conversation.setShortcutInfo(shortcuts.get(0));
+                }
+            }
+            return new ParceledListSlice<>(conversations);
         }
 
         @Override
