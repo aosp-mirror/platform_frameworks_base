@@ -1345,7 +1345,9 @@ public class ExifInterface {
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mHasThumbnail;
-    // The following values used for indicating a thumbnail position.
+    private boolean mHasThumbnailStrips;
+    private boolean mAreThumbnailStripsConsecutive;
+    // Used to indicate the position of the thumbnail (includes offset to EXIF data segment).
     private int mThumbnailOffset;
     private int mThumbnailLength;
     private byte[] mThumbnailBytes;
@@ -2043,10 +2045,12 @@ public class ExifInterface {
 
     /**
      * Returns the offset and length of thumbnail inside the image file, or
-     * {@code null} if there is no thumbnail.
+     * {@code null} if either there is no thumbnail or the thumbnail bytes are stored
+     * non-consecutively.
      *
      * @return two-element array, the offset in the first value, and length in
-     *         the second, or {@code null} if no thumbnail was found.
+     *         the second, or {@code null} if no thumbnail was found or the thumbnail strips are
+     *         not placed consecutively.
      * @throws IllegalStateException if {@link #saveAttributes()} has been
      *             called since the underlying file was initially parsed, since
      *             that means offsets may have changed.
@@ -2058,10 +2062,12 @@ public class ExifInterface {
         }
 
         if (mHasThumbnail) {
+            if (mHasThumbnailStrips && !mAreThumbnailStripsConsecutive) {
+                return null;
+            }
             return new long[] { mThumbnailOffset, mThumbnailLength };
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -2536,10 +2542,9 @@ public class ExifInterface {
                         final byte[] value = Arrays.copyOfRange(bytes,
                                 IDENTIFIER_EXIF_APP1.length, bytes.length);
 
-                        readExifSegment(value, imageType);
-
                         // Save offset values for createJpegThumbnailBitmap() function
                         mExifOffset = (int) offset;
+                        readExifSegment(value, imageType);
                     } else if (ArrayUtils.startsWith(bytes, IDENTIFIER_XMP_APP1)) {
                         // See XMP Specification Part 3: Storage in Files, 1.1.3 JPEG, Table 6
                         final long offset = start + IDENTIFIER_XMP_APP1.length;
@@ -2843,6 +2848,8 @@ public class ExifInterface {
                 if (in.read(bytes) != length) {
                     throw new IOException("Can't read exif");
                 }
+                // Save offset values for handling thumbnail and attribute offsets.
+                mExifOffset = offset;
                 readExifSegment(bytes, IFD_TYPE_PRIMARY);
             }
 
@@ -2988,7 +2995,7 @@ public class ExifInterface {
         // Write EXIF APP1 segment
         dataOutputStream.writeByte(MARKER);
         dataOutputStream.writeByte(MARKER_APP1);
-        writeExifSegment(dataOutputStream, 6);
+        writeExifSegment(dataOutputStream);
 
         byte[] bytes = new byte[4096];
 
@@ -3319,7 +3326,7 @@ public class ExifInterface {
                 continue;
             }
 
-            final int bytesOffset = dataInputStream.peek();
+            final int bytesOffset = dataInputStream.peek() + mExifOffset;
             final byte[] bytes = new byte[(int) byteCount];
             dataInputStream.readFully(bytes);
             ExifAttribute attribute = new ExifAttribute(dataFormat, numberOfComponents,
@@ -3451,30 +3458,27 @@ public class ExifInterface {
 
             // The following code limits the size of thumbnail size not to overflow EXIF data area.
             thumbnailLength = Math.min(thumbnailLength, in.getLength() - thumbnailOffset);
-            if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF
-                    || mMimeType == IMAGE_TYPE_RW2) {
-                thumbnailOffset += mExifOffset;
-            } else if (mMimeType == IMAGE_TYPE_ORF) {
+            if (mMimeType == IMAGE_TYPE_ORF) {
                 // Update offset value since RAF files have IFD data preceding MakerNote data.
                 thumbnailOffset += mOrfMakerNoteOffset;
             }
-            if (DEBUG) {
-                Log.d(TAG, "Setting thumbnail attributes with offset: " + thumbnailOffset
-                        + ", length: " + thumbnailLength);
-            }
             if (thumbnailOffset > 0 && thumbnailLength > 0) {
                 mHasThumbnail = true;
-                mThumbnailOffset = thumbnailOffset;
+                mThumbnailOffset = thumbnailOffset + mExifOffset;
                 mThumbnailLength = thumbnailLength;
                 mThumbnailCompression = DATA_JPEG;
 
                 if (mFilename == null && mAssetInputStream == null
                         && mSeekableFileDescriptor == null) {
                     // Save the thumbnail in memory if the input doesn't support reading again.
-                    byte[] thumbnailBytes = new byte[thumbnailLength];
-                    in.seek(thumbnailOffset);
+                    byte[] thumbnailBytes = new byte[mThumbnailLength];
+                    in.seek(mThumbnailOffset);
                     in.readFully(thumbnailBytes);
                     mThumbnailBytes = thumbnailBytes;
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "Setting thumbnail attributes with offset: " + thumbnailOffset
+                            + ", length: " + thumbnailLength);
                 }
             }
         }
@@ -3494,12 +3498,16 @@ public class ExifInterface {
             long[] stripByteCounts =
                     convertToLongArray(stripByteCountsAttribute.getValue(mExifByteOrder));
 
-            if (stripOffsets == null) {
-                Log.w(TAG, "stripOffsets should not be null.");
+            if (stripOffsets == null || stripOffsets.length == 0) {
+                Log.w(TAG, "stripOffsets should not be null or have zero length.");
                 return;
             }
-            if (stripByteCounts == null) {
-                Log.w(TAG, "stripByteCounts should not be null.");
+            if (stripByteCounts == null || stripByteCounts.length == 0) {
+                Log.w(TAG, "stripByteCounts should not be null or have zero length.");
+                return;
+            }
+            if (stripOffsets.length != stripByteCounts.length) {
+                Log.w(TAG, "stripOffsets and stripByteCounts should have same length.");
                 return;
             }
 
@@ -3509,9 +3517,17 @@ public class ExifInterface {
 
             int bytesRead = 0;
             int bytesAdded = 0;
+            mHasThumbnail = mHasThumbnailStrips = mAreThumbnailStripsConsecutive = true;
             for (int i = 0; i < stripOffsets.length; i++) {
                 int stripOffset = (int) stripOffsets[i];
                 int stripByteCount = (int) stripByteCounts[i];
+
+                // Check if strips are consecutive
+                // TODO: Add test for non-consecutive thumbnail image
+                if (i < stripOffsets.length - 1
+                        && stripOffset + stripByteCount != stripOffsets[i + 1]) {
+                    mAreThumbnailStripsConsecutive = false;
+                }
 
                 // Skip to offset
                 int skipBytes = stripOffset - bytesRead;
@@ -3531,10 +3547,13 @@ public class ExifInterface {
                         stripBytes.length);
                 bytesAdded += stripBytes.length;
             }
-
-            mHasThumbnail = true;
             mThumbnailBytes = totalStripBytes;
-            mThumbnailLength = totalStripBytes.length;
+
+            if (mAreThumbnailStripsConsecutive) {
+                // Need to add mExifOffset, which is the offset to the EXIF data segment
+                mThumbnailOffset = (int) stripOffsets[0] + mExifOffset;
+                mThumbnailLength = totalStripBytes.length;
+            }
         }
     }
 
@@ -3691,8 +3710,7 @@ public class ExifInterface {
     }
 
     // Writes an Exif segment into the given output stream.
-    private int writeExifSegment(ByteOrderedDataOutputStream dataOutputStream,
-            int exifOffsetFromBeginning) throws IOException {
+    private int writeExifSegment(ByteOrderedDataOutputStream dataOutputStream) throws IOException {
         // The following variables are for calculating each IFD tag group size in bytes.
         int[] ifdOffsets = new int[EXIF_TAGS.length];
         int[] ifdDataSizes = new int[EXIF_TAGS.length];
@@ -3751,6 +3769,8 @@ public class ExifInterface {
         }
 
         // Calculate IFD offsets.
+        // 8 bytes are for TIFF headers: 2 bytes (byte order) + 2 bytes (identifier) + 4 bytes
+        // (offset of IFDs)
         int position = 8;
         for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
             if (!mAttributes[ifdType].isEmpty()) {
@@ -3762,7 +3782,8 @@ public class ExifInterface {
             int thumbnailOffset = position;
             mAttributes[IFD_TYPE_THUMBNAIL].put(JPEG_INTERCHANGE_FORMAT_TAG.name,
                     ExifAttribute.createULong(thumbnailOffset, mExifByteOrder));
-            mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
+            // Need to add mExifOffset, which is the offset to the EXIF data segment
+            mThumbnailOffset = thumbnailOffset + mExifOffset;
             position += mThumbnailLength;
         }
 
