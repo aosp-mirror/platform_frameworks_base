@@ -196,8 +196,8 @@ public class Tuner implements AutoCloseable  {
     private native int nativeSetLnb(int lnbId);
     private native int nativeSetLna(boolean enable);
     private native FrontendStatus nativeGetFrontendStatus(int[] statusTypes);
-    private native int nativeGetAvSyncHwId(Filter filter);
-    private native long nativeGetAvSyncTime(int avSyncId);
+    private native Integer nativeGetAvSyncHwId(Filter filter);
+    private native Long nativeGetAvSyncTime(int avSyncId);
     private native int nativeConnectCiCam(int ciCamId);
     private native int nativeDisconnectCiCam();
     private native FrontendInfo nativeGetFrontendInfo(int id);
@@ -443,7 +443,8 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public int getAvSyncHwId(@NonNull Filter filter) {
         TunerUtils.checkTunerPermission(mContext);
-        return nativeGetAvSyncHwId(filter);
+        Integer id = nativeGetAvSyncHwId(filter);
+        return id == null ? TunerConstants.INVALID_AV_SYNC_ID : id;
     }
 
     /**
@@ -458,7 +459,8 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public long getAvSyncTime(int avSyncHwId) {
         TunerUtils.checkTunerPermission(mContext);
-        return nativeGetAvSyncTime(avSyncHwId);
+        Long time = nativeGetAvSyncTime(avSyncHwId);
+        return time == null ? TunerConstants.TIMESTAMP_UNAVAILABLE : time;
     }
 
     /**
