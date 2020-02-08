@@ -21,10 +21,8 @@
 #include "packages/UidMap.h"
 #include "stats_log_util.h"
 
-#include <android/os/IIncidentManager.h>
-#include <android/os/IncidentReportArgs.h>
 #include <android/util/ProtoOutputStream.h>
-#include <binder/IServiceManager.h>
+#include <incident/incident_report.h>
 
 #include <vector>
 
@@ -132,7 +130,7 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
         return false;
     }
 
-    IncidentReportArgs incidentReport;
+    android::os::IncidentReportRequest incidentReport;
 
     vector<uint8_t> protoData;
     getProtoData(rule_id, metricId, dimensionKey, metricValue, configKey,
@@ -146,30 +144,21 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
     uint8_t dest;
     switch (config.dest()) {
         case IncidentdDetails_Destination_AUTOMATIC:
-            dest = android::os::PRIVACY_POLICY_AUTOMATIC;
+            dest = INCIDENT_REPORT_PRIVACY_POLICY_AUTOMATIC;
             break;
         case IncidentdDetails_Destination_EXPLICIT:
-            dest = android::os::PRIVACY_POLICY_EXPLICIT;
+            dest = INCIDENT_REPORT_PRIVACY_POLICY_EXPLICIT;
             break;
         default:
-            dest = android::os::PRIVACY_POLICY_AUTOMATIC;
+            dest = INCIDENT_REPORT_PRIVACY_POLICY_AUTOMATIC;
     }
     incidentReport.setPrivacyPolicy(dest);
 
-    incidentReport.setReceiverPkg(config.receiver_pkg());
+    incidentReport.setReceiverPackage(config.receiver_pkg());
 
-    incidentReport.setReceiverCls(config.receiver_cls());
+    incidentReport.setReceiverClass(config.receiver_cls());
 
-    sp<IIncidentManager> service = interface_cast<IIncidentManager>(
-            defaultServiceManager()->getService(android::String16("incident")));
-    if (service == nullptr) {
-        ALOGW("Failed to fetch incident service.");
-        return false;
-    }
-    VLOG("Calling incidentd %p", service.get());
-    binder::Status s = service->reportIncident(incidentReport);
-    VLOG("Report incident status: %s", s.toString8().string());
-    return s.isOk();
+    return incidentReport.takeReport() == NO_ERROR;
 }
 
 }  // namespace statsd

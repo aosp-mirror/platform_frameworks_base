@@ -22,8 +22,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.logging.NotifEvent;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +40,15 @@ import javax.inject.Singleton;
 public class PreparationCoordinator implements Coordinator {
     private static final String TAG = "PreparationCoordinator";
 
-    private final NotifLog mNotifLog;
+    private final PreparationCoordinatorLogger mLogger;
     private final NotifInflater mNotifInflater;
     private final List<NotificationEntry> mPendingNotifications = new ArrayList<>();
 
     @Inject
-    public PreparationCoordinator(NotifLog notifLog, NotifInflaterImpl notifInflater) {
-        mNotifLog = notifLog;
+    public PreparationCoordinator(
+            PreparationCoordinatorLogger logger,
+            NotifInflaterImpl notifInflater) {
+        mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifInflater.setInflationCallback(mInflationCallback);
     }
@@ -106,7 +106,7 @@ public class PreparationCoordinator implements Coordinator {
             new NotifInflater.InflationCallback() {
         @Override
         public void onInflationFinished(NotificationEntry entry) {
-            mNotifLog.log(NotifEvent.INFLATED, entry);
+            mLogger.logNotifInflated(entry.getKey());
             mPendingNotifications.remove(entry);
             mNotifInflatingFilter.invalidateList();
         }
@@ -123,7 +123,7 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
-        mNotifLog.log(NotifEvent.INFLATION_ABORTED, reason);
+        mLogger.logInflationAborted(entry.getKey(), reason);
         entry.abortTask();
         mPendingNotifications.remove(entry);
     }

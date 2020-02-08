@@ -113,11 +113,27 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
             return ERROR_COMMAND_EXECUTION;
         }
 
-        final Map<String, ParcelFileDescriptor> dataLoaderDynamicArgs = getDataLoaderDynamicArgs();
-        if (dataLoaderDynamicArgs == null) {
+        final Map<String, ParcelFileDescriptor> fds = getShellFileDescriptors();
+        if (fds == null) {
             pw.println("File names and sizes don't match.");
             return ERROR_DATA_LOADER_INIT;
         }
+        // dup FDs before closing them
+        final Map<String, ParcelFileDescriptor> dataLoaderDynamicArgs = new HashMap<>();
+        for (Map.Entry<String, ParcelFileDescriptor> nfd : fds.entrySet()) {
+            try {
+                dataLoaderDynamicArgs.put(nfd.getKey(), nfd.getValue().dup());
+            } catch (IOException ignored) {
+                pw.println("Failed to dup shell file descriptor");
+                return ERROR_DATA_LOADER_INIT;
+            } finally {
+                try {
+                    nfd.getValue().close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+
         final DataLoaderParams params = DataLoaderParams.forIncremental(
                 new ComponentName(LOADER_PACKAGE_NAME, LOADER_CLASS_NAME), "",
                 dataLoaderDynamicArgs);
@@ -131,17 +147,9 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
         try {
             int sessionId = packageInstaller.createSession(sessionParams);
             pw.println("Successfully opened session: sessionId = " + sessionId);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             pw.println("Failed to create session.");
             return ERROR_COMMAND_EXECUTION;
-        } finally {
-            try {
-                for (Map.Entry<String, ParcelFileDescriptor> nfd
-                        : dataLoaderDynamicArgs.entrySet()) {
-                    nfd.getValue().close();
-                }
-            } catch (IOException ignored) {
-            }
         }
         return 0;
     }
@@ -177,7 +185,8 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
                 InstallationFile file = installationFiles.get(i);
                 final int location = file.getFileType() == FILE_TYPE_OBB ? LOCATION_MEDIA_OBB
                         : LOCATION_DATA_APP;
-                session.addFile(location, file.getName(), file.getSize(), file.getMetadata(), null);
+                session.addFile(location, file.getName(), file.getSize(), file.getMetadata(),
+                        null);
             }
             session.commit(localReceiver.getIntentSender());
             final Intent result = localReceiver.getResult();
@@ -212,7 +221,8 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
 
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
-            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+            public void send(int code, Intent intent, String resolvedType,
+                    IBinder whitelistToken,
                     IIntentReceiver finishedReceiver, String requiredPermission,
                     Bundle options) {
                 try {
@@ -237,14 +247,14 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
     }
 
     /** Helpers. */
-    private Map<String, ParcelFileDescriptor> getDataLoaderDynamicArgs() {
-        Map<String, ParcelFileDescriptor> dataLoaderDynamicArgs = new HashMap<>();
+    private Map<String, ParcelFileDescriptor> getShellFileDescriptors() {
+        Map<String, ParcelFileDescriptor> fds = new HashMap<>();
         final FileDescriptor outFd = getOutFileDescriptor();
         final FileDescriptor inFd = getInFileDescriptor();
         try {
-            dataLoaderDynamicArgs.put("inFd", ParcelFileDescriptor.dup(inFd));
-            dataLoaderDynamicArgs.put("outFd", ParcelFileDescriptor.dup(outFd));
-            return dataLoaderDynamicArgs;
+            fds.put("inFd", ParcelFileDescriptor.dup(inFd));
+            fds.put("outFd", ParcelFileDescriptor.dup(outFd));
+            return fds;
         } catch (Exception ex) {
             Slog.e(TAG, "Failed to dup FDs");
             return null;
@@ -292,7 +302,8 @@ public final class IncrementalManagerShellCommand extends ShellCommand {
                         pw.println("Invalid file index in: " + fileArgs);
                         return null;
                     }
-                    final byte[] metadata = String.valueOf(index).getBytes(StandardCharsets.UTF_8);
+                    final byte[] metadata = String.valueOf(index).getBytes(
+                            StandardCharsets.UTF_8);
                     fileList.add(new InstallationFile(name, size, metadata));
                     break;
                 }

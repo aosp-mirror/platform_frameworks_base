@@ -323,6 +323,7 @@ public final class ConversationActions implements Parcelable {
         private int mUserId = UserHandle.USER_NULL;
         @NonNull
         private Bundle mExtras;
+        private boolean mUseDefaultTextClassifier;
 
         private Request(
                 @NonNull List<Message> conversation,
@@ -347,6 +348,8 @@ public final class ConversationActions implements Parcelable {
             String callingPackageName = in.readString();
             int userId = in.readInt();
             Bundle extras = in.readBundle();
+            boolean useDefaultTextClassifier = in.readBoolean();
+
             Request request = new Request(
                     conversation,
                     typeConfig,
@@ -355,6 +358,7 @@ public final class ConversationActions implements Parcelable {
                     extras);
             request.setCallingPackageName(callingPackageName);
             request.setUserId(userId);
+            request.setUseDefaultTextClassifier(useDefaultTextClassifier);
             return request;
         }
 
@@ -367,6 +371,7 @@ public final class ConversationActions implements Parcelable {
             parcel.writeString(mCallingPackageName);
             parcel.writeInt(mUserId);
             parcel.writeBundle(mExtras);
+            parcel.writeBoolean(mUseDefaultTextClassifier);
         }
 
         @Override
@@ -452,6 +457,26 @@ public final class ConversationActions implements Parcelable {
         @UserIdInt
         public int getUserId() {
             return mUserId;
+        }
+
+        /**
+         * Sets whether to use the default text classifier to handle this request.
+         * This will be ignored if it is not the system text classifier to handle this request.
+         *
+         * @hide
+         */
+        void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
+            mUseDefaultTextClassifier = useDefaultTextClassifier;
+        }
+
+        /**
+         * Returns whether to use the default text classifier to handle this request. This
+         * will be ignored if it is not the system text classifier to handle this request.
+         *
+         * @hide
+         */
+        public boolean getUseDefaultTextClassifier() {
+            return mUseDefaultTextClassifier;
         }
 
         /**

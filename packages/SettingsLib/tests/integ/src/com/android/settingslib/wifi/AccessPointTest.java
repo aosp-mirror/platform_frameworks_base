@@ -465,6 +465,8 @@ public class AccessPointTest {
         WifiConfiguration.NetworkSelectionStatus status =
                 mock(WifiConfiguration.NetworkSelectionStatus.class);
         when(configuration.getNetworkSelectionStatus()).thenReturn(status);
+        when(status.getNetworkSelectionStatus()).thenReturn(
+                WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_TEMPORARY_DISABLED);
         when(status.getNetworkSelectionDisableReason()).thenReturn(
                 WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD);
         AccessPoint ap = new AccessPoint(mContext, configuration);
@@ -1370,13 +1372,13 @@ public class AccessPointTest {
     public void testOsuAccessPointSummary_showsProvisioningUpdates() {
         OsuProvider provider = createOsuProvider();
         Context spyContext = spy(new ContextWrapper(mContext));
-        AccessPoint osuAccessPoint = new AccessPoint(spyContext, provider,
-                mScanResults);
+        when(spyContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
         Map<OsuProvider, PasspointConfiguration> osuProviderConfigMap = new HashMap<>();
         osuProviderConfigMap.put(provider, null);
-        when(spyContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
         when(mMockWifiManager.getMatchingPasspointConfigsForOsuProviders(
                 Collections.singleton(provider))).thenReturn(osuProviderConfigMap);
+        AccessPoint osuAccessPoint = new AccessPoint(spyContext, provider,
+                mScanResults);
 
         osuAccessPoint.setListener(mMockAccessPointListener);
 

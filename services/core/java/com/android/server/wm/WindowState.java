@@ -5689,4 +5689,30 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     SurfaceControl getDeferTransactionBarrier() {
         return mWinAnimator.getDeferTransactionBarrier();
     }
+
+    @Override
+    boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
+            int waitingId) {
+        // TODO(b/148871522): Support child window
+        mWaitingListener = waitingListener;
+        mWaitingSyncId = waitingId;
+        mUsingBLASTSyncTransaction = true;
+        return true;
+    }
+
+    boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
+        if (!mUsingBLASTSyncTransaction) {
+            return mWinAnimator.finishDrawingLocked(postDrawTransaction);
+        }
+        if (postDrawTransaction == null) {
+            postDrawTransaction = new SurfaceControl.Transaction();
+        }
+        postDrawTransaction.merge(mBLASTSyncTransaction);
+        mWaitingListener.transactionReady(mWaitingSyncId, postDrawTransaction);
+        mUsingBLASTSyncTransaction = false;
+
+        mWaitingSyncId = 0;
+        mWaitingListener = null;
+        return mWinAnimator.finishDrawingLocked(null);
+    }
 }

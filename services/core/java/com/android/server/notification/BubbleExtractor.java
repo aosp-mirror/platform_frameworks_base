@@ -42,7 +42,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             return null;
         }
         boolean appCanShowBubble =
-                mConfig.areBubblesAllowed(record.sbn.getPackageName(), record.sbn.getUid());
+                mConfig.areBubblesAllowed(record.getSbn().getPackageName(), record.getSbn().getUid());
         if (!mConfig.bubblesEnabled() || !appCanShowBubble) {
             record.setAllowBubble(false);
         } else {

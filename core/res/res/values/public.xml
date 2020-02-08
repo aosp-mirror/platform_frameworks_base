@@ -3066,6 +3066,7 @@
       <public name="accessibilitySystemActionToggleSplitScreen" />
       <public name="accessibilitySystemActionLockScreen" />
       <public name="accessibilitySystemActionTakeScreenshot" />
+      <public name="accessibilityActionImeEnter" />
     </public-group>
 
     <public-group type="array" first-id="0x01070006">

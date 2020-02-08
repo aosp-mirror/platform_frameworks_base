@@ -34,9 +34,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Provides access to environment variables.
@@ -539,10 +541,19 @@ public class Environment {
     @SystemApi
     public static @NonNull Collection<File> getInternalMediaDirectories() {
         final ArrayList<File> res = new ArrayList<>();
-        res.add(new File(Environment.getRootDirectory(), "media"));
-        res.add(new File(Environment.getOemDirectory(), "media"));
-        res.add(new File(Environment.getProductDirectory(), "media"));
+        addCanonicalFile(res, new File(Environment.getRootDirectory(), "media"));
+        addCanonicalFile(res, new File(Environment.getOemDirectory(), "media"));
+        addCanonicalFile(res, new File(Environment.getProductDirectory(), "media"));
         return res;
+    }
+
+    private static void addCanonicalFile(List<File> list, File file) {
+        try {
+            list.add(file.getCanonicalFile());
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to resolve " + file + ": " + e);
+            list.add(file);
+        }
     }
 
     /**

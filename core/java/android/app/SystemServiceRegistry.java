@@ -163,7 +163,7 @@ import android.os.Vibrator;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
-import android.os.incremental.IIncrementalManagerNative;
+import android.os.incremental.IIncrementalService;
 import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionControllerManager;
@@ -1299,7 +1299,7 @@ public final class SystemServiceRegistry {
                             return null;
                         }
                         return new IncrementalManager(
-                                IIncrementalManagerNative.Stub.asInterface(b));
+                                IIncrementalService.Stub.asInterface(b));
                     }});
 
         registerService(Context.FILE_INTEGRITY_SERVICE, FileIntegrityManager.class,

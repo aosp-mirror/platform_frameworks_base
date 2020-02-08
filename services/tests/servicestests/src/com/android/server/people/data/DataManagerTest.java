@@ -16,15 +16,12 @@
 
 package com.android.server.people.data;
 
-import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
-
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,7 +37,6 @@ import android.app.Person;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
-import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -232,7 +228,7 @@ public final class DataManagerTest {
         mDataManager.getShortcut(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID);
         verify(mShortcutServiceInternal).getShortcuts(anyInt(), anyString(), anyLong(),
                 eq(TEST_PKG_NAME), eq(Collections.singletonList(TEST_SHORTCUT_ID)),
-                eq(null), anyInt(), eq(USER_ID_PRIMARY), anyInt(), anyInt());
+                eq(null), eq(null), anyInt(), eq(USER_ID_PRIMARY), anyInt(), anyInt());
     }
 
     @Test
@@ -263,6 +259,7 @@ public final class DataManagerTest {
     @Test
     public void testContactsChanged() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -289,6 +286,7 @@ public final class DataManagerTest {
     @Test
     public void testNotificationListener() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -310,37 +308,9 @@ public final class DataManagerTest {
     }
 
     @Test
-    public void testQueryUsageStatsService() {
-        UsageEvents.Event e = new UsageEvents.Event(SHORTCUT_INVOCATION,
-                System.currentTimeMillis());
-        e.mPackage = TEST_PKG_NAME;
-        e.mShortcutId = TEST_SHORTCUT_ID;
-        List<UsageEvents.Event> events = new ArrayList<>();
-        events.add(e);
-        UsageEvents usageEvents = new UsageEvents(events, new String[]{});
-        when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
-                anyBoolean(), anyBoolean())).thenReturn(usageEvents);
-
-        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
-
-        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
-                buildPerson());
-        mDataManager.onShortcutAddedOrUpdated(shortcut);
-
-        mDataManager.queryUsageStatsService(USER_ID_PRIMARY, 0L, Long.MAX_VALUE);
-
-        List<Range<Long>> activeShortcutInvocationTimeSlots = new ArrayList<>();
-        mDataManager.forAllPackages(packageData ->
-                activeShortcutInvocationTimeSlots.addAll(
-                        packageData.getEventHistory(TEST_SHORTCUT_ID)
-                                .getEventIndex(Event.TYPE_SHORTCUT_INVOCATION)
-                                .getActiveTimeSlots()));
-        assertEquals(1, activeShortcutInvocationTimeSlots.size());
-    }
-
-    @Test
     public void testCallLogContentObserver() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
@@ -368,6 +338,7 @@ public final class DataManagerTest {
     @Test
     public void testMmsSmsContentObserver() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        mDataManager.onUserUnlocked(USER_ID_SECONDARY);
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());

@@ -103,6 +103,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.server.autofill.ui.AutoFillUI;
+import com.android.server.autofill.ui.InlineSuggestionFactory;
 import com.android.server.autofill.ui.PendingUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
@@ -2681,7 +2682,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-
         getUiForShowing().showFillUi(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName,
                 serviceLabel, serviceIcon, this, id, mCompatMode);
@@ -2733,7 +2733,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(response.getRequestId(),
-                        datasets.toArray(new Dataset[]{}), mCurrentViewId, mContext, this);
+                        datasets.toArray(new Dataset[]{}), mCurrentViewId, mContext, this, () -> {
+                    synchronized (mLock) {
+                        requestHideFillUi(mCurrentViewId);
+                    }
+                });
         try  {
             inlineContentCallback.onInlineSuggestionsResponse(inlineSuggestionsResponse);
         } catch (RemoteException e) {
@@ -3024,7 +3028,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mInlineSuggestionsRequestCallback != null
                         ? mInlineSuggestionsRequestCallback.getResponseCallback() : null;
         remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName, focusedId,
-                currentValue, inlineSuggestionsRequest, inlineSuggestionsResponseCallback);
+                currentValue, inlineSuggestionsRequest, inlineSuggestionsResponseCallback, () -> {
+                    synchronized (mLock) {
+                        cancelAugmentedAutofillLocked();
+                    }
+                });
 
         if (mAugmentedAutofillDestroyer == null) {
             mAugmentedAutofillDestroyer = () -> remoteService.onDestroyAutofillWindowsRequest();

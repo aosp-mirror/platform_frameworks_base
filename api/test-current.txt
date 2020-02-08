@@ -183,6 +183,9 @@ package android.app {
     field public static final int HISTORICAL_MODE_DISABLED = 0; // 0x0
     field public static final int HISTORICAL_MODE_ENABLED_ACTIVE = 1; // 0x1
     field public static final int HISTORICAL_MODE_ENABLED_PASSIVE = 2; // 0x2
+    field public static final String KEY_BG_STATE_SETTLE_TIME = "bg_state_settle_time";
+    field public static final String KEY_FG_SERVICE_STATE_SETTLE_TIME = "fg_service_state_settle_time";
+    field public static final String KEY_TOP_STATE_SETTLE_TIME = "top_state_settle_time";
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
@@ -416,6 +419,7 @@ package android.app {
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
     method public void setImportanceLockedByOEM(boolean);
+    method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
   }
 
@@ -885,6 +889,7 @@ package android.content.pm {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @Nullable public String getContentCaptureServicePackageName();
     method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
+    method @Nullable public String getDefaultTextClassifierPackageName();
     method @Nullable public String getIncidentReportApproverPackageName();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
@@ -894,6 +899,7 @@ package android.content.pm {
     method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS", "android.permission.GET_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
+    method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String[] getTelephonyPackageNames();
     method @Nullable public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);

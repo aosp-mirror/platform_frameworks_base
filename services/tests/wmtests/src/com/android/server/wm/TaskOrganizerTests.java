@@ -26,16 +26,19 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
@@ -139,6 +142,52 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUnregisterOrganizer() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer).taskAppeared(any());
+        assertTrue(stack.isControlledByTaskOrganizer());
+
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer);
+        verify(organizer).taskVanished(any());
+        assertFalse(stack.isControlledByTaskOrganizer());
+    }
+
+    @Test
+    public void testUnregisterOrganizerReturnsRegistrationToPrevious() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        final ActivityStack stack2 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task2 = createTaskInStack(stack2, 0 /* userId */);
+        final ActivityStack stack3 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task3 = createTaskInStack(stack3, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+
+        // First organizer is registered, verify a task appears when changing windowing mode
+        stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer, times(1)).taskAppeared(any());
+        assertTrue(stack.isControlledByTaskOrganizer());
+
+        // Now we replace the registration and1 verify the new organizer receives tasks
+        // newly entering the windowing mode.
+        final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
+        stack2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer2).taskAppeared(any());
+        assertTrue(stack2.isControlledByTaskOrganizer());
+
+        // Now we unregister the second one, the first one should automatically be reregistered
+        // so we verify that it's now seeing changes.
+        mWm.mAtmService.mTaskOrganizerController.unregisterTaskOrganizer(organizer2);
+
+        stack3.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        verify(organizer, times(2)).taskAppeared(any());
+        assertTrue(stack3.isControlledByTaskOrganizer());
+    }
+
+    @Test
     public void testRegisterTaskOrganizerStackWindowingModeChanges() throws RemoteException {
         final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_PINNED);
 
@@ -161,7 +210,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction t = new WindowContainerTransaction();
         Rect newBounds = new Rect(10, 10, 100, 100);
         t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
         assertEquals(newBounds, task.getBounds());
     }
 
@@ -176,7 +225,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         assertEquals(stack.mRemoteToken, info.stackToken);
         Rect newBounds = new Rect(10, 10, 100, 100);
         t.setBounds(info.stackToken, new Rect(10, 10, 100, 100));
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
         assertEquals(newBounds, stack.getBounds());
     }
 
@@ -189,7 +238,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction t = new WindowContainerTransaction();
         assertTrue(task.isFocusable());
         t.setFocusable(stack.mRemoteToken, false);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
         assertFalse(task.isFocusable());
     }
 
@@ -317,5 +366,47 @@ public class TaskOrganizerTests extends WindowTestsBase {
             }
         }
         return out;
+    }
+
+    @Test
+    public void testTrivialBLASTCallback() throws RemoteException {
+        final ActivityStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+
+        BLASTSyncEngine bse = new BLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener transactionListener =
+            mock(BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = bse.startSyncSet(transactionListener);
+        bse.addToSyncSet(id, task);
+        bse.setReady(id);
+        // Since this task has no windows the sync is trivial and completes immediately.
+        verify(transactionListener)
+            .transactionReady(anyInt(), any());
+    }
+
+    @Test
+    public void testBLASTCallbackWithWindow() {
+        final ActivityStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
+
+        BLASTSyncEngine bse = new BLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener transactionListener =
+            mock(BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = bse.startSyncSet(transactionListener);
+        bse.addToSyncSet(id, task);
+        bse.setReady(id);
+        // Since we have a window we have to wait for it to draw to finish sync.
+        verify(transactionListener, never())
+            .transactionReady(anyInt(), any());
+        w.finishDrawing(null);
+        verify(transactionListener)
+            .transactionReady(anyInt(), any());
     }
 }

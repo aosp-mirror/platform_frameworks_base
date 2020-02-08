@@ -29,18 +29,12 @@ interface IShortcutService {
     boolean setDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
             int userId);
 
-    ParceledListSlice getDynamicShortcuts(String packageName, int userId);
-
-    ParceledListSlice getManifestShortcuts(String packageName, int userId);
-
     boolean addDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
             int userId);
 
     void removeDynamicShortcuts(String packageName, in List shortcutIds, int userId);
 
     void removeAllDynamicShortcuts(String packageName, int userId);
-
-    ParceledListSlice getPinnedShortcuts(String packageName, int userId);
 
     boolean updateShortcuts(String packageName, in ParceledListSlice shortcuts, int userId);
 

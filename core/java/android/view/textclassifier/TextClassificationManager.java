@@ -25,7 +25,6 @@ import android.content.Context;
 import android.os.ServiceManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
-import android.service.textclassifier.TextClassifierService;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
 import com.android.internal.annotations.GuardedBy;
@@ -62,9 +61,6 @@ public final class TextClassificationManager {
     @Nullable
     private TextClassifier mLocalTextClassifier;
     @GuardedBy("mLock")
-    @Nullable
-    private TextClassifier mSystemTextClassifier;
-    @GuardedBy("mLock")
     private TextClassificationSessionFactory mSessionFactory;
     @GuardedBy("mLock")
     private TextClassificationConstants mSettings;
@@ -91,8 +87,8 @@ public final class TextClassificationManager {
         synchronized (mLock) {
             if (mCustomTextClassifier != null) {
                 return mCustomTextClassifier;
-            } else if (isSystemTextClassifierEnabled()) {
-                return getSystemTextClassifier();
+            } else if (getSettings().isSystemTextClassifierEnabled()) {
+                return getSystemTextClassifier(SystemTextClassifier.SYSTEM);
             } else {
                 return getLocalTextClassifier();
             }
@@ -116,6 +112,7 @@ public final class TextClassificationManager {
      *
      * @see TextClassifier#LOCAL
      * @see TextClassifier#SYSTEM
+     * @see TextClassifier#DEFAULT_SERVICE
      * @hide
      */
     @UnsupportedAppUsage
@@ -124,7 +121,7 @@ public final class TextClassificationManager {
             case TextClassifier.LOCAL:
                 return getLocalTextClassifier();
             default:
-                return getSystemTextClassifier();
+                return getSystemTextClassifier(type);
         }
     }
 
@@ -204,21 +201,22 @@ public final class TextClassificationManager {
         }
     }
 
-    private TextClassifier getSystemTextClassifier() {
+    /** @hide */
+    private TextClassifier getSystemTextClassifier(@TextClassifierType int type) {
         synchronized (mLock) {
-            if (mSystemTextClassifier == null && isSystemTextClassifierEnabled()) {
+            if (getSettings().isSystemTextClassifierEnabled()) {
                 try {
-                    mSystemTextClassifier = new SystemTextClassifier(mContext, getSettings());
-                    Log.d(LOG_TAG, "Initialized SystemTextClassifier");
+                    Log.d(LOG_TAG, "Initializing SystemTextClassifier, type = " + type);
+                    return new SystemTextClassifier(
+                            mContext,
+                            getSettings(),
+                            /* useDefault= */ type == TextClassifier.DEFAULT_SERVICE);
                 } catch (ServiceManager.ServiceNotFoundException e) {
                     Log.e(LOG_TAG, "Could not initialize SystemTextClassifier", e);
                 }
             }
+            return TextClassifier.NO_OP;
         }
-        if (mSystemTextClassifier != null) {
-            return mSystemTextClassifier;
-        }
-        return TextClassifier.NO_OP;
     }
 
     /**
@@ -240,11 +238,6 @@ public final class TextClassificationManager {
         }
     }
 
-    private boolean isSystemTextClassifierEnabled() {
-        return getSettings().isSystemTextClassifierEnabled()
-                && TextClassifierService.getServiceComponentName(mContext) != null;
-    }
-
     /** @hide */
     @VisibleForTesting
     public void invalidateForTesting() {
@@ -261,7 +254,6 @@ public final class TextClassificationManager {
     private void invalidateTextClassifiers() {
         synchronized (mLock) {
             mLocalTextClassifier = null;
-            mSystemTextClassifier = null;
         }
     }
 
@@ -274,7 +266,8 @@ public final class TextClassificationManager {
     /** @hide **/
     public void dump(IndentingPrintWriter pw) {
         getLocalTextClassifier().dump(pw);
-        getSystemTextClassifier().dump(pw);
+        getSystemTextClassifier(TextClassifier.DEFAULT_SERVICE).dump(pw);
+        getSystemTextClassifier(TextClassifier.SYSTEM).dump(pw);
         getSettings().dump(pw);
     }
 

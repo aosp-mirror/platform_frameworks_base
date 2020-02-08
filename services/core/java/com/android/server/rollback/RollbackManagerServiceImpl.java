@@ -1237,8 +1237,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // equal to the number of sessions we are installing, to ensure we didn't skip enabling
         // of any sessions. If we successfully enable an apex, then we can assume we enabled
         // rollback for the embedded apk-in-apex, if any.
-        // TODO: add a helper instead of exposing 2 methods from Rollback
-        if (rollback.getPackageCount(0 /*flags*/) != rollback.getPackageSessionIdCount()) {
+        if (!rollback.allPackagesEnabled()) {
             Slog.e(TAG, "Failed to enable rollback for all packages in session.");
             rollback.delete(mAppDataRollbackHelper);
             return null;

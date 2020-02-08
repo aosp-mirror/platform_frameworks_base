@@ -30,6 +30,7 @@ import static android.os.PowerManager.locationPowerSaveModeToString;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -305,11 +306,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         public void onOpChanged(int op, String packageName) {
                             // onOpChanged invoked on ui thread, move to our thread to reduce risk
                             // of blocking ui thread
-                            mHandler.post(() -> {
-                                synchronized (mLock) {
-                                    onAppOpChangedLocked();
-                                }
-                            });
+                            mHandler.post(() -> onAppOpChanged(packageName));
                         }
                     });
             mPackageManager.addOnPermissionsChangeListener(
@@ -392,13 +389,26 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    @GuardedBy("mLock")
-    private void onAppOpChangedLocked() {
-        for (Receiver receiver : mReceivers.values()) {
-            receiver.updateMonitoring(true);
-        }
-        for (LocationProviderManager manager : mProviderManagers) {
-            applyRequirementsLocked(manager);
+    private void onAppOpChanged(String packageName) {
+        synchronized (mLock) {
+            for (Receiver receiver : mReceivers.values()) {
+                if (receiver.mCallerIdentity.mPackageName.equals(packageName)) {
+                    receiver.updateMonitoring(true);
+                }
+            }
+
+            HashSet<String> affectedProviders = new HashSet<>(mRecordsByProvider.size());
+            for (Entry<String, ArrayList<UpdateRecord>> entry : mRecordsByProvider.entrySet()) {
+                String provider = entry.getKey();
+                for (UpdateRecord record : entry.getValue()) {
+                    if (record.mReceiver.mCallerIdentity.mPackageName.equals(packageName)) {
+                        affectedProviders.add(provider);
+                    }
+                }
+            }
+            for (String provider : affectedProviders) {
+                applyRequirementsLocked(provider);
+            }
         }
     }
 
@@ -2161,10 +2171,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean injectLocation(Location location) {
-        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
-                "Location Hardware permission not granted to inject location");
-        mContext.enforceCallingPermission(ACCESS_FINE_LOCATION,
-                "Access Fine Location permission not granted to inject Location");
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingPermission(ACCESS_FINE_LOCATION, null);
+
+        Preconditions.checkArgument(location.isComplete());
 
         synchronized (mLock) {
             LocationProviderManager manager = getLocationProviderManager(location.getProvider());
@@ -2410,20 +2420,15 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isLocationEnabledForUser(int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
-                    null);
-        }
-
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false, "isLocationEnabledForUser", null);
         return mSettingsHelper.isLocationEnabled(userId);
     }
 
     @Override
     public boolean isProviderEnabledForUser(String providerName, int userId) {
-        if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
-                    null);
-        }
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false, "isProviderEnabledForUser", null);
 
         // Fused provider is accessed indirectly via criteria rather than the provider-based APIs,
         // so we discourage its use
@@ -2732,6 +2737,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void setTestProviderLocation(String provider, Location location, String packageName) {
+        Preconditions.checkArgument(location.isComplete(),
+                "incomplete location object, missing timestamp or accuracy?");
+
         if (mAppOps.checkOp(AppOpsManager.OP_MOCK_LOCATION, Binder.getCallingUid(), packageName)
                 != AppOpsManager.MODE_ALLOWED) {
             return;

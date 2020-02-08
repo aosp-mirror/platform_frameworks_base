@@ -655,13 +655,13 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(NotificationChannel.class);
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), anyInt(), captor.capture());
-        assertTrue(captor.getValue().canBypassDnd());
+        assertTrue(captor.getValue().isImportantConversation());
     }
 
     @Test
     public void testFavorite_unfavorite() throws Exception {
-        mNotificationChannel.setBypassDnd(true);
-        mConversationChannel.setBypassDnd(true);
+        mNotificationChannel.setImportantConversation(true);
+        mConversationChannel.setImportantConversation(true);
 
         mNotificationInfo.bindNotification(
                 mShortcutManager,
@@ -688,7 +688,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(NotificationChannel.class);
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), anyInt(), captor.capture());
-        assertFalse(captor.getValue().canBypassDnd());
+        assertFalse(captor.getValue().isImportantConversation());
     }
 
     @Test

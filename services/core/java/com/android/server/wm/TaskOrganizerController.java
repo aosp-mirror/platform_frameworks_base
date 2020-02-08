@@ -38,6 +38,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
+import android.view.SurfaceControl;
 import android.view.WindowContainerTransaction;
 
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -53,7 +54,8 @@ import java.util.WeakHashMap;
  * Stores the TaskOrganizers associated with a given windowing mode and
  * their associated state.
  */
-class TaskOrganizerController extends ITaskOrganizerController.Stub {
+class TaskOrganizerController extends ITaskOrganizerController.Stub
+    implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "TaskOrganizerController";
 
     /** Flag indicating that an applied transaction may have effected lifecycle */
@@ -74,11 +76,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state = mTaskOrganizerStates.get(mTaskOrganizer);
-                for (int i = 0; i < state.mOrganizedTasks.size(); i++) {
-                    state.mOrganizedTasks.get(i).taskOrganizerDied();
-                }
-                mTaskOrganizerStates.remove(mTaskOrganizer);
+                final TaskOrganizerState state =
+                    mTaskOrganizerStates.get(mTaskOrganizer.asBinder());
+                state.releaseTasks();
+                mTaskOrganizerStates.remove(mTaskOrganizer.asBinder());
                 if (mTaskOrganizersForWindowingMode.get(mWindowingMode) == mTaskOrganizer) {
                     mTaskOrganizersForWindowingMode.remove(mWindowingMode);
                 }
@@ -89,31 +90,83 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     class TaskOrganizerState {
         ITaskOrganizer mOrganizer;
         DeathRecipient mDeathRecipient;
+        int mWindowingMode;
 
         ArrayList<Task> mOrganizedTasks = new ArrayList<>();
 
+        // Save the TaskOrganizer which we replaced registration for
+        // so it can be re-registered if we unregister.
+        TaskOrganizerState mReplacementFor;
+        boolean mDisposed = false;
+
+
+        TaskOrganizerState(ITaskOrganizer organizer, int windowingMode,
+                TaskOrganizerState replacing) {
+            mOrganizer = organizer;
+            mDeathRecipient = new DeathRecipient(organizer, windowingMode);
+            try {
+                organizer.asBinder().linkToDeath(mDeathRecipient, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "TaskOrganizer failed to register death recipient");
+            }
+            mWindowingMode = windowingMode;
+            mReplacementFor = replacing;
+        }
+
         void addTask(Task t) {
             mOrganizedTasks.add(t);
+            try {
+                mOrganizer.taskAppeared(t.getTaskInfo());
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception sending taskAppeared callback" + e);
+            }
         }
 
         void removeTask(Task t) {
+            try {
+                mOrganizer.taskVanished(t.getRemoteToken());
+            } catch (Exception e) {
+                Slog.e(TAG, "Exception sending taskVanished callback" + e);
+            }
             mOrganizedTasks.remove(t);
         }
 
-        TaskOrganizerState(ITaskOrganizer organizer, DeathRecipient deathRecipient) {
-            mOrganizer = organizer;
-            mDeathRecipient = deathRecipient;
+        void dispose() {
+            mDisposed = true;
+            releaseTasks();
+            handleReplacement();
+        }
+
+        void releaseTasks() {
+            for (int i = mOrganizedTasks.size() - 1; i >= 0; i--) {
+                final Task t = mOrganizedTasks.get(i);
+                t.taskOrganizerDied();
+                removeTask(t);
+            }
+        }
+
+        void handleReplacement() {
+            if (mReplacementFor != null && !mReplacementFor.mDisposed) {
+                mTaskOrganizersForWindowingMode.put(mWindowingMode, mReplacementFor);
+            }
+        }
+
+        void unlinkDeath() {
+            mDisposed = true;
+            mOrganizer.asBinder().unlinkToDeath(mDeathRecipient, 0);
         }
     };
 
 
     final HashMap<Integer, TaskOrganizerState> mTaskOrganizersForWindowingMode = new HashMap();
-    final HashMap<ITaskOrganizer, TaskOrganizerState> mTaskOrganizerStates = new HashMap();
+    final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap();
 
     final HashMap<Integer, ITaskOrganizer> mTaskOrganizersByPendingSyncId = new HashMap();
 
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     private final ArrayList<Task> mPendingTaskInfoChanges = new ArrayList<>();
+
+    private final BLASTSyncEngine mBLASTSyncEngine = new BLASTSyncEngine();
 
     final ActivityTaskManagerService mService;
 
@@ -128,17 +181,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         mService.mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, func);
     }
 
-    private void clearIfNeeded(int windowingMode) {
-        final TaskOrganizerState oldState = mTaskOrganizersForWindowingMode.get(windowingMode);
-        if (oldState != null) {
-            oldState.mOrganizer.asBinder().unlinkToDeath(oldState.mDeathRecipient, 0);
-        }
-    }
-
     /**
      * Register a TaskOrganizer to manage tasks as they enter the given windowing mode.
      * If there was already a TaskOrganizer for this windowing mode it will be evicted
-     * and receive taskVanished callbacks in the process.
+     * but will continue to organize it's existing tasks.
      */
     @Override
     public void registerTaskOrganizer(ITaskOrganizer organizer, int windowingMode) {
@@ -153,22 +199,23 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                clearIfNeeded(windowingMode);
-                DeathRecipient dr = new DeathRecipient(organizer, windowingMode);
-                try {
-                    organizer.asBinder().linkToDeath(dr, 0);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "TaskOrganizer failed to register death recipient");
-                }
-
-                final TaskOrganizerState state = new TaskOrganizerState(organizer, dr);
+                final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode,
+                        mTaskOrganizersForWindowingMode.get(windowingMode));
                 mTaskOrganizersForWindowingMode.put(windowingMode, state);
-
-                mTaskOrganizerStates.put(organizer, state);
+                mTaskOrganizerStates.put(organizer.asBinder(), state);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    void unregisterTaskOrganizer(ITaskOrganizer organizer) {
+        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+        state.unlinkDeath();
+        if (mTaskOrganizersForWindowingMode.get(state.mWindowingMode) == state) {
+            mTaskOrganizersForWindowingMode.remove(state.mWindowingMode);
+        }
+        state.dispose();
     }
 
     ITaskOrganizer getTaskOrganizer(int windowingMode) {
@@ -179,35 +226,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return state.mOrganizer;
     }
 
-    private void sendTaskAppeared(ITaskOrganizer organizer, Task task) {
-        try {
-            organizer.taskAppeared(task.getTaskInfo());
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception sending taskAppeared callback" + e);
-        }
-    }
-
-    private void sendTaskVanished(ITaskOrganizer organizer, Task task) {
-        try {
-            organizer.taskVanished(task.getRemoteToken());
-        } catch (Exception e) {
-            Slog.e(TAG, "Exception sending taskVanished callback" + e);
-        }
-    }
-
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
-        TaskOrganizerState state = mTaskOrganizerStates.get(organizer);
-
+        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.addTask(task);
-        sendTaskAppeared(organizer, task);
     }
 
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
-        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer);
-        sendTaskVanished(organizer, task);
-
-        // This could trigger TaskAppeared for other tasks in the same stack so make sure
-        // we do this AFTER sending taskVanished.
+        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.removeTask(task);
     }
 
@@ -408,15 +433,35 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void applyContainerTransaction(WindowContainerTransaction t) {
+    public int applyContainerTransaction(WindowContainerTransaction t, ITaskOrganizer organizer) {
         enforceStackPermission("applyContainerTransaction()");
+        int syncId = -1;
         if (t == null) {
-            return;
+            throw new IllegalArgumentException(
+                    "Null transaction passed to applyContainerTransaction");
         }
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 int effects = 0;
+
+                /**
+                 * If organizer is non-null we are looking to synchronize this transaction
+                 * by collecting all the results in to a SurfaceFlinger transaction and
+                 * then delivering that to the given organizers transaction ready callback.
+                 * See {@link BLASTSyncEngine} for the details of the operation. But at
+                 * a high level we create a sync operation with a given ID and an associated
+                 * organizer. Then we notify each WindowContainer in this WindowContainer
+                 * transaction that it is participating in a sync operation with that
+                 * ID. Once everything is notified we tell the BLASTSyncEngine
+                 * "setSyncReady" which means that we have added everything
+                 * to the set. At any point after this, all the WindowContainers
+                 * will eventually finish applying their changes and notify the
+                 * BLASTSyncEngine which will deliver the Transaction to the organizer.
+                 */
+                if (organizer != null) {
+                    syncId = startSyncWithOrganizer(organizer);
+                }
                 mService.deferWindowLayout();
                 try {
                     ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
@@ -429,10 +474,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                                 entry.getKey()).getContainer();
                         int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                         effects |= containerEffect;
+
                         // Lifecycle changes will trigger ensureConfig for everything.
                         if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
                                 && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                             haveConfigChanges.add(wc);
+                        }
+                        if (syncId >= 0) {
+                            mBLASTSyncEngine.addToSyncSet(syncId, wc);
                         }
                     }
                     if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
@@ -454,10 +503,38 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     }
                 } finally {
                     mService.continueWindowLayout();
+                    if (syncId >= 0) {
+                        setSyncReady(syncId);
+                    }
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+        return syncId;
+    }
+
+    @Override
+    public void transactionReady(int id, SurfaceControl.Transaction sc) {
+        final ITaskOrganizer organizer = mTaskOrganizersByPendingSyncId.get(id);
+        if (organizer == null) {
+            Slog.e(TAG, "Got transaction complete for unexpected ID");
+        }
+        try {
+            organizer.transactionReady(id, sc);
+        } catch (RemoteException e) {
+        }
+
+        mTaskOrganizersByPendingSyncId.remove(id);
+    }
+
+    int startSyncWithOrganizer(ITaskOrganizer organizer) {
+        int id = mBLASTSyncEngine.startSyncSet(this);
+        mTaskOrganizersByPendingSyncId.put(id, organizer);
+        return id;
+    }
+
+    void setSyncReady(int id) {
+        mBLASTSyncEngine.setReady(id);
     }
 }

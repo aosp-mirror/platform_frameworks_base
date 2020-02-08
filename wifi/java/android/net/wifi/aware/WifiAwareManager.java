@@ -34,7 +34,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -447,8 +446,7 @@ public class WifiAwareManager {
                 pmk,
                 passphrase,
                 0, // no port info for deprecated IB APIs
-                -1, // no transport info for deprecated IB APIs
-                Process.myUid());
+                -1); // no transport info for deprecated IB APIs
     }
 
     /** @hide */
@@ -488,8 +486,7 @@ public class WifiAwareManager {
                 pmk,
                 passphrase,
                 0, // no port info for OOB APIs
-                -1, // no transport protocol info for OOB APIs
-                Process.myUid());
+                -1); // no transport protocol info for OOB APIs
     }
 
     private static class WifiAwareEventCallbackProxy extends IWifiAwareEventCallback.Stub {

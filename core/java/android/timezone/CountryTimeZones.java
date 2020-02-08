@@ -18,8 +18,6 @@ package android.timezone;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.icu.util.TimeZone;
 
 import java.util.ArrayList;
@@ -32,7 +30,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class CountryTimeZones {
 
     /**
@@ -40,7 +37,6 @@ public final class CountryTimeZones {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class TimeZoneMapping {
 
         @NonNull
@@ -97,7 +93,6 @@ public final class CountryTimeZones {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class OffsetResult {
 
         private final TimeZone mTimeZone;
@@ -210,27 +205,47 @@ public final class CountryTimeZones {
     }
 
     /**
-     * Returns a time zone for the country, if there is one, that matches the desired properties. If
-     * there are multiple matches and the {@code bias} is one of them then it is returned, otherwise
-     * an arbitrary match is returned based on the {@link #getEffectiveTimeZoneMappingsAt(long)}
-     * ordering.
+     * Returns a time zone for the country, if there is one, that matches the supplied properties.
+     * If there are multiple matches and the {@code bias} is one of them then it is returned,
+     * otherwise an arbitrary match is returned based on the {@link
+     * #getEffectiveTimeZoneMappingsAt(long)} ordering.
      *
+     * @param whenMillis the UTC time to match against
+     * @param bias the time zone to prefer, can be {@code null} to indicate there is no preference
      * @param totalOffsetMillis the offset from UTC at {@code whenMillis}
      * @param isDst the Daylight Savings Time state at {@code whenMillis}. {@code true} means DST,
-     *     {@code false} means not DST, {@code null} means unknown
-     * @param dstOffsetMillis the part of {@code totalOffsetMillis} contributed by DST, only used if
-     *     {@code isDst} is {@code true}. The value can be {@code null} if the DST offset is
-     *     unknown
-     * @param whenMillis the UTC time to match against
-     * @param bias the time zone to prefer, can be {@code null}
+     *     {@code false} means not DST
+     * @return an {@link OffsetResult} with information about a matching zone, or {@code null} if
+     *     there is no match
      */
     @Nullable
-    public OffsetResult lookupByOffsetWithBias(int totalOffsetMillis, @Nullable Boolean isDst,
-            @SuppressLint("AutoBoxing") @Nullable Integer dstOffsetMillis, long whenMillis,
-            @Nullable TimeZone bias) {
+    public OffsetResult lookupByOffsetWithBias(long whenMillis, @Nullable TimeZone bias,
+            int totalOffsetMillis, boolean isDst) {
         libcore.timezone.CountryTimeZones.OffsetResult delegateOffsetResult =
                 mDelegate.lookupByOffsetWithBias(
-                        totalOffsetMillis, isDst, dstOffsetMillis, whenMillis, bias);
+                        whenMillis, bias, totalOffsetMillis, isDst);
+        return delegateOffsetResult == null ? null :
+                new OffsetResult(
+                        delegateOffsetResult.getTimeZone(), delegateOffsetResult.isOnlyMatch());
+    }
+
+    /**
+     * Returns a time zone for the country, if there is one, that matches the supplied properties.
+     * If there are multiple matches and the {@code bias} is one of them then it is returned,
+     * otherwise an arbitrary match is returned based on the {@link
+     * #getEffectiveTimeZoneMappingsAt(long)} ordering.
+     *
+     * @param whenMillis the UTC time to match against
+     * @param bias the time zone to prefer, can be {@code null} to indicate there is no preference
+     * @param totalOffsetMillis the offset from UTC at {@code whenMillis}
+     * @return an {@link OffsetResult} with information about a matching zone, or {@code null} if
+     *     there is no match
+     */
+    @Nullable
+    public OffsetResult lookupByOffsetWithBias(long whenMillis, @Nullable TimeZone bias,
+            int totalOffsetMillis) {
+        libcore.timezone.CountryTimeZones.OffsetResult delegateOffsetResult =
+                mDelegate.lookupByOffsetWithBias(whenMillis, bias, totalOffsetMillis);
         return delegateOffsetResult == null ? null :
                 new OffsetResult(
                         delegateOffsetResult.getTimeZone(), delegateOffsetResult.isOnlyMatch());

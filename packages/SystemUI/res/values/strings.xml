@@ -217,15 +217,31 @@
         your organization</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
-    <string name="screenrecord_name">Screen Recording</string>
+    <string name="screenrecord_name">Screen Recorder</string>
     <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
     <string name="screenrecord_channel_description">Ongoing notification for a screen record session</string>
-    <!-- Label for the button to begin screen recording [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_start_label">Start Recording</string>
-    <!-- Label for the checkbox to enable microphone input during screen recording [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_mic_label">Record voiceover</string>
+    <!-- Title for the screen prompting the user to begin recording their screen [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_start_label">Start Recording?</string>
+    <!-- Message reminding the user that sensitive information may be captured during a screen recording [CHAR_LIMIT=NONE]-->
+    <string name="screenrecord_description">While recording, Android System can capture any sensitive information that\u2019s visible on your screen or played on your device. This includes passwords, payment info, photos, messages, and audio.</string>
+    <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_audio_label">Record audio</string>
+    <!-- Label for the option to record audio from the device [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_device_audio_label">Device audio</string>
+    <!-- Description of what audio may be captured from the device [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_device_audio_description">Sound from your device, like music, calls, and ringtones</string>
+    <!-- Label for the option to enable microphone input during screen recording [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_mic_label">Microphone</string>
+    <!-- Label for an option to record audio from both device and microphone [CHAR LIMIT=NONE]-->
+    <string name="screenrecord_device_audio_and_mic_label">Device audio and microphone</string>
+    <!-- Button to start a screen recording [CHAR LIMIT=50]-->
+    <string name="screenrecord_start">Start</string>
+    <!-- Notification text displayed when we are recording the screen [CHAR LIMIT=100]-->
+    <string name="screenrecord_ongoing_screen_only">Recording screen</string>
+    <!-- Notification text displayed when we are recording both the screen and audio [CHAR LIMIT=100]-->
+    <string name="screenrecord_ongoing_screen_and_audio">Recording screen and audio</string>
     <!-- Label for the checkbox to enable showing location of touches during screen recording [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_taps_label">Show taps</string>
+    <string name="screenrecord_taps_label">Show touches on screen</string>
     <!-- Label for notification that the user can tap to stop and save the screen recording [CHAR LIMIT=NONE] -->
     <string name="screenrecord_stop_text">Tap to stop</string>
     <!-- Label for notification action to stop and save the screen recording [CHAR LIMIT=35] -->
@@ -250,6 +266,8 @@
     <string name="screenrecord_delete_error">Error deleting screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to insufficient permissions [CHAR LIMIT=NONE] -->
     <string name="screenrecord_permission_error">Failed to get permissions</string>
+    <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_start_error">Error starting screen recording</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>
@@ -1812,16 +1830,16 @@
     <string name="demote">Mark this notification as not a conversation</string>
 
     <!-- [CHAR LIMIT=100] Mark this conversation as a favorite -->
-    <string name="notification_conversation_favorite">Favorite</string>
+    <string name="notification_conversation_favorite">Mark as important</string>
 
     <!-- [CHAR LIMIT=100] Unmark this conversation as a favorite -->
-    <string name="notification_conversation_unfavorite">Unfavorite</string>
+    <string name="notification_conversation_unfavorite">Mark as unimportant</string>
 
     <!-- [CHAR LIMIT=100] Mute this conversation -->
-    <string name="notification_conversation_mute">Mute</string>
+    <string name="notification_conversation_mute">Silence</string>
 
     <!-- [CHAR LIMIT=100] Umute this conversation -->
-    <string name="notification_conversation_unmute">Unmute</string>
+    <string name="notification_conversation_unmute">Alerting</string>
 
     <!-- [CHAR LIMIT=100] Show notification as bubble -->
     <string name="notification_conversation_bubble">Show as bubble</string>

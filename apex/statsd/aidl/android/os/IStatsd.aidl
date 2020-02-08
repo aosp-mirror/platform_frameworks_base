@@ -222,12 +222,6 @@ interface IStatsd {
     const int FLAG_REQUIRE_LOW_LATENCY_MONITOR = 0x04;
 
     /**
-     * Logs an event for binary push for module updates.
-     */
-     oneway void sendBinaryPushStateChangedAtom(in String trainName, in long trainVersionCode,
-         in int options, in int state, in long[] experimentId);
-
-    /**
      * Logs an event for watchdog rollbacks.
      */
      oneway void sendWatchdogRollbackOccurredAtom(in int rollbackType, in String packageName,

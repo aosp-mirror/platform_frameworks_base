@@ -154,21 +154,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onUpdateVolume(String routeId, int delta) {
-        android.util.Log.d(TAG, "onUpdateVolume routeId= " + routeId + "delta=" + delta);
-        MediaRoute2Info route = mRoutes.get(routeId);
-        if (route == null) {
-            return;
-        }
-        int volume = route.getVolume() + delta;
-        volume = Math.min(volume, Math.max(0, route.getVolumeMax()));
-        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
-                .setVolume(volume)
-                .build());
-        publishRoutes();
-    }
-
-    @Override
     public void onCreateSession(String packageName, String routeId, long requestId,
             @Nullable Bundle sessionHints) {
         MediaRoute2Info route = mRoutes.get(routeId);

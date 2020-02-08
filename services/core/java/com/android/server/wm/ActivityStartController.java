@@ -386,6 +386,8 @@ public class ActivityStartController {
         } else {
             callingPid = callingUid = -1;
         }
+        final int filterCallingUid = ActivityStarter.computeResolveFilterUid(
+                callingUid, realCallingUid, UserHandle.USER_NULL);
         final SparseArray<String> startingUidPkgs = new SparseArray<>();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -408,9 +410,7 @@ public class ActivityStartController {
 
                 // Collect information about the target of the Intent.
                 ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],
-                        0 /* startFlags */, null /* profilerInfo */, userId,
-                        ActivityStarter.computeResolveFilterUid(
-                                callingUid, realCallingUid, UserHandle.USER_NULL));
+                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                 if (aInfo != null) {
@@ -457,6 +457,7 @@ public class ActivityStartController {
                 Slog.wtf(TAG, sb.toString());
             }
 
+            final IBinder sourceResultTo = resultTo;
             final ActivityRecord[] outActivity = new ActivityRecord[1];
             // Lock the loop to ensure the activities launched in a sequence.
             synchronized (mService.mGlobalLock) {
@@ -470,7 +471,18 @@ public class ActivityStartController {
                         }
                         return startResult;
                     }
-                    resultTo = outActivity[0] != null ? outActivity[0].appToken : null;
+                    final ActivityRecord started = outActivity[0];
+                    if (started != null && started.getUid() == filterCallingUid) {
+                        // Only the started activity which has the same uid as the source caller can
+                        // be the caller of next activity.
+                        resultTo = started.appToken;
+                    } else {
+                        resultTo = sourceResultTo;
+                        // Different apps not adjacent to the caller are forced to be new task.
+                        if (i < starters.length - 1) {
+                            starters[i + 1].getIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        }
+                    }
                 }
             }
         } finally {

@@ -34,6 +34,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.pm.PackageInstaller.SessionCallback;
 import android.content.pm.PackageInstaller.SessionCallbackDelegate;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -61,15 +62,21 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
+
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -151,6 +158,9 @@ public class LauncherApps {
 
     private final List<CallbackMessageHandler> mCallbacks = new ArrayList<>();
     private final List<SessionCallbackDelegate> mDelegates = new ArrayList<>();
+
+    private final Map<Integer, Pair<Executor, ShortcutChangeCallback>>
+            mShortcutChangeCallbacks = new HashMap<>();
 
     /**
      * Callbacks for package changes to this and related managed profiles.
@@ -406,6 +416,9 @@ public class LauncherApps {
         List<String> mShortcutIds;
 
         @Nullable
+        List<LocusId> mLocusIds;
+
+        @Nullable
         ComponentName mActivity;
 
         @QueryFlags
@@ -442,6 +455,19 @@ public class LauncherApps {
         }
 
         /**
+         * If non-null, return only the specified shortcuts by locus ID.  When setting this field,
+         * a package name must also be set with {@link #setPackage}.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull
+        public ShortcutQuery setLocusIds(@Nullable List<LocusId> locusIds) {
+            mLocusIds = locusIds;
+            return this;
+        }
+
+        /**
          * If non-null, returns only shortcuts associated with the activity; i.e.
          * {@link ShortcutInfo}s whose {@link ShortcutInfo#getActivity()} are equal
          * to {@code activity}.
@@ -466,6 +492,95 @@ public class LauncherApps {
         public ShortcutQuery setQueryFlags(@QueryFlags int queryFlags) {
             mQueryFlags = queryFlags;
             return this;
+        }
+    }
+
+    /**
+     * Callbacks for shortcut changes to this and related managed profiles.
+     *
+     * @hide
+     */
+    public interface ShortcutChangeCallback {
+        /**
+         * Indicates that one or more shortcuts, that match the {@link ShortcutQuery} used to
+         * register this callback, have been added or updated.
+         * @see LauncherApps#registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery)
+         *
+         * <p>Only the applications that are allowed to access the shortcut information,
+         * as defined in {@link #hasShortcutHostPermission()}, will receive it.
+         *
+         * @param packageName The name of the package that has the shortcuts.
+         * @param shortcuts Shortcuts from the package that have updated or added. Only "key"
+         *    information will be provided, as defined in {@link ShortcutInfo#hasKeyFieldsOnly()}.
+         * @param user The UserHandle of the profile that generated the change.
+         *
+         * @see ShortcutManager
+         */
+        default void onShortcutsAddedOrUpdated(@NonNull String packageName,
+                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {}
+
+        /**
+         * Indicates that one or more shortcuts, that match the {@link ShortcutQuery} used to
+         * register this callback, have been removed.
+         * @see LauncherApps#registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery)
+         *
+         * <p>Only the applications that are allowed to access the shortcut information,
+         * as defined in {@link #hasShortcutHostPermission()}, will receive it.
+         *
+         * @param packageName The name of the package that has the shortcuts.
+         * @param shortcuts Shortcuts from the package that have been removed. Only "key"
+         *    information will be provided, as defined in {@link ShortcutInfo#hasKeyFieldsOnly()}.
+         * @param user The UserHandle of the profile that generated the change.
+         *
+         * @see ShortcutManager
+         */
+        default void onShortcutsRemoved(@NonNull String packageName,
+                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {}
+    }
+
+    /**
+     * Callback proxy class for {@link ShortcutChangeCallback}
+     *
+     * @hide
+     */
+    private static class ShortcutChangeCallbackProxy extends
+            android.content.pm.IShortcutChangeCallback.Stub {
+        private final WeakReference<Pair<Executor, ShortcutChangeCallback>> mRemoteReferences;
+
+        ShortcutChangeCallbackProxy(Pair<Executor, ShortcutChangeCallback> remoteReferences) {
+            mRemoteReferences = new WeakReference<>(remoteReferences);
+        }
+
+        @Override
+        public void onShortcutsAddedOrUpdated(@NonNull String packageName,
+                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
+            Pair<Executor, ShortcutChangeCallback> remoteReferences = mRemoteReferences.get();
+            if (remoteReferences == null) {
+                // Binder is dead.
+                return;
+            }
+
+            final Executor executor = remoteReferences.first;
+            final ShortcutChangeCallback callback = remoteReferences.second;
+            executor.execute(
+                    PooledLambda.obtainRunnable(ShortcutChangeCallback::onShortcutsAddedOrUpdated,
+                            callback, packageName, shortcuts, user).recycleOnUse());
+        }
+
+        @Override
+        public void onShortcutsRemoved(@NonNull String packageName,
+                @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
+            Pair<Executor, ShortcutChangeCallback> remoteReferences = mRemoteReferences.get();
+            if (remoteReferences == null) {
+                // Binder is dead.
+                return;
+            }
+
+            final Executor executor = remoteReferences.first;
+            final ShortcutChangeCallback callback = remoteReferences.second;
+            executor.execute(
+                    PooledLambda.obtainRunnable(ShortcutChangeCallback::onShortcutsRemoved,
+                            callback, packageName, shortcuts, user).recycleOnUse());
         }
     }
 
@@ -924,8 +1039,8 @@ public class LauncherApps {
             // changed callback, but that only returns shortcuts with the "key" information, so
             // that won't return disabled message.
             return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
-                    query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
-                    query.mQueryFlags, user)
+                    query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
+                    query.mActivity, query.mQueryFlags, user)
                     .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1556,6 +1671,63 @@ public class LauncherApps {
             return mService.getAllSessions(mContext.getPackageName()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register a callback to watch for shortcut change events in this user and managed profiles.
+     *
+     * @param callback The callback to register.
+     * @param query {@link ShortcutQuery} to match and filter the shortcut events. Only matching
+     * shortcuts will be returned by the callback.
+     * @param executor {@link Executor} to handle the callbacks. To dispatch callbacks to the main
+     * thread of your application, you can use {@link android.content.Context#getMainExecutor()}.
+     *
+     * @hide
+     */
+    public void registerShortcutChangeCallback(@NonNull ShortcutChangeCallback callback,
+            @NonNull ShortcutQuery query, @NonNull @CallbackExecutor Executor executor) {
+        Objects.requireNonNull(callback, "Callback cannot be null");
+        Objects.requireNonNull(query, "Query cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+
+        synchronized (mShortcutChangeCallbacks) {
+            final int callbackId = callback.hashCode();
+            final Pair<Executor, ShortcutChangeCallback> state = new Pair<>(executor, callback);
+            mShortcutChangeCallbacks.put(callbackId, state);
+            try {
+                mService.registerShortcutChangeCallback(mContext.getPackageName(),
+                        query.mChangedSince, query.mPackage, query.mShortcutIds, query.mLocusIds,
+                        query.mActivity, query.mQueryFlags, new ShortcutChangeCallbackProxy(state),
+                        callbackId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregisters a callback that was previously registered.
+     * @see #registerShortcutChangeCallback(ShortcutChangeCallback, ShortcutQuery, Executor)
+     *
+     * @param callback Callback to be unregistered.
+     *
+     * @hide
+     */
+    public void unregisterShortcutChangeCallback(@NonNull ShortcutChangeCallback callback) {
+        Objects.requireNonNull(callback, "Callback cannot be null");
+
+        synchronized (mShortcutChangeCallbacks) {
+            final int callbackId = callback.hashCode();
+            if (mShortcutChangeCallbacks.containsKey(callbackId)) {
+                mShortcutChangeCallbacks.remove(callbackId);
+                try {
+                    mService.unregisterShortcutChangeCallback(mContext.getPackageName(),
+                            callbackId);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
         }
     }
 

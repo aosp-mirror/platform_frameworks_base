@@ -442,7 +442,7 @@ public final class CachedAppOptimizer {
      */
     @GuardedBy("mPhenotypeFlagLock")
     private void updateUseFreezer() {
-        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
                     KEY_USE_FREEZER, DEFAULT_USE_FREEZER)) {
             mUseFreezer = isFreezerSupported();
         }

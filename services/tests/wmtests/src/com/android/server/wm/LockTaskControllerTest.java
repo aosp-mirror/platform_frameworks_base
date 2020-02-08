@@ -25,10 +25,14 @@ import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.os.Process.SYSTEM_UID;
 import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
 
@@ -691,6 +695,45 @@ public class LockTaskControllerTest {
         assertTrue((StatusBarManager.DISABLE2_GLOBAL_ACTIONS & flags.second) == 0);
         // THEN quick settings should still be disabled
         assertTrue((StatusBarManager.DISABLE2_QUICK_SETTINGS & flags.second) != 0);
+    }
+
+    @Test
+    public void testIsActivityAllowed() {
+        // WHEN lock task mode is not enabled
+        assertTrue(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
+
+        // Start lock task mode
+        Task tr = getTask(Task.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // WHEN LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK is not enabled
+        assertTrue(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
+
+        // Enable LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK feature
+        mLockTaskController.updateLockTaskFeatures(
+                TEST_USER_ID, LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK);
+
+        // package with LOCK_TASK_LAUNCH_MODE_ALWAYS should always be allowed
+        assertTrue(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_ALWAYS));
+
+        // unwhitelisted package should not be allowed
+        assertFalse(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
+
+        // update the whitelist
+        String[] whitelist = new String[] { TEST_PACKAGE_NAME };
+        mLockTaskController.updateLockTaskPackages(TEST_USER_ID, whitelist);
+
+        // whitelisted package should be allowed
+        assertTrue(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT));
+
+        // package with LOCK_TASK_LAUNCH_MODE_NEVER should never be allowed
+        assertFalse(mLockTaskController.isActivityAllowed(
+                TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_NEVER));
     }
 
     private Task getTask(int lockTaskAuth) {

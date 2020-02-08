@@ -38,6 +38,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -355,6 +356,7 @@ public class ChooserActivityTest {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
 
+        markWorkProfileUserAvailable();
         Intent sendIntent = createSendTextIntent();
         List<ResolvedComponentInfo> resolvedComponentInfos =
                 createResolvedComponentsForTestWithOtherProfile(2);
@@ -1209,17 +1211,24 @@ public class ChooserActivityTest {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         int personalProfileTargets = 3;
+        int otherProfileTargets = 1;
         List<ResolvedComponentInfo> personalResolvedComponentInfos =
-                createResolvedComponentsForTest(personalProfileTargets);
+                createResolvedComponentsForTestWithOtherProfile(
+                        personalProfileTargets + otherProfileTargets, /* userID */ 10);
         int workProfileTargets = 4;
         List<ResolvedComponentInfo> workResolvedComponentInfos = createResolvedComponentsForTest(
                 workProfileTargets);
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
-                Mockito.isA(List.class))).thenReturn(personalResolvedComponentInfos);
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         when(sOverrides.workResolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
-                Mockito.isA(List.class))).thenReturn(workResolvedComponentInfos);
+                Mockito.isA(List.class))).thenReturn(new ArrayList<>(workResolvedComponentInfos));
+        when(sOverrides.workResolverListController.getResolversForIntentAsUser(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class),
+                eq(UserHandle.SYSTEM))).thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
         markWorkProfileUserAvailable();
@@ -1229,8 +1238,6 @@ public class ChooserActivityTest {
         waitForIdle();
 
         assertThat(activity.getCurrentUserHandle().getIdentifier(), is(0));
-        // The work list adapter must only be filled when we open the work tab
-        assertThat(activity.getWorkListAdapter().getCount(), is(0));
         onView(withText(R.string.resolver_work_tab)).perform(click());
         assertThat(activity.getCurrentUserHandle().getIdentifier(), is(10));
         assertThat(activity.getPersonalListAdapter().getCount(), is(personalProfileTargets));
@@ -1243,11 +1250,22 @@ public class ChooserActivityTest {
         ResolverActivity.ENABLE_TABBED_VIEW = true;
         markWorkProfileUserAvailable();
         int workProfileTargets = 4;
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
         List<ResolvedComponentInfo> workResolvedComponentInfos =
                 createResolvedComponentsForTest(workProfileTargets);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         when(sOverrides.workResolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(workResolvedComponentInfos);
+        when(sOverrides.workResolverListController.getResolversForIntentAsUser(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class),
+                eq(UserHandle.SYSTEM)))
+                .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType("TestType");
 
@@ -1350,6 +1368,20 @@ public class ChooserActivityTest {
         for (int i = 0; i < numberOfResults; i++) {
             if (i == 0) {
                 infoList.add(ResolverDataProvider.createResolvedComponentInfoWithOtherId(i));
+            } else {
+                infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+            }
+        }
+        return infoList;
+    }
+
+    private List<ResolvedComponentInfo> createResolvedComponentsForTestWithOtherProfile(
+            int numberOfResults, int userId) {
+        List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
+        for (int i = 0; i < numberOfResults; i++) {
+            if (i == 0) {
+                infoList.add(
+                        ResolverDataProvider.createResolvedComponentInfoWithOtherId(i, userId));
             } else {
                 infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
             }

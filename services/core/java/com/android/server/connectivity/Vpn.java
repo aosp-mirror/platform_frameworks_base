@@ -49,6 +49,7 @@ import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.IpPrefix;
+import android.net.IpSecManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LocalSocket;
@@ -180,7 +181,10 @@ public class Vpn {
     private boolean mIsPackageTargetingAtLeastQ;
     private String mInterface;
     private Connection mConnection;
-    private LegacyVpnRunner mLegacyVpnRunner;
+
+    /** Tracks the runners for all VPN types managed by the platform (eg. LegacyVpn, PlatformVpn) */
+    private VpnRunner mVpnRunner;
+
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
     private final INetworkManagementService mNetd;
@@ -762,7 +766,7 @@ public class Vpn {
                 mNetworkCapabilities.setUids(null);
             }
 
-            // Revoke the connection or stop LegacyVpnRunner.
+            // Revoke the connection or stop the VpnRunner.
             if (mConnection != null) {
                 try {
                     mConnection.mService.transact(IBinder.LAST_CALL_TRANSACTION,
@@ -772,9 +776,9 @@ public class Vpn {
                 }
                 mContext.unbindService(mConnection);
                 mConnection = null;
-            } else if (mLegacyVpnRunner != null) {
-                mLegacyVpnRunner.exit();
-                mLegacyVpnRunner = null;
+            } else if (mVpnRunner != null) {
+                mVpnRunner.exit();
+                mVpnRunner = null;
             }
 
             try {
@@ -1510,8 +1514,8 @@ public class Vpn {
         @Override
         public void interfaceStatusChanged(String interfaze, boolean up) {
             synchronized (Vpn.this) {
-                if (!up && mLegacyVpnRunner != null) {
-                    mLegacyVpnRunner.check(interfaze);
+                if (!up && mVpnRunner != null && mVpnRunner instanceof LegacyVpnRunner) {
+                    ((LegacyVpnRunner) mVpnRunner).exitIfOuterInterfaceIs(interfaze);
                 }
             }
         }
@@ -1528,9 +1532,10 @@ public class Vpn {
                         mContext.unbindService(mConnection);
                         mConnection = null;
                         agentDisconnect();
-                    } else if (mLegacyVpnRunner != null) {
-                        mLegacyVpnRunner.exit();
-                        mLegacyVpnRunner = null;
+                    } else if (mVpnRunner != null) {
+                        // agentDisconnect must be called from mVpnRunner.exit()
+                        mVpnRunner.exit();
+                        mVpnRunner = null;
                     }
                 }
             }
@@ -1913,23 +1918,40 @@ public class Vpn {
 
     private synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd,
             VpnProfile profile) {
-        stopLegacyVpnPrivileged();
+        stopVpnRunnerPrivileged();
 
         // Prepare for the new request.
         prepareInternal(VpnConfig.LEGACY_VPN);
         updateState(DetailedState.CONNECTING, "startLegacyVpn");
 
         // Start a new LegacyVpnRunner and we are done!
-        mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd, profile);
-        mLegacyVpnRunner.start();
+        mVpnRunner = new LegacyVpnRunner(config, racoon, mtpd, profile);
+        mVpnRunner.start();
     }
 
-    /** Stop legacy VPN. Permissions must be checked by callers. */
-    public synchronized void stopLegacyVpnPrivileged() {
-        if (mLegacyVpnRunner != null) {
-            mLegacyVpnRunner.exit();
-            mLegacyVpnRunner = null;
+    /**
+     * Checks if this the currently running VPN (if any) was started by the Settings app
+     *
+     * <p>This includes both Legacy VPNs and Platform VPNs.
+     */
+    private boolean isSettingsVpnLocked() {
+        return mVpnRunner != null && VpnConfig.LEGACY_VPN.equals(mPackage);
+    }
 
+    /** Stop VPN runner. Permissions must be checked by callers. */
+    public synchronized void stopVpnRunnerPrivileged() {
+        if (!isSettingsVpnLocked()) {
+            return;
+        }
+
+        final boolean isLegacyVpn = mVpnRunner instanceof LegacyVpnRunner;
+
+        mVpnRunner.exit();
+        mVpnRunner = null;
+
+        // LegacyVpn uses daemons that must be shut down before new ones are brought up.
+        // The same limitation does not apply to Platform VPNs.
+        if (isLegacyVpn) {
             synchronized (LegacyVpnRunner.TAG) {
                 // wait for old thread to completely finish before spinning up
                 // new instance, otherwise state updates can be out of order.
@@ -1951,7 +1973,7 @@ public class Vpn {
      * Callers are responsible for checking permissions if needed.
      */
     private synchronized LegacyVpnInfo getLegacyVpnInfoPrivileged() {
-        if (mLegacyVpnRunner == null) return null;
+        if (!isSettingsVpnLocked()) return null;
 
         final LegacyVpnInfo info = new LegacyVpnInfo();
         info.key = mConfig.user;
@@ -1962,11 +1984,50 @@ public class Vpn {
         return info;
     }
 
-    public VpnConfig getLegacyVpnConfig() {
-        if (mLegacyVpnRunner != null) {
+    public synchronized VpnConfig getLegacyVpnConfig() {
+        if (isSettingsVpnLocked()) {
             return mConfig;
         } else {
             return null;
+        }
+    }
+
+    /** This class represents the common interface for all VPN runners. */
+    private abstract class VpnRunner extends Thread {
+
+        protected VpnRunner(String name) {
+            super(name);
+        }
+
+        public abstract void run();
+
+        protected abstract void exit();
+    }
+
+    private class IkeV2VpnRunner extends VpnRunner {
+        private static final String TAG = "IkeV2VpnRunner";
+
+        private final IpSecManager mIpSecManager;
+        private final VpnProfile mProfile;
+
+        IkeV2VpnRunner(VpnProfile profile) {
+            super(TAG);
+            mProfile = profile;
+
+            // TODO: move this to startVpnRunnerPrivileged()
+            mConfig = new VpnConfig();
+            mIpSecManager = mContext.getSystemService(IpSecManager.class);
+        }
+
+        @Override
+        public void run() {
+            // TODO: Build IKE config, start IKE session
+        }
+
+        @Override
+        public void exit() {
+            // TODO: Teardown IKE session & any resources.
+            agentDisconnect();
         }
     }
 
@@ -1977,7 +2038,7 @@ public class Vpn {
      * requests will pile up. This could be done in a Handler as a state
      * machine, but it is much easier to read in the current form.
      */
-    private class LegacyVpnRunner extends Thread {
+    private class LegacyVpnRunner extends VpnRunner {
         private static final String TAG = "LegacyVpnRunner";
 
         private final String[] mDaemons;
@@ -2047,13 +2108,21 @@ public class Vpn {
             mContext.registerReceiver(mBroadcastReceiver, filter);
         }
 
-        public void check(String interfaze) {
+        /**
+         * Checks if the parameter matches the underlying interface
+         *
+         * <p>If the underlying interface is torn down, the LegacyVpnRunner also should be. It has
+         * no ability to migrate between interfaces (or Networks).
+         */
+        public void exitIfOuterInterfaceIs(String interfaze) {
             if (interfaze.equals(mOuterInterface)) {
                 Log.i(TAG, "Legacy VPN is going down with " + interfaze);
                 exit();
             }
         }
 
+        /** Tears down this LegacyVpn connection */
+        @Override
         public void exit() {
             // We assume that everything is reset after stopping the daemons.
             interrupt();

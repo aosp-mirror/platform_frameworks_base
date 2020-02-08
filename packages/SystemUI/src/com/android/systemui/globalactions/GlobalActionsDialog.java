@@ -1725,7 +1725,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (!(mBackgroundDrawable instanceof ScrimDrawable)) {
                 return;
             }
-            ((ScrimDrawable) mBackgroundDrawable).setColor(Color.BLACK, animate);
+            ((ScrimDrawable) mBackgroundDrawable).setColor(colors.supportsDarkText() ? Color.WHITE
+                    : Color.BLACK, animate);
             View decorView = getWindow().getDecorView();
             if (colors.supportsDarkText()) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
@@ -1899,9 +1900,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldShowControls() {
-        return isCurrentUserOwner()
-                && !mKeyguardManager.isDeviceLocked()
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                        "systemui.controls_available", 0) == 1;
+        return !mKeyguardManager.isDeviceLocked()
+                && mControlsUiController.getAvailable();
     }
 }

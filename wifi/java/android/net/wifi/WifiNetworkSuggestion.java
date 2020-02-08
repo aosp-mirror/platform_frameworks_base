@@ -126,7 +126,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         /**
          * Whether this network is initialized with auto-join enabled (the default) or not.
          */
-        private boolean mIsInitialAutoJoinEnabled;
+        private boolean mIsInitialAutojoinEnabled;
 
         /**
          * Pre-shared key for use with WAPI-PSK networks.
@@ -159,7 +159,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsMetered = false;
             mIsSharedWithUser = true;
             mIsSharedWithUserSet = false;
-            mIsInitialAutoJoinEnabled = true;
+            mIsInitialAutojoinEnabled = true;
             mPriority = UNASSIGNED_PRIORITY;
             mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
             mWapiPskPassphrase = null;
@@ -467,10 +467,10 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *
          * @param enabled true for initializing with auto-join enabled (the default), false to
          *                initializing with auto-join disabled.
-         * @return Instance of (@link {@link Builder} to enable chaining of the builder method.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsInitialAutoJoinEnabled(boolean enabled) {
-            mIsInitialAutoJoinEnabled = enabled;
+        public @NonNull Builder setIsInitialAutojoinEnabled(boolean enabled) {
+            mIsInitialAutojoinEnabled = enabled;
             return this;
         }
 
@@ -664,10 +664,10 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mIsSharedWithUser = false;
                 }
             }
-            if (!mIsSharedWithUser && !mIsInitialAutoJoinEnabled) {
+            if (!mIsSharedWithUser && !mIsInitialAutojoinEnabled) {
                 throw new IllegalStateException("Should have not a network with both "
                         + "setCredentialSharedWithUser and "
-                        + "setIsAutoJoinEnabled set to false");
+                        + "setIsAutojoinEnabled set to false");
             }
             if (mIsNetworkUntrusted) {
                 if (mIsSharedWithUserSet && mIsSharedWithUser) {
@@ -683,7 +683,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
                     mIsSharedWithUser,
-                    mIsInitialAutoJoinEnabled,
+                    mIsInitialAutojoinEnabled,
                     mIsNetworkUntrusted);
         }
     }
@@ -774,7 +774,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
                             in.readBoolean(), // isSharedCredentialWithUser
-                            in.readBoolean(),  // isAutoJoinEnabled
+                            in.readBoolean(),  // isAutojoinEnabled
                             in.readBoolean()
                     );
                 }

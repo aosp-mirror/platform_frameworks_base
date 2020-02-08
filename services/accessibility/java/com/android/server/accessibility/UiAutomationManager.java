@@ -328,6 +328,6 @@ class UiAutomationManager {
         public void onFingerprintGesture(int gesture) {}
 
         @Override
-        public void takeScreenshotWithCallback(int displayId, RemoteCallback callback) {}
+        public void takeScreenshot(int displayId, RemoteCallback callback) {}
     }
 }

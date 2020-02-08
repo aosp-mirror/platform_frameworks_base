@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -144,19 +143,9 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
      */
     public final int transportProtocol;
 
-    /**
-     * The UID of the process initializing this network specifier. Validated by receiver using
-     * checkUidIfNecessary() and is used by satisfiedBy() to determine whether matches the
-     * offered network.
-     *
-     * @hide
-     */
-    public final int requestorUid;
-
     /** @hide */
     public WifiAwareNetworkSpecifier(int type, int role, int clientId, int sessionId, int peerId,
-            byte[] peerMac, byte[] pmk, String passphrase, int port, int transportProtocol,
-            int requestorUid) {
+            byte[] peerMac, byte[] pmk, String passphrase, int port, int transportProtocol) {
         this.type = type;
         this.role = role;
         this.clientId = clientId;
@@ -167,7 +156,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         this.passphrase = passphrase;
         this.port = port;
         this.transportProtocol = transportProtocol;
-        this.requestorUid = requestorUid;
     }
 
     public static final @android.annotation.NonNull Creator<WifiAwareNetworkSpecifier> CREATOR =
@@ -184,8 +172,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                         in.createByteArray(), // pmk
                         in.readString(), // passphrase
                         in.readInt(), // port
-                        in.readInt(), // transportProtocol
-                        in.readInt()); // requestorUid
+                        in.readInt()); // transportProtocol
                 }
 
                 @Override
@@ -221,7 +208,6 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         dest.writeString(passphrase);
         dest.writeInt(port);
         dest.writeInt(transportProtocol);
-        dest.writeInt(requestorUid);
     }
 
     /** @hide */
@@ -238,7 +224,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
     @Override
     public int hashCode() {
         return Objects.hash(type, role, clientId, sessionId, peerId, Arrays.hashCode(peerMac),
-                Arrays.hashCode(pmk), passphrase, port, transportProtocol, requestorUid);
+                Arrays.hashCode(pmk), passphrase, port, transportProtocol);
     }
 
     /** @hide */
@@ -263,8 +249,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 && Arrays.equals(pmk, lhs.pmk)
                 && Objects.equals(passphrase, lhs.passphrase)
                 && port == lhs.port
-                && transportProtocol == lhs.transportProtocol
-                && requestorUid == lhs.requestorUid;
+                && transportProtocol == lhs.transportProtocol;
     }
 
     /** @hide */
@@ -283,17 +268,9 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
                 // masking PII
                 .append(", passphrase=").append((passphrase == null) ? "<null>" : "<non-null>")
                 .append(", port=").append(port).append(", transportProtocol=")
-                .append(transportProtocol).append(", requestorUid=").append(requestorUid)
+                .append(transportProtocol)
                 .append("]");
         return sb.toString();
-    }
-
-    /** @hide */
-    @Override
-    public void assertValidFromUid(int requestorUid) {
-        if (this.requestorUid != requestorUid) {
-            throw new SecurityException("mismatched UIDs");
-        }
     }
 
     /**
@@ -463,7 +440,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
             return new WifiAwareNetworkSpecifier(
                     WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB, role,
                     mDiscoverySession.mClientId, mDiscoverySession.mSessionId, mPeerHandle.peerId,
-                    null, mPmk, mPskPassphrase, mPort, mTransportProtocol, Process.myUid());
+                    null, mPmk, mPskPassphrase, mPort, mTransportProtocol);
         }
     }
 }

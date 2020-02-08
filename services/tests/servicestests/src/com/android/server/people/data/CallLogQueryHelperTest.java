@@ -92,7 +92,7 @@ public final class CallLogQueryHelperTest {
         assertEquals(1, events.size());
         assertEquals(Event.TYPE_CALL_INCOMING, events.get(0).getType());
         assertEquals(100L, events.get(0).getTimestamp());
-        assertEquals(30L, events.get(0).getCallDetails().getDurationSeconds());
+        assertEquals(30L, events.get(0).getDurationSeconds());
     }
 
     @Test
@@ -108,7 +108,7 @@ public final class CallLogQueryHelperTest {
         assertEquals(1, events.size());
         assertEquals(Event.TYPE_CALL_OUTGOING, events.get(0).getType());
         assertEquals(100L, events.get(0).getTimestamp());
-        assertEquals(40L, events.get(0).getCallDetails().getDurationSeconds());
+        assertEquals(40L, events.get(0).getDurationSeconds());
     }
 
     @Test
@@ -124,7 +124,7 @@ public final class CallLogQueryHelperTest {
         assertEquals(1, events.size());
         assertEquals(Event.TYPE_CALL_MISSED, events.get(0).getType());
         assertEquals(100L, events.get(0).getTimestamp());
-        assertEquals(0L, events.get(0).getCallDetails().getDurationSeconds());
+        assertEquals(0L, events.get(0).getDurationSeconds());
     }
 
     @Test
@@ -145,7 +145,7 @@ public final class CallLogQueryHelperTest {
         assertEquals(100L, events.get(0).getTimestamp());
         assertEquals(Event.TYPE_CALL_OUTGOING, events.get(1).getType());
         assertEquals(110L, events.get(1).getTimestamp());
-        assertEquals(40L, events.get(1).getCallDetails().getDurationSeconds());
+        assertEquals(40L, events.get(1).getDurationSeconds());
     }
 
     private class EventConsumer implements BiConsumer<String, Event> {

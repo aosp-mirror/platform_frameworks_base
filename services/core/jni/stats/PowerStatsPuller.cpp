@@ -78,11 +78,12 @@ static bool getPowerStatsHalLocked() {
 
 PowerStatsPuller::PowerStatsPuller() {}
 
-status_pull_atom_return_t PowerStatsPuller::Pull(int32_t atomTag, pulled_stats_event_list* data) {
+AStatsManager_PullAtomCallbackReturn PowerStatsPuller::Pull(int32_t atomTag,
+                                                            AStatsEventList* data) {
     std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
 
     if (!getPowerStatsHalLocked()) {
-        return STATS_PULL_SKIP;
+        return AStatsManager_PULL_SKIP;
     }
 
     // Pull getRailInfo if necessary
@@ -100,14 +101,14 @@ status_pull_atom_return_t PowerStatsPuller::Pull(int32_t atomTag, pulled_stats_e
         if (!resultSuccess || !ret.isOk()) {
             ALOGE("power.stats getRailInfo() failed. Description: %s", ret.description().c_str());
             gPowerStatsHal = nullptr;
-            return STATS_PULL_SKIP;
+            return AStatsManager_PULL_SKIP;
         }
         // If SUCCESS but empty, or if NOT_SUPPORTED, then never try again.
         if (gRailInfo.empty()) {
             ALOGE("power.stats has no rail information");
             gPowerStatsExist = false; // No rail info, so never try again.
             gPowerStatsHal = nullptr;
-            return STATS_PULL_SKIP;
+            return AStatsManager_PULL_SKIP;
         }
     }
 
@@ -134,15 +135,16 @@ status_pull_atom_return_t PowerStatsPuller::Pull(int32_t atomTag, pulled_stats_e
                                             }
                                             const RailInfo& rail = gRailInfo[energyData.index];
 
-                                            stats_event* event = add_stats_event_to_pull_data(data);
-                                            stats_event_set_atom_id(event,
-                                                                    android::util::ON_DEVICE_POWER_MEASUREMENT);
-                                            stats_event_write_string8(event,
-                                                                      rail.subsysName.c_str());
-                                            stats_event_write_string8(event, rail.railName.c_str());
-                                            stats_event_write_int64(event, energyData.timestamp);
-                                            stats_event_write_int64(event, energyData.energy);
-                                            stats_event_build(event);
+                                            AStatsEvent* event =
+                                                    AStatsEventList_addStatsEvent(data);
+                                            AStatsEvent_setAtomId(
+                                                    event,
+                                                    android::util::ON_DEVICE_POWER_MEASUREMENT);
+                                            AStatsEvent_writeString(event, rail.subsysName.c_str());
+                                            AStatsEvent_writeString(event, rail.railName.c_str());
+                                            AStatsEvent_writeInt64(event, energyData.timestamp);
+                                            AStatsEvent_writeInt64(event, energyData.energy);
+                                            AStatsEvent_build(event);
 
                                             ALOGV("power.stat: %s.%s: %llu, %llu",
                                                   rail.subsysName.c_str(), rail.railName.c_str(),
@@ -153,9 +155,9 @@ status_pull_atom_return_t PowerStatsPuller::Pull(int32_t atomTag, pulled_stats_e
     if (!resultSuccess || !ret.isOk()) {
         ALOGE("power.stats getEnergyData() failed. Description: %s", ret.description().c_str());
         gPowerStatsHal = nullptr;
-        return STATS_PULL_SKIP;
+        return AStatsManager_PULL_SKIP;
     }
-    return STATS_PULL_SUCCESS;
+    return AStatsManager_PULL_SUCCESS;
 }
 
 } // namespace stats

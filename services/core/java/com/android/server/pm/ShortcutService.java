@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -1985,7 +1986,6 @@ public class ShortcutService extends IShortcutService.Stub {
             // Verify if caller is the shortcut owner, only if caller doesn't have ACCESS_SHORTCUTS.
             verifyShortcutInfoPackage(callingPackage, shortcut);
         }
-        final String shortcutPackage = shortcut.getPackage();
 
         final boolean ret;
         synchronized (mLock) {
@@ -1999,6 +1999,7 @@ public class ShortcutService extends IShortcutService.Stub {
             // someone already), then we just replace the existing one with this new one,
             // and then proceed the rest of the process.
             if (shortcut != null) {
+                final String shortcutPackage = shortcut.getPackage();
                 final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(
                         shortcutPackage, userId);
                 final String id = shortcut.getId();
@@ -2152,48 +2153,6 @@ public class ShortcutService extends IShortcutService.Stub {
         packageShortcutsChanged(packageName, userId);
 
         verifyStates();
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getDynamicShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isDynamicVisible);
-        }
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getManifestShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isManifestVisible);
-        }
-    }
-
-    @Override
-    public ParceledListSlice<ShortcutInfo> getPinnedShortcuts(String packageName,
-            @UserIdInt int userId) {
-        verifyCaller(packageName, userId);
-
-        synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            return getShortcutsWithQueryLocked(
-                    packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
-                    ShortcutInfo::isPinnedVisible);
-        }
     }
 
     @Override
@@ -2631,7 +2590,7 @@ public class ShortcutService extends IShortcutService.Stub {
         public List<ShortcutInfo> getShortcuts(int launcherUserId,
                 @NonNull String callingPackage, long changedSince,
                 @Nullable String packageName, @Nullable List<String> shortcutIds,
-                @Nullable ComponentName componentName,
+                @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
                 int queryFlags, int userId, int callingPid, int callingUid) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
@@ -2652,15 +2611,16 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 if (packageName != null) {
                     getShortcutsInnerLocked(launcherUserId,
-                            callingPackage, packageName, shortcutIds, changedSince,
+                            callingPackage, packageName, shortcutIds, locusIds, changedSince,
                             componentName, queryFlags, userId, ret, cloneFlag,
                             callingPid, callingUid);
                 } else {
                     final List<String> shortcutIdsF = shortcutIds;
+                    final List<LocusId> locusIdsF = locusIds;
                     getUserShortcutsLocked(userId).forAllPackages(p -> {
                         getShortcutsInnerLocked(launcherUserId,
-                                callingPackage, p.getPackageName(), shortcutIdsF, changedSince,
-                                componentName, queryFlags, userId, ret, cloneFlag,
+                                callingPackage, p.getPackageName(), shortcutIdsF, locusIdsF,
+                                changedSince, componentName, queryFlags, userId, ret, cloneFlag,
                                 callingPid, callingUid);
                     });
                 }
@@ -2670,12 +2630,15 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @GuardedBy("ShortcutService.this.mLock")
         private void getShortcutsInnerLocked(int launcherUserId, @NonNull String callingPackage,
-                @Nullable String packageName, @Nullable List<String> shortcutIds, long changedSince,
+                @Nullable String packageName, @Nullable List<String> shortcutIds,
+                @Nullable List<LocusId> locusIds, long changedSince,
                 @Nullable ComponentName componentName, int queryFlags,
                 int userId, ArrayList<ShortcutInfo> ret, int cloneFlag,
                 int callingPid, int callingUid) {
             final ArraySet<String> ids = shortcutIds == null ? null
                     : new ArraySet<>(shortcutIds);
+            final ArraySet<LocusId> locIds = locusIds == null ? null
+                    : new ArraySet<>(locusIds);
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
             final ShortcutPackage p = user.getPackageShortcutsIfExists(packageName);
@@ -2700,6 +2663,9 @@ public class ShortcutService extends IShortcutService.Stub {
                             return false;
                         }
                         if (ids != null && !ids.contains(si.getId())) {
+                            return false;
+                        }
+                        if (locIds != null && !locIds.contains(si.getLocusId())) {
                             return false;
                         }
                         if (componentName != null) {

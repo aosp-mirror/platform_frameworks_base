@@ -148,6 +148,9 @@ public class Toast {
     @Nullable
     private CharSequence mText;
 
+    // TODO(b/144152069): Remove this after assessing impact on dogfood.
+    private boolean mIsCustomToast;
+
     /**
      * Construct an empty Toast object.  You must call {@link #setView} before you
      * can call {@link #show}.
@@ -214,7 +217,8 @@ public class Toast {
                     service.enqueueTextToast(pkg, mToken, mText, mDuration, displayId, callback);
                 }
             } else {
-                service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
+                service.enqueueTextOrCustomToast(pkg, mToken, tn, mDuration, displayId,
+                        mIsCustomToast);
             }
         } catch (RemoteException e) {
             // Empty
@@ -252,11 +256,16 @@ public class Toast {
      */
     @Deprecated
     public void setView(View view) {
+        mIsCustomToast = true;
         mNextView = view;
     }
 
     /**
      * Return the view.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher that haven't called {@link
+     * #setView(View)} with a non-{@code null} view, this method will return {@code null}.
      *
      * @see #setView
      * @deprecated Custom toast views are deprecated. Apps can create a standard text toast with the
@@ -266,6 +275,7 @@ public class Toast {
      *      targeting API level {@link Build.VERSION_CODES#R} or higher that are in the background
      *      will not have custom toast views displayed.
      */
+    @Deprecated
     public View getView() {
         return mNextView;
     }
@@ -292,6 +302,10 @@ public class Toast {
     /**
      * Set the margins of the view.
      *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method is a no-op when
+     * called on text toasts.
+     *
      * @param horizontalMargin The horizontal margin, in percentage of the
      *        container width, between the container's edges and the
      *        notification
@@ -300,30 +314,59 @@ public class Toast {
      *        notification
      */
     public void setMargin(float horizontalMargin, float verticalMargin) {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "setMargin() shouldn't be called on text toasts, the values won't be used");
+        }
         mTN.mHorizontalMargin = horizontalMargin;
         mTN.mVerticalMargin = verticalMargin;
     }
 
     /**
      * Return the horizontal margin.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public float getHorizontalMargin() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getHorizontalMargin() shouldn't be called on text toasts, the result may "
+                    + "not reflect actual values.");
+        }
         return mTN.mHorizontalMargin;
     }
 
     /**
      * Return the vertical margin.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public float getVerticalMargin() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getVerticalMargin() shouldn't be called on text toasts, the result may not"
+                    + " reflect actual values.");
+        }
         return mTN.mVerticalMargin;
     }
 
     /**
      * Set the location at which the notification should appear on the screen.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method is a no-op when
+     * called on text toasts.
+     *
      * @see android.view.Gravity
      * @see #getGravity
      */
     public void setGravity(int gravity, int xOffset, int yOffset) {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "setGravity() shouldn't be called on text toasts, the values won't be used");
+        }
         mTN.mGravity = gravity;
         mTN.mX = xOffset;
         mTN.mY = yOffset;
@@ -331,25 +374,57 @@ public class Toast {
 
      /**
      * Get the location at which the notification should appear on the screen.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
+     *
      * @see android.view.Gravity
      * @see #getGravity
      */
     public int getGravity() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getGravity() shouldn't be called on text toasts, the result may not reflect"
+                    + " actual values.");
+        }
         return mTN.mGravity;
     }
 
     /**
      * Return the X offset in pixels to apply to the gravity's location.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public int getXOffset() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getXOffset() shouldn't be called on text toasts, the result may not reflect"
+                    + " actual values.");
+        }
         return mTN.mX;
     }
 
     /**
      * Return the Y offset in pixels to apply to the gravity's location.
+     *
+     * <p><strong>Warning:</strong> Starting from Android {@link Build.VERSION_CODES#R}, for apps
+     * targeting API level {@link Build.VERSION_CODES#R} or higher, this method shouldn't be called
+     * on text toasts as its return value may not reflect actual value since text toasts are not
+     * rendered by the app anymore.
      */
     public int getYOffset() {
+        if (isSystemRenderedTextToast()) {
+            Log.e(TAG, "getYOffset() shouldn't be called on text toasts, the result may not reflect"
+                    + " actual values.");
+        }
         return mTN.mY;
+    }
+
+    private boolean isSystemRenderedTextToast() {
+        return Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM) && mNextView == null;
     }
 
     /**
@@ -385,7 +460,7 @@ public class Toast {
     }
 
     /**
-     * Make a standard toast that just contains a text view.
+     * Make a standard toast that just contains text.
      *
      * @param context  The context to use.  Usually your {@link android.app.Application}
      *                 or {@link android.app.Activity} object.
@@ -428,7 +503,7 @@ public class Toast {
     }
 
     /**
-     * Make a standard toast that just contains a text view with the text from a resource.
+     * Make a standard toast that just contains text from a resource.
      *
      * @param context  The context to use.  Usually your {@link android.app.Application}
      *                 or {@link android.app.Activity} object.

@@ -334,20 +334,6 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void requestUpdateVolume2(IMediaRouter2Client client, MediaRoute2Info route, int delta) {
-        Objects.requireNonNull(client, "client must not be null");
-        Objects.requireNonNull(route, "route must not be null");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                requestUpdateVolumeLocked(client, route, delta);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     public void requestCreateClientSession(IMediaRouter2Manager manager, String packageName,
             MediaRoute2Info route, int requestId) {
         final long token = Binder.clearCallingIdentity();
@@ -369,21 +355,6 @@ class MediaRouter2ServiceImpl {
         try {
             synchronized (mLock) {
                 requestSetVolumeLocked(manager, route, volume);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    public void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
-            MediaRoute2Info route, int delta) {
-        Objects.requireNonNull(manager, "manager must not be null");
-        Objects.requireNonNull(route, "route must not be null");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                requestUpdateVolumeLocked(manager, route, delta);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -598,6 +569,9 @@ class MediaRouter2ServiceImpl {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::updateClientUsage,
                             clientRecord.mUserRecord.mHandler, clientRecord));
+            clientRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::updateDiscoveryPreference,
+                            clientRecord.mUserRecord.mHandler));
         }
     }
 
@@ -622,18 +596,6 @@ class MediaRouter2ServiceImpl {
             clientRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::requestSetVolume,
                             clientRecord.mUserRecord.mHandler, route, volume));
-        }
-    }
-
-    private void requestUpdateVolumeLocked(IMediaRouter2Client client, MediaRoute2Info route,
-            int delta) {
-        final IBinder binder = client.asBinder();
-        Client2Record clientRecord = mAllClientRecords.get(binder);
-
-        if (clientRecord != null) {
-            clientRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::requestUpdateVolume,
-                            clientRecord.mUserRecord.mHandler, route, delta));
         }
     }
 
@@ -707,18 +669,6 @@ class MediaRouter2ServiceImpl {
             managerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::requestSetVolume,
                             managerRecord.mUserRecord.mHandler, route, volume));
-        }
-    }
-
-    private void requestUpdateVolumeLocked(IMediaRouter2Manager manager, MediaRoute2Info route,
-            int delta) {
-        final IBinder binder = manager.asBinder();
-        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
-
-        if (managerRecord != null) {
-            managerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::requestUpdateVolume,
-                            managerRecord.mUserRecord.mHandler, route, delta));
         }
     }
 
@@ -856,6 +806,7 @@ class MediaRouter2ServiceImpl {
         //TODO: make records private for thread-safety
         final ArrayList<Client2Record> mClientRecords = new ArrayList<>();
         final ArrayList<ManagerRecord> mManagerRecords = new ArrayList<>();
+        RouteDiscoveryPreference mCompositeDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
         final UserHandler mHandler;
 
         UserRecord(int userId) {
@@ -885,8 +836,6 @@ class MediaRouter2ServiceImpl {
         public final int mClientId;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
-        public boolean mIsManagerSelecting;
-        public MediaRoute2Info mSelectingRoute;
         public MediaRoute2Info mSelectedRoute;
 
         Client2Record(UserRecord userRecord, IMediaRouter2Client client,
@@ -1003,6 +952,7 @@ class MediaRouter2ServiceImpl {
         public void onAddProvider(MediaRoute2ProviderProxy provider) {
             provider.setCallback(this);
             mMediaProviders.add(provider);
+            provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
         }
 
         @Override
@@ -1456,13 +1406,6 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void requestUpdateVolume(MediaRoute2Info route, int delta) {
-            final MediaRoute2Provider provider = findProvider(route.getProviderId());
-            if (provider != null) {
-                provider.requestUpdateVolume(route.getOriginalId(), delta);
-            }
-        }
-
         private List<IMediaRouter2Client> getClients() {
             final List<IMediaRouter2Client> clients = new ArrayList<>();
             MediaRouter2ServiceImpl service = mServiceRef.get();
@@ -1639,6 +1582,25 @@ class MediaRouter2ServiceImpl {
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to update client usage. Manager probably died.", ex);
                 }
+            }
+        }
+
+        private void updateDiscoveryPreference() {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return;
+            }
+            List<RouteDiscoveryPreference> discoveryPreferences = new ArrayList<>();
+            synchronized (service.mLock) {
+                for (Client2Record clientRecord : mUserRecord.mClientRecords) {
+                    discoveryPreferences.add(clientRecord.mDiscoveryPreference);
+                }
+                mUserRecord.mCompositeDiscoveryPreference =
+                        new RouteDiscoveryPreference.Builder(discoveryPreferences)
+                        .build();
+            }
+            for (MediaRoute2Provider provider : mMediaProviders) {
+                provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);
             }
         }
 

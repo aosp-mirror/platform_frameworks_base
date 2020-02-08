@@ -18,12 +18,15 @@ package com.android.server.blob;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Environment;
+import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 class BlobStoreConfig {
     public static final String TAG = "BlobStore";
+    public static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
 
     public static final int CURRENT_XML_VERSION = 1;
 
@@ -31,6 +34,20 @@ class BlobStoreConfig {
     private static final String BLOBS_DIR_NAME = "blobs";
     private static final String SESSIONS_INDEX_FILE_NAME = "sessions_index.xml";
     private static final String BLOBS_INDEX_FILE_NAME = "blobs_index.xml";
+
+    /**
+     * Job Id for idle maintenance job ({@link BlobStoreIdleJobService}).
+     */
+    public static final int IDLE_JOB_ID = 0xB70B1D7; // 191934935L
+    /**
+     * Max time period (in millis) between each idle maintenance job run.
+     */
+    public static final long IDLE_JOB_PERIOD_MILLIS = TimeUnit.DAYS.toMillis(1);
+
+    /**
+     * Timeout in millis after which sessions with no updates will be deleted.
+     */
+    public static final long SESSION_EXPIRY_TIMEOUT_MILLIS = TimeUnit.DAYS.toMillis(7);
 
     @Nullable
     public static File prepareBlobFile(long sessionId) {

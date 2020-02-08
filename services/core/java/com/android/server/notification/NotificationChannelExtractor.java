@@ -15,10 +15,8 @@
 */
 package com.android.server.notification;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
-import android.util.FeatureFlagUtils;
 import android.util.Slog;
 
 /**
@@ -47,9 +45,9 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
             return null;
         }
         NotificationChannel updatedChannel = mConfig.getConversationNotificationChannel(
-                record.sbn.getPackageName(),
-                record.sbn.getUid(), record.getChannel().getId(),
-                record.sbn.getShortcutId(mContext), true, false);
+                record.getSbn().getPackageName(),
+                record.getSbn().getUid(), record.getChannel().getId(),
+                record.getSbn().getShortcutId(mContext), true, false);
         record.updateNotificationChannel(updatedChannel);
 
         return null;

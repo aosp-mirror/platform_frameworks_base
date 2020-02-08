@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -37,6 +37,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 
+/**
+ * The implementation of ITimeDetectorService.aidl.
+ */
 public final class TimeDetectorService extends ITimeDetectorService.Stub {
     private static final String TAG = "TimeDetectorService";
 
@@ -75,7 +78,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME), true,
                 new ContentObserver(handler) {
                     public void onChange(boolean selfChange) {
-                        timeDetectorService.handleAutoTimeDetectionToggle();
+                        timeDetectorService.handleAutoTimeDetectionChanged();
                     }
                 });
 
@@ -91,11 +94,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSignal) {
-        enforceSuggestPhoneTimePermission();
+    public void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSignal) {
+        enforceSuggestTelephonyTimePermission();
         Objects.requireNonNull(timeSignal);
 
-        mHandler.post(() -> mTimeDetectorStrategy.suggestPhoneTime(timeSignal));
+        mHandler.post(() -> mTimeDetectorStrategy.suggestTelephonyTime(timeSignal));
     }
 
     @Override
@@ -114,8 +117,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
     }
 
+    /** Internal method for handling the auto time setting being changed. */
     @VisibleForTesting
-    public void handleAutoTimeDetectionToggle() {
+    public void handleAutoTimeDetectionChanged() {
         mHandler.post(mTimeDetectorStrategy::handleAutoTimeDetectionChanged);
     }
 
@@ -127,10 +131,10 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mTimeDetectorStrategy.dump(pw, args);
     }
 
-    private void enforceSuggestPhoneTimePermission() {
+    private void enforceSuggestTelephonyTimePermission() {
         mContext.enforceCallingPermission(
-                android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE,
-                "suggest phone time and time zone");
+                android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE,
+                "suggest telephony time and time zone");
     }
 
     private void enforceSuggestManualTimePermission() {

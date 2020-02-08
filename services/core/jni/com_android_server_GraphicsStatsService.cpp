@@ -137,7 +137,7 @@ using namespace google::protobuf;
 #define TIME_MILLIS_BUCKETS_FIELD_NUMBER 1
 #define FRAME_COUNTS_FIELD_NUMBER 2
 
-static void writeCpuHistogram(stats_event* event,
+static void writeCpuHistogram(AStatsEvent* event,
                               const uirenderer::protos::GraphicsStatsProto& stat) {
     util::ProtoOutputStream proto;
     for (int bucketIndex = 0; bucketIndex < stat.histogram_size(); bucketIndex++) {
@@ -154,10 +154,10 @@ static void writeCpuHistogram(stats_event* event,
     }
     std::vector<uint8_t> outVector;
     proto.serializeToVector(&outVector);
-    stats_event_write_byte_array(event, outVector.data(), outVector.size());
+    AStatsEvent_writeByteArray(event, outVector.data(), outVector.size());
 }
 
-static void writeGpuHistogram(stats_event* event,
+static void writeGpuHistogram(AStatsEvent* event,
                               const uirenderer::protos::GraphicsStatsProto& stat) {
     util::ProtoOutputStream proto;
     for (int bucketIndex = 0; bucketIndex < stat.gpu_histogram_size(); bucketIndex++) {
@@ -174,20 +174,20 @@ static void writeGpuHistogram(stats_event* event,
     }
     std::vector<uint8_t> outVector;
     proto.serializeToVector(&outVector);
-    stats_event_write_byte_array(event, outVector.data(), outVector.size());
+    AStatsEvent_writeByteArray(event, outVector.data(), outVector.size());
 }
 
 // graphicsStatsPullCallback is invoked by statsd service to pull GRAPHICS_STATS atom.
-static status_pull_atom_return_t graphicsStatsPullCallback(int32_t atom_tag,
-                                                           pulled_stats_event_list* data,
-                                                           void* cookie) {
+static AStatsManager_PullAtomCallbackReturn graphicsStatsPullCallback(int32_t atom_tag,
+                                                                      AStatsEventList* data,
+                                                                      void* cookie) {
     JNIEnv* env = getJNIEnv();
     if (!env) {
         return false;
     }
     if (gGraphicsStatsServiceObject == nullptr) {
         ALOGE("Failed to get graphicsstats service");
-        return STATS_PULL_SKIP;
+        return AStatsManager_PULL_SKIP;
     }
 
     for (bool lastFullDay : {true, false}) {
@@ -199,7 +199,7 @@ static status_pull_atom_return_t graphicsStatsPullCallback(int32_t atom_tag,
             env->ExceptionDescribe();
             env->ExceptionClear();
             ALOGE("Failed to invoke graphicsstats service");
-            return STATS_PULL_SKIP;
+            return AStatsManager_PULL_SKIP;
         }
         if (!jdata) {
             // null means data is not available for that day.
@@ -218,49 +218,51 @@ static status_pull_atom_return_t graphicsStatsPullCallback(int32_t atom_tag,
         if (!success) {
             ALOGW("Parse failed on GraphicsStatsPuller error='%s' dataSize='%d'",
                   serviceDump.InitializationErrorString().c_str(), dataSize);
-            return STATS_PULL_SKIP;
+            return AStatsManager_PULL_SKIP;
         }
 
         for (int stat_index = 0; stat_index < serviceDump.stats_size(); stat_index++) {
             auto& stat = serviceDump.stats(stat_index);
-            stats_event* event = add_stats_event_to_pull_data(data);
-            stats_event_set_atom_id(event, android::util::GRAPHICS_STATS);
-            stats_event_write_string8(event, stat.package_name().c_str());
-            stats_event_write_int64(event, (int64_t)stat.version_code());
-            stats_event_write_int64(event, (int64_t)stat.stats_start());
-            stats_event_write_int64(event, (int64_t)stat.stats_end());
-            stats_event_write_int32(event, (int32_t)stat.pipeline());
-            stats_event_write_int32(event, (int32_t)stat.summary().total_frames());
-            stats_event_write_int32(event, (int32_t)stat.summary().missed_vsync_count());
-            stats_event_write_int32(event, (int32_t)stat.summary().high_input_latency_count());
-            stats_event_write_int32(event, (int32_t)stat.summary().slow_ui_thread_count());
-            stats_event_write_int32(event, (int32_t)stat.summary().slow_bitmap_upload_count());
-            stats_event_write_int32(event, (int32_t)stat.summary().slow_draw_count());
-            stats_event_write_int32(event, (int32_t)stat.summary().missed_deadline_count());
+            AStatsEvent* event = AStatsEventList_addStatsEvent(data);
+            AStatsEvent_setAtomId(event, android::util::GRAPHICS_STATS);
+            AStatsEvent_writeString(event, stat.package_name().c_str());
+            AStatsEvent_writeInt64(event, (int64_t)stat.version_code());
+            AStatsEvent_writeInt64(event, (int64_t)stat.stats_start());
+            AStatsEvent_writeInt64(event, (int64_t)stat.stats_end());
+            AStatsEvent_writeInt32(event, (int32_t)stat.pipeline());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().total_frames());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().missed_vsync_count());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().high_input_latency_count());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_ui_thread_count());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_bitmap_upload_count());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().slow_draw_count());
+            AStatsEvent_writeInt32(event, (int32_t)stat.summary().missed_deadline_count());
             writeCpuHistogram(event, stat);
             writeGpuHistogram(event, stat);
             // TODO: fill in UI mainline module version, when the feature is available.
-            stats_event_write_int64(event, (int64_t)0);
-            stats_event_write_bool(event, !lastFullDay);
-            stats_event_build(event);
+            AStatsEvent_writeInt64(event, (int64_t)0);
+            AStatsEvent_writeBool(event, !lastFullDay);
+            AStatsEvent_build(event);
         }
     }
-    return STATS_PULL_SUCCESS;
+    return AStatsManager_PULL_SUCCESS;
 }
 
 // Register a puller for GRAPHICS_STATS atom with the statsd service.
 static void nativeInit(JNIEnv* env, jobject javaObject) {
     gGraphicsStatsServiceObject = env->NewGlobalRef(javaObject);
-    pull_atom_metadata metadata = {.cool_down_ns = 10 * 1000000, // 10 milliseconds
-                                   .timeout_ns = 2 * NS_PER_SEC, // 2 seconds
-                                   .additive_fields = nullptr,
-                                   .additive_fields_size = 0};
-    register_stats_pull_atom_callback(android::util::GRAPHICS_STATS, &graphicsStatsPullCallback,
-            &metadata, nullptr);
+    AStatsManager_PullAtomMetadata* metadata = AStatsManager_PullAtomMetadata_obtain();
+    AStatsManager_PullAtomMetadata_setCoolDownNs(metadata, 10 * 1000000);  // 10 milliseconds
+    AStatsManager_PullAtomMetadata_setTimeoutNs(metadata, 2 * NS_PER_SEC); // 2 seconds
+
+    AStatsManager_registerPullAtomCallback(android::util::GRAPHICS_STATS,
+                                           &graphicsStatsPullCallback, metadata, nullptr);
+
+    AStatsManager_PullAtomMetadata_release(metadata);
 }
 
 static void nativeDestructor(JNIEnv* env, jobject javaObject) {
-    //TODO: Unregister the puller callback when a new API is available.
+    AStatsManager_unregisterPullAtomCallback(android::util::GRAPHICS_STATS);
     env->DeleteGlobalRef(gGraphicsStatsServiceObject);
     gGraphicsStatsServiceObject = nullptr;
 }

@@ -126,7 +126,8 @@ public class DragDropControllerTests extends WindowTestsBase {
         mTarget = new TestDragDropController(mWm, mWm.mH.getLooper());
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
-        when(mWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
+        when(mWm.mInputManager.transferTouchFocus(any(InputChannel.class),
+                any(InputChannel.class))).thenReturn(true);
 
         mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
     }
@@ -176,7 +177,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
-            assertTrue(mWm.mInputManager.transferTouchFocus(null, null));
+            assertTrue(mWm.mInputManager.transferTouchFocus(new InputChannel(),
+                    new InputChannel()));
             mToken = mTarget.performDrag(
                     new SurfaceSession(), 0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0,
                     data);

@@ -166,7 +166,7 @@ public class SnoozeHelper {
             ArrayMap<String, NotificationRecord> packages =
                     mSnoozedNotifications.get(userId).get(pkg);
             for (int i = 0; i < packages.size(); i++) {
-                String currentGroupKey = packages.valueAt(i).sbn.getGroup();
+                String currentGroupKey = packages.valueAt(i).getSbn().getGroup();
                 if (currentGroupKey.equals(groupKey)) {
                     records.add(packages.valueAt(i));
                 }
@@ -223,7 +223,7 @@ public class SnoozeHelper {
      * Snoozes a notification and schedules an alarm to repost at that time.
      */
     protected void snooze(NotificationRecord record, long duration) {
-        String pkg = record.sbn.getPackageName();
+        String pkg = record.getSbn().getPackageName();
         String key = record.getKey();
         int userId = record.getUser().getIdentifier();
 
@@ -242,7 +242,7 @@ public class SnoozeHelper {
         int userId = record.getUser().getIdentifier();
         if (contextId != null) {
             synchronized (mPersistedSnoozedNotificationsWithContext) {
-                storeRecord(record.sbn.getPackageName(), record.getKey(),
+                storeRecord(record.getSbn().getPackageName(), record.getKey(),
                         userId, mPersistedSnoozedNotificationsWithContext, contextId);
             }
         }
@@ -254,9 +254,9 @@ public class SnoozeHelper {
         if (DEBUG) {
             Slog.d(TAG, "Snoozing " + record.getKey());
         }
-        storeRecord(record.sbn.getPackageName(), record.getKey(),
+        storeRecord(record.getSbn().getPackageName(), record.getKey(),
                 userId, mSnoozedNotifications, record);
-        mPackages.put(record.getKey(), record.sbn.getPackageName());
+        mPackages.put(record.getKey(), record.getSbn().getPackageName());
         mUsers.put(record.getKey(), userId);
     }
 
@@ -308,7 +308,7 @@ public class SnoozeHelper {
             if (recordsForPkg != null) {
                 final Set<Map.Entry<String, NotificationRecord>> records = recordsForPkg.entrySet();
                 for (Map.Entry<String, NotificationRecord> record : records) {
-                    final StatusBarNotification sbn = record.getValue().sbn;
+                    final StatusBarNotification sbn = record.getValue().getSbn();
                     if (Objects.equals(sbn.getTag(), tag) && sbn.getId() == id) {
                         record.getValue().isCanceled = true;
                         return true;
@@ -369,7 +369,7 @@ public class SnoozeHelper {
         if (records == null) {
             return;
         }
-        ArrayMap<String, NotificationRecord> pkgRecords = records.get(record.sbn.getPackageName());
+        ArrayMap<String, NotificationRecord> pkgRecords = records.get(record.getSbn().getPackageName());
         if (pkgRecords == null) {
             return;
         }
@@ -420,7 +420,7 @@ public class SnoozeHelper {
                     int N = recordsByKey.size();
                     for (int i = 0; i < N; i++) {
                         final NotificationRecord potentialGroupSummary = recordsByKey.valueAt(i);
-                        if (potentialGroupSummary.sbn.isGroup()
+                        if (potentialGroupSummary.getSbn().isGroup()
                                 && potentialGroupSummary.getNotification().isGroupSummary()
                                 && groupKey.equals(potentialGroupSummary.getGroupKey())) {
                             groupSummaryKey = potentialGroupSummary.getKey();

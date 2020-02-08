@@ -99,6 +99,33 @@ public class AuthService extends SystemService {
         public String[] getConfiguration(Context context) {
             return context.getResources().getStringArray(R.array.config_biometric_sensors);
         }
+
+        /**
+         * Allows us to mock FingerprintService for testing
+         */
+        @VisibleForTesting
+        public IFingerprintService getFingerprintService() {
+            return IFingerprintService.Stub.asInterface(
+                    ServiceManager.getService(Context.FINGERPRINT_SERVICE));
+        }
+
+        /**
+         * Allows us to mock FaceService for testing
+         */
+        @VisibleForTesting
+        public IFaceService getFaceService() {
+            return IFaceService.Stub.asInterface(
+                    ServiceManager.getService(Context.FACE_SERVICE));
+        }
+
+        /**
+         * Allows us to mock IrisService for testing
+         */
+        @VisibleForTesting
+        public IIrisService getIrisService() {
+            return IIrisService.Stub.asInterface(
+                    ServiceManager.getService(Context.IRIS_SERVICE));
+        }
     }
 
     private final class AuthServiceImpl extends IAuthService.Stub {
@@ -178,7 +205,6 @@ public class AuthService extends SystemService {
 
         mInjector = injector;
         mImpl = new AuthServiceImpl();
-        final PackageManager pm = context.getPackageManager();
     }
 
     private void registerAuthenticator(SensorConfig config) throws RemoteException {
@@ -191,18 +217,36 @@ public class AuthService extends SystemService {
 
         switch (config.mModality) {
             case TYPE_FINGERPRINT:
-                authenticator = new FingerprintAuthenticator(IFingerprintService.Stub.asInterface(
-                        ServiceManager.getService(Context.FINGERPRINT_SERVICE)));
+                final IFingerprintService fingerprintService = mInjector.getFingerprintService();
+                if (fingerprintService == null) {
+                    Slog.e(TAG, "Attempting to register with null FingerprintService. Please check"
+                            + " your device configuration.");
+                    return;
+                }
+
+                authenticator = new FingerprintAuthenticator(fingerprintService);
                 break;
 
             case TYPE_FACE:
-                authenticator = new FaceAuthenticator(IFaceService.Stub.asInterface(
-                        ServiceManager.getService(Context.FACE_SERVICE)));
+                final IFaceService faceService = mInjector.getFaceService();
+                if (faceService == null) {
+                    Slog.e(TAG, "Attempting to register with null FaceService. Please check your"
+                            + " device configuration.");
+                    return;
+                }
+
+                authenticator = new FaceAuthenticator(faceService);
                 break;
 
             case TYPE_IRIS:
-                authenticator = new IrisAuthenticator(IIrisService.Stub.asInterface(
-                        ServiceManager.getService(Context.IRIS_SERVICE)));
+                final IIrisService irisService = mInjector.getIrisService();
+                if (irisService == null) {
+                    Slog.e(TAG, "Attempting to register with null IrisService. Please check your"
+                            + " device configuration.");
+                    return;
+                }
+
+                authenticator = new IrisAuthenticator(irisService);
                 break;
 
             default:

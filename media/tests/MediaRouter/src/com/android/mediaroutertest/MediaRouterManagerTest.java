@@ -289,12 +289,13 @@ public class MediaRouterManagerTest {
         MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
 
         int originalVolume = volRoute.getVolume();
-        int deltaVolume = (originalVolume == volRoute.getVolumeMax() ? -1 : 1);
+        int targetVolume = originalVolume == volRoute.getVolumeMax()
+                ? originalVolume - 1 : originalVolume + 1;
 
         awaitOnRouteChangedManager(
-                () -> mManager.requestUpdateVolume(volRoute, deltaVolume),
+                () -> mManager.requestSetVolume(volRoute, targetVolume),
                 ROUTE_ID_VARIABLE_VOLUME,
-                (route -> route.getVolume() == originalVolume + deltaVolume));
+                (route -> route.getVolume() == targetVolume));
 
         awaitOnRouteChangedManager(
                 () -> mManager.requestSetVolume(volRoute, originalVolume),

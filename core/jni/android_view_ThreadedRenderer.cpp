@@ -147,10 +147,12 @@ static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, job
 }
 
 static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject clazz,
-        jboolean translucent, jlong rootRenderNodePtr) {
+        jboolean translucent, jboolean isWideGamut, jlong rootRenderNodePtr) {
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
     ContextFactoryImpl factory(rootRenderNode);
-    return (jlong) new RenderProxy(translucent, rootRenderNode, &factory);
+    RenderProxy* proxy = new RenderProxy(translucent, rootRenderNode, &factory);
+    proxy->setWideGamut(isWideGamut);
+    return (jlong) proxy;
 }
 
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
@@ -627,7 +629,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetProcessStatsBuffer", "(I)V", (void*) android_view_ThreadedRenderer_setProcessStatsBuffer },
     { "nGetRenderThreadTid", "(J)I", (void*) android_view_ThreadedRenderer_getRenderThreadTid },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
-    { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
+    { "nCreateProxy", "(ZZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nSetName", "(JLjava/lang/String;)V", (void*) android_view_ThreadedRenderer_setName },

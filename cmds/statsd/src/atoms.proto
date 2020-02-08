@@ -202,7 +202,8 @@ message Atom {
         DocsUIStartupMsReported docs_ui_startup_ms = 111 [(module) = "docsui"];
         DocsUIUserActionReported docs_ui_user_action_reported = 112 [(module) = "docsui"];
         WifiEnabledStateChanged wifi_enabled_state_changed = 113 [(module) = "framework"];
-        WifiRunningStateChanged wifi_running_state_changed = 114 [(module) = "framework"];
+        WifiRunningStateChanged wifi_running_state_changed = 114
+                [(module) = "framework", deprecated = true];
         AppCompacted app_compacted = 115 [(module) = "framework"];
         NetworkDnsEventReported network_dns_event_reported = 116 [(module) = "resolv"];
         DocsUIPickerLaunchedFromReported docs_ui_picker_launched_from_reported =
@@ -390,6 +391,7 @@ message Atom {
         WifiHealthStatReported wifi_health_stat_reported = 251 [(module) = "wifi"];
         WifiFailureStatReported wifi_failure_stat_reported = 252 [(module) = "wifi"];
         WifiConnectionResultReported wifi_connection_result_reported = 253 [(module) = "wifi"];
+        SdkExtensionStatus sdk_extension_status = 354;
     }
 
     // Pulled events will start at field 10000.
@@ -1258,6 +1260,8 @@ message WifiEnabledStateChanged {
 }
 
 /**
+ * This atom is deprecated starting in R.
+ *
  * Logs when an app causes Wifi to run. In this context, 'to run' means to use Wifi Client Mode.
  * TODO: Include support for Hotspot, perhaps by using an extra field to denote 'mode'.
  * Note that Wifi Scanning is monitored separately in WifiScanStateChanged.
@@ -3706,6 +3710,7 @@ message FlagFlipUpdateOccurred {
 
 /**
  * Potential experiment ids that goes with a train install.
+ * Should be kept in sync with experiment_ids.proto.
  */
 message TrainExperimentIds {
     repeated int64 experiment_id = 1;
@@ -8332,4 +8337,28 @@ message CellBroadcastMessageError {
 
     // Exception message (or log message) associated with the error (max 1000 chars)
     optional string exception_message = 2;
+}
+
+/**
+ * Logs when the SDK Extensions test app has polled the current version.
+ * This is atom ID 354.
+ *
+ * Logged from:
+ *   vendor/google_testing/integration/packages/apps/SdkExtensionsTestApp/
+ */
+message SdkExtensionStatus {
+    enum ApiCallStatus {
+        CALL_NOT_ATTEMPTED = 0;
+        CALL_SUCCESSFUL = 1;
+        CALL_FAILED = 2;
+    }
+
+    optional ApiCallStatus result = 1;
+
+    // The R extension version, i.e. android.os.ext.SdkExtension.getExtensionVersion(R).
+    optional int32 r_extension_version = 2;
+
+    // A number identifying which particular symbol's call failed, if any. 0 means no missing symbol.
+    // "Failed" here can mean a symbol that wasn't meant to be visible was, or the other way around.
+    optional int32 failed_call_symbol = 3;
 }

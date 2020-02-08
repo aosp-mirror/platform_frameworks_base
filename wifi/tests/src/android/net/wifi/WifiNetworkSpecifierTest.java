@@ -29,7 +29,6 @@ import android.net.MatchAllNetworkSpecifier;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.PatternMatcher;
-import android.os.Process;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
@@ -41,8 +40,6 @@ import org.junit.Test;
  */
 @SmallTest
 public class WifiNetworkSpecifierTest {
-    private static final int TEST_UID = 5;
-    private static final String TEST_PACKAGE_NAME = "com.test";
     private static final String TEST_SSID = "Test123";
     private static final String TEST_BSSID_OUI_BASE_ADDRESS = "12:12:12:00:00:00";
     private static final String TEST_BSSID_OUI_MASK = "ff:ff:ff:00:00:00";
@@ -62,7 +59,6 @@ public class WifiNetworkSpecifierTest {
         assertTrue(specifier instanceof WifiNetworkSpecifier);
         WifiNetworkSpecifier wifiNetworkSpecifier = (WifiNetworkSpecifier) specifier;
 
-        assertEquals(Process.myUid(), wifiNetworkSpecifier.requestorUid);
         assertEquals(TEST_SSID, wifiNetworkSpecifier.ssidPatternMatcher.getPath());
         assertEquals(PATTERN_PREFIX, wifiNetworkSpecifier.ssidPatternMatcher.getType());
         assertEquals(WifiManager.ALL_ZEROS_MAC_ADDRESS,
@@ -367,8 +363,7 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         Parcel parcelW = Parcel.obtain();
         specifier.writeToParcel(parcelW, 0);
@@ -399,8 +394,7 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         assertTrue(specifier.satisfiedBy(null));
         assertTrue(specifier.satisfiedBy(new MatchAllNetworkSpecifier()));
@@ -422,15 +416,13 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         WifiNetworkSpecifier specifier2 =
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         assertTrue(specifier2.satisfiedBy(specifier1));
     }
@@ -451,8 +443,7 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration1,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration1);
 
         WifiConfiguration wifiConfiguration2 = new WifiConfiguration();
         wifiConfiguration2.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
@@ -460,8 +451,7 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration2,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration2);
 
         assertFalse(specifier2.satisfiedBy(specifier1));
     }
@@ -482,15 +472,13 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher("", PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         WifiNetworkSpecifier specifier2 =
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         assertFalse(specifier2.satisfiedBy(specifier1));
     }
@@ -511,44 +499,13 @@ public class WifiNetworkSpecifierTest {
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                                 MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
+                        wifiConfiguration);
 
         WifiNetworkSpecifier specifier2 =
                 new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
                         Pair.create(WifiManager.ALL_ZEROS_MAC_ADDRESS,
                                 WifiManager.ALL_ZEROS_MAC_ADDRESS),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
-
-        assertFalse(specifier2.satisfiedBy(specifier1));
-    }
-
-    /**
-     * Validate NetworkSpecifier matching.
-     * a) Create network specifier 1 for WPA_PSK network
-     * b) Create network specifier 2 with different package name .
-     * c) Ensure that the specifier 2 is not satisfied by specifier 1.
-     */
-    @Test
-    public void testWifiNetworkSpecifierDoesNotSatisfyWhenPackageNameDifferent() {
-        WifiConfiguration wifiConfiguration = new WifiConfiguration();
-        wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        wifiConfiguration.preSharedKey = TEST_PRESHARED_KEY;
-
-        WifiNetworkSpecifier specifier1 =
-                new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
-                        Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
-                                MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME);
-
-        WifiNetworkSpecifier specifier2 =
-                new WifiNetworkSpecifier(new PatternMatcher(TEST_SSID, PATTERN_LITERAL),
-                        Pair.create(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
-                                MacAddress.fromString(TEST_BSSID_OUI_MASK)),
-                        wifiConfiguration,
-                        TEST_UID, TEST_PACKAGE_NAME + "blah");
+                        wifiConfiguration);
 
         assertFalse(specifier2.satisfiedBy(specifier1));
     }

@@ -190,9 +190,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     onAnimationFinish();
                 }
             });
-            setStartingAnimation(true);
             mAnimator.start();
-            setStartingAnimation(false);
         }
 
         @Override
@@ -201,9 +199,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (mAnimator != null) {
                 mAnimator.cancel();
             }
-        }
-
-        protected void setStartingAnimation(boolean startingAnimation) {
         }
 
         protected void onAnimationFinish() {
@@ -239,16 +234,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final @AnimationType int type;
     }
 
-    private class DefaultAnimationControlListener extends InternalAnimationControlListener {
-        DefaultAnimationControlListener(boolean show) {
-            super(show);
-        }
-        
-        @Override
-        protected void setStartingAnimation(boolean startingAnimation) {
-            mStartingAnimation = startingAnimation;
-        }
-    }
     /**
      * Represents a control request that we had to defer because we are waiting for the IME to
      * process our show request.
@@ -822,7 +807,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
 
-        final DefaultAnimationControlListener listener = new DefaultAnimationControlListener(show);
+        final InternalAnimationControlListener listener =
+                new InternalAnimationControlListener(show);
         // Show/hide animations always need to be relative to the display frame, in order that shown
         // and hidden state insets are correct.
         controlAnimationUnchecked(
@@ -878,7 +864,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     return true;
                 }
                 mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
+                mStartingAnimation = true;
                 listener.onReady(controller, types);
+                mStartingAnimation = false;
                 return true;
             }
         });

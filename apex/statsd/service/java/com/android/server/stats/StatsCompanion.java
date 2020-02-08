@@ -38,11 +38,15 @@ public class StatsCompanion {
     private static final String TAG = "StatsCompanion";
     private static final boolean DEBUG = false;
 
-    static void enforceStatsCompanionPermission(Context context) {
+    private static final int AID_STATSD = 1066;
+
+    static void enforceStatsdCallingUid() {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
         }
-        context.enforceCallingPermission(android.Manifest.permission.STATSCOMPANION, null);
+        if (Binder.getCallingUid() != AID_STATSD) {
+            throw new SecurityException("Not allowed to access StatsCompanion");
+        }
     }
 
     /**
@@ -114,7 +118,7 @@ public class StatsCompanion {
 
         @Override
         public void sendDataBroadcast(long lastReportTimeNs) {
-            enforceStatsCompanionPermission(mContext);
+            enforceStatsdCallingUid();
             Intent intent = new Intent();
             intent.putExtra(EXTRA_LAST_REPORT_TIME, lastReportTimeNs);
             try {
@@ -126,7 +130,7 @@ public class StatsCompanion {
 
         @Override
         public void sendActiveConfigsChangedBroadcast(long[] configIds) {
-            enforceStatsCompanionPermission(mContext);
+            enforceStatsdCallingUid();
             Intent intent = new Intent();
             intent.putExtra(StatsManager.EXTRA_STATS_ACTIVE_CONFIG_KEYS, configIds);
             try {
@@ -142,7 +146,7 @@ public class StatsCompanion {
         @Override
         public void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
                 long subscriptionRuleId, String[] cookies, StatsDimensionsValue dimensionsValue) {
-            enforceStatsCompanionPermission(mContext);
+            enforceStatsdCallingUid();
             Intent intent =
                     new Intent()
                             .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)

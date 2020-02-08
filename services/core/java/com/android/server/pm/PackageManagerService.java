@@ -150,6 +150,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.ComponentInfo;
+import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
@@ -1537,15 +1538,16 @@ public class PackageManagerService extends IPackageManager.Stub
     final @NonNull String mRequiredPermissionControllerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
-    final @Nullable String mSystemTextClassifierPackage;
+    final @Nullable String mDefaultTextClassifierPackage;
+    final @Nullable String mSystemTextClassifierPackageName;
     final @Nullable String mWellbeingPackage;
     final @Nullable String mDocumenterPackage;
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
     final @Nullable String mIncidentReportApproverPackage;
     final @Nullable String[] mTelephonyPackages;
-    final @NonNull String mServicesExtensionPackageName;
-    final @NonNull String mSharedSystemSharedLibraryPackageName;
+    final @Nullable String mServicesExtensionPackageName;
+    final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -1657,7 +1659,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         handlePackagePostInstall(parentRes, grantPermissions,
                                 killApp, virtualPreload, grantedPermissions,
                                 whitelistedRestrictedPermissions, didRestore,
-                                args.installSource.installerPackageName, args.observer);
+                                args.installSource.installerPackageName, args.observer,
+                                args.mDataLoaderType);
 
                         // Handle the child packages
                         final int childCount = (parentRes.addedChildPackages != null)
@@ -1667,7 +1670,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             handlePackagePostInstall(childRes, grantPermissions,
                                     killApp, virtualPreload, grantedPermissions,
                                     whitelistedRestrictedPermissions, false /*didRestore*/,
-                                    args.installSource.installerPackageName, args.observer);
+                                    args.installSource.installerPackageName, args.observer,
+                                    args.mDataLoaderType);
                         }
 
                         // Log tracing if needed
@@ -1994,7 +1998,7 @@ public class PackageManagerService extends IPackageManager.Stub
             boolean killApp, boolean virtualPreload,
             String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
             boolean launchedForRestore, String installerPackage,
-            IPackageInstallObserver2 installObserver) {
+            IPackageInstallObserver2 installObserver, int dataLoaderType) {
         final boolean succeeded = res.returnCode == PackageManager.INSTALL_SUCCEEDED;
         final boolean update = res.removedInfo != null && res.removedInfo.removedPackage != null;
 
@@ -2095,11 +2099,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (update) {
                     extras.putBoolean(Intent.EXTRA_REPLACING, true);
                 }
+                extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
+                // Send to all running apps.
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                         extras, 0 /*flags*/,
                         null /*targetPackage*/, null /*finishedReceiver*/,
                         updateUserIds, instantUserIds);
                 if (installerPackageName != null) {
+                    // Send to the installer, even if it's not running.
                     sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
                             installerPackageName, null /*finishedReceiver*/,
@@ -3155,8 +3162,8 @@ public class PackageManagerService extends IPackageManager.Stub
             mSetupWizardPackage = getSetupWizardPackageNameImpl();
             mComponentResolver.fixProtectedFilterPriorities();
 
-            mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
-
+            mDefaultTextClassifierPackage = getDefaultTextClassifierPackageName();
+            mSystemTextClassifierPackageName = getSystemTextClassifierPackageName();
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
             mConfiguratorPackage = getDeviceConfiguratorPackageName();
@@ -3351,6 +3358,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mServicesExtensionPackageName = null;
                 mSharedSystemSharedLibraryPackageName = null;
             }
+
             // PermissionController hosts default permission granting and role management, so it's a
             // critical part of the core system.
             mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
@@ -13976,9 +13984,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final int appId;
         final String seinfo;
         final int targetSdkVersion;
+        final String fromCodePath;
 
         public MoveInfo(int moveId, String fromUuid, String toUuid, String packageName,
-                String dataAppName, int appId, String seinfo, int targetSdkVersion) {
+                String dataAppName, int appId, String seinfo, int targetSdkVersion,
+                String fromCodePath) {
             this.moveId = moveId;
             this.fromUuid = fromUuid;
             this.toUuid = toUuid;
@@ -13987,6 +13997,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.appId = appId;
             this.seinfo = seinfo;
             this.targetSdkVersion = targetSdkVersion;
+            this.fromCodePath = fromCodePath;
         }
     }
 
@@ -14112,13 +14123,14 @@ public class PackageManagerService extends IPackageManager.Stub
         MultiPackageInstallParams mParentInstallParams;
         final long requiredInstalledVersionCode;
         final boolean forceQueryableOverride;
+        final int mDataLoaderType;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
                 SigningDetails signingDetails, int installReason,
-                long requiredInstalledVersionCode) {
+                long requiredInstalledVersionCode, int dataLoaderType) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -14134,40 +14146,42 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installReason = installReason;
             this.requiredInstalledVersionCode = requiredInstalledVersionCode;
             this.forceQueryableOverride = false;
+            this.mDataLoaderType = dataLoaderType;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
             super(activeInstallSession.getUser());
+            final PackageInstaller.SessionParams sessionParams =
+                    activeInstallSession.getSessionParams();
             if (DEBUG_INSTANT) {
-                if ((activeInstallSession.getSessionParams().installFlags
+                if ((sessionParams.installFlags
                         & PackageManager.INSTALL_INSTANT_APP) != 0) {
                     Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
                 }
             }
             verificationInfo = new VerificationInfo(
-                    activeInstallSession.getSessionParams().originatingUri,
-                    activeInstallSession.getSessionParams().referrerUri,
-                    activeInstallSession.getSessionParams().originatingUid,
+                    sessionParams.originatingUri,
+                    sessionParams.referrerUri,
+                    sessionParams.originatingUid,
                     activeInstallSession.getInstallerUid());
             origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
             move = null;
             installReason = fixUpInstallReason(
                     activeInstallSession.getInstallSource().installerPackageName,
                     activeInstallSession.getInstallerUid(),
-                    activeInstallSession.getSessionParams().installReason);
+                    sessionParams.installReason);
             observer = activeInstallSession.getObserver();
-            installFlags = activeInstallSession.getSessionParams().installFlags;
+            installFlags = sessionParams.installFlags;
             installSource = activeInstallSession.getInstallSource();
-            volumeUuid = activeInstallSession.getSessionParams().volumeUuid;
-            packageAbiOverride = activeInstallSession.getSessionParams().abiOverride;
-            grantedRuntimePermissions = activeInstallSession.getSessionParams()
-                    .grantedRuntimePermissions;
-            whitelistedRestrictedPermissions = activeInstallSession.getSessionParams()
-                    .whitelistedRestrictedPermissions;
+            volumeUuid = sessionParams.volumeUuid;
+            packageAbiOverride = sessionParams.abiOverride;
+            grantedRuntimePermissions = sessionParams.grantedRuntimePermissions;
+            whitelistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
             signingDetails = activeInstallSession.getSigningDetails();
-            requiredInstalledVersionCode = activeInstallSession.getSessionParams()
-                    .requiredInstalledVersionCode;
-            forceQueryableOverride = activeInstallSession.getSessionParams().forceQueryableOverride;
+            requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
+            forceQueryableOverride = sessionParams.forceQueryableOverride;
+            mDataLoaderType = (sessionParams.dataLoaderParams != null)
+                    ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
         }
 
         @Override
@@ -14770,6 +14784,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int installReason;
         final boolean forceQueryableOverride;
         @Nullable final MultiPackageInstallParams mMultiPackageInstallParams;
+        final int mDataLoaderType;
 
         // The list of instruction sets supported by this app. This is currently
         // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -14783,7 +14798,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 List<String> whitelistedRestrictedPermissions,
                 String traceMethod, int traceCookie, SigningDetails signingDetails,
                 int installReason, boolean forceQueryableOverride,
-                MultiPackageInstallParams multiPackageInstallParams) {
+                MultiPackageInstallParams multiPackageInstallParams, int dataLoaderType) {
             this.origin = origin;
             this.move = move;
             this.installFlags = installFlags;
@@ -14801,6 +14816,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installReason = installReason;
             this.forceQueryableOverride = forceQueryableOverride;
             this.mMultiPackageInstallParams = multiPackageInstallParams;
+            this.mDataLoaderType = dataLoaderType;
         }
 
         /** New install */
@@ -14810,7 +14826,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.forceQueryableOverride, params.mParentInstallParams);
+                    params.installReason, params.forceQueryableOverride,
+                    params.mParentInstallParams, params.mDataLoaderType);
         }
 
         abstract int copyApk();
@@ -14901,7 +14918,8 @@ public class PackageManagerService extends IPackageManager.Stub
             super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
                     null, null, instructionSets, null, null, null, null, 0,
                     PackageParser.SigningDetails.UNKNOWN,
-                    PackageManager.INSTALL_REASON_UNKNOWN, false, null /* parent */);
+                    PackageManager.INSTALL_REASON_UNKNOWN, false, null /* parent */,
+                    DataLoaderType.NONE);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
         }
@@ -14981,9 +14999,7 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 makeDirRecursive(afterCodeFile.getParentFile(), 0775);
                 if (onIncremental) {
-                    // TODO(b/147371381): fix incremental installation
-                    mIncrementalManager.rename(beforeCodeFile.getAbsolutePath(),
-                            afterCodeFile.getAbsolutePath());
+                    mIncrementalManager.renameCodePath(beforeCodeFile, afterCodeFile);
                 } else {
                     Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
                 }
@@ -15102,7 +15118,8 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mInstaller) {
                 try {
                     mInstaller.moveCompleteApp(move.fromUuid, move.toUuid, move.packageName,
-                            move.dataAppName, move.appId, move.seinfo, move.targetSdkVersion);
+                            move.dataAppName, move.appId, move.seinfo, move.targetSdkVersion,
+                            move.fromCodePath);
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to move app", e);
                     return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -19626,15 +19643,15 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String getSystemTextClassifierPackageName() {
-        return ensureSystemPackageName(mContext.getString(
-                R.string.config_defaultTextClassifierPackage));
+    public String getDefaultTextClassifierPackageName() {
+        return ensureSystemPackageName(
+                mContext.getString(R.string.config_servicesExtensionPackage));
     }
 
     @Override
-    public String[] getSystemTextClassifierPackages() {
-        return ensureSystemPackageNames(mContext.getResources().getStringArray(
-                R.array.config_defaultTextClassifierPackages));
+    public String getSystemTextClassifierPackageName() {
+        return ensureSystemPackageName(
+                mContext.getString(R.string.config_defaultTextClassifierPackage));
     }
 
     @Override
@@ -19804,8 +19821,13 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName == null) {
             return null;
         }
-        if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
-            return null;
+        long token = Binder.clearCallingIdentity();
+        try {
+            if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
+                return null;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return packageName;
     }
@@ -22047,6 +22069,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageFreezer freezer;
         final int[] installedUserIds;
         final boolean isCurrentLocationExternal;
+        final String fromCodePath;
 
         // reader
         synchronized (mLock) {
@@ -22103,6 +22126,7 @@ public class PackageManagerService extends IPackageManager.Stub
             targetSdkVersion = pkg.getTargetSdkVersion();
             freezer = freezePackage(packageName, "movePackageInternal");
             installedUserIds = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
+            fromCodePath = pkg.getCodePath();
         }
 
         final Bundle extras = new Bundle();
@@ -22231,7 +22255,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final String dataAppName = codeFile.getName();
             move = new MoveInfo(moveId, currentVolumeUuid, volumeUuid, packageName,
-                    dataAppName, appId, seinfo, targetSdkVersion);
+                    dataAppName, appId, seinfo, targetSdkVersion, fromCodePath);
         } else {
             move = null;
         }
@@ -22244,7 +22268,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 installSource, volumeUuid, null /*verificationInfo*/, user,
                 packageAbiOverride, null /*grantedPermissions*/,
                 null /*whitelistedRestrictedPermissions*/, PackageParser.SigningDetails.UNKNOWN,
-                PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.VERSION_CODE_HIGHEST);
+                PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.VERSION_CODE_HIGHEST,
+                DataLoaderType.NONE);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -22750,6 +22775,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private class PackageManagerNative extends IPackageManagerNative.Stub {
         @Override
+        public String[] getAllPackages() {
+            return PackageManagerService.this.getAllPackages().toArray(new String[0]);
+        }
+
+        @Override
         public String[] getNamesForUids(int[] uids) throws RemoteException {
             final String[] results = PackageManagerService.this.getNamesForUids(uids);
             // massage results so they can be parsed by the native binder
@@ -23058,7 +23088,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         private String[] getKnownPackageNamesInternal(int knownPackage, int userId) {
-            switch(knownPackage) {
+            switch (knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
                     return new String[]{mPermissionManager.getDefaultBrowser(userId)};
                 case PackageManagerInternal.PACKAGE_INSTALLER:
@@ -23070,7 +23100,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 case PackageManagerInternal.PACKAGE_VERIFIER:
                     return filterOnlySystemPackages(mRequiredVerifierPackage);
                 case PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER:
-                    return filterOnlySystemPackages(mSystemTextClassifierPackage);
+                    return filterOnlySystemPackages(
+                            mDefaultTextClassifierPackage, mSystemTextClassifierPackageName);
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
                     return filterOnlySystemPackages(mRequiredPermissionControllerPackage);
                 case PackageManagerInternal.PACKAGE_WELLBEING:

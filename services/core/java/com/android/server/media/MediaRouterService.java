@@ -539,22 +539,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void requestUpdateVolume2(IMediaRouter2Client client, MediaRoute2Info route, int delta) {
-        mService2.requestUpdateVolume2(client, route, delta);
-    }
-
-    // Binder call
-    @Override
     public void requestSetVolume2Manager(IMediaRouter2Manager manager,
             MediaRoute2Info route, int volume) {
         mService2.requestSetVolume2Manager(manager, route, volume);
-    }
-
-    // Binder call
-    @Override
-    public void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
-            MediaRoute2Info route, int delta) {
-        mService2.requestUpdateVolume2Manager(manager, route, delta);
     }
 
     // Binder call

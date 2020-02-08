@@ -1867,7 +1867,7 @@ public class WifiManagerTest {
      * Tests that passing a null Executor to {@link WifiManager#getWifiActivityEnergyInfoAsync}
      * throws an exception.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testGetWifiActivityInfoNullExecutor() throws Exception {
         mWifiManager.getWifiActivityEnergyInfoAsync(null, mOnWifiActivityEnergyInfoListener);
     }
@@ -1876,7 +1876,7 @@ public class WifiManagerTest {
      * Tests that passing a null listener to {@link WifiManager#getWifiActivityEnergyInfoAsync}
      * throws an exception.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void testGetWifiActivityInfoNullListener() throws Exception {
         mWifiManager.getWifiActivityEnergyInfoAsync(mExecutor, null);
     }

@@ -169,7 +169,7 @@ applications that come with the platform
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
-        <permission name="android.permission.SUGGEST_PHONE_TIME_AND_ZONE"/>
+        <permission name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
         <permission name="android.permission.UPDATE_LOCK"/>
@@ -366,6 +366,10 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
         <!-- Permission required for Tethering CTS tests. -->
         <permission name="android.permission.TETHER_PRIVILEGED"/>
+        <!-- Permissions required for ganting and logging -->
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG" />
         <!-- Permissions required to test ambient display. -->
         <permission name="android.permission.READ_DREAM_STATE" />
         <permission name="android.permission.WRITE_DREAM_STATE" />

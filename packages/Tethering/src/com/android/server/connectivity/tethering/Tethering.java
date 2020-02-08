@@ -272,13 +272,6 @@ public class Tethering {
 
         mStateReceiver = new StateReceiver();
 
-        mNetdCallback = new NetdCallback();
-        try {
-            mNetd.registerUnsolicitedEventListener(mNetdCallback);
-        } catch (RemoteException e) {
-            mLog.e("Unable to register netd UnsolicitedEventListener");
-        }
-
         final UserManager userManager = (UserManager) mContext.getSystemService(
                 Context.USER_SERVICE);
         mTetheringRestriction = new UserRestrictionActionListener(userManager, this);
@@ -287,6 +280,14 @@ public class Tethering {
 
         // Load tethering configuration.
         updateConfiguration();
+        // NetdCallback should be registered after updateConfiguration() to ensure
+        // TetheringConfiguration is created.
+        mNetdCallback = new NetdCallback();
+        try {
+            mNetd.registerUnsolicitedEventListener(mNetdCallback);
+        } catch (RemoteException e) {
+            mLog.e("Unable to register netd UnsolicitedEventListener");
+        }
 
         startStateMachineUpdaters(mHandler);
         startTrackDefaultNetwork();

@@ -568,14 +568,12 @@ public class WifiConfiguration implements Parcelable {
      * 2GHz band.
      * @hide
      */
-    @SystemApi
     public static final int AP_BAND_2GHZ = 0;
 
     /**
      * 5GHz band.
      * @hide
      */
-    @SystemApi
     public static final int AP_BAND_5GHZ = 1;
 
     /**
@@ -583,7 +581,6 @@ public class WifiConfiguration implements Parcelable {
      * operating country code and current radio conditions.
      * @hide
      */
-    @SystemApi
     public static final int AP_BAND_ANY = -1;
 
     /**
@@ -593,7 +590,7 @@ public class WifiConfiguration implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @ApBand
     public int apBand = AP_BAND_2GHZ;
 
@@ -1304,8 +1301,32 @@ public class WifiConfiguration implements Parcelable {
         public static final int DISABLED_BY_WRONG_PASSWORD = 8;
         /** This network is disabled because service is not subscribed. */
         public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9;
-        /** All other disable reasons should be strictly less than this value. */
+        /**
+         * All other disable reasons should be strictly less than this value.
+         * @hide
+         */
         public static final int NETWORK_SELECTION_DISABLED_MAX = 10;
+
+        /**
+         * Get an integer that is equal to the maximum integer value of all the
+         * DISABLED_* reasons
+         * e.g. {@link #DISABLED_NONE}, {@link #DISABLED_ASSOCIATION_REJECTION}, etc.
+         *
+         * All DISABLED_* constants will be contiguous in the range
+         * 0, 1, 2, 3, ..., getMaxNetworkSelectionDisableReasons()
+         *
+         * <br />
+         * For example, this can be used to iterate through all the network selection
+         * disable reasons like so:
+         * <pre>{@code
+         * for (int reason = 0; reason <= getMaxNetworkSelectionDisableReasons(); reason++) {
+         *     ...
+         * }
+         * }</pre>
+         */
+        public static int getMaxNetworkSelectionDisableReason() {
+            return NETWORK_SELECTION_DISABLED_MAX - 1;
+        }
 
         /**
          * Contains info about disable reasons.
@@ -1709,7 +1730,10 @@ public class WifiConfiguration implements Parcelable {
             return mStatus;
         }
 
-        /** True if the current network is enabled to join network selection, false otherwise. */
+        /**
+         * True if the current network is enabled to join network selection, false otherwise.
+         * @hide
+         */
         public boolean isNetworkEnabled() {
             return mStatus == NETWORK_SELECTION_ENABLED;
         }
@@ -1722,7 +1746,10 @@ public class WifiConfiguration implements Parcelable {
             return mStatus == NETWORK_SELECTION_TEMPORARY_DISABLED;
         }
 
-        /** True if the current network is permanently disabled, false otherwise. */
+        /**
+         * True if the current network is permanently disabled, false otherwise.
+         * @hide
+         */
         public boolean isNetworkPermanentlyDisabled() {
             return mStatus == NETWORK_SELECTION_PERMANENTLY_DISABLED;
         }

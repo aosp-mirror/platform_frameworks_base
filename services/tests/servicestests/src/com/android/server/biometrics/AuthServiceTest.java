@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +33,9 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.face.IFaceService;
+import android.hardware.fingerprint.IFingerprintService;
+import android.hardware.iris.IIrisService;
 import android.os.Binder;
 import android.os.Bundle;
 
@@ -61,6 +65,12 @@ public class AuthServiceTest {
     AuthService.Injector mInjector;
     @Mock
     IBiometricService mBiometricService;
+    @Mock
+    IFingerprintService mFingerprintService;
+    @Mock
+    IIrisService mIrisService;
+    @Mock
+    IFaceService mFaceService;
 
     @Before
     public void setUp() {
@@ -76,10 +86,28 @@ public class AuthServiceTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mInjector.getBiometricService()).thenReturn(mBiometricService);
         when(mInjector.getConfiguration(any())).thenReturn(config);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
-                .thenReturn(true);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)).thenReturn(true);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true);
+        when(mInjector.getFingerprintService()).thenReturn(mFingerprintService);
+        when(mInjector.getFaceService()).thenReturn(mFaceService);
+        when(mInjector.getIrisService()).thenReturn(mIrisService);
+    }
+
+    @Test
+    public void testRegisterNullService_doesNotRegister() throws Exception {
+
+        // Config contains Fingerprint, Iris, Face, but services are all null
+
+        when(mInjector.getFingerprintService()).thenReturn(null);
+        when(mInjector.getFaceService()).thenReturn(null);
+        when(mInjector.getIrisService()).thenReturn(null);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        verify(mBiometricService, never()).registerAuthenticator(
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                any());
     }
 
 

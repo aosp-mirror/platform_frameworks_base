@@ -223,6 +223,11 @@
     <!-- permissions required for CTS test - PhoneStateListenerTest -->
     <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
 
+    <!-- Permissions required for ganting and logging -->
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
+
     <!-- Permission required for CTS test - UiModeManagerTest -->
     <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
 

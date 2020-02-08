@@ -302,11 +302,41 @@ public class RollbackUnitTest {
         assertThat(rollback.notifySessionWithSuccess()).isTrue();
     }
 
+    @Test
+    public void allPackagesEnabled() {
+        int[] sessionIds = new int[]{ 7777, 8888 };
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER,
+                sessionIds);
+        // #allPackagesEnabled returns false when 1 out of 2 packages is enabled.
+        rollback.info.getPackages().add(newPkgInfoFor(PKG_1, 12, 10, false));
+        assertThat(rollback.allPackagesEnabled()).isFalse();
+        // #allPackagesEnabled returns false for ApkInApex doesn't count.
+        rollback.info.getPackages().add(newPkgInfoForApkInApex(PKG_3, 157, 156));
+        assertThat(rollback.allPackagesEnabled()).isFalse();
+        // #allPackagesEnabled returns true when 2 out of 2 packages are enabled.
+        rollback.info.getPackages().add(newPkgInfoFor(PKG_2, 18, 12, true));
+        assertThat(rollback.allPackagesEnabled()).isTrue();
+    }
+
     private static PackageRollbackInfo newPkgInfoFor(
             String packageName, long fromVersion, long toVersion, boolean isApex) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
                 new VersionedPackage(packageName, toVersion),
                 new IntArray(), new ArrayList<>(), isApex, false, new IntArray(),
+                new SparseLongArray());
+    }
+
+    /**
+     * TODO: merge newPkgInfoFor and newPkgInfoForApkInApex by using enums to specify
+     * 1. IS_APK
+     * 2. IS_APEX
+     * 3. IS_APK_IN_APEX
+     */
+    private static PackageRollbackInfo newPkgInfoForApkInApex(
+            String packageName, long fromVersion, long toVersion) {
+        return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
+                new VersionedPackage(packageName, toVersion),
+                new IntArray(), new ArrayList<>(), false, true, new IntArray(),
                 new SparseLongArray());
     }
 

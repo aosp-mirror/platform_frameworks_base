@@ -27,7 +27,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
@@ -47,7 +47,6 @@ public class AdminSecondaryLockScreenController {
     private Handler mHandler;
     private IKeyguardClient mClient;
     private KeyguardSecurityCallback mKeyguardCallback;
-    private SurfaceControl.Transaction mTransaction;
 
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -84,13 +83,13 @@ public class AdminSecondaryLockScreenController {
         }
 
         @Override
-        public void onSurfaceControlCreated(@Nullable SurfaceControl remoteSurfaceControl) {
+        public void onRemoteContentReady(
+                @Nullable SurfaceControlViewHost.SurfacePackage surfacePackage) {
             if (mHandler != null) {
                 mHandler.removeCallbacksAndMessages(null);
             }
-            if (remoteSurfaceControl != null) {
-                mTransaction.reparent(remoteSurfaceControl, mView.getSurfaceControl())
-                    .apply();
+            if (surfacePackage != null) {
+                mView.setChildSurfacePackage(surfacePackage);
             } else {
                 dismiss(KeyguardUpdateMonitor.getCurrentUser());
             }
@@ -138,11 +137,10 @@ public class AdminSecondaryLockScreenController {
 
     public AdminSecondaryLockScreenController(Context context, ViewGroup parent,
             KeyguardUpdateMonitor updateMonitor, KeyguardSecurityCallback callback,
-            Handler handler, SurfaceControl.Transaction transaction) {
+            Handler handler) {
         mContext = context;
         mHandler = handler;
         mParent = parent;
-        mTransaction = transaction;
         mUpdateMonitor = updateMonitor;
         mKeyguardCallback = callback;
         mView = new AdminSecurityView(mContext, mSurfaceHolderCallback);

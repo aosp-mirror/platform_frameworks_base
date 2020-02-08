@@ -182,11 +182,16 @@ public class MediaRouter2 {
                 Client2 client = new Client2();
                 try {
                     mMediaRouterService.registerClient2(client, mPackageName);
-                    updateDiscoveryRequestLocked();
-                    mMediaRouterService.setDiscoveryRequest2(client, mDiscoveryPreference);
                     mClient = client;
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to register media router.", ex);
+                    Log.e(TAG, "registerRouteCallback: Unable to register client.", ex);
+                }
+            }
+            if (mClient != null && updateDiscoveryPreferenceIfNeededLocked()) {
+                try {
+                    mMediaRouterService.setDiscoveryRequest2(mClient, mDiscoveryPreference);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "registerRouteCallback: Unable to set discovery request.");
                 }
             }
         }
@@ -209,22 +214,37 @@ public class MediaRouter2 {
         }
 
         synchronized (sRouterLock) {
-            if (mRouteCallbackRecords.size() == 0 && mClient != null) {
-                try {
-                    mMediaRouterService.unregisterClient2(mClient);
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to unregister media router.", ex);
+            if (mClient != null) {
+                if (updateDiscoveryPreferenceIfNeededLocked()) {
+                    try {
+                        mMediaRouterService.setDiscoveryRequest2(mClient, mDiscoveryPreference);
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.");
+                    }
                 }
-                //TODO: Clean up mRoutes. (onHandler?)
+                if (mRouteCallbackRecords.size() == 0) {
+                    try {
+                        mMediaRouterService.unregisterClient2(mClient);
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "Unable to unregister media router.", ex);
+                    }
+                }
+                mShouldUpdateRoutes = true;
                 mClient = null;
             }
         }
     }
 
-    private void updateDiscoveryRequestLocked() {
-        mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
+    private boolean updateDiscoveryPreferenceIfNeededLocked() {
+        RouteDiscoveryPreference newDiscoveryPreference = new RouteDiscoveryPreference.Builder(
                 mRouteCallbackRecords.stream().map(record -> record.mPreference).collect(
                         Collectors.toList())).build();
+        if (Objects.equals(mDiscoveryPreference, newDiscoveryPreference)) {
+            return false;
+        }
+        mDiscoveryPreference = newDiscoveryPreference;
+        mShouldUpdateRoutes = true;
+        return true;
     }
 
     /**
@@ -436,31 +456,6 @@ public class MediaRouter2 {
         if (client != null) {
             try {
                 mMediaRouterService.requestSetVolume2(client, route, volume);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to send control request.", ex);
-            }
-        }
-    }
-
-    /**
-     * Requests an incremental volume update  for the route asynchronously.
-     * <p>
-     * It may have no effect if the route is currently not selected.
-     * </p>
-     *
-     * @param delta The delta to add to the current volume.
-     * @hide
-     */
-    public void requestUpdateVolume(@NonNull MediaRoute2Info route, int delta) {
-        Objects.requireNonNull(route, "route must not be null");
-
-        Client2 client;
-        synchronized (sRouterLock) {
-            client = mClient;
-        }
-        if (client != null) {
-            try {
-                mMediaRouterService.requestUpdateVolume2(client, route, delta);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }

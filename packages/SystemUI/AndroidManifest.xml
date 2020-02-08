@@ -645,7 +645,6 @@
         <activity android:name=".controls.management.ControlsProviderSelectorActivity"
                   android:label="Controls Providers"
                   android:theme="@style/Theme.ControlsManagement"
-                  android:exported="true"
                   android:showForAllUsers="true"
                   android:excludeFromRecents="true"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"

@@ -16,12 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
-import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
-import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -65,18 +61,6 @@ public class PbapClientProfileTest {
                 mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.PBAP_CLIENT, mService);
-    }
-
-    @Test
-    public void connect_shouldConnectBluetoothPbapClient() {
-        mProfile.connect(mBluetoothDevice);
-        verify(mService).setConnectionPolicy(mBluetoothDevice, CONNECTION_POLICY_ALLOWED);
-    }
-
-    @Test
-    public void disconnect_shouldDisconnectBluetoothPbapClient() {
-        mProfile.disconnect(mBluetoothDevice);
-        verify(mService).setConnectionPolicy(mBluetoothDevice, CONNECTION_POLICY_FORBIDDEN);
     }
 
     @Test

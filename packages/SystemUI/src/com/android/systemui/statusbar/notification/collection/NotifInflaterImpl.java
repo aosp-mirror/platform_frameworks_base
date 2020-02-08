@@ -149,9 +149,7 @@ public class NotifInflaterImpl implements NotifInflater {
                 }
 
                 @Override
-                public void onAsyncInflationFinished(
-                        NotificationEntry entry,
-                        int inflatedFlags) {
+                public void onAsyncInflationFinished(NotificationEntry entry) {
                     if (mExternalInflationCallback != null) {
                         mExternalInflationCallback.onInflationFinished(entry);
                     }
