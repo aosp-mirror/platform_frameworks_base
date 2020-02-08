@@ -36,8 +36,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -49,8 +47,7 @@ import javax.inject.Inject;
 
 import dagger.Lazy;
 
-public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
-        PluginListener<GlobalActionsPanelPlugin> {
+public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
 
@@ -60,12 +57,9 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
     private final BlurUtils mBlurUtils;
-    private GlobalActionsPanelPlugin mPlugin;
     private final CommandQueue mCommandQueue;
     private GlobalActionsDialog mGlobalActionsDialog;
     private boolean mDisabled;
-    private final PluginManager mPluginManager;
-    private final String mPluginPackageName;
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
@@ -74,7 +68,6 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         mGlobalActionsDialogLazy = globalActionsDialogLazy;
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mPluginManager = Dependency.get(PluginManager.class);
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
         mCommandQueue.addCallback(this);
@@ -82,17 +75,11 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
                 .newExtension(GlobalActionsPanelPlugin.class)
                 .withPlugin(GlobalActionsPanelPlugin.class)
                 .build();
-        mPluginPackageName = mContext.getString(
-                com.android.systemui.R.string.config_controlsPluginPackageName);
-        mPluginManager.addPluginListener(
-                GlobalActionsPanelPlugin.ACTION, this, GlobalActionsPanelPlugin.class, true);
     }
 
     @Override
     public void destroy() {
         mCommandQueue.removeCallback(this);
-        mPluginManager.removePluginListener(this);
-        if (mPlugin != null) mPlugin.onDestroy();
         if (mGlobalActionsDialog != null) {
             mGlobalActionsDialog.destroy();
             mGlobalActionsDialog = null;
@@ -105,7 +92,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
-                mPlugin != null ? mPlugin : mPanelExtension.get());
+                mPanelExtension.get());
         Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
     }
 
@@ -204,17 +191,5 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         if (disabled && mGlobalActionsDialog != null) {
             mGlobalActionsDialog.dismissDialog();
         }
-    }
-
-    @Override
-    public void onPluginConnected(GlobalActionsPanelPlugin plugin, Context pluginContext) {
-        if (pluginContext.getPackageName().equals(mPluginPackageName)) {
-            mPlugin = plugin;
-        }
-    }
-
-    @Override
-    public void onPluginDisconnected(GlobalActionsPanelPlugin plugin) {
-        mPlugin = null;
     }
 }
