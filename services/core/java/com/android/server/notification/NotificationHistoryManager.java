@@ -130,7 +130,7 @@ public class NotificationHistoryManager {
         }
     }
 
-    public void onPackageRemoved(int userId, String packageName) {
+    public void onPackageRemoved(@UserIdInt int userId, String packageName) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.get(userId, false)) {
                 if (mHistoryEnabled.get(userId, false)) {
@@ -147,6 +147,22 @@ public class NotificationHistoryManager {
             }
 
             userHistory.onPackageRemoved(packageName);
+        }
+    }
+
+    public void deleteNotificationHistoryItem(String pkg, int uid, long postedTime) {
+        synchronized (mLock) {
+            int userId = UserHandle.getUserId(uid);
+            final NotificationHistoryDatabase userHistory =
+                    getUserHistoryAndInitializeIfNeededLocked(userId);
+            // TODO: it shouldn't be possible to delete a notification entry while the user is
+            // locked but we should handle it
+            if (userHistory == null) {
+                Slog.w(TAG, "Attempted to remove notif for locked/gone/disabled user "
+                        + userId);
+                return;
+            }
+            userHistory.deleteNotificationHistoryItem(pkg, postedTime);
         }
     }
 
