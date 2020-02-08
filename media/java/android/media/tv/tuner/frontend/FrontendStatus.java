@@ -41,8 +41,7 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_MODULATION, FRONTEND_STATUS_TYPE_SPECTRAL,
             FRONTEND_STATUS_TYPE_LNB_VOLTAGE, FRONTEND_STATUS_TYPE_PLP_ID,
             FRONTEND_STATUS_TYPE_EWBS, FRONTEND_STATUS_TYPE_AGC, FRONTEND_STATUS_TYPE_LNA,
-            FRONTEND_STATUS_TYPE_LAYER_ERROR, FRONTEND_STATUS_TYPE_VBER_CN,
-            FRONTEND_STATUS_TYPE_LBER_CN, FRONTEND_STATUS_TYPE_XER_CN, FRONTEND_STATUS_TYPE_MER,
+            FRONTEND_STATUS_TYPE_LAYER_ERROR, FRONTEND_STATUS_TYPE_MER,
             FRONTEND_STATUS_TYPE_FREQ_OFFSET, FRONTEND_STATUS_TYPE_HIERARCHY,
             FRONTEND_STATUS_TYPE_RF_LOCK, FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO})
     @Retention(RetentionPolicy.SOURCE)
@@ -124,18 +123,6 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR =
             Constants.FrontendStatusType.LAYER_ERROR;
-    /**
-     * CN value by VBER.
-     */
-    public static final int FRONTEND_STATUS_TYPE_VBER_CN = Constants.FrontendStatusType.VBER_CN;
-    /**
-     * CN value by LBER.
-     */
-    public static final int FRONTEND_STATUS_TYPE_LBER_CN = Constants.FrontendStatusType.LBER_CN;
-    /**
-     * CN value by XER.
-     */
-    public static final int FRONTEND_STATUS_TYPE_XER_CN = Constants.FrontendStatusType.XER_CN;
     /**
      * Modulation Error Ratio.
      */
@@ -223,9 +210,6 @@ public class FrontendStatus {
     private Integer mAgc;
     private Boolean mIsLnaOn;
     private boolean[] mIsLayerErrors;
-    private Integer mVberCn;
-    private Integer mLberCn;
-    private Integer mXerCn;
     private Integer mMer;
     private Integer mFreqOffset;
     private Integer mHierarchy;
@@ -401,33 +385,6 @@ public class FrontendStatus {
             throw new IllegalStateException();
         }
         return mIsLayerErrors;
-    }
-    /**
-     * Gets CN value by VBER in thousandths of a deciBel (0.001dB).
-     */
-    public int getVberCn() {
-        if (mVberCn == null) {
-            throw new IllegalStateException();
-        }
-        return mVberCn;
-    }
-    /**
-     * Gets CN value by LBER in thousandths of a deciBel (0.001dB).
-     */
-    public int getLberCn() {
-        if (mLberCn == null) {
-            throw new IllegalStateException();
-        }
-        return mLberCn;
-    }
-    /**
-     * Gets CN value by XER in thousandths of a deciBel (0.001dB).
-     */
-    public int getXerCn() {
-        if (mXerCn == null) {
-            throw new IllegalStateException();
-        }
-        return mXerCn;
     }
     /**
      * Gets Modulation Error Ratio in thousandths of a deciBel (0.001dB).
