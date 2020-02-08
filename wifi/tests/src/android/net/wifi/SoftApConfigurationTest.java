@@ -287,17 +287,43 @@ public class SoftApConfigurationTest {
 
     @Test
     public void testToWifiConfigurationWithSupportedParameter() {
-        SoftApConfiguration softApConfig = new SoftApConfiguration.Builder()
+        SoftApConfiguration softApConfig_2g = new SoftApConfiguration.Builder()
+                .setPassphrase("secretsecret",
+                        SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
+                .setChannel(11, SoftApConfiguration.BAND_2GHZ)
+                .setHiddenSsid(true)
+                .build();
+        WifiConfiguration wifiConfig_2g = softApConfig_2g.toWifiConfiguration();
+        assertThat(wifiConfig_2g.getAuthType()).isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
+        assertThat(wifiConfig_2g.preSharedKey).isEqualTo("secretsecret");
+        assertThat(wifiConfig_2g.apBand).isEqualTo(WifiConfiguration.AP_BAND_2GHZ);
+        assertThat(wifiConfig_2g.apChannel).isEqualTo(11);
+        assertThat(wifiConfig_2g.hiddenSSID).isEqualTo(true);
+
+        SoftApConfiguration softApConfig_5g = new SoftApConfiguration.Builder()
                 .setPassphrase("secretsecret",
                         SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
                 .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
                 .build();
-        WifiConfiguration wifiConfig = softApConfig.toWifiConfiguration();
-        assertThat(wifiConfig.getAuthType()).isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
-        assertThat(wifiConfig.preSharedKey).isEqualTo("secretsecret");
-        assertThat(wifiConfig.apBand).isEqualTo(WifiConfiguration.AP_BAND_5GHZ);
-        assertThat(wifiConfig.apChannel).isEqualTo(149);
-        assertThat(wifiConfig.hiddenSSID).isEqualTo(true);
+        WifiConfiguration wifiConfig_5g = softApConfig_5g.toWifiConfiguration();
+        assertThat(wifiConfig_5g.getAuthType()).isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
+        assertThat(wifiConfig_5g.preSharedKey).isEqualTo("secretsecret");
+        assertThat(wifiConfig_5g.apBand).isEqualTo(WifiConfiguration.AP_BAND_5GHZ);
+        assertThat(wifiConfig_5g.apChannel).isEqualTo(149);
+        assertThat(wifiConfig_5g.hiddenSSID).isEqualTo(true);
+
+        SoftApConfiguration softApConfig_2g5g = new SoftApConfiguration.Builder()
+                .setPassphrase("secretsecret",
+                        SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
+                .setBand(SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ)
+                .setHiddenSsid(true)
+                .build();
+        WifiConfiguration wifiConfig_2g5g = softApConfig_2g5g.toWifiConfiguration();
+        assertThat(wifiConfig_2g5g.getAuthType()).isEqualTo(WifiConfiguration.KeyMgmt.WPA2_PSK);
+        assertThat(wifiConfig_2g5g.preSharedKey).isEqualTo("secretsecret");
+        assertThat(wifiConfig_2g5g.apBand).isEqualTo(WifiConfiguration.AP_BAND_ANY);
+        assertThat(wifiConfig_2g5g.apChannel).isEqualTo(0);
+        assertThat(wifiConfig_2g5g.hiddenSSID).isEqualTo(true);
     }
 }
