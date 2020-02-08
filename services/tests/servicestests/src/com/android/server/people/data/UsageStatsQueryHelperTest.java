@@ -288,14 +288,13 @@ public final class UsageStatsQueryHelperTest {
 
         @Override
         @NonNull
-        EventHistoryImpl getOrCreateShortcutEventHistory(String shortcutId) {
-            return mShortcutEventHistory;
-        }
-
-        @Override
-        @NonNull
-        EventHistoryImpl getOrCreateLocusEventHistory(LocusId locusId) {
-            return mLocusEventHistory;
+        EventHistoryImpl getOrCreateEventHistory(@EventCategory int category, String key) {
+            if (category == EventStore.CATEGORY_SHORTCUT_BASED) {
+                return mShortcutEventHistory;
+            } else if (category == EventStore.CATEGORY_LOCUS_ID_BASED) {
+                return mLocusEventHistory;
+            }
+            throw new UnsupportedOperationException();
         }
     }
 

@@ -69,6 +69,10 @@ class EventList {
         return result;
     }
 
+    void clear() {
+        mEvents.clear();
+    }
+
     /** Returns the first index whose timestamp is greater or equal to the provided timestamp. */
     private int firstIndexOnOrAfter(long timestamp) {
         int result = mEvents.size();

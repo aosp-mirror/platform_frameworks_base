@@ -16,99 +16,129 @@
 
 package com.android.server.people.data;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.LocusId;
 import android.util.ArrayMap;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /** The store that stores and accesses the events data for a package. */
 class EventStore {
 
-    private final EventHistoryImpl mPackageEventHistory = new EventHistoryImpl();
+    /** The events that are queryable with a shortcut ID. */
+    static final int CATEGORY_SHORTCUT_BASED = 0;
 
-    // Shortcut ID -> Event History
-    private final Map<String, EventHistoryImpl> mShortcutEventHistoryMap = new ArrayMap<>();
+    /** The events that are queryable with a {@link android.content.LocusId}. */
+    static final int CATEGORY_LOCUS_ID_BASED = 1;
 
-    // Locus ID -> Event History
-    private final Map<LocusId, EventHistoryImpl> mLocusEventHistoryMap = new ArrayMap<>();
+    /** The phone call events that are queryable with a phone number. */
+    static final int CATEGORY_CALL = 2;
 
-    // Phone Number -> Event History
-    private final Map<String, EventHistoryImpl> mCallEventHistoryMap = new ArrayMap<>();
+    /** The SMS or MMS events that are queryable with a phone number. */
+    static final int CATEGORY_SMS = 3;
 
-    // Phone Number -> Event History
-    private final Map<String, EventHistoryImpl> mSmsEventHistoryMap = new ArrayMap<>();
+    /** The events that are queryable with an {@link android.app.Activity} class name. */
+    static final int CATEGORY_CLASS_BASED = 4;
 
-    /** Gets the package level {@link EventHistory}. */
-    @NonNull
-    EventHistory getPackageEventHistory() {
-        return mPackageEventHistory;
-    }
+    @IntDef(prefix = { "CATEGORY_" }, value = {
+            CATEGORY_SHORTCUT_BASED,
+            CATEGORY_LOCUS_ID_BASED,
+            CATEGORY_CALL,
+            CATEGORY_SMS,
+            CATEGORY_CLASS_BASED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface EventCategory {}
 
-    /** Gets the {@link EventHistory} for the specified {@code shortcutId} if exists. */
-    @Nullable
-    EventHistory getShortcutEventHistory(String shortcutId) {
-        return mShortcutEventHistoryMap.get(shortcutId);
-    }
+    private final List<Map<String, EventHistoryImpl>> mEventHistoryMaps = new ArrayList<>();
 
-    /** Gets the {@link EventHistory} for the specified {@code locusId} if exists. */
-    @Nullable
-    EventHistory getLocusEventHistory(LocusId locusId) {
-        return mLocusEventHistoryMap.get(locusId);
-    }
-
-    /** Gets the phone call {@link EventHistory} for the specified {@code phoneNumber} if exists. */
-    @Nullable
-    EventHistory getCallEventHistory(String phoneNumber) {
-        return mCallEventHistoryMap.get(phoneNumber);
-    }
-
-    /** Gets the SMS {@link EventHistory} for the specified {@code phoneNumber} if exists. */
-    @Nullable
-    EventHistory getSmsEventHistory(String phoneNumber) {
-        return mSmsEventHistoryMap.get(phoneNumber);
+    EventStore() {
+        mEventHistoryMaps.add(CATEGORY_SHORTCUT_BASED, new ArrayMap<>());
+        mEventHistoryMaps.add(CATEGORY_LOCUS_ID_BASED, new ArrayMap<>());
+        mEventHistoryMaps.add(CATEGORY_CALL, new ArrayMap<>());
+        mEventHistoryMaps.add(CATEGORY_SMS, new ArrayMap<>());
+        mEventHistoryMaps.add(CATEGORY_CLASS_BASED, new ArrayMap<>());
     }
 
     /**
-     * Gets the {@link EventHistoryImpl} for the specified {@code shortcutId} or creates a new
-     * instance and put it into the store if not exists. The caller needs to verify if a
-     * conversation with this shortcut ID exists before calling this method.
+     * Gets the {@link EventHistory} for the specified key if exists.
+     *
+     * @param key Category-specific key, it can be shortcut ID, locus ID, phone number, or class
+     *            name.
      */
-    @NonNull
-    EventHistoryImpl getOrCreateShortcutEventHistory(String shortcutId) {
-        return mShortcutEventHistoryMap.computeIfAbsent(shortcutId, key -> new EventHistoryImpl());
+    @Nullable
+    EventHistory getEventHistory(@EventCategory int category, String key) {
+        return mEventHistoryMaps.get(category).get(key);
     }
 
     /**
-     * Gets the {@link EventHistoryImpl} for the specified {@code locusId} or creates a new
-     * instance and put it into the store if not exists. The caller needs to ensure a conversation
-     * with this locus ID exists before calling this method.
+     * Gets the {@link EventHistoryImpl} for the specified ID or creates a new instance and put it
+     * into the store if not exists. The caller needs to verify if the associated conversation
+     * exists before calling this method.
+     *
+     * @param key Category-specific key, it can be shortcut ID, locus ID, phone number, or class
+     *            name.
      */
     @NonNull
-    EventHistoryImpl getOrCreateLocusEventHistory(LocusId locusId) {
-        return mLocusEventHistoryMap.computeIfAbsent(locusId, key -> new EventHistoryImpl());
+    EventHistoryImpl getOrCreateEventHistory(@EventCategory int category, String key) {
+        return mEventHistoryMaps.get(category).computeIfAbsent(key, k -> new EventHistoryImpl());
     }
 
     /**
-     * Gets the {@link EventHistoryImpl} for the specified {@code phoneNumber} for call events
-     * or creates a new instance and put it into the store if not exists. The caller needs to ensure
-     * a conversation with this phone number exists and this package is the default dialer
-     * before calling this method.
+     * Deletes the events and index data for the specified key.
+     *
+     * @param key Category-specific key, it can be shortcut ID, locus ID, phone number, or class
+     *            name.
      */
-    @NonNull
-    EventHistoryImpl getOrCreateCallEventHistory(String phoneNumber) {
-        return mCallEventHistoryMap.computeIfAbsent(phoneNumber, key -> new EventHistoryImpl());
+    void deleteEventHistory(@EventCategory int category, String key) {
+        EventHistoryImpl eventHistory = mEventHistoryMaps.get(category).remove(key);
+        if (eventHistory != null) {
+            eventHistory.onDestroy();
+        }
+    }
+
+    /** Deletes all the events and index data for the specified category from disk. */
+    void deleteEventHistories(@EventCategory int category) {
+        mEventHistoryMaps.get(category).clear();
+        // TODO: Implement this method to delete the data from disk.
+    }
+
+    /** Deletes the events data that exceeds the retention period. */
+    void pruneOldEvents(long currentTimeMillis) {
+        for (Map<String, EventHistoryImpl> map : mEventHistoryMaps) {
+            for (EventHistoryImpl eventHistory : map.values()) {
+                eventHistory.pruneOldEvents(currentTimeMillis);
+            }
+        }
     }
 
     /**
-     * Gets the {@link EventHistoryImpl} for the specified {@code phoneNumber} for SMS events
-     * or creates a new instance and put it into the store if not exists. The caller needs to ensure
-     * a conversation with this phone number exists and this package is the default SMS app
-     * before calling this method.
+     * Prunes the event histories whose key (shortcut ID, locus ID or phone number) does not match
+     * any conversations.
+     *
+     * @param keyChecker Check whether there exists a conversation contains this key.
      */
-    @NonNull
-    EventHistoryImpl getOrCreateSmsEventHistory(String phoneNumber) {
-        return mSmsEventHistoryMap.computeIfAbsent(phoneNumber, key -> new EventHistoryImpl());
+    void pruneOrphanEventHistories(@EventCategory int category, Predicate<String> keyChecker) {
+        Set<String> keys = mEventHistoryMaps.get(category).keySet();
+        List<String> keysToDelete = new ArrayList<>();
+        for (String key : keys) {
+            if (!keyChecker.test(key)) {
+                keysToDelete.add(key);
+            }
+        }
+        Map<String, EventHistoryImpl> eventHistoryMap = mEventHistoryMaps.get(category);
+        for (String key : keysToDelete) {
+            EventHistoryImpl eventHistory = eventHistoryMap.remove(key);
+            if (eventHistory != null) {
+                eventHistory.onDestroy();
+            }
+        }
     }
 }
