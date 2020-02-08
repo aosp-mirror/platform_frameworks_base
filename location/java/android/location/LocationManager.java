@@ -2196,6 +2196,30 @@ public class LocationManager {
     }
 
     /**
+     * Registers a GNSS Measurement callback.
+     *
+     * @param request  extra parameters to pass to GNSS measurement provider. For example, if {@link
+     *                 GnssRequest#isFullTrackingEnabled()} is true, GNSS chipset switches off duty
+     *                 cycling.
+     * @param executor the executor that the callback runs on.
+     * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     * @throws IllegalArgumentException if request is null
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException        if the ACCESS_FINE_LOCATION permission is not present
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, LOCATION_HARDWARE})
+    public boolean registerGnssMeasurementsCallback(
+            @NonNull GnssRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GnssMeasurementsEvent.Callback callback) {
+        throw new RuntimeException();
+    }
+
+    /**
      * Injects GNSS measurement corrections into the GNSS chipset.
      *
      * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
