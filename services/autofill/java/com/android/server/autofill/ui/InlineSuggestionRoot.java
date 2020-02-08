@@ -48,6 +48,7 @@ class InlineSuggestionRoot extends FrameLayout {
         super(context);
         mOnErrorCallback = onErrorCallback;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        setFocusable(false);
     }
 
     @Override
