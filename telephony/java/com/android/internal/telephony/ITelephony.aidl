@@ -2254,4 +2254,10 @@ interface ITelephony {
      * Notify Rcs auto config received.
      */
     void notifyRcsAutoConfigurationReceived(int subId, in byte[] config, boolean isCompressed);
+
+    boolean isIccLockEnabled(int subId);
+
+    int setIccLockEnabled(int subId, boolean enabled, String password);
+
+    int changeIccLockPassword(int subId, String oldPassword, String newPassword);
 }
