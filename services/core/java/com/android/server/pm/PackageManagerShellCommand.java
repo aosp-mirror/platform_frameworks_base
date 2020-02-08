@@ -88,6 +88,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.V4Signature;
 import android.os.storage.StorageManager;
 import android.permission.IPermissionManager;
 import android.system.ErrnoException;
@@ -3024,9 +3025,15 @@ class PackageManagerShellCommand extends ShellCommand {
                 final File file = new File(inPath);
                 final String name = file.getName();
                 final long size = file.length();
-                byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
+                final byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
 
-                session.addFile(LOCATION_DATA_APP, name, size, metadata, null);
+                // Try to load a v4 signature for the APK.
+                final V4Signature v4signature = V4Signature.readFrom(
+                        new File(inPath + V4Signature.EXT));
+                final byte[] v4signatureBytes =
+                        (v4signature != null) ? v4signature.toByteArray() : null;
+
+                session.addFile(LOCATION_DATA_APP, name, size, metadata, v4signatureBytes);
             }
             return 0;
         } finally {
