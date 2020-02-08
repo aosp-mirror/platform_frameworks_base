@@ -92,9 +92,12 @@ cc_defaults {
                 "libandroidfw",
                 "libcrypto",
                 "libsync",
+                "libstatspull",
+                "libstatssocket",
             ],
             static_libs: [
                 "libEGL_blobCache",
+                "libprotoutil",
             ],
         },
         host: {

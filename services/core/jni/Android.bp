@@ -13,7 +13,6 @@ cc_library_static {
     ],
 
     srcs: [
-        ":graphicsstats_proto",
         ":lib_alarmManagerService_native",
         "BroadcastRadio/JavaRef.cpp",
         "BroadcastRadio/NativeCallbackThread.cpp",
@@ -53,7 +52,6 @@ cc_library_static {
         "com_android_server_UsbHostManager.cpp",
         "com_android_server_VibratorService.cpp",
         "com_android_server_PersistentDataBlockService.cpp",
-        "com_android_server_GraphicsStatsService.cpp",
         "com_android_server_am_CachedAppOptimizer.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_incremental_IncrementalManagerService.cpp",
@@ -107,8 +105,6 @@ cc_defaults {
         "libinputflinger",
         "libinputflinger_base",
         "libinputservice",
-        "libprotobuf-cpp-lite",
-        "libprotoutil",
         "libstatshidl",
         "libstatspull",
         "libstatssocket",
