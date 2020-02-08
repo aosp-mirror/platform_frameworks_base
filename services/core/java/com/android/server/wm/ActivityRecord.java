@@ -1589,6 +1589,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             info.taskAffinity = uid + ":" + info.taskAffinity;
         }
         taskAffinity = info.taskAffinity;
+        if (info.windowLayout != null && info.windowLayout.windowLayoutAffinity != null
+                && !info.windowLayout.windowLayoutAffinity.startsWith(uid)) {
+            info.windowLayout.windowLayoutAffinity =
+                    uid + ":" + info.windowLayout.windowLayoutAffinity;
+        }
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
         nonLocalizedLabel = aInfo.nonLocalizedLabel;
         labelRes = aInfo.labelRes;
