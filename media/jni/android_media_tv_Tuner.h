@@ -60,6 +60,7 @@ using ::android::hardware::tv::tuner::V1_0::LnbEventType;
 using ::android::hardware::tv::tuner::V1_0::LnbId;
 using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
 using ::android::hardware::tv::tuner::V1_0::RecordStatus;
+using ::android::hardware::tv::tuner::V1_0::Result;
 
 using FilterMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 using DvrMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
@@ -141,6 +142,10 @@ struct TimeFilter : public RefBase {
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
     sp<ITuner> getTunerService();
+    jobject getAvSyncHwId(sp<Filter> filter);
+    jobject getAvSyncTime(jint id);
+    int connectCiCam(jint id);
+    int disconnectCiCam();
     jobject getFrontendIds();
     jobject openFrontendById(int id);
     jobject getFrontendInfo(int id);
@@ -158,7 +163,7 @@ struct JTuner : public RefBase {
     jobject openDvr(DvrType type, int bufferSize);
 
 protected:
-    bool openDemux();
+    Result openDemux();
     virtual ~JTuner();
 
 private:
