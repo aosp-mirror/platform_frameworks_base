@@ -1874,6 +1874,8 @@ message WatchdogRollbackOccurred {
     // Set by RollbackPackageHealthObserver to be the package that is failing when a rollback
     // is initiated. Empty if the package is unknown.
     optional string failing_package_name = 5;
+
+    optional TrainExperimentIds experiment_ids = 6 [(log_mode) = MODE_BYTES];
 }
 
 /**
@@ -3770,6 +3772,8 @@ message BinaryPushStateChanged {
     // user id
     optional int32 user_id = 8;
     optional int32 reason = 9;
+    // Whether or not this is a rollback event
+    optional bool is_rollback = 10;
 }
 
 /* Test atom, is not logged anywhere */

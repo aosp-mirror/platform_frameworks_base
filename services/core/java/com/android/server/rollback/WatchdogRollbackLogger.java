@@ -38,9 +38,9 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.PackageWatchdog;
 
 import java.util.ArrayList;
@@ -206,12 +206,25 @@ public final class WatchdogRollbackLogger {
                 + " rollbackReason: " + rollbackReasonToString(rollbackReason)
                 + " failedPackageName: " + failingPackageName);
         if (logPackage != null) {
-            StatsLog.logWatchdogRollbackOccurred(type, logPackage.getPackageName(),
-                    logPackage.getVersionCode(), rollbackReason, failingPackageName);
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    type,
+                    logPackage.getPackageName(),
+                    logPackage.getVersionCode(),
+                    rollbackReason,
+                    failingPackageName,
+                    new byte[]{});
         } else {
             // In the case that the log package is null, still log an empty string as an
             // indication that retrieving the logging parent failed.
-            StatsLog.logWatchdogRollbackOccurred(type, "", 0, rollbackReason, failingPackageName);
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    type,
+                    "",
+                    0,
+                    rollbackReason,
+                    failingPackageName,
+                    new byte[]{});
         }
     }
 

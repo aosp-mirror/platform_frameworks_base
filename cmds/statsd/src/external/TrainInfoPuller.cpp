@@ -37,14 +37,16 @@ TrainInfoPuller::TrainInfoPuller() :
 }
 
 bool TrainInfoPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
-    InstallTrainInfo trainInfo;
-    bool ret = StorageManager::readTrainInfo(trainInfo);
-    if (!ret) {
-        ALOGW("Failed to read train info.");
-        return false;
+    vector<InstallTrainInfo> trainInfoList =
+        StorageManager::readAllTrainInfo();
+    if (trainInfoList.empty()) {
+        ALOGW("Train info was empty.");
+        return true;
     }
-    auto event = make_shared<LogEvent>(getWallClockNs(), getElapsedRealtimeNs(), trainInfo);
-    data->push_back(event);
+    for (InstallTrainInfo& trainInfo : trainInfoList) {
+        auto event = make_shared<LogEvent>(getWallClockNs(), getElapsedRealtimeNs(), trainInfo);
+        data->push_back(event);
+    }
     return true;
 }
 
