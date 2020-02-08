@@ -2401,13 +2401,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     /* systemAppsOnly */ false, UserHandle.SYSTEM));
 
             // Apply whitelist for split system user
-            ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
-            enableApps.addAll(wlApps);
+            ArraySet<String> whitelistedSystemUserApps = SystemConfig.getInstance()
+                    .getSystemUserWhitelistedApps();
+            enableApps.addAll(whitelistedSystemUserApps);
+            Log.i(TAG, "Whitelisted packages: " + whitelistedSystemUserApps);
         }
         // Apply blacklist for split system user/headless system user
-        ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
-        enableApps.removeAll(blApps);
-        Log.i(TAG, "Blacklisted packages: " + blApps);
+        ArraySet<String> blacklistedSystemUserApps = SystemConfig.getInstance()
+                .getSystemUserBlacklistedApps();
+        enableApps.removeAll(blacklistedSystemUserApps);
+        Log.i(TAG, "Blacklisted packages: " + blacklistedSystemUserApps);
 
         final int allAppsSize = allAps.size();
         synchronized (mPackages) {
@@ -21722,6 +21725,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         isSystemUserPackagesBlacklistSupported();
                 pw.println("isSystemUserPackagesBlacklistSupported: "
                         + systemUserPackagesBlacklistSupported);
+                if (systemUserPackagesBlacklistSupported) {
+                    SystemConfig sysconfig = SystemConfig.getInstance();
+                    dumpPackagesList(pw, "  ", "whitelist",
+                            sysconfig.getSystemUserWhitelistedApps());
+                    dumpPackagesList(pw, "  ", "blacklist",
+                            sysconfig.getSystemUserBlacklistedApps());
+                }
             }
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
@@ -21828,6 +21838,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
             mApexManager.dump(pw, packageName);
+        }
+    }
+
+    private void dumpPackagesList(PrintWriter pw, String prefix, String name,
+            ArraySet<String> list) {
+        pw.print(prefix); pw.print(name); pw.print(": ");
+        int size = list.size();
+        if (size == 0) {
+            pw.println("empty");
+            return;
+        }
+        pw.print(size); pw.println(" packages");
+        String prefix2 = prefix + "  ";
+        for (int i = 0; i < size; i++) {
+            pw.print(prefix2); pw.println(list.valueAt(i));
         }
     }
 
