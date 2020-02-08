@@ -3380,6 +3380,7 @@ public abstract class Context {
             //@hide: TIME_DETECTOR_SERVICE,
             //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
+            LIGHTS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4878,6 +4879,15 @@ public abstract class Context {
      */
     @SystemApi
     public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.lights.LightsManager} for controlling device lights.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String LIGHTS_SERVICE = "lights";
 
     /**
      * Determine whether the given permission is allowed for a particular
