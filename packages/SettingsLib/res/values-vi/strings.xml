@@ -42,8 +42,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"Đã kết nối qua <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Có sẵn qua %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Nhấn để đăng ký"</string>
-    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Không có Internet"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Không thể truy cập máy chủ DNS riêng tư"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Kết nối giới hạn"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Không có Internet"</string>
@@ -384,7 +383,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Mù màu đỏ không hoàn toàn (đỏ-xanh lục)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mù màu (xanh lam-vàng)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Sửa màu"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"Tùy chọn sửa màu giúp những người bị mù màu thấy màu sắc chính xác hơn"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -414,7 +414,10 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là sạc xong"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Đang sạc"</string>
-    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"đang sạc"</string>
+    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hiện không sạc"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Đã cắm nhưng không thể sạc ngay"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Đầy"</string>

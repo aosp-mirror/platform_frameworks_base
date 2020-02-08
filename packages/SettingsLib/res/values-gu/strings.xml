@@ -42,8 +42,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> દ્વારા કનેક્ટ થયેલ"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s દ્વારા ઉપલબ્ધ"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"સાઇન અપ કરવા માટે ટૅપ કરો"</string>
-    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"કોઈ ઇન્ટરનેટ નથી"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"ખાનગી DNS સર્વર ઍક્સેસ કરી શકાતા નથી"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"મર્યાદિત કનેક્શન"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ઇન્ટરનેટ ઍક્સેસ નથી"</string>
@@ -384,7 +383,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"પ્રોટેનોમલી (લાલ-લીલો)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ટ્રાઇટેનોમલી(વાદળી-પીળો)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"રંગ સુધારણા"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"રંગ સુધારણા રંગ અંધત્વવાળા લોકોને વધુ સચોટ રંગો જોવામાં સહાય કરે છે"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"લગભગ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> બાકી છે"</string>
@@ -414,7 +414,10 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જ થવા માટે <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"અજાણ્યું"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ચાર્જ થઈ રહ્યું છે"</string>
-    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"ચાર્જ થઈ રહ્યું છે"</string>
+    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"પ્લગ ઇન કરેલ, હમણાં ચાર્જ કરી શકતા નથી"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"પૂર્ણ"</string>

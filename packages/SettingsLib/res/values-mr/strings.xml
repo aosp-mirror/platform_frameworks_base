@@ -42,8 +42,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> द्वारे कनेक्ट केले"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s द्वारे उपलब्‍ध"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"साइन अप करण्यासाठी टॅप करा"</string>
-    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"इंटरनेट नाही"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"खाजगी DNS सर्व्हर ॲक्सेस करू शकत नाही"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"मर्यादित कनेक्शन"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"इंटरनेट नाही"</string>
@@ -384,7 +383,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"क्षीण रक्तवर्णांधता (लाल-हिरवा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"रंग दृष्टी कमतरता (निळा-पिवळा)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधारणा"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"रंग सुधारणा ही वर्णांधता असलेल्या लोकांना रंग अधिक अचूक दिसण्यात मदत करते"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे"</string>
@@ -414,7 +414,10 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पर्यंत पूर्ण चार्ज होईल"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
-    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"चार्ज होत आहे"</string>
+    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज होत नाही"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"प्लग इन केलेले आहे, आता चार्ज करू शकत नाही"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"पूर्ण"</string>
