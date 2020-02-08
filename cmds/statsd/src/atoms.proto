@@ -6986,6 +6986,20 @@ message MediametricsDrmManagerReported {
     optional string description = 6;
     optional Method method = 7;
     optional string mime_types = 8;
+
+    optional int64 get_constraints_count =  9;
+    optional int64 get_metadata_count = 10;
+    optional int64 can_handle_count = 11;
+    optional int64 process_drm_info_count = 12;
+    optional int64 acquire_drm_info_count = 13;
+    optional int64 save_rights_count = 14;
+    optional int64 get_original_mime_type_count = 15;
+    optional int64 get_drm_object_type_count = 16;
+    optional int64 check_rights_status_count = 17;
+    optional int64 remove_rights_count = 18;
+    optional int64 remove_all_rights_count = 19;
+    optional int64 open_convert_session_count = 20;
+    optional int64 open_decrypt_session_count = 21;
 }
 
 /**
