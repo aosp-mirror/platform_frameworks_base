@@ -280,7 +280,9 @@ public class PipMenuActivityController {
         if (mToActivityMessenger != null) {
             Bundle data = new Bundle();
             data.putInt(EXTRA_MENU_STATE, menuState);
-            data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
+            if (stackBounds != null) {
+                data.putParcelable(EXTRA_STACK_BOUNDS, stackBounds);
+            }
             data.putParcelable(EXTRA_MOVEMENT_BOUNDS, movementBounds);
             data.putBoolean(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
             data.putBoolean(EXTRA_WILL_RESIZE_MENU, willResizeMenu);
