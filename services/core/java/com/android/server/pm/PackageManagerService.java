@@ -2363,32 +2363,41 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void enableSystemUserPackages() {
-        if (!UserManager.isSplitSystemUser()) {
+        boolean isHeadlessSystemUserMode = UserManager.isHeadlessSystemUserMode();
+        if (!isHeadlessSystemUserMode && !UserManager.isSplitSystemUser()) {
             return;
         }
-        // For system user, enable apps based on the following conditions:
-        // - app is whitelisted or belong to one of these groups:
-        //   -- system app which has no launcher icons
-        //   -- system app which has INTERACT_ACROSS_USERS permission
-        //   -- system IME app
-        // - app is not in the blacklist
-        AppsQueryHelper queryHelper = new AppsQueryHelper(this);
+
         Set<String> enableApps = new ArraySet<>();
-        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
-                | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
-                | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
-        ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
-        enableApps.addAll(wlApps);
-        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
-                /* systemAppsOnly */ false, UserHandle.SYSTEM));
-        ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
-        enableApps.removeAll(blApps);
-        Log.i(TAG, "Applications installed for system user: " + enableApps);
+        AppsQueryHelper queryHelper = new AppsQueryHelper(this);
         List<String> allAps = queryHelper.queryApps(0, /* systemAppsOnly */ false,
                 UserHandle.SYSTEM);
+
+        if (isHeadlessSystemUserMode) {
+            enableApps.addAll(allAps);
+        } else {
+            // For split system user, select apps based on the following conditions:
+            //   -- system app which has no launcher icons
+            //   -- system app which has INTERACT_ACROSS_USERS permission
+            //   -- system IME app
+            enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
+                    | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
+                    | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
+            enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
+                    /* systemAppsOnly */ false, UserHandle.SYSTEM));
+
+            // Apply whitelist for split system user
+            ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
+            enableApps.addAll(wlApps);
+        }
+        // Apply blacklist for split system user/headless system user
+        ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
+        enableApps.removeAll(blApps);
+        Log.i(TAG, "Blacklisted packages: " + blApps);
+
         final int allAppsSize = allAps.size();
         synchronized (mPackages) {
-            for (int i = 0; i < allAppsSize; i++) {
+            for  (int i = 0; i < allAppsSize; i++) {
                 String pName = allAps.get(i);
                 PackageSetting pkgSetting = mSettings.mPackages.get(pName);
                 // Should not happen, but we shouldn't be failing if it does
