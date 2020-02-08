@@ -2362,11 +2362,25 @@ public class PackageManagerService extends IPackageManager.Stub
         return m;
     }
 
+    private boolean isSystemUserPackagesBlacklistSupported() {
+        return Resources.getSystem().getBoolean(
+              R.bool.config_systemUserPackagesBlacklistSupported);
+    }
+
     private void enableSystemUserPackages() {
-        boolean isHeadlessSystemUserMode = UserManager.isHeadlessSystemUserMode();
-        if (!isHeadlessSystemUserMode && !UserManager.isSplitSystemUser()) {
+        if (!isSystemUserPackagesBlacklistSupported()) {
+            Log.i(TAG, "Skipping system user blacklist since "
+                    + "config_systemUserPackagesBlacklistSupported is false");
             return;
         }
+
+        boolean isHeadlessSystemUserMode = UserManager.isHeadlessSystemUserMode();
+        if (!isHeadlessSystemUserMode && !UserManager.isSplitSystemUser()) {
+            Log.i(TAG, "Skipping system user blacklist on 'regular' device type");
+            return;
+        }
+
+        Log.i(TAG, "blacklisting packages for system user");
 
         Set<String> enableApps = new ArraySet<>();
         AppsQueryHelper queryHelper = new AppsQueryHelper(this);
@@ -21703,6 +21717,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
                 mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
+
+                boolean systemUserPackagesBlacklistSupported =
+                        isSystemUserPackagesBlacklistSupported();
+                pw.println("isSystemUserPackagesBlacklistSupported: "
+                        + systemUserPackagesBlacklistSupported);
             }
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
