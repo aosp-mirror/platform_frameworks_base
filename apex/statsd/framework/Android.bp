@@ -15,9 +15,9 @@
 filegroup {
     name: "framework-statsd-sources",
     srcs: [
-    "java/**/*.java",
+        "java/**/*.java",
+        ":statsd_java_aidl",
     ],
-    path: "java",
 }
 
 java_library {
