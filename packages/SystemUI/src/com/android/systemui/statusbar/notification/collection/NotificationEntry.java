@@ -66,6 +66,7 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
@@ -103,6 +104,9 @@ public final class NotificationEntry extends ListEntry {
 
     /** List of lifetime extenders that are extending the lifetime of this notification. */
     final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
+
+    /** List of dismiss interceptors that are intercepting the dismissal of this notification. */
+    final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
     /** If this notification was filtered out, then the filter that did the filtering. */
     @Nullable NotifFilter mExcludingFilter;

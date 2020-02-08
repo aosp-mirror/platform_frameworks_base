@@ -29,6 +29,7 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
 import android.text.TextUtils;
@@ -1154,6 +1155,10 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_RAM_LOW, 0);
         } else {
             addFeature(PackageManager.FEATURE_RAM_NORMAL, 0);
+        }
+
+        if (IncrementalManager.isEnabled()) {
+            addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, 0);
         }
 
         for (String featureName : mUnavailableFeatures) {

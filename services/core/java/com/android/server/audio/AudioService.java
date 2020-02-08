@@ -65,7 +65,7 @@ import android.hardware.usb.UsbManager;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.media.AudioAttributes;
 import android.media.AudioAttributes.AttributeSystemUsage;
-import android.media.AudioDeviceAddress;
+import android.media.AudioDevice;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFocusInfo;
 import android.media.AudioFocusRequest;
@@ -1712,7 +1712,7 @@ public class AudioService extends IAudioService.Stub
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
     /** @see AudioManager#setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceInfo) */
-    public int setPreferredDeviceForStrategy(int strategy, AudioDeviceAddress device) {
+    public int setPreferredDeviceForStrategy(int strategy, AudioDevice device) {
         if (device == null) {
             return AudioSystem.ERROR;
         }
@@ -1721,7 +1721,7 @@ public class AudioService extends IAudioService.Stub
                 "setPreferredDeviceForStrategy u/pid:%d/%d strat:%d dev:%s",
                 Binder.getCallingUid(), Binder.getCallingPid(), strategy, device.toString());
         sDeviceLogger.log(new AudioEventLogger.StringEvent(logString).printLog(TAG));
-        if (device.getRole() == AudioDeviceAddress.ROLE_INPUT) {
+        if (device.getRole() == AudioDevice.ROLE_INPUT) {
             Log.e(TAG, "Unsupported input routing in " + logString);
             return AudioSystem.ERROR;
         }
@@ -1749,9 +1749,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#getPreferredDeviceForStrategy(AudioProductStrategy) */
-    public AudioDeviceAddress getPreferredDeviceForStrategy(int strategy) {
+    public AudioDevice getPreferredDeviceForStrategy(int strategy) {
         enforceModifyAudioRoutingPermission();
-        AudioDeviceAddress[] devices = new AudioDeviceAddress[1];
+        AudioDevice[] devices = new AudioDevice[1];
         final long identity = Binder.clearCallingIdentity();
         final int status = AudioSystem.getPreferredDeviceForStrategy(strategy, devices);
         Binder.restoreCallingIdentity(identity);
@@ -1765,7 +1765,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */
-    public @NonNull ArrayList<AudioDeviceAddress> getDevicesForAttributes(
+    public @NonNull ArrayList<AudioDevice> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
         enforceModifyAudioRoutingPermission();

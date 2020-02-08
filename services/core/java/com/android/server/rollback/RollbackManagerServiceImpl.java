@@ -19,6 +19,7 @@ package com.android.server.rollback;
 import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.AppOpsManager;
@@ -50,7 +51,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArrayQueue;
@@ -120,10 +120,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // Set of allocated rollback ids
     @GuardedBy("mLock")
     private final SparseBooleanArray mAllocatedRollbackIds = new SparseBooleanArray();
-
-    // Rollbacks we are in the process of enabling.
-    @GuardedBy("mLock")
-    private final Set<Rollback> mNewRollbacks = new ArraySet<>();
 
     // The list of all rollbacks, including available and committed rollbacks.
     @GuardedBy("mLock")
@@ -240,16 +236,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         Slog.v(TAG, "broadcast=ACTION_CANCEL_ENABLE_ROLLBACK token=" + token);
                     }
                     synchronized (mLock) {
-                        Rollback found = null;
-                        for (Rollback newRollback : mNewRollbacks) {
-                            if (newRollback.hasToken(token)) {
-                                found = newRollback;
+                        for (int i = 0; i < mRollbacks.size(); ++i) {
+                            Rollback rollback = mRollbacks.get(i);
+                            if (rollback.hasToken(token) && rollback.isEnabling()) {
+                                mRollbacks.remove(i);
+                                rollback.delete(mAppDataRollbackHelper);
                                 break;
                             }
-                        }
-                        if (found != null) {
-                            mNewRollbacks.remove(found);
-                            found.delete(mAppDataRollbackHelper);
                         }
                     }
                 }
@@ -441,15 +434,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     iter.remove();
                     rollback.delete(mAppDataRollbackHelper);
                 }
-            }
-            Iterator<Rollback> iter2 = mNewRollbacks.iterator();
-            while (iter2.hasNext()) {
-                Rollback newRollback = iter2.next();
-                if (newRollback.includesPackage(packageName)) {
-                    iter2.remove();
-                    newRollback.delete(mAppDataRollbackHelper);
-                }
-
             }
         }
     }
@@ -810,40 +794,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             newRollback = getNewRollbackForPackageSessionLocked(packageSession.getSessionId());
             if (newRollback == null) {
                 newRollback = createNewRollbackLocked(parentSession);
-                mNewRollbacks.add(newRollback);
+                mRollbacks.add(newRollback);
+                newRollback.setIsNewRollback(true);
             }
         }
         newRollback.addToken(token);
 
         return enableRollbackForPackageSession(newRollback, packageSession);
-    }
-
-    @WorkerThread
-    private void removeRollbackForPackageSessionId(int sessionId) {
-        if (LOCAL_LOGV) {
-            Slog.v(TAG, "removeRollbackForPackageSessionId=" + sessionId);
-        }
-
-        synchronized (mLock) {
-            Rollback newRollback = getNewRollbackForPackageSessionLocked(sessionId);
-            if (newRollback != null) {
-                Slog.w(TAG, "Delete new rollback id=" + newRollback.info.getRollbackId()
-                        + " for session id=" + sessionId);
-                mNewRollbacks.remove(newRollback);
-                newRollback.delete(mAppDataRollbackHelper);
-            }
-            Iterator<Rollback> iter = mRollbacks.iterator();
-            while (iter.hasNext()) {
-                Rollback rollback = iter.next();
-                if (rollback.getStagedSessionId() == sessionId) {
-                    Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
-                            + " for session id=" + sessionId);
-                    iter.remove();
-                    rollback.delete(mAppDataRollbackHelper);
-                    break;
-                }
-            }
-        }
     }
 
     /**
@@ -966,13 +923,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     + " users=" + Arrays.toString(userIds));
         }
         synchronized (mLock) {
-            // staged installs
             for (int i = 0; i < mRollbacks.size(); i++) {
                 Rollback rollback = mRollbacks.get(i);
-                rollback.snapshotUserData(packageName, userIds, mAppDataRollbackHelper);
-            }
-            // non-staged installs
-            for (Rollback rollback : mNewRollbacks) {
                 rollback.snapshotUserData(packageName, userIds, mAppDataRollbackHelper);
             }
         }
@@ -1200,7 +1152,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 synchronized (mLock) {
                     newRollback = getNewRollbackForPackageSessionLocked(sessionId);
                     if (newRollback != null && newRollback.notifySessionWithSuccess()) {
-                        mNewRollbacks.remove(newRollback);
+                        mRollbacks.remove(newRollback);
+                        newRollback.setIsNewRollback(false);
                     } else {
                         // Not all child sessions finished with success.
                         // Don't enable the rollback yet.
@@ -1215,7 +1168,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
                 }
             } else {
-                removeRollbackForPackageSessionId(sessionId);
+                synchronized (mLock) {
+                    Rollback rollback = getRollbackForSessionLocked(sessionId);
+                    if (rollback != null && rollback.isEnabling()) {
+                        Slog.w(TAG, "Delete rollback id=" + rollback.info.getRollbackId()
+                                + " for failed session id=" + sessionId);
+                        mRollbacks.remove(rollback);
+                        rollback.delete(mAppDataRollbackHelper);
+                    }
+                }
             }
         }
     }
@@ -1376,6 +1337,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     /**
+     * Returns the Rollback associated with the given session if parent or child session id matches.
+     * Returns null if not found.
+     */
+    @WorkerThread
+    @GuardedBy("mLock")
+    @Nullable
+    private Rollback getRollbackForSessionLocked(int sessionId) {
+        // We expect mRollbacks to be a very small list; linear search should be plenty fast.
+        for (int i = 0; i < mRollbacks.size(); ++i) {
+            Rollback rollback = mRollbacks.get(i);
+            if (rollback.getStagedSessionId() == sessionId
+                    || rollback.containsSessionId(sessionId)) {
+                return rollback;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the NewRollback associated with the given package session.
      * Returns null if no NewRollback is found for the given package
      * session.
@@ -1383,11 +1363,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @WorkerThread
     @GuardedBy("mLock")
     Rollback getNewRollbackForPackageSessionLocked(int packageSessionId) {
-        // We expect mNewRollbacks to be a very small list; linear search
+        // We expect mRollbacks to be a very small list; linear search
         // should be plenty fast.
-        for (Rollback newRollback: mNewRollbacks) {
-            if (newRollback.containsSessionId(packageSessionId)) {
-                return newRollback;
+        for (Rollback rollback: mRollbacks) {
+            if (rollback.isNewRollback() && rollback.containsSessionId(packageSessionId)) {
+                return rollback;
             }
         }
         return null;

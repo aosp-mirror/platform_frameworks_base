@@ -2578,4 +2578,7 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     CONNECTION_DEVICE_ADVANCED_NFC = 1828;
+
+    // OPEN: Settings -> Apps & Notifications -> Special App Access
+    INTERACT_ACROSS_PROFILES = 1829;
 }

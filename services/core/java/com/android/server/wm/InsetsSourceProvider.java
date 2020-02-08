@@ -240,6 +240,10 @@ class InsetsSourceProvider {
             target = target.getWindow().getImeControlTarget();
         }
 
+        if (mWin != null && mWin.getSurfaceControl() == null) {
+            // if window doesn't have a surface, set it null and return.
+            setWindow(null, null, null);
+        }
         if (mWin == null) {
             mControlTarget = target;
             return;

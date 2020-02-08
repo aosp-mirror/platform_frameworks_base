@@ -26,12 +26,6 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
-#include "android_media_AudioAttributes.h"
-#include "android_media_AudioDeviceAddress.h"
-#include "android_media_AudioEffectDescriptor.h"
-#include "android_media_AudioErrors.h"
-#include "android_media_AudioFormat.h"
-#include "android_media_MicrophoneInfo.h"
 #include <audiomanager/AudioManager.h>
 #include <media/AudioPolicy.h>
 #include <media/AudioSystem.h>
@@ -39,6 +33,12 @@
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
+#include "android_media_AudioAttributes.h"
+#include "android_media_AudioDevice.h"
+#include "android_media_AudioEffectDescriptor.h"
+#include "android_media_AudioErrors.h"
+#include "android_media_AudioFormat.h"
+#include "android_media_MicrophoneInfo.h"
 
 // ----------------------------------------------------------------------------
 
@@ -2349,7 +2349,7 @@ android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thi
         jint strategy, jobjectArray jDeviceArray)
 {
     if (jDeviceArray == nullptr || env->GetArrayLength(jDeviceArray) != 1) {
-        ALOGE("%s invalid array to store AudioDeviceAddress", __FUNCTION__);
+        ALOGE("%s invalid array to store AudioDevice", __FUNCTION__);
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
@@ -2359,10 +2359,10 @@ android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thi
     if (status != NO_ERROR) {
         return (jint) status;
     }
-    jobject jAudioDeviceAddress = NULL;
-    jint jStatus = createAudioDeviceAddressFromNative(env, &jAudioDeviceAddress, &elDevice);
+    jobject jAudioDevice = NULL;
+    jint jStatus = createAudioDeviceFromNative(env, &jAudioDevice, &elDevice);
     if (jStatus == AUDIO_JAVA_SUCCESS) {
-        env->SetObjectArrayElement(jDeviceArray, 0, jAudioDeviceAddress);
+        env->SetObjectArrayElement(jDeviceArray, 0, jAudioDevice);
     }
     return jStatus;
 }
@@ -2377,7 +2377,7 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
     // with reverse JNI to make the array grow as need as this would be less efficient, and some
     // components call this method often
     if (jDeviceArray == nullptr || maxResultSize == 0) {
-        ALOGE("%s invalid array to store AudioDeviceAddress", __FUNCTION__);
+        ALOGE("%s invalid array to store AudioDevice", __FUNCTION__);
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
 
@@ -2398,105 +2398,133 @@ android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobject thiz,
         return AUDIO_JAVA_INVALID_OPERATION;
     }
     size_t index = 0;
-    jobject jAudioDeviceAddress = NULL;
+    jobject jAudioDevice = NULL;
     for (const auto& device : devices) {
-        jStatus = createAudioDeviceAddressFromNative(env, &jAudioDeviceAddress, &device);
+        jStatus = createAudioDeviceFromNative(env, &jAudioDevice, &device);
         if (jStatus != AUDIO_JAVA_SUCCESS) {
             return jStatus;
         }
-        env->SetObjectArrayElement(jDeviceArray, index++, jAudioDeviceAddress);
+        env->SetObjectArrayElement(jDeviceArray, index++, jAudioDevice);
     }
     return jStatus;
 }
 
 // ----------------------------------------------------------------------------
 
-static const JNINativeMethod gMethods[] = {
-    {"setParameters",        "(Ljava/lang/String;)I", (void *)android_media_AudioSystem_setParameters},
-    {"getParameters",        "(Ljava/lang/String;)Ljava/lang/String;", (void *)android_media_AudioSystem_getParameters},
-    {"muteMicrophone",      "(Z)I",     (void *)android_media_AudioSystem_muteMicrophone},
-    {"isMicrophoneMuted",   "()Z",      (void *)android_media_AudioSystem_isMicrophoneMuted},
-    {"isStreamActive",      "(II)Z",    (void *)android_media_AudioSystem_isStreamActive},
-    {"isStreamActiveRemotely","(II)Z",  (void *)android_media_AudioSystem_isStreamActiveRemotely},
-    {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
-    {"newAudioSessionId",   "()I",      (void *)android_media_AudioSystem_newAudioSessionId},
-    {"newAudioPlayerId",    "()I",      (void *)android_media_AudioSystem_newAudioPlayerId},
-    {"newAudioRecorderId",  "()I",      (void *)android_media_AudioSystem_newAudioRecorderId},
-    {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;I)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
-    {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
-    {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;I)I", (void *)android_media_AudioSystem_handleDeviceConfigChange},
-    {"setPhoneState",       "(I)I",     (void *)android_media_AudioSystem_setPhoneState},
-    {"setForceUse",         "(II)I",    (void *)android_media_AudioSystem_setForceUse},
-    {"getForceUse",         "(I)I",     (void *)android_media_AudioSystem_getForceUse},
-    {"initStreamVolume",    "(III)I",   (void *)android_media_AudioSystem_initStreamVolume},
-    {"setStreamVolumeIndex","(III)I",   (void *)android_media_AudioSystem_setStreamVolumeIndex},
-    {"getStreamVolumeIndex","(II)I",    (void *)android_media_AudioSystem_getStreamVolumeIndex},
-    {"setVolumeIndexForAttributes","(Landroid/media/AudioAttributes;II)I",   (void *)android_media_AudioSystem_setVolumeIndexForAttributes},
-    {"getVolumeIndexForAttributes","(Landroid/media/AudioAttributes;I)I",    (void *)android_media_AudioSystem_getVolumeIndexForAttributes},
-    {"getMinVolumeIndexForAttributes","(Landroid/media/AudioAttributes;)I",    (void *)android_media_AudioSystem_getMinVolumeIndexForAttributes},
-    {"getMaxVolumeIndexForAttributes","(Landroid/media/AudioAttributes;)I",    (void *)android_media_AudioSystem_getMaxVolumeIndexForAttributes},
-    {"setMasterVolume",     "(F)I",     (void *)android_media_AudioSystem_setMasterVolume},
-    {"getMasterVolume",     "()F",      (void *)android_media_AudioSystem_getMasterVolume},
-    {"setMasterMute",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMute},
-    {"getMasterMute",       "()Z",      (void *)android_media_AudioSystem_getMasterMute},
-    {"setMasterMono",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMono},
-    {"getMasterMono",       "()Z",      (void *)android_media_AudioSystem_getMasterMono},
-    {"setMasterBalance",    "(F)I",     (void *)android_media_AudioSystem_setMasterBalance},
-    {"getMasterBalance",    "()F",      (void *)android_media_AudioSystem_getMasterBalance},
-    {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
-    {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
-    {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
-    {"getOutputLatency",    "(I)I",     (void *)android_media_AudioSystem_getOutputLatency},
-    {"setLowRamDevice",     "(ZJ)I",    (void *)android_media_AudioSystem_setLowRamDevice},
-    {"checkAudioFlinger",    "()I",     (void *)android_media_AudioSystem_checkAudioFlinger},
-    {"listAudioPorts",      "(Ljava/util/ArrayList;[I)I",
-                                                (void *)android_media_AudioSystem_listAudioPorts},
-    {"createAudioPatch",    "([Landroid/media/AudioPatch;[Landroid/media/AudioPortConfig;[Landroid/media/AudioPortConfig;)I",
-                                            (void *)android_media_AudioSystem_createAudioPatch},
-    {"releaseAudioPatch",   "(Landroid/media/AudioPatch;)I",
-                                            (void *)android_media_AudioSystem_releaseAudioPatch},
-    {"listAudioPatches",    "(Ljava/util/ArrayList;[I)I",
-                                                (void *)android_media_AudioSystem_listAudioPatches},
-    {"setAudioPortConfig",   "(Landroid/media/AudioPortConfig;)I",
-                                            (void *)android_media_AudioSystem_setAudioPortConfig},
-    {"startAudioSource",    "(Landroid/media/AudioPortConfig;Landroid/media/AudioAttributes;)I",
-                                            (void *)android_media_AudioSystem_startAudioSource},
-    {"stopAudioSource",     "(I)I", (void *)android_media_AudioSystem_stopAudioSource},
-    {"getAudioHwSyncForSession", "(I)I",
-                                    (void *)android_media_AudioSystem_getAudioHwSyncForSession},
-    {"registerPolicyMixes",    "(Ljava/util/ArrayList;Z)I",
-                                            (void *)android_media_AudioSystem_registerPolicyMixes},
-    {"setUidDeviceAffinities", "(I[I[Ljava/lang/String;)I",
-                                        (void *)android_media_AudioSystem_setUidDeviceAffinities},
-    {"removeUidDeviceAffinities", "(I)I",
-                                        (void *)android_media_AudioSystem_removeUidDeviceAffinities},
-    {"native_register_dynamic_policy_callback", "()V",
-                                    (void *)android_media_AudioSystem_registerDynPolicyCallback},
-    {"native_register_recording_callback", "()V",
-                                    (void *)android_media_AudioSystem_registerRecordingCallback},
-    {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
-    {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
-    {"native_is_offload_supported", "(IIIII)Z", (void *)android_media_AudioSystem_isOffloadSupported},
-    {"getMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_AudioSystem_getMicrophones},
-    {"getSurroundFormats", "(Ljava/util/Map;Z)I", (void *)android_media_AudioSystem_getSurroundFormats},
-    {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},
-    {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
-    {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
-    {"isHapticPlaybackSupported", "()Z", (void *)android_media_AudioSystem_isHapticPlaybackSupported},
-    {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
-                    (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
-    {"setSupportedSystemUsages", "([I)I", (void *)android_media_AudioSystem_setSupportedSystemUsages},
-    {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
-    {"setRttEnabled",       "(Z)I",     (void *)android_media_AudioSystem_setRttEnabled},
-    {"setAudioHalPids",  "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},
-    {"isCallScreeningModeSupported", "()Z", (void *)android_media_AudioSystem_isCallScreeningModeSupported},
-    {"setPreferredDeviceForStrategy", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
-    {"removePreferredDeviceForStrategy", "(I)I", (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
-    {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
-    {"getDevicesForAttributes", "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getDevicesForAttributes},
-    {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I", (void *)android_media_AudioSystem_setUserIdDeviceAffinities},
-    {"removeUserIdDeviceAffinities", "(I)I", (void *)android_media_AudioSystem_removeUserIdDeviceAffinities}
-};
+static const JNINativeMethod gMethods[] =
+        {{"setParameters", "(Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_setParameters},
+         {"getParameters", "(Ljava/lang/String;)Ljava/lang/String;",
+          (void *)android_media_AudioSystem_getParameters},
+         {"muteMicrophone", "(Z)I", (void *)android_media_AudioSystem_muteMicrophone},
+         {"isMicrophoneMuted", "()Z", (void *)android_media_AudioSystem_isMicrophoneMuted},
+         {"isStreamActive", "(II)Z", (void *)android_media_AudioSystem_isStreamActive},
+         {"isStreamActiveRemotely", "(II)Z",
+          (void *)android_media_AudioSystem_isStreamActiveRemotely},
+         {"isSourceActive", "(I)Z", (void *)android_media_AudioSystem_isSourceActive},
+         {"newAudioSessionId", "()I", (void *)android_media_AudioSystem_newAudioSessionId},
+         {"newAudioPlayerId", "()I", (void *)android_media_AudioSystem_newAudioPlayerId},
+         {"newAudioRecorderId", "()I", (void *)android_media_AudioSystem_newAudioRecorderId},
+         {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;I)I",
+          (void *)android_media_AudioSystem_setDeviceConnectionState},
+         {"getDeviceConnectionState", "(ILjava/lang/String;)I",
+          (void *)android_media_AudioSystem_getDeviceConnectionState},
+         {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;I)I",
+          (void *)android_media_AudioSystem_handleDeviceConfigChange},
+         {"setPhoneState", "(I)I", (void *)android_media_AudioSystem_setPhoneState},
+         {"setForceUse", "(II)I", (void *)android_media_AudioSystem_setForceUse},
+         {"getForceUse", "(I)I", (void *)android_media_AudioSystem_getForceUse},
+         {"initStreamVolume", "(III)I", (void *)android_media_AudioSystem_initStreamVolume},
+         {"setStreamVolumeIndex", "(III)I", (void *)android_media_AudioSystem_setStreamVolumeIndex},
+         {"getStreamVolumeIndex", "(II)I", (void *)android_media_AudioSystem_getStreamVolumeIndex},
+         {"setVolumeIndexForAttributes", "(Landroid/media/AudioAttributes;II)I",
+          (void *)android_media_AudioSystem_setVolumeIndexForAttributes},
+         {"getVolumeIndexForAttributes", "(Landroid/media/AudioAttributes;I)I",
+          (void *)android_media_AudioSystem_getVolumeIndexForAttributes},
+         {"getMinVolumeIndexForAttributes", "(Landroid/media/AudioAttributes;)I",
+          (void *)android_media_AudioSystem_getMinVolumeIndexForAttributes},
+         {"getMaxVolumeIndexForAttributes", "(Landroid/media/AudioAttributes;)I",
+          (void *)android_media_AudioSystem_getMaxVolumeIndexForAttributes},
+         {"setMasterVolume", "(F)I", (void *)android_media_AudioSystem_setMasterVolume},
+         {"getMasterVolume", "()F", (void *)android_media_AudioSystem_getMasterVolume},
+         {"setMasterMute", "(Z)I", (void *)android_media_AudioSystem_setMasterMute},
+         {"getMasterMute", "()Z", (void *)android_media_AudioSystem_getMasterMute},
+         {"setMasterMono", "(Z)I", (void *)android_media_AudioSystem_setMasterMono},
+         {"getMasterMono", "()Z", (void *)android_media_AudioSystem_getMasterMono},
+         {"setMasterBalance", "(F)I", (void *)android_media_AudioSystem_setMasterBalance},
+         {"getMasterBalance", "()F", (void *)android_media_AudioSystem_getMasterBalance},
+         {"getDevicesForStream", "(I)I", (void *)android_media_AudioSystem_getDevicesForStream},
+         {"getPrimaryOutputSamplingRate", "()I",
+          (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
+         {"getPrimaryOutputFrameCount", "()I",
+          (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
+         {"getOutputLatency", "(I)I", (void *)android_media_AudioSystem_getOutputLatency},
+         {"setLowRamDevice", "(ZJ)I", (void *)android_media_AudioSystem_setLowRamDevice},
+         {"checkAudioFlinger", "()I", (void *)android_media_AudioSystem_checkAudioFlinger},
+         {"listAudioPorts", "(Ljava/util/ArrayList;[I)I",
+          (void *)android_media_AudioSystem_listAudioPorts},
+         {"createAudioPatch",
+          "([Landroid/media/AudioPatch;[Landroid/media/AudioPortConfig;[Landroid/media/"
+          "AudioPortConfig;)I",
+          (void *)android_media_AudioSystem_createAudioPatch},
+         {"releaseAudioPatch", "(Landroid/media/AudioPatch;)I",
+          (void *)android_media_AudioSystem_releaseAudioPatch},
+         {"listAudioPatches", "(Ljava/util/ArrayList;[I)I",
+          (void *)android_media_AudioSystem_listAudioPatches},
+         {"setAudioPortConfig", "(Landroid/media/AudioPortConfig;)I",
+          (void *)android_media_AudioSystem_setAudioPortConfig},
+         {"startAudioSource", "(Landroid/media/AudioPortConfig;Landroid/media/AudioAttributes;)I",
+          (void *)android_media_AudioSystem_startAudioSource},
+         {"stopAudioSource", "(I)I", (void *)android_media_AudioSystem_stopAudioSource},
+         {"getAudioHwSyncForSession", "(I)I",
+          (void *)android_media_AudioSystem_getAudioHwSyncForSession},
+         {"registerPolicyMixes", "(Ljava/util/ArrayList;Z)I",
+          (void *)android_media_AudioSystem_registerPolicyMixes},
+         {"setUidDeviceAffinities", "(I[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_setUidDeviceAffinities},
+         {"removeUidDeviceAffinities", "(I)I",
+          (void *)android_media_AudioSystem_removeUidDeviceAffinities},
+         {"native_register_dynamic_policy_callback", "()V",
+          (void *)android_media_AudioSystem_registerDynPolicyCallback},
+         {"native_register_recording_callback", "()V",
+          (void *)android_media_AudioSystem_registerRecordingCallback},
+         {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
+         {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
+         {"native_is_offload_supported", "(IIIII)Z",
+          (void *)android_media_AudioSystem_isOffloadSupported},
+         {"getMicrophones", "(Ljava/util/ArrayList;)I",
+          (void *)android_media_AudioSystem_getMicrophones},
+         {"getSurroundFormats", "(Ljava/util/Map;Z)I",
+          (void *)android_media_AudioSystem_getSurroundFormats},
+         {"setSurroundFormatEnabled", "(IZ)I",
+          (void *)android_media_AudioSystem_setSurroundFormatEnabled},
+         {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
+         {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
+         {"isHapticPlaybackSupported", "()Z",
+          (void *)android_media_AudioSystem_isHapticPlaybackSupported},
+         {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
+          (void *)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
+         {"setSupportedSystemUsages", "([I)I",
+          (void *)android_media_AudioSystem_setSupportedSystemUsages},
+         {"setAllowedCapturePolicy", "(II)I",
+          (void *)android_media_AudioSystem_setAllowedCapturePolicy},
+         {"setRttEnabled", "(Z)I", (void *)android_media_AudioSystem_setRttEnabled},
+         {"setAudioHalPids", "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},
+         {"isCallScreeningModeSupported", "()Z",
+          (void *)android_media_AudioSystem_isCallScreeningModeSupported},
+         {"setPreferredDeviceForStrategy", "(IILjava/lang/String;)I",
+          (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
+         {"removePreferredDeviceForStrategy", "(I)I",
+          (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
+         {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDevice;)I",
+          (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
+         {"getDevicesForAttributes",
+          "(Landroid/media/AudioAttributes;[Landroid/media/AudioDevice;)I",
+          (void *)android_media_AudioSystem_getDevicesForAttributes},
+         {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_setUserIdDeviceAffinities},
+         {"removeUserIdDeviceAffinities", "(I)I",
+          (void *)android_media_AudioSystem_removeUserIdDeviceAffinities}};
 
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",

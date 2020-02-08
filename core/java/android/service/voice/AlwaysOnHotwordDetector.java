@@ -181,14 +181,14 @@ public class AlwaysOnHotwordDetector {
      * Returned by {@link #getSupportedAudioCapabilities()}
      */
     public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION =
-            SoundTrigger.ModuleProperties.CAPABILITY_ECHO_CANCELLATION;
+            SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION;
 
     /**
      * If set, the underlying module supports noise suppression.
      * Returned by {@link #getSupportedAudioCapabilities()}
      */
     public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION =
-            SoundTrigger.ModuleProperties.CAPABILITY_NOISE_SUPPRESSION;
+            SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

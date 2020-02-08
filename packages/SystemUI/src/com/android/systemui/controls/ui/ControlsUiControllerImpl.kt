@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.drawable.Drawable
 import android.os.IBinder
 import android.service.controls.Control
 import android.service.controls.TokenProvider
@@ -29,18 +30,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
-import android.widget.TextView
 
+import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlInfo
+import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.R
 import com.android.systemui.util.concurrency.DelayableExecutor
 
 import dagger.Lazy
+
+import java.text.Collator
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -110,7 +116,9 @@ private data class ControlKey(val componentName: ComponentName, val controlId: S
 class ControlsUiControllerImpl @Inject constructor (
     val controlsController: Lazy<ControlsController>,
     val context: Context,
-    @Main val uiExecutor: DelayableExecutor
+    @Main val uiExecutor: DelayableExecutor,
+    @Background val bgExecutor: DelayableExecutor,
+    val controlsListingController: Lazy<ControlsListingController>
 ) : ControlsUiController {
 
     private lateinit var controlInfos: List<ControlInfo>
@@ -120,6 +128,22 @@ class ControlsUiControllerImpl @Inject constructor (
 
     override val available: Boolean
         get() = controlsController.get().available
+
+    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
+        override fun onServicesUpdated(candidates: List<CandidateInfo>) {
+            bgExecutor.execute {
+                val collator = Collator.getInstance(context.getResources()
+                        .getConfiguration().locale)
+                val localeComparator = compareBy<CandidateInfo, CharSequence>(collator) {
+                    it.loadLabel()
+                }
+
+                val mList = candidates.toMutableList()
+                mList.sortWith(localeComparator)
+                loadInitialSetupViewIcons(mList.map { it.loadLabel() to it.loadIcon() })
+            }
+        }
+    }
 
     override fun show(parent: ViewGroup) {
         Log.d(TAG, "show()")
@@ -153,8 +177,26 @@ class ControlsUiControllerImpl @Inject constructor (
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
-        val textView = parent.requireViewById(R.id.controls_title) as TextView
-        textView.setOnClickListener(launchSelectorActivityListener(context))
+        val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
+        viewGroup.setOnClickListener(launchSelectorActivityListener(context))
+
+        controlsListingController.get().addCallback(listingCallback)
+    }
+
+    private fun loadInitialSetupViewIcons(icons: List<Pair<CharSequence, Drawable>>) {
+        uiExecutor.execute {
+            val viewGroup = parent.requireViewById(R.id.controls_icon_row) as ViewGroup
+            viewGroup.removeAllViews()
+
+            val inflater = LayoutInflater.from(context)
+            icons.forEach {
+                val imageView = inflater.inflate(R.layout.controls_icon, viewGroup, false)
+                        as ImageView
+                imageView.setContentDescription(it.first)
+                imageView.setImageDrawable(it.second)
+                viewGroup.addView(imageView)
+            }
+        }
     }
 
     private fun launchSelectorActivityListener(context: Context): (View) -> Unit {
@@ -206,6 +248,7 @@ class ControlsUiControllerImpl @Inject constructor (
         parent.removeAllViews()
         controlsById.clear()
         controlViewsById.clear()
+        controlsListingController.get().removeCallback(listingCallback)
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
@@ -231,9 +274,9 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun createRow(inflater: LayoutInflater, parent: ViewGroup): ViewGroup {
-        val row = inflater.inflate(R.layout.controls_row, parent, false) as ViewGroup
-        parent.addView(row)
+    private fun createRow(inflater: LayoutInflater, listView: ViewGroup): ViewGroup {
+        val row = inflater.inflate(R.layout.controls_row, listView, false) as ViewGroup
+        listView.addView(row)
         return row
     }
 }

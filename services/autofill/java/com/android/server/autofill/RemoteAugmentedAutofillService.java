@@ -166,8 +166,8 @@ final class RemoteAugmentedAutofillService
                                 public void onSuccess(@Nullable Dataset[] inlineSuggestionsData) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
-                                            inlineSuggestionsData, focusedId,
-                                            inlineSuggestionsCallback, client,
+                                            inlineSuggestionsRequest, inlineSuggestionsData,
+                                            focusedId, inlineSuggestionsCallback, client,
                                             onErrorCallback);
                                     requestAutofill.complete(null);
                                 }
@@ -231,10 +231,12 @@ final class RemoteAugmentedAutofillService
     }
 
     private void maybeRequestShowInlineSuggestions(int sessionId,
-            @Nullable Dataset[] inlineSuggestionsData, @NonNull AutofillId focusedId,
+            @Nullable InlineSuggestionsRequest request, @Nullable Dataset[] inlineSuggestionsData,
+            @NonNull AutofillId focusedId,
             @Nullable IInlineSuggestionsResponseCallback inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback) {
-        if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null) {
+        if (ArrayUtils.isEmpty(inlineSuggestionsData) || inlineSuggestionsCallback == null
+                || request == null) {
             return;
         }
         mCallbacks.setLastResponse(sessionId);
@@ -242,7 +244,7 @@ final class RemoteAugmentedAutofillService
         try {
             inlineSuggestionsCallback.onInlineSuggestionsResponse(
                     InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
-                            inlineSuggestionsData, focusedId, mContext,
+                            request, inlineSuggestionsData, focusedId, mContext,
                             dataset -> {
                                 mCallbacks.logAugmentedAutofillSelected(sessionId,
                                         dataset.getId());

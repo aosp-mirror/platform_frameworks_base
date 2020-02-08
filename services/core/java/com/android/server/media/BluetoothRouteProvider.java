@@ -27,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaRoute2Info;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -55,6 +56,7 @@ class BluetoothRouteProvider {
     private final Context mContext;
     private final BluetoothAdapter mBluetoothAdapter;
     private final BluetoothRoutesUpdatedListener mListener;
+    private final AudioManager mAudioManager;
     private final Map<String, BluetoothEventReceiver> mEventReceiverMap = new HashMap<>();
     private final IntentFilter mIntentFilter = new IntentFilter();
     private final BroadcastReceiver mBroadcastReceiver = new BluetoothBroadcastReceiver();
@@ -82,6 +84,7 @@ class BluetoothRouteProvider {
         mContext = context;
         mBluetoothAdapter = btAdapter;
         mListener = listener;
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         buildBluetoothRoutes();
 
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.A2DP);
@@ -181,12 +184,15 @@ class BluetoothRouteProvider {
     private BluetoothRouteInfo createBluetoothRoute(BluetoothDevice device) {
         BluetoothRouteInfo newBtRoute = new BluetoothRouteInfo();
         newBtRoute.btDevice = device;
+        // Current / Max volume will be set when connected.
+        // TODO: Is there any BT device which has fixed volume?
         newBtRoute.route = new MediaRoute2Info.Builder(device.getAddress(), device.getName())
                 .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())
                 .setDeviceType(MediaRoute2Info.DEVICE_TYPE_BLUETOOTH)
+                .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .build();
         newBtRoute.connectedProfiles = new SparseBooleanArray();
         return newBtRoute;
@@ -203,10 +209,20 @@ class BluetoothRouteProvider {
             Slog.w(TAG, "setRouteConnectionStateForDevice: route shouldn't be null");
             return;
         }
-        if (btRoute.route.getConnectionState() != state) {
-            btRoute.route = new MediaRoute2Info.Builder(btRoute.route)
-                    .setConnectionState(state).build();
+        if (btRoute.route.getConnectionState() == state) {
+            return;
         }
+
+        // Update volume when the connection state is changed.
+        MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(btRoute.route)
+                .setConnectionState(state);
+
+        if (state == MediaRoute2Info.CONNECTION_STATE_CONNECTED) {
+            int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            builder.setVolumeMax(maxVolume).setVolume(currentVolume);
+        }
+        btRoute.route = builder.build();
     }
 
     interface BluetoothRoutesUpdatedListener {

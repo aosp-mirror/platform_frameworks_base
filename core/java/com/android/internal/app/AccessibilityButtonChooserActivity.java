@@ -471,6 +471,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mSwitchItem.setVisibility(View.GONE);
             holder.mItemContainer.setVisibility(isLaunchMenuMode ? View.GONE : View.VISIBLE);
             holder.mItemView.setEnabled(enabledState);
+            holder.mItemView.setClickable(!enabledState);
         }
 
         private void updateInvisibleActionItemVisibility(@NonNull Context context,
@@ -485,6 +486,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mItemContainer.setVisibility((mShortcutMenuMode == ShortcutMenuMode.EDIT)
                     ? View.VISIBLE : View.GONE);
             holder.mItemView.setEnabled(true);
+            holder.mItemView.setClickable(false);
         }
 
         private void updateIntuitiveActionItemVisibility(@NonNull Context context,
@@ -504,6 +506,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mSwitchItem.setChecked(!isEditMenuMode && isServiceEnabled);
             holder.mItemContainer.setVisibility(View.VISIBLE);
             holder.mItemView.setEnabled(true);
+            holder.mItemView.setClickable(false);
         }
 
         private void updateBounceActionItemVisibility(@NonNull Context context,
@@ -518,6 +521,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             holder.mSwitchItem.setVisibility(View.GONE);
             holder.mItemContainer.setVisibility(View.VISIBLE);
             holder.mItemView.setEnabled(true);
+            holder.mItemView.setClickable(false);
         }
     }
 

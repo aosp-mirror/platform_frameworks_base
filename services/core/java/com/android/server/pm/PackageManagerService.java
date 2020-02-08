@@ -3627,7 +3627,7 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 handle = NativeLibraryHelper.Handle.create(dstCodePath);
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                        null /*abiOverride*/);
+                        null /*abiOverride*/, false /*isIncremental*/);
             } catch (IOException e) {
                 logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
                         + "; pkg: " + packageName);
@@ -13350,12 +13350,9 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @return true if verification should be performed
      */
-    private boolean isVerificationEnabled(int userId, int installFlags, int installerUid) {
+    private boolean isVerificationEnabled(
+            PackageInfoLite pkgInfoLite, int userId, int installFlags, int installerUid) {
         if (!DEFAULT_VERIFY_ENABLE) {
-            return false;
-        }
-
-        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
             return false;
         }
 
@@ -13364,28 +13361,42 @@ public class PackageManagerService extends IPackageManager.Stub
             if (isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
                 return true;
             }
-            // Check if the developer does not want package verification for ADB installs
+            // Check if the developer wants to skip verification for ADB installs
+            if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
+                synchronized (mLock) {
+                    if (mSettings.mPackages.get(pkgInfoLite.packageName) == null) {
+                        // Always verify fresh install
+                        return true;
+                    }
+                }
+                // Only skip when apk is debuggable
+                return !pkgInfoLite.debuggable;
+            }
             return Global.getInt(mContext.getContentResolver(),
                     Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
-        } else {
-            // only when not installed from ADB, skip verification for instant apps when
-            // the installer and verifier are the same.
-            if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                if (mInstantAppInstallerActivity != null
-                        && mInstantAppInstallerActivity.packageName.equals(
-                                mRequiredVerifierPackage)) {
-                    try {
-                        mInjector.getAppOpsManager()
-                                .checkPackage(installerUid, mRequiredVerifierPackage);
-                        if (DEBUG_VERIFY) {
-                            Slog.i(TAG, "disable verification for instant app");
-                        }
-                        return false;
-                    } catch (SecurityException ignore) { }
-                }
-            }
-            return true;
         }
+
+        if ((installFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0) {
+            return false;
+        }
+
+        // only when not installed from ADB, skip verification for instant apps when
+        // the installer and verifier are the same.
+        if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+            if (mInstantAppInstallerActivity != null
+                    && mInstantAppInstallerActivity.packageName.equals(
+                            mRequiredVerifierPackage)) {
+                try {
+                    mInjector.getAppOpsManager()
+                            .checkPackage(installerUid, mRequiredVerifierPackage);
+                    if (DEBUG_VERIFY) {
+                        Slog.i(TAG, "disable verification for instant app");
+                    }
+                    return false;
+                } catch (SecurityException ignore) { }
+            }
+        }
+        return true;
     }
 
     /**
@@ -14549,7 +14560,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     verificationInfo == null ? -1 : verificationInfo.installerUid;
             if (!origin.existing && requiredUid != -1
                     && isVerificationEnabled(
-                    verifierUser.getIdentifier(), installFlags, installerUid)) {
+                            pkgLite, verifierUser.getIdentifier(), installFlags, installerUid)) {
                 final Intent verification = new Intent(
                         Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                 verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -14959,12 +14970,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 return ret;
             }
 
+            final boolean isIncremental = isIncrementalPath(codeFile.getAbsolutePath());
             final File libraryRoot = new File(codeFile, LIB_DIR_NAME);
             NativeLibraryHelper.Handle handle = null;
             try {
                 handle = NativeLibraryHelper.Handle.create(codeFile);
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
-                        abiOverride);
+                        abiOverride, isIncremental);
             } catch (IOException e) {
                 Slog.e(TAG, "Copying native libraries failed", e);
                 ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;

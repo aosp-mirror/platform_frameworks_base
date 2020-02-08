@@ -55,8 +55,8 @@ public class WifiP2pWfdInfoTest {
     public void testSettersGetters() throws Exception {
         WifiP2pWfdInfo info = new WifiP2pWfdInfo();
 
-        info.setWfdEnabled(true);
-        assertTrue(info.isWfdEnabled());
+        info.setEnabled(true);
+        assertTrue(info.isEnabled());
 
         info.setDeviceType(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE);
         assertEquals(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE, info.getDeviceType());

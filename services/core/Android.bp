@@ -98,7 +98,7 @@ java_library_static {
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.vibrator-java",
         "app-compat-annotations",
-        "framework-tethering",
+        "framework-tethering-stubs",
     ],
 
     required: [

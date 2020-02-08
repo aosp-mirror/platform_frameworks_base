@@ -17,7 +17,6 @@
 package android.hardware.soundtrigger;
 
 import android.annotation.Nullable;
-import android.hardware.soundtrigger.ModelParams;
 import android.media.AudioFormat;
 import android.media.audio.common.AudioConfig;
 import android.media.soundtrigger_middleware.AudioCapabilities;
@@ -333,20 +332,22 @@ class ConversionUtil {
     public static int aidl2apiAudioCapabilities(int aidlCapabilities) {
         int result = 0;
         if ((aidlCapabilities & AudioCapabilities.ECHO_CANCELLATION) != 0) {
-            result |= SoundTrigger.ModuleProperties.CAPABILITY_ECHO_CANCELLATION;
+            result |= SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION;
         }
         if ((aidlCapabilities & AudioCapabilities.NOISE_SUPPRESSION) != 0) {
-            result |= SoundTrigger.ModuleProperties.CAPABILITY_NOISE_SUPPRESSION;
+            result |= SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION;
         }
         return result;
     }
 
     public static int api2aidlAudioCapabilities(int apiCapabilities) {
         int result = 0;
-        if ((apiCapabilities & SoundTrigger.ModuleProperties.CAPABILITY_ECHO_CANCELLATION) != 0) {
+        if ((apiCapabilities & SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION)
+                != 0) {
             result |= AudioCapabilities.ECHO_CANCELLATION;
         }
-        if ((apiCapabilities & SoundTrigger.ModuleProperties.CAPABILITY_NOISE_SUPPRESSION) != 0) {
+        if ((apiCapabilities & SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION)
+                != 0) {
             result |= AudioCapabilities.NOISE_SUPPRESSION;
         }
         return result;

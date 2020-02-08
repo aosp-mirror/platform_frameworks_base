@@ -1901,7 +1901,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean hasBaseUserRestriction(String restrictionKey, @UserIdInt int userId) {
-        checkManageUsersPermission("hasBaseUserRestriction");
+        checkManageOrCreateUsersPermission("hasBaseUserRestriction");
         if (!UserRestrictionsUtils.isValidRestriction(restrictionKey)) {
             return false;
         }

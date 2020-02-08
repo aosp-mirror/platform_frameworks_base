@@ -97,8 +97,8 @@ public class SoundTrigger {
          */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "AUDIO_CAPABILITY_" }, value = {
-                CAPABILITY_ECHO_CANCELLATION,
-                CAPABILITY_NOISE_SUPPRESSION
+                AUDIO_CAPABILITY_ECHO_CANCELLATION,
+                AUDIO_CAPABILITY_NOISE_SUPPRESSION
         })
         public @interface AudioCapabilities {}
 
@@ -106,12 +106,12 @@ public class SoundTrigger {
          * If set the underlying module supports AEC.
          * Describes bit field {@link ModuleProperties#audioCapabilities}
          */
-        public static final int CAPABILITY_ECHO_CANCELLATION = 0x1;
+        public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 0x1;
         /**
          * If set, the underlying module supports noise suppression.
          * Describes bit field {@link ModuleProperties#audioCapabilities}
          */
-        public static final int CAPABILITY_NOISE_SUPPRESSION = 0x2;
+        public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 0x2;
 
         /** Unique module ID provided by the native service */
         public final int id;

@@ -23,7 +23,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
-import android.media.AudioDeviceAddress;
+import android.media.AudioDevice;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -75,7 +75,7 @@ public class AudioDeviceInventory {
     private final ArrayMap<Integer, String> mApmConnectedDevices = new ArrayMap<>();
 
     // List of preferred devices for strategies
-    private final ArrayMap<Integer, AudioDeviceAddress> mPreferredDevices = new ArrayMap<>();
+    private final ArrayMap<Integer, AudioDevice> mPreferredDevices = new ArrayMap<>();
 
     // the wrapper for AudioSystem static methods, allows us to spy AudioSystem
     private final @NonNull AudioSystemAdapter mAudioSystem;
@@ -468,7 +468,7 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDeviceAddress device) {
+    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDevice device) {
         mPreferredDevices.put(strategy, device);
     }
 
@@ -480,7 +480,7 @@ public class AudioDeviceInventory {
     //
 
     /*package*/ int setPreferredDeviceForStrategySync(int strategy,
-                                                      @NonNull AudioDeviceAddress device) {
+                                                      @NonNull AudioDevice device) {
         final long identity = Binder.clearCallingIdentity();
         final int status = mAudioSystem.setPreferredDeviceForStrategy(strategy, device);
         Binder.restoreCallingIdentity(identity);

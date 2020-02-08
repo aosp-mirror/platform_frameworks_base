@@ -494,9 +494,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String DEPRECATED_KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
         private static final String DEPRECATED_KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
 
-        private static final String KEY_MAX_STANDARD_RESCHEDULE_COUNT
+        private static final String DEPRECATED_KEY_MAX_STANDARD_RESCHEDULE_COUNT
                 = "max_standard_reschedule_count";
-        private static final String KEY_MAX_WORK_RESCHEDULE_COUNT = "max_work_reschedule_count";
+        private static final String DEPRECATED_KEY_MAX_WORK_RESCHEDULE_COUNT =
+                "max_work_reschedule_count";
         private static final String KEY_MIN_LINEAR_BACKOFF_TIME = "min_linear_backoff_time";
         private static final String KEY_MIN_EXP_BACKOFF_TIME = "min_exp_backoff_time";
         private static final String DEPRECATED_KEY_STANDBY_HEARTBEAT_TIME =
@@ -525,8 +526,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
         private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
-        private static final int DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT = Integer.MAX_VALUE;
-        private static final int DEFAULT_MAX_WORK_RESCHEDULE_COUNT = Integer.MAX_VALUE;
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
@@ -640,16 +639,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         "screen_off_job_concurrency_increase_delay_ms", 30_000);
 
         /**
-         * The maximum number of times we allow a job to have itself rescheduled before
-         * giving up on it, for standard jobs.
-         */
-        int MAX_STANDARD_RESCHEDULE_COUNT = DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT;
-        /**
-         * The maximum number of times we allow a job to have itself rescheduled before
-         * giving up on it, for jobs that are executing work.
-         */
-        int MAX_WORK_RESCHEDULE_COUNT = DEFAULT_MAX_WORK_RESCHEDULE_COUNT;
-        /**
          * The minimum backoff time to allow for linear backoff.
          */
         long MIN_LINEAR_BACKOFF_TIME = DEFAULT_MIN_LINEAR_BACKOFF_TIME;
@@ -735,10 +724,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.parse(mParser);
 
-            MAX_STANDARD_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_STANDARD_RESCHEDULE_COUNT,
-                    DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
-            MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
-                    DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
             MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
                     DEFAULT_MIN_LINEAR_BACKOFF_TIME);
             MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
@@ -790,8 +775,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.dump(pw, "");
 
-            pw.printPair(KEY_MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT).println();
-            pw.printPair(KEY_MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT).println();
             pw.printPair(KEY_MIN_LINEAR_BACKOFF_TIME, MIN_LINEAR_BACKOFF_TIME).println();
             pw.printPair(KEY_MIN_EXP_BACKOFF_TIME, MIN_EXP_BACKOFF_TIME).println();
             pw.printPair(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
@@ -827,8 +810,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS.dumpProto(proto,
                     ConstantsProto.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
 
-            proto.write(ConstantsProto.MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT);
-            proto.write(ConstantsProto.MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT);
             proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME);
             proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME);
             proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
@@ -1390,18 +1371,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Effective standby bucket can change after this in some situations so use
                     // the real bucket so that the job is tracked by the controllers.
                     if (js.getStandbyBucket() == RESTRICTED_INDEX) {
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
-                        js.addDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
-
                         mRestrictiveControllers.get(j).startTrackingRestrictedJobLocked(js);
                     } else {
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_BATTERY_NOT_LOW);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CHARGING);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_CONNECTIVITY);
-                        js.removeDynamicConstraint(JobStatus.CONSTRAINT_IDLE);
-
                         mRestrictiveControllers.get(j).stopTrackingRestrictedJobLocked(js);
                     }
                 }
@@ -1737,19 +1708,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         final long initialBackoffMillis = job.getInitialBackoffMillis();
         final int backoffAttempts = failureToReschedule.getNumFailures() + 1;
         long delayMillis;
-
-        if (failureToReschedule.hasWorkLocked()) {
-            if (backoffAttempts > mConstants.MAX_WORK_RESCHEDULE_COUNT) {
-                Slog.w(TAG, "Not rescheduling " + failureToReschedule + ": attempt #"
-                        + backoffAttempts + " > work limit "
-                        + mConstants.MAX_STANDARD_RESCHEDULE_COUNT);
-                return null;
-            }
-        } else if (backoffAttempts > mConstants.MAX_STANDARD_RESCHEDULE_COUNT) {
-            Slog.w(TAG, "Not rescheduling " + failureToReschedule + ": attempt #"
-                    + backoffAttempts + " > std limit " + mConstants.MAX_STANDARD_RESCHEDULE_COUNT);
-            return null;
-        }
 
         switch (job.getBackoffPolicy()) {
             case JobInfo.BACKOFF_POLICY_LINEAR: {

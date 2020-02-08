@@ -28,30 +28,17 @@ import java.util.List;
 
 /**
  * Class used to provide one time hooks for existing OEM devices to migrate their config store
- * data to the wifi mainline module.
- * <p>
- * Note:
- * <li> OEM's need to implement {@link #load()} only if their
- * existing config store format or file locations differs from the vanilla AOSP implementation (
- * which is what the wifi mainline module understands).
- * </li>
- * <li> The wifi mainline module will invoke {@link #load()}  method on every bootup, its
- * the responsibility of the OEM implementation to ensure that this method returns non-null data
- * only on the first bootup. Once the migration is done, the OEM can safely delete their config
- * store files and then return null on any subsequent reboots. The first & only relevant invocation
- * of {@link #load()} occurs when a previously released device upgrades to the wifi
- * mainline module from an OEM implementation of the wifi stack.
- * </li>
+ * data and other settings to the wifi mainline module.
  * @hide
  */
 @SystemApi
-public final class WifiOemConfigStoreMigrationHook {
+public final class WifiOemMigrationHook {
     /**
      * Container for all the wifi config data to migrate.
      */
-    public static final class MigrationData implements Parcelable {
+    public static final class ConfigStoreMigrationData implements Parcelable {
         /**
-         * Builder to create instance of {@link MigrationData}.
+         * Builder to create instance of {@link ConfigStoreMigrationData}.
          */
         public static final class Builder {
             private List<WifiConfiguration> mUserSavedNetworkConfigurations;
@@ -92,39 +79,40 @@ public final class WifiOemConfigStoreMigrationHook {
             }
 
             /**
-             * Build an instance of {@link MigrationData}.
+             * Build an instance of {@link ConfigStoreMigrationData}.
              *
-             * @return Instance of {@link MigrationData}.
+             * @return Instance of {@link ConfigStoreMigrationData}.
              */
-            public @NonNull MigrationData build() {
-                return new MigrationData(mUserSavedNetworkConfigurations, mUserSoftApConfiguration);
+            public @NonNull ConfigStoreMigrationData build() {
+                return new ConfigStoreMigrationData(
+                        mUserSavedNetworkConfigurations, mUserSoftApConfiguration);
             }
         }
 
         private final List<WifiConfiguration> mUserSavedNetworkConfigurations;
         private final SoftApConfiguration mUserSoftApConfiguration;
 
-        private MigrationData(
+        private ConfigStoreMigrationData(
                 @Nullable List<WifiConfiguration> userSavedNetworkConfigurations,
                 @Nullable SoftApConfiguration userSoftApConfiguration) {
             mUserSavedNetworkConfigurations = userSavedNetworkConfigurations;
             mUserSoftApConfiguration = userSoftApConfiguration;
         }
 
-        public static final @NonNull Parcelable.Creator<MigrationData> CREATOR =
-                new Parcelable.Creator<MigrationData>() {
+        public static final @NonNull Parcelable.Creator<ConfigStoreMigrationData> CREATOR =
+                new Parcelable.Creator<ConfigStoreMigrationData>() {
                     @Override
-                    public MigrationData createFromParcel(Parcel in) {
+                    public ConfigStoreMigrationData createFromParcel(Parcel in) {
                         List<WifiConfiguration> userSavedNetworkConfigurations =
                                 in.readArrayList(null);
                         SoftApConfiguration userSoftApConfiguration = in.readParcelable(null);
-                        return new MigrationData(
+                        return new ConfigStoreMigrationData(
                                 userSavedNetworkConfigurations, userSoftApConfiguration);
                     }
 
                     @Override
-                    public MigrationData[] newArray(int size) {
-                        return new MigrationData[size];
+                    public ConfigStoreMigrationData[] newArray(int size) {
+                        return new ConfigStoreMigrationData[size];
                     }
                 };
 
@@ -164,16 +152,29 @@ public final class WifiOemConfigStoreMigrationHook {
         }
     }
 
-    private WifiOemConfigStoreMigrationHook() { }
+    private WifiOemMigrationHook() { }
 
     /**
      * Load data from OEM's config store.
+     * <p>
+     * Note:
+     * <li> OEM's need to implement {@link #loadFromConfigStore()} ()} only if their
+     * existing config store format or file locations differs from the vanilla AOSP implementation (
+     * which is what the wifi mainline module understands).
+     * </li>
+     * <li> The wifi mainline module will invoke {@link #loadFromConfigStore()} method on every
+     * bootup, its the responsibility of the OEM implementation to ensure that this method returns
+     * non-null data only on the first bootup. Once the migration is done, the OEM can safely delete
+     * their config store files and then return null on any subsequent reboots. The first & only
+     * relevant invocation of {@link #loadFromConfigStore()} occurs when a previously released
+     * device upgrades to the wifi mainline module from an OEM implementation of the wifi stack.
+     * </li>
      *
-     * @return Instance of {@link MigrationData} for migrating data, null if no
+     * @return Instance of {@link ConfigStoreMigrationData} for migrating data, null if no
      * migration is necessary.
      */
     @Nullable
-    public static MigrationData load() {
+    public static ConfigStoreMigrationData loadFromConfigStore() {
         // Note: OEM's should add code to parse data from their config store format here!
         return null;
     }

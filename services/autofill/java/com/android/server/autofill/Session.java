@@ -314,6 +314,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final InputMethodManagerInternal mInputMethodManagerInternal;
 
     @Nullable
+    @GuardedBy("mLock")
     private InlineSuggestionsRequestCallbackImpl mInlineSuggestionsRequestCallback;
 
     /**
@@ -423,6 +424,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         suggestionsRequest);
             }
 
+            if (mActivityToken != null) {
+                mService.sendActivityAssistDataToContentCapture(mActivityToken, resultData);
+            }
             mRemoteFillService.onFillRequest(request);
         }
 
@@ -2674,11 +2678,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         if (response.supportsInlineSuggestions()) {
-            if (requestShowInlineSuggestions(response)) {
-                //TODO(b/137800469): Fix it to log showed only when IME asks for inflation, rather
-                // than here where framework sends back the response.
-                mService.logDatasetShown(id, mClientState);
-                return;
+            synchronized (mLock) {
+                if (requestShowInlineSuggestions(response, mInlineSuggestionsRequestCallback)) {
+                    //TODO(b/137800469): Fix it to log showed only when IME asks for inflation,
+                    // rather than here where framework sends back the response.
+                    mService.logDatasetShown(id, mClientState);
+                    return;
+                }
             }
         }
 
@@ -2716,30 +2722,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Returns whether we made a request to show inline suggestions.
      */
-    private boolean requestShowInlineSuggestions(FillResponse response) {
-        final IInlineSuggestionsResponseCallback inlineContentCallback =
-                mInlineSuggestionsRequestCallback != null
-                        ? mInlineSuggestionsRequestCallback.getResponseCallback() : null;
-        if (inlineContentCallback == null) {
-            Log.w(TAG, "Session input method callback is not set yet");
-            return false;
-        }
-
+    private boolean requestShowInlineSuggestions(@NonNull FillResponse response,
+            @Nullable InlineSuggestionsRequestCallbackImpl callback) {
         final List<Dataset> datasets = response.getDatasets();
         if (datasets == null) {
             Log.w(TAG, "response returned null datasets");
             return false;
         }
 
+        if (callback == null || callback.getRequest() == null
+                || callback.getResponseCallback() == null) {
+            Log.w(TAG, "Session input method callback is not set yet");
+            return false;
+        }
+
+        final InlineSuggestionsRequest request = callback.getRequest();
         InlineSuggestionsResponse inlineSuggestionsResponse =
-                InlineSuggestionFactory.createInlineSuggestionsResponse(response.getRequestId(),
-                        datasets.toArray(new Dataset[]{}), mCurrentViewId, mContext, this, () -> {
-                    synchronized (mLock) {
-                        requestHideFillUi(mCurrentViewId);
-                    }
-                });
-        try  {
-            inlineContentCallback.onInlineSuggestionsResponse(inlineSuggestionsResponse);
+                InlineSuggestionFactory.createInlineSuggestionsResponse(request,
+                        response.getRequestId(),
+                        datasets.toArray(new Dataset[]{}), response.getInlineActions(),
+                        mCurrentViewId, mContext, this, () -> {
+                            synchronized (mLock) {
+                                requestHideFillUi(mCurrentViewId);
+                            }
+                        });
+        try {
+            callback.getResponseCallback().onInlineSuggestionsResponse(inlineSuggestionsResponse);
         } catch (RemoteException e) {
             Log.w(TAG, "onFillReady() remote error calling onInlineSuggestionsResponse()");
             return false;

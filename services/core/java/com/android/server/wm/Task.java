@@ -79,11 +79,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.TAG_STACK;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
-import static com.android.server.wm.TaskProto.FILLS_PARENT;
-import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
-import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
-import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -125,7 +120,6 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationTarget;
@@ -3195,12 +3189,16 @@ class Task extends WindowContainer<WindowContainer> {
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
-        info.resizeMode = mResizeMode;
         info.configuration.setTo(getConfiguration());
         info.token = mRemoteToken;
         // Get's the first non-undefined activity type among this and children. Can't use
         // configuration.windowConfiguration because that would only be this level.
         info.topActivityType = getActivityType();
+
+        //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child
+        //                    order changes.
+        final Task top = getTopMostTask();
+        info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
     }
 
     /**

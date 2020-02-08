@@ -213,12 +213,12 @@ int32_t AImageDecoderHeaderInfo_getDataSpace(const AImageDecoderHeaderInfo* info
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    // Note: This recomputes the data space because it's possible the client has
-    // changed the output color space, so we cannot rely on it. Alternatively,
+    // Note: This recomputes the color type because it's possible the client has
+    // changed the output color type, so we cannot rely on it. Alternatively,
     // we could store the ADataSpace in the ImageDecoder.
     const ImageDecoder* imageDecoder = toDecoder(info);
     SkColorType colorType = imageDecoder->mCodec->computeOutputColorType(kN32_SkColorType);
-    sk_sp<SkColorSpace> colorSpace = imageDecoder->mCodec->computeOutputColorSpace(colorType);
+    sk_sp<SkColorSpace> colorSpace = imageDecoder->getDefaultColorSpace();
     return uirenderer::ColorSpaceToADataSpace(colorSpace.get(), colorType);
 }
 

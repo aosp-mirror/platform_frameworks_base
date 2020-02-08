@@ -124,6 +124,7 @@ cc_defaults {
         "libstatslog",
         "libstatsmetadata",
         "libsysutils",
+        "libutils",
     ],
     shared_libs: [
         "libbinder",
@@ -131,7 +132,6 @@ cc_defaults {
         "liblog",
         "libservices",
         "libstatssocket",
-        "libutils",
     ],
 }
 

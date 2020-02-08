@@ -16,9 +16,12 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -30,16 +33,9 @@ public class InfoMediaDevice extends MediaDevice {
 
     private static final String TAG = "InfoMediaDevice";
 
-    private final MediaRoute2Info mRouteInfo;
-    private final MediaRouter2Manager mRouterManager;
-    private final String mPackageName;
-
     InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
             String packageName) {
-        super(context, MediaDeviceType.TYPE_CAST_DEVICE);
-        mRouterManager = routerManager;
-        mRouteInfo = info;
-        mPackageName = packageName;
+        super(context, MediaDeviceType.TYPE_CAST_DEVICE, routerManager, info, packageName);
         initDeviceRecord();
     }
 
@@ -67,13 +63,6 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
-    public boolean connect() {
-        setConnectedRecord();
-        mRouterManager.selectRoute(mPackageName, mRouteInfo);
-        return true;
-    }
-
-    @Override
     public void requestSetVolume(int volume) {
         mRouterManager.requestSetVolume(mRouteInfo, volume);
     }
@@ -89,11 +78,30 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
-    public void disconnect() {
-        //TODO(b/144535188): disconnected last select device
+    public String getClientPackageName() {
+        return mRouteInfo.getClientPackageName();
     }
 
     @Override
+    public String getClientAppLabel() {
+        final String packageName = mRouteInfo.getClientPackageName();
+        if (TextUtils.isEmpty(packageName)) {
+            Log.d(TAG, "Client package name is empty");
+            return mContext.getResources().getString(R.string.unknown);
+        }
+        try {
+            final PackageManager packageManager = mContext.getPackageManager();
+            final String appLabel = packageManager.getApplicationLabel(
+                    packageManager.getApplicationInfo(packageName, 0)).toString();
+            if (!TextUtils.isEmpty(appLabel)) {
+                return appLabel;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "unable to find " + packageName);
+        }
+        return mContext.getResources().getString(R.string.unknown);
+    }
+
     public boolean isConnected() {
         return true;
     }

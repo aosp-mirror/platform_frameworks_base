@@ -83,7 +83,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile = new Tile();
         updateDefaultTileAndIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
-        if (mServiceManager.isBooleanTile()) {
+        if (mServiceManager.isToggleableTile()) {
             // Replace states with BooleanState
             resetStates();
         }
@@ -252,7 +252,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public State newTileState() {
-        if (mServiceManager != null && mServiceManager.isBooleanTile()) {
+        if (mServiceManager != null && mServiceManager.isToggleableTile()) {
             return new BooleanState();
         }
         return new State();

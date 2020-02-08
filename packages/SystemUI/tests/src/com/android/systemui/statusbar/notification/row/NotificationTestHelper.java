@@ -199,9 +199,17 @@ public class NotificationTestHelper {
     /**
      * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
      */
+    public ExpandableNotificationRow createBubbleInGroup()
+            throws Exception {
+        return createBubble(makeBubbleMetadata(null), PKG, true);
+    }
+
+    /**
+     * Returns an {@link ExpandableNotificationRow} that should be shown as a bubble.
+     */
     public ExpandableNotificationRow createBubble()
             throws Exception {
-        return createBubble(makeBubbleMetadata(null), PKG);
+        return createBubble(makeBubbleMetadata(null), PKG, false);
     }
 
     /**
@@ -211,7 +219,7 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble(@Nullable PendingIntent deleteIntent)
             throws Exception {
-        return createBubble(makeBubbleMetadata(deleteIntent), PKG);
+        return createBubble(makeBubbleMetadata(deleteIntent), PKG, false);
     }
 
     /**
@@ -221,8 +229,14 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg)
             throws Exception {
+        return createBubble(bubbleMetadata, pkg, false);
+    }
+
+    private ExpandableNotificationRow createBubble(BubbleMetadata bubbleMetadata, String pkg,
+            boolean inGroup)
+            throws Exception {
         Notification n = createNotification(false /* isGroupSummary */,
-                null /* groupKey */, bubbleMetadata);
+                inGroup ? GROUP_KEY : null /* groupKey */, bubbleMetadata);
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, pkg, UID, USER_HANDLE,
                 0 /* extraInflationFlags */, IMPORTANCE_HIGH);

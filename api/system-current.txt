@@ -585,10 +585,6 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
-  public final class ApplicationExitInfo implements android.os.Parcelable {
-    method @NonNull public android.os.UserHandle getUserHandle();
-  }
-
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission("android.permission.START_ACTIVITIES_FROM_BACKGROUND") public void setBackgroundActivityStartsAllowed(boolean);
@@ -2212,6 +2208,7 @@ package android.content.pm {
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
+    field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = -268435456; // 0xf0000000
@@ -3704,8 +3701,8 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
-    field public static final int CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
+    field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
     field public final int audioCapabilities;
     field @NonNull public final String description;
@@ -4215,15 +4212,15 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioAttributes.Builder setSystemUsage(int);
   }
 
-  public final class AudioDeviceAddress implements android.os.Parcelable {
-    ctor public AudioDeviceAddress(@NonNull android.media.AudioDeviceInfo);
-    ctor public AudioDeviceAddress(int, int, @NonNull String);
+  public final class AudioDevice implements android.os.Parcelable {
+    ctor public AudioDevice(@NonNull android.media.AudioDeviceInfo);
+    ctor public AudioDevice(int, int, @NonNull String);
     method public int describeContents();
     method @NonNull public String getAddress();
     method public int getRole();
     method public int getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDeviceAddress> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDevice> CREATOR;
     field public static final int ROLE_INPUT = 1; // 0x1
     field public static final int ROLE_OUTPUT = 2; // 0x2
   }
@@ -4260,11 +4257,11 @@ package android.media {
     method @IntRange(from=0) public int getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioProductStrategy> getAudioProductStrategies();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static java.util.List<android.media.audiopolicy.AudioVolumeGroup> getAudioVolumeGroups();
-    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDeviceAddress> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioDevice> getDevicesForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) public int getMaxAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMaxVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMinVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDeviceAddress getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioDevice getPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int[] getSupportedSystemUsages();
     method @IntRange(from=0) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getVolumeIndexForAttributes(@NonNull android.media.AudioAttributes);
     method public boolean isAudioServerRunning();
@@ -4278,7 +4275,7 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo, @IntRange(from=0) int);
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAddress);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean setPreferredDeviceForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDevice);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setSupportedSystemUsages(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -4374,7 +4371,7 @@ package android.media {
 package android.media.audiofx {
 
   public class AudioEffect {
-    ctor @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public AudioEffect(@NonNull java.util.UUID, @NonNull android.media.AudioDeviceAddress);
+    ctor @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public AudioEffect(@NonNull java.util.UUID, @NonNull android.media.AudioDevice);
   }
 
 }
@@ -7692,6 +7689,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setScanThrottleEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public boolean setSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setVerboseLoggingEnabled(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
@@ -7836,23 +7834,23 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING) public android.net.wifi.WifiNetworkSuggestion.Builder setCarrierId(int);
   }
 
-  public final class WifiOemConfigStoreMigrationHook {
-    method @Nullable public static android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData load();
+  public final class WifiOemMigrationHook {
+    method @Nullable public static android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData loadFromConfigStore();
   }
 
-  public static final class WifiOemConfigStoreMigrationHook.MigrationData implements android.os.Parcelable {
+  public static final class WifiOemMigrationHook.ConfigStoreMigrationData implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
     method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData> CREATOR;
   }
 
-  public static final class WifiOemConfigStoreMigrationHook.MigrationData.Builder {
-    ctor public WifiOemConfigStoreMigrationHook.MigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData build();
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiOemConfigStoreMigrationHook.MigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
+  public static final class WifiOemMigrationHook.ConfigStoreMigrationData.Builder {
+    ctor public WifiOemMigrationHook.ConfigStoreMigrationData.Builder();
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData build();
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
+    method @NonNull public android.net.wifi.WifiOemMigrationHook.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
   }
 
   public class WifiScanner {
@@ -8110,7 +8108,7 @@ package android.net.wifi.p2p {
 
   public final class WifiP2pGroupList implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public java.util.Collection<android.net.wifi.p2p.WifiP2pGroup> getGroupList();
+    method @NonNull public java.util.List<android.net.wifi.p2p.WifiP2pGroup> getGroupList();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pGroupList> CREATOR;
   }
@@ -8118,12 +8116,13 @@ package android.net.wifi.p2p {
   public class WifiP2pManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.OVERRIDE_WIFI_CONFIG}) public void deletePersistentGroup(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, int, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void factoryReset(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void listen(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, boolean, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.READ_WIFI_CREDENTIAL}) public void requestPersistentGroupInfo(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.PersistentGroupInfoListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.OVERRIDE_WIFI_CONFIG}) public void setDeviceName(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @NonNull String, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(allOf={android.Manifest.permission.CONNECTIVITY_INTERNAL, android.Manifest.permission.CONFIGURE_WIFI_DISPLAY}) public void setMiracastMode(int);
     method @RequiresPermission(android.Manifest.permission.CONFIGURE_WIFI_DISPLAY) public void setWfdInfo(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @NonNull android.net.wifi.p2p.WifiP2pWfdInfo, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.OVERRIDE_WIFI_CONFIG}) public void setWifiP2pChannels(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, int, int, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void startListening(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void stopListening(@NonNull android.net.wifi.p2p.WifiP2pManager.Channel, @Nullable android.net.wifi.p2p.WifiP2pManager.ActionListener);
     field public static final String ACTION_WIFI_P2P_PERSISTENT_GROUPS_CHANGED = "android.net.wifi.p2p.action.WIFI_P2P_PERSISTENT_GROUPS_CHANGED";
     field public static final int MIRACAST_DISABLED = 0; // 0x0
     field public static final int MIRACAST_SINK = 2; // 0x2
@@ -9139,6 +9138,15 @@ package android.os.ext {
 
   public class SdkExtensions {
     method public static int getExtensionVersion(int);
+  }
+
+}
+
+package android.os.ext.test {
+
+  @Deprecated public class Test {
+    method @Deprecated public void testF();
+    method @Deprecated public void testG();
   }
 
 }
@@ -14126,6 +14134,10 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
+  }
+
+  public abstract class ContentCaptureSession implements java.lang.AutoCloseable {
+    field public static final int NO_SESSION_ID = 0; // 0x0
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

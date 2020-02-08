@@ -80,7 +80,7 @@ public class LocalMediaManagerTest {
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
         mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
-                mBluetoothMediaManager, mInfoMediaManager);
+                mInfoMediaManager, "com.test.packagename");
     }
 
     @Test
@@ -163,14 +163,14 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceAdded_mediaDeviceAndPhoneDeviceNotExistInList_addBothDevice() {
+    public void onDeviceAdded_addDevice() {
         final MediaDevice device = mock(MediaDevice.class);
 
         assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
         verify(mCallback).onDeviceListUpdate(any());
     }
 
@@ -206,7 +206,7 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceListAdded_phoneDeviceNotExistInList_addPhoneDeviceAndDevicesList() {
+    public void onDeviceListAdded_addDevicesList() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
@@ -220,12 +220,12 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
         verify(mCallback).onDeviceListUpdate(any());
     }
 
     @Test
-    public void onDeviceListAdded_phoneDeviceExistInList_addDeviceList() {
+    public void onDeviceListAdded_addDeviceList() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
@@ -245,12 +245,12 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(4);
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
         verify(mCallback).onDeviceListUpdate(any());
     }
 
     @Test
-    public void onDeviceRemoved_phoneDeviceIsLastDeviceAfterRemoveMediaDevice_removeBothDevice() {
+    public void onDeviceRemoved_removeDevice() {
         final MediaDevice device1 = mock(MediaDevice.class);
         mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
         mLocalMediaManager.mMediaDevices.add(device1);
@@ -260,7 +260,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device1);
 
-        assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
+        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
         verify(mCallback).onDeviceListUpdate(any());
     }
 
@@ -298,7 +298,7 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceListRemoved_phoneDeviceIsLastDeviceAfterRemoveDeviceList_removeAll() {
+    public void onDeviceListRemoved_removeAll() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
@@ -311,7 +311,8 @@ public class LocalMediaManagerTest {
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
         mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceListRemoved(devices);
+        mLocalMediaManager.mMediaDeviceCallback
+                .onDeviceListRemoved(mLocalMediaManager.mMediaDevices);
 
         assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
         verify(mCallback).onDeviceListUpdate(any());
@@ -383,5 +384,39 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
 
         verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
+    public void getActiveMediaDevice_checkList() {
+        final List<MediaDevice> devices = new ArrayList<>();
+        final MediaDevice device1 = mock(MediaDevice.class);
+        final MediaDevice device2 = mock(MediaDevice.class);
+        final MediaDevice device3 = mock(MediaDevice.class);
+        device1.mType = MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE;
+        device2.mType = MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE;
+        device3.mType = MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
+        when(device1.getClientPackageName()).thenReturn(TEST_DEVICE_ID_1);
+        when(device2.getClientPackageName()).thenReturn(TEST_DEVICE_ID_2);
+        when(device3.getClientPackageName()).thenReturn(TEST_DEVICE_ID_3);
+        when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
+        when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
+        when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
+        devices.add(device1);
+        devices.add(device2);
+        devices.add(device3);
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
+
+        List<MediaDevice> activeDevices = mLocalMediaManager.getActiveMediaDevice(
+                MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
+        assertThat(activeDevices).containsExactly(device1);
+
+        activeDevices = mLocalMediaManager.getActiveMediaDevice(
+                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
+        assertThat(activeDevices).containsExactly(device2);
+
+        activeDevices = mLocalMediaManager.getActiveMediaDevice(
+                MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
+        assertThat(activeDevices).containsExactly(device3);
     }
 }

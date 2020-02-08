@@ -19,7 +19,6 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.ActivityManager.RunningAppProcessInfo.Importance;
 import android.icu.text.SimpleDateFormat;
 import android.os.Parcel;
@@ -245,12 +244,12 @@ public final class ApplicationExitInfo implements Parcelable {
     /**
      * @see {@link #getPss}
      */
-    private int mPss;
+    private long mPss;
 
     /**
      * @see {@link #getRss}
      */
-    private int mRss;
+    private long mRss;
 
     /**
      * @see {@link #getTimestamp}
@@ -385,7 +384,7 @@ public final class ApplicationExitInfo implements Parcelable {
      * it's NOT the exact memory information prior to its death; and it'll be zero
      * if the process died before system had a chance to take the sample. </p>
      */
-    public int getPss() {
+    public long getPss() {
         return mPss;
     }
 
@@ -396,12 +395,13 @@ public final class ApplicationExitInfo implements Parcelable {
      * it's NOT the exact memory information prior to its death; and it'll be zero
      * if the process died before system had a chance to take the sample. </p>
      */
-    public int getRss() {
+    public long getRss() {
         return mRss;
     }
 
     /**
-     * The timestamp of the process's death, in milliseconds since the epoch.
+     * The timestamp of the process's death, in milliseconds since the epoch,
+     * as returned by {@link System#currentTimeMillis System.currentTimeMillis()}.
      */
     public long getTimestamp() {
         return mTimestamp;
@@ -409,6 +409,9 @@ public final class ApplicationExitInfo implements Parcelable {
 
     /**
      * The human readable description of the process's death, given by the system; could be null.
+     *
+     * <p class="note">Note: only intended to be human-readable and the system provides no
+     * guarantees that the format is stable across devices or Android releases.</p>
      */
     public @Nullable String getDescription() {
         return mDescription;
@@ -416,10 +419,7 @@ public final class ApplicationExitInfo implements Parcelable {
 
     /**
      * Return the user id of the record on a multi-user system.
-     *
-     * @hide
      */
-    @SystemApi
     public @NonNull UserHandle getUserHandle() {
         return UserHandle.of(UserHandle.getUserId(mRealUid));
     }
@@ -546,7 +546,7 @@ public final class ApplicationExitInfo implements Parcelable {
      *
      * @hide
      */
-    public void setPss(final int pss) {
+    public void setPss(final long pss) {
         mPss = pss;
     }
 
@@ -555,7 +555,7 @@ public final class ApplicationExitInfo implements Parcelable {
      *
      * @hide
      */
-    public void setRss(final int rss) {
+    public void setRss(final long rss) {
         mRss = rss;
     }
 
@@ -630,8 +630,8 @@ public final class ApplicationExitInfo implements Parcelable {
         dest.writeInt(mSubReason);
         dest.writeInt(mStatus);
         dest.writeInt(mImportance);
-        dest.writeInt(mPss);
-        dest.writeInt(mRss);
+        dest.writeLong(mPss);
+        dest.writeLong(mRss);
         dest.writeLong(mTimestamp);
         dest.writeString(mDescription);
     }
@@ -669,8 +669,8 @@ public final class ApplicationExitInfo implements Parcelable {
         mSubReason = in.readInt();
         mStatus = in.readInt();
         mImportance = in.readInt();
-        mPss = in.readInt();
-        mRss = in.readInt();
+        mPss = in.readLong();
+        mRss = in.readLong();
         mTimestamp = in.readLong();
         mDescription = in.readString();
     }
@@ -848,10 +848,10 @@ public final class ApplicationExitInfo implements Parcelable {
                     mImportance = proto.readInt(ApplicationExitInfoProto.IMPORTANCE);
                     break;
                 case (int) ApplicationExitInfoProto.PSS:
-                    mPss = proto.readInt(ApplicationExitInfoProto.PSS);
+                    mPss = proto.readLong(ApplicationExitInfoProto.PSS);
                     break;
                 case (int) ApplicationExitInfoProto.RSS:
-                    mRss = proto.readInt(ApplicationExitInfoProto.RSS);
+                    mRss = proto.readLong(ApplicationExitInfoProto.RSS);
                     break;
                 case (int) ApplicationExitInfoProto.TIMESTAMP:
                     mTimestamp = proto.readLong(ApplicationExitInfoProto.TIMESTAMP);
@@ -891,8 +891,8 @@ public final class ApplicationExitInfo implements Parcelable {
         result = 31 * result + mSubReason;
         result = 31 * result + mImportance;
         result = 31 * result + mStatus;
-        result = 31 * result + mPss;
-        result = 31 * result + mRss;
+        result = 31 * result + (int) mPss;
+        result = 31 * result + (int) mRss;
         result = 31 * result + Long.hashCode(mTimestamp);
         result = 31 * result + Objects.hashCode(mProcessName);
         result = 31 * result + Objects.hashCode(mDescription);

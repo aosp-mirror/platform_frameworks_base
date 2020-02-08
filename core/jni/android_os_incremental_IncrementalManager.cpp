@@ -26,6 +26,10 @@
 
 namespace android {
 
+static jboolean nativeIsEnabled(JNIEnv* env, jobject clazz) {
+    return IncFs_IsEnabled();
+}
+
 static jboolean nativeIsIncrementalPath(JNIEnv* env,
                                     jobject clazz,
                                     jstring javaPath) {
@@ -34,8 +38,8 @@ static jboolean nativeIsIncrementalPath(JNIEnv* env,
 }
 
 static const JNINativeMethod method_table[] = {
-        {"nativeIsIncrementalPath", "(Ljava/lang/String;)Z",
-         (void*)nativeIsIncrementalPath},
+        {"nativeIsEnabled", "()Z", (void*)nativeIsEnabled},
+        {"nativeIsIncrementalPath", "(Ljava/lang/String;)Z", (void*)nativeIsIncrementalPath},
 };
 
 int register_android_os_incremental_IncrementalManager(JNIEnv* env) {

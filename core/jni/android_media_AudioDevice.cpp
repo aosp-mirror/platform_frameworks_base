@@ -14,40 +14,38 @@
  * limitations under the License.
  */
 
-#include "core_jni_helpers.h"
-#include "android_media_AudioDeviceAddress.h"
+#include "android_media_AudioDevice.h"
 #include "android_media_AudioErrors.h"
+#include "core_jni_helpers.h"
 
 #include <media/AudioDeviceTypeAddr.h>
 
 using namespace android;
 
-static jclass gAudioDeviceAddressClass;
-static jmethodID gAudioDeviceAddressCstor;
+static jclass gAudioDeviceClass;
+static jmethodID gAudioDeviceCstor;
 
 namespace android {
 
-jint createAudioDeviceAddressFromNative(
-        JNIEnv *env, jobject *jAudioDeviceAddress,
-        const AudioDeviceTypeAddr *devTypeAddr) {
+jint createAudioDeviceFromNative(JNIEnv *env, jobject *jAudioDevice,
+                                 const AudioDeviceTypeAddr *devTypeAddr) {
     jint jStatus = (jint)AUDIO_JAVA_SUCCESS;
     jint jNativeType = (jint)devTypeAddr->mType;
     ScopedLocalRef<jstring> jAddress(env, env->NewStringUTF(devTypeAddr->mAddress.data()));
 
-    *jAudioDeviceAddress = env->NewObject(gAudioDeviceAddressClass, gAudioDeviceAddressCstor,
-            jNativeType, jAddress.get());
+    *jAudioDevice =
+            env->NewObject(gAudioDeviceClass, gAudioDeviceCstor, jNativeType, jAddress.get());
 
     return jStatus;
 }
 
-}
+} // namespace android
 
-int register_android_media_AudioDeviceAddress(JNIEnv *env)
-{
-    jclass audioDeviceTypeAddressClass = FindClassOrDie(env, "android/media/AudioDeviceAddress");
-    gAudioDeviceAddressClass = MakeGlobalRefOrDie(env, audioDeviceTypeAddressClass);
-    gAudioDeviceAddressCstor = GetMethodIDOrDie(env, audioDeviceTypeAddressClass, "<init>",
-                                                "(ILjava/lang/String;)V");
+int register_android_media_AudioDevice(JNIEnv *env) {
+    jclass audioDeviceTypeAddressClass = FindClassOrDie(env, "android/media/AudioDevice");
+    gAudioDeviceClass = MakeGlobalRefOrDie(env, audioDeviceTypeAddressClass);
+    gAudioDeviceCstor =
+            GetMethodIDOrDie(env, audioDeviceTypeAddressClass, "<init>", "(ILjava/lang/String;)V");
 
     return 0;
 }

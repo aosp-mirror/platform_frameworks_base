@@ -1681,10 +1681,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mInternalProgress = 0.5f;
                 computeProgressLocked(true);
 
-                // Unpack native libraries for non-incremental installation
-                if (!isIncrementalInstallation()) {
-                    extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
-                }
+                extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
             }
 
             // We've reached point of no return; call into PMS to install the stage.
@@ -2260,7 +2257,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Slog.d(TAG, "Copied " + fromFiles.size() + " files into " + toDir);
     }
 
-    private static void extractNativeLibraries(File packageDir, String abiOverride, boolean inherit)
+    private void extractNativeLibraries(File packageDir, String abiOverride, boolean inherit)
             throws PackageManagerException {
         final File libDir = new File(packageDir, NativeLibraryHelper.LIB_DIR_NAME);
         if (!inherit) {
@@ -2272,7 +2269,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             handle = NativeLibraryHelper.Handle.create(packageDir);
             final int res = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libDir,
-                    abiOverride);
+                    abiOverride, isIncrementalInstallation());
             if (res != PackageManager.INSTALL_SUCCEEDED) {
                 throw new PackageManagerException(res,
                         "Failed to extract native libraries, res=" + res);

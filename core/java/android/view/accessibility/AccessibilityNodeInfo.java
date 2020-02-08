@@ -4854,8 +4854,11 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionPressAndHold);
 
         /**
-         * Action to send ime action. A node should expose this action only for views that are
-         * currently with input focus and editable.
+         * Action to send an ime action which is from
+         * {@link android.view.inputmethod.EditorInfo#actionId}. This action would be
+         * {@link android.view.inputmethod.EditorInfo#IME_ACTION_UNSPECIFIED} if no specific
+         * actionId defined. A node should expose this action only for views that are currently
+         * with input focus and editable.
          */
         @NonNull public static final AccessibilityAction ACTION_IME_ENTER =
                 new AccessibilityAction(R.id.accessibilityActionImeEnter);

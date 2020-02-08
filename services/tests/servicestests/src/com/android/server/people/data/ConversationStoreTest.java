@@ -167,7 +167,7 @@ public final class ConversationStoreTest {
                 .setContactPhoneNumber(phoneNumber)
                 .setNotificationChannelId(notificationChannelId)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
-                .setVip(true)
+                .setImportant(true)
                 .setBubbled(true)
                 .build();
     }

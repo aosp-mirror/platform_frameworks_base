@@ -1596,7 +1596,7 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public boolean setPreferredDeviceForStrategy(@NonNull AudioProductStrategy strategy,
-            @NonNull AudioDeviceAddress device) {
+            @NonNull AudioDevice device) {
         Objects.requireNonNull(strategy);
         Objects.requireNonNull(device);
         try {
@@ -1611,7 +1611,7 @@ public class AudioManager {
     /**
      * @hide
      * Removes the preferred audio device previously set with
-     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAddress)}.
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDevice)}.
      * @param strategy the audio strategy whose routing will be affected
      * @return true if the operation was successful, false otherwise (invalid strategy, or no
      *     device set for example)
@@ -1632,14 +1632,14 @@ public class AudioManager {
     /**
      * @hide
      * Return the preferred device for an audio strategy, previously set with
-     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAddress)}
+     * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDevice)}
      * @param strategy the strategy to query
      * @return the preferred device for that strategy, or null if none was ever set or if the
      *    strategy is invalid
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @Nullable AudioDeviceAddress getPreferredDeviceForStrategy(
+    public @Nullable AudioDevice getPreferredDeviceForStrategy(
             @NonNull AudioProductStrategy strategy) {
         Objects.requireNonNull(strategy);
         try {
@@ -4379,7 +4379,7 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public @NonNull List<AudioDeviceAddress> getDevicesForAttributes(
+    public @NonNull List<AudioDevice> getDevicesForAttributes(
             @NonNull AudioAttributes attributes) {
         Objects.requireNonNull(attributes);
         final IAudioService service = getService();

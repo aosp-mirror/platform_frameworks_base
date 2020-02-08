@@ -17,9 +17,12 @@ package com.android.settingslib.media;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,14 +43,23 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         int TYPE_BLUETOOTH_DEVICE = 3;
     }
 
+    @VisibleForTesting
+    int mType;
+
     private int mConnectedRecord;
 
-    protected Context mContext;
-    protected int mType;
+    protected final Context mContext;
+    protected final MediaRoute2Info mRouteInfo;
+    protected final MediaRouter2Manager mRouterManager;
+    protected final String mPackageName;
 
-    MediaDevice(Context context, @MediaDeviceType int type) {
+    MediaDevice(Context context, @MediaDeviceType int type, MediaRouter2Manager routerManager,
+            MediaRoute2Info info, String packageName) {
         mType = type;
         mContext = context;
+        mRouteInfo = info;
+        mRouterManager = routerManager;
+        mPackageName = packageName;
     }
 
     void initDeviceRecord() {
@@ -83,23 +95,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     public abstract String getId();
 
-    /**
-     * Transfer MediaDevice for media
-     *
-     * @return result of transfer media
-     */
-    public abstract boolean connect();
-
     void setConnectedRecord() {
         mConnectedRecord++;
         ConnectionRecordManager.getInstance().setConnectionRecord(mContext, getId(),
                 mConnectedRecord);
     }
-
-    /**
-     * Stop transfer MediaDevice
-     */
-    public abstract void disconnect();
 
     /**
      * According the MediaDevice type to check whether we are connected to this MediaDevice.
@@ -159,6 +159,23 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     public int getDeviceType() {
         return mType;
+    }
+
+    /**
+     * Transfer MediaDevice for media
+     *
+     * @return result of transfer media
+     */
+    public boolean connect() {
+        setConnectedRecord();
+        mRouterManager.selectRoute(mPackageName, mRouteInfo);
+        return true;
+    }
+
+    /**
+     * Stop transfer MediaDevice
+     */
+    public void disconnect() {
     }
 
     /**

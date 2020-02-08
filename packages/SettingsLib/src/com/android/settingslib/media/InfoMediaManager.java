@@ -15,13 +15,23 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.DEVICE_TYPE_BLUETOOTH;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
+import static android.media.MediaRoute2Info.DEVICE_TYPE_UNKNOWN;
+
 import android.app.Notification;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.RoutingSessionInfo;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -44,11 +54,14 @@ public class InfoMediaManager extends MediaManager {
     String mPackageName;
 
     private MediaDevice mCurrentConnectedDevice;
+    private LocalBluetoothManager mBluetoothManager;
 
-    public InfoMediaManager(Context context, String packageName, Notification notification) {
+    public InfoMediaManager(Context context, String packageName, Notification notification,
+            LocalBluetoothManager localBluetoothManager) {
         super(context, notification);
 
         mRouterManager = MediaRouter2Manager.getInstance(context);
+        mBluetoothManager = localBluetoothManager;
         if (!TextUtils.isEmpty(packageName)) {
             mPackageName = packageName;
         }
@@ -94,21 +107,71 @@ public class InfoMediaManager extends MediaManager {
 
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
-            final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, route,
-                    mPackageName);
-            mMediaDevices.add(device);
+            addMediaDevice(route);
         }
     }
 
     private void buildAvailableRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
-            final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, route,
-                    mPackageName);
-            if (TextUtils.equals(route.getClientPackageName(), mPackageName)) {
-                mCurrentConnectedDevice = device;
-            }
-            mMediaDevices.add(device);
+            addMediaDevice(route);
         }
+    }
+
+    private void addMediaDevice(MediaRoute2Info route) {
+        final int deviceType = route.getDeviceType();
+        MediaDevice mediaDevice = null;
+        switch (deviceType) {
+            case DEVICE_TYPE_UNKNOWN:
+                //TODO(b/148765806): use correct device type once api is ready.
+                final String defaultRoute = "DEFAULT_ROUTE";
+                if (TextUtils.equals(defaultRoute, route.getOriginalId())) {
+                    mediaDevice =
+                            new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName);
+                } else {
+                    mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
+                            mPackageName);
+                    if (!TextUtils.isEmpty(mPackageName)
+                            && TextUtils.equals(route.getClientPackageName(), mPackageName)) {
+                        mCurrentConnectedDevice = mediaDevice;
+                    }
+                }
+                break;
+            case DEVICE_TYPE_REMOTE_TV:
+                break;
+            case DEVICE_TYPE_BLUETOOTH:
+                final BluetoothDevice device =
+                        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getOriginalId());
+                final CachedBluetoothDevice cachedDevice =
+                        mBluetoothManager.getCachedDeviceManager().findDevice(device);
+                mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
+                        route, mPackageName);
+                break;
+            default:
+                Log.w(TAG, "addMediaDevice() unknown device type : " + deviceType);
+                break;
+
+        }
+
+        if (mediaDevice != null) {
+            mMediaDevices.add(mediaDevice);
+        }
+    }
+
+    /**
+     * Transfer MediaDevice for media without package name.
+     */
+    public boolean connectDeviceWithoutPackageName(MediaDevice device) {
+        boolean isConnected = false;
+        final List<RoutingSessionInfo> infos = mRouterManager.getActiveSessions();
+        if (infos.size() > 0) {
+            final RoutingSessionInfo info = infos.get(0);
+            final MediaRouter2Manager.RoutingController controller =
+                    mRouterManager.getControllerForSession(info);
+
+            controller.transferToRoute(device.mRouteInfo);
+            isConnected = true;
+        }
+        return isConnected;
     }
 
     class RouterManagerCallback extends MediaRouter2Manager.Callback {
@@ -123,6 +186,11 @@ public class InfoMediaManager extends MediaManager {
             if (TextUtils.equals(mPackageName, packageName)) {
                 refreshDevices();
             }
+        }
+
+        @Override
+        public void onRoutesChanged(List<MediaRoute2Info> routes) {
+            refreshDevices();
         }
     }
 }

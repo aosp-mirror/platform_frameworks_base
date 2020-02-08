@@ -27,6 +27,7 @@
 #include "idmap2/ResourceUtils.h"
 
 using android::base::StringPrintf;
+using android::idmap2::utils::IsReference;
 using android::idmap2::utils::ResToTypeEntryName;
 
 namespace android::idmap2 {
@@ -200,8 +201,7 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
     // Only rewrite resources defined within the overlay package to their corresponding target
     // resource ids at runtime.
     bool rewrite_overlay_reference =
-        (overlay_resource->dataType == Res_value::TYPE_REFERENCE ||
-         overlay_resource->dataType == Res_value::TYPE_DYNAMIC_REFERENCE)
+        IsReference(overlay_resource->dataType)
             ? overlay_package_id == EXTRACT_PACKAGE(overlay_resource->data)
             : false;
 
@@ -331,8 +331,13 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
   std::unique_ptr<uint8_t[]> string_pool_data;
   Result<ResourceMapping> resource_mapping = {{}};
   if (overlay_info.resource_mapping != 0U) {
+    // Use the dynamic reference table to find the assigned resource id of the map xml.
+    const auto& ref_table = overlay_asset_manager.GetDynamicRefTableForCookie(0);
+    uint32_t resource_mapping_id = overlay_info.resource_mapping;
+    ref_table->lookupResourceId(&resource_mapping_id);
+
     // Load the overlay resource mappings from the file specified using android:resourcesMap.
-    auto asset = OpenNonAssetFromResource(overlay_info.resource_mapping, overlay_asset_manager);
+    auto asset = OpenNonAssetFromResource(resource_mapping_id, overlay_asset_manager);
     if (!asset) {
       return Error("failed opening xml for android:resourcesMap: %s",
                    asset.GetErrorMessage().c_str());
@@ -404,8 +409,7 @@ Result<Unit> ResourceMapping::AddMapping(ResourceId target_resource,
 
   target_map_.insert(std::make_pair(target_resource, TargetValue{data_type, data_value}));
 
-  if (rewrite_overlay_reference &&
-      (data_type == Res_value::TYPE_REFERENCE || data_type == Res_value::TYPE_DYNAMIC_REFERENCE)) {
+  if (rewrite_overlay_reference && IsReference(data_type)) {
     overlay_map_.insert(std::make_pair(data_value, target_resource));
   }
 
@@ -421,8 +425,7 @@ void ResourceMapping::RemoveMapping(ResourceId target_resource) {
   const TargetValue value = target_iter->second;
   target_map_.erase(target_iter);
 
-  if (value.data_type != Res_value::TYPE_REFERENCE &&
-      value.data_type != Res_value::TYPE_DYNAMIC_REFERENCE) {
+  if (!IsReference(value.data_type)) {
     return;
   }
 

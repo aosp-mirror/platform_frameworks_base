@@ -73,9 +73,6 @@ public class BubbleExperimentConfig {
 
     private static final String WHITELISTED_AUTO_BUBBLE_APPS = "whitelisted_auto_bubble_apps";
 
-    private static final String ALLOW_BUBBLE_MENU = "allow_bubble_screenshot_menu";
-    private static final boolean ALLOW_BUBBLE_MENU_DEFAULT = false;
-
     private static final String ALLOW_BUBBLE_OVERFLOW = "allow_bubble_overflow";
     private static final boolean ALLOW_BUBBLE_OVERFLOW_DEFAULT = false;
 
@@ -131,16 +128,6 @@ public class BubbleExperimentConfig {
             }
         }
         return false;
-    }
-
-    /**
-     * When true, show a menu when a bubble is long-pressed, which will allow the user to take
-     * actions on that bubble.
-     */
-    static boolean allowBubbleScreenshotMenu(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ALLOW_BUBBLE_MENU,
-                ALLOW_BUBBLE_MENU_DEFAULT ? 1 : 0) != 0;
     }
 
     /**

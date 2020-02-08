@@ -75,7 +75,7 @@ java_library {
 
     libs: [
         "android.hidl.manager-V1.0-java",
-        "framework-tethering"
+        "framework-tethering-stubs",
     ],
 
     plugins: [
