@@ -30,7 +30,7 @@ import android.os.IStatsd;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -192,7 +192,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             statsd.registerPullAtomCallback(
                     callingUid, atomTag, coolDownNs, timeoutNs, additiveFields, pullerCallback);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
+            Log.e(TAG, "Failed to access statsd to register puller for atom " + atomTag);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -219,7 +219,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
         try {
             statsd.unregisterPullAtomCallback(callingUid, atomTag);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to access statsd to unregister puller for atom " + atomTag);
+            Log.e(TAG, "Failed to access statsd to unregister puller for atom " + atomTag);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -243,7 +243,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 statsd.setDataFetchOperation(configId, pir, callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to setDataFetchOperation with statsd");
+            Log.e(TAG, "Failed to setDataFetchOperation with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -264,7 +264,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 statsd.removeDataFetchOperation(configId, callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to removeDataFetchOperation with statsd");
+            Log.e(TAG, "Failed to removeDataFetchOperation with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -287,7 +287,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return statsd.setActiveConfigsChangedOperation(pir, callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to setActiveConfigsChangedOperation with statsd");
+            Log.e(TAG, "Failed to setActiveConfigsChangedOperation with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -308,7 +308,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 statsd.removeActiveConfigsChangedOperation(callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to removeActiveConfigsChangedOperation with statsd");
+            Log.e(TAG, "Failed to removeActiveConfigsChangedOperation with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -336,7 +336,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                         configId, subscriberId, pir, callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to setBroadcastSubscriber with statsd");
+            Log.e(TAG, "Failed to setBroadcastSubscriber with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -362,7 +362,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 statsd.unsetBroadcastSubscriber(configId, subscriberId, callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to unsetBroadcastSubscriber with statsd");
+            Log.e(TAG, "Failed to unsetBroadcastSubscriber with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -378,7 +378,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return statsd.getRegisteredExperimentIds();
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to getRegisteredExperimentIds with statsd");
+            Log.e(TAG, "Failed to getRegisteredExperimentIds with statsd");
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -396,7 +396,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return statsd.getMetadata();
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to getMetadata with statsd");
+            Log.e(TAG, "Failed to getMetadata with statsd");
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -415,7 +415,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return statsd.getData(key, callingUid);
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to getData with statsd");
+            Log.e(TAG, "Failed to getData with statsd");
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -436,7 +436,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return;
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to addConfiguration with statsd");
+            Log.e(TAG, "Failed to addConfiguration with statsd");
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -457,7 +457,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 return;
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to removeConfiguration with statsd");
+            Log.e(TAG, "Failed to removeConfiguration with statsd");
             throw new IllegalStateException(e.getMessage(), e);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -522,7 +522,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 try {
                     mLock.wait(STATSD_TIMEOUT_MILLIS);
                 } catch (InterruptedException e) {
-                    Slog.e(TAG, "wait for statsd interrupted");
+                    Log.e(TAG, "wait for statsd interrupted");
                 }
             }
             return mStatsd;
@@ -578,7 +578,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             registerAllActiveConfigsChangedOperations(statsd);
             registerAllBroadcastSubscribers(statsd);
         } catch (RemoteException e) {
-            Slog.e(TAG, "StatsManager failed to (re-)register data with statsd");
+            Log.e(TAG, "StatsManager failed to (re-)register data with statsd");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
