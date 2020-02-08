@@ -93,8 +93,8 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.lights.LogicalLight;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
@@ -247,7 +247,7 @@ public final class PowerManagerService extends SystemService
     private WirelessChargerDetector mWirelessChargerDetector;
     private SettingsObserver mSettingsObserver;
     private DreamManagerInternal mDreamManager;
-    private Light mAttentionLight;
+    private LogicalLight mAttentionLight;
 
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_POWER);
 
@@ -3130,7 +3130,7 @@ public final class PowerManagerService extends SystemService
     }
 
     private void setAttentionLightInternal(boolean on, int color) {
-        Light light;
+        LogicalLight light;
         synchronized (mLock) {
             if (!mSystemReady) {
                 return;
@@ -3139,7 +3139,7 @@ public final class PowerManagerService extends SystemService
         }
 
         // Control light outside of lock.
-        light.setFlashing(color, Light.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
+        light.setFlashing(color, LogicalLight.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
     }
 
     private void setDozeAfterScreenOffInternal(boolean on) {
