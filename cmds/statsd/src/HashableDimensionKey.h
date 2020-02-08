@@ -16,10 +16,11 @@
 
 #pragma once
 
+#include <android/os/StatsDimensionsValueParcel.h>
 #include <utils/JenkinsHash.h>
 #include <vector>
-#include "FieldValue.h"
 #include "android-base/stringprintf.h"
+#include "FieldValue.h"
 #include "logd/LogEvent.h"
 
 namespace android {
@@ -68,6 +69,8 @@ public:
         }
         return nullptr;
     }
+
+    StatsDimensionsValueParcel toStatsDimensionsValueParcel() const;
 
     std::string toString() const;
 
