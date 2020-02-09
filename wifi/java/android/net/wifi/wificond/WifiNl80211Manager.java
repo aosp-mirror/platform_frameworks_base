@@ -49,15 +49,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This class encapsulates the interface the wificond daemon presents to the Wi-Fi framework. The
+ * This class encapsulates the interface the wificond daemon presents to the Wi-Fi framework - used
+ * to encapsulate the Wi-Fi 80211nl management interface. The
  * interface is only for use by the Wi-Fi framework and access is protected by SELinux permissions.
  *
  * @hide
  */
 @SystemApi
-@SystemService(Context.WIFI_COND_SERVICE)
-public class WifiCondManager {
-    private static final String TAG = "WifiCondManager";
+@SystemService(Context.WIFI_NL80211_SERVICE)
+public class WifiNl80211Manager {
+    private static final String TAG = "WifiNl80211Manager";
     private boolean mVerboseLoggingEnabled = false;
 
     /**
@@ -316,14 +317,14 @@ public class WifiCondManager {
     public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5;
 
     /** @hide */
-    public WifiCondManager(Context context) {
+    public WifiNl80211Manager(Context context) {
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mEventHandler = new Handler(context.getMainLooper());
     }
 
     /** @hide */
     @VisibleForTesting
-    public WifiCondManager(Context context, IWificond wificond) {
+    public WifiNl80211Manager(Context context, IWificond wificond) {
         this(context);
         mWificond = wificond;
     }
@@ -485,7 +486,7 @@ public class WifiCondManager {
     }
 
     /**
-     * Enable or disable verbose logging of the WifiCondManager module.
+     * Enable or disable verbose logging of the WifiNl80211Manager module.
      * @param enable True to enable verbose logging. False to disable verbose logging.
      */
     public void enableVerboseLogging(boolean enable) {
@@ -493,7 +494,7 @@ public class WifiCondManager {
     }
 
     /**
-     * Register a death notification for the WifiCondManager which acts as a proxy for the
+     * Register a death notification for the WifiNl80211Manager which acts as a proxy for the
      * wificond daemon (i.e. the death listener will be called when and if the wificond daemon
      * dies).
      *
@@ -518,7 +519,7 @@ public class WifiCondManager {
             // We already have a wificond handle.
             return true;
         }
-        IBinder binder = ServiceManager.getService(Context.WIFI_COND_SERVICE);
+        IBinder binder = ServiceManager.getService(Context.WIFI_NL80211_SERVICE);
         mWificond = IWificond.Stub.asInterface(binder);
         if (mWificond == null) {
             Log.e(TAG, "Failed to get reference to wificond");
