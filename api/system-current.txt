@@ -8305,7 +8305,7 @@ package android.net.wifi.wificond {
   public class WifiCondManager {
     method public void abortScan(@NonNull String);
     method public void enableVerboseLogging(boolean);
-    method @NonNull public java.util.List<java.lang.Integer> getChannelsMhzForBand(int);
+    method @NonNull public int[] getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);

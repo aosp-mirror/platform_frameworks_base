@@ -65,8 +65,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -742,40 +740,8 @@ public class WifiCondManagerTest {
         verify(deathHandler).run();
 
         // The handles should be cleared after death.
-        assertEquals(0, mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ).size());
+        assertEquals(0, mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ).length);
         verify(mWificond, never()).getAvailable5gNonDFSChannels();
-    }
-
-    /**
-     * Verify primitive array to list translation of channel API.
-     */
-    @Test
-    public void testGetChannels() throws Exception {
-        int[] resultsEmpty = new int[0];
-        int[] resultsSingle = new int[]{100};
-        int[] resultsMore = new int[]{100, 200};
-
-        List<Integer> emptyList = Collections.emptyList();
-        List<Integer> singleList = Arrays.asList(100);
-        List<Integer> moreList = Arrays.asList(100, 200);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(null);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                emptyList);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ),
-                emptyList);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(resultsEmpty);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                emptyList);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(resultsSingle);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                singleList);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(resultsMore);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                moreList);
     }
 
     /**
