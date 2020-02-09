@@ -2007,18 +2007,15 @@ package android.content.pm {
   }
 
   public final class InstallationFile implements android.os.Parcelable {
-    ctor public InstallationFile(@NonNull String, long, @Nullable byte[]);
+    ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
     method public int describeContents();
-    method public int getFileType();
+    method public long getLengthBytes();
+    method public int getLocation();
     method @Nullable public byte[] getMetadata();
     method @NonNull public String getName();
-    method public long getSize();
+    method @Nullable public byte[] getSignature();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallationFile> CREATOR;
-    field public static final int FILE_TYPE_APK = 0; // 0x0
-    field public static final int FILE_TYPE_LIB = 1; // 0x1
-    field public static final int FILE_TYPE_OBB = 2; // 0x2
-    field public static final int FILE_TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -10317,7 +10314,7 @@ package android.service.dataloader {
 
   public abstract class DataLoaderService extends android.app.Service {
     ctor public DataLoaderService();
-    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader();
+    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
   }
 
   public static interface DataLoaderService.DataLoader {

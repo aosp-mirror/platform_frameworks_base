@@ -1163,7 +1163,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final InstallParams params = makeInstallParams();
         if (params.sessionParams.dataLoaderParams == null) {
             params.sessionParams.setDataLoaderParams(
-                    PackageManagerShellCommandDataLoader.getDataLoaderParams(this));
+                    PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(this));
         }
         return doRunInstall(params);
     }

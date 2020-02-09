@@ -54,7 +54,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
 
     private static final String STDIN_PATH = "-";
 
-    static DataLoaderParams getDataLoaderParams(ShellCommand shellCommand) {
+    private static String getDataLoaderParamsArgs(ShellCommand shellCommand) {
         int commandId;
         synchronized (sShellCommands) {
             // Clean up old references.
@@ -78,8 +78,12 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             sShellCommands.put(commandId, new WeakReference<>(shellCommand));
         }
 
-        final String args = SHELL_COMMAND_ID_PREFIX + commandId;
-        return DataLoaderParams.forStreaming(new ComponentName(PACKAGE, CLASS), args);
+        return SHELL_COMMAND_ID_PREFIX + commandId;
+    }
+
+    static DataLoaderParams getStreamingDataLoaderParams(ShellCommand shellCommand) {
+        return DataLoaderParams.forStreaming(new ComponentName(PACKAGE, CLASS),
+                getDataLoaderParamsArgs(shellCommand));
     }
 
     private static int extractShellCommandId(String args) {
@@ -133,17 +137,17 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
                 return false;
             }
             try {
-                for (InstallationFile fileInfo : addedFiles) {
-                    String filePath = new String(fileInfo.getMetadata(), StandardCharsets.UTF_8);
+                for (InstallationFile file : addedFiles) {
+                    String filePath = new String(file.getMetadata(), StandardCharsets.UTF_8);
                     if (STDIN_PATH.equals(filePath) || TextUtils.isEmpty(filePath)) {
                         final ParcelFileDescriptor inFd = ParcelFileDescriptor.dup(
                                 shellCommand.getInFileDescriptor());
-                        mConnector.writeData(fileInfo.getName(), 0, fileInfo.getSize(), inFd);
+                        mConnector.writeData(file.getName(), 0, file.getLengthBytes(), inFd);
                     } else {
                         ParcelFileDescriptor incomingFd = null;
                         try {
                             incomingFd = shellCommand.openFileForSystem(filePath, "r");
-                            mConnector.writeData(fileInfo.getName(), 0, incomingFd.getStatSize(),
+                            mConnector.writeData(file.getName(), 0, incomingFd.getStatSize(),
                                     incomingFd);
                         } finally {
                             IoUtils.closeQuietly(incomingFd);
@@ -159,7 +163,8 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
     }
 
     @Override
-    public DataLoaderService.DataLoader onCreateDataLoader() {
+    public DataLoaderService.DataLoader onCreateDataLoader(
+            @NonNull DataLoaderParams dataLoaderParams) {
         return new DataLoader();
     }
 }

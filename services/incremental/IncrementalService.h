@@ -122,7 +122,6 @@ public:
     }
 
     RawMetadata getMetadata(StorageId storage, FileId node) const;
-    std::string getSignatureData(StorageId storage, FileId node) const;
 
     std::vector<std::string> listFiles(StorageId storage) const;
     bool startLoading(StorageId storage) const;
