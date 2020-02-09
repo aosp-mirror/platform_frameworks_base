@@ -8242,8 +8242,8 @@ package android.net.wifi.wificond {
   public final class NativeScanResult implements android.os.Parcelable {
     ctor public NativeScanResult();
     method public int describeContents();
-    method @NonNull public byte[] getBssid();
-    method @NonNull public int getCapabilities();
+    method @Nullable public android.net.MacAddress getBssid();
+    method public int getCapabilities();
     method public int getFrequencyMhz();
     method @NonNull public byte[] getInformationElements();
     method @NonNull public java.util.List<android.net.wifi.wificond.RadioChainInfo> getRadioChainInfos();
@@ -8252,15 +8252,31 @@ package android.net.wifi.wificond {
     method public long getTsf();
     method public boolean isAssociated();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BSS_CAPABILITY_APSD = 2048; // 0x800
+    field public static final int BSS_CAPABILITY_CF_POLLABLE = 4; // 0x4
+    field public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 8; // 0x8
+    field public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 128; // 0x80
+    field public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 16384; // 0x4000
+    field public static final int BSS_CAPABILITY_DSSS_OFDM = 8192; // 0x2000
+    field public static final int BSS_CAPABILITY_ESS = 1; // 0x1
+    field public static final int BSS_CAPABILITY_IBSS = 2; // 0x2
+    field public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 32768; // 0x8000
+    field public static final int BSS_CAPABILITY_PBCC = 64; // 0x40
+    field public static final int BSS_CAPABILITY_PRIVACY = 16; // 0x10
+    field public static final int BSS_CAPABILITY_QOS = 512; // 0x200
+    field public static final int BSS_CAPABILITY_RADIO_MANAGEMENT = 4096; // 0x1000
+    field public static final int BSS_CAPABILITY_SHORT_PREAMBLE = 32; // 0x20
+    field public static final int BSS_CAPABILITY_SHORT_SLOT_TIME = 1024; // 0x400
+    field public static final int BSS_CAPABILITY_SPECTRUM_MANAGEMENT = 256; // 0x100
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeScanResult> CREATOR;
   }
 
   public final class NativeWifiClient implements android.os.Parcelable {
-    ctor public NativeWifiClient(@NonNull byte[]);
+    ctor public NativeWifiClient(@Nullable android.net.MacAddress);
     method public int describeContents();
+    method @Nullable public android.net.MacAddress getMacAddress();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
-    field @NonNull public final byte[] macAddress;
   }
 
   public final class PnoNetwork implements android.os.Parcelable {

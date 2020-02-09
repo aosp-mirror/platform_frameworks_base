@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.app.test.TestAlarmManager;
 import android.content.Context;
+import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApInfo;
 import android.net.wifi.WifiConfiguration;
@@ -119,7 +120,8 @@ public class WifiCondManagerTest {
     private static final String TEST_QUOTED_SSID_2 = "\"testSsid2\"";
     private static final int[] TEST_FREQUENCIES_1 = {};
     private static final int[] TEST_FREQUENCIES_2 = {2500, 5124};
-    private static final byte[] TEST_RAW_MAC_BYTES = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+    private static final MacAddress TEST_RAW_MAC_BYTES = MacAddress.fromBytes(
+            new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05});
 
     private static final List<byte[]> SCAN_HIDDEN_NETWORK_SSID_LIST =
             new ArrayList<byte[]>() {{

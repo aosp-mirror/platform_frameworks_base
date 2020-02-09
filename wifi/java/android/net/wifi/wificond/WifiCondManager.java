@@ -368,7 +368,7 @@ public class WifiCondManager {
         public void onConnectedClientsChanged(NativeWifiClient client, boolean isConnected) {
             if (mVerboseLoggingEnabled) {
                 Log.d(TAG, "onConnectedClientsChanged called with "
-                        + client.macAddress + " isConnected: " + isConnected);
+                        + client.getMacAddress() + " isConnected: " + isConnected);
             }
 
             Binder.clearCallingIdentity();
