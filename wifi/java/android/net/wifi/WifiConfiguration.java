@@ -2112,7 +2112,8 @@ public class WifiConfiguration implements Parcelable {
         return !TextUtils.isEmpty(FQDN)
                 && !TextUtils.isEmpty(providerFriendlyName)
                 && enterpriseConfig != null
-                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
+                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE
+                && !TextUtils.isEmpty(mPasspointUniqueId);
     }
 
     /**
@@ -2494,12 +2495,17 @@ public class WifiConfiguration implements Parcelable {
      */
     @NonNull
     public String getKey() {
-        String key = providerFriendlyName == null
-                ? getSsidAndSecurityTypeString()
-                : FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        // Passpoint ephemeral networks have their unique identifier set. Return it as is to be
+        // able to match internally.
+        if (mPasspointUniqueId != null) {
+            return mPasspointUniqueId;
+        }
+
+        String key = getSsidAndSecurityTypeString();
         if (!shared) {
             key += "-" + UserHandle.getUserHandleForUid(creatorUid).getIdentifier();
         }
+
         return key;
     }
 
@@ -2754,6 +2760,7 @@ public class WifiConfiguration implements Parcelable {
             requirePMF = source.requirePMF;
             updateIdentifier = source.updateIdentifier;
             carrierId = source.carrierId;
+            mPasspointUniqueId = source.mPasspointUniqueId;
         }
     }
 
@@ -2826,6 +2833,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(osu ? 1 : 0);
         dest.writeLong(randomizedMacExpirationTimeMs);
         dest.writeInt(carrierId);
+        dest.writeString(mPasspointUniqueId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2900,6 +2908,7 @@ public class WifiConfiguration implements Parcelable {
                 config.osu = in.readInt() != 0;
                 config.randomizedMacExpirationTimeMs = in.readLong();
                 config.carrierId = in.readInt();
+                config.mPasspointUniqueId = in.readString();
                 return config;
             }
 
@@ -2907,4 +2916,28 @@ public class WifiConfiguration implements Parcelable {
                 return new WifiConfiguration[size];
             }
         };
+
+    /**
+     * Passpoint Unique identifier
+     * @hide
+     */
+    private String mPasspointUniqueId = null;
+
+    /**
+     * Set the Passpoint unique identifier
+     * @param uniqueId Passpoint unique identifier to be set
+     * @hide
+     */
+    public void setPasspointUniqueId(String uniqueId) {
+        mPasspointUniqueId = uniqueId;
+    }
+
+    /**
+     * Set the Passpoint unique identifier
+     * @hide
+     */
+    public String getPasspointUniqueId() {
+        return mPasspointUniqueId;
+    }
+
 }

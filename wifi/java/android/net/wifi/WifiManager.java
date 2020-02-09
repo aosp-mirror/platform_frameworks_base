@@ -1400,8 +1400,7 @@ public class WifiManager {
         List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> configs = new ArrayList<>();
         try {
             Map<String, Map<Integer, List<ScanResult>>> results =
-                    mService.getAllMatchingFqdnsForScanResults(
-                            scanResults);
+                    mService.getAllMatchingPasspointProfilesForScanResults(scanResults);
             if (results.isEmpty()) {
                 return configs;
             }
@@ -1409,8 +1408,8 @@ public class WifiManager {
                     mService.getWifiConfigsForPasspointProfiles(
                             new ArrayList<>(results.keySet()));
             for (WifiConfiguration configuration : wifiConfigurations) {
-                Map<Integer, List<ScanResult>> scanResultsPerNetworkType = results.get(
-                        configuration.FQDN);
+                Map<Integer, List<ScanResult>> scanResultsPerNetworkType =
+                        results.get(configuration.getKey());
                 if (scanResultsPerNetworkType != null) {
                     configs.add(Pair.create(configuration, scanResultsPerNetworkType));
                 }
@@ -1962,9 +1961,11 @@ public class WifiManager {
      * for connecting to Passpoint networks that are operated by the Passpoint
      * service provider specified in the configuration.
      *
-     * Each configuration is uniquely identified by its FQDN (Fully Qualified Domain
-     * Name).  In the case when there is an existing configuration with the same
-     * FQDN, the new configuration will replace the existing configuration.
+     * Each configuration is uniquely identified by a unique key which depends on the contents of
+     * the configuration. This allows the caller to install multiple profiles with the same FQDN
+     * (Fully qualified domain name). Therefore, in order to update an existing profile, it is
+     * first required to remove it using {@link WifiManager#removePasspointConfiguration(String)}.
+     * Otherwise, a new profile will be added with both configuration.
      *
      * @param config The Passpoint configuration to be added
      * @throws IllegalArgumentException if configuration is invalid or Passpoint is not enabled on

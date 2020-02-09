@@ -270,4 +270,6 @@ interface IWifiManager
     void setScanThrottleEnabled(boolean enable);
 
     boolean isScanThrottleEnabled();
+
+    Map getAllMatchingPasspointProfilesForScanResults(in List<ScanResult> scanResult);
 }
