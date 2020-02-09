@@ -42,8 +42,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"ភ្ជាប់​តាម <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"មានតាមរយៈ %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"ចុច​ដើម្បី​ចុះឈ្មោះ"</string>
-    <!-- no translation found for wifi_connected_no_internet (5087420713443350646) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"គ្មាន​អ៊ីនធឺណិតទេ"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"មិនអាច​ចូលប្រើ​ម៉ាស៊ីនមេ DNS ឯកជន​បានទេ"</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"ការតភ្ជាប់មានកម្រិត"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"គ្មាន​អ៊ីនធឺណិតទេ"</string>
@@ -384,7 +383,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (ក្រហម​ពណ៌​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ពណ៌​ខៀវ​-លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="9137381746633858694">"ការកែតម្រូវ​ពណ៌​ជួយដល់​អ្នកដែល​មិនអាច​បែងចែក​ពណ៌​ឱ្យមើលឃើញ​ពណ៌ដែលត្រឹមត្រូវ​ជាមុន"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (6178138727195403796) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
@@ -414,7 +414,10 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​ត្រូវសាក"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងបញ្ចូល​ថ្ម"</string>
-    <string name="battery_info_status_charging_lower" msgid="8696042568167401574">"កំពុង​សាក​ថ្ម"</string>
+    <!-- no translation found for battery_info_status_charging_fast (8027559755902954885) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_slow (3190803837168962319) -->
+    <skip />
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"ដោត​សាកថ្ម​រួចហើយ ប៉ុន្តែ​​សាកថ្ម​មិន​ចូលទេឥឡូវនេះ"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"ពេញ"</string>
