@@ -13,35 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
-// TODO(b/145815909): move StatsDimensionsValue.aidl here
 filegroup {
-    name: "statsd_aidl",
+    name: "statsd_java_aidl",
+    srcs: ["**/*.aidl"],
+}
+
+aidl_interface {
+    name: "statsd-aidl",
     srcs: [
         "android/os/IPendingIntentRef.aidl",
         "android/os/IPullAtomCallback.aidl",
         "android/os/IPullAtomResultReceiver.aidl",
         "android/os/IStatsCompanionService.aidl",
         "android/os/IStatsd.aidl",
+        "android/os/StatsDimensionsValueParcel.aidl",
         "android/util/StatsEventParcel.aidl",
     ],
-}
-
-filegroup {
-    name: "statsd_java_aidl",
-    srcs: ["**/*.aidl"],
-}
-
-// This library is currently unused
-aidl_interface {
-    name: "stats-event-parcel-aidl",
-    srcs: ["android/util/StatsEventParcel.aidl"],
     backend: {
         java: {
-            sdk_version: "28",
+            enabled: false, // the platform uses statsd_java_aidl
         },
         cpp: {
-            enabled: false,
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
         }
     }
 }

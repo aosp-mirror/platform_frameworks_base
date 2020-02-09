@@ -1293,81 +1293,24 @@ Status StatsService::unregisterNativePullAtomCallback(int32_t atomTag) {
     return Status::ok();
 }
 
-Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackTypeIn,
-                                                      const android::String16& packageNameIn,
-                                                      const int64_t packageVersionCodeIn,
-                                                      const int32_t rollbackReasonIn,
-                                                      const android::String16&
-                                                       failingPackageNameIn) {
-    // Note: We skip the usage stats op check here since we do not have a package name.
-    // This is ok since we are overloading the usage_stats permission.
-    // This method only sends data, it does not receive it.
-    pid_t pid = IPCThreadState::self()->getCallingPid();
-    uid_t uid = IPCThreadState::self()->getCallingUid();
-    // Root, system, and shell always have access
-    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
-        // Caller must be granted these permissions
-        if (!checkPermission(kPermissionDump)) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionDump));
-        }
-        if (!checkPermission(kPermissionUsage)) {
-            return exception(binder::Status::EX_SECURITY,
-                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
-                                          kPermissionUsage));
-        }
-    }
-
-    android::util::stats_write(android::util::WATCHDOG_ROLLBACK_OCCURRED,
-            rollbackTypeIn, String8(packageNameIn).string(), packageVersionCodeIn,
-            rollbackReasonIn, String8(failingPackageNameIn).string());
-
-    // Fast return to save disk read.
-    if (rollbackTypeIn != android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS
-            && rollbackTypeIn !=
-                    android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE) {
-        return Status::ok();
-    }
-
-    bool readTrainInfoSuccess = false;
-    InstallTrainInfo trainInfoOnDisk;
-    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
-
-    if (!readTrainInfoSuccess) {
-        return Status::ok();
-    }
-    std::vector<int64_t> experimentIds = trainInfoOnDisk.experimentIds;
-    if (experimentIds.empty()) {
-        return Status::ok();
-    }
-    switch (rollbackTypeIn) {
-        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
-            experimentIds.push_back(experimentIds[0] + 4);
-            break;
-        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
-            experimentIds.push_back(experimentIds[0] + 5);
-            break;
-    }
-    StorageManager::writeTrainInfo(trainInfoOnDisk.trainVersionCode, trainInfoOnDisk.trainName,
-            trainInfoOnDisk.status, experimentIds);
-    return Status::ok();
-}
-
 Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experimentIdsOut) {
     ENFORCE_UID(AID_SYSTEM);
     // TODO: add verifier permission
 
+    experimentIdsOut->clear();
     // Read the latest train info
-    InstallTrainInfo trainInfo;
-    if (!StorageManager::readTrainInfo(trainInfo)) {
+    vector<InstallTrainInfo> trainInfoList = StorageManager::readAllTrainInfo();
+    if (trainInfoList.empty()) {
         // No train info means no experiment IDs, return an empty list
-        experimentIdsOut->clear();
         return Status::ok();
     }
 
     // Copy the experiment IDs to the out vector
-    experimentIdsOut->assign(trainInfo.experimentIds.begin(), trainInfo.experimentIds.end());
+    for (InstallTrainInfo& trainInfo : trainInfoList) {
+        experimentIdsOut->insert(experimentIdsOut->end(),
+                                 trainInfo.experimentIds.begin(),
+                                 trainInfo.experimentIds.end());
+    }
     return Status::ok();
 }
 

@@ -284,16 +284,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
                         | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
-                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST
+                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST;
+
+    static final int ENFORCE_PRECISE_PHONE_STATE_PERMISSION_MASK =
+                PhoneStateListener.LISTEN_PRECISE_CALL_STATE
+                        | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE
+                        | PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES
+                        | PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED
+                        | PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES
                         | PhoneStateListener.LISTEN_REGISTRATION_FAILURE
                         | PhoneStateListener.LISTEN_BARRING_INFO;
-
-    static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
-                PhoneStateListener.LISTEN_PRECISE_CALL_STATE
-                | PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE
-                | PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES
-                | PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED
-                | PhoneStateListener.LISTEN_IMS_CALL_DISCONNECT_CAUSES;
 
     static final int READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
             PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
@@ -2535,7 +2535,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
-        if ((events & PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
+        if ((events & ENFORCE_PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
             // check if calling app has either permission READ_PRECISE_PHONE_STATE
             // or with carrier privileges
             try {

@@ -263,8 +263,6 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
-        // TODO: this needs to be removed when statsd-framework.jar is separated out
-        ":statsd_java_aidl",
         ":storaged_aidl",
         ":vold_aidl",
 
@@ -442,13 +440,6 @@ filegroup {
         "core/java/android/os/IIncidentReportStatusListener.aidl",
     ],
     path: "core/java",
-}
-
-filegroup {
-    name: "graphicsstats_proto",
-    srcs: [
-        "libs/hwui/protos/graphicsstats.proto",
-    ],
 }
 
 filegroup {

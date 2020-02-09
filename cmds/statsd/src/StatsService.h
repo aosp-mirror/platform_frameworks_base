@@ -187,16 +187,6 @@ public:
     virtual Status unregisterNativePullAtomCallback(int32_t atomTag) override;
 
     /**
-     * Binder call to log WatchdogRollbackOccurred atom.
-     */
-    virtual Status sendWatchdogRollbackOccurredAtom(
-            const int32_t rollbackTypeIn,
-            const android::String16& packageNameIn,
-            const int64_t packageVersionCodeIn,
-            const int32_t rollbackReasonIn,
-            const android::String16& failingPackageNameIn) override;
-
-    /**
      * Binder call to get registered experiment IDs.
      */
     virtual Status getRegisteredExperimentIds(std::vector<int64_t>* expIdsOut);

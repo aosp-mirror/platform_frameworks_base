@@ -22,7 +22,6 @@
 
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // subscription
-#include "android/os/StatsDimensionsValue.h"
 #include "HashableDimensionKey.h"
 
 #include <mutex>
@@ -69,8 +68,6 @@ public:
                                   const MetricDimensionKey& dimKey) const;
 
     sp<IPendingIntentRef> getBroadcastSubscriber(const ConfigKey& configKey, int64_t subscriberId);
-
-    static StatsDimensionsValue getStatsDimensionsValue(const HashableDimensionKey& dim);
 
 private:
     SubscriberReporter() {};

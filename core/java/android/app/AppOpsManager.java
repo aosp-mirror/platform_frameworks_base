@@ -3916,7 +3916,10 @@ public class AppOpsManager {
         }
 
         /**
-         * The features that have been used when checking the op
+         * The features that have been used when checking the op keyed by id of the feature.
+         *
+         * @see Context#createFeatureContext(String)
+         * @see #noteOp(String, int, String, String, String)
          */
         @DataClass.Generated.Member
         public @NonNull Map<String,OpFeatureEntry> getFeatures() {

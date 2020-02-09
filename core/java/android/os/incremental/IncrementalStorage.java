@@ -416,4 +416,24 @@ public final class IncrementalStorage {
             return false;
         }
     }
+
+    /**
+     * Configure all the lib files inside Incremental Service, e.g., create lib dirs, create new lib
+     * files, extract original lib file data from zip and then write data to the lib files on the
+     * Incremental File System.
+     *
+     * @param apkFullPath Source APK to extract native libs from.
+     * @param libDirRelativePath Target dir to put lib files, e.g., "lib" or "lib/arm".
+     * @param abi Target ABI of the native lib files. Only extract native libs of this ABI.
+     * @return Success of not.
+     */
+    public boolean configureNativeBinaries(String apkFullPath, String libDirRelativePath,
+            String abi) {
+        try {
+            return mService.configureNativeBinaries(mId, apkFullPath, libDirRelativePath, abi);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
 }

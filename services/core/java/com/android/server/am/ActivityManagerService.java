@@ -466,18 +466,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10*1000;
-    // How long we wait for an attached process to publish its content providers
-    // before we decide it must be hung.
-    static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
-
     // How long we wait to kill an application zygote, after the last process using
     // it has gone away.
     static final int KILL_APP_ZYGOTE_DELAY_MS = 5 * 1000;
-    /**
-     * How long we wait for an provider to be published. Should be longer than
-     * {@link #CONTENT_PROVIDER_PUBLISH_TIMEOUT}.
-     */
-    static final int CONTENT_PROVIDER_WAIT_TIMEOUT = 20 * 1000;
 
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
@@ -4934,7 +4925,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (providers != null && checkAppInLaunchingProvidersLocked(app)) {
             Message msg = mHandler.obtainMessage(CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG);
             msg.obj = app;
-            mHandler.sendMessageDelayed(msg, CONTENT_PROVIDER_PUBLISH_TIMEOUT);
+            mHandler.sendMessageDelayed(msg,
+                    ContentResolver.CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS);
         }
 
         checkTime(startTime, "attachApplicationLocked: before bindApplication");
@@ -7201,7 +7193,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Wait for the provider to be published...
-        final long timeout = SystemClock.uptimeMillis() + CONTENT_PROVIDER_WAIT_TIMEOUT;
+        final long timeout =
+                SystemClock.uptimeMillis() + ContentResolver.CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS;
         boolean timedOut = false;
         synchronized (cpr) {
             while (cpr.provider == null) {
@@ -7238,12 +7231,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         if (timedOut) {
-            // Note we do it afer releasing the lock.
+            // Note we do it after releasing the lock.
             String callerName = "unknown";
-            synchronized (this) {
-                final ProcessRecord record = mProcessList.getLRURecordForAppLocked(caller);
-                if (record != null) {
-                    callerName = record.processName;
+            if (caller != null) {
+                synchronized (this) {
+                    final ProcessRecord record = mProcessList.getLRURecordForAppLocked(caller);
+                    if (record != null) {
+                        callerName = record.processName;
+                    }
                 }
             }
 

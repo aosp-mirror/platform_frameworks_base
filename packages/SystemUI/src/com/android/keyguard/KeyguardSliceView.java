@@ -42,7 +42,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -251,9 +250,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             SliceItem item = rc.getSliceItem();
             final Uri itemTag = item.getSlice().getUri();
             // Try to reuse the view if already exists in the layout
-            KeyguardSliceButton button = mRow.findViewWithTag(itemTag);
+            KeyguardSliceTextView button = mRow.findViewWithTag(itemTag);
             if (button == null) {
-                button = new KeyguardSliceButton(mContext);
+                button = new KeyguardSliceTextView(mContext);
                 button.setTextColor(blendedColor);
                 button.setTag(itemTag);
                 final int viewIndex = i - (mHasHeader ? 1 : 0);
@@ -316,8 +315,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         int childCount = mRow.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View v = mRow.getChildAt(i);
-            if (v instanceof Button) {
-                ((Button) v).setTextColor(blendedColor);
+            if (v instanceof TextView) {
+                ((TextView) v).setTextColor(blendedColor);
             }
         }
     }
@@ -500,8 +499,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
                 View child = getChildAt(i);
-                if (child instanceof KeyguardSliceButton) {
-                    ((KeyguardSliceButton) child).setMaxWidth(width / childCount);
+                if (child instanceof KeyguardSliceTextView) {
+                    ((KeyguardSliceTextView) child).setMaxWidth(width / childCount);
                 }
             }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -527,13 +526,13 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
      * Representation of an item that appears under the clock on main keyguard message.
      */
     @VisibleForTesting
-    static class KeyguardSliceButton extends Button implements
+    static class KeyguardSliceTextView extends TextView implements
             ConfigurationController.ConfigurationListener {
 
         @StyleRes
         private static int sStyleId = R.style.TextAppearance_Keyguard_Secondary;
 
-        public KeyguardSliceButton(Context context) {
+        KeyguardSliceTextView(Context context) {
             super(context, null /* attrs */, 0 /* styleAttr */, sStyleId);
             onDensityOrFontScaleChanged();
             setEllipsize(TruncateAt.END);

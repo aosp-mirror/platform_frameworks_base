@@ -222,12 +222,6 @@ interface IStatsd {
     const int FLAG_REQUIRE_LOW_LATENCY_MONITOR = 0x04;
 
     /**
-     * Logs an event for watchdog rollbacks.
-     */
-     oneway void sendWatchdogRollbackOccurredAtom(in int rollbackType, in String packageName,
-         in long packageVersionCode, in int rollbackReason, in String failingPackageName);
-
-    /**
      * Returns the most recently registered experiment IDs.
      */
     long[] getRegisteredExperimentIds();

@@ -34,6 +34,7 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -171,11 +172,13 @@ public class AppsFilter {
         @Override
         public boolean packageIsEnabled(AndroidPackage pkg) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "packageIsEnabled");
+            final long token = Binder.clearCallingIdentity();
             try {
                 // TODO(b/135203078): Do not use toAppInfo
                 return mInjector.getCompatibility().isChangeEnabled(
                         PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
             } finally {
+                Binder.restoreCallingIdentity(token);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }

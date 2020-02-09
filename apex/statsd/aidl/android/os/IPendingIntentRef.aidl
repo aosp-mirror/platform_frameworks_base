@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.os.StatsDimensionsValue;
+import android.os.StatsDimensionsValueParcel;
 
 /**
   * Binder interface to hold a PendingIntent for StatsCompanionService.
@@ -42,5 +42,5 @@ interface IPendingIntentRef {
       */
      oneway void sendSubscriberBroadcast(long configUid, long configId, long subscriptionId,
                                          long subscriptionRuleId, in String[] cookies,
-                                         in StatsDimensionsValue dimensionsValue);
+                                         in StatsDimensionsValueParcel dimensionsValueParcel);
 }

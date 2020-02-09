@@ -39,9 +39,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -52,14 +50,15 @@ import android.telecom.TelecomManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseLongArray;
-import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
@@ -70,6 +69,7 @@ import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -100,7 +100,7 @@ public final class PermissionPolicyService extends SystemService {
      * scheduled for a package/user.
      */
     @GuardedBy("mLock")
-    private final ArraySet<Pair<String, Integer>> mIsPackageSyncsScheduled = new ArraySet<>();
+    private final ArraySet<Integer> mIsPackageSyncsScheduled = new ArraySet<>();
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
@@ -125,10 +125,8 @@ public final class PermissionPolicyService extends SystemService {
 
             @Override
             public void onPackageChanged(String packageName, int uid) {
-                final int userId = UserHandle.getUserId(uid);
-
-                if (isStarted(userId)) {
-                    synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
+                if (isStarted(UserHandle.getUserId(uid))) {
+                    synchronizePackagePermissionsAndAppOpsForUser(uid);
                 }
             }
 
@@ -139,12 +137,21 @@ public final class PermissionPolicyService extends SystemService {
         });
 
         permManagerInternal.addOnRuntimePermissionStateChangedListener(
-                this::synchronizePackagePermissionsAndAppOpsAsyncForUser);
+                (packageName, userId) -> {
+                    int uid;
+                    try {
+                        uid = getContext().getPackageManager().getPackageUidAsUser(packageName, 0,
+                                userId);
+                    } catch (NameNotFoundException e) {
+                        Slog.e(LOG_TAG, "Cannot synchronize changed package " + packageName, e);
+                        return;
+                    }
+                    synchronizeUidPermissionsAndAppOpsAsync(uid);
+                });
 
         mAppOpsCallback = new IAppOpsCallback.Stub() {
             public void opChanged(int op, int uid, String packageName) {
-                synchronizePackagePermissionsAndAppOpsAsyncForUser(packageName,
-                        UserHandle.getUserId(uid));
+                synchronizeUidPermissionsAndAppOpsAsync(uid);
             }
         };
 
@@ -194,19 +201,17 @@ public final class PermissionPolicyService extends SystemService {
         return AppOpsManager.opToSwitch(op);
     }
 
-    private void synchronizePackagePermissionsAndAppOpsAsyncForUser(@NonNull String packageName,
-            @UserIdInt int changedUserId) {
-        if (isStarted(changedUserId)) {
+    private void synchronizeUidPermissionsAndAppOpsAsync(int uid) {
+        if (isStarted(UserHandle.getUserId(uid))) {
             synchronized (mLock) {
-                if (mIsPackageSyncsScheduled.add(new Pair<>(packageName, changedUserId))) {
+                if (mIsPackageSyncsScheduled.add(uid)) {
                     FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             PermissionPolicyService
                                     ::synchronizePackagePermissionsAndAppOpsForUser,
-                            this, packageName, changedUserId));
+                            this, uid));
                 } else {
                     if (DEBUG) {
-                        Slog.v(LOG_TAG, "sync for " + packageName + "/" + changedUserId
-                                + " already scheduled");
+                        Slog.v(LOG_TAG, "sync for " + uid + " already scheduled");
                     }
                 }
             }
@@ -335,39 +340,20 @@ public final class PermissionPolicyService extends SystemService {
     /**
      * Synchronize a single package.
      */
-    private void synchronizePackagePermissionsAndAppOpsForUser(@NonNull String packageName,
-            @UserIdInt int userId) {
+    private void synchronizePackagePermissionsAndAppOpsForUser(int uid) {
         synchronized (mLock) {
-            mIsPackageSyncsScheduled.remove(new Pair<>(packageName, userId));
+            mIsPackageSyncsScheduled.remove(uid);
         }
 
         if (DEBUG) {
             Slog.v(LOG_TAG,
-                    "synchronizePackagePermissionsAndAppOpsForUser(" + packageName + ", "
-                            + userId + ")");
+                    "synchronizePackagePermissionsAndAppOpsForUser(" + uid + ")");
         }
 
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        final PackageInfo pkg = packageManagerInternal.getPackageInfo(packageName, 0,
-                Process.SYSTEM_UID, userId);
-        if (pkg == null) {
-            return;
-        }
         final PermissionToOpSynchroniser synchroniser = new PermissionToOpSynchroniser(
-                getUserContext(getContext(), UserHandle.of(userId)));
-        synchroniser.addPackage(pkg.packageName);
-        final String[] sharedPkgNames = packageManagerInternal.getSharedUserPackagesForPackage(
-                pkg.packageName, userId);
-
-        for (String sharedPkgName : sharedPkgNames) {
-            final AndroidPackage sharedPkg = packageManagerInternal
-                    .getPackage(sharedPkgName);
-            if (sharedPkg != null) {
-                synchroniser.addPackage(sharedPkg.getPackageName());
-            }
-        }
-        synchroniser.syncPackages();
+                getUserContext(getContext(), UserHandle.getUserHandleForUid(uid)));
+        synchroniser.addUid(uid);
+        synchroniser.syncUids();
     }
 
     /**
@@ -381,8 +367,8 @@ public final class PermissionPolicyService extends SystemService {
         final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
                 getUserContext(getContext(), UserHandle.of(userId)));
         packageManagerInternal.forEachPackage(
-                (pkg) -> synchronizer.addPackage(pkg.getPackageName()));
-        synchronizer.syncPackages();
+                (pkg) -> synchronizer.addUid(pkg.getUid()));
+        synchronizer.syncUids();
     }
 
     /**
@@ -397,37 +383,51 @@ public final class PermissionPolicyService extends SystemService {
 
         private final @NonNull ArrayMap<String, PermissionInfo> mRuntimePermissionInfos;
 
+        // Cache uid -> packageNames
+        private SparseArray<String[]> mUidToPkg = new SparseArray<>();
+
         /**
          * All ops that need to be flipped to allow.
          *
-         * @see #syncPackages
+         * @see #syncUids
          */
-        private final @NonNull ArrayList<OpToChange> mOpsToAllow = new ArrayList<>();
+        private final @NonNull ArraySet<OpToChange> mOpsToAllow = new ArraySet<>();
 
         /**
          * All ops that need to be flipped to ignore.
          *
-         * @see #syncPackages
+         * @see #syncUids
          */
-        private final @NonNull ArrayList<OpToChange> mOpsToIgnore = new ArrayList<>();
+        private final @NonNull ArraySet<OpToChange> mOpsToIgnore = new ArraySet<>();
 
         /**
          * All ops that need to be flipped to ignore if not allowed.
          *
          * Currently, only used by soft restricted permissions logic.
          *
-         * @see #syncPackages
+         * @see #syncUids
          */
-        private final @NonNull ArrayList<OpToChange> mOpsToIgnoreIfNotAllowed = new ArrayList<>();
+        private final @NonNull ArraySet<OpToChange> mOpsToIgnoreIfNotAllowed = new ArraySet<>();
 
         /**
          * All ops that need to be flipped to foreground.
          *
          * Currently, only used by the foreground/background permissions logic.
          *
-         * @see #syncPackages
+         * @see #syncUids
          */
-        private final @NonNull ArrayList<OpToChange> mOpsToForeground = new ArrayList<>();
+        private final @NonNull ArraySet<OpToChange> mOpsToForeground = new ArraySet<>();
+
+        private @Nullable String[] getPackageNamesForUid(int uid) {
+            String[] pkgs = mUidToPkg.get(uid);
+            if (pkgs != null) {
+                return pkgs;
+            }
+
+            pkgs = mPackageManager.getPackagesForUid(uid);
+            mUidToPkg.put(uid, pkgs);
+            return pkgs;
+        }
 
         PermissionToOpSynchroniser(@NonNull Context context) {
             mContext = context;
@@ -449,11 +449,11 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         /**
-         * Set app ops that were added in {@link #addPackage}.
+         * Set app ops that were added in {@link #addUid}.
          *
          * <p>This processes ops previously added by {@link #addAppOps(PackageInfo, String)}
          */
-        private void syncPackages() {
+        private void syncUids() {
             // Remember which ops were already set. This makes sure that we always set the most
             // permissive mode if two OpChanges are scheduled. This can e.g. happen if two
             // permissions change the same op. See {@link #getSwitchOp}.
@@ -461,42 +461,42 @@ public final class PermissionPolicyService extends SystemService {
 
             final int allowCount = mOpsToAllow.size();
             for (int i = 0; i < allowCount; i++) {
-                final OpToChange op = mOpsToAllow.get(i);
+                final OpToChange op = mOpsToAllow.valueAt(i);
 
-                setUidModeAllowed(op.code, op.uid, op.packageName);
+                setUidModeAllowed(op.code, op.uid);
                 alreadySetAppOps.put(IntPair.of(op.uid, op.code), 1);
             }
 
             final int foregroundCount = mOpsToForeground.size();
             for (int i = 0; i < foregroundCount; i++) {
-                final OpToChange op = mOpsToForeground.get(i);
+                final OpToChange op = mOpsToForeground.valueAt(i);
                 if (alreadySetAppOps.indexOfKey(IntPair.of(op.uid, op.code)) >= 0) {
                     continue;
                 }
 
-                setUidModeForeground(op.code, op.uid, op.packageName);
+                setUidModeForeground(op.code, op.uid);
                 alreadySetAppOps.put(IntPair.of(op.uid, op.code), 1);
             }
 
             final int ignoreCount = mOpsToIgnore.size();
             for (int i = 0; i < ignoreCount; i++) {
-                final OpToChange op = mOpsToIgnore.get(i);
+                final OpToChange op = mOpsToIgnore.valueAt(i);
                 if (alreadySetAppOps.indexOfKey(IntPair.of(op.uid, op.code)) >= 0) {
                     continue;
                 }
 
-                setUidModeIgnored(op.code, op.uid, op.packageName);
+                setUidModeIgnored(op.code, op.uid);
                 alreadySetAppOps.put(IntPair.of(op.uid, op.code), 1);
             }
 
             final int ignoreIfNotAllowedCount = mOpsToIgnoreIfNotAllowed.size();
             for (int i = 0; i < ignoreIfNotAllowedCount; i++) {
-                final OpToChange op = mOpsToIgnoreIfNotAllowed.get(i);
+                final OpToChange op = mOpsToIgnoreIfNotAllowed.valueAt(i);
                 if (alreadySetAppOps.indexOfKey(IntPair.of(op.uid, op.code)) >= 0) {
                     continue;
                 }
 
-                boolean wasSet = setUidModeIgnoredIfNotAllowed(op.code, op.uid, op.packageName);
+                boolean wasSet = setUidModeIgnoredIfNotAllowed(op.code, op.uid);
                 if (wasSet) {
                     alreadySetAppOps.put(IntPair.of(op.uid, op.code), 1);
                 }
@@ -555,7 +555,7 @@ public final class PermissionPolicyService extends SystemService {
             }
 
             int uid = packageInfo.applicationInfo.uid;
-            OpToChange opToChange = new OpToChange(uid, packageName, appOpCode);
+            OpToChange opToChange = new OpToChange(uid, appOpCode);
             switch (appOpMode) {
                 case MODE_ALLOWED:
                     mOpsToAllow.add(opToChange);
@@ -618,8 +618,7 @@ public final class PermissionPolicyService extends SystemService {
             }
 
             int uid = packageInfo.applicationInfo.uid;
-            String packageName = packageInfo.packageName;
-            OpToChange extraOpToChange = new OpToChange(uid, packageName, extraOpCode);
+            OpToChange extraOpToChange = new OpToChange(uid, extraOpCode);
             if (policy.mayAllowExtraAppOp()) {
                 mOpsToAllow.add(extraOpToChange);
             } else {
@@ -632,45 +631,56 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         /**
-         * Add a package for {@link #syncPackages() processing} later.
+         * Add a Uid for {@link #syncUids() processing} later.
          *
          * <p>Note: Called with the package lock held. Do <u>not</u> call into app-op manager.
          *
-         * @param pkgName The package to add for later processing.
+         * @param uid The uid to add for later processing.
          */
-        void addPackage(@NonNull String pkgName) {
-            final PackageInfo pkg;
-            try {
-                pkg = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
-            } catch (NameNotFoundException e) {
+        void addUid(int uid) {
+            String[] pkgNames = getPackageNamesForUid(uid);
+            if (pkgNames == null) {
                 return;
             }
 
-            if (pkg.requestedPermissions == null) {
-                return;
+            for (String pkgName : pkgNames) {
+                final PackageInfo pkg;
+                try {
+                    pkg = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
+                } catch (NameNotFoundException e) {
+                    continue;
+                }
+
+                if (pkg.requestedPermissions == null) {
+                    continue;
+                }
+
+                for (String permission : pkg.requestedPermissions) {
+                    addAppOps(pkg, permission);
+                }
+            }
+        }
+
+        private void setUidModeAllowed(int opCode, int uid) {
+            setUidMode(opCode, uid, MODE_ALLOWED);
+        }
+
+        private void setUidModeForeground(int opCode, int uid) {
+            setUidMode(opCode, uid, MODE_FOREGROUND);
+        }
+
+        private void setUidModeIgnored(int opCode, int uid) {
+            setUidMode(opCode, uid, MODE_IGNORED);
+        }
+
+        private boolean setUidModeIgnoredIfNotAllowed(int opCode, int uid) {
+            String[] pkgsOfUid = getPackageNamesForUid(uid);
+            if (ArrayUtils.isEmpty(pkgsOfUid)) {
+                return false;
             }
 
-            for (String permission : pkg.requestedPermissions) {
-                addAppOps(pkg, permission);
-            }
-        }
-
-        private void setUidModeAllowed(int opCode, int uid, @NonNull String packageName) {
-            setUidMode(opCode, uid, MODE_ALLOWED, packageName);
-        }
-
-        private void setUidModeForeground(int opCode, int uid, @NonNull String packageName) {
-            setUidMode(opCode, uid, MODE_FOREGROUND, packageName);
-        }
-
-        private void setUidModeIgnored(int opCode, int uid, @NonNull String packageName) {
-            setUidMode(opCode, uid, MODE_IGNORED, packageName);
-        }
-
-        private boolean setUidModeIgnoredIfNotAllowed(int opCode, int uid,
-                @NonNull String packageName) {
             final int currentMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
-                    opCode), uid, packageName);
+                    opCode), uid, pkgsOfUid[0]);
             if (currentMode != MODE_ALLOWED) {
                 if (currentMode != MODE_IGNORED) {
                     mAppOpsManagerInternal.setUidModeIgnoringCallback(opCode, uid, MODE_IGNORED,
@@ -681,20 +691,24 @@ public final class PermissionPolicyService extends SystemService {
             return false;
         }
 
-        private void setUidMode(int opCode, int uid, int mode,
-                @NonNull String packageName) {
+        private void setUidMode(int opCode, int uid, int mode) {
+            String[] pkgsOfUid = getPackageNamesForUid(uid);
+            if (ArrayUtils.isEmpty(pkgsOfUid)) {
+                return;
+            }
+
             final int oldMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
-                    opCode), uid, packageName);
+                    opCode), uid, pkgsOfUid[0]);
             if (oldMode != mode) {
                 mAppOpsManagerInternal.setUidModeIgnoringCallback(opCode, uid, mode,
                         mAppOpsCallback);
                 final int newMode = mAppOpsManager.unsafeCheckOpRaw(AppOpsManager.opToPublicName(
-                        opCode), uid, packageName);
+                        opCode), uid, pkgsOfUid[0]);
                 if (newMode != mode) {
                     // Work around incorrectly-set package mode. It never makes sense for app ops
                     // related to runtime permissions, but can get in the way and we have to reset
                     // it.
-                    mAppOpsManagerInternal.setModeIgnoringCallback(opCode, uid, packageName,
+                    mAppOpsManagerInternal.setModeIgnoringCallback(opCode, uid, pkgsOfUid[0],
                             AppOpsManager.opToDefaultMode(opCode), mAppOpsCallback);
                 }
             }
@@ -702,13 +716,29 @@ public final class PermissionPolicyService extends SystemService {
 
         private class OpToChange {
             final int uid;
-            final @NonNull String packageName;
             final int code;
 
-            OpToChange(int uid, @NonNull String packageName, int code) {
+            OpToChange(int uid, int code) {
                 this.uid = uid;
-                this.packageName = packageName;
                 this.code = code;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
+
+                OpToChange other = (OpToChange) o;
+                return uid == other.uid && code == other.code;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(uid, code);
             }
         }
     }

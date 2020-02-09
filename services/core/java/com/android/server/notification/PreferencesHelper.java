@@ -36,6 +36,7 @@ import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.RankingHelperProto;
 import android.text.TextUtils;
@@ -1174,6 +1175,43 @@ public class PreferencesHelper implements RankingConfig {
             groups.addAll(r.groups.values());
         }
         return groups;
+    }
+
+    public ArrayList<ConversationChannelWrapper> getConversations(String pkg, int uid) {
+        Objects.requireNonNull(pkg);
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            if (r == null) {
+                return new ArrayList<>();
+            }
+            ArrayList<ConversationChannelWrapper> conversations = new ArrayList<>();
+            int N = r.channels.size();
+            for (int i = 0; i < N; i++) {
+                final NotificationChannel nc = r.channels.valueAt(i);
+                if (!TextUtils.isEmpty(nc.getConversationId()) && !nc.isDeleted()) {
+                    ConversationChannelWrapper conversation = new ConversationChannelWrapper();
+                    conversation.setNotificationChannel(nc);
+                    conversation.setParentChannelLabel(
+                            r.channels.get(nc.getParentChannelId()).getName());
+                    boolean blockedByGroup = false;
+                    if (nc.getGroup() != null) {
+                        NotificationChannelGroup group = r.groups.get(nc.getGroup());
+                        if (group != null) {
+                            if (group.isBlocked()) {
+                                blockedByGroup = true;
+                            } else {
+                                conversation.setGroupLabel(group.getName());
+                            }
+                        }
+                    }
+                    if (!blockedByGroup) {
+                        conversations.add(conversation);
+                    }
+                }
+            }
+
+            return conversations;
+        }
     }
 
     @Override

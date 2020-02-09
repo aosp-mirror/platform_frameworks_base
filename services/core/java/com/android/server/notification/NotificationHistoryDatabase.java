@@ -170,6 +170,11 @@ public class NotificationHistoryDatabase {
         mFileWriteHandler.post(rpr);
     }
 
+    public void deleteNotificationHistoryItem(String pkg, long postedTime) {
+        RemoveNotificationRunnable rnr = new RemoveNotificationRunnable(pkg, postedTime);
+        mFileWriteHandler.post(rnr);
+    }
+
     public void addNotification(final HistoricalNotification notification) {
         synchronized (mLock) {
             mBuffer.addNewNotificationToWrite(notification);
@@ -360,6 +365,49 @@ public class NotificationHistoryDatabase {
                         writeLocked(af, notifications);
                     } catch (Exception e) {
                         Slog.e(TAG, "Cannot clean up file on pkg removal "
+                                + af.getBaseFile().getName(), e);
+                    }
+                }
+            }
+        }
+    }
+
+    final class RemoveNotificationRunnable implements Runnable {
+        private String mPkg;
+        private long mPostedTime;
+        private NotificationHistory mNotificationHistory;
+
+        public RemoveNotificationRunnable(String pkg, long postedTime) {
+            mPkg = pkg;
+            mPostedTime = postedTime;
+        }
+
+        @VisibleForTesting
+        void setNotificationHistory(NotificationHistory nh) {
+            mNotificationHistory = nh;
+        }
+
+        @Override
+        public void run() {
+            if (DEBUG) Slog.d(TAG, "RemovePackageRunnable");
+            synchronized (mLock) {
+                // Remove from pending history
+                mBuffer.removeNotificationFromWrite(mPkg, mPostedTime);
+
+                Iterator<AtomicFile> historyFileItr = mHistoryFiles.iterator();
+                while (historyFileItr.hasNext()) {
+                    final AtomicFile af = historyFileItr.next();
+                    try {
+                        NotificationHistory notificationHistory = mNotificationHistory != null
+                                ? mNotificationHistory
+                                : new NotificationHistory();
+                        readLocked(af, notificationHistory,
+                                new NotificationHistoryFilter.Builder().build());
+                        if(notificationHistory.removeNotificationFromWrite(mPkg, mPostedTime)) {
+                            writeLocked(af, notificationHistory);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Cannot clean up file on notification removal "
                                 + af.getBaseFile().getName(), e);
                     }
                 }

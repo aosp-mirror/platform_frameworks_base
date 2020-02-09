@@ -3862,6 +3862,20 @@ package android.location {
     method @NonNull public android.location.GnssReflectingPlane.Builder setLongitudeDegrees(@FloatRange(from=-180.0F, to=180.0f) double);
   }
 
+  public final class GnssRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isFullTracking();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssRequest> CREATOR;
+  }
+
+  public static final class GnssRequest.Builder {
+    ctor public GnssRequest.Builder();
+    ctor public GnssRequest.Builder(@NonNull android.location.GnssRequest);
+    method @NonNull public android.location.GnssRequest build();
+    method @NonNull public android.location.GnssRequest.Builder setFullTracking(boolean);
+  }
+
   public final class GnssSingleSatCorrection implements android.os.Parcelable {
     method public int describeContents();
     method @FloatRange(from=0.0f, fromInclusive=false) public float getCarrierFrequencyHz();
@@ -4135,6 +4149,7 @@ package android.location {
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
+    method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.LOCATION_HARDWARE}) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
@@ -5742,7 +5757,6 @@ package android.media.tv.tuner.frontend {
     method public int getFreqOffset();
     method public int getHierarchy();
     method @NonNull public boolean[] getLayerErrors();
-    method public int getLberCn();
     method public int getLnbVoltage();
     method public int getMer();
     method public int getModulation();
@@ -5754,37 +5768,32 @@ package android.media.tv.tuner.frontend {
     method public int getSnr();
     method public int getSpectralInversion();
     method public int getSymbolRate();
-    method public int getVberCn();
-    method public int getXerCn();
     method public boolean isDemodLocked();
     method public boolean isEwbs();
     method public boolean isLnaOn();
     method public boolean isRfLock();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
-    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 24; // 0x18
+    field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BER = 2; // 0x2
     field public static final int FRONTEND_STATUS_TYPE_DEMOD_LOCK = 0; // 0x0
     field public static final int FRONTEND_STATUS_TYPE_EWBS = 13; // 0xd
     field public static final int FRONTEND_STATUS_TYPE_FEC = 8; // 0x8
-    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 21; // 0x15
-    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 22; // 0x16
+    field public static final int FRONTEND_STATUS_TYPE_FREQ_OFFSET = 18; // 0x12
+    field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_LAYER_ERROR = 16; // 0x10
-    field public static final int FRONTEND_STATUS_TYPE_LBER_CN = 18; // 0x12
     field public static final int FRONTEND_STATUS_TYPE_LNA = 15; // 0xf
     field public static final int FRONTEND_STATUS_TYPE_LNB_VOLTAGE = 11; // 0xb
-    field public static final int FRONTEND_STATUS_TYPE_MER = 20; // 0x14
+    field public static final int FRONTEND_STATUS_TYPE_MER = 17; // 0x11
     field public static final int FRONTEND_STATUS_TYPE_MODULATION = 9; // 0x9
     field public static final int FRONTEND_STATUS_TYPE_PER = 3; // 0x3
     field public static final int FRONTEND_STATUS_TYPE_PLP_ID = 12; // 0xc
     field public static final int FRONTEND_STATUS_TYPE_PRE_BER = 4; // 0x4
-    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 23; // 0x17
+    field public static final int FRONTEND_STATUS_TYPE_RF_LOCK = 20; // 0x14
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_QUALITY = 5; // 0x5
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
-    field public static final int FRONTEND_STATUS_TYPE_VBER_CN = 17; // 0x11
-    field public static final int FRONTEND_STATUS_TYPE_XER_CN = 19; // 0x13
   }
 
   public static class FrontendStatus.Atsc3PlpInfo {
@@ -7202,6 +7211,28 @@ package android.net.netstats.provider {
     method public void onLimitReached();
     method public void onStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
     method public void unregister();
+  }
+
+}
+
+package android.net.sip {
+
+  public class SipAudioCall {
+    method @Nullable public android.net.rtp.AudioGroup getAudioGroup();
+    method public void setAudioGroup(@NonNull android.net.rtp.AudioGroup);
+  }
+
+  public class SipManager {
+    method @NonNull public java.util.List<android.net.sip.SipProfile> getProfiles() throws android.net.sip.SipException;
+    field public static final String ACTION_SIP_CALL_OPTION_CHANGED = "android.net.sip.action.SIP_CALL_OPTION_CHANGED";
+    field public static final String ACTION_SIP_INCOMING_CALL = "android.net.sip.action.SIP_INCOMING_CALL";
+    field public static final String ACTION_SIP_REMOVE_PROFILE = "android.net.sip.action.SIP_REMOVE_PROFILE";
+    field public static final String ACTION_SIP_SERVICE_UP = "android.net.sip.action.SIP_SERVICE_UP";
+    field public static final String ACTION_START_SIP = "android.net.sip.action.START_SIP";
+  }
+
+  public class SipProfile implements java.lang.Cloneable android.os.Parcelable java.io.Serializable {
+    method public int getCallingUid();
   }
 
 }

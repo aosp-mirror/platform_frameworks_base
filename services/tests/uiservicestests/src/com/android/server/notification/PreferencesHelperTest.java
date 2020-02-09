@@ -26,6 +26,8 @@ import static android.util.FeatureFlagUtils.NOTIF_CONVO_BYPASS_SHORTCUT_REQ;
 
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
 
@@ -64,6 +66,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.service.notification.ConversationChannelWrapper;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
@@ -91,6 +94,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -2938,5 +2942,98 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         assertNotNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
+    }
+
+    @Test
+    public void testGetConversations_invalidPkg() {
+        assertThat(mHelper.getConversations("bad", 1)).isEmpty();
+    }
+
+    @Test
+    public void testGetConversations_noConversations() {
+        NotificationChannel channel =
+                new NotificationChannel("not_convo", "not_convo", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        assertThat(mHelper.getConversations(PKG_O, UID_O)).isEmpty();
+    }
+
+    @Test
+    public void testGetConversations_noDisabledGroups() {
+        NotificationChannelGroup group = new NotificationChannelGroup("a", "a");
+        group.setBlocked(true);
+        mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+        NotificationChannel parent = new NotificationChannel("parent", "p", 1);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("convo", "convo", IMPORTANCE_DEFAULT);
+        channel.setConversationId("parent", "convo");
+        channel.setGroup(group.getId());
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        assertThat(mHelper.getConversations(PKG_O, UID_O)).isEmpty();
+    }
+
+    @Test
+    public void testGetConversations_noDeleted() {
+        NotificationChannel parent = new NotificationChannel("parent", "p", 1);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+        NotificationChannel channel =
+                new NotificationChannel("convo", "convo", IMPORTANCE_DEFAULT);
+        channel.setConversationId("parent", "convo");
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+        mHelper.deleteNotificationChannel(PKG_O, UID_O, channel.getId());
+
+        assertThat(mHelper.getConversations(PKG_O, UID_O)).isEmpty();
+    }
+
+    @Test
+    public void testGetConversations() {
+        NotificationChannelGroup group = new NotificationChannelGroup("acct", "account_name");
+        mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+
+        NotificationChannel messages =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        messages.setGroup(group.getId());
+        mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
+        NotificationChannel calls =
+                new NotificationChannel("calls", "Calls", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, calls, true, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("A person", "A lovely person", IMPORTANCE_DEFAULT);
+        channel.setGroup(group.getId());
+        channel.setConversationId(messages.getId(), channel.getName().toString());
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        NotificationChannel channel2 =
+                new NotificationChannel("B person", "B fabulous person", IMPORTANCE_DEFAULT);
+        channel2.setConversationId(calls.getId(), channel.getName().toString());
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
+
+        Map<String, NotificationChannel> expected = new HashMap<>();
+        expected.put(channel.getId(), channel);
+        expected.put(channel2.getId(), channel2);
+
+        Map<String, CharSequence> expectedGroup = new HashMap<>();
+        expectedGroup.put(channel.getId(), group.getName());
+        expectedGroup.put(channel2.getId(), null);
+
+        Map<String, CharSequence> expectedParentLabel= new HashMap<>();
+        expectedParentLabel.put(channel.getId(), messages.getName());
+        expectedParentLabel.put(channel2.getId(), calls.getName());
+
+        ArrayList<ConversationChannelWrapper> convos = mHelper.getConversations(PKG_O, UID_O);
+        assertThat(convos).hasSize(2);
+
+        for (ConversationChannelWrapper convo : convos) {
+            assertThat(convo.getNotificationChannel())
+                    .isEqualTo(expected.get(convo.getNotificationChannel().getId()));
+            assertThat(convo.getParentChannelLabel())
+                    .isEqualTo(expectedParentLabel.get(convo.getNotificationChannel().getId()));
+            assertThat(convo.getGroupLabel())
+                    .isEqualTo(expectedGroup.get(convo.getNotificationChannel().getId()));
+        }
     }
 }

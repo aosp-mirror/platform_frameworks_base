@@ -1704,7 +1704,7 @@ public class ShortcutService extends IShortcutService.Stub {
             ShortcutInfo.validateIcon(shortcut.getIcon());
         }
 
-        shortcut.replaceFlags(0);
+        shortcut.replaceFlags(shortcut.getFlags() & ShortcutInfo.FLAG_LONG_LIVED);
     }
 
     private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut, boolean forUpdate) {
@@ -2751,6 +2751,68 @@ public class ShortcutService extends IShortcutService.Stub {
                 launcher.attemptToRestoreIfNeededAndSave();
 
                 launcher.pinShortcuts(userId, packageName, shortcutIds, /*forPinRequest=*/ false);
+            }
+            packageShortcutsChanged(packageName, userId);
+
+            verifyStates();
+        }
+
+        @Override
+        public void cacheShortcuts(int launcherUserId,
+                @NonNull String callingPackage, @NonNull String packageName,
+                @NonNull List<String> shortcutIds, int userId) {
+            updateCachedShortcutsInternal(launcherUserId, callingPackage, packageName, shortcutIds,
+                    userId, /* doCache= */ true);
+        }
+
+        @Override
+        public void uncacheShortcuts(int launcherUserId,
+                @NonNull String callingPackage, @NonNull String packageName,
+                @NonNull List<String> shortcutIds, int userId) {
+            updateCachedShortcutsInternal(launcherUserId, callingPackage, packageName, shortcutIds,
+                    userId, /* doCache= */ false);
+        }
+
+        private void updateCachedShortcutsInternal(int launcherUserId,
+                @NonNull String callingPackage, @NonNull String packageName,
+                @NonNull List<String> shortcutIds, int userId, boolean doCache) {
+            // Calling permission must be checked by LauncherAppsImpl.
+            Preconditions.checkStringNotEmpty(packageName, "packageName");
+            Objects.requireNonNull(shortcutIds, "shortcutIds");
+
+            synchronized (mLock) {
+                throwIfUserLockedL(userId);
+                throwIfUserLockedL(launcherUserId);
+
+                final int idSize = shortcutIds.size();
+                final ShortcutPackage sp = getUserShortcutsLocked(userId)
+                        .getPackageShortcutsIfExists(packageName);
+                if (idSize == 0 || sp == null) {
+                    return;
+                }
+
+                for (int i = 0; i < idSize; i++) {
+                    final String id = Preconditions.checkStringNotEmpty(shortcutIds.get(i));
+                    final ShortcutInfo si = sp.findShortcutById(id);
+                    if (si == null || doCache == si.isCached()) {
+                        continue;
+                    }
+
+                    if (doCache) {
+                        if (si.isDynamic() && si.isLongLived()) {
+                            si.addFlags(ShortcutInfo.FLAG_CACHED);
+                        } else {
+                            Log.w(TAG, "Only dynamic long lived shortcuts can get cached. Ignoring"
+                                    + "shortcut " + si.getId());
+                        }
+                    } else {
+                        if (si.isDynamic()) {
+                            si.clearFlags(ShortcutInfo.FLAG_CACHED);
+                        } else {
+                            sp.deleteLongLivedWithId(id, /*ignoreInvisible=*/ true);
+                        }
+                    }
+                }
             }
             packageShortcutsChanged(packageName, userId);
 

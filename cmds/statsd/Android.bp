@@ -44,12 +44,8 @@ cc_library_host_shared {
 
 cc_defaults {
     name: "statsd_defaults",
-    aidl: {
-        include_dirs: ["frameworks/base/core/java"],
-    },
 
     srcs: [
-        ":statsd_aidl",
         "src/active_config_list.proto",
         "src/anomaly/AlarmMonitor.cpp",
         "src/anomaly/AlarmTracker.cpp",
@@ -130,8 +126,8 @@ cc_defaults {
         "libbinder",
         "libincident",
         "liblog",
-        "libservices",
         "libstatssocket",
+        "statsd-aidl-cpp",
     ],
 }
 

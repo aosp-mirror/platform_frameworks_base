@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.UserManager;
 import android.service.quicksettings.Tile;
+import android.util.Log;
 import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -199,6 +200,14 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             mCallbackInfo.isHotspotEnabled = enabled;
             mCallbackInfo.numConnectedDevices = numDevices;
             refreshState(mCallbackInfo);
+        }
+
+        @Override
+        public void onHotspotAvailabilityChanged(boolean available) {
+            if (!available) {
+                Log.d(TAG, "Tile removed. Hotspot no longer available");
+                mHost.removeTile(getTileSpec());
+            }
         }
     }
 

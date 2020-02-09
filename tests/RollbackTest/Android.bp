@@ -36,6 +36,15 @@ java_test_host {
 }
 
 java_test_host {
+    name: "NetworkStagedRollbackTest",
+    srcs: ["NetworkStagedRollbackTest/src/**/*.java"],
+    libs: ["tradefed"],
+    static_libs: ["testng"],
+    test_suites: ["general-tests"],
+    test_config: "NetworkStagedRollbackTest.xml",
+}
+
+java_test_host {
     name: "MultiUserRollbackTest",
     srcs: ["MultiUserRollbackTest/src/**/*.java"],
     libs: ["tradefed"],

@@ -16,6 +16,7 @@
 
 #include "BinderIncrementalService.h"
 
+#include <android-base/logging.h>
 #include <binder/IResultReceiver.h>
 #include <binder/PermissionCache.h>
 #include <incfs.h>
@@ -24,7 +25,6 @@
 #include "jni.h"
 #include "nativehelper/JNIHelp.h"
 #include "path.h"
-#include <android-base/logging.h>
 
 using namespace std::literals;
 using namespace android::incremental;
@@ -274,6 +274,13 @@ binder::Status BinderIncrementalService::makeDirectories(int32_t storageId, cons
 
 binder::Status BinderIncrementalService::startLoading(int32_t storageId, bool* _aidl_return) {
     *_aidl_return = mImpl.startLoading(storageId);
+    return ok();
+}
+
+binder::Status BinderIncrementalService::configureNativeBinaries(
+        int32_t storageId, const std::string& apkFullPath, const std::string& libDirRelativePath,
+        const std::string& abi, bool* _aidl_return) {
+    *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi);
     return ok();
 }
 

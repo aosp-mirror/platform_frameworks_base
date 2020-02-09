@@ -96,6 +96,47 @@ public final class StatsDimensionsValue implements Parcelable {
     }
 
     /**
+     * Creates a {@code StatsDimensionsValue} from a StatsDimensionsValueParcel
+     * TODO(b/149103391): Make StatsDimensionsValue a wrapper on top of
+     * StatsDimensionsValueParcel.
+     *
+     * @hide
+     */
+    public StatsDimensionsValue(StatsDimensionsValueParcel parcel) {
+        mField = parcel.field;
+        mValueType = parcel.valueType;
+        switch (mValueType) {
+            case STRING_VALUE_TYPE:
+                mValue = parcel.stringValue;
+                break;
+            case INT_VALUE_TYPE:
+                mValue = parcel.intValue;
+                break;
+            case LONG_VALUE_TYPE:
+                mValue = parcel.longValue;
+                break;
+            case BOOLEAN_VALUE_TYPE:
+                mValue = parcel.boolValue;
+                break;
+            case FLOAT_VALUE_TYPE:
+                mValue = parcel.floatValue;
+                break;
+            case TUPLE_VALUE_TYPE:
+                StatsDimensionsValue[] values = new StatsDimensionsValue[parcel.tupleValue.length];
+                for (int i = 0; i < parcel.tupleValue.length; i++) {
+                    values[i] = new StatsDimensionsValue(parcel.tupleValue[i]);
+                }
+                mValue = values;
+                break;
+            default:
+                Slog.w(TAG, "StatsDimensionsValueParcel contains bad valueType: " + mValueType);
+                mValue = null;
+                break;
+        }
+    }
+
+
+    /**
      * Return the field, i.e. the tag of a statsd atom.
      *
      * @return the field
