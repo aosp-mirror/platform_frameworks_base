@@ -127,7 +127,7 @@ message Atom {
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported =
-                47 [(allow_from_any_uid) = true, (module) = "framework"];
+                47 [(allow_from_any_uid) = true, (module) = "statsd"];
         AppStartOccurred app_start_occurred = 48 [(module) = "framework"];
         AppStartCanceled app_start_canceled = 49 [(module) = "framework"];
         AppStartFullyDrawn app_start_fully_drawn = 50 [(module) = "framework"];
@@ -188,7 +188,7 @@ message Atom {
         ServiceStateChanged service_state_changed = 99 [(module) = "framework"];
         ServiceLaunchReported service_launch_reported = 100 [(module) = "framework"];
         FlagFlipUpdateOccurred flag_flip_update_occurred = 101 [(module) = "framework"];
-        BinaryPushStateChanged binary_push_state_changed = 102 [(module) = "framework"];
+        BinaryPushStateChanged binary_push_state_changed = 102 [(module) = "statsd"];
         DevicePolicyEvent device_policy_event = 103 [(module) = "framework"];
         DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104 [(module) = "docsui"];
         DocsUIFileOperationCopyMoveModeReported docs_ui_file_op_copy_move_mode_reported =
