@@ -598,7 +598,8 @@ public class WallpaperManager {
      *     is not able to access the wallpaper.
      */
     public Drawable getDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, mCmProxy);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -829,7 +830,8 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, mCmProxy);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -853,7 +855,8 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable getFastDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, mCmProxy);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -869,7 +872,8 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable peekFastDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, mCmProxy);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -892,10 +896,11 @@ public class WallpaperManager {
         if (!shouldEnableWideColorGamut()) {
             return false;
         }
-        Bitmap bitmap = sGlobals.peekWallpaperBitmap(mContext, false, which, mCmProxy);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        Bitmap bitmap = sGlobals.peekWallpaperBitmap(mContext, false, which, cmProxy);
         return bitmap != null && bitmap.getColorSpace() != null
                 && bitmap.getColorSpace() != ColorSpace.get(ColorSpace.Named.SRGB)
-                && mCmProxy.isSupportedColorSpace(bitmap.getColorSpace());
+                && cmProxy.isSupportedColorSpace(bitmap.getColorSpace());
     }
 
     /**
@@ -928,8 +933,8 @@ public class WallpaperManager {
      * @hide
      */
     public Bitmap getBitmapAsUser(int userId, boolean hardware) {
-        return sGlobals.peekWallpaperBitmap(
-                mContext, true, FLAG_SYSTEM, userId, hardware, mCmProxy);
+        final ColorManagementProxy cmProxy = getColorManagementProxy();
+        return sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, userId, hardware, cmProxy);
     }
 
     /**
@@ -2074,12 +2079,23 @@ public class WallpaperManager {
     }
 
     /**
-     * A private class to help Globals#getCurrentWallpaperLocked handle color management.
+     * Get the instance of {@link ColorManagementProxy}.
+     *
+     * @return instance of {@link ColorManagementProxy}.
+     * @hide
      */
-    private static class ColorManagementProxy {
+    public ColorManagementProxy getColorManagementProxy() {
+        return mCmProxy;
+    }
+
+    /**
+     * A hidden class to help {@link Globals#getCurrentWallpaperLocked} handle color management.
+     * @hide
+     */
+    public static class ColorManagementProxy {
         private final Set<ColorSpace> mSupportedColorSpaces = new HashSet<>();
 
-        ColorManagementProxy(Context context) {
+        public ColorManagementProxy(@NonNull Context context) {
             // Get a list of supported wide gamut color spaces.
             Display display = context.getDisplay();
             if (display != null) {
@@ -2087,9 +2103,14 @@ public class WallpaperManager {
             }
         }
 
+        @NonNull
+        public Set<ColorSpace> getSupportedColorSpaces() {
+            return mSupportedColorSpaces;
+        }
+
         boolean isSupportedColorSpace(ColorSpace colorSpace) {
             return colorSpace != null && (colorSpace == ColorSpace.get(ColorSpace.Named.SRGB)
-                    || mSupportedColorSpaces.contains(colorSpace));
+                    || getSupportedColorSpaces().contains(colorSpace));
         }
 
         void doColorManagement(ImageDecoder decoder, ImageDecoder.ImageInfo info) {
