@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"دفتری پروفائل آن کریں؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"آپ کی دفتری ایپس، اطلاعات، ڈیٹا اور دفتری پروفائل کی دیگر خصوصیات آن کر دی جائیں گی"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"آن کریں"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"ایپ دستیاب نہیں ہے"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ابھی دستیاب نہیں ہے۔"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏یہ ایپ Android کے پرانے ورژن کے لئے بنائی گئی ہے اور ہو سکتا ہے صحیح طور پر کام نہ کرے۔ اپ ڈیٹس چیک کر کے آزمائیں یا ڈیولپر سے رابطہ کریں۔"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"اپ ڈیٹ چیک کریں"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"آپ کے پاس نئے پیغامات ہیں"</string>

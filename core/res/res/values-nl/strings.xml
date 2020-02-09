@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Werkprofiel inschakelen?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Je werk-apps, meldingen, gegevens en andere functies van je werkprofiel worden uitgeschakeld"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Inschakelen"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Deze app is ontwikkeld voor een oudere versie van Android en werkt mogelijk niet op de juiste manier. Controleer op updates of neem contact op met de ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Controleren op update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Je hebt nieuwe berichten"</string>

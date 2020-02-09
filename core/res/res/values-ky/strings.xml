@@ -190,7 +190,7 @@
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Өтө көп жолу сырсөздү киргизүү аракети жасалды"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Админ түзмөктөн жеке колдонуу үчүн баш тартты"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Түзмөктү ишкана башкарат"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"Ишканаңыз бул түзмөктү башкарат жана тармак трафигин көзөмөлдөшү мүмкүн. Чоо-жайын көрүү үчүн таптап коюңуз."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"Ишканаңыз бул түзмөктү башкарат жана тармак трафигин көзөмөлдөшү мүмкүн. Чоо-жайын билгиңиз келсе, таптап коюңуз."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Түзмөгүңүз тазаланат"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Түзмөктү башкаруучу колдонмо жараксыз. Түзмөгүңүз азыр тазаланат.\n\nСуроолоруңуз болсо, ишканаңыздын администраторуна кайрылыңыз."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Басып чыгаруу <xliff:g id="OWNER_APP">%s</xliff:g> тарабынан өчүрүлдү."</string>
@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Жумуш профили күйгүзүлсүнбү?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайын-даректериңиз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Күйгүзүү"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Колдонмо учурда жеткиликсиз"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> учурда жеткиликсиз"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Бул колдонмо Android\'дин эски версиясы үчүн иштеп чыгарылган, андыктан туура эмес иштеши мүмкүн. Жаңыртууларды издеп көрүңүз же иштеп чыгуучуга кайрылыңыз."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңыртууну издөө"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сизге жаңы билдирүүлөр келди"</string>

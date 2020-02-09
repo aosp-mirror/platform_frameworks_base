@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Zapnúť pracovný profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Pracovné aplikácie, upozornenia, dáta a ďalšie funkcie pracovného profilu sa zapnú"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnúť"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Táto aplikácia bola zostavená pre staršiu verziu Androidu a nemusí správne fungovať. Skúste skontrolovať dostupnosť aktualizácií alebo kontaktovať vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
@@ -1944,7 +1946,7 @@
     <string name="app_category_social" msgid="2278269325488344054">"Sociálne siete a komunikácia"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Noviny a časopisy"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Mapy a navigácia"</string>
-    <string name="app_category_productivity" msgid="1844422703029557883">"Produktivita"</string>
+    <string name="app_category_productivity" msgid="1844422703029557883">"Kancelárske"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Úložisko zariadenia"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Ladenie cez USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"hodina"</string>

@@ -509,8 +509,8 @@
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permite que o app execute métodos para adicionar e excluir modelos de impressão digital para uso."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"usar hardware de impressão digital"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permite que o app use hardware de impressão digital para autenticação."</string>
-    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar sua coleção de músicas"</string>
-    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permite que o app modifique sua coleção de músicas."</string>
+    <string name="permlab_audioWrite" msgid="8501705294265669405">"modificar sua biblioteca de música"</string>
+    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Permite que o app modifique sua biblioteca de música."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modificar sua coleção de vídeos"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"Permite que o app modifique sua coleção de vídeos."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"modificar sua coleção de fotos"</string>
@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ativar o perfil de trabalho?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Seus apps, notificações, dados e outros recursos do perfil de trabalho serão ativados"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"O app não está disponível"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível no momento."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Este app foi criado para uma versão mais antiga do Android e pode não funcionar corretamente. Tente verificar se há atualizações ou entre em contato com o desenvolvedor."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Procurar atualizações"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Você tem mensagens novas"</string>

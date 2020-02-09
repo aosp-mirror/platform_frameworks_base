@@ -1297,7 +1297,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"কোনো অনুমতির প্রয়োজন নেই"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"এর জন্য অর্থপ্রদান করতে হতে পারে"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ঠিক আছে"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"এই ডিভাইসটি USB এর মাধ্যমে চার্জ করুন"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"এই ডিভাইসটি USB দিয়ে চার্জ করা হচ্ছে"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"সংযুক্ত ডিভাইসটি USB এর মাধ্যমে চার্জ করা হচ্ছে"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ফাইল ট্রান্সফার চালু করা হয়েছে"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB এর মাধ্যমে PTP চালু করা হয়েছে"</string>
@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"কাজের প্রোফাইল চালু করবেন?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"আপনার কাজের অ্যাপ, বিজ্ঞপ্তি, ডেটা এবং কাজের প্রোফাইলের অন্যান্য বৈশিষ্ট্য চালু করা হবে"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"চালু করুন"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"অ্যাপ পাওয়া যাচ্ছে না"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"এই মুহূর্তে <xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপ পাওয়া যাচ্ছে না।"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"এই অ্যাপটি Android এর একটি পুরনো ভার্সনের জন্য তৈরি করা হয়েছিল, তাই এখানে সেটি ঠিকমতো কাজ নাও করতে পারে। আপডেট পাওয়া যাচ্ছে কিনা দেখুন বা ডেভেলপারের সাথে যোগাযোগ করুন।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"আপডেট পাওয়া যাচ্ছে কিনা দেখুন"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"আপনার নতুন মেসেজ আছে"</string>

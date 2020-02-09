@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ແອັບວຽກຂອງທ່ານ, ການແຈ້ງເຕືອນ, ຂໍ້ມູນ ແລະ ຄຸນສົມບັດໂປຣໄຟລ໌ວຽກຈະຖືກເປີດໃຊ້"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ແອັບນີ້ຖືກສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນທີ່ເກົ່າກວ່າ ແລະ ອາດເຮັດວຽກໄດ້ບໍ່ປົກກະຕິ. ໃຫ້ລອງກວດສອບເບິ່ງອັບເດດ ຫຼື ຕິດຕໍ່ຜູ້ພັດທະນາ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>

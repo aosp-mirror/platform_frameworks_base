@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"பணிச் சுயவிவரத்தை ஆன் செய்யவா?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"பணி ஆப்ஸ், அறிவிப்புகள், தரவு மற்றும் பிற பணிச் சுயவிவர அம்சங்கள் ஆன் செய்யப்படும்"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"இயக்கு"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"இந்த ஆப்ஸ் Android இன் பழைய பதிப்புக்காக உருவாக்கப்பட்டதால், சரியாக வேலை செய்யாமல் போகலாம். புதுப்பிப்புகள் ஏதேனும் உள்ளதா எனப் பார்க்கவும் அல்லது டெவெலப்பரைத் தொடர்புகொள்ளவும்."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"புதிய செய்திகள் வந்துள்ளன"</string>

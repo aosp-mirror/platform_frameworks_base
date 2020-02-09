@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Įjungti darbo profilį?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Darbo programos, pranešimai, duomenys ir kitos darbo profilio funkcijos bus išjungtos"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Įjungti"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ši programa sukurta naudoti senesnės versijos sistemoje „Android“ ir gali tinkamai neveikti. Pabandykite patikrinti, ar yra naujinių, arba susisiekite su kūrėju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tikrinti, ar yra naujinių"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Turite naujų pranešimų"</string>

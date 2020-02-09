@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"要开启工作资料吗？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"您的工作应用、通知、数据及其他工作资料功能将会开启"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"开启"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"应用无法使用"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g>目前无法使用。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此应用专为旧版 Android 打造，因此可能无法正常运行。请尝试检查更新或与开发者联系。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"检查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新消息"</string>

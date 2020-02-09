@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"I-on ang profile sa trabaho?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"I-on"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Hindi available ang app"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Hindi available sa ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ang app na ito ay ginawa para sa mas lumang bersyon ng Android at maaaring hindi gumana nang maayos. Subukang tingnan kung may mga update, o makipag-ugnayan sa developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tingnan kung may update"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Mayroon kang mga bagong mensahe"</string>

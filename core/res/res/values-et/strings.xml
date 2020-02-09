@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Kas lülitada tööprofiil sisse?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Teie töörakendused, märguanded, andmed ja muud tööprofiili funktsioonid lülitatakse sisse"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Lülita sisse"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"See rakendus on loodud Androidi vanema versiooni jaoks ega pruugi õigesti töötada. Otsige värskendusi või võtke ühendust arendajaga."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Otsi värskendust"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Teile on uusi sõnumeid"</string>

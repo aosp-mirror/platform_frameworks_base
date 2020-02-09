@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Kveikja á vinnusniði?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Kveikt verður á vinnuforritum, tilkynningum, gögnum og öðrum eiginleikum vinnusniðsins"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Kveikja"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Forrit er ekki tiltækt"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ekki tiltækt núna."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Þetta forrit var hannað fyrir eldri útgáfu af Android og ekki er víst að það virki eðlilega. Athugaðu hvort uppfærslur séu í boði eða hafðu samband við þróunaraðilann."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Leita að uppfærslu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Þú ert með ný skilaboð"</string>

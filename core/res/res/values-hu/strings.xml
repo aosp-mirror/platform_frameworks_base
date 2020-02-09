@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Bekapcsolja a munkaprofilt?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"A munkahelyi alkalmazások, értesítések, adatok és a munkaprofilhoz tartozó egyéb funkciók be lesznek kapcsolva"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Bekapcsolás"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Az alkalmazás nem hozzáférhető"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> jelenleg nem hozzáférhető."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ez az alkalmazás az Android egyik korábbi verziójához készült, így elképzelhető, hogy nem működik majd megfelelően ezen a rendszeren. Keressen frissítéseket, vagy vegye fel a kapcsolatot a fejlesztővel."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Frissítés keresése"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Új üzenetei érkeztek"</string>

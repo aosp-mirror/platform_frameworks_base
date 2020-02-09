@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Të aktivizohet profili i punës?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ky aplikacion është ndërtuar për një version më të vjetër të Android dhe mund të mos funksionojë mirë. Provo të kontrollosh për përditësime ose kontakto me zhvilluesin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
