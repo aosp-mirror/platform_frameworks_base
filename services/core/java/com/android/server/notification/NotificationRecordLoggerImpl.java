@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.FrameworkStatsLog;
 
 /**
@@ -23,6 +25,8 @@ import com.android.internal.util.FrameworkStatsLog;
  * @hide
  */
 public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
+
+    UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     @Override
     public void logNotificationReported(NotificationRecord r, NotificationRecord old,
@@ -32,7 +36,7 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_REPORTED,
-                /* int32 event_id = 1 */ p.getUiEvent().getId(),
+                /* int32 event_id = 1 */ NotificationReportedEvent.fromRecordPair(p).getId(),
                 /* int32 uid = 2 */ r.getUid(),
                 /* string package_name = 3 */ r.getSbn().getPackageName(),
                 /* int32 instance_id = 4 */ p.getInstanceId(),
@@ -61,9 +65,10 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
         );
     }
 
-
-
-
-
-
+    @Override
+    public void logNotificationCancelled(NotificationRecord r, int reason, int dismissalSurface) {
+        mUiEventLogger.logWithInstanceId(
+                NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface),
+                r.getUid(), r.getSbn().getPackageName(), r.getSbn().getInstanceId());
+    }
 }
