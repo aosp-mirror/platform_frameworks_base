@@ -6665,37 +6665,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final NetworkAgentInfo newSatisfier = entry.getValue();
             changes.addRequestReassignment(new NetworkReassignment.RequestReassignment(
                     nri, previousSatisfier, newSatisfier));
-            if (newSatisfier != null) {
-                if (VDBG) log("rematch for " + newSatisfier.name());
-                if (previousSatisfier != null) {
-                    if (VDBG || DDBG) {
-                        log("   accepting network in place of " + previousSatisfier.name());
-                    }
-                    previousSatisfier.removeRequest(nri.request.requestId);
-                    previousSatisfier.lingerRequest(nri.request, now, mLingerDelayMs);
-                } else {
-                    if (VDBG || DDBG) log("   accepting network in place of null");
-                }
-                newSatisfier.unlingerRequest(nri.request);
-                if (!newSatisfier.addRequest(nri.request)) {
-                    Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
-                }
-            } else {
-                // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
-                // mark it as no longer satisfying "nri".  Because networks are processed by
-                // rematchAllNetworksAndRequests() in descending score order, "currentNetwork" will
-                // match "newNetwork" before this loop will encounter a "currentNetwork" with higher
-                // score than "newNetwork" and where "currentNetwork" no longer satisfies "nri".
-                // This means this code doesn't have to handle the case where "currentNetwork" no
-                // longer satisfies "nri" when "currentNetwork" does not equal "newNetwork".
-                if (DBG) {
-                    log("Network " + newNetwork.name() + " stopped satisfying" +
-                            " request " + nri.request.requestId);
-                }
-                newNetwork.removeRequest(nri.request.requestId);
-            }
-            nri.mSatisfier = newSatisfier;
+            updateSatisfiersForRematchRequest(nri, previousSatisfier, newSatisfier, now);
         }
+    }
+
+    private void updateSatisfiersForRematchRequest(@NonNull final NetworkRequestInfo nri,
+            @Nullable final NetworkAgentInfo previousSatisfier,
+            @Nullable final NetworkAgentInfo newSatisfier,
+            final long now) {
+        if (newSatisfier != null) {
+            if (VDBG) log("rematch for " + newSatisfier.name());
+            if (previousSatisfier != null) {
+                if (VDBG || DDBG) {
+                    log("   accepting network in place of " + previousSatisfier.name());
+                }
+                previousSatisfier.removeRequest(nri.request.requestId);
+                previousSatisfier.lingerRequest(nri.request, now, mLingerDelayMs);
+            } else {
+                if (VDBG || DDBG) log("   accepting network in place of null");
+            }
+            newSatisfier.unlingerRequest(nri.request);
+            if (!newSatisfier.addRequest(nri.request)) {
+                Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
+            }
+        } else {
+            if (DBG) {
+                log("Network " + previousSatisfier.name() + " stopped satisfying"
+                        + " request " + nri.request.requestId);
+            }
+            previousSatisfier.removeRequest(nri.request.requestId);
+        }
+        nri.mSatisfier = newSatisfier;
     }
 
     /**
