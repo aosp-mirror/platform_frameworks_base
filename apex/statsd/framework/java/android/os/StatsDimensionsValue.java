@@ -16,7 +16,7 @@
 package android.os;
 
 import android.annotation.SystemApi;
-import android.util.Slog;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +129,7 @@ public final class StatsDimensionsValue implements Parcelable {
                 mValue = values;
                 break;
             default:
-                Slog.w(TAG, "StatsDimensionsValueParcel contains bad valueType: " + mValueType);
+                Log.w(TAG, "StatsDimensionsValueParcel contains bad valueType: " + mValueType);
                 mValue = null;
                 break;
         }
@@ -155,7 +155,7 @@ public final class StatsDimensionsValue implements Parcelable {
         try {
             if (mValueType == STRING_VALUE_TYPE) return (String) mValue;
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
         }
         return null;
     }
@@ -169,7 +169,7 @@ public final class StatsDimensionsValue implements Parcelable {
         try {
             if (mValueType == INT_VALUE_TYPE) return (Integer) mValue;
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
         }
         return 0;
     }
@@ -183,7 +183,7 @@ public final class StatsDimensionsValue implements Parcelable {
         try {
             if (mValueType == LONG_VALUE_TYPE) return (Long) mValue;
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
         }
         return 0;
     }
@@ -198,7 +198,7 @@ public final class StatsDimensionsValue implements Parcelable {
         try {
             if (mValueType == BOOLEAN_VALUE_TYPE) return (Boolean) mValue;
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
         }
         return false;
     }
@@ -212,7 +212,7 @@ public final class StatsDimensionsValue implements Parcelable {
         try {
             if (mValueType == FLOAT_VALUE_TYPE) return (Float) mValue;
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
         }
         return 0;
     }
@@ -238,7 +238,7 @@ public final class StatsDimensionsValue implements Parcelable {
             }
             return copy;
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
             return null;
         }
     }
@@ -297,7 +297,7 @@ public final class StatsDimensionsValue implements Parcelable {
             }
             return sb.toString();
         } catch (ClassCastException e) {
-            Slog.w(TAG, "Failed to successfully get value", e);
+            Log.w(TAG, "Failed to successfully get value", e);
         }
         return "";
     }
@@ -357,11 +357,11 @@ public final class StatsDimensionsValue implements Parcelable {
                     return true;
                 }
                 default:
-                    Slog.w(TAG, "readValue of an impossible type " + valueType);
+                    Log.w(TAG, "readValue of an impossible type " + valueType);
                     return false;
             }
         } catch (ClassCastException e) {
-            Slog.w(TAG, "writeValue cast failed", e);
+            Log.w(TAG, "writeValue cast failed", e);
             return false;
         }
     }
@@ -388,7 +388,7 @@ public final class StatsDimensionsValue implements Parcelable {
                 return values;
             }
             default:
-                Slog.w(TAG, "readValue of an impossible type " + valueType);
+                Log.w(TAG, "readValue of an impossible type " + valueType);
                 return null;
         }
     }
