@@ -2,6 +2,7 @@ cc_library_static {
     name: "libservices.core",
     defaults: ["libservices.core-libs"],
 
+    cpp_std: "c++2a",
     cflags: [
         "-Wall",
         "-Werror",
@@ -55,6 +56,7 @@ cc_library_static {
         "com_android_server_am_CachedAppOptimizer.cpp",
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_incremental_IncrementalManagerService.cpp",
+        "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
     ],
@@ -125,6 +127,8 @@ cc_defaults {
         "libnetdbpf",
         "libnetdutils",
         "libpsi",
+        "libdataloader",
+        "libincfs",
         "android.hardware.audio.common@2.0",
         "android.hardware.broadcastradio@1.0",
         "android.hardware.broadcastradio@1.1",

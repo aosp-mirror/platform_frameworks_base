@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
+import android.content.pm.IDataLoaderStatusListener;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
@@ -103,10 +104,11 @@ public final class IncrementalManager {
      */
     @Nullable
     public IncrementalStorage createStorage(@NonNull String path,
-            @NonNull DataLoaderParams params, @CreateMode int createMode,
+            @NonNull DataLoaderParams params, @Nullable IDataLoaderStatusListener listener,
+            @CreateMode int createMode,
             boolean autoStartDataLoader) {
         try {
-            final int id = mService.createStorage(path, params.getData(), createMode);
+            final int id = mService.createStorage(path, params.getData(), listener, createMode);
             if (id < 0) {
                 return null;
             }
