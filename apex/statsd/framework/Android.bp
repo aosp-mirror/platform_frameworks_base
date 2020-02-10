@@ -12,11 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+genrule {
+    name: "statslog-statsd-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module statsd" +
+         " --javaPackage com.android.internal.util --javaClass StatsdStatsLog",
+    out: ["com/android/internal/util/StatsdStatsLog.java"],
+}
+
+java_library_static {
+    name: "statslog-statsd",
+    srcs: [
+        ":statslog-statsd-java-gen",
+    ],
+}
+
 filegroup {
     name: "framework-statsd-sources",
     srcs: [
         "java/**/*.java",
         ":statsd_java_aidl",
+        ":statslog-statsd-java-gen",
     ],
 }
 

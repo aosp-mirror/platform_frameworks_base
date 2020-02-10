@@ -29,7 +29,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.StatsdStatsLog;
 
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
@@ -64,7 +64,7 @@ public final class StatsLog {
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(label,
-                        FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
+                        StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
@@ -93,7 +93,7 @@ public final class StatsLog {
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
+                        label, StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
@@ -122,7 +122,7 @@ public final class StatsLog {
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
+                        label, StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
@@ -162,7 +162,7 @@ public final class StatsLog {
                     | EXPERIMENT_IDS_FIELD_ID,
                     id);
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.BINARY_PUSH_STATE_CHANGED,
+        StatsdStatsLog.write(StatsdStatsLog.BINARY_PUSH_STATE_CHANGED,
                 trainName,
                 trainVersionCode,
                 (options & IStatsd.FLAG_REQUIRE_STAGING) > 0,
