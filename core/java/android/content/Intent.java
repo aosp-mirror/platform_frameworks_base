@@ -4289,7 +4289,9 @@ public class Intent implements Parcelable, Cloneable {
      * intent filter in their manifests, so that they can be looked up and bound to by
      * {@code DataLoaderManagerService}.
      *
-     * Data loader service providers must be privileged apps. 
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * Data loader service providers must be privileged apps.
      * See {@link com.android.server.pm.PackageManagerShellCommandDataLoader} as an example of such
      * data loader service provider.
      *
