@@ -8874,26 +8874,6 @@ package android.os {
     field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
   }
 
-  public class StatsFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
-  }
-
-  public class StatsServiceManager {
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsdServiceRegisterer();
-  }
-
-  public static class StatsServiceManager.ServiceNotFoundException extends java.lang.Exception {
-    ctor public StatsServiceManager.ServiceNotFoundException(@NonNull String);
-  }
-
-  public static final class StatsServiceManager.ServiceRegisterer {
-    method @Nullable public android.os.IBinder get();
-    method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
-  }
-
   public class SystemConfigManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
