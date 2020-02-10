@@ -19,13 +19,7 @@ package android.app.compat;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.compat.Compatibility;
-import android.content.Context;
-import android.os.Binder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
-
-import com.android.internal.compat.IPlatformCompat;
 
 /**
  * CompatChanges APIs - to be used by platform code only (including mainline
@@ -35,6 +29,7 @@ import com.android.internal.compat.IPlatformCompat;
  */
 @SystemApi
 public final class CompatChanges {
+    private static final ChangeIdStateCache QUERY_CACHE = new ChangeIdStateCache();
     private CompatChanges() {}
 
     /**
@@ -69,17 +64,8 @@ public final class CompatChanges {
      */
     public static boolean isChangeEnabled(long changeId, @NonNull String packageName,
             @NonNull UserHandle user) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        final long token = Binder.clearCallingIdentity();
-        try {
-            return platformCompat.isChangeEnabledByPackageName(changeId, packageName,
-                    user.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        return QUERY_CACHE.query(ChangeIdStateQuery.byPackageName(changeId, packageName,
+                                                           user.getIdentifier()));
     }
 
     /**
@@ -101,15 +87,7 @@ public final class CompatChanges {
      * @return {@code true} if the change is enabled for the current app.
      */
     public static boolean isChangeEnabled(long changeId, int uid) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        final long token = Binder.clearCallingIdentity();
-        try {
-            return platformCompat.isChangeEnabledByUid(changeId, uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        return QUERY_CACHE.query(ChangeIdStateQuery.byUid(changeId, uid));
     }
+
 }
