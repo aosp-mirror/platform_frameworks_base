@@ -1431,18 +1431,27 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * @return whether or not there are ONLY task overlay activities in the stack.
+     * @return whether or not there are ONLY task overlay activities in the task.
      *         If {@param includeFinishing} is set, then don't ignore finishing activities in the
      *         check. If there are no task overlay activities, this call returns false.
      */
     boolean onlyHasTaskOverlayActivities(boolean includeFinishing) {
-        if (getChildCount() == 0) {
-            return false;
+        int count = 0;
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = getChildAt(i).asActivityRecord();
+            if (r == null) {
+                // Has a child that is other than Activity.
+                return false;
+            }
+            if (!includeFinishing && r.finishing) {
+                continue;
+            }
+            if (!r.isTaskOverlay()) {
+                return false;
+            }
+            count++;
         }
-        if (includeFinishing) {
-            return getActivity((r) -> r.isTaskOverlay()) != null;
-        }
-        return getActivity((r) -> !r.finishing && r.isTaskOverlay()) != null;
+        return count > 0;
     }
 
     private boolean autoRemoveFromRecents() {
@@ -2367,6 +2376,15 @@ class Task extends WindowContainer<WindowContainer> {
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
+    }
+
+    boolean isLeafTask() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).asTask() != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     int getDescendantTaskCount() {
