@@ -1217,6 +1217,12 @@ java_library {
     visibility: ["//frameworks/base/wifi"],
 }
 
+filegroup {
+    name: "framework-wifi-util-lib-aidls",
+    srcs: ["core/java/android/content/pm/ParceledListSlice.aidl"],
+    path: "core/java",
+}
+
 // utility classes statically linked into wifi-service
 filegroup {
     name: "framework-wifi-service-shared-srcs",
