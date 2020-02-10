@@ -7519,6 +7519,9 @@ message GrantPermissionsActivityButtonActions {
 
     // Button clicked by user - same as bit flags in buttons_presented with only single bit set
     optional int32 button_clicked = 5;
+
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 6;
 }
 
 /**
