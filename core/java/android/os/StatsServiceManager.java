@@ -18,16 +18,17 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.SystemApi.Client;
 
 /**
  * Provides a way to register and obtain the system service binder objects managed by the stats
  * service.
  *
  * <p> Only the statsd mainline module will be able to access an instance of this class.
+ *
+ * TODO(b/148225705) Change to @SystemApi(client=MODULE_LIBRARIES) when the build system is ready.
  * @hide
  */
-@SystemApi(client = Client.MODULE_LIBRARIES)
+@SystemApi
 public class StatsServiceManager {
     /**
      * @hide
