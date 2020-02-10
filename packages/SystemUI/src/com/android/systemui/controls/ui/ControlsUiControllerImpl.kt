@@ -51,8 +51,6 @@ import java.text.Collator
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val TAG = "ControlsUi"
-
 // TEMP CODE for MOCK
 private const val TOKEN = "https://www.googleapis.com/auth/assistant"
 private const val SCOPE = "oauth2:" + TOKEN
@@ -63,13 +61,13 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
 
     override fun onServiceConnected(cName: ComponentName, binder: IBinder) {
         Thread({
-            Log.i(TAG, "TokenProviderConnection connected")
+            Log.i(ControlsUiController.TAG, "TokenProviderConnection connected")
             mTokenProvider = TokenProvider.Stub.asInterface(binder)
 
             val mLastAccountName = mTokenProvider?.getAccountName()
 
             if (mLastAccountName == null || mLastAccountName.isEmpty()) {
-                Log.e(TAG, "NO ACCOUNT IS SET. Open HomeMock app")
+                Log.e(ControlsUiController.TAG, "NO ACCOUNT IS SET. Open HomeMock app")
             } else {
                 mTokenProvider?.setAuthToken(getAuthToken(mLastAccountName))
                 cc.subscribeToFavorites()
@@ -85,7 +83,7 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
         val am = AccountManager.get(context)
         val accounts = am.getAccountsByType("com.google")
         if (accounts == null || accounts.size == 0) {
-            Log.w(TAG, "No com.google accounts found")
+            Log.w(ControlsUiController.TAG, "No com.google accounts found")
             return null
         }
 
@@ -104,7 +102,7 @@ class TokenProviderConnection(val cc: ControlsController, val context: Context)
         try {
             return am.blockingGetAuthToken(account!!, SCOPE, true)
         } catch (e: Throwable) {
-            Log.e(TAG, "Error getting auth token", e)
+            Log.e(ControlsUiController.TAG, "Error getting auth token", e)
             return null
         }
     }
@@ -146,7 +144,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun show(parent: ViewGroup) {
-        Log.d(TAG, "show()")
+        Log.d(ControlsUiController.TAG, "show()")
 
         this.parent = parent
 
@@ -218,7 +216,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
         controlInfos.forEach {
-            Log.d(TAG, "favorited control id: " + it.controlId)
+            Log.d(ControlsUiController.TAG, "favorited control id: " + it.controlId)
             if (lastRow.getChildCount() == 2) {
                 lastRow = createRow(inflater, listView)
             }
@@ -240,7 +238,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun hide() {
-        Log.d(TAG, "hide()")
+        Log.d(ControlsUiController.TAG, "hide()")
         controlsController.get().unsubscribe()
         context.unbindService(tokenProviderConnection)
         tokenProviderConnection = null
@@ -252,10 +250,10 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
-        Log.d(TAG, "onRefreshState()")
+        Log.d(ControlsUiController.TAG, "onRefreshState()")
         controls.forEach { c ->
             controlsById.get(ControlKey(componentName, c.getControlId()))?.let {
-                Log.d(TAG, "onRefreshState() for id: " + c.getControlId())
+                Log.d(ControlsUiController.TAG, "onRefreshState() for id: " + c.getControlId())
                 val cws = ControlWithState(it.ci, c)
                 val key = ControlKey(componentName, c.getControlId())
                 controlsById.put(key, cws)

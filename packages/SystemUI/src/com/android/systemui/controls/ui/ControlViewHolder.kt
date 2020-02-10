@@ -17,7 +17,6 @@
 package com.android.systemui.controls.ui
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
@@ -37,8 +36,6 @@ import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.R
 
-const val MIN_LEVEL = 0
-const val MAX_LEVEL = 10000
 private const val UPDATE_DELAY_IN_MILLIS = 3000L
 
 class ControlViewHolder(
@@ -79,12 +76,9 @@ class ControlViewHolder(
             Pair(Control.STATUS_UNKNOWN, ControlTemplate.NO_TEMPLATE)
         }
 
-        cws.control?.let { c ->
+        cws.control?.let {
             layout.setOnLongClickListener(View.OnLongClickListener() {
-                val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                context.sendBroadcast(closeDialog)
-
-                c.getAppIntent().send()
+                ControlActionCoordinator.longPress(this@ControlViewHolder)
                 true
             })
         }
@@ -100,17 +94,21 @@ class ControlViewHolder(
         }
 
         if (!text.isEmpty()) {
-            val previousText = status.getText()
-            val previousTextExtra = statusExtra.getText()
-
-            cancelUpdate = uiExecutor.executeDelayed({
-                    status.setText(previousText)
-                    statusExtra.setText(previousTextExtra)
-                }, UPDATE_DELAY_IN_MILLIS)
-
-            status.setText(text)
-            statusExtra.setText("")
+            setTransientStatus(text)
         }
+    }
+
+    fun setTransientStatus(tempStatus: String) {
+        val previousText = status.getText()
+        val previousTextExtra = statusExtra.getText()
+
+        cancelUpdate = uiExecutor.executeDelayed({
+                status.setText(previousText)
+                statusExtra.setText(previousTextExtra)
+            }, UPDATE_DELAY_IN_MILLIS)
+
+        status.setText(tempStatus)
+        statusExtra.setText("")
     }
 
     fun action(action: ControlAction) {
