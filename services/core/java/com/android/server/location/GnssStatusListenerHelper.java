@@ -24,7 +24,8 @@ import android.util.Log;
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.
  */
-public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGnssStatusListener> {
+public abstract class GnssStatusListenerHelper extends
+        RemoteListenerHelper<Void, IGnssStatusListener> {
     private static final String TAG = "GnssStatusListenerHelper";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 

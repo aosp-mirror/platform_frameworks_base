@@ -2199,7 +2199,7 @@ public class LocationManager {
      * Registers a GNSS Measurement callback.
      *
      * @param request  extra parameters to pass to GNSS measurement provider. For example, if {@link
-     *                 GnssRequest#isFullTrackingEnabled()} is true, GNSS chipset switches off duty
+     *                 GnssRequest#isFullTracking()} is true, GNSS chipset switches off duty
      *                 cycling.
      * @param executor the executor that the callback runs on.
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
@@ -2216,7 +2216,12 @@ public class LocationManager {
             @NonNull GnssRequest request,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull GnssMeasurementsEvent.Callback callback) {
-        throw new RuntimeException();
+        Preconditions.checkArgument(request != null, "invalid null request");
+        try {
+            return mGnssMeasurementsListenerManager.addListener(request, callback, executor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2763,8 +2768,7 @@ public class LocationManager {
     }
 
     private class GnssStatusListenerManager extends
-            AbstractListenerManager<GnssStatus.Callback> {
-
+            AbstractListenerManager<Void, GnssStatus.Callback> {
         @Nullable
         private IGnssStatusListener mListenerTransport;
 
@@ -2782,19 +2786,19 @@ public class LocationManager {
 
         public boolean addListener(@NonNull GpsStatus.Listener listener, @NonNull Executor executor)
                 throws RemoteException {
-            return addInternal(listener, executor);
+            return addInternal(null, listener, executor);
         }
 
         public boolean addListener(@NonNull OnNmeaMessageListener listener,
                 @NonNull Handler handler)
                 throws RemoteException {
-            return addInternal(listener, handler);
+            return addInternal(null, listener, handler);
         }
 
         public boolean addListener(@NonNull OnNmeaMessageListener listener,
                 @NonNull Executor executor)
                 throws RemoteException {
-            return addInternal(listener, executor);
+            return addInternal(null, listener, executor);
         }
 
         @Override
@@ -2833,7 +2837,7 @@ public class LocationManager {
         }
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(Void ignored) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             GnssStatusListener transport = new GnssStatusListener();
@@ -2893,17 +2897,17 @@ public class LocationManager {
     }
 
     private class GnssMeasurementsListenerManager extends
-            AbstractListenerManager<GnssMeasurementsEvent.Callback> {
+            AbstractListenerManager<GnssRequest, GnssMeasurementsEvent.Callback> {
 
         @Nullable
         private IGnssMeasurementsListener mListenerTransport;
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(GnssRequest request) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             GnssMeasurementsListener transport = new GnssMeasurementsListener();
-            if (mService.addGnssMeasurementsListener(transport, mContext.getPackageName(),
+            if (mService.addGnssMeasurementsListener(request, transport, mContext.getPackageName(),
                     mContext.getFeatureId(), "gnss measurement callback")) {
                 mListenerTransport = transport;
                 return true;
@@ -2920,6 +2924,18 @@ public class LocationManager {
             mListenerTransport = null;
         }
 
+        @Override
+        @Nullable
+        protected GnssRequest merge(@NonNull GnssRequest[] requests) {
+            Preconditions.checkArgument(requests.length > 0);
+            for (GnssRequest request : requests) {
+                if (request.isFullTracking()) {
+                    return request;
+                }
+            }
+            return requests[0];
+        }
+
         private class GnssMeasurementsListener extends IGnssMeasurementsListener.Stub {
             @Override
             public void onGnssMeasurementsReceived(final GnssMeasurementsEvent event) {
@@ -2934,13 +2950,13 @@ public class LocationManager {
     }
 
     private class GnssNavigationMessageListenerManager extends
-            AbstractListenerManager<GnssNavigationMessage.Callback> {
+            AbstractListenerManager<Void, GnssNavigationMessage.Callback> {
 
         @Nullable
         private IGnssNavigationMessageListener mListenerTransport;
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(Void ignored) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             GnssNavigationMessageListener transport = new GnssNavigationMessageListener();
@@ -2975,13 +2991,13 @@ public class LocationManager {
     }
 
     private class BatchedLocationCallbackManager extends
-            AbstractListenerManager<BatchedLocationCallback> {
+            AbstractListenerManager<Void, BatchedLocationCallback> {
 
         @Nullable
         private IBatchedLocationCallback mListenerTransport;
 
         @Override
-        protected boolean registerService() throws RemoteException {
+        protected boolean registerService(Void ignored) throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
             BatchedLocationCallback transport = new BatchedLocationCallback();
