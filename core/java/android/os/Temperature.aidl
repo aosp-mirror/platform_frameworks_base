@@ -16,4 +16,4 @@
 
 package android.os;
 
-parcelable Temperature;
+parcelable Temperature cpp_header "android/Temperature.h";

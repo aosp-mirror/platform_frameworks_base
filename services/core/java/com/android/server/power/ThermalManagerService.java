@@ -370,30 +370,33 @@ public class ThermalManagerService extends SystemService {
         }
 
         @Override
-        public List<Temperature> getCurrentTemperatures() {
+        public Temperature[] getCurrentTemperatures() {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mHalReady.get()) {
-                    return new ArrayList<>();
+                    return new Temperature[0];
                 }
-                return mHalWrapper.getCurrentTemperatures(false, 0 /* not used */);
+                final List<Temperature> curr = mHalWrapper.getCurrentTemperatures(
+                        false, 0 /* not used */);
+                return curr.toArray(new Temperature[curr.size()]);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public List<Temperature> getCurrentTemperaturesWithType(int type) {
+        public Temperature[] getCurrentTemperaturesWithType(int type) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mHalReady.get()) {
-                    return new ArrayList<>();
+                    return new Temperature[0];
                 }
-                return mHalWrapper.getCurrentTemperatures(true, type);
+                final List<Temperature> curr = mHalWrapper.getCurrentTemperatures(true, type);
+                return curr.toArray(new Temperature[curr.size()]);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -443,30 +446,34 @@ public class ThermalManagerService extends SystemService {
         }
 
         @Override
-        public List<CoolingDevice> getCurrentCoolingDevices() {
+        public CoolingDevice[] getCurrentCoolingDevices() {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mHalReady.get()) {
-                    return new ArrayList<>();
+                    return new CoolingDevice[0];
                 }
-                return mHalWrapper.getCurrentCoolingDevices(false, 0);
+                final List<CoolingDevice> devList = mHalWrapper.getCurrentCoolingDevices(
+                        false, 0);
+                return devList.toArray(new CoolingDevice[devList.size()]);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public List<CoolingDevice> getCurrentCoolingDevicesWithType(int type) {
+        public CoolingDevice[] getCurrentCoolingDevicesWithType(int type) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.DEVICE_POWER, null);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (!mHalReady.get()) {
-                    return new ArrayList<>();
+                    return new CoolingDevice[0];
                 }
-                return mHalWrapper.getCurrentCoolingDevices(true, type);
+                final List<CoolingDevice> devList = mHalWrapper.getCurrentCoolingDevices(
+                        true, type);
+                return devList.toArray(new CoolingDevice[devList.size()]);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

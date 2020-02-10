@@ -453,6 +453,18 @@ filegroup {
     path: "core/java",
 }
 
+filegroup {
+    name: "libpowermanager_aidl",
+    srcs: [
+        "core/java/android/os/Temperature.aidl",
+        "core/java/android/os/CoolingDevice.aidl",
+        "core/java/android/os/IThermalEventListener.aidl",
+        "core/java/android/os/IThermalStatusListener.aidl",
+        "core/java/android/os/IThermalService.aidl",
+    ],
+    path: "core/java",
+}
+
 java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],

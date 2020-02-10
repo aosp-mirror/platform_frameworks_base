@@ -51,6 +51,7 @@ cc_library_shared {
         "surface_control.cpp",
         "system_fonts.cpp",
         "trace.cpp",
+        "thermal.cpp"
     ],
 
     shared_libs: [
@@ -72,6 +73,7 @@ cc_library_shared {
         "libxml2",
         "libEGL",
         "libGLESv2",
+        "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
     ],

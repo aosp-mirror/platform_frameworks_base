@@ -297,9 +297,11 @@ public class ThermalManagerServiceTest {
     @Test
     public void testGetCurrentTemperatures() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(false, 0),
-                mService.mService.getCurrentTemperatures());
-        assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
-                mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN));
+                Arrays.asList(mService.mService.getCurrentTemperatures()));
+        assertListEqualsIgnoringOrder(
+                mFakeHal.getCurrentTemperatures(true, Temperature.TYPE_SKIN),
+                Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
+                        Temperature.TYPE_SKIN)));
     }
 
     @Test
@@ -331,21 +333,22 @@ public class ThermalManagerServiceTest {
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
         assertTrue(mService.mService.unregisterThermalEventListener(mEventListener1));
         assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener1));
-        assertEquals(0, mService.mService.getCurrentTemperatures().size());
-        assertEquals(0,
-                mService.mService.getCurrentTemperaturesWithType(Temperature.TYPE_SKIN).size());
+        assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperatures()).size());
+        assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
+                        Temperature.TYPE_SKIN)).size());
         assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
     }
 
     @Test
     public void testGetCurrentCoolingDevices() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentCoolingDevices(false, 0),
-                mService.mService.getCurrentCoolingDevices());
+                Arrays.asList(mService.mService.getCurrentCoolingDevices()));
         assertListEqualsIgnoringOrder(
                 mFakeHal.getCurrentCoolingDevices(false, CoolingDevice.TYPE_BATTERY),
-                mService.mService.getCurrentCoolingDevices());
+                Arrays.asList(mService.mService.getCurrentCoolingDevices()));
         assertListEqualsIgnoringOrder(
                 mFakeHal.getCurrentCoolingDevices(true, CoolingDevice.TYPE_CPU),
-                mService.mService.getCurrentCoolingDevicesWithType(CoolingDevice.TYPE_CPU));
+                Arrays.asList(mService.mService.getCurrentCoolingDevicesWithType(
+                        CoolingDevice.TYPE_CPU)));
     }
 }
