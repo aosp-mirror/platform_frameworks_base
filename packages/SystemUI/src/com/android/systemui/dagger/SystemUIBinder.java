@@ -33,6 +33,7 @@ import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.shortcut.ShortcutKeyDispatcher;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarModule;
 import com.android.systemui.statusbar.tv.TvStatusBar;
@@ -49,7 +50,7 @@ import dagger.multibindings.IntoMap;
 /**
  * SystemUI objects that are injectable should go here.
  */
-@Module(includes = {RecentsModule.class, StatusBarModule.class})
+@Module(includes = {RecentsModule.class, StatusBarModule.class, NotificationsModule.class})
 public abstract class SystemUIBinder {
     /** Inject into AuthController. */
     @Binds

@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
+import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.tests.R;
 
 import org.mockito.ArgumentCaptor;
@@ -98,7 +99,6 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
-        dependency.injectMockDependency(SmartReplyController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mGroupManager = new NotificationGroupManager(mStatusBarStateController);
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
@@ -106,10 +106,11 @@ public class NotificationTestHelper {
         mHeadsUpManager.setUp(null, mGroupManager, null, null);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 
-
         NotificationContentInflater contentBinder = new NotificationContentInflater(
                 mock(NotifRemoteViewCache.class),
-                mock(NotificationRemoteInputManager.class));
+                mock(NotificationRemoteInputManager.class),
+                () -> mock(SmartReplyConstants.class),
+                () -> mock(SmartReplyController.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),

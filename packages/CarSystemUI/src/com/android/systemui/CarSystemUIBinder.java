@@ -29,6 +29,7 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.car.CarStatusBarModule;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
+import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.theme.ThemeOverlayController;
@@ -42,7 +43,7 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /** Binder for car specific {@link SystemUI} modules. */
-@Module(includes = {RecentsModule.class, CarStatusBarModule.class})
+@Module(includes = {RecentsModule.class, CarStatusBarModule.class, NotificationsModule.class})
 public abstract class CarSystemUIBinder {
     /** Inject into AuthController. */
     @Binds
