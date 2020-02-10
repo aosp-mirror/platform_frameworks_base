@@ -26,7 +26,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IStatsd;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.StatsFrameworkInitializer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.StatsdStatsLog;
@@ -180,7 +180,10 @@ public final class StatsLog {
         if (sService != null) {
             return sService;
         }
-        sService = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
+        sService = IStatsd.Stub.asInterface(StatsFrameworkInitializer
+            .getStatsServiceManager()
+            .getStatsdServiceRegisterer()
+            .get());
         return sService;
     }
 
