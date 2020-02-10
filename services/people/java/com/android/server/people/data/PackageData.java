@@ -27,8 +27,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.LocusId;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -63,22 +65,50 @@ public class PackageData {
         mUserId = userId;
 
         mPackageDataDir = new File(perUserPeopleDataDir, mPackageName);
+        mPackageDataDir.mkdirs();
+
         mConversationStore = new ConversationStore(mPackageDataDir, scheduledExecutorService,
                 helper);
-        mEventStore = new EventStore();
+        mEventStore = new EventStore(mPackageDataDir, scheduledExecutorService);
         mIsDefaultDialerPredicate = isDefaultDialerPredicate;
         mIsDefaultSmsAppPredicate = isDefaultSmsAppPredicate;
     }
 
-    /** Called when user is unlocked. */
-    void loadFromDisk() {
-        mPackageDataDir.mkdirs();
+    /**
+     * Returns a map of package directory names as keys and their associated {@link PackageData}.
+     * This should be called when device is powered on and unlocked.
+     */
+    @NonNull
+    static Map<String, PackageData> packagesDataFromDisk(@UserIdInt int userId,
+            @NonNull Predicate<String> isDefaultDialerPredicate,
+            @NonNull Predicate<String> isDefaultSmsAppPredicate,
+            @NonNull ScheduledExecutorService scheduledExecutorService,
+            @NonNull File perUserPeopleDataDir,
+            @NonNull ContactsQueryHelper helper) {
+        Map<String, PackageData> results = new ArrayMap<>();
+        File[] packageDirs = perUserPeopleDataDir.listFiles(File::isDirectory);
+        if (packageDirs == null) {
+            return results;
+        }
+        for (File packageDir : packageDirs) {
+            PackageData packageData = new PackageData(packageDir.getName(), userId,
+                    isDefaultDialerPredicate, isDefaultSmsAppPredicate, scheduledExecutorService,
+                    perUserPeopleDataDir, helper);
+            packageData.loadFromDisk();
+            results.put(packageDir.getName(), packageData);
+        }
+        return results;
+    }
+
+    private void loadFromDisk() {
         mConversationStore.loadConversationsFromDisk();
+        mEventStore.loadFromDisk();
     }
 
     /** Called when device is shutting down. */
     void saveToDisk() {
         mConversationStore.saveConversationsToDisk();
+        mEventStore.saveToDisk();
     }
 
     @NonNull
@@ -222,6 +252,7 @@ public class PackageData {
     }
 
     void onDestroy() {
-        // TODO: STOPSHIP: Implements this method for the case of package being uninstalled.
+        mEventStore.onDestroy();
+        // TODO: STOPSHIP: Destroy conversation info for the case of package being uninstalled.
     }
 }

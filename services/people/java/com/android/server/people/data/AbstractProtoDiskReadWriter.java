@@ -51,11 +51,13 @@ import java.util.concurrent.TimeoutException;
 abstract class AbstractProtoDiskReadWriter<T> {
 
     private static final String TAG = AbstractProtoDiskReadWriter.class.getSimpleName();
+
+    // Common disk write delay that will be appropriate for most scenarios.
+    private static final long DEFAULT_DISK_WRITE_DELAY = 2L * DateUtils.MINUTE_IN_MILLIS;
     private static final long SHUTDOWN_DISK_WRITE_TIMEOUT = 5L * DateUtils.SECOND_IN_MILLIS;
 
     private final File mRootDir;
     private final ScheduledExecutorService mScheduledExecutorService;
-    private final long mWriteDelayMs;
 
     @GuardedBy("this")
     private ScheduledFuture<?> mScheduledFuture;
@@ -75,10 +77,9 @@ abstract class AbstractProtoDiskReadWriter<T> {
      */
     abstract ProtoStreamReader<T> protoStreamReader();
 
-    AbstractProtoDiskReadWriter(@NonNull File rootDir, long writeDelayMs,
+    AbstractProtoDiskReadWriter(@NonNull File rootDir,
             @NonNull ScheduledExecutorService scheduledExecutorService) {
         mRootDir = rootDir;
-        mWriteDelayMs = writeDelayMs;
         mScheduledExecutorService = scheduledExecutorService;
     }
 
@@ -174,7 +175,7 @@ abstract class AbstractProtoDiskReadWriter<T> {
         }
 
         mScheduledFuture = mScheduledExecutorService.schedule(this::flushScheduledData,
-                mWriteDelayMs, TimeUnit.MILLISECONDS);
+                DEFAULT_DISK_WRITE_DELAY, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -183,7 +184,13 @@ abstract class AbstractProtoDiskReadWriter<T> {
      */
     @MainThread
     synchronized void saveImmediately(@NonNull String fileName, @NonNull T data) {
-        if (mScheduledExecutorService.isShutdown()) {
+        mScheduledFileDataMap.put(fileName, data);
+        triggerScheduledFlushEarly();
+    }
+
+    @MainThread
+    private synchronized void triggerScheduledFlushEarly() {
+        if (mScheduledFileDataMap.isEmpty() || mScheduledExecutorService.isShutdown()) {
             return;
         }
         // Cancel existing future.
@@ -194,7 +201,6 @@ abstract class AbstractProtoDiskReadWriter<T> {
             mScheduledFuture.cancel(true);
         }
 
-        mScheduledFileDataMap.put(fileName, data);
         // Submit flush and blocks until it completes. Blocking will prevent the device from
         // shutting down before flushing completes.
         Future<?> future = mScheduledExecutorService.submit(this::flushScheduledData);
@@ -212,9 +218,10 @@ abstract class AbstractProtoDiskReadWriter<T> {
             return;
         }
         for (String fileName : mScheduledFileDataMap.keySet()) {
-            T data = mScheduledFileDataMap.remove(fileName);
+            T data = mScheduledFileDataMap.get(fileName);
             writeTo(fileName, data);
         }
+        mScheduledFileDataMap.clear();
         mScheduledFuture = null;
     }
 

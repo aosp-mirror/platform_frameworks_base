@@ -319,12 +319,11 @@ public class DataManager {
         }
         pruneUninstalledPackageData(userData);
 
-        long currentTimeMillis = System.currentTimeMillis();
         userData.forAllPackages(packageData -> {
             if (signal.isCanceled()) {
                 return;
             }
-            packageData.getEventStore().pruneOldEvents(currentTimeMillis);
+            packageData.getEventStore().pruneOldEvents();
             if (!packageData.isDefaultDialer()) {
                 packageData.getEventStore().deleteEventHistories(EventStore.CATEGORY_CALL);
             }
