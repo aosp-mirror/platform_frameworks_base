@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -305,6 +306,10 @@ public class LauncherAppsService extends SystemService {
             final int callingUserId = injectCallingUserId();
 
             if (targetUserId == callingUserId) return true;
+            if (mContext.checkCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
 
             long ident = injectClearCallingIdentity();
             try {

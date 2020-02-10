@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import static android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -601,11 +602,15 @@ public class LauncherApps {
     }
 
     /**
-     * Show an error log on logcat, when the calling user is a managed profile, and the target
-     * user is different from the calling user, in order to help developers to detect it.
+     * Show an error log on logcat, when the calling user is a managed profile, the target
+     * user is different from the calling user, and it is not called from a package that has the
+     * {@link permission.INTERACT_ACROSS_USERS_FULL} permission, in order to help
+     * developers to detect it.
      */
     private void logErrorForInvalidProfileAccess(@NonNull UserHandle target) {
-        if (UserHandle.myUserId() != target.getIdentifier() && mUserManager.isManagedProfile()) {
+        if (UserHandle.myUserId() != target.getIdentifier() && mUserManager.isManagedProfile()
+                    && mContext.checkSelfPermission(permission.INTERACT_ACROSS_USERS_FULL)
+                            != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "Accessing other profiles/users from managed profile is no longer allowed.");
         }
     }
