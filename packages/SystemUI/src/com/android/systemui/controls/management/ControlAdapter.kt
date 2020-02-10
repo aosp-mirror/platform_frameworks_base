@@ -25,101 +25,150 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
-import com.android.systemui.controls.ControlStatus
-import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.ui.RenderInfo
+
+private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
 
 /**
  * Adapter for binding [Control] information to views.
  *
+ * The model for this adapter is provided by a [FavoriteModel] that is set using
+ * [changeFavoritesModel]. This allows for updating the model if there's a reload.
+ *
  * @param layoutInflater an inflater for the views in the containing [RecyclerView]
- * @param favoriteCallback a callback to be called when the favorite status of a [Control] is
- *                         changed. The callback will take a [ControlInfo.Builder] that's
- *                         pre-populated with the [Control] information and the new favorite
- *                         status.
+ * @param onlyFavorites set to true to only display favorites instead of all controls
  */
 class ControlAdapter(
     private val layoutInflater: LayoutInflater,
-    private val favoriteCallback: (ControlInfo.Builder, Boolean) -> Unit
-) : RecyclerView.Adapter<ControlAdapter.Holder>() {
+    private val onlyFavorites: Boolean = false
+) : RecyclerView.Adapter<Holder>() {
 
-    var listOfControls = emptyList<ControlStatus>()
-
-    override fun onCreateViewHolder(parent: ViewGroup, i: Int): Holder {
-        return Holder(layoutInflater.inflate(R.layout.controls_base_item, parent, false).apply {
-            layoutParams.apply {
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-            }
-            elevation = 15f
-        })
+    companion object {
+        private const val TYPE_ZONE = 0
+        private const val TYPE_CONTROL = 1
     }
 
-    override fun getItemCount() = listOfControls.size
+    val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+            return if (getItemViewType(position) == TYPE_ZONE) 2 else 1
+        }
+    }
+
+    var modelList: List<ElementWrapper> = emptyList()
+    private var favoritesModel: FavoriteModel? = null
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+        return when (viewType) {
+            TYPE_CONTROL -> {
+                ControlHolder(
+                        layoutInflater.inflate(R.layout.controls_base_item, parent, false).apply {
+                            layoutParams.apply {
+                                width = ViewGroup.LayoutParams.MATCH_PARENT
+                            }
+                            elevation = 15f
+                        },
+                        { id, favorite ->
+                            favoritesModel?.changeFavoriteStatus(id, favorite)
+                        })
+            }
+            TYPE_ZONE -> {
+                ZoneHolder(layoutInflater.inflate(R.layout.controls_zone_header, parent, false))
+            }
+            else -> throw IllegalStateException("Wrong viewType: $viewType")
+        }
+    }
+
+    fun changeFavoritesModel(favoritesModel: FavoriteModel) {
+        this.favoritesModel = favoritesModel
+        if (onlyFavorites) {
+            modelList = favoritesModel.favorites
+        } else {
+            modelList = favoritesModel.all
+        }
+        notifyDataSetChanged()
+    }
+
+    override fun getItemCount() = modelList.size
 
     override fun onBindViewHolder(holder: Holder, index: Int) {
-        holder.bindData(listOfControls[index], favoriteCallback)
+        holder.bindData(modelList[index])
     }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (modelList[position]) {
+            is ZoneNameWrapper -> TYPE_ZONE
+            is ControlWrapper -> TYPE_CONTROL
+        }
+    }
+}
+
+/**
+ * Holder for binding views in the [RecyclerView]-
+ * @param view the [View] for this [Holder]
+ */
+sealed class Holder(view: View) : RecyclerView.ViewHolder(view) {
 
     /**
-     * Holder for binding views in the [RecyclerView]-
+     * Bind the data from the model into the view
      */
-    class Holder(view: View) : RecyclerView.ViewHolder(view) {
-        private val icon: ImageView = itemView.requireViewById(R.id.icon)
-        private val title: TextView = itemView.requireViewById(R.id.title)
-        private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
-        private val removed: TextView = itemView.requireViewById(R.id.status)
-        private val favorite: CheckBox = itemView.requireViewById<CheckBox>(R.id.favorite).apply {
-            visibility = View.VISIBLE
-        }
+    abstract fun bindData(wrapper: ElementWrapper)
+}
 
-        /**
-         * Bind data to the view
-         * @param data information about the [Control]
-         * @param callback a callback to be called when the favorite status of the [Control] is
-         *                 changed. The callback will take a [ControlInfo.Builder] that's
-         *                 pre-populated with the [Control] information and the new favorite status.
-         */
-        fun bindData(data: ControlStatus, callback: (ControlInfo.Builder, Boolean) -> Unit) {
-            val renderInfo = getRenderInfo(data.control.deviceType, data.favorite)
-            title.text = data.control.title
-            subtitle.text = data.control.subtitle
-            favorite.isChecked = data.favorite
-            removed.text = if (data.removed) "Removed" else ""
-            favorite.setOnClickListener {
-                val infoBuilder = ControlInfo.Builder().apply {
-                    controlId = data.control.controlId
-                    controlTitle = data.control.title
-                    deviceType = data.control.deviceType
-                }
-                callback(infoBuilder, favorite.isChecked)
-            }
-            itemView.setOnClickListener {
-                favorite.performClick()
-            }
-            applyRenderInfo(renderInfo)
-        }
+/**
+ * Holder for using with [ZoneNameWrapper] to display names of zones.
+ */
+private class ZoneHolder(view: View) : Holder(view) {
+    private val zone: TextView = itemView as TextView
 
-        private fun getRenderInfo(
-            @DeviceTypes.DeviceType deviceType: Int,
-            favorite: Boolean
-        ): RenderInfo {
-            return RenderInfo.lookup(deviceType, favorite)
-        }
+    override fun bindData(wrapper: ElementWrapper) {
+        wrapper as ZoneNameWrapper
+        zone.text = wrapper.zoneName
+    }
+}
 
-        private fun applyRenderInfo(ri: RenderInfo) {
-            val context = itemView.context
-            val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
-
-            icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
-            icon.setImageTintList(fg)
-        }
+/**
+ * Holder for using with [ControlWrapper] to display names of zones.
+ * @param favoriteCallback this callback will be called whenever the favorite state of the
+ *                         [Control] this view represents changes.
+ */
+private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChanger) : Holder(view) {
+    private val icon: ImageView = itemView.requireViewById(R.id.icon)
+    private val title: TextView = itemView.requireViewById(R.id.title)
+    private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
+    private val removed: TextView = itemView.requireViewById(R.id.status)
+    private val favorite: CheckBox = itemView.requireViewById<CheckBox>(R.id.favorite).apply {
+        visibility = View.VISIBLE
     }
 
-    fun setItems(list: List<ControlStatus>) {
-        listOfControls = list
-        notifyDataSetChanged()
+    override fun bindData(wrapper: ElementWrapper) {
+        wrapper as ControlWrapper
+        val data = wrapper.controlStatus
+        val renderInfo = getRenderInfo(data.control.deviceType)
+        title.text = data.control.title
+        subtitle.text = data.control.subtitle
+        favorite.isChecked = data.favorite
+        removed.text = if (data.removed) "Removed" else ""
+        favorite.setOnClickListener {
+            favoriteCallback(data.control.controlId, favorite.isChecked)
+        }
+        applyRenderInfo(renderInfo)
+    }
+
+    private fun getRenderInfo(
+        @DeviceTypes.DeviceType deviceType: Int
+    ): RenderInfo {
+        return RenderInfo.lookup(deviceType, true)
+    }
+
+    private fun applyRenderInfo(ri: RenderInfo) {
+        val context = itemView.context
+        val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
+
+        icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
+        icon.setImageTintList(fg)
     }
 }
 
