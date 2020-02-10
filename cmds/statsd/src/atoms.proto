@@ -7951,6 +7951,10 @@ message SurfaceflingerStatsLayerInfo {
     // presentation, until the buffer was ready to be presented.
     optional FrameTimingHistogram post_to_acquire = 9
         [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Frames missed latch because the acquire fence didn't fire
+    optional int64 late_acquire_frames = 10;
+    // Frames latched early because the desired present time was bad
+    optional int64 bad_desired_present_frames = 11;
 }
 
 /**
