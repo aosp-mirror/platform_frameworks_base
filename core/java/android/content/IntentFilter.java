@@ -41,6 +41,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -940,6 +941,14 @@ public class IntentFilter implements Parcelable {
      */
     public final Iterator<String> typesIterator() {
         return mDataTypes != null ? mDataTypes.iterator() : null;
+    }
+
+    /**
+     * Return copy of filter's data types.
+     * @hide
+     */
+    public final List<String> dataTypes() {
+        return mDataTypes != null ? new ArrayList<>(mDataTypes) : null;
     }
 
     /** @hide */

@@ -1176,26 +1176,47 @@ public class ComponentResolver {
          *
          * @param packageName package to which MIME group belongs
          * @param mimeGroup MIME group to update
+         * @return true, if any intent filters were changed due to this update
          */
-        public void updateMimeGroup(String packageName, String mimeGroup) {
+        public boolean updateMimeGroup(String packageName, String mimeGroup) {
             F[] filters = mMimeGroupToFilter.get(mimeGroup);
             int n = filters != null ? filters.length : 0;
 
             mIsUpdatingMimeGroup = true;
+            boolean hasChanges = false;
             F filter;
             for (int i = 0; i < n && (filter = filters[i]) != null; i++) {
                 if (isPackageForFilter(packageName, filter)) {
-                    updateFilter(filter);
+                    hasChanges |= updateFilter(filter);
                 }
             }
             mIsUpdatingMimeGroup = false;
+            return hasChanges;
         }
 
-        private void updateFilter(F filter) {
+        private boolean updateFilter(F filter) {
+            List<String> oldTypes = filter.dataTypes();
             removeFilter(filter);
             addFilter(filter);
+            List<String> newTypes = filter.dataTypes();
+            return !equalLists(oldTypes, newTypes);
         }
 
+        private boolean equalLists(List<String> first, List<String> second) {
+            if (first == null) {
+                return second == null;
+            } else if (second == null) {
+                return false;
+            }
+
+            if (first.size() != second.size()) {
+                return false;
+            }
+
+            Collections.sort(first);
+            Collections.sort(second);
+            return first.equals(second);
+        }
 
         private void applyMimeGroups(F filter) {
             String packageName = filter.getPackageName();
@@ -2195,11 +2216,14 @@ public class ComponentResolver {
 
     /**
      * Removes MIME type from the group, by delegating to IntentResolvers
+     * @return true if any intent filters were changed due to this update
      */
-    void updateMimeGroup(String packageName, String group) {
-        mActivities.updateMimeGroup(packageName, group);
-        mProviders.updateMimeGroup(packageName, group);
-        mReceivers.updateMimeGroup(packageName, group);
-        mServices.updateMimeGroup(packageName, group);
+    boolean updateMimeGroup(String packageName, String group) {
+        boolean hasChanges = mActivities.updateMimeGroup(packageName, group);
+        hasChanges |= mProviders.updateMimeGroup(packageName, group);
+        hasChanges |= mReceivers.updateMimeGroup(packageName, group);
+        hasChanges |= mServices.updateMimeGroup(packageName, group);
+
+        return hasChanges;
     }
 }
