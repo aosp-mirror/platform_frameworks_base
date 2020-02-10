@@ -38,9 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The Android Bluetooth API is not finalized, and *will* change. Use at your
- * own risk.
- *
  * Public API for controlling the Bluetooth Pbap Service. This includes
  * Bluetooth Phone book Access profile.
  * BluetoothPbap is a proxy object for controlling the Bluetooth Pbap
@@ -55,6 +52,11 @@ import java.util.List;
  * BluetoothPbap service. Use the ServiceListener interface to obtain a
  * notification when it is bound, this is especially important if you wish to
  * immediately call methods on BluetoothPbap after construction.
+ *
+ * To get an instance of the BluetoothPbap class, you can call
+ * {@link BluetoothAdapter#getProfileProxy(Context, ServiceListener, int)} with the final param
+ * being {@link BluetoothProfile#PBAP}. The ServiceListener should be able to get the instance of
+ * BluetoothPbap in {@link android.bluetooth.BluetoothProfile.ServiceListener#onServiceConnected}.
  *
  * Android only supports one connected Bluetooth Pce at a time.
  *
@@ -87,6 +89,7 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     @SuppressLint("ActionValue")
     @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
@@ -235,7 +238,8 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     @SystemApi
     @Override
-    public int getConnectionState(@Nullable BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @BtProfileState int getConnectionState(@Nullable BluetoothDevice device) {
         log("getConnectionState: device=" + device);
         try {
             final IBluetoothPbap service = mService;
@@ -287,7 +291,7 @@ public class BluetoothPbap implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
