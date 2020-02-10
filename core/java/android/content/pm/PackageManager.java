@@ -3012,6 +3012,17 @@ public abstract class PackageManager {
             "android.software.incremental_delivery";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has tuner hardware to support tuner operations.
+     *
+     * <p>This feature implies that the device has the tuner HAL implementation.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
