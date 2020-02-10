@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -384,6 +385,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 guts.resetFalsingCheck();
                 mOnSettingsClickListener.onSettingsClick(sbn.getKey());
                 startAppNotificationSettingsActivity(packageName, appUid, channel, row);
+                notificationInfoView.closeControls(v, false);
             };
         }
 
