@@ -700,27 +700,6 @@ public abstract class ContentResolver implements ContentInterface {
     /** @hide */
     public static final String REMOTE_CALLBACK_RESULT = "result";
 
-    /**
-     * How long we wait for an attached process to publish its content providers
-     * before we decide it must be hung.
-     * @hide
-     */
-    public static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS = 10 * 1000;
-
-    /**
-     * How long we wait for an provider to be published. Should be longer than
-     * {@link #CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS}.
-     * @hide
-     */
-    public static final int CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS =
-            CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS + 10 * 1000;
-
-    // Should be >= {@link #CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS}, because that's how
-    // long ActivityManagerService is giving a content provider to get published if a new process
-    // needs to be started for that.
-    private static final int GET_TYPE_TIMEOUT_MILLIS =
-            CONTENT_PROVIDER_WAIT_TIMEOUT_MILLIS + 5 * 1000;
-
     public ContentResolver(@Nullable Context context) {
         this(context, null);
     }
@@ -869,6 +848,8 @@ public abstract class ContentResolver implements ContentInterface {
             return null;
         }
     }
+
+    private static final int GET_TYPE_TIMEOUT_MILLIS = 3000;
 
     private static class GetTypeResultListener implements RemoteCallback.OnResultListener {
         @GuardedBy("this")

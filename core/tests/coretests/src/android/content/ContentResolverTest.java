@@ -209,13 +209,4 @@ public class ContentResolverTest {
         String type = mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote"));
         assertEquals("fake/remote", type);
     }
-
-
-    @Test
-    public void testGetType_slowProvider() {
-        // This provider is running in a different process and is intentionally slow to start.
-        // We are trying to confirm that it does not cause an ANR
-        String type = mResolver.getType(Uri.parse("content://android.content.SlowProvider"));
-        assertEquals("slow", type);
-    }
 }
