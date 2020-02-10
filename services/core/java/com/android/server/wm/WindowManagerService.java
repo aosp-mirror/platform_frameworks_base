@@ -8021,7 +8021,11 @@ public class WindowManagerService extends IWindowManager.Stub
             int displayId, Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper displayCutout) {
         synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                throw new WindowManager.InvalidDisplayException("Display#" + displayId
+                        + "could not be found!");
+            }
             final WindowToken windowToken = dc.getWindowToken(attrs.token);
             final ActivityRecord activity;
             if (windowToken != null && windowToken.asActivityRecord() != null) {
