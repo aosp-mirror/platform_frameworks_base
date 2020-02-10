@@ -41,7 +41,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -645,20 +644,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     }
                 });
 
-        if (mCarNotificationListener != null) {
-            try {
-                // If we already had a notification listener we need to unreigster is before
-                // making a new one
-                mCarNotificationListener.unregisterAsSystemService();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error unregistering notification listener.");
-            }
-        }
-
-        mCarNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
 
-        mNotificationDataManager = new NotificationDataManager();
+        if (mCarNotificationListener == null) {
+            // Only make and register a listener if we don't already have one since
+            // #connectNotificationsUI can be called multiple times on locale change.
+            mCarNotificationListener = new CarNotificationListener();
+            mNotificationDataManager = new NotificationDataManager();
+
+            CarHeadsUpNotificationManager carHeadsUpNotificationManager =
+                    new CarSystemUIHeadsUpNotificationManager(mContext,
+                            mNotificationClickHandlerFactory, mNotificationDataManager);
+            mCarNotificationListener.registerAsSystemService(mContext,
+                    mCarUxRestrictionManagerWrapper,
+                    carHeadsUpNotificationManager, mNotificationDataManager);
+        }
+
         mNotificationDataManager.setOnUnseenCountUpdateListener(() -> {
             if (mNavigationBarView != null && mNotificationDataManager != null) {
                 onUseenCountUpdate(mNotificationDataManager.getUnseenNotificationCount());
@@ -667,13 +668,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mContext.getResources().getBoolean(
                 R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
-        CarHeadsUpNotificationManager carHeadsUpNotificationManager =
-                new CarSystemUIHeadsUpNotificationManager(mContext,
-                        mNotificationClickHandlerFactory, mNotificationDataManager);
-        mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
-        mCarNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
-                carHeadsUpNotificationManager, mNotificationDataManager);
+        mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
         View glassPane = mStatusBarWindow.findViewById(R.id.glass_pane);
