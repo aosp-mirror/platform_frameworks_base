@@ -100,6 +100,8 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage addQueriesPackage(String packageName);
 
+    ParsingPackage addQueriesProvider(String authority);
+
     ParsingPackage setProcesses(ArrayMap<String, ComponentParseUtils.ParsedProcess> processes);
 
     ParsingPackage asSplit(

@@ -216,6 +216,9 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     private ArrayList<String> queriesPackages;
 
     @Nullable
+    private ArraySet<String> queriesProviders;
+
+    @Nullable
     private ArrayMap<String, ComponentParseUtils.ParsedProcess> processes;
 
     private String[] splitClassLoaderNames;
@@ -953,6 +956,12 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     public PackageImpl addQueriesPackage(String packageName) {
         this.queriesPackages = ArrayUtils.add(this.queriesPackages,
                 TextUtils.safeIntern(packageName));
+        return this;
+    }
+
+    @Override
+    public ParsingPackage addQueriesProvider(String authority) {
+        this.queriesProviders = ArrayUtils.add(this.queriesProviders, authority);
         return this;
     }
 
@@ -2973,6 +2982,11 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Nullable
     public List<String> getQueriesPackages() {
         return queriesPackages;
+    }
+
+    @Override
+    public Set<String> getQueriesProviders() {
+        return queriesProviders;
     }
 
     private static void internStringArrayList(List<String> list) {

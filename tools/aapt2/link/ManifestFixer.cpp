@@ -391,6 +391,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["uses-split"].Action(RequiredNameIsJavaPackage);
   manifest_action["queries"]["package"].Action(RequiredNameIsJavaPackage);
   manifest_action["queries"]["intent"] = intent_filter_action;
+  manifest_action["queries"]["provider"].Action(RequiredAndroidAttribute("authorities"));
   // TODO: more complicated component name tag
 
   manifest_action["key-sets"]["key-set"]["public-key"];
