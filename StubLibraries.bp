@@ -190,7 +190,6 @@ droidstubs {
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-api-stubs-default"],
-    libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + module_libs,
     check_api: {
@@ -222,7 +221,6 @@ droidstubs {
 droidstubs {
     name: "module-lib-api-stubs-docs",
     defaults: ["metalava-api-stubs-default"],
-    libs: ["framework-all"],
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + priv_apps + module_libs,
 }
@@ -299,12 +297,12 @@ java_library_static {
     ],
     libs: [
         "stub-annotations",
-        "framework-all",
     ],
     static_libs: [
         "private-stub-annotations-jar",
     ],
     defaults: ["framework-stubs-default"],
+    sdk_version: "core_current",
 }
 
 /////////////////////////////////////////////////////////////////////
