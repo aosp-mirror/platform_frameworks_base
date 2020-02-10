@@ -11066,10 +11066,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (dumpAll || dumpPackage != null) {
+            final SparseArray<ProcessRecord> pidToProcess = new SparseArray<>();
             synchronized (mPidsSelfLocked) {
                 boolean printed = false;
                 for (int i=0; i<mPidsSelfLocked.size(); i++) {
                     ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    pidToProcess.put(r.pid, r);
                     if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
                         continue;
                     }
@@ -11081,6 +11083,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
                         pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
+                }
+            }
+
+            synchronized (sActiveProcessInfoSelfLocked) {
+                boolean printed = false;
+                for (int i = 0; i < sActiveProcessInfoSelfLocked.size(); i++) {
+                    ProcessInfo info = sActiveProcessInfoSelfLocked.valueAt(i);
+                    ProcessRecord r = pidToProcess.get(sActiveProcessInfoSelfLocked.keyAt(i));
+                    if (r != null && dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
+                        continue;
+                    }
+                    if (!printed) {
+                        if (needSep) pw.println();
+                        needSep = true;
+                        pw.println("  Active process infos:");
+                        printed = true;
+                    }
+                    pw.print("    Pinfo PID #"); pw.print(sActiveProcessInfoSelfLocked.keyAt(i));
+                    pw.println(":");
+                    pw.print("      name="); pw.println(info.name);
+                    if (info.deniedPermissions != null) {
+                        for (int j = 0; j < info.deniedPermissions.size(); j++) {
+                            pw.print("      deny: ");
+                            pw.println(info.deniedPermissions.valueAt(i));
+                        }
+                    }
                 }
             }
         }
