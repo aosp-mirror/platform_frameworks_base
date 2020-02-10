@@ -40,6 +40,7 @@ extern int register_android_graphics_ByteBufferStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_ImageDecoder(JNIEnv*);
+extern int register_android_graphics_Interpolator(JNIEnv* env);
 extern int register_android_graphics_MaskFilter(JNIEnv* env);
 extern int register_android_graphics_NinePatch(JNIEnv*);
 extern int register_android_graphics_PathEffect(JNIEnv* env);
@@ -115,6 +116,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.FontFamily", REG_JNI(register_android_graphics_FontFamily)},
         {"android.graphics.Graphics", REG_JNI(register_android_graphics_Graphics)},
         {"android.graphics.ImageDecoder", REG_JNI(register_android_graphics_ImageDecoder)},
+        {"android.graphics.Interpolator", REG_JNI(register_android_graphics_Interpolator)},
         {"android.graphics.MaskFilter", REG_JNI(register_android_graphics_MaskFilter)},
         {"android.graphics.Matrix", REG_JNI(register_android_graphics_Matrix)},
         {"android.graphics.NinePatch", REG_JNI(register_android_graphics_NinePatch)},
