@@ -30,6 +30,7 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -189,6 +190,12 @@ public class DependencyProvider {
     @Provides
     public AlwaysOnDisplayPolicy provideAlwaysOnDisplayPolicy(Context context) {
         return new AlwaysOnDisplayPolicy(context);
+    }
+
+    /***/
+    @Provides
+    public NotificationMessagingUtil provideNotificationMessagingUtil(Context context) {
+        return new NotificationMessagingUtil(context);
     }
 
     /** */
