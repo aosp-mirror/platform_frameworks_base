@@ -1180,7 +1180,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         }
 
         // Create new lib file without signature info
-        incfs::NewFileParams libFileParams;
+        incfs::NewFileParams libFileParams{};
         libFileParams.size = uncompressedLen;
         libFileParams.verification.hashAlgorithm = INCFS_HASH_NONE;
         // Metadata of the new lib file is its relative path
