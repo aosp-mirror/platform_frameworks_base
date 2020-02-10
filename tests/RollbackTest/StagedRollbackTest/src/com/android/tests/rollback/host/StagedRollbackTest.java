@@ -228,44 +228,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     }
 
     /**
-     * Tests failed network health check triggers watchdog staged rollbacks.
-     */
-    @Test
-    public void testNetworkFailedRollback() throws Exception {
-        try {
-            // Disconnect internet so we can test network health triggered rollbacks
-            getDevice().executeShellCommand("svc wifi disable");
-            getDevice().executeShellCommand("svc data disable");
-
-            runPhase("testNetworkFailedRollback_Phase1");
-            // Reboot device to activate staged package
-            getDevice().reboot();
-
-            // Verify rollback was enabled
-            runPhase("testNetworkFailedRollback_Phase2");
-            assertThrows(AssertionError.class, () -> runPhase("testNetworkFailedRollback_Phase3"));
-
-            getDevice().waitForDeviceAvailable();
-            // Verify rollback was executed after health check deadline
-            runPhase("testNetworkFailedRollback_Phase4");
-            InputStreamSource logcatStream = mReceiver.getLogcatData();
-            try {
-                List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-                assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_INITIATE, null,
-                                REASON_EXPLICIT_HEALTH_CHECK, null));
-                assertTrue(watchdogEventOccurred(watchdogEvents, ROLLBACK_BOOT_TRIGGERED, null,
-                        null, null));
-            } finally {
-                logcatStream.close();
-            }
-        } finally {
-            // Reconnect internet again so we won't break tests which assume internet available
-            getDevice().executeShellCommand("svc wifi enable");
-            getDevice().executeShellCommand("svc data enable");
-        }
-    }
-
-    /**
      * Tests passed network health check does not trigger watchdog staged rollbacks.
      */
     @Test

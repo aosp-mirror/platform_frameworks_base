@@ -274,55 +274,6 @@ public class StagedRollbackTest {
                 TestApp.B)).isNotNull();
     }
 
-    @Test
-    public void testNetworkFailedRollback_Phase1() throws Exception {
-        // Remove available rollbacks and uninstall NetworkStack on /data/
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        String networkStack = getNetworkStackPackageName();
-
-        rm.expireRollbackForPackage(networkStack);
-        uninstallNetworkStackPackage();
-
-        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
-                        networkStack)).isNull();
-
-        // Reduce health check deadline
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
-                PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS,
-                Integer.toString(120000), false);
-        // Simulate re-installation of new NetworkStack with rollbacks enabled
-        installNetworkStackPackage();
-    }
-
-    @Test
-    public void testNetworkFailedRollback_Phase2() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
-                        getNetworkStackPackageName())).isNotNull();
-
-        // Sleep for < health check deadline
-        Thread.sleep(TimeUnit.SECONDS.toMillis(5));
-        // Verify rollback was not executed before health check deadline
-        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        getNetworkStackPackageName())).isNull();
-    }
-
-    @Test
-    public void testNetworkFailedRollback_Phase3() throws Exception {
-        // Sleep for > health check deadline (120s to trigger rollback + 120s to reboot)
-        // The device is expected to reboot during sleeping. This device method will fail and
-        // the host will catch the assertion. If reboot doesn't happen, the host will fail the
-        // assertion.
-        Thread.sleep(TimeUnit.SECONDS.toMillis(240));
-    }
-
-    @Test
-    public void testNetworkFailedRollback_Phase4() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        getNetworkStackPackageName())).isNotNull();
-    }
-
     private static String getNetworkStackPackageName() {
         Intent intent = new Intent(NETWORK_STACK_CONNECTOR_CLASS);
         ComponentName comp = intent.resolveSystemService(
