@@ -304,8 +304,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final DisplayArea.Root mRootDisplayArea = new DisplayArea.Root(mWmService);
 
-    private final DisplayAreaPolicy mDisplayAreaPolicy = new DisplayAreaPolicy.Default(
-            mWmService, this, mRootDisplayArea, mImeWindowsContainers, mTaskContainers);
+    private final DisplayAreaPolicy mDisplayAreaPolicy;
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -1027,6 +1026,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         super.addChild(mWindowContainers, null);
         super.addChild(mOverlayContainers, null);
 
+        mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
+                mWmService, this, mRootDisplayArea, mImeWindowsContainers, mTaskContainers);
         mWindowContainers.addChildren();
 
         // Sets the display content for the children.
