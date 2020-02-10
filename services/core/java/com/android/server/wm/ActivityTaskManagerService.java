@@ -4434,12 +4434,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void resizePinnedStack(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
+    public void resizePinnedStack(Rect displayedBounds, Rect configBounds) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "resizePinnedStack()");
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mStackSupervisor.resizePinnedStackLocked(pinnedBounds, tempPinnedTaskBounds);
+                mStackSupervisor.resizePinnedStack(displayedBounds, configBounds);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

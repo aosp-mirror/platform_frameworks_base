@@ -2627,6 +2627,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void setOverrideDisplayedBounds(Rect overrideDisplayedBounds) {
         if (overrideDisplayedBounds != null) {
+            adjustForMinimalTaskDimensions(overrideDisplayedBounds, mOverrideDisplayedBounds);
             mOverrideDisplayedBounds.set(overrideDisplayedBounds);
         } else {
             mOverrideDisplayedBounds.setEmpty();

@@ -742,8 +742,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 setBounds(newBounds);
             } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
                 // For pinned stack, resize is now part of the {@link WindowContainerTransaction}
-                resize(new Rect(newBounds), null /* tempTaskBounds */,
-                        null /* tempTaskInsetBounds */, PRESERVE_WINDOWS, true /* deferResume */);
+                resize(new Rect(newBounds), null /* configBounds */,
+                        PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
@@ -952,8 +952,8 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             }
 
             if (!Objects.equals(getRequestedOverrideBounds(), mTmpRect2)) {
-                resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        false /* preserveWindows */, true /* deferResume */);
+                resize(mTmpRect2, null /*configBounds*/,
+                        false /*preserveWindows*/, true /*deferResume*/);
             }
         } finally {
             if (showRecents && !alreadyInSplitScreenMode && isOnHomeDisplay()
@@ -3093,24 +3093,30 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
 
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
     // Need to consolidate those calls points into this resize method so anyone can call directly.
-    void resize(Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds,
-            boolean preserveWindows, boolean deferResume) {
-        if (!updateBoundsAllowed(bounds)) {
+    void resize(Rect displayedBounds, Rect configBounds, boolean preserveWindows,
+            boolean deferResume) {
+        if (!updateBoundsAllowed(displayedBounds)) {
             return;
         }
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "stack.resize_" + getRootTaskId());
         mAtmService.deferWindowLayout();
         try {
+            // TODO: Why not just set this on the stack directly vs. on each tasks?
             // Update override configurations of all tasks in the stack.
-            final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : bounds;
             final PooledConsumer c = PooledLambda.obtainConsumer(
                     ActivityStack::processTaskResizeBounds, PooledLambda.__(Task.class),
-                    taskBounds, tempTaskInsetBounds);
-            forAllLeafTasks(c, true /* traverseTopToBottom */);
+                    displayedBounds, configBounds);
+            forAllTasks(c, true /* traverseTopToBottom */);
             c.recycle();
 
-            setBounds(bounds);
+            if (mBoundsAnimating) {
+                // Force to update task surface bounds and relayout windows, since configBounds
+                // remains unchanged during bounds animation.
+                updateSurfaceBounds();
+                getDisplay().setLayoutNeeded();
+                mWmService.requestTraversal();
+            }
 
             if (!deferResume) {
                 ensureVisibleActivitiesConfiguration(topRunningActivity(), preserveWindows);
@@ -3121,15 +3127,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         }
     }
 
-    private static void processTaskResizeBounds(Task task, Rect bounds, Rect insetBounds) {
+    private static void processTaskResizeBounds(
+            Task task, Rect displayedBounds, Rect configBounds) {
         if (!task.isResizeable()) return;
 
-        if (insetBounds != null && !insetBounds.isEmpty()) {
-            task.setOverrideDisplayedBounds(bounds);
-            task.setBounds(insetBounds);
+        if (configBounds != null && !configBounds.isEmpty()) {
+            task.setOverrideDisplayedBounds(displayedBounds);
+            task.setBounds(configBounds);
         } else {
             task.setOverrideDisplayedBounds(null);
-            task.setBounds(bounds);
+            task.setBounds(displayedBounds);
         }
     }
 
@@ -4583,19 +4590,15 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         return task != null;
     }
 
-    public boolean setPinnedStackSize(Rect stackBounds, Rect tempTaskBounds) {
+    public boolean setPinnedStackSize(Rect displayedBounds, Rect configBounds) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mWmService.mGlobalLock) {
             if (mCancelCurrentBoundsAnimation) {
                 return false;
             }
+            mStackSupervisor.resizePinnedStack(displayedBounds, configBounds);
         }
 
-        try {
-            mWmService.mActivityTaskManager.resizePinnedStack(stackBounds, tempTaskBounds);
-        } catch (RemoteException e) {
-            // I don't believe you.
-        }
         return true;
     }
 

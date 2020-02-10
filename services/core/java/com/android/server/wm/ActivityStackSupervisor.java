@@ -1443,8 +1443,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
             if (stack.shouldResizeStackWithLaunchBounds()) {
-                stack.resize(bounds, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        !PRESERVE_WINDOWS, !DEFER_RESUME);
+                stack.resize(bounds, null /* configBounds */, !PRESERVE_WINDOWS, !DEFER_RESUME);
             } else {
                 // WM resizeTask must be done after the task is moved to the correct stack,
                 // because Task's setBounds() also updates dim layer's bounds, but that has
@@ -1604,7 +1603,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 false /* deferResume */);
     }
 
-    void resizeDockedStackLocked(Rect dockedBounds, Rect tempDockedTaskBounds,
+    void resizeDockedStackLocked(Rect displayedBounds, Rect tempDockedTaskBounds,
             Rect tempDockedTaskInsetBounds, Rect tempOtherTaskBounds, Rect tempOtherTaskInsetBounds,
             boolean preserveWindows, boolean deferResume) {
 
@@ -1622,7 +1621,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         if (mDockedStackResizing) {
             mHasPendingDockedBounds = true;
-            mPendingDockedBounds = copyOrNull(dockedBounds);
+            mPendingDockedBounds = copyOrNull(displayedBounds);
             mPendingTempDockedTaskBounds = copyOrNull(tempDockedTaskBounds);
             mPendingTempDockedTaskInsetBounds = copyOrNull(tempDockedTaskInsetBounds);
             mPendingTempOtherTaskBounds = copyOrNull(tempOtherTaskBounds);
@@ -1635,13 +1634,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Don't allow re-entry while resizing. E.g. due to docked stack detaching.
             mAllowDockedStackResize = false;
             ActivityRecord r = stack.topRunningActivity();
-            stack.resize(dockedBounds, tempDockedTaskBounds, tempDockedTaskInsetBounds,
+            stack.resize(displayedBounds, tempDockedTaskBounds,
                     !PRESERVE_WINDOWS, DEFER_RESUME);
 
             // TODO: Checking for isAttached might not be needed as if the user passes in null
             // dockedBounds then they want the docked stack to be dismissed.
             if (stack.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                    || (dockedBounds == null && !stack.isAttached())) {
+                    || (displayedBounds == null && !stack.isAttached())) {
                 // The dock stack either was dismissed or went fullscreen, which is kinda the same.
                 // In this case we make all other static stacks fullscreen and move all
                 // docked stack tasks to the fullscreen stack.
@@ -1669,7 +1668,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         // interaction.
                         continue;
                     }
-                    current.getStackDockedModeBounds(dockedBounds,
+                    current.getStackDockedModeBounds(displayedBounds,
                             tempOtherTaskBounds /* currentTempTaskBounds */,
                             tempRect /* outStackBounds */,
                             otherTaskRect /* outTempTaskBounds */);
@@ -1684,9 +1683,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                                 + " non-fullscreen stack");
                     }
 
-                    current.resize(tempRect,
-                            !otherTaskRect.isEmpty() ? otherTaskRect : tempOtherTaskBounds,
-                            tempOtherTaskInsetBounds, preserveWindows, deferResume);
+                    current.resize(tempRect, tempOtherTaskBounds, preserveWindows, deferResume);
                 }
             }
             if (!deferResume) {
@@ -1699,7 +1696,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    void resizePinnedStackLocked(Rect pinnedBounds, Rect tempPinnedTaskBounds) {
+    void resizePinnedStack(Rect displayedBounds, Rect inConfigBounds) {
         // TODO(multi-display): The display containing the stack should be passed in.
         final ActivityStack stack =
                 mRootWindowContainer.getDefaultDisplay().getRootPinnedTask();
@@ -1711,23 +1708,22 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizePinnedStack");
         mService.deferWindowLayout();
         try {
-            Rect insetBounds = null;
-            if (tempPinnedTaskBounds != null && stack.isAnimatingBoundsToFullscreen()) {
+            Rect configBounds = null;
+            if (inConfigBounds != null) {
                 // Use 0,0 as the position for the inset rect because we are headed for fullscreen.
-                insetBounds = tempRect;
-                insetBounds.top = 0;
-                insetBounds.left = 0;
-                insetBounds.right = tempPinnedTaskBounds.width();
-                insetBounds.bottom = tempPinnedTaskBounds.height();
+                configBounds = tempRect;
+                configBounds.top = 0;
+                configBounds.left = 0;
+                configBounds.right = inConfigBounds.width();
+                configBounds.bottom = inConfigBounds.height();
             }
-            if (pinnedBounds != null && tempPinnedTaskBounds == null) {
+            if (displayedBounds != null && inConfigBounds == null) {
                 // We have finished the animation into PiP, and are resizing the tasks to match the
                 // stack bounds, while layouts are deferred, update any task state as a part of
                 // transitioning it from fullscreen into a floating state.
                 stack.onPipAnimationEndResize();
             }
-            stack.resize(pinnedBounds, tempPinnedTaskBounds, insetBounds, !PRESERVE_WINDOWS,
-                    !DEFER_RESUME);
+            stack.resize(displayedBounds, configBounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
         } finally {
             mService.continueWindowLayout();
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);

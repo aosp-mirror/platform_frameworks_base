@@ -547,8 +547,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
             final ActivityStack stack = (ActivityStack) container;
             if (stack.inPinnedWindowingMode()) {
                 stack.resize(config.windowConfiguration.getBounds(),
-                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                        PRESERVE_WINDOWS, true /* deferResume */);
+                        null /* configBounds */, PRESERVE_WINDOWS, true /* deferResume */);
             }
         }
     }
