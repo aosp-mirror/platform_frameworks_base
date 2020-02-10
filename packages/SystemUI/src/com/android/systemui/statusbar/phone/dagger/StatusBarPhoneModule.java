@@ -22,7 +22,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
-import android.view.IWindowManager;
 
 import androidx.annotation.Nullable;
 
@@ -34,7 +33,6 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -54,7 +52,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -67,7 +64,6 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -81,7 +77,6 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
-import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -115,7 +110,7 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module(includes = {StatusBarDependenciesModule.class})
+@Module(includes = {StatusBarPhoneDependenciesModule.class})
 public interface StatusBarPhoneModule {
     /**
      * Provides our instance of StatusBar which is considered optional.
@@ -273,24 +268,5 @@ public interface StatusBarPhoneModule {
                 extensionController,
                 userInfoControllerImpl,
                 dismissCallbackRegistry);
-    }
-
-    /** */
-    @Singleton
-    @Provides
-    static AutoHideController newAutoHideController(Context context,
-            @Main Handler handler,
-            NotificationRemoteInputManager notificationRemoteInputManager,
-            IWindowManager iWindowManager) {
-        return new AutoHideController(context, handler, notificationRemoteInputManager,
-                iWindowManager);
-    }
-
-    /** */
-    @Singleton
-    @Provides
-    static NotificationGroupAlertTransferHelper provideNotificationGroupAlertTransferHelper(
-            RowContentBindStage bindStage) {
-        return new NotificationGroupAlertTransferHelper(bindStage);
     }
 }

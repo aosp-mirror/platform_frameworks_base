@@ -22,7 +22,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
-import android.view.IWindowManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -34,7 +33,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.car.SystemUIPrimaryWindowController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -56,10 +54,10 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.dagger.StatusBarDependenciesModule;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
@@ -69,7 +67,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.row.RowContentBindStage;
+import com.android.systemui.statusbar.notification.row.NotificationRowModule;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -82,7 +80,6 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
-import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -91,6 +88,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneDependenciesModule;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -116,7 +114,8 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link CarStatusBar}.
  */
-@Module(includes = {StatusBarDependenciesModule.class})
+@Module(includes = {StatusBarDependenciesModule.class, StatusBarPhoneDependenciesModule.class,
+        NotificationRowModule.class})
 public class CarStatusBarModule {
     /**
      * Provides our instance of StatusBar which is considered optional.
@@ -284,25 +283,5 @@ public class CarStatusBarModule {
                 systemUIPrimaryWindowController,
                 carNavigationBarController,
                 flingAnimationUtilsBuilder);
-    }
-
-
-    /** */
-    @Singleton
-    @Provides
-    static AutoHideController newAutoHideController(Context context,
-            @Main Handler handler,
-            NotificationRemoteInputManager notificationRemoteInputManager,
-            IWindowManager iWindowManager) {
-        return new AutoHideController(context, handler, notificationRemoteInputManager,
-                iWindowManager);
-    }
-
-    /** */
-    @Singleton
-    @Provides
-    static NotificationGroupAlertTransferHelper provideNotificationGroupAlertTransferHelper(
-            RowContentBindStage bindStage) {
-        return new NotificationGroupAlertTransferHelper(bindStage);
     }
 }
