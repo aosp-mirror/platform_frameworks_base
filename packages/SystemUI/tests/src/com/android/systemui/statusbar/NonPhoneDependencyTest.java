@@ -85,7 +85,7 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 Dependency.get(NotificationLockscreenUserManager.class);
         NotificationViewHierarchyManager viewHierarchyManager =
                 Dependency.get(NotificationViewHierarchyManager.class);
-        entryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
+        entryManager.setUpWithPresenter(mPresenter);
         entryManager.addNotificationEntryListener(mEntryListener);
         gutsManager.setUpWithPresenter(mPresenter, mListContainer,
                 mCheckSaveListener, mOnSettingsClickListener);

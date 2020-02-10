@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
+import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneDependenciesModule;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -197,6 +198,7 @@ public class CarStatusBarModule {
             ExtensionController extensionController,
             UserInfoControllerImpl userInfoControllerImpl,
             DismissCallbackRegistry dismissCallbackRegistry,
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
             FullscreenUserSwitcher fullscreenUserSwitcher,
@@ -277,6 +279,7 @@ public class CarStatusBarModule {
                 extensionController,
                 userInfoControllerImpl,
                 dismissCallbackRegistry,
+                statusBarTouchableRegionManager,
                 carServiceProvider,
                 powerManagerHelperLazy,
                 fullscreenUserSwitcher,

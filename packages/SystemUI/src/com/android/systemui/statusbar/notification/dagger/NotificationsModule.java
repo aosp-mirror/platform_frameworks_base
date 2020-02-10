@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.row.NotificationBlockingHelpe
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 
 import java.util.concurrent.Executor;
@@ -123,14 +124,16 @@ public interface NotificationsModule {
             VisualStabilityManager visualStabilityManager,
             StatusBarStateController statusBarStateController,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
-            NotificationListener notificationListener) {
+            NotificationListener notificationListener,
+            HeadsUpManager headsUpManager) {
         return new NotificationAlertingManager(
                 notificationEntryManager,
                 remoteInputManager,
                 visualStabilityManager,
                 statusBarStateController,
                 notificationInterruptionStateProvider,
-                notificationListener);
+                notificationListener,
+                headsUpManager);
     }
 
     /** Provides an instance of {@link NotificationLogger} */

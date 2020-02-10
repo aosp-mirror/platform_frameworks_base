@@ -236,6 +236,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
+    @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private LockscreenLockIconController mLockscreenLockIconController;
     @Mock private StatusBarNotificationActivityStarter.Builder
@@ -397,7 +398,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardDismissUtil,
                 mExtensionController,
                 mUserInfoControllerImpl,
-                mDismissCallbackRegistry);
+                mDismissCallbackRegistry,
+                mStatusBarTouchableRegionManager);
 
         when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
