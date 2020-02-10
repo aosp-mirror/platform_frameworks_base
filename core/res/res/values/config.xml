@@ -2374,7 +2374,7 @@
          type. These are flags and can be freely combined.
          0  - disable whitelist (install all system packages; no logging)
          1  - enforce (only install system packages if they are whitelisted)
-         2  - log (log when a non-whitelisted package is run)
+         2  - log (log non-whitelisted packages)
          4  - any package not mentioned in the whitelist file is implicitly whitelisted on all users
          8  - same as 4, but just for the SYSTEM user
          16 - ignore OTAs (don't install system packages during OTAs)
