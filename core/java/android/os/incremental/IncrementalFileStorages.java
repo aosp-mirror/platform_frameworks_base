@@ -29,6 +29,8 @@ package android.os.incremental;
  * @throws IllegalStateException the session is not an Incremental installation session.
  */
 
+import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -85,7 +87,7 @@ public final class IncrementalFileStorages {
         try {
             result = new IncrementalFileStorages(stageDir, incrementalManager, dataLoaderParams);
             for (InstallationFile file : addedFiles) {
-                if (file.getFileType() == InstallationFile.FILE_TYPE_APK) {
+                if (file.getLocation() == LOCATION_DATA_APP) {
                     try {
                         result.addApkFile(file);
                     } catch (IOException e) {
@@ -95,7 +97,7 @@ public final class IncrementalFileStorages {
                                 e);
                     }
                 } else {
-                    throw new IOException("Unknown file type: " + file.getFileType());
+                    throw new IOException("Unknown file location: " + file.getLocation());
                 }
             }
 
@@ -147,8 +149,8 @@ public final class IncrementalFileStorages {
         String apkName = apk.getName();
         File targetFile = Paths.get(stageDirPath, apkName).toFile();
         if (!targetFile.exists()) {
-            mDefaultStorage.makeFile(apkName, apk.getSize(), null,
-                    apk.getMetadata(), 0, null, null, null);
+            mDefaultStorage.makeFile(apkName, apk.getLengthBytes(), null, apk.getMetadata(),
+                    apk.getSignature());
         }
     }
 

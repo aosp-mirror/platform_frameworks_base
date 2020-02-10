@@ -299,7 +299,16 @@ public final class IncrementalManager {
         return nativeIsIncrementalPath(path);
     }
 
+    /**
+     * Returns raw signature for file if it's on Incremental File System.
+     * Unsafe, use only if you are sure what you are doing.
+     */
+    public static @Nullable byte[] unsafeGetFileSignature(@NonNull String path) {
+        return nativeUnsafeGetFileSignature(path);
+    }
+
     /* Native methods */
     private static native boolean nativeIsEnabled();
     private static native boolean nativeIsIncrementalPath(@NonNull String path);
+    private static native byte[] nativeUnsafeGetFileSignature(@NonNull String path);
 }

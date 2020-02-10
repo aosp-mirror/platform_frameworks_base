@@ -37,10 +37,28 @@ static jboolean nativeIsIncrementalPath(JNIEnv* env,
     return (jboolean)IncFs_IsIncFsPath(path.c_str());
 }
 
-static const JNINativeMethod method_table[] = {
-        {"nativeIsEnabled", "()Z", (void*)nativeIsEnabled},
-        {"nativeIsIncrementalPath", "(Ljava/lang/String;)Z", (void*)nativeIsIncrementalPath},
-};
+static jbyteArray nativeUnsafeGetFileSignature(JNIEnv* env, jobject clazz, jstring javaPath) {
+    ScopedUtfChars path(env, javaPath);
+
+    char signature[INCFS_MAX_SIGNATURE_SIZE];
+    size_t size = sizeof(signature);
+    if (IncFs_UnsafeGetSignatureByPath(path.c_str(), signature, &size) < 0) {
+        return nullptr;
+    }
+
+    jbyteArray result = env->NewByteArray(size);
+    if (result != nullptr) {
+        env->SetByteArrayRegion(result, 0, size, (const jbyte*)signature);
+    }
+    return result;
+}
+
+static const JNINativeMethod method_table[] = {{"nativeIsEnabled", "()Z", (void*)nativeIsEnabled},
+                                               {"nativeIsIncrementalPath", "(Ljava/lang/String;)Z",
+                                                (void*)nativeIsIncrementalPath},
+                                               {"nativeUnsafeGetFileSignature",
+                                                "(Ljava/lang/String;)[B",
+                                                (void*)nativeUnsafeGetFileSignature}};
 
 int register_android_os_incremental_IncrementalManager(JNIEnv* env) {
     return jniRegisterNativeMethods(env, "android/os/incremental/IncrementalManager",
