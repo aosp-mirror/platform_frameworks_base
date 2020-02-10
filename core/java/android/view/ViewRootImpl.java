@@ -736,7 +736,7 @@ public final class ViewRootImpl implements ViewParent,
 
         loadSystemProperties();
         mImeFocusController = new ImeFocusController(this);
-        mUseBLASTAdapter = WindowManagerGlobal.getInstance().useBLAST();
+        mUseBLASTAdapter = WindowManagerGlobal.useBLAST();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
