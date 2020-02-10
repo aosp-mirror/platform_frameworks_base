@@ -134,6 +134,11 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
+    <style name="TextAppearance.StatusBar.Expanded.UserSwitcher.Activated">
+        <item name="android:fontWeight">700</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="TextAppearance" />
 
     <style name="TextAppearance.QS">
@@ -214,6 +219,16 @@
     <style name="TextAppearance.QS.TileLabel.Secondary">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+    </style>
+
+    <style name="TextAppearance.QS.UserSwitcher">
+        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.QS.UserSwitcher.Activated">
+        <item name="android:fontWeight">700</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
