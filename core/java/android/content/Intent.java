@@ -1881,6 +1881,20 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGE_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to manage auto-revoke state.
+     * <p>
+     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose
+     * auto-revoke state will be reviewed (mandatory).
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_AUTO_REVOKE_PERMISSIONS =
+            "android.intent.action.AUTO_REVOKE_PERMISSIONS";
+
+    /**
      * Activity action: Launch UI to review permissions for an app.
      * The system uses this intent if permission review for apps not
      * supporting the new runtime permissions model is enabled. In
