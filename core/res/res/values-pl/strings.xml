@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Włączyć profil służbowy?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Aplikacje do pracy, powiadomienia, dane i inne funkcje profilu do pracy zostaną włączone"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Włącz"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacja jest na starszą wersję Androida i może nie działać prawidłowo. Sprawdź dostępność aktualizacji lub skontaktuj się z programistą."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sprawdź dostępność aktualizacji"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Masz nowe wiadomości"</string>

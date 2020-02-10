@@ -1855,6 +1855,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Да се вклучи работниот профил?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Вашите работни апликации, известувања, податоци и други функции на работниот профил ќе бидат вклучени"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Апликацијава е создадена за постара верзија на Android и може да не функционира правилно. Проверете за ажурирања или контактирајте со програмерот."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>

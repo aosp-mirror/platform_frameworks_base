@@ -1177,7 +1177,7 @@
     <string name="whichEditApplication" msgid="6191568491456092812">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Редактировать с помощью приложения \"%1$s\""</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Изменить"</string>
-    <string name="whichSendApplication" msgid="4143847974460792029">"Отправка данных"</string>
+    <string name="whichSendApplication" msgid="4143847974460792029">"Поделиться"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Поделиться через %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Поделиться"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Выберите приложение"</string>
@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Включить рабочий профиль?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Будут включены корпоративные приложения, уведомления, данные и другие функции рабочего профиля."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Включить"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Приложение недоступно"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Это приложение было создано для более ранней версии Android и может работать со сбоями. Проверьте наличие обновлений или свяжитесь с разработчиком."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверить обновления"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Новые сообщения"</string>

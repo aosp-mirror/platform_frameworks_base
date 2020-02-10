@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ажлын профайлыг асаах уу?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Таны ажлын апп, мэдэгдэл, өгөгдөл болон бусад ажлын профайлын онцлогийг асаана"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Асаах"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Апп боломжгүй байна"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> яг одоо боломжгүй байна."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Энэ аппыг Андройдын хуучин хувилбарт зориулсан бөгөөд буруу ажиллаж болзошгүй. Шинэчлэлтийг шалгаж эсвэл хөгжүүлэгчтэй холбогдоно уу."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шинэчлэлтийг шалгах"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Танд шинэ зурвасууд байна"</string>

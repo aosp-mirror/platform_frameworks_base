@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"የስራ መገለጫ ይብራ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"የእርስዎ የስራ መተግበሪያዎች፣ ማሳወቂያዎች፣ ውሂብ እና ሌሎች የስራ መገለጫ ባህሪያት ይበራሉ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"አብራ"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"መተግበሪያ አይገኝም"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> አሁን አይገኝም።"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ይህ መተግበሪያ ለቆየ የAndroid ስሪት ነው የተገነባው፣ እና በአግባቡ ላይሰራ ይችላል። ዝማኔዎች ካሉ ለመመልከት ይሞክሩ፣ ወይም ደግሞ ገንቢውን ያነጋግሩ።"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ዝማኔ ካለ አረጋግጥ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"አዲስ መልዕክቶች አለዎት"</string>

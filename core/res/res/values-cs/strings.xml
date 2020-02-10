@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Zapnout pracovní profil?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Vaše pracovní aplikace, oznámení, data a ostatní funkce pracovního účtu budou zapnuty"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnout"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> v tuto chvíli není k dispozici."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Tato aplikace byla vytvořena pro starší verzi systému Android a nemusí fungovat správně. Zkuste vyhledat aktualizace, případně kontaktujte vývojáře."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Zkontrolovat aktualizace"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové zprávy"</string>

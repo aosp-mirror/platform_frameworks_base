@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Activer profil professionnel ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Vos applications professionnelles, notifications, données et d\'autres fonctionnalités de votre profil professionnel seront activées"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activer"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Application non disponible"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas disponible pour le moment."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Cette application a été conçue pour une ancienne version d\'Android et risque de ne pas fonctionner correctement. Recherchez des mises à jour ou contactez le développeur."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rechercher une mise à jour"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Vous avez de nouveaux messages"</string>

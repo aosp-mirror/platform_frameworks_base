@@ -1917,6 +1917,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"להפעיל את פרופיל העבודה?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"אפליקציות העבודה, התראות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"הפעל"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏האפליקציה הזו עוצבה לגרסה ישנה יותר של Android וייתכן שלא תפעל כראוי. ניתן לבדוק אם יש עדכונים או ליצור קשר עם המפתח."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"האם יש עדכון חדש?"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"יש לך הודעות חדשות"</string>

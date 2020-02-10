@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ഓണാക്കുക"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ഈ ആപ്പ് Android-ന്റെ പഴയ പതിപ്പിനായി നിർമ്മിച്ചിരിക്കുന്നതിനാൽ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല. അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക, അല്ലെങ്കിൽ ഡെവലപ്പറുമായി ബന്ധപ്പെടുക."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>

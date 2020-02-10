@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"¿Activar el perfil de trabajo?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Se activaran las apps de trabajo, los datos, las notificaciones y otras funciones del perfil de trabajo"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activar"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"La app no está disponible"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible en este momento."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta app se creó para una versión anterior de Android y es posible que no funcione correctamente. Busca actualizaciones o comunícate con el programador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualización"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tienes mensajes nuevos"</string>

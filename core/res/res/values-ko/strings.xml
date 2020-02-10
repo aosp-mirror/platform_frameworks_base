@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"직장 프로필을 사용 설정하시겠어요?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"업무용 앱, 알림, 데이터 및 기타 직장 프로필 기능이 사용 설정됩니다."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"이 앱은 Android 이전 버전에 맞게 개발되었기 때문에 제대로 작동하지 않을 수 있습니다. 업데이트를 확인하거나 개발자에게 문의하세요."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"업데이트 확인"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"새 메시지 있음"</string>

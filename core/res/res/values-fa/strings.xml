@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"نمایه کاری روشن شود؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"برنامه‌ها، اعلان‌ها، داده‌ها و سایر قابلیت‌های نمایه کاری شما روشن خواهد شد"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏این برنامه برای نسخه قدیمی‌تری از Android ساخته شده است و ممکن است درست کار نکند. وجود به‌روزرسانی را بررسی کنید یا با برنامه‌نویس تماس بگیرید."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"بررسی وجود به‌روزرسانی"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"پیام‌های جدیدی دارید"</string>

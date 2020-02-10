@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಆನ್ ಮಾಡುವುದೇ?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"ನಿಮ್ಮ ಕೆಲಸದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಅಧಿಸೂಚನೆಗಳು, ಡೇಟಾ ಮತ್ತು ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ನ ಇತರ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆನ್ ಮಾಡಲಾಗುತ್ತದೆ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ಆನ್‌ ಮಾಡಿ"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಇದೀಗ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು Android ನ ಹಳೆಯ ಆವೃತ್ತಿಗೆ ರಚಿಸಲಾಗಿದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕೆಲಸ ಮಾಡದಿರಬಹುದು. ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಡೆವಲಪರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ಅಪ್‌ಡೇಟ್‌ಗಾಗಿ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ನೀವು ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿರುವಿರಿ"</string>

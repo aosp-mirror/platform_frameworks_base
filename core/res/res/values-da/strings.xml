@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Skal arbejdsprofilen slås til?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Dine arbejdsapps, notifikationer, data og andre funktioner til din arbejdsprofil deaktiveres"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Slå til"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Appen er ikke tilgængelig"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> er ikke tilgængelig lige nu."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Denne app er lavet til en ældre version af Android og fungerer muligvis ikke korrekt. Prøv at søge efter opdateringer, eller kontakt udvikleren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Søg efter opdatering"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye beskeder"</string>
