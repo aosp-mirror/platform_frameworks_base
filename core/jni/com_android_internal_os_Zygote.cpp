@@ -1496,6 +1496,11 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
     std::string mirrorCurPackageProfile = StringPrintf("/data_mirror/cur_profiles/%d/%s",
         user_id, packageName.c_str());
 
+    if (access(mirrorCurPackageProfile.c_str(), F_OK) != 0) {
+      ALOGW("Can't access app profile directory: %s", mirrorCurPackageProfile.c_str());
+      continue;
+    }
+
     PrepareDir(actualCurPackageProfile, DEFAULT_DATA_DIR_PERMISSION, uid, uid, fail_fn);
     BindMount(mirrorCurPackageProfile, actualCurPackageProfile, fail_fn);
   }
