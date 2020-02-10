@@ -290,6 +290,9 @@ public class NotificationEntryManager implements
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
+            for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                listener.onEntryCleanUp(entry);
+            }
             mLogger.logInflationAborted(key, "pending", reason);
         }
         NotificationEntry addedEntry = getActiveNotificationUnfiltered(key);
