@@ -22,7 +22,6 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAY
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
@@ -43,8 +42,8 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.SurfaceControlViewHost;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -386,7 +385,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                  * This gets called on a RenderThread worker thread, so members accessed here must
                  * be protected by a lock.
                  */
-                final boolean useBLAST = WindowManagerGlobal.USE_BLAST_ADAPTER;
+                final boolean useBLAST = WindowManagerGlobal.getInstance().useBLAST();
                 viewRoot.registerRtFrameCallback(frame -> {
                     try {
                         final SurfaceControl.Transaction t = useBLAST ?
@@ -1120,7 +1119,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void applySurfaceTransforms(SurfaceControl surface, SurfaceControl.Transaction t,
             Rect position, long frameNumber) {
-        if (frameNumber > 0 && !WindowManagerGlobal.USE_BLAST_ADAPTER) {
+        if (frameNumber > 0 && !WindowManagerGlobal.getInstance().useBLAST()) {
             final ViewRootImpl viewRoot = getViewRootImpl();
 
             t.deferTransactionUntil(surface, viewRoot.getRenderSurfaceControl(),
@@ -1138,7 +1137,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
-        final boolean useBLAST = WindowManagerGlobal.USE_BLAST_ADAPTER;
+        final boolean useBLAST = WindowManagerGlobal.getInstance().useBLAST();
         final ViewRootImpl viewRoot = getViewRootImpl();
         final SurfaceControl.Transaction t = useBLAST ? viewRoot.getBLASTSyncTransaction() :
             mRtTransaction;
@@ -1199,7 +1198,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionLost(long frameNumber) {
-            boolean useBLAST = WindowManagerGlobal.USE_BLAST_ADAPTER;
+            boolean useBLAST = WindowManagerGlobal.getInstance().useBLAST();
             if (DEBUG) {
                 Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
                         System.identityHashCode(this), frameNumber));
@@ -1538,7 +1537,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @Override
     public void invalidate(boolean invalidateCache) {
         super.invalidate(invalidateCache);
-        if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
+        if (!WindowManagerGlobal.getInstance().useBLAST()) {
             return;
         }
         final ViewRootImpl viewRoot = getViewRootImpl();
