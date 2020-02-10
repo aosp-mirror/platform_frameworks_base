@@ -244,7 +244,7 @@ public class Tuner implements AutoCloseable  {
      *
      * <p>
      * Tuner events are started when {@link #tune(FrontendSettings)} is called and end when {@link
-     * #stopTune()} is called.
+     * #cancelTuning()} is called.
      *
      * @param eventListener receives tune events.
      * @throws SecurityException if the caller does not have appropriate permissions.
@@ -309,7 +309,7 @@ public class Tuner implements AutoCloseable  {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
-    public int stopTune() {
+    public int cancelTuning() {
         TunerUtils.checkTunerPermission(mContext);
         return nativeStopTune();
     }
@@ -322,8 +322,8 @@ public class Tuner implements AutoCloseable  {
      * @param settings A {@link FrontendSettings} to configure the frontend.
      * @param scanType The scan type.
      * @throws SecurityException     if the caller does not have appropriate permissions.
-     * @throws IllegalStateException if {@code scan} is called again before {@link #stopScan()} is
-     *                               called.
+     * @throws IllegalStateException if {@code scan} is called again before
+     *                               {@link #cancelScanning()} is called.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
@@ -354,7 +354,7 @@ public class Tuner implements AutoCloseable  {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
-    public int stopScan() {
+    public int cancelScanning() {
         TunerUtils.checkTunerPermission(mContext);
         int retVal = nativeStopScan();
         mScanCallback = null;

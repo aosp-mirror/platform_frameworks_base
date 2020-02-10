@@ -4851,6 +4851,8 @@ package android.media.tv.tuner {
 
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @NonNull String, int, @Nullable android.media.tv.tuner.Tuner.OnResourceLostListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelScanning();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelTuning();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int connectCiCam(int);
@@ -4871,8 +4873,6 @@ package android.media.tv.tuner {
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setLna(boolean);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopScan();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
   }
