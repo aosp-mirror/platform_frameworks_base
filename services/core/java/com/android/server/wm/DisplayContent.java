@@ -5660,7 +5660,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return activityType == ACTIVITY_TYPE_STANDARD
                 && (windowingMode == WINDOWING_MODE_FULLSCREEN
                 || windowingMode == WINDOWING_MODE_FREEFORM
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                || windowingMode == WINDOWING_MODE_MULTI_WINDOW);
     }
 
     /**
