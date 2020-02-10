@@ -234,7 +234,6 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
@@ -264,7 +263,6 @@ import com.android.server.am.BaseErrorDialog;
 import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
-import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
@@ -378,7 +376,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     RootWindowContainer mRootWindowContainer;
     WindowManagerService mWindowManager;
     private UserManagerService mUserManager;
-    private AppOpsService mAppOpsService;
+    private AppOpsManager mAppOpsManager;
     /** All active uids in the system. */
     private final MirrorActiveUids mActiveUids = new MirrorActiveUids();
     private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
@@ -891,12 +889,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mUserManager;
     }
 
-    AppOpsService getAppOpsService() {
-        if (mAppOpsService == null) {
-            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-            mAppOpsService = (AppOpsService) IAppOpsService.Stub.asInterface(b);
+    AppOpsManager getAppOpsManager() {
+        if (mAppOpsManager == null) {
+            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         }
-        return mAppOpsService;
+        return mAppOpsManager;
     }
 
     boolean hasUserRestriction(String restriction, int userId) {
@@ -904,8 +901,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     boolean hasSystemAlertWindowPermission(int callingUid, int callingPid, String callingPackage) {
-        final int mode = getAppOpsService().noteOperation(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                callingUid, callingPackage, /* featureId */ null, false, "");
+        final int mode = getAppOpsManager().noteOpNoThrow(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+                callingUid, callingPackage, /* featureId */ null, "");
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkPermission(Manifest.permission.SYSTEM_ALERT_WINDOW, callingPid, callingUid)
                     == PERMISSION_GRANTED;
@@ -1025,41 +1022,43 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public final int startActivity(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions) {
-        return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
-                resultWho, requestCode, startFlags, profilerInfo, bOptions,
+            String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
+            Bundle bOptions) {
+        return startActivityAsUser(caller, callingPackage, callingFeatureId, intent, resolvedType,
+                resultTo, resultWho, requestCode, startFlags, profilerInfo, bOptions,
                 UserHandle.getCallingUserId());
     }
 
     @Override
     public final int startActivities(IApplicationThread caller, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle bOptions,
-            int userId) {
+            String callingFeatureId, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
+            Bundle bOptions, int userId) {
         assertPackageMatchesCallingUid(callingPackage);
         final String reason = "startActivities";
         enforceNotIsolatedCaller(reason);
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId, reason);
         // TODO: Switch to user app stacks here.
         return getActivityStartController().startActivities(caller, -1, 0, -1, callingPackage,
-                intents, resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId,
-                reason, null /* originatingPendingIntent */,
-                false /* allowBackgroundActivityStart */);
+                callingFeatureId, intents, resolvedTypes, resultTo,
+                SafeActivityOptions.fromBundle(bOptions), userId, reason,
+                null /* originatingPendingIntent */, false /* allowBackgroundActivityStart */);
     }
 
     @Override
     public int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
-        return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,
-                resultWho, requestCode, startFlags, profilerInfo, bOptions, userId,
+            String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
+            Bundle bOptions, int userId) {
+        return startActivityAsUser(caller, callingPackage, callingFeatureId, intent, resolvedType,
+                resultTo, resultWho, requestCode, startFlags, profilerInfo, bOptions, userId,
                 true /*validateIncomingUser*/);
     }
 
     private int startActivityAsUser(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId,
-            boolean validateIncomingUser) {
+            @Nullable String callingFeatureId, Intent intent, String resolvedType,
+            IBinder resultTo, String resultWho, int requestCode, int startFlags,
+            ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
 
@@ -1070,6 +1069,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return getActivityStartController().obtainStarter(intent, "startActivityAsUser")
                 .setCaller(caller)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setResultTo(resultTo)
                 .setResultWho(resultWho)
@@ -1215,6 +1215,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setCallingPid(-1)
                     .setCallingUid(r.launchedFromUid)
                     .setCallingPackage(r.launchedFromPackage)
+                    .setCallingFeatureId(r.launchedFromFeatureId)
                     .setRealCallingPid(-1)
                     .setRealCallingUid(r.launchedFromUid)
                     .setActivityOptions(options)
@@ -1231,8 +1232,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public final WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
+            String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, ProfilerInfo profilerInfo,
+            Bundle bOptions, int userId) {
         assertPackageMatchesCallingUid(callingPackage);
         final WaitResult res = new WaitResult();
         enforceNotIsolatedCaller("startActivityAndWait");
@@ -1242,6 +1244,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         getActivityStartController().obtainStarter(intent, "startActivityAndWait")
                 .setCaller(caller)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setResultTo(resultTo)
                 .setResultWho(resultWho)
@@ -1257,8 +1260,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public final int startActivityWithConfig(IApplicationThread caller, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
-            int startFlags, Configuration config, Bundle bOptions, int userId) {
+            String callingFeatureId, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, Configuration config,
+            Bundle bOptions, int userId) {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityWithConfig");
         userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
@@ -1267,6 +1271,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
                 .setCaller(caller)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setResultTo(resultTo)
                 .setResultWho(resultWho)
@@ -1317,6 +1322,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityRecord sourceRecord;
         final int targetUid;
         final String targetPackage;
+        final String targetFeatureId;
         final boolean isResolver;
         synchronized (mGlobalLock) {
             if (resultTo == null) {
@@ -1384,6 +1390,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             targetUid = sourceRecord.launchedFromUid;
             targetPackage = sourceRecord.launchedFromPackage;
+            targetFeatureId = sourceRecord.launchedFromFeatureId;
             isResolver = sourceRecord.isResolverOrChildActivity();
         }
 
@@ -1396,6 +1403,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return getActivityStartController().obtainStarter(intent, "startActivityAsCaller")
                     .setCallingUid(targetUid)
                     .setCallingPackage(targetPackage)
+                    .setCallingFeatureId(targetFeatureId)
                     .setResolvedType(resolvedType)
                     .setResultTo(resultTo)
                     .setResultWho(resultWho)
@@ -1431,8 +1439,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public int startVoiceActivity(String callingPackage, int callingPid, int callingUid,
-            Intent intent, String resolvedType, IVoiceInteractionSession session,
+    public int startVoiceActivity(String callingPackage, String callingFeatureId, int callingPid,
+            int callingUid, Intent intent, String resolvedType, IVoiceInteractionSession session,
             IVoiceInteractor interactor, int startFlags, ProfilerInfo profilerInfo,
             Bundle bOptions, int userId) {
         assertPackageMatchesCallingUid(callingPackage);
@@ -1445,6 +1453,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return getActivityStartController().obtainStarter(intent, "startVoiceActivity")
                 .setCallingUid(callingUid)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setVoiceSession(session)
                 .setVoiceInteractor(interactor)
@@ -1457,8 +1466,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public int startAssistantActivity(String callingPackage, int callingPid, int callingUid,
-            Intent intent, String resolvedType, Bundle bOptions, int userId) {
+    public int startAssistantActivity(String callingPackage, @NonNull String callingFeatureId,
+            int callingPid, int callingUid, Intent intent, String resolvedType, Bundle bOptions,
+            int userId) {
         assertPackageMatchesCallingUid(callingPackage);
         mAmInternal.enforceCallingPermission(BIND_VOICE_INTERACTION, "startAssistantActivity()");
         userId = handleIncomingUser(callingPid, callingUid, userId, "startAssistantActivity");
@@ -1466,6 +1476,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return getActivityStartController().obtainStarter(intent, "startAssistantActivity")
                 .setCallingUid(callingUid)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
                 .setUserId(userId)
@@ -1489,13 +1500,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
+                final String recentsFeatureId = mRecentTasks.getRecentsComponentFeatureId();
                 final int recentsUid = mRecentTasks.getRecentsComponentUid();
                 final WindowProcessController caller = getProcessController(callingPid, callingUid);
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
                         getActivityStartController(), mWindowManager, intent, recentsComponent,
-                        recentsUid, caller);
+                        recentsFeatureId, recentsUid, caller);
                 if (recentsAnimationRunner == null) {
                     anim.preloadRecentsActivity();
                 } else {
@@ -5773,9 +5785,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     }
 
-    IIntentSender getIntentSenderLocked(int type, String packageName, int callingUid, int userId,
-            IBinder token, String resultWho, int requestCode, Intent[] intents,
-            String[] resolvedTypes, int flags, Bundle bOptions) {
+    IIntentSender getIntentSenderLocked(int type, String packageName, String featureId,
+            int callingUid, int userId, IBinder token, String resultWho, int requestCode,
+            Intent[] intents, String[] resolvedTypes, int flags, Bundle bOptions) {
 
         ActivityRecord activity = null;
         if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
@@ -5791,8 +5803,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         final PendingIntentRecord rec = mPendingIntentController.getIntentSender(type, packageName,
-                callingUid, userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
-                bOptions);
+                featureId, callingUid, userId, token, resultWho, requestCode, intents,
+                resolvedTypes, flags, bOptions);
         final boolean noCreate = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
         if (noCreate) {
             return rec;
@@ -6180,8 +6192,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public int startActivitiesAsPackage(String packageName, int userId, Intent[] intents,
-                Bundle bOptions) {
+        public int startActivitiesAsPackage(String packageName, @Nullable String featureId,
+                int userId, Intent[] intents, Bundle bOptions) {
             Objects.requireNonNull(intents, "intents");
             final String[] resolvedTypes = new String[intents.length];
 
@@ -6206,7 +6218,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
 
             return getActivityStartController().startActivitiesInPackage(
-                    packageUid, packageName,
+                    packageUid, packageName, featureId,
                     intents, resolvedTypes, null /* resultTo */,
                     SafeActivityOptions.fromBundle(bOptions), userId,
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
@@ -6215,41 +6227,41 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
-                String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-                SafeActivityOptions options, int userId, boolean validateIncomingUser,
-                PendingIntentRecord originatingPendingIntent,
+                String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
+                String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+                boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             assertPackageMatchesCallingUid(callingPackage);
             synchronized (mGlobalLock) {
                 return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
-                        realCallingUid, callingPackage, intents, resolvedTypes, resultTo, options,
-                        userId, validateIncomingUser, originatingPendingIntent,
+                        realCallingUid, callingPackage, callingFeatureId, intents, resolvedTypes,
+                        resultTo, options, userId, validateIncomingUser, originatingPendingIntent,
                         allowBackgroundActivityStart);
             }
         }
 
         @Override
         public int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
-                String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
-                String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
-                int userId, Task inTask, String reason, boolean validateIncomingUser,
-                PendingIntentRecord originatingPendingIntent,
+                String callingPackage, @Nullable String callingFeatureId, Intent intent,
+                String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+                int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
+                boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             assertPackageMatchesCallingUid(callingPackage);
             synchronized (mGlobalLock) {
                 return getActivityStartController().startActivityInPackage(uid, realCallingPid,
-                        realCallingUid, callingPackage, intent, resolvedType, resultTo, resultWho,
-                        requestCode, startFlags, options, userId, inTask, reason,
-                        validateIncomingUser, originatingPendingIntent,
+                        realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
+                        resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
+                        reason, validateIncomingUser, originatingPendingIntent,
                         allowBackgroundActivityStart);
             }
         }
 
         @Override
-        public int startActivityAsUser(IApplicationThread caller, String callerPacakge,
-                Intent intent, Bundle options, int userId) {
+        public int startActivityAsUser(IApplicationThread caller, String callerPackage,
+                @Nullable String callerFeatureId, Intent intent, Bundle options, int userId) {
             return ActivityTaskManagerService.this.startActivityAsUser(
-                    caller, callerPacakge, intent,
+                    caller, callerPackage, callerFeatureId, intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                     null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options, userId,
                     false /*validateIncomingUser*/);
@@ -6685,12 +6697,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public IIntentSender getIntentSender(int type, String packageName,
-                int callingUid, int userId, IBinder token, String resultWho,
-                int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
-                Bundle bOptions) {
+                @Nullable String featureId, int callingUid, int userId, IBinder token,
+                String resultWho, int requestCode, Intent[] intents, String[] resolvedTypes,
+                int flags, Bundle bOptions) {
             synchronized (mGlobalLock) {
-                return getIntentSenderLocked(type, packageName, callingUid, userId, token,
-                        resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
+                return getIntentSenderLocked(type, packageName, featureId, callingUid, userId,
+                        token, resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
             }
         }
 

@@ -4316,8 +4316,8 @@ public class ActivityManager {
      */
     public static void broadcastStickyIntent(Intent intent, int appOp, int userId) {
         try {
-            getService().broadcastIntent(
-                    null, intent, null, null, Activity.RESULT_OK, null, null,
+            getService().broadcastIntentWithFeature(
+                    null, null, intent, null, null, Activity.RESULT_OK, null, null,
                     null /*permission*/, appOp, null, false, true, userId);
         } catch (RemoteException ex) {
         }

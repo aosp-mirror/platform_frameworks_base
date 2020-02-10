@@ -5195,7 +5195,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     final Intent dock = createHomeDockIntent();
                     if (dock != null) {
                         int result = ActivityTaskManager.getService()
-                                .startActivityAsUser(null, mContext.getBasePackageName(), dock,
+                                .startActivityAsUser(null, mContext.getBasePackageName(),
+                                        mContext.getFeatureId(), dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
                                         null, null, 0,
                                         ActivityManager.START_FLAG_ONLY_IF_NEEDED,
@@ -5206,7 +5207,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 int result = ActivityTaskManager.getService()
-                        .startActivityAsUser(null, mContext.getBasePackageName(), mHomeIntent,
+                        .startActivityAsUser(null, mContext.getBasePackageName(),
+                                mContext.getFeatureId(), mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,
                                 ActivityManager.START_FLAG_ONLY_IF_NEEDED,
