@@ -1045,7 +1045,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
             view.setOnClickListener(v -> onClickItem(position));
-            view.setOnLongClickListener(v -> onLongClickItem(position));
+            if (action instanceof LongPressAction) {
+                view.setOnLongClickListener(v -> onLongClickItem(position));
+            }
             return view;
         }
 
