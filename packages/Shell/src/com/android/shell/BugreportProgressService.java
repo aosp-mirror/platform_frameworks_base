@@ -606,26 +606,21 @@ public class BugreportProgressService extends Service {
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name,
                 shareTitle, shareDescription, bugreportType, mBugreportsDir);
-        ParcelFileDescriptor bugreportFd;
-        ParcelFileDescriptor screenshotFd;
-
-        try {
-            bugreportFd = info.createAndGetBugreportFd();
-            if (bugreportFd == null) {
-                Log.e(TAG, "Bugreport parcel file descriptor is null.");
-                return;
-            }
-            screenshotFd = info.createAndGetDefaultScreenshotFd();
-            if (screenshotFd == null) {
-                Log.e(TAG, "Screenshot parcel file descriptor is null. Deleting bugreport file");
-                FileUtils.closeQuietly(bugreportFd);
-                info.bugreportFile.delete();
-                return;
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Error in generating bugreport files: ", e);
+        ParcelFileDescriptor bugreportFd = info.getBugreportFd();
+        if (bugreportFd == null) {
+            Log.e(TAG, "Failed to start bugreport generation as "
+                    + " bugreport parcel file descriptor is null.");
             return;
         }
+        ParcelFileDescriptor screenshotFd = info.getDefaultScreenshotFd();
+        if (screenshotFd == null) {
+            Log.e(TAG, "Failed to start bugreport generation as"
+                    + " screenshot parcel file descriptor is null. Deleting bugreport file");
+            FileUtils.closeQuietly(bugreportFd);
+            info.bugreportFile.delete();
+            return;
+        }
+
         mBugreportManager = (BugreportManager) mContext.getSystemService(
                 Context.BUGREPORT_SERVICE);
         final Executor executor = ActivityThread.currentActivityThread().getExecutor();
@@ -639,7 +634,7 @@ public class BugreportProgressService extends Service {
             mBugreportManager.startBugreport(bugreportFd, screenshotFd,
                     new BugreportParams(bugreportType), executor, bugreportCallback);
         } catch (RuntimeException e) {
-            Log.i(TAG, "error in generating bugreports: ", e);
+            Log.i(TAG, "Error in generating bugreports: ", e);
             // The binder call didn't go through successfully, so need to close the fds.
             // If the calls went through API takes ownership.
             FileUtils.closeQuietly(bugreportFd);
@@ -657,11 +652,15 @@ public class BugreportProgressService extends Service {
         return null;
     }
 
-    private static void createReadWriteFile(File file) throws IOException {
-        if (!file.exists()) {
-            file.createNewFile();
-            file.setReadable(true, true);
-            file.setWritable(true, true);
+    private static void createReadWriteFile(File file) {
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+                file.setReadable(true, true);
+                file.setWritable(true, true);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error in creating bugreport file: ", e);
         }
     }
 
@@ -1836,23 +1835,23 @@ public class BugreportProgressService extends Service {
 
         void createBugreportFile(File bugreportsDir) {
             bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+            createReadWriteFile(bugreportFile);
         }
 
         void createScreenshotFile(File bugreportsDir) {
             File screenshotFile = new File(bugreportsDir, getScreenshotName("default"));
             addScreenshot(screenshotFile);
+            createReadWriteFile(screenshotFile);
         }
 
-        ParcelFileDescriptor createAndGetBugreportFd() throws IOException {
-            createReadWriteFile(bugreportFile);
+        ParcelFileDescriptor getBugreportFd() {
             return getFd(bugreportFile);
         }
 
-        ParcelFileDescriptor createAndGetDefaultScreenshotFd() throws IOException {
+        ParcelFileDescriptor getDefaultScreenshotFd() {
             if (screenshotFiles.isEmpty()) {
                 return null;
             }
-            createReadWriteFile(screenshotFiles.get(0));
             return getFd(screenshotFiles.get(0));
         }
 
