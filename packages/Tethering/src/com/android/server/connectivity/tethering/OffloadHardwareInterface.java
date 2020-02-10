@@ -18,19 +18,28 @@ package com.android.server.connectivity.tethering;
 
 import static android.net.util.TetheringUtils.uint16;
 
+import android.hardware.tetheroffload.config.V1_0.IOffloadConfig;
 import android.hardware.tetheroffload.control.V1_0.IOffloadControl;
 import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
 import android.hardware.tetheroffload.control.V1_0.NetworkProtocol;
 import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
+import android.net.netlink.NetlinkSocket;
 import android.net.util.SharedLog;
-import android.net.util.TetheringUtils;
+import android.net.util.SocketUtils;
 import android.os.Handler;
+import android.os.NativeHandle;
 import android.os.RemoteException;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 
@@ -49,6 +58,10 @@ public class OffloadHardwareInterface {
     private static final String NO_INTERFACE_NAME = "";
     private static final String NO_IPV4_ADDRESS = "";
     private static final String NO_IPV4_GATEWAY = "";
+    // Reference kernel/uapi/linux/netfilter/nfnetlink_compat.h
+    private static final int NF_NETLINK_CONNTRACK_NEW = 1;
+    private static final int NF_NETLINK_CONNTRACK_UPDATE = 2;
+    private static final int NF_NETLINK_CONNTRACK_DESTROY = 4;
 
     private final Handler mHandler;
     private final SharedLog mLog;
@@ -121,9 +134,103 @@ public class OffloadHardwareInterface {
         return DEFAULT_TETHER_OFFLOAD_DISABLED;
     }
 
-    /** Configure offload management process. */
+    /**
+     * Offload management process need to know conntrack rules to support NAT, but it may not have
+     * permission to create netlink netfilter sockets. Create two netlink netfilter sockets and
+     * share them with offload management process.
+     */
     public boolean initOffloadConfig() {
-        return TetheringUtils.configOffload();
+        IOffloadConfig offloadConfig;
+        try {
+            offloadConfig = IOffloadConfig.getService();
+        } catch (RemoteException e) {
+            mLog.e("getIOffloadConfig error " + e);
+            return false;
+        }
+        if (offloadConfig == null) {
+            mLog.e("Could not find IOffloadConfig service");
+            return false;
+        }
+        // Per the IConfigOffload definition:
+        //
+        // h1    provides a file descriptor bound to the following netlink groups
+        //       (NF_NETLINK_CONNTRACK_NEW | NF_NETLINK_CONNTRACK_DESTROY).
+        //
+        // h2    provides a file descriptor bound to the following netlink groups
+        //       (NF_NETLINK_CONNTRACK_UPDATE | NF_NETLINK_CONNTRACK_DESTROY).
+        final NativeHandle h1 = createConntrackSocket(
+                NF_NETLINK_CONNTRACK_NEW | NF_NETLINK_CONNTRACK_DESTROY);
+        if (h1 == null) return false;
+
+        final NativeHandle h2 = createConntrackSocket(
+                NF_NETLINK_CONNTRACK_UPDATE | NF_NETLINK_CONNTRACK_DESTROY);
+        if (h2 == null) {
+            closeFdInNativeHandle(h1);
+            return false;
+        }
+
+        final CbResults results = new CbResults();
+        try {
+            offloadConfig.setHandles(h1, h2,
+                    (boolean success, String errMsg) -> {
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
+                    });
+        } catch (RemoteException e) {
+            record("initOffloadConfig, setHandles fail", e);
+            return false;
+        }
+        // Explicitly close FDs.
+        closeFdInNativeHandle(h1);
+        closeFdInNativeHandle(h2);
+
+        record("initOffloadConfig, setHandles results:", results);
+        return results.mSuccess;
+    }
+
+    private void closeFdInNativeHandle(final NativeHandle h) {
+        try {
+            h.close();
+        } catch (IOException | IllegalStateException e) {
+            // IllegalStateException means fd is already closed, do nothing here.
+            // Also nothing we can do if IOException.
+        }
+    }
+
+    private NativeHandle createConntrackSocket(final int groups) {
+        FileDescriptor fd;
+        try {
+            fd = NetlinkSocket.forProto(OsConstants.NETLINK_NETFILTER);
+        } catch (ErrnoException e) {
+            mLog.e("Unable to create conntrack socket " + e);
+            return null;
+        }
+
+        final SocketAddress sockAddr = SocketUtils.makeNetlinkSocketAddress(0, groups);
+        try {
+            Os.bind(fd, sockAddr);
+        } catch (ErrnoException | SocketException e) {
+            mLog.e("Unable to bind conntrack socket for groups " + groups + " error: " + e);
+            try {
+                SocketUtils.closeSocket(fd);
+            } catch (IOException ie) {
+                // Nothing we can do here
+            }
+            return null;
+        }
+        try {
+            Os.connect(fd, sockAddr);
+        } catch (ErrnoException | SocketException e) {
+            mLog.e("connect to kernel fail for groups " + groups + " error: " + e);
+            try {
+                SocketUtils.closeSocket(fd);
+            } catch (IOException ie) {
+                // Nothing we can do here
+            }
+            return null;
+        }
+
+        return new NativeHandle(fd, true);
     }
 
     /** Initialize the tethering offload HAL. */
