@@ -3058,4 +3058,40 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
     }
+
+    @Override
+    public void setGestureDetectionPassthroughRegion(int displayId, Region region) {
+        mMainHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityManagerService::setGestureDetectionPassthroughRegionInternal,
+                        this,
+                        displayId,
+                        region));
+    }
+
+    @Override
+    public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
+        mMainHandler.sendMessage(
+                obtainMessage(
+                        AccessibilityManagerService::setTouchExplorationPassthroughRegionInternal,
+                        this,
+                        displayId,
+                        region));
+    }
+
+    private void setTouchExplorationPassthroughRegionInternal(int displayId, Region region) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.setTouchExplorationPassthroughRegion(displayId, region);
+            }
+        }
+    }
+
+    private void setGestureDetectionPassthroughRegionInternal(int displayId, Region region) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.setGestureDetectionPassthroughRegion(displayId, region);
+            }
+        }
+    }
 }

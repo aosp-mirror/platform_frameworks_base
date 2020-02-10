@@ -23,6 +23,7 @@ import static com.android.server.accessibility.gestures.TouchState.ALL_POINTER_I
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Region;
 import android.os.Handler;
 import android.util.Slog;
 import android.view.InputDevice;
@@ -120,6 +121,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
     // Context in which this explorer operates.
     private final Context mContext;
 
+    private Region mGestureDetectionPassthroughRegion;
+    private Region mTouchExplorationPassthroughRegion;
 
 /**
      * Creates a new instance.
@@ -165,6 +168,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
         } else {
             mGestureDetector = detector;
         }
+        mGestureDetectionPassthroughRegion = new Region();
+        mTouchExplorationPassthroughRegion = new Region();
     }
 
     @Override
@@ -230,10 +235,11 @@ public class TouchExplorer extends BaseEventStreamTransformation
         }
 
         mState.onReceivedMotionEvent(rawEvent);
-
-        if (mGestureDetector.onMotionEvent(event, rawEvent, policyFlags)) {
-            // Event was handled by the gesture detector.
-            return;
+        if (shouldPerformGestureDetection(event)) {
+            if (mGestureDetector.onMotionEvent(event, rawEvent, policyFlags)) {
+                // Event was handled by the gesture detector.
+                return;
+            }
         }
 
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
@@ -418,6 +424,21 @@ public class TouchExplorer extends BaseEventStreamTransformation
             mSendTouchExplorationEndDelayed.forceSendAndRemove();
             mSendTouchInteractionEndDelayed.forceSendAndRemove();
             mDispatcher.sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
+            if (mTouchExplorationPassthroughRegion.contains(
+                    (int) event.getX(), (int) event.getY())) {
+                // The touch exploration passthrough overrides the gesture detection passthrough in
+                // the event they overlap.
+                // Pass this entire gesture through to the system as-is.
+                mState.startDelegating();
+                event = MotionEvent.obtainNoHistory(event);
+                mDispatcher.sendMotionEvent(
+                        event, event.getAction(), rawEvent, ALL_POINTER_ID_BITS, policyFlags);
+                mSendHoverEnterAndMoveDelayed.cancel();
+            } else if (mGestureDetectionPassthroughRegion.contains(
+                    (int) event.getX(), (int) event.getY())) {
+                // Jump straight to touch exploration.
+                mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
+            }
         } else {
             // Avoid duplicated TYPE_TOUCH_INTERACTION_START event when 2nd tap of double tap.
             mSendTouchInteractionEndDelayed.cancel();
@@ -909,6 +930,29 @@ public class TouchExplorer extends BaseEventStreamTransformation
         mGestureDetector.setMultiFingerGesturesEnabled(enabled);
     }
 
+    public void setGestureDetectionPassthroughRegion(Region region) {
+        mGestureDetectionPassthroughRegion = region;
+    }
+
+    public void setTouchExplorationPassthroughRegion(Region region) {
+        mTouchExplorationPassthroughRegion = region;
+    }
+
+    private boolean shouldPerformGestureDetection(MotionEvent event) {
+        if (mState.isDelegating()) {
+            return false;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            final int x = (int) event.getX();
+            final int y = (int) event.getY();
+            if (mTouchExplorationPassthroughRegion.contains(x, y)
+                    || mGestureDetectionPassthroughRegion.contains(x, y)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Class for delayed exiting from gesture detecting mode.
      */
@@ -1135,5 +1179,4 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 + ", mTempPoint: " + mTempPoint
                 + " }";
     }
-
 }
