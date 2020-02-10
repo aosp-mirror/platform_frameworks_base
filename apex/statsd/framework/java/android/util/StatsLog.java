@@ -59,7 +59,7 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging start");
+                        Log.d(TAG, "Failed to find statsd when logging start");
                     }
                     return false;
                 }
@@ -69,7 +69,7 @@ public final class StatsLog {
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging start");
+                    Log.d(TAG, "Failed to connect to statsd when logging start");
                 }
                 return false;
             }
@@ -88,7 +88,7 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging stop");
+                        Log.d(TAG, "Failed to find statsd when logging stop");
                     }
                     return false;
                 }
@@ -98,7 +98,7 @@ public final class StatsLog {
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                    Log.d(TAG, "Failed to connect to statsd when logging stop");
                 }
                 return false;
             }
@@ -117,7 +117,7 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging event");
+                        Log.d(TAG, "Failed to find statsd when logging event");
                     }
                     return false;
                 }
@@ -127,7 +127,7 @@ public final class StatsLog {
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging event");
+                    Log.d(TAG, "Failed to connect to statsd when logging event");
                 }
                 return false;
             }
