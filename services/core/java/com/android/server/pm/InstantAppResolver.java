@@ -222,7 +222,6 @@ public abstract class InstantAppResolver {
                         sanitizedIntent,
                         failureIntent,
                         requestObj.callingPackage,
-                        requestObj.callingFeatureId,
                         requestObj.verificationBundle,
                         requestObj.resolvedType,
                         requestObj.userId,
@@ -267,7 +266,6 @@ public abstract class InstantAppResolver {
             @NonNull Intent sanitizedIntent,
             @Nullable Intent failureIntent,
             @NonNull String callingPackage,
-            @Nullable String callingFeatureId,
             @Nullable Bundle verificationBundle,
             @NonNull String resolvedType,
             int userId,
@@ -310,10 +308,9 @@ public abstract class InstantAppResolver {
                         onFailureIntent = failureIntent;
                     }
                     final IIntentSender failureIntentTarget = ActivityManager.getService()
-                            .getIntentSenderWithFeature(
+                            .getIntentSender(
                                     ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                                    callingFeatureId, null /*token*/, null /*resultWho*/,
-                                    1 /*requestCode*/,
+                                    null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
                                     new Intent[] { onFailureIntent },
                                     new String[] { resolvedType },
                                     PendingIntent.FLAG_CANCEL_CURRENT
@@ -331,10 +328,9 @@ public abstract class InstantAppResolver {
             successIntent.setLaunchToken(token);
             try {
                 final IIntentSender successIntentTarget = ActivityManager.getService()
-                        .getIntentSenderWithFeature(
+                        .getIntentSender(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
-                                callingFeatureId, null /*token*/, null /*resultWho*/,
-                                0 /*requestCode*/,
+                                null /*token*/, null /*resultWho*/, 0 /*requestCode*/,
                                 new Intent[] { successIntent },
                                 new String[] { resolvedType },
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT

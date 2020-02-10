@@ -269,16 +269,13 @@ public abstract class ActivityManagerInternal {
 
     public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,
             long duration, String tag);
-
-    public abstract int broadcastIntentInPackage(String packageName, @Nullable String featureId,
-            int uid, int realCallingUid, int realCallingPid, Intent intent, String resolvedType,
-            IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
-            String requiredPermission, Bundle bOptions, boolean serialized, boolean sticky,
-            @UserIdInt int userId, boolean allowBackgroundActivityStarts);
-
+    public abstract int broadcastIntentInPackage(String packageName, int uid, int realCallingUid,
+            int realCallingPid, Intent intent, String resolvedType, IIntentReceiver resultTo,
+            int resultCode, String resultData, Bundle resultExtras, String requiredPermission,
+            Bundle bOptions, boolean serialized, boolean sticky, @UserIdInt int userId,
+            boolean allowBackgroundActivityStarts);
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
-            String resolvedType, boolean fgRequired, String callingPackage,
-            @Nullable String callingFeatureId, @UserIdInt int userId,
+            String resolvedType, boolean fgRequired, String callingPackage, @UserIdInt int userId,
             boolean allowBackgroundActivityStarts) throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);

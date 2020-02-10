@@ -23,7 +23,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -89,9 +88,9 @@ public class PendingIntentController {
         }
     }
 
-    public PendingIntentRecord getIntentSender(int type, String packageName,
-            @Nullable String featureId, int callingUid, int userId, IBinder token, String resultWho,
-            int requestCode, Intent[] intents, String[] resolvedTypes, int flags, Bundle bOptions) {
+    public PendingIntentRecord getIntentSender(int type, String packageName, int callingUid,
+            int userId, IBinder token, String resultWho, int requestCode, Intent[] intents,
+            String[] resolvedTypes, int flags, Bundle bOptions) {
         synchronized (mLock) {
             if (DEBUG_MU) Slog.v(TAG_MU, "getIntentSender(): uid=" + callingUid);
 
@@ -110,8 +109,8 @@ public class PendingIntentController {
             flags &= ~(PendingIntent.FLAG_NO_CREATE | PendingIntent.FLAG_CANCEL_CURRENT
                     | PendingIntent.FLAG_UPDATE_CURRENT);
 
-            PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, featureId,
-                    token, resultWho, requestCode, intents, resolvedTypes, flags,
+            PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, token,
+                    resultWho, requestCode, intents, resolvedTypes, flags,
                     SafeActivityOptions.fromBundle(bOptions), userId);
             WeakReference<PendingIntentRecord> ref;
             ref = mIntentSenderRecords.get(key);

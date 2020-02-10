@@ -49,13 +49,13 @@ interface ILauncherApps {
     ActivityInfo resolveActivity(
             String callingPackage, in ComponentName component, in UserHandle user);
     void startSessionDetailsActivityAsUser(in IApplicationThread caller, String callingPackage,
-                String callingFeatureId, in PackageInstaller.SessionInfo sessionInfo,
-                in Rect sourceBounds, in Bundle opts, in UserHandle user);
+                in PackageInstaller.SessionInfo sessionInfo, in Rect sourceBounds, in Bundle opts,
+                in UserHandle user);
     void startActivityAsUser(in IApplicationThread caller, String callingPackage,
-            String callingFeatureId, in ComponentName component, in Rect sourceBounds,
+            in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
-    void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
-            String callingFeatureId, in ComponentName component, in Rect sourceBounds,
+    void showAppDetailsAsUser(in IApplicationThread caller,
+            String callingPackage, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     boolean isPackageEnabled(String callingPackage, String packageName, in UserHandle user);
     Bundle getSuspendedPackageLauncherExtras(String packageName, in UserHandle user);
@@ -72,7 +72,7 @@ interface ILauncherApps {
             int flags, in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
-    boolean startShortcut(String callingPackage, String packageName, String featureId, String id,
+    boolean startShortcut(String callingPackage, String packageName, String id,
             in Rect sourceBounds, in Bundle startActivityOptions, int userId);
 
     int getShortcutIconResId(String callingPackage, String packageName, String id,

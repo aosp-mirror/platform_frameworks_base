@@ -55,7 +55,6 @@ import java.util.List;
 @RunWith(MockitoJUnitRunner.class)
 public class CrossProfileAppsServiceImplTest {
     private static final String PACKAGE_ONE = "com.one";
-    private static final String FEATURE_ID = "feature.one";
     private static final int PACKAGE_ONE_UID = 1111;
     private static final ComponentName ACTIVITY_COMPONENT =
             new ComponentName("com.one", "test");
@@ -221,7 +220,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PRIMARY_USER).getIdentifier(),
                                 true));
@@ -230,7 +228,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -244,7 +241,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PRIMARY_USER).getIdentifier(),
                                 false));
@@ -253,7 +249,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -269,7 +264,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 true));
@@ -278,7 +272,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -294,7 +287,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 false));
@@ -303,7 +295,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -317,7 +308,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_TWO,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 true));
@@ -326,7 +316,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -340,7 +329,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_TWO,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 false));
@@ -349,7 +337,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -365,7 +352,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 true));
@@ -374,7 +360,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -395,7 +380,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 false));
@@ -404,7 +388,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -418,7 +401,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 new ComponentName(PACKAGE_TWO, "test"),
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 true));
@@ -427,7 +409,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -441,7 +422,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 new ComponentName(PACKAGE_TWO, "test"),
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER).getIdentifier(),
                                 false));
@@ -450,7 +430,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -464,7 +443,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(SECONDARY_USER).getIdentifier(),
                                 true));
@@ -473,7 +451,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -487,7 +464,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 mIApplicationThread,
                                 PACKAGE_ONE,
-                                FEATURE_ID,
                                 ACTIVITY_COMPONENT,
                                 UserHandle.of(SECONDARY_USER).getIdentifier(),
                                 false));
@@ -496,7 +472,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         anyString(),
-                        nullable(String.class),
                         any(Intent.class),
                         nullable(Bundle.class),
                         anyInt());
@@ -509,7 +484,6 @@ public class CrossProfileAppsServiceImplTest {
         mCrossProfileAppsServiceImpl.startActivityAsUser(
                 mIApplicationThread,
                 PACKAGE_ONE,
-                FEATURE_ID,
                 ACTIVITY_COMPONENT,
                 UserHandle.of(PRIMARY_USER).getIdentifier(),
                 true);
@@ -518,7 +492,6 @@ public class CrossProfileAppsServiceImplTest {
                 .startActivityAsUser(
                         nullable(IApplicationThread.class),
                         eq(PACKAGE_ONE),
-                        eq(FEATURE_ID),
                         any(Intent.class),
                         nullable(Bundle.class),
                         eq(PRIMARY_USER));

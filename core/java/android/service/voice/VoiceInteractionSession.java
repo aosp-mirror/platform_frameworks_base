@@ -1314,7 +1314,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startVoiceActivity(mToken, intent,
-                    intent.resolveType(mContext.getContentResolver()), mContext.getFeatureId());
+                    intent.resolveType(mContext.getContentResolver()));
             Instrumentation.checkStartActivityResult(res, intent);
         } catch (RemoteException e) {
         }
@@ -1342,7 +1342,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startAssistantActivity(mToken, intent,
-                    intent.resolveType(mContext.getContentResolver()), mContext.getFeatureId());
+                    intent.resolveType(mContext.getContentResolver()));
             Instrumentation.checkStartActivityResult(res, intent);
         } catch (RemoteException e) {
         }

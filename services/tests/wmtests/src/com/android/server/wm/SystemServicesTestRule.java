@@ -439,11 +439,11 @@ public class SystemServicesTestRule implements TestRule {
             doNothing().when(this).updateCpuStats();
 
             // AppOpsService
-            final AppOpsManager aos = mock(AppOpsManager.class);
-            doReturn(aos).when(this).getAppOpsManager();
+            final AppOpsService aos = mock(AppOpsService.class);
+            doReturn(aos).when(this).getAppOpsService();
             // Make sure permission checks aren't overridden.
-            doReturn(AppOpsManager.MODE_DEFAULT).when(aos).noteOpNoThrow(anyInt(), anyInt(),
-                    anyString(), nullable(String.class), nullable(String.class));
+            doReturn(AppOpsManager.MODE_DEFAULT).when(aos).noteOperation(anyInt(), anyInt(),
+                    anyString(), nullable(String.class), anyBoolean(), nullable(String.class));
 
             // UserManagerService
             final UserManagerService ums = mock(UserManagerService.class);

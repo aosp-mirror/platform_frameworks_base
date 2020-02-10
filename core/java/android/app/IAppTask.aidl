@@ -27,7 +27,7 @@ interface IAppTask {
     @UnsupportedAppUsage
     ActivityManager.RecentTaskInfo getTaskInfo();
     void moveToFront(in IApplicationThread appThread, in String callingPackage);
-    int startActivity(IBinder whoThread, String callingPackage, String callingFeatureId,
+    int startActivity(IBinder whoThread, String callingPackage,
             in Intent intent, String resolvedType, in Bundle options);
     void setExcludeFromRecents(boolean exclude);
 }

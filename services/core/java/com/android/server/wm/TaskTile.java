@@ -60,11 +60,10 @@ public class TaskTile extends ActivityStack {
                 System.currentTimeMillis(), true /*neverRelinquishIdentity*/,
                 new ActivityManager.TaskDescription(), id, INVALID_TASK_ID, INVALID_TASK_ID,
                 0 /*taskAffiliationColor*/, 0 /*callingUid*/, "" /*callingPackage*/,
-                null /*callingFeatureId*/, RESIZE_MODE_RESIZEABLE,
-                false /*supportsPictureInPicture*/, false /*_realActivitySuspended*/,
-                false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE,
-                createEmptyActivityInfo(), null /*voiceSession*/, null /*voiceInteractor*/,
-                null /*stack*/);
+                RESIZE_MODE_RESIZEABLE, false /*supportsPictureInPicture*/,
+                false /*_realActivitySuspended*/, false /*userSetupComplete*/, INVALID_MIN_SIZE,
+                INVALID_MIN_SIZE, createEmptyActivityInfo(), null /*voiceSession*/,
+                null /*voiceInteractor*/, null /*stack*/);
         getRequestedOverrideConfiguration().windowConfiguration.setWindowingMode(windowingMode);
     }
 

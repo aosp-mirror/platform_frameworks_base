@@ -24,7 +24,6 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -1729,7 +1728,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final ArgumentCaptor<Intent[]> intentsCaptor = ArgumentCaptor.forClass(Intent[].class);
         verify(mMockActivityTaskManagerInternal).startActivitiesAsPackage(
                 eq(packageName),
-                isNull(),
                 eq(userId),
                 intentsCaptor.capture(),
                 anyOrNull(Bundle.class));
@@ -1788,7 +1786,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         // This shouldn't have been called.
         verify(mMockActivityTaskManagerInternal, times(0)).startActivitiesAsPackage(
                 anyString(),
-                isNull(),
                 anyInt(),
                 any(Intent[].class),
                 anyOrNull(Bundle.class));
