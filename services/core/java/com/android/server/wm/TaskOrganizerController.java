@@ -43,6 +43,7 @@ import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.WindowContainerTransaction;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -379,7 +380,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
     }
 
     @Override
-    public List<RunningTaskInfo> getChildTasks(IWindowContainer parent) {
+    public List<RunningTaskInfo> getChildTasks(IWindowContainer parent,
+            @Nullable int[] activityTypes) {
         enforceStackPermission("getChildTasks()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -405,10 +407,48 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                 for (int i = dc.getStackCount() - 1; i >= 0; --i) {
                     final ActivityStack as = dc.getStackAt(i);
                     if (as.getTile() == container) {
+                        if (activityTypes != null
+                                && !ArrayUtils.contains(activityTypes, as.getActivityType())) {
+                            continue;
+                        }
                         final RunningTaskInfo info = new RunningTaskInfo();
                         as.fillTaskInfo(info);
                         out.add(info);
                     }
+                }
+                return out;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public List<RunningTaskInfo> getRootTasks(int displayId, @Nullable int[] activityTypes) {
+        enforceStackPermission("getRootTasks()");
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc =
+                        mService.mRootWindowContainer.getDisplayContent(displayId);
+                if (dc == null) {
+                    throw new IllegalArgumentException("Display " + displayId + " doesn't exist");
+                }
+                ArrayList<RunningTaskInfo> out = new ArrayList<>();
+                for (int i = dc.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack task = dc.getStackAt(i);
+                    if (task.getTile() != null) {
+                        // a tile is supposed to look like a parent, so don't include their
+                        // "children" here. They can be accessed via getChildTasks()
+                        continue;
+                    }
+                    if (activityTypes != null
+                            && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
+                        continue;
+                    }
+                    final RunningTaskInfo info = new RunningTaskInfo();
+                    task.fillTaskInfo(info);
+                    out.add(info);
                 }
                 return out;
             }

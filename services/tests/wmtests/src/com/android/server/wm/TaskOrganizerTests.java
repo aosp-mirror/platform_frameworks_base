@@ -393,10 +393,18 @@ public class TaskOrganizerTests extends WindowTestsBase {
         RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
+        final int initialRootTaskCount = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
+                mDisplayContent.mDisplayId, null /* activityTypes */).size();
+
         final ActivityStack stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final ActivityStack stack2 = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, mDisplayContent);
+
+        // Check getRootTasks works
+        List<RunningTaskInfo> roots = mWm.mAtmService.mTaskOrganizerController.getRootTasks(
+                mDisplayContent.mDisplayId, null /* activityTypes */);
+        assertEquals(initialRootTaskCount + 2, roots.size());
 
         lastReportedTiles.clear();
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -424,10 +432,17 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         // Check the getChildren call
         List<RunningTaskInfo> children =
-                mWm.mAtmService.mTaskOrganizerController.getChildTasks(info1.token);
+                mWm.mAtmService.mTaskOrganizerController.getChildTasks(info1.token,
+                        null /* activityTypes */);
         assertEquals(2, children.size());
-        children = mWm.mAtmService.mTaskOrganizerController.getChildTasks(info2.token);
+        children = mWm.mAtmService.mTaskOrganizerController.getChildTasks(info2.token,
+                null /* activityTypes */);
         assertEquals(0, children.size());
+
+        // Check that getRootTasks doesn't include children of tiles
+        roots = mWm.mAtmService.mTaskOrganizerController.getRootTasks(mDisplayContent.mDisplayId,
+                null /* activityTypes */);
+        assertEquals(initialRootTaskCount, roots.size());
 
         lastReportedTiles.clear();
         wct = new WindowContainerTransaction();
