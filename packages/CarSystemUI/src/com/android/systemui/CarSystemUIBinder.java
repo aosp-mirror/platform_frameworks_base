@@ -17,8 +17,10 @@
 package com.android.systemui;
 
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.car.CarNavigationBar;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
@@ -43,7 +45,8 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /** Binder for car specific {@link SystemUI} modules. */
-@Module(includes = {RecentsModule.class, CarStatusBarModule.class, NotificationsModule.class})
+@Module(includes = {RecentsModule.class, CarStatusBarModule.class, NotificationsModule.class,
+        BubbleModule.class, KeyguardModule.class})
 public abstract class CarSystemUIBinder {
     /** Inject into AuthController. */
     @Binds

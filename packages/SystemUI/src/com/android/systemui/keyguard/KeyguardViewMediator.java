@@ -86,6 +86,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -99,9 +100,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
@@ -146,7 +144,6 @@ import dagger.Lazy;
  * directly to the keyguard UI is posted to a {@link android.os.Handler} to ensure it is taken on the UI
  * thread of the keyguard.
  */
-@Singleton
 public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
@@ -688,7 +685,9 @@ public class KeyguardViewMediator extends SystemUI {
         }
     };
 
-    @Inject
+    /**
+     * Injected constructor. See {@link KeyguardModule}.
+     */
     public KeyguardViewMediator(
             Context context,
             FalsingManager falsingManager,

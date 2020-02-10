@@ -24,8 +24,10 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.accessibility.WindowMagnification;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
@@ -49,7 +51,8 @@ import dagger.multibindings.IntoMap;
 /**
  * SystemUI objects that are injectable should go here.
  */
-@Module(includes = {RecentsModule.class, StatusBarModule.class})
+@Module(includes = {RecentsModule.class, StatusBarModule.class, BubbleModule.class,
+        KeyguardModule.class})
 public abstract class SystemUIBinder {
     /** Inject into AuthController. */
     @Binds
