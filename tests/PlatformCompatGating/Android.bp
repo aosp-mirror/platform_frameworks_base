@@ -18,6 +18,7 @@ android_test {
     name: "PlatformCompatGating",
     // Only compile source java files in this apk.
     srcs: ["src/**/*.java"],
+    test_suites: ["device-tests"],
     static_libs: [
         "junit",
         "androidx.test.runner",
