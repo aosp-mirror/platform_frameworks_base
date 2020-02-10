@@ -373,7 +373,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             if (tile.equals("default")) {
                 if (!addedDefault) {
                     tiles.addAll(Arrays.asList(defaultTileList.split(",")));
-                    if (Build.IS_DEBUGGABLE
+                    if (Build.IS_ENG
                             && GarbageMonitor.MemoryTile.ADD_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
                         tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
                     }
