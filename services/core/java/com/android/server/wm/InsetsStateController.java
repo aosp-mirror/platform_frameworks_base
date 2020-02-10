@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -89,6 +90,12 @@ class InsetsStateController {
         if (type == ITYPE_NAVIGATION_BAR) {
             state.removeSource(ITYPE_IME);
             state.removeSource(ITYPE_STATUS_BAR);
+            state.removeSource(ITYPE_CAPTION_BAR);
+        }
+
+        // Status bar doesn't get influenced by caption bar
+        if (type == ITYPE_STATUS_BAR) {
+            state.removeSource(ITYPE_CAPTION_BAR);
         }
 
         // IME needs different frames for certain cases (e.g. navigation bar in gesture nav).
@@ -212,18 +219,18 @@ class InsetsStateController {
     /**
      * Called when the focused window that is able to control the system bars changes.
      *
-     * @param topControlling The target that is now able to control the top bar appearance
-     *                       and visibility.
+     * @param statusControlling The target that is now able to control the status bar appearance
+     *                          and visibility.
      * @param navControlling The target that is now able to control the nav bar appearance
      *                       and visibility.
      */
-    void onBarControlTargetChanged(@Nullable InsetsControlTarget topControlling,
-            @Nullable InsetsControlTarget fakeTopControlling,
+    void onBarControlTargetChanged(@Nullable InsetsControlTarget statusControlling,
+            @Nullable InsetsControlTarget fakeStatusControlling,
             @Nullable InsetsControlTarget navControlling,
             @Nullable InsetsControlTarget fakeNavControlling) {
-        onControlChanged(ITYPE_STATUS_BAR, topControlling);
+        onControlChanged(ITYPE_STATUS_BAR, statusControlling);
         onControlChanged(ITYPE_NAVIGATION_BAR, navControlling);
-        onControlFakeTargetChanged(ITYPE_STATUS_BAR, fakeTopControlling);
+        onControlFakeTargetChanged(ITYPE_STATUS_BAR, fakeStatusControlling);
         onControlFakeTargetChanged(ITYPE_NAVIGATION_BAR, fakeNavControlling);
         notifyPendingInsetsControlChanged();
     }
