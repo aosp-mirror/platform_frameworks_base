@@ -35,8 +35,6 @@ public final class InstantAppRequest {
     public final String resolvedType;
     /** The name of the package requesting the instant application */
     public final String callingPackage;
-    /** The feature in the package requesting the instant application */
-    public final String callingFeatureId;
     /** Whether or not the requesting package was an instant app */
     public final boolean isRequesterInstantApp;
     /** ID of the user requesting the instant application */
@@ -59,15 +57,13 @@ public final class InstantAppRequest {
     public final String token;
 
     public InstantAppRequest(AuxiliaryResolveInfo responseObj, Intent origIntent,
-            String resolvedType, String callingPackage, @Nullable String callingFeatureId,
-            boolean isRequesterInstantApp, int userId, Bundle verificationBundle,
-            boolean resolveForStart, @Nullable int[] hostDigestPrefixSecure,
-            @NonNull String token) {
+            String resolvedType, String callingPackage, boolean isRequesterInstantApp,
+            int userId, Bundle verificationBundle, boolean resolveForStart,
+            @Nullable int[] hostDigestPrefixSecure, @NonNull String token) {
         this.responseObj = responseObj;
         this.origIntent = origIntent;
         this.resolvedType = resolvedType;
         this.callingPackage = callingPackage;
-        this.callingFeatureId = callingFeatureId;
         this.isRequesterInstantApp = isRequesterInstantApp;
         this.userId = userId;
         this.verificationBundle = verificationBundle;

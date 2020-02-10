@@ -120,7 +120,7 @@ public class ActivityStartInterceptorTest {
         mInterceptor = new ActivityStartInterceptor(
                 mService, mSupervisor, mRootWindowContainer, mContext);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,
-                TEST_START_FLAGS, TEST_CALLING_PACKAGE, null);
+                TEST_START_FLAGS, TEST_CALLING_PACKAGE);
 
         // Mock ActivityManagerInternal
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);

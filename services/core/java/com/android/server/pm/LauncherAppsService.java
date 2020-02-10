@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -742,9 +741,8 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public boolean startShortcut(String callingPackage, String packageName, String featureId,
-                String shortcutId, Rect sourceBounds, Bundle startActivityOptions,
-                int targetUserId) {
+        public boolean startShortcut(String callingPackage, String packageName, String shortcutId,
+                Rect sourceBounds, Bundle startActivityOptions, int targetUserId) {
             verifyCallingPackage(callingPackage);
             if (!canAccessProfile(targetUserId, "Cannot start activity")) {
                 return false;
@@ -768,16 +766,15 @@ public class LauncherAppsService extends SystemService {
             intents[0].setSourceBounds(sourceBounds);
 
             return startShortcutIntentsAsPublisher(
-                    intents, packageName, featureId, startActivityOptions, targetUserId);
+                    intents, packageName, startActivityOptions, targetUserId);
         }
 
         private boolean startShortcutIntentsAsPublisher(@NonNull Intent[] intents,
-                @NonNull String publisherPackage, @Nullable String publishedFeatureId,
-                Bundle startActivityOptions, int userId) {
+                @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
             final int code;
             try {
                 code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
-                        publishedFeatureId, userId, intents, startActivityOptions);
+                        userId, intents, startActivityOptions);
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
                 } else {
@@ -832,8 +829,8 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public void startSessionDetailsActivityAsUser(IApplicationThread caller,
-                String callingPackage, String callingFeatureId, SessionInfo sessionInfo,
-                Rect sourceBounds, Bundle opts, UserHandle userHandle) throws RemoteException {
+                String callingPackage, SessionInfo sessionInfo, Rect sourceBounds,
+                Bundle opts, UserHandle userHandle) throws RemoteException {
             int userId = userHandle.getIdentifier();
             if (!canAccessProfile(userId, "Cannot start details activity")) {
                 return;
@@ -849,13 +846,13 @@ public class LauncherAppsService extends SystemService {
                             .authority(callingPackage).build());
             i.setSourceBounds(sourceBounds);
 
-            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, i, opts, userId);
+            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage, i, opts,
+                    userId);
         }
 
         @Override
         public void startActivityAsUser(IApplicationThread caller, String callingPackage,
-                String callingFeatureId, ComponentName component, Rect sourceBounds,
+                ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 return;
@@ -909,12 +906,12 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, launchIntent, opts, user.getIdentifier());
+                    launchIntent, opts, user.getIdentifier());
         }
 
         @Override
         public void showAppDetailsAsUser(IApplicationThread caller,
-                String callingPackage, String callingFeatureId, ComponentName component,
+                String callingPackage, ComponentName component,
                 Rect sourceBounds, Bundle opts, UserHandle user) throws RemoteException {
             if (!canAccessProfile(user.getIdentifier(), "Cannot show app details")) {
                 return;
@@ -932,7 +929,7 @@ public class LauncherAppsService extends SystemService {
                 Binder.restoreCallingIdentity(ident);
             }
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
-                    callingFeatureId, intent, opts, user.getIdentifier());
+                    intent, opts, user.getIdentifier());
         }
 
         /** Checks if user is a profile of or same as listeningUser.
