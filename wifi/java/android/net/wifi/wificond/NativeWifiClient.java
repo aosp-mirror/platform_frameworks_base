@@ -17,11 +17,13 @@
 package android.net.wifi.wificond;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Structure providing information about clients (STAs) associated with a SoftAp.
@@ -30,16 +32,21 @@ import java.util.Arrays;
  */
 @SystemApi
 public final class NativeWifiClient implements Parcelable {
+    private final MacAddress mMacAddress;
+
     /**
-     * The raw bytes of the MAC address of the client (STA) represented by this object.
+     * The MAC address of the client (STA) represented by this object. The MAC address may be null
+     * in case of an error.
      */
-    @NonNull public final byte[] macAddress;
+    @Nullable public MacAddress getMacAddress() {
+        return mMacAddress;
+    }
 
     /**
      * Construct a native Wi-Fi client.
      */
-    public NativeWifiClient(@NonNull byte[] macAddress) {
-        this.macAddress = macAddress;
+    public NativeWifiClient(@Nullable MacAddress macAddress) {
+        this.mMacAddress = macAddress;
     }
 
     /** override comparator */
@@ -50,13 +57,13 @@ public final class NativeWifiClient implements Parcelable {
             return false;
         }
         NativeWifiClient other = (NativeWifiClient) rhs;
-        return Arrays.equals(macAddress, other.macAddress);
+        return Objects.equals(mMacAddress, other.mMacAddress);
     }
 
     /** override hash code */
     @Override
     public int hashCode() {
-        return Arrays.hashCode(macAddress);
+        return mMacAddress.hashCode();
     }
 
     /** implement Parcelable interface */
@@ -71,7 +78,7 @@ public final class NativeWifiClient implements Parcelable {
      */
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeByteArray(macAddress);
+        out.writeByteArray(mMacAddress.toByteArray());
     }
 
     /** implement Parcelable interface */
@@ -79,9 +86,11 @@ public final class NativeWifiClient implements Parcelable {
             new Parcelable.Creator<NativeWifiClient>() {
                 @Override
                 public NativeWifiClient createFromParcel(Parcel in) {
-                    byte[] macAddress = in.createByteArray();
-                    if (macAddress == null) {
-                        macAddress = new byte[0];
+                    MacAddress macAddress;
+                    try {
+                        macAddress = MacAddress.fromBytes(in.createByteArray());
+                    } catch (IllegalArgumentException e) {
+                        macAddress = null;
                     }
                     return new NativeWifiClient(macAddress);
                 }

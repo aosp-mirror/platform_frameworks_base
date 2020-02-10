@@ -41,19 +41,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 /**
- * This class encapsulates the interface the wificond (Wi-Fi Conductor) daemon presents to the
- * Wi-Fi framework. The interface is only for use by the Wi-Fi framework and access is protected
- * by SELinux permissions: only the system server and wpa_supplicant can use WifiCondManager.
+ * This class encapsulates the interface the wificond daemon presents to the Wi-Fi framework. The
+ * interface is only for use by the Wi-Fi framework and access is protected by SELinux permissions.
  *
  * @hide
  */
@@ -371,7 +368,7 @@ public class WifiCondManager {
         public void onConnectedClientsChanged(NativeWifiClient client, boolean isConnected) {
             if (mVerboseLoggingEnabled) {
                 Log.d(TAG, "onConnectedClientsChanged called with "
-                        + client.macAddress + " isConnected: " + isConnected);
+                        + client.getMacAddress() + " isConnected: " + isConnected);
             }
 
             Binder.clearCallingIdentity();
@@ -1046,13 +1043,13 @@ public class WifiCondManager {
      * WifiScanner.WIFI_BAND_5_GHZ
      * WifiScanner.WIFI_BAND_5_GHZ_DFS_ONLY
      * WifiScanner.WIFI_BAND_6_GHZ
-     * @return frequencies List of valid frequencies (MHz), or an empty list for error.
+     * @return frequencies vector of valid frequencies (MHz), or an empty array for error.
      * @throws IllegalArgumentException if band is not recognized.
      */
-    public @NonNull List<Integer> getChannelsMhzForBand(@WifiAnnotations.WifiBandBasic int band) {
+    public @NonNull int[] getChannelsMhzForBand(@WifiAnnotations.WifiBandBasic int band) {
         if (mWificond == null) {
             Log.e(TAG, "No valid wificond scanner interface handler");
-            return Collections.emptyList();
+            return new int[0];
         }
         int[] result = null;
         try {
@@ -1076,9 +1073,9 @@ public class WifiCondManager {
             Log.e(TAG, "Failed to request getChannelsForBand due to remote exception");
         }
         if (result == null) {
-            return Collections.emptyList();
+            result = new int[0];
         }
-        return Arrays.stream(result).boxed().collect(Collectors.toList());
+        return result;
     }
 
     /** Helper function to look up the interface handle using name */
