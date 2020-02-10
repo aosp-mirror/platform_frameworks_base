@@ -155,8 +155,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // When finished call listener
     private final OnTaskFinishedListener mListener;
 
-    private final Map<String, Set<String>> mExcludedKeys;
-
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
@@ -168,14 +166,14 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     @VisibleForTesting
-    PerformUnifiedRestoreTask(Map<String, Set<String>> excludedKeys) {
-        mExcludedKeys = excludedKeys;
+    PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
         mListener = null;
         mAgentTimeoutParameters = null;
         mTransportClient = null;
         mTransportManager = null;
         mEphemeralOpToken = 0;
         mUserId = 0;
+        this.backupManagerService = backupManagerService;
     }
 
     // This task can assume that the wakelock is properly held for it and doesn't have to worry
@@ -190,8 +188,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             int pmToken,
             boolean isFullSystemRestore,
             @Nullable String[] filterSet,
-            OnTaskFinishedListener listener,
-            Map<String, Set<String>> excludedKeys) {
+            OnTaskFinishedListener listener) {
         this.backupManagerService = backupManagerService;
         mUserId = backupManagerService.getUserId();
         mTransportManager = backupManagerService.getTransportManager();
@@ -212,8 +209,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
-
-        mExcludedKeys = excludedKeys;
 
         if (targetPackage != null) {
             // Single package restore
@@ -791,8 +786,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 !getExcludedKeysForPackage(PLATFORM_PACKAGE_NAME).isEmpty();
     }
 
-    private Set<String> getExcludedKeysForPackage(String packageName) {
-        return mExcludedKeys.getOrDefault(packageName, Collections.emptySet());
+    @VisibleForTesting
+    Set<String> getExcludedKeysForPackage(String packageName) {
+        return backupManagerService.getExcludedRestoreKeys(packageName);
     }
 
     @VisibleForTesting

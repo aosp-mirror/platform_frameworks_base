@@ -20,7 +20,9 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import androidx.test.InstrumentationRegistry;
@@ -29,6 +31,8 @@ import androidx.test.runner.AndroidJUnit4;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.platform.test.annotations.Presubmit;
+
+import com.android.server.backup.UserBackupManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +44,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +64,7 @@ public class PerformUnifiedRestoreTaskTest {
 
     @Mock private BackupDataInput mBackupDataInput;
     @Mock private BackupDataOutput mBackupDataOutput;
+    @Mock private UserBackupManagerService mBackupManagerService;
 
     private Set<String> mExcludedkeys = new HashSet<>();
     private Map<String, String> mBackupData = new HashMap<>();
@@ -99,6 +105,8 @@ public class PerformUnifiedRestoreTaskTest {
                         return null;
                     }
                 });
+
+        mRestoreTask = new PerformUnifiedRestoreTask(mBackupManagerService);
     }
 
     private void populateTestData() {
@@ -114,8 +122,9 @@ public class PerformUnifiedRestoreTaskTest {
 
     @Test
     public void testFilterExcludedKeys() throws Exception {
-        mRestoreTask = new PerformUnifiedRestoreTask(Collections.singletonMap(
-                PACKAGE_NAME, mExcludedkeys));
+        when(mBackupManagerService.getExcludedRestoreKeys(eq(PACKAGE_NAME))).thenReturn(
+                mExcludedkeys);
+
         mRestoreTask.filterExcludedKeys(PACKAGE_NAME, mBackupDataInput, mBackupDataOutput);
 
         // Verify only the correct were written into BackupDataOutput object.
@@ -125,32 +134,49 @@ public class PerformUnifiedRestoreTaskTest {
     }
 
     @Test
+    public void testGetExcludedKeysForPackage_alwaysReturnsLatestKeys() {
+        Set<String> firstExcludedKeys = new HashSet<>(Collections.singletonList(EXCLUDED_KEY_1));
+        when(mBackupManagerService.getExcludedRestoreKeys(eq(PACKAGE_NAME))).thenReturn(
+                firstExcludedKeys);
+        assertEquals(firstExcludedKeys, mRestoreTask.getExcludedKeysForPackage(PACKAGE_NAME));
+
+
+        Set<String> secondExcludedKeys = new HashSet<>(Arrays.asList(EXCLUDED_KEY_1,
+                EXCLUDED_KEY_2));
+        when(mBackupManagerService.getExcludedRestoreKeys(eq(PACKAGE_NAME))).thenReturn(
+                secondExcludedKeys);
+        assertEquals(secondExcludedKeys, mRestoreTask.getExcludedKeysForPackage(PACKAGE_NAME));
+    }
+
+    @Test
     public void testStageBackupData_stageForNonSystemPackageWithKeysToExclude() {
-        mRestoreTask = new PerformUnifiedRestoreTask(Collections.singletonMap(
-                PACKAGE_NAME, mExcludedkeys));
+        when(mBackupManagerService.getExcludedRestoreKeys(eq(NON_SYSTEM_PACKAGE_NAME))).thenReturn(
+                mExcludedkeys);
 
         assertTrue(mRestoreTask.shouldStageBackupData(NON_SYSTEM_PACKAGE_NAME));
     }
 
     @Test
     public void testStageBackupData_stageForNonSystemPackageWithNoKeysToExclude() {
-        mRestoreTask = new PerformUnifiedRestoreTask(Collections.emptyMap());
+        when(mBackupManagerService.getExcludedRestoreKeys(any())).thenReturn(
+                Collections.emptySet());
 
         assertTrue(mRestoreTask.shouldStageBackupData(NON_SYSTEM_PACKAGE_NAME));
     }
 
     @Test
     public void testStageBackupData_doNotStageForSystemPackageWithNoKeysToExclude() {
-        mRestoreTask = new PerformUnifiedRestoreTask(Collections.emptyMap());
+        when(mBackupManagerService.getExcludedRestoreKeys(any())).thenReturn(
+                Collections.emptySet());
 
         assertFalse(mRestoreTask.shouldStageBackupData(SYSTEM_PACKAGE_NAME));
     }
 
     @Test
     public void testStageBackupData_stageForSystemPackageWithKeysToExclude() {
-        mRestoreTask = new PerformUnifiedRestoreTask(Collections.singletonMap(
-                PACKAGE_NAME, mExcludedkeys));
+        when(mBackupManagerService.getExcludedRestoreKeys(eq(SYSTEM_PACKAGE_NAME))).thenReturn(
+                mExcludedkeys);
 
-        assertTrue(mRestoreTask.shouldStageBackupData(NON_SYSTEM_PACKAGE_NAME));
+        assertTrue(mRestoreTask.shouldStageBackupData(SYSTEM_PACKAGE_NAME));
     }
 }
