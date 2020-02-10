@@ -16,12 +16,9 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -60,46 +57,6 @@ public class InfoMediaDevice extends MediaDevice {
     @Override
     public String getId() {
         return MediaDeviceUtils.getId(mRouteInfo);
-    }
-
-    @Override
-    public void requestSetVolume(int volume) {
-        mRouterManager.requestSetVolume(mRouteInfo, volume);
-    }
-
-    @Override
-    public int getMaxVolume() {
-        return mRouteInfo.getVolumeMax();
-    }
-
-    @Override
-    public int getCurrentVolume() {
-        return mRouteInfo.getVolume();
-    }
-
-    @Override
-    public String getClientPackageName() {
-        return mRouteInfo.getClientPackageName();
-    }
-
-    @Override
-    public String getClientAppLabel() {
-        final String packageName = mRouteInfo.getClientPackageName();
-        if (TextUtils.isEmpty(packageName)) {
-            Log.d(TAG, "Client package name is empty");
-            return mContext.getResources().getString(R.string.unknown);
-        }
-        try {
-            final PackageManager packageManager = mContext.getPackageManager();
-            final String appLabel = packageManager.getApplicationLabel(
-                    packageManager.getApplicationInfo(packageName, 0)).toString();
-            if (!TextUtils.isEmpty(appLabel)) {
-                return appLabel;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "unable to find " + packageName);
-        }
-        return mContext.getResources().getString(R.string.unknown);
     }
 
     public boolean isConnected() {
