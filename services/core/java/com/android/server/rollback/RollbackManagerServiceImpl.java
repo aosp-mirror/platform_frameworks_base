@@ -164,8 +164,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // Load rollback data from device storage.
         synchronized (mLock) {
             mRollbacks = mRollbackStore.loadRollbacks();
-            for (Rollback rollback : mRollbacks) {
-                mAllocatedRollbackIds.put(rollback.info.getRollbackId(), true);
+            if (!context.getPackageManager().isDeviceUpgrading()) {
+                for (Rollback rollback : mRollbacks) {
+                    mAllocatedRollbackIds.put(rollback.info.getRollbackId(), true);
+                }
+            } else {
+                // Delete rollbacks when build fingerprint has changed.
+                for (Rollback rollback : mRollbacks) {
+                    rollback.delete(mAppDataRollbackHelper);
+                }
+                mRollbacks.clear();
             }
         }
 
