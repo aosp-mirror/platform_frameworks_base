@@ -4153,7 +4153,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             return;
                         }
                         // Only update the saved args from the args that are set
-                        r.pictureInPictureArgs.copyOnlySet(params);
+                        r.setPictureInPictureParams(params);
                         final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
                         final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                         // Adjust the source bounds by the insets for the transition down
@@ -4201,7 +4201,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         "setPictureInPictureParams", token, params);
 
                 // Only update the saved args from the args that are set
-                r.pictureInPictureArgs.copyOnlySet(params);
+                r.setPictureInPictureParams(params);
                 if (r.inPinnedWindowingMode()) {
                     // If the activity is already in picture-in-picture, update the pinned stack now
                     // if it is not already expanding to fullscreen. Otherwise, the arguments will

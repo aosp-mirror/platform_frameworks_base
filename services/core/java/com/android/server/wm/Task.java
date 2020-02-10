@@ -99,6 +99,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
+import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -461,6 +462,11 @@ class Task extends WindowContainer<WindowContainer> {
      */
     ITaskOrganizer mTaskOrganizer;
 
+    /**
+     * Last Picture-in-Picture params applicable to the task. Updated when the app
+     * enters Picture-in-Picture or when setPictureInPictureParams is called.
+     */
+    PictureInPictureParams mPictureInPictureParams = new PictureInPictureParams.Builder().build();
 
     /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
@@ -3217,6 +3223,12 @@ class Task extends WindowContainer<WindowContainer> {
         //                    order changes.
         final Task top = getTopMostTask();
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
+
+        if (mPictureInPictureParams.empty()) {
+            info.pictureInPictureParams = null;
+        } else {
+            info.pictureInPictureParams = mPictureInPictureParams;
+        }
     }
 
     /**
@@ -3946,5 +3958,11 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void onWindowFocusChanged(boolean hasFocus) {
         updateShadowsRadius(hasFocus, getPendingTransaction());
+    }
+
+    void setPictureInPictureParams(PictureInPictureParams p) {
+        mPictureInPictureParams.copyOnlySet(p);
+        mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                this, true /* force */);
     }
 }

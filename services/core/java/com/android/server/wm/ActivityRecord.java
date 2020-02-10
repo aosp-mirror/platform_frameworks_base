@@ -7692,4 +7692,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         win.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
     }
+
+    void setPictureInPictureParams(PictureInPictureParams p) {
+        pictureInPictureArgs.copyOnlySet(p);
+        getTask().getRootTask().setPictureInPictureParams(p);
+    }
 }
