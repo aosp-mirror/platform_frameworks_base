@@ -28,6 +28,7 @@ java_defaults {
         "netd_aidl_interface-unstable-java",
         "netlink-client",
         "networkstack-aidl-interfaces-unstable-java",
+        "android.hardware.tetheroffload.config-V1.0-java",
         "android.hardware.tetheroffload.control-V1.0-java",
         "net-utils-framework-common",
     ],
@@ -48,24 +49,25 @@ android_library {
 // Due to b/143733063, APK can't access a jni lib that is in APEX (but not in the APK).
 cc_library {
     name: "libtetherutilsjni",
+    sdk_version: "current",
     srcs: [
         "jni/android_net_util_TetheringUtils.cpp",
     ],
     shared_libs: [
-        "libcgrouprc",
-        "libnativehelper_compat_libc++",
-        "libvndksupport",
-    ],
-    static_libs: [
-        "android.hardware.tetheroffload.config@1.0",
         "liblog",
-        "libbase",
-        "libcutils",
-        "libhidlbase",
-        "libjsoncpp",
-        "libprocessgroup",
-        "libutils",
+        "libnativehelper_compat_libc++",
     ],
+
+    // We cannot use plain "libc++" here to link libc++ dynamically because it results in:
+    //   java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found
+    // even if "libc++" is added into jni_libs below. Adding "libc++_shared" into jni_libs doesn't
+    // build because soong complains of:
+    //   module Tethering missing dependencies: libc++_shared
+    //
+    // So, link libc++ statically. This means that we also need to ensure that all the C++ libraries
+    // we depend on do not dynamically link libc++. This is currently the case, because liblog is
+    // C-only and libnativehelper_compat_libc also uses stl: "c++_static".
+    stl: "c++_static",
 
     cflags: [
         "-Wall",
@@ -85,9 +87,8 @@ java_defaults {
     // Build system doesn't track transitive dependeicies for jni_libs, list all the dependencies
     // explicitly.
     jni_libs: [
-        "libcgrouprc",
+        "liblog",
         "libnativehelper_compat_libc++",
-        "libvndksupport",
         "libtetherutilsjni",
     ],
     resource_dirs: [
