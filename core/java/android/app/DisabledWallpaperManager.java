@@ -41,8 +41,7 @@ final class DisabledWallpaperManager extends WallpaperManager {
     // Don't need to worry about synchronization
     private static DisabledWallpaperManager sInstance;
 
-    // TODO(b/138939803): STOPSHIP changed to false and/or remove it
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     @NonNull
     static DisabledWallpaperManager getInstance() {
@@ -65,10 +64,6 @@ final class DisabledWallpaperManager extends WallpaperManager {
     public boolean isSetWallpaperAllowed() {
         return false;
     }
-
-    // TODO(b/138939803): STOPSHIP methods below should not be necessary,
-    // callers should check if isWallpaperSupported(), consider removing them to keep this class
-    // simpler
 
     private static <T> T unsupported() {
         if (DEBUG) Log.w(TAG, "unsupported method called; returning null", new Exception());
