@@ -7674,7 +7674,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mainWindow.getContentInsets(insets);
         InsetUtils.addInsets(insets, getLetterboxInsets());
         return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
-                record.mAdapter.mCapturedLeash, !task.fillsParent(),
+                record.mAdapter.mCapturedLeash, !fillsParent(),
                 mainWindow.mWinAnimator.mLastClipRect, insets,
                 getPrefixOrderIndex(), record.mAdapter.mPosition,
                 record.mAdapter.mStackBounds, task.getWindowConfiguration(),
