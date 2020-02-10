@@ -992,6 +992,11 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   return bag;
 }
 
+static bool compare_bag_entries(const ResolvedBag::Entry& entry1,
+    const ResolvedBag::Entry& entry2) {
+  return entry1.key < entry2.key;
+}
+
 const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& child_resids) {
   auto cached_iter = cached_bags_.find(resid);
   if (cached_iter != cached_bags_.end()) {
@@ -1027,13 +1032,15 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
   child_resids.push_back(resid);
 
   uint32_t parent_resid = dtohl(map->parent.ident);
-  if (parent_resid == 0 || std::find(child_resids.begin(), child_resids.end(), parent_resid)
+  if (parent_resid == 0U || std::find(child_resids.begin(), child_resids.end(), parent_resid)
       != child_resids.end()) {
-    // There is no parent or that a circular dependency exist, meaning there is nothing to
-    // inherit and we can do a simple copy of the entries in the map.
+    // There is no parent or a circular dependency exist, meaning there is nothing to inherit and
+    // we can do a simple copy of the entries in the map.
     const size_t entry_count = map_entry_end - map_entry;
     util::unique_cptr<ResolvedBag> new_bag{reinterpret_cast<ResolvedBag*>(
         malloc(sizeof(ResolvedBag) + (entry_count * sizeof(ResolvedBag::Entry))))};
+
+    bool sort_entries = false;
     ResolvedBag::Entry* new_entry = new_bag->entries;
     for (; map_entry != map_entry_end; ++map_entry) {
       uint32_t new_key = dtohl(map_entry->name.ident);
@@ -1059,8 +1066,15 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
             new_entry->value.data, new_key);
         return nullptr;
       }
+      sort_entries = sort_entries ||
+          (new_entry != new_bag->entries && (new_entry->key < (new_entry - 1U)->key));
       ++new_entry;
     }
+
+    if (sort_entries) {
+      std::sort(new_bag->entries, new_bag->entries + entry_count, compare_bag_entries);
+    }
+
     new_bag->type_spec_flags = entry.type_flags;
     new_bag->entry_count = static_cast<uint32_t>(entry_count);
     ResolvedBag* result = new_bag.get();
@@ -1091,6 +1105,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
   const ResolvedBag::Entry* const parent_entry_end = parent_entry + parent_bag->entry_count;
 
   // The keys are expected to be in sorted order. Merge the two bags.
+  bool sort_entries = false;
   while (map_entry != map_entry_end && parent_entry != parent_entry_end) {
     uint32_t child_key = dtohl(map_entry->name.ident);
     if (!is_internal_resid(child_key)) {
@@ -1123,6 +1138,8 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
       memcpy(new_entry, parent_entry, sizeof(*new_entry));
     }
 
+    sort_entries = sort_entries ||
+        (new_entry != new_bag->entries && (new_entry->key < (new_entry - 1U)->key));
     if (child_key >= parent_entry->key) {
       // Move to the next parent entry if we used it or it was overridden.
       ++parent_entry;
@@ -1153,6 +1170,8 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
                                        new_entry->value.dataType, new_entry->value.data, new_key);
       return nullptr;
     }
+    sort_entries = sort_entries ||
+        (new_entry != new_bag->entries && (new_entry->key < (new_entry - 1U)->key));
     ++map_entry;
     ++new_entry;
   }
@@ -1170,6 +1189,10 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
   if (actual_count != max_count) {
     new_bag.reset(reinterpret_cast<ResolvedBag*>(realloc(
         new_bag.release(), sizeof(ResolvedBag) + (actual_count * sizeof(ResolvedBag::Entry)))));
+  }
+
+  if (sort_entries) {
+    std::sort(new_bag->entries, new_bag->entries + actual_count, compare_bag_entries);
   }
 
   // Combine flags from the parent and our own bag.
