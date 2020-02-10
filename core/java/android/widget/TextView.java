@@ -12109,6 +12109,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             } return true;
+            case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
+                if (isLongClickable()) {
+                    boolean handled;
+                    if (isEnabled() && (mBufferType == BufferType.EDITABLE)) {
+                        mEditor.mIsBeingLongClickedByAccessibility = true;
+                        try {
+                            handled = performLongClick();
+                        } finally {
+                            mEditor.mIsBeingLongClickedByAccessibility = false;
+                        }
+                    } else {
+                        handled = performLongClick();
+                    }
+                    return handled;
+                }
+            }
+            return false;
             default: {
                 return super.performAccessibilityActionInternal(action, arguments);
             }

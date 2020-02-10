@@ -317,6 +317,7 @@ public class Editor {
     private SelectionActionModeHelper mSelectionActionModeHelper;
 
     boolean mIsBeingLongClicked;
+    boolean mIsBeingLongClickedByAccessibility;
 
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
     SuggestionRangeSpan mSuggestionRangeSpan;
@@ -1312,6 +1313,12 @@ public class Editor {
         if (TextView.DEBUG_CURSOR) {
             logCursor("performLongClick", "handled=%s", handled);
         }
+        if (mIsBeingLongClickedByAccessibility) {
+            if (!handled) {
+                toggleInsertionActionMode();
+            }
+            return true;
+        }
         // Long press in empty space moves cursor and starts the insertion action mode.
         if (!handled && !isPositionOnText(mTouchState.getLastDownX(), mTouchState.getLastDownY())
                 && !mTouchState.isOnHandle() && mInsertionControllerEnabled) {
@@ -1357,6 +1364,14 @@ public class Editor {
         }
 
         return handled;
+    }
+
+    private void toggleInsertionActionMode() {
+        if (mTextActionMode != null) {
+            stopTextActionMode();
+        } else {
+            startInsertionActionMode();
+        }
     }
 
     float getLastUpPositionX() {
@@ -5415,11 +5430,7 @@ public class Editor {
                                 config.getScaledTouchSlop());
                         if (isWithinTouchSlop) {
                             // Tapping on the handle toggles the insertion action mode.
-                            if (mTextActionMode != null) {
-                                stopTextActionMode();
-                            } else {
-                                startInsertionActionMode();
-                            }
+                            toggleInsertionActionMode();
                         }
                     } else {
                         if (mTextActionMode != null) {
