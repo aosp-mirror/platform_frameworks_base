@@ -8951,7 +8951,8 @@ public class DevicePolicyManager {
      *
      * <strong>Note: Starting from Android R, apps should no longer call this method with the
      * setting {@link android.provider.Settings.Secure#LOCATION_MODE}, which is deprecated. Instead,
-     * device owners should call {@link #setLocationEnabled(ComponentName, boolean)}.
+     * device owners should call {@link #setLocationEnabled(ComponentName, boolean)}. This will be
+     * enforced for all apps targeting Android R or above.
      * </strong>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -8961,6 +8962,7 @@ public class DevicePolicyManager {
      */
     public void setSecureSetting(@NonNull ComponentName admin, String setting, String value) {
         throwIfParentInstance("setSecureSetting");
+
         if (mService != null) {
             try {
                 mService.setSecureSetting(admin, setting, value);

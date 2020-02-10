@@ -553,6 +553,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long ADMIN_APP_PASSWORD_COMPLEXITY = 123562444L;
 
+    /**
+     * Admin apps targeting Android R+ may not use
+     * {@link android.app.admin.DevicePolicyManager#setSecureSetting} to change the deprecated
+     * {@link android.provider.Settings.Secure#LOCATION_MODE} setting. Instead they should use
+     * {@link android.app.admin.DevicePolicyManager#setLocationEnabled}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long USE_SET_LOCATION_ENABLED = 117835097L;
+
     final Context mContext;
     final Injector mInjector;
     final IPackageManager mIPackageManager;
@@ -11554,13 +11564,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setLocationEnabled(ComponentName who, boolean locationEnabled) {
-        Objects.requireNonNull(who, "ComponentName is null");
-        enforceDeviceOwner(who);
+        enforceDeviceOwner(Objects.requireNonNull(who));
 
-        UserHandle userHandle = mInjector.binderGetCallingUserHandle();
-        mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
-                        userHandle));
+        UserHandle user = mInjector.binderGetCallingUserHandle();
+
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            boolean wasLocationEnabled = mInjector.getLocationManager().isLocationEnabledForUser(
+                    user);
+            mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled, user);
+
+            // make a best effort to only show the notification if the admin is actually changing
+            // something. this is subject to race conditions with settings changes, but those are
+            // unlikely to realistically interfere
+            if (wasLocationEnabled != locationEnabled) {
+                showLocationSettingsChangedNotification(user);
+            }
+        });
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
@@ -11569,6 +11588,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         locationEnabled ? Settings.Secure.LOCATION_MODE_ON
                                 : Settings.Secure.LOCATION_MODE_OFF))
                 .write();
+    }
+
+    private void showLocationSettingsChangedNotification(UserHandle user) {
+        PendingIntent locationSettingsIntent = mInjector.pendingIntentGetActivityAsUser(mContext, 0,
+                new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT,
+                null, user);
+        Notification notification = new Notification.Builder(mContext,
+                SystemNotificationChannels.DEVICE_ADMIN)
+                .setSmallIcon(R.drawable.ic_info_outline)
+                .setContentTitle(mContext.getString(R.string.location_changed_notification_title))
+                .setContentText(mContext.getString(R.string.location_changed_notification_text))
+                .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                .setShowWhen(true)
+                .setContentIntent(locationSettingsIntent)
+                .setAutoCancel(true)
+                .build();
+        mInjector.getNotificationManager().notify(SystemMessage.NOTE_LOCATION_CHANGED,
+                notification);
     }
 
     @Override
@@ -11641,6 +11679,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 throw new SecurityException(String.format(
                         "Permission denial: Profile owners cannot update %1$s", setting));
             }
+            if (setting.equals(Settings.Secure.LOCATION_MODE)
+                    && isSetSecureSettingLocationModeCheckEnabled(who.getPackageName(),
+                    callingUserId)) {
+                throw new UnsupportedOperationException(Settings.Secure.LOCATION_MODE + " is "
+                        + "deprecated. Please use setLocationEnabled() instead.");
+            }
             if (setting.equals(Settings.Secure.INSTALL_NON_MARKET_APPS)) {
                 if (getTargetSdk(who.getPackageName(), callingUserId) >= Build.VERSION_CODES.O) {
                     throw new UnsupportedOperationException(Settings.Secure.INSTALL_NON_MARKET_APPS
@@ -11685,6 +11729,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     saveSettingsLocked(callingUserId);
                 }
                 mInjector.settingsSecurePutStringForUser(setting, value, callingUserId);
+                if (setting.equals(Settings.Secure.LOCATION_MODE)) {
+                    showLocationSettingsChangedNotification(UserHandle.of(callingUserId));
+                }
             });
         }
         DevicePolicyEventLogger
@@ -11692,6 +11739,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setAdmin(who)
                 .setStrings(setting, value)
                 .write();
+    }
+
+    private boolean isSetSecureSettingLocationModeCheckEnabled(String packageName, int userId) {
+        try {
+            return mIPlatformCompat.isChangeEnabledByPackageName(USE_SET_LOCATION_ENABLED,
+                    packageName, userId);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
+            return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
+        }
     }
 
     @Override
