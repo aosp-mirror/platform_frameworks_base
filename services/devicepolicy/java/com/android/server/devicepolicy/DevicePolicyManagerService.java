@@ -458,8 +458,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // A collection of user restrictions that are deprecated and should simply be ignored.
     private static final Set<String> DEPRECATED_USER_RESTRICTIONS;
     private static final String AB_DEVICE_KEY = "ro.build.ab_update";
-    // Permissions related to location which must not be granted automatically
-    private static  final Set<String> LOCATION_PERMISSIONS;
 
     static {
         SECURE_SETTINGS_WHITELIST = new ArraySet<>();
@@ -504,11 +502,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DEPRECATED_USER_RESTRICTIONS = Sets.newHashSet(
                 UserManager.DISALLOW_ADD_MANAGED_PROFILE,
                 UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
-
-        LOCATION_PERMISSIONS = Sets.newHashSet(
-                permission.ACCESS_FINE_LOCATION,
-                permission.ACCESS_BACKGROUND_LOCATION,
-                permission.ACCESS_COARSE_LOCATION);
     }
 
     /**
@@ -12539,14 +12532,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     throw new RemoteException(
                             "Cannot check if " + permission + "is a runtime permission", e, false,
                             true);
-                }
-
-                // Prevent granting location-related permissions without user consent.
-                if (LOCATION_PERMISSIONS.contains(permission)
-                        && grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
-                        && !isUnattendedManagedKioskUnchecked()) {
-                    callback.sendResult(null);
-                    return;
                 }
 
                 if (grantState == DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED
