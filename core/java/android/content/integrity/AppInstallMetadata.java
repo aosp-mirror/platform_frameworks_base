@@ -18,6 +18,7 @@ package android.content.integrity;
 
 import android.annotation.NonNull;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,18 +34,18 @@ import java.util.Objects;
 public final class AppInstallMetadata {
     private final String mPackageName;
     // Raw string encoding for the SHA-256 hash of the certificate of the app.
-    private final String mAppCertificate;
+    private final List<String> mAppCertificates;
     private final String mInstallerName;
     // Raw string encoding for the SHA-256 hash of the certificate of the installer.
-    private final String mInstallerCertificate;
+    private final List<String> mInstallerCertificates;
     private final long mVersionCode;
     private final boolean mIsPreInstalled;
 
     private AppInstallMetadata(Builder builder) {
         this.mPackageName = builder.mPackageName;
-        this.mAppCertificate = builder.mAppCertificate;
+        this.mAppCertificates = builder.mAppCertificates;
         this.mInstallerName = builder.mInstallerName;
-        this.mInstallerCertificate = builder.mInstallerCertificate;
+        this.mInstallerCertificates = builder.mInstallerCertificates;
         this.mVersionCode = builder.mVersionCode;
         this.mIsPreInstalled = builder.mIsPreInstalled;
     }
@@ -55,8 +56,8 @@ public final class AppInstallMetadata {
     }
 
     @NonNull
-    public String getAppCertificate() {
-        return mAppCertificate;
+    public List<String> getAppCertificates() {
+        return mAppCertificates;
     }
 
     @NonNull
@@ -65,8 +66,8 @@ public final class AppInstallMetadata {
     }
 
     @NonNull
-    public String getInstallerCertificate() {
-        return mInstallerCertificate;
+    public List<String> getInstallerCertificates() {
+        return mInstallerCertificates;
     }
 
     /** @see AppInstallMetadata.Builder#setVersionCode(long) */
@@ -82,12 +83,12 @@ public final class AppInstallMetadata {
     @Override
     public String toString() {
         return String.format(
-                "AppInstallMetadata { PackageName = %s, AppCert = %s, InstallerName = %s,"
-                    + " InstallerCert = %s, VersionCode = %d, PreInstalled = %b }",
+                "AppInstallMetadata { PackageName = %s, AppCerts = %s, InstallerName = %s,"
+                    + " InstallerCerts = %s, VersionCode = %d, PreInstalled = %b }",
                 mPackageName,
-                mAppCertificate,
+                mAppCertificates,
                 mInstallerName == null ? "null" : mInstallerName,
-                mInstallerCertificate == null ? "null" : mInstallerCertificate,
+                mInstallerCertificates == null ? "null" : mInstallerCertificates,
                 mVersionCode,
                 mIsPreInstalled);
     }
@@ -95,9 +96,9 @@ public final class AppInstallMetadata {
     /** Builder class for constructing {@link AppInstallMetadata} objects. */
     public static final class Builder {
         private String mPackageName;
-        private String mAppCertificate;
+        private List<String> mAppCertificates;
         private String mInstallerName;
-        private String mInstallerCertificate;
+        private List<String> mInstallerCertificates;
         private long mVersionCode;
         private boolean mIsPreInstalled;
 
@@ -118,11 +119,11 @@ public final class AppInstallMetadata {
          * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
          * of the app.
          *
-         * @see AppInstallMetadata#getAppCertificate()
+         * @see AppInstallMetadata#getAppCertificates()
          */
         @NonNull
-        public Builder setAppCertificate(@NonNull String appCertificate) {
-            this.mAppCertificate = Objects.requireNonNull(appCertificate);
+        public Builder setAppCertificates(@NonNull List<String> appCertificates) {
+            this.mAppCertificates = Objects.requireNonNull(appCertificates);
             return this;
         }
 
@@ -143,11 +144,11 @@ public final class AppInstallMetadata {
          * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
          * of the installer.
          *
-         * @see AppInstallMetadata#getInstallerCertificate()
+         * @see AppInstallMetadata#getInstallerCertificates()
          */
         @NonNull
-        public Builder setInstallerCertificate(@NonNull String installerCertificate) {
-            this.mInstallerCertificate = Objects.requireNonNull(installerCertificate);
+        public Builder setInstallerCertificates(@NonNull List<String> installerCertificates) {
+            this.mInstallerCertificates = Objects.requireNonNull(installerCertificates);
             return this;
         }
 
@@ -181,7 +182,7 @@ public final class AppInstallMetadata {
         @NonNull
         public AppInstallMetadata build() {
             Objects.requireNonNull(mPackageName);
-            Objects.requireNonNull(mAppCertificate);
+            Objects.requireNonNull(mAppCertificates);
             return new AppInstallMetadata(this);
         }
     }

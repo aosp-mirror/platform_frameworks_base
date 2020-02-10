@@ -32,7 +32,6 @@ import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
-import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -52,6 +51,8 @@ import static android.os.Build.VERSION_CODES.P;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
@@ -1147,7 +1148,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         assertEquals(1, mNotificationRecordLogger.getCalls().size());
         NotificationRecordLoggerFake.CallRecord call = mNotificationRecordLogger.get(0);
-        assertTrue(call.shouldLog());
+        assertTrue(call.shouldLog);
+        assertEquals(NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
+                call.event);
         assertNotNull(call.r);
         assertNull(call.old);
         assertEquals(0, call.position);
@@ -1156,7 +1159,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(0, call.r.getSbn().getId());
         assertEquals(tag, call.r.getSbn().getTag());
         assertNotNull(call.r.getSbn().getInstanceId());
-        assertEquals(0, call.r.getSbn().getInstanceId().getId());
+        assertEquals(0, call.getInstanceId());  // Fake instance IDs are assigned in order
     }
 
     @Test
@@ -1174,18 +1177,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         assertEquals(2, mNotificationRecordLogger.getCalls().size());
 
-        assertTrue(mNotificationRecordLogger.get(0).shouldLog());
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog);
         assertEquals(
-                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
-                mNotificationRecordLogger.get(0).getUiEvent());
-        assertEquals(0, mNotificationRecordLogger.get(0).r.getSbn().getInstanceId().getId());
+                NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
+                mNotificationRecordLogger.get(0).event);
+        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
 
-        assertTrue(mNotificationRecordLogger.get(1).shouldLog());
+        assertTrue(mNotificationRecordLogger.get(1).shouldLog);
         assertEquals(
-                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_UPDATED,
-                mNotificationRecordLogger.get(1).getUiEvent());
+                NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED,
+                mNotificationRecordLogger.get(1).event);
         // Instance ID doesn't change on update of an active notification
-        assertEquals(0, mNotificationRecordLogger.get(1).r.getSbn().getInstanceId().getId());
+        assertEquals(0, mNotificationRecordLogger.get(1).getInstanceId());
     }
 
     @Test
@@ -1197,8 +1200,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 generateNotificationRecord(null).getNotification(), 0);
         waitForIdle();
         assertEquals(2, mNotificationRecordLogger.getCalls().size());
-        assertTrue(mNotificationRecordLogger.get(0).shouldLog());
-        assertFalse(mNotificationRecordLogger.get(1).shouldLog());
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog);
+        assertFalse(mNotificationRecordLogger.get(1).shouldLog);
     }
 
     @Test
@@ -1213,20 +1216,37 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         mBinderService.enqueueNotificationWithTag(PKG, PKG, tag, 0, notification, 0);
         waitForIdle();
-        assertEquals(2, mNotificationRecordLogger.getCalls().size());
+        assertEquals(3, mNotificationRecordLogger.getCalls().size());
 
-        assertTrue(mNotificationRecordLogger.get(0).shouldLog());
         assertEquals(
-                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
-                mNotificationRecordLogger.get(0).getUiEvent());
-        assertEquals(0, mNotificationRecordLogger.get(0).r.getSbn().getInstanceId().getId());
+                NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
+                mNotificationRecordLogger.get(0).event);
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog);
+        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
 
-        assertTrue(mNotificationRecordLogger.get(1).shouldLog());
+        assertEquals(REASON_APP_CANCEL, mNotificationRecordLogger.get(1).reason);
         assertEquals(
-                NotificationRecordLogger.NotificationReportedEvents.NOTIFICATION_POSTED,
-                mNotificationRecordLogger.get(1).getUiEvent());
+                NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_APP_CANCEL,
+                mNotificationRecordLogger.get(1).event);
+        assertTrue(mNotificationRecordLogger.get(1).shouldLog);
+        assertEquals(0, mNotificationRecordLogger.get(1).getInstanceId());
+
+        assertEquals(
+                NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED,
+                mNotificationRecordLogger.get(2).event);
+        assertTrue(mNotificationRecordLogger.get(2).shouldLog);
         // New instance ID because notification was canceled before re-post
-        assertEquals(1, mNotificationRecordLogger.get(1).r.getSbn().getInstanceId().getId());
+        assertEquals(1, mNotificationRecordLogger.get(2).getInstanceId());
+    }
+
+    @Test
+    public void testCancelNonexistentNotification() throws Exception {
+        mBinderService.cancelNotificationWithTag(PKG, PKG,
+                "testCancelNonexistentNotification", 0, 0);
+        waitForIdle();
+        // The notification record logger doesn't even get called when a nonexistent notification
+        // is cancelled, because that happens very frequently and is not interesting.
+        assertEquals(0, mNotificationRecordLogger.getCalls().size());
     }
 
     @Test
@@ -3368,6 +3388,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         assertEquals(NotificationStats.DISMISSAL_AOD, r.getStats().getDismissalSurface());
+
+        // Using mService.addNotification() does not generate a NotificationRecordLogger log,
+        // so we only get the cancel notification.
+        assertEquals(1, mNotificationRecordLogger.getCalls().size());
+
+        assertEquals(REASON_CANCEL, mNotificationRecordLogger.get(0).reason);
+        assertEquals(
+                NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_USER_AOD,
+                mNotificationRecordLogger.get(0).event);
+        assertTrue(mNotificationRecordLogger.get(0).shouldLog);
+        assertEquals(0, mNotificationRecordLogger.get(0).getInstanceId());
     }
 
     @Test

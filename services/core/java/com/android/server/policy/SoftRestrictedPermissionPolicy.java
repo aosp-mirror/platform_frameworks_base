@@ -122,8 +122,9 @@ public abstract class SoftRestrictedPermissionPolicy {
                     PackageManager pm = context.getPackageManager();
                     int flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
-                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
+                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
+                            || targetSDK > Build.VERSION_CODES.Q;
                     hasRequestedLegacyExternalStorage = hasUidRequestedLegacyExternalStorage(
                             appInfo.uid, context);
                     hasWriteMediaStorageGrantedForUid = hasWriteMediaStorageGrantedForUid(

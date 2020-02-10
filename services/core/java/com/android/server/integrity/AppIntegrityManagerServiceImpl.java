@@ -272,21 +272,15 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             List<String> installerCertificates =
                     getInstallerCertificateFingerprint(installerPackageName);
 
-            // TODO (b/148373316): Figure out what field contains which fields are populated for
-            // rotated and the multiple signers. Until then, return the first certificate.
-            String appCert = appCertificates.isEmpty() ? "" : appCertificates.get(0);
-            String installerCert =
-                    installerCertificates.isEmpty() ? "" : installerCertificates.get(0);
-
             Slog.w(TAG, appCertificates.toString());
 
             AppInstallMetadata.Builder builder = new AppInstallMetadata.Builder();
 
             builder.setPackageName(getPackageNameNormalized(packageName));
-            builder.setAppCertificate(appCert);
+            builder.setAppCertificates(appCertificates);
             builder.setVersionCode(intent.getLongExtra(EXTRA_LONG_VERSION_CODE, -1));
             builder.setInstallerName(getPackageNameNormalized(installerPackageName));
-            builder.setInstallerCertificate(installerCert);
+            builder.setInstallerCertificates(installerCertificates);
             builder.setIsPreInstalled(isSystemApp(packageName));
 
             AppInstallMetadata appInstallMetadata = builder.build();
@@ -307,7 +301,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
                     packageName,
-                    appCert,
+                    appCertificates.toString(),
                     appInstallMetadata.getVersionCode(),
                     installerPackageName,
                     result.getLoggingResponse(),

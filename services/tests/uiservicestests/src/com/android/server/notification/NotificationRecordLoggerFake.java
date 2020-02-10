@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import com.android.internal.logging.UiEventLogger;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,18 +26,27 @@ import java.util.List;
  */
 class NotificationRecordLoggerFake implements NotificationRecordLogger {
     static class CallRecord extends NotificationRecordPair {
-        public int position, buzzBeepBlink;
+        static final int INVALID = -1;
+        public int position = INVALID, buzzBeepBlink = INVALID, reason = INVALID;
+        public boolean shouldLog;
+        public UiEventLogger.UiEventEnum event;
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
                 int buzzBeepBlink) {
             super(r, old);
+
             this.position = position;
             this.buzzBeepBlink = buzzBeepBlink;
+            shouldLog = shouldLog(buzzBeepBlink);
+            event = NotificationReportedEvent.fromRecordPair(this);
         }
-        boolean shouldLog() {
-            return shouldLog(buzzBeepBlink);
+        CallRecord(NotificationRecord r, int reason, int dismissalSurface) {
+            super(r, null);
+            this.reason = reason;
+            shouldLog = true;
+            event = NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface);
         }
     }
-    private List<CallRecord> mCalls = new ArrayList<CallRecord>();
+    private List<CallRecord> mCalls = new ArrayList<>();
 
     List<CallRecord> getCalls() {
         return mCalls;
@@ -50,4 +61,10 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
             int position, int buzzBeepBlink) {
         mCalls.add(new CallRecord(r, old, position, buzzBeepBlink));
     }
+
+    @Override
+    public void logNotificationCancelled(NotificationRecord r, int reason, int dismissalSurface) {
+        mCalls.add(new CallRecord(r, reason, dismissalSurface));
+    }
+
 }

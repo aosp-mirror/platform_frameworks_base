@@ -70,17 +70,17 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata1 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         AppInstallMetadata appInstallMetadata2 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_2)
-                        .setInstallerCertificate(INSTALLER_2_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_2_CERT))
                         .build();
         AppInstallMetadata appInstallMetadata3 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(RANDOM_INSTALLER)
-                        .setInstallerCertificate(RANDOM_INSTALLER_CERT)
+                        .setInstallerCertificates(Collections.singletonList(RANDOM_INSTALLER_CERT))
                         .build();
 
         assertThat(mEngine.evaluate(appInstallMetadata1, allowedInstallers).getEffect())
@@ -99,7 +99,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata1 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata1, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.ALLOW);
@@ -107,7 +107,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata2 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(RANDOM_INSTALLER)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata2, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.DENY);
@@ -115,7 +115,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata3 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(RANDOM_INSTALLER_CERT)
+                        .setInstallerCertificates(Collections.singletonList(RANDOM_INSTALLER_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata3, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.DENY);
@@ -123,7 +123,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata4 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(RANDOM_INSTALLER_CERT)
+                        .setInstallerCertificates(Collections.singletonList(RANDOM_INSTALLER_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata4, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.DENY);
@@ -138,7 +138,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata1 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata1, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.ALLOW);
@@ -146,7 +146,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata2 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_2)
-                        .setInstallerCertificate(INSTALLER_2_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_2_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata2, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.ALLOW);
@@ -154,7 +154,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata3 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(INSTALLER_2_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_2_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata3, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.DENY);
@@ -162,7 +162,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata4 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_2)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata4, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.DENY);
@@ -178,7 +178,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata1 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(INSTALLER_1)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata1, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.ALLOW);
@@ -186,7 +186,7 @@ public class RuleEvaluationEngineTest {
         AppInstallMetadata appInstallMetadata2 =
                 getAppInstallMetadataBuilder()
                         .setInstallerName(RANDOM_INSTALLER)
-                        .setInstallerCertificate(INSTALLER_1_CERT)
+                        .setInstallerCertificates(Collections.singletonList(INSTALLER_1_CERT))
                         .build();
         assertThat(mEngine.evaluate(appInstallMetadata2, allowedInstallers).getEffect())
                 .isEqualTo(IntegrityCheckResult.Effect.DENY);
@@ -196,8 +196,8 @@ public class RuleEvaluationEngineTest {
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
-                .setAppCertificate("abc")
-                .setInstallerCertificate("abc")
+                .setAppCertificates(Collections.singletonList("abc"))
+                .setInstallerCertificates(Collections.singletonList("abc"))
                 .setInstallerName("abc")
                 .setVersionCode(-1)
                 .setIsPreInstalled(true);

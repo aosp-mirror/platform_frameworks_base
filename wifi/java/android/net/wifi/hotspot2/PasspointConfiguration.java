@@ -908,6 +908,9 @@ public final class PasspointConfiguration implements Parcelable {
             throw new IllegalStateException("Credential or HomeSP are not initialized");
         }
 
-        return mHomeSp.getFqdn();
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s_%x%x", mHomeSp.getFqdn(), mHomeSp.hashCode(),
+                mCredential.hashCode()));
+        return sb.toString();
     }
 }

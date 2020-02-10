@@ -616,6 +616,18 @@ genrule {
     out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
+java_library {
+    name: "uieventloggerlib",
+    srcs: [
+        "core/java/com/android/internal/logging/UiEvent.java",
+        "core/java/com/android/internal/logging/UiEventLogger.java",
+        "core/java/com/android/internal/logging/UiEventLoggerImpl.java",
+        "core/java/com/android/internal/logging/InstanceId.java",
+        "core/java/com/android/internal/logging/InstanceIdSequence.java",
+        ":statslog-framework-java-gen",
+    ],
+}
+
 gensrcs {
     name: "framework-javastream-protos",
     depfile: true,

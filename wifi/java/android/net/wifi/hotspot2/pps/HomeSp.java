@@ -16,8 +16,8 @@
 
 package android.net.wifi.hotspot2.pps;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -299,8 +299,10 @@ public final class HomeSp implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFqdn, mFriendlyName, mIconUrl, mHomeNetworkIds, mMatchAllOis,
-                mMatchAnyOis, mOtherHomePartners, mRoamingConsortiumOis);
+        return Objects.hash(mFqdn, mFriendlyName, mIconUrl,
+                mHomeNetworkIds, Arrays.hashCode(mMatchAllOis),
+                Arrays.hashCode(mMatchAnyOis), Arrays.hashCode(mOtherHomePartners),
+                Arrays.hashCode(mRoamingConsortiumOis));
     }
 
     @Override
