@@ -17,7 +17,6 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.SystemApi.Client;
 import android.app.StatsManager;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
@@ -25,9 +24,10 @@ import android.content.Context;
 /**
  * Class for performing registration for all stats services
  *
+ * TODO(b/148225705) Change to @SystemApi(client=MODULE_LIBRARIES) when the build system is ready.
  * @hide
  */
-@SystemApi(client = Client.MODULE_LIBRARIES)
+@SystemApi
 public class StatsFrameworkInitializer {
     private StatsFrameworkInitializer() {
     }
