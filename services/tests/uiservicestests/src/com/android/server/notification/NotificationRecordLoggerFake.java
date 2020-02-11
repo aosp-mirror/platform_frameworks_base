@@ -26,24 +26,26 @@ import java.util.List;
  */
 class NotificationRecordLoggerFake implements NotificationRecordLogger {
     static class CallRecord extends NotificationRecordPair {
-        static final int INVALID = -1;
-        public int position = INVALID, buzzBeepBlink = INVALID, reason = INVALID;
-        public boolean shouldLog;
         public UiEventLogger.UiEventEnum event;
+
+        // The following fields are only relevant to maybeLogNotificationPosted() calls.
+        static final int INVALID = -1;
+        public int position = INVALID, buzzBeepBlink = INVALID;
+        public boolean shouldLogReported;
+
         CallRecord(NotificationRecord r, NotificationRecord old, int position,
                 int buzzBeepBlink) {
             super(r, old);
-
             this.position = position;
             this.buzzBeepBlink = buzzBeepBlink;
-            shouldLog = shouldLog(buzzBeepBlink);
-            event = NotificationReportedEvent.fromRecordPair(this);
+            shouldLogReported = shouldLogReported(buzzBeepBlink);
+            event = shouldLogReported ? NotificationReportedEvent.fromRecordPair(this) : null;
         }
-        CallRecord(NotificationRecord r, int reason, int dismissalSurface) {
+
+        CallRecord(NotificationRecord r, UiEventLogger.UiEventEnum event) {
             super(r, null);
-            this.reason = reason;
-            shouldLog = true;
-            event = NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface);
+            shouldLogReported = false;
+            this.event = event;
         }
     }
     private List<CallRecord> mCalls = new ArrayList<>();
@@ -57,14 +59,19 @@ class NotificationRecordLoggerFake implements NotificationRecordLogger {
     }
 
     @Override
-    public void logNotificationReported(NotificationRecord r, NotificationRecord old,
+    public void maybeLogNotificationPosted(NotificationRecord r, NotificationRecord old,
             int position, int buzzBeepBlink) {
         mCalls.add(new CallRecord(r, old, position, buzzBeepBlink));
     }
 
     @Override
     public void logNotificationCancelled(NotificationRecord r, int reason, int dismissalSurface) {
-        mCalls.add(new CallRecord(r, reason, dismissalSurface));
+        mCalls.add(new CallRecord(r,
+                NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface)));
     }
 
+    @Override
+    public void logNotificationVisibility(NotificationRecord r, boolean visible) {
+        mCalls.add(new CallRecord(r, NotificationEvent.fromVisibility(visible)));
+    }
 }
