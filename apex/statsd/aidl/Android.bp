@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 filegroup {
-    name: "statsd_java_aidl",
+    name: "framework-statsd-aidl-sources",
     srcs: ["**/*.aidl"],
 }
 

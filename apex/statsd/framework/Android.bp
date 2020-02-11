@@ -31,35 +31,56 @@ filegroup {
     name: "framework-statsd-sources",
     srcs: [
         "java/**/*.java",
-        ":statsd_java_aidl",
+        ":framework-statsd-aidl-sources",
         ":statslog-statsd-java-gen",
+    ],
+}
+
+java_defaults {
+    name: "framework-statsd-defaults",
+
+    // TODO(b/146757305): Use "module_current" once it's ready.
+    sdk_version: "core_current",
+
+    libs: [
+        "framework-annotations-lib",
+
+        // TODO(b/146757305): should be unnecessary once
+        // sdk_version="module_lib_current" or "module_current"
+        "android_module_lib_stubs_current",
     ],
 }
 
 java_library {
     name: "framework-statsd",
+    defaults: [
+        "framework-statsd-defaults",
+    ],
     installable: true,
-    // TODO(b/146209659): Use system_current instead.
-    sdk_version: "core_platform",
+
     srcs: [
         ":framework-statsd-sources",
     ],
+
+    aidl: {
+        // TODO(b/146757305): should be unnecessary once
+        // sdk_version="module_lib_current" or "module_current"
+        include_dirs: [
+            // To refer:
+            // android.app.PendintIntent
+            "frameworks/base/core/java",
+        ],
+    },
+
     permitted_packages: [
         "android.app",
         "android.os",
         "android.util",
     ],
-    libs: [
-        "framework-annotations-lib",
-        // TODO(b/146230220): Use android_module_lib_stubs_current instead.
-        //"android_module_lib_stubs_current",
-        "framework-all",
-    ],
+
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",
-        //TODO(b/146167933) remove this
-        "//frameworks/opt/net/wifi/service",
     ],
     apex_available: [
         "com.android.os.statsd",
@@ -69,13 +90,14 @@ java_library {
 
 stubs_defaults {
     name: "framework-statsd-stubs-srcs-defaults",
-    srcs: [ ":framework-statsd-sources" ],
+    srcs: [
+        ":framework-statsd-sources",
+    ],
+
     libs: [
-        // TODO(b/148218250): Change to android_system_stubs_current
-        "framework-all",
         "framework-annotations-lib",
     ],
-    sdk_version: "core_platform",
+    sdk_version: "system_current",
 }
 
 droidstubs {
@@ -92,6 +114,7 @@ droidstubs {
         "framework-module-stubs-defaults-systemapi",
         "framework-statsd-stubs-srcs-defaults",
     ],
+
 }
 
 droidstubs {
@@ -112,24 +135,24 @@ droidstubs {
 
 java_library {
     name: "framework-statsd-stubs-publicapi",
+    defaults: [
+        "framework-statsd-defaults",
+    ],
     srcs: [ ":framework-statsd-stubs-srcs-publicapi" ],
-    // TODO(b/148218250): Change to current
-    libs: [ "framework-all" ],
-    sdk_version: "core_platform",
 }
 
 java_library {
     name: "framework-statsd-stubs-systemapi",
+    defaults: [
+        "framework-statsd-defaults",
+    ],
     srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],
-    // TODO(b/148218250): Change to system_current
-    libs: [ "framework-all" ],
-    sdk_version: "core_platform",
 }
 
 java_library {
     name: "framework-statsd-stubs-module_libs_api",
-    srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],
-    // TODO(b/148218250): Change to system_current
-    libs: [ "framework-all" ],
-    sdk_version: "core_platform",
+    defaults: [
+        "framework-statsd-defaults",
+    ],
+    srcs: [ ":framework-statsd-stubs-srcs-module_libs_api" ],
 }

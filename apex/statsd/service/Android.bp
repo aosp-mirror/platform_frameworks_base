@@ -16,16 +16,21 @@ java_library {
     srcs: [
         ":service-statsd-sources",
     ],
-    // TODO(b/146209659): Use system_current instead once framework-statsd compiles against
-    // system_current.
+
+    // TODO(b/146757305) should be "module_current" since not allowed to use
+    // @CorePlatformApi's
     sdk_version: "core_platform",
+
     libs: [
         "framework-annotations-lib",
-        "framework-statsd",
-        // TODO(b/146758669): Remove this line after nullability annotations are system APIs.
-        "android_system_stubs_current",
         "services-stubs",
+        "framework-statsd",
+
+        // TODO(b/146757305): should be unnecessary once
+        // sdk_version="module_lib_current" or "module_current"
+        "android_module_lib_stubs_current",
     ],
+
     apex_available: [
         "com.android.os.statsd",
         "test_com.android.os.statsd",
