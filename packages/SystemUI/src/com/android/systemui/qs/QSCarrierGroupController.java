@@ -69,8 +69,10 @@ public class QSCarrierGroupController {
                 @Override
                 public void setMobileDataIndicators(NetworkController.IconState statusIcon,
                         NetworkController.IconState qsIcon, int statusType, int qsType,
-                        boolean activityIn, boolean activityOut, String typeContentDescription,
-                        String description, boolean isWide, int subId, boolean roaming) {
+                        boolean activityIn, boolean activityOut,
+                        CharSequence typeContentDescription,
+                        CharSequence typeContentDescriptionHtml, CharSequence description,
+                        boolean isWide, int subId, boolean roaming) {
                     int slotIndex = getSlotIndex(subId);
                     if (slotIndex >= SIM_SLOTS) {
                         Log.w(TAG, "setMobileDataIndicators - slot: " + slotIndex);
@@ -83,7 +85,7 @@ public class QSCarrierGroupController {
                     mInfos[slotIndex].visible = statusIcon.visible;
                     mInfos[slotIndex].mobileSignalIconId = statusIcon.icon;
                     mInfos[slotIndex].contentDescription = statusIcon.contentDescription;
-                    mInfos[slotIndex].typeContentDescription = typeContentDescription;
+                    mInfos[slotIndex].typeContentDescription = typeContentDescription.toString();
                     mInfos[slotIndex].roaming = roaming;
                     mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
                 }
