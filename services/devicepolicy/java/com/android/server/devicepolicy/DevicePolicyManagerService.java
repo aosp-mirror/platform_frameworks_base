@@ -8076,15 +8076,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSecurityLogMonitor.stop();
         setNetworkLoggingActiveInternal(false);
         deleteTransferOwnershipBundleLocked(userId);
-
-        try {
-            if (mInjector.getIBackupManager() != null) {
-                // Reactivate backup service.
-                mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, true);
-            }
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed reactivating backup service.", e);
-        }
+        toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
     }
 
     @Override
@@ -8144,7 +8136,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-
     private void toggleBackupServiceActive(int userId, boolean makeActive) {
         long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -8153,7 +8144,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .setBackupServiceActive(userId, makeActive);
             }
         } catch (RemoteException e) {
-            throw new IllegalStateException("Failed deactivating backup service.", e);
+            throw new IllegalStateException(String.format("Failed %s backup service.",
+                    makeActive ? "activating" : "deactivating"), e);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
@@ -8204,6 +8196,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mOwners.removeProfileOwner(userId);
         mOwners.writeProfileOwner(userId);
         deleteTransferOwnershipBundleLocked(userId);
+        toggleBackupServiceActive(userId, true);
     }
 
     @Override
