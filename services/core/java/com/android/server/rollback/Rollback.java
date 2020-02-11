@@ -181,15 +181,6 @@ class Rollback {
     private int mNumPackageSessionsWithSuccess;
 
     /**
-     * A temp flag to facilitate merging of the 2 rollback collections managed by
-     * RollbackManagerServiceImpl. True if this rollback is in the process of enabling and was
-     * originally managed by RollbackManagerServiceImpl#mNewRollbacks.
-     * TODO: remove this flag when merge is completed.
-     */
-    @GuardedBy("mLock")
-    private boolean mIsNewRollback = false;
-
-    /**
      * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
@@ -834,18 +825,6 @@ class Rollback {
                 }
             }
             return packagesWithoutApkInApex == mPackageSessionIds.length;
-        }
-    }
-
-    void setIsNewRollback(boolean newRollback) {
-        synchronized (mLock) {
-            mIsNewRollback = newRollback;
-        }
-    }
-
-    boolean isNewRollback() {
-        synchronized (mLock) {
-            return mIsNewRollback;
         }
     }
 
