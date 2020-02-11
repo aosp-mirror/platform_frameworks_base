@@ -170,30 +170,13 @@ message JobSchedulerServiceDumpProto {
 message ConstantsProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Minimum # of idle jobs that must be ready in order to force the JMS to
-    // schedule things early.
-    optional int32 min_idle_count = 1;
-    // Minimum # of charging jobs that must be ready in order to force the JMS
-    // to schedule things early.
-    optional int32 min_charging_count = 2;
-    // Minimum # of "battery not low" jobs that must be ready in order to force
-    // the JMS to schedule things early.
-    optional int32 min_battery_not_low_count = 3;
-    // Minimum # of "storage not low" jobs that must be ready in order to force
-    // the JMS to schedule things early.
-    optional int32 min_storage_not_low_count = 4;
-    // Minimum # of connectivity jobs that must be ready in order to force the
-    // JMS to schedule things early. 1 == Run connectivity jobs as soon as
-    // ready.
-    optional int32 min_connectivity_count = 5;
-    // Minimum # of content trigger jobs that must be ready in order to force
-    // the JMS to schedule things early.
-    optional int32 min_content_count = 6;
-    // Minimum # of jobs (with no particular constraints) for which the JMS will
-    // be happy running some work early. This (and thus the other min counts)
-    // is now set to 1, to prevent any batching at this level. Since we now do
-    // batching through doze, that is a much better mechanism.
-    optional int32 min_ready_jobs_count = 7;
+    reserved 1; // min_idle_count
+    reserved 2; // min_charging_count
+    reserved 3; // min_battery_not_low_count
+    reserved 4; // min_storage_not_low_count
+    reserved 5; // min_connectivity_count
+    reserved 6; // min_content_count
+    reserved 7; // min_ready_jobs_count
     // Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
     optional int32 min_ready_non_active_jobs_count = 29;
     // Don't batch a non-ACTIVE job if it's been delayed due to force batching attempts for
