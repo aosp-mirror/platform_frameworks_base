@@ -1056,10 +1056,8 @@ public class PackageParser {
      * has changed since the last parse, it's up to callers to do so.
      *
      * @see #parsePackageLite(File, int)
-     * @deprecated use {@link #parseParsedPackage(File, int, boolean)}
      */
     @UnsupportedAppUsage
-    @Deprecated
     public Package parsePackage(File packageFile, int flags, boolean useCaches)
             throws PackageParserException {
         if (packageFile.isDirectory()) {
@@ -1071,10 +1069,8 @@ public class PackageParser {
 
     /**
      * Equivalent to {@link #parsePackage(File, int, boolean)} with {@code useCaches == false}.
-     * @deprecated use {@link #parseParsedPackage(File, int, boolean)}
      */
     @UnsupportedAppUsage
-    @Deprecated
     public Package parsePackage(File packageFile, int flags) throws PackageParserException {
         return parsePackage(packageFile, flags, false /* useCaches */);
     }
@@ -1345,12 +1341,7 @@ public class PackageParser {
      * Note that this <em>does not</em> perform signature verification; that
      * must be done separately in
      * {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}.
-     *
-     * @deprecated external callers should move to
-     *             {@link #parseParsedPackage(File, int, boolean)}. Eventually this method will
-     *             be marked private.
      */
-    @Deprecated
     @UnsupportedAppUsage
     public Package parseMonolithicPackage(File apkFile, int flags) throws PackageParserException {
         final PackageLite lite = parseMonolithicPackageLite(apkFile, flags);
@@ -1547,11 +1538,8 @@ public class PackageParser {
      * Collect certificates from all the APKs described in the given package,
      * populating {@link Package#mSigningDetails}. Also asserts that all APK
      * contents are signed correctly and consistently.
-     *
-     * @deprecated use {@link ApkParseUtils#collectCertificates(AndroidPackage, boolean)}
      */
     @UnsupportedAppUsage
-    @Deprecated
     public static void collectCertificates(Package pkg, boolean skipVerify)
             throws PackageParserException {
         collectCertificatesInternal(pkg, skipVerify);
@@ -6472,9 +6460,8 @@ public class PackageParser {
      * Representation of a full package parsed from APK files on disk. A package
      * consists of a single base APK, and zero or more split APKs.
      *
-     * @deprecated use an {@link AndroidPackage}
+     * Deprecated internally. Use AndroidPackage instead.
      */
-    @Deprecated
     public final static class Package implements Parcelable {
 
         @UnsupportedAppUsage
@@ -7388,10 +7375,6 @@ public class PackageParser {
         };
     }
 
-    /**
-     * @deprecated use a {@link ComponentParseUtils.ParsedComponent}
-     */
-    @Deprecated
     public static abstract class Component<II extends IntentInfo> {
         @UnsupportedAppUsage
         public final ArrayList<II> intents;
@@ -7572,10 +7555,6 @@ public class PackageParser {
         }
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedPermission}
-     */
-    @Deprecated
     public final static class Permission extends Component<IntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final PermissionInfo info;
@@ -7650,10 +7629,6 @@ public class PackageParser {
         };
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedPermissionGroup}
-     */
-    @Deprecated
     public final static class PermissionGroup extends Component<IntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final PermissionGroupInfo info;
@@ -7753,12 +7728,7 @@ public class PackageParser {
         return false;
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateApplicationInfo(
-     *      AndroidPackage, int, PackageUserState, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state) {
         return generateApplicationInfo(p, flags, state, UserHandle.getCallingUserId());
@@ -7815,12 +7785,7 @@ public class PackageParser {
         ai.icon = (sUseRoundIcon && ai.roundIconRes != 0) ? ai.roundIconRes : ai.iconRes;
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateApplicationInfo(
-     *      AndroidPackage, int, PackageUserState, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
@@ -7860,11 +7825,6 @@ public class PackageParser {
         return ai;
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateApplicationInfo(
-     *      AndroidPackage, int, PackageUserState, int)}
-     */
-    @Deprecated
     public static ApplicationInfo generateApplicationInfo(ApplicationInfo ai, int flags,
             PackageUserState state, int userId) {
         if (ai == null) return null;
@@ -7884,12 +7844,7 @@ public class PackageParser {
         return ai;
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generatePermissionInfo(
-     *      ComponentParseUtils.ParsedPermission, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static final PermissionInfo generatePermissionInfo(
             Permission p, int flags) {
         if (p == null) return null;
@@ -7901,12 +7856,7 @@ public class PackageParser {
         return pi;
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generatePermissionGroupInfo(
-     *      ComponentParseUtils.ParsedPermissionGroup, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static final PermissionGroupInfo generatePermissionGroupInfo(
             PermissionGroup pg, int flags) {
         if (pg == null) return null;
@@ -7918,10 +7868,6 @@ public class PackageParser {
         return pgi;
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedActivity}
-     */
-    @Deprecated
     public final static class Activity extends Component<ActivityIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ActivityInfo info;
@@ -8037,12 +7983,7 @@ public class PackageParser {
         };
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateActivityInfo(
-     *      AndroidPackage, ComponentParseUtils.ParsedActivity, int, PackageUserState, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
             PackageUserState state, int userId) {
         if (a == null) return null;
@@ -8060,11 +8001,6 @@ public class PackageParser {
         return ai;
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateActivityInfo(
-     *      AndroidPackage, ComponentParseUtils.ParsedActivity, int, PackageUserState, int)}
-     */
-    @Deprecated
     public static final ActivityInfo generateActivityInfo(ActivityInfo ai, int flags,
             PackageUserState state, int userId) {
         if (ai == null) return null;
@@ -8078,10 +8014,6 @@ public class PackageParser {
         return ai;
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedService}
-     */
-    @Deprecated
     public final static class Service extends Component<ServiceIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ServiceInfo info;
@@ -8143,12 +8075,7 @@ public class PackageParser {
         };
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateServiceInfo(
-     * AndroidPackage, ComponentParseUtils.ParsedService, int, PackageUserState, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
             PackageUserState state, int userId) {
         if (s == null) return null;
@@ -8166,10 +8093,6 @@ public class PackageParser {
         return si;
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedProvider}
-     */
-    @Deprecated
     public final static class Provider extends Component<ProviderIntentInfo> implements Parcelable {
         @UnsupportedAppUsage
         public final ProviderInfo info;
@@ -8250,12 +8173,7 @@ public class PackageParser {
         };
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateProviderInfo(
-     *      AndroidPackage, ComponentParseUtils.ParsedProvider, int, PackageUserState, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
@@ -8278,10 +8196,6 @@ public class PackageParser {
         return pi;
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedInstrumentation}
-     */
-    @Deprecated
     public final static class Instrumentation extends Component<IntentInfo> implements
             Parcelable {
         @UnsupportedAppUsage
@@ -8342,12 +8256,7 @@ public class PackageParser {
         };
     }
 
-    /**
-     * @deprecated use {@link PackageInfoUtils#generateInstrumentationInfo(
-     *      ComponentParseUtils.ParsedInstrumentation, int)}
-     */
     @UnsupportedAppUsage
-    @Deprecated
     public static final InstrumentationInfo generateInstrumentationInfo(
             Instrumentation i, int flags) {
         if (i == null) return null;
@@ -8359,10 +8268,6 @@ public class PackageParser {
         return ii;
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedIntentInfo}
-     */
-    @Deprecated
     public static abstract class IntentInfo extends IntentFilter {
         @UnsupportedAppUsage
         public boolean hasDefault;
@@ -8406,10 +8311,6 @@ public class PackageParser {
         }
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedActivityIntentInfo}
-     */
-    @Deprecated
     public final static class ActivityIntentInfo extends IntentInfo {
         @UnsupportedAppUsage
         public Activity activity;
@@ -8433,10 +8334,6 @@ public class PackageParser {
         }
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedServiceIntentInfo}
-     */
-    @Deprecated
     public final static class ServiceIntentInfo extends IntentInfo {
         @UnsupportedAppUsage
         public Service service;
@@ -8460,10 +8357,6 @@ public class PackageParser {
         }
     }
 
-    /**
-     * @deprecated use {@link ComponentParseUtils.ParsedProviderIntentInfo}
-     */
-    @Deprecated
     public static final class ProviderIntentInfo extends IntentInfo {
         @UnsupportedAppUsage
         public Provider provider;
