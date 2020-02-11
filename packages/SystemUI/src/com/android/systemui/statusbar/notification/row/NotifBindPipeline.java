@@ -25,11 +25,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
-import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 import java.util.Map;
@@ -78,8 +77,8 @@ public final class NotifBindPipeline {
     private BindStage mStage;
 
     @Inject
-    NotifBindPipeline(NotificationEntryManager entryManager) {
-        entryManager.addNotificationEntryListener(mEntryListener);
+    NotifBindPipeline(CommonNotifCollection collection) {
+        collection.addCollectionListener(mCollectionListener);
     }
 
     /**
@@ -158,18 +157,15 @@ public final class NotifBindPipeline {
         callbacks.clear();
     }
 
-    //TODO: Move this to onManageEntry hook when we split that from add/remove
-    private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
+    private final NotifCollectionListener mCollectionListener = new NotifCollectionListener() {
         @Override
-        public void onPendingEntryAdded(NotificationEntry entry) {
+        public void onEntryInit(NotificationEntry entry) {
             mBindEntries.put(entry, new BindEntry());
             mStage.createStageParams(entry);
         }
 
         @Override
-        public void onEntryRemoved(NotificationEntry entry,
-                @Nullable NotificationVisibility visibility,
-                boolean removedByUser) {
+        public void onEntryCleanUp(NotificationEntry entry) {
             BindEntry bindEntry = mBindEntries.remove(entry);
             ExpandableNotificationRow row = bindEntry.row;
             if (row != null) {

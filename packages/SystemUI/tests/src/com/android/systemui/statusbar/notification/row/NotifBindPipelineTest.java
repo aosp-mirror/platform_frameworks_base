@@ -28,9 +28,9 @@ import androidx.core.os.CancellationSignal;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
 
 import org.junit.Before;
@@ -57,17 +57,17 @@ public class NotifBindPipelineTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        NotificationEntryManager entryManager = mock(NotificationEntryManager.class);
+        CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(entryManager);
+        mBindPipeline = new NotifBindPipeline(collection);
         mBindPipeline.setStage(mStage);
 
-        ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
-                ArgumentCaptor.forClass(NotificationEntryListener.class);
-        verify(entryManager).addNotificationEntryListener(entryListenerCaptor.capture());
-        NotificationEntryListener entryListener = entryListenerCaptor.getValue();
+        ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
+                ArgumentCaptor.forClass(NotifCollectionListener.class);
+        verify(collection).addCollectionListener(collectionListenerCaptor.capture());
+        NotifCollectionListener listener = collectionListenerCaptor.getValue();
 
-        entryListener.onPendingEntryAdded(mEntry);
+        listener.onEntryInit(mEntry);
     }
 
     @Test
