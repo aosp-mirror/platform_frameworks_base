@@ -13429,8 +13429,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getImportantForAccessibility()
      */
     public boolean isImportantForAccessibility() {
-        final int mode = (mPrivateFlags2 & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK)
-                >> PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT;
+        final int mode = getImportantForAccessibility();
         if (mode == IMPORTANT_FOR_ACCESSIBILITY_NO
                 || mode == IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS) {
             return false;
