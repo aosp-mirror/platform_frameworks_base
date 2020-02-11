@@ -269,6 +269,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
+    private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
+                mForceNavBarHandleOpaque = properties.getBoolean(
+                        NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
+            }
+        }
+    };
+
     @Inject
     public NavigationBarFragment(AccessibilityManagerWrapper accessibilityManagerWrapper,
             DeviceProvisionedController deviceProvisionedController, MetricsLogger metricsLogger,
@@ -298,21 +309,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mDivider = divider;
         mRecentsOptional = recentsOptional;
         mHandler = mainHandler;
-
-        mForceNavBarHandleOpaque = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                NAV_BAR_HANDLE_FORCE_OPAQUE,
-                /* defaultValue = */ true);
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post,
-                new DeviceConfig.OnPropertiesChangedListener() {
-                    @Override
-                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
-                        if (properties.getKeyset().contains(NAV_BAR_HANDLE_FORCE_OPAQUE)) {
-                            mForceNavBarHandleOpaque = properties.getBoolean(
-                                    NAV_BAR_HANDLE_FORCE_OPAQUE, /* defaultValue = */ true);
-                        }
-                    }
-                });
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -338,6 +334,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
         // Respect the latest disabled-flags.
         mCommandQueue.recomputeDisableFlags(mDisplayId, false);
+
+        mForceNavBarHandleOpaque = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                NAV_BAR_HANDLE_FORCE_OPAQUE,
+                /* defaultValue = */ true);
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post, mOnPropertiesChangedListener);
     }
 
     @Override
@@ -346,6 +349,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationModeController.removeListener(this);
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
+
+        DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
 
     @Override
