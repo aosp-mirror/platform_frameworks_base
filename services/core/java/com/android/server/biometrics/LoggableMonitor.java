@@ -124,7 +124,7 @@ public abstract class LoggableMonitor {
                 error,
                 vendorCode,
                 Utils.isDebugEnabled(context, targetUserId),
-                latency);
+                sanitizeLatency(latency));
     }
 
     protected final void logOnAuthenticated(Context context, boolean authenticated,
@@ -165,7 +165,7 @@ public abstract class LoggableMonitor {
                 statsClient(),
                 requireConfirmation,
                 authState,
-                latency,
+                sanitizeLatency(latency),
                 Utils.isDebugEnabled(context, targetUserId));
     }
 
@@ -183,8 +183,16 @@ public abstract class LoggableMonitor {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
                 statsModality(),
                 targetUserId,
-                latency,
+                sanitizeLatency(latency),
                 enrollSuccessful);
+    }
+
+    private long sanitizeLatency(long latency) {
+        if (latency < 0) {
+            Slog.w(TAG, "found a negative latency : " + latency);
+            return -1;
+        }
+        return latency;
     }
 
 }
