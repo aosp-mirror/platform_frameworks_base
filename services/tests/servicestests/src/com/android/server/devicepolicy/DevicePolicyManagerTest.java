@@ -909,10 +909,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().iactivityManager, times(1)).updateDeviceOwner(
                 eq(admin1.getPackageName()));
 
-        // TODO We should check if the caller has called clearCallerIdentity().
-        verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
-                eq(UserHandle.USER_SYSTEM), eq(false));
-
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
@@ -1139,6 +1135,37 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
         // TODO Check other calls.
+    }
+
+    public void testDeviceOwnerBackupActivateDeactivate() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        // Set admin1 as a DA to the secondary user.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
+
+        verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
+                eq(UserHandle.USER_SYSTEM), eq(false));
+
+        dpm.clearDeviceOwnerApp(admin1.getPackageName());
+
+        verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
+                eq(UserHandle.USER_SYSTEM), eq(true));
+    }
+
+    public void testProfileOwnerBackupActivateDeactivate() throws Exception {
+        setAsProfileOwner(admin1);
+
+        verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
+                eq(DpmMockContext.CALLER_USER_HANDLE), eq(false));
+
+        dpm.clearProfileOwner(admin1);
+
+        verify(getServices().ibackupManager, times(1)).setBackupServiceActive(
+                eq(DpmMockContext.CALLER_USER_HANDLE), eq(true));
     }
 
     public void testClearDeviceOwner_fromDifferentUser() throws Exception {
