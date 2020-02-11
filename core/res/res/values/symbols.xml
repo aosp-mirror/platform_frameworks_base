@@ -1560,6 +1560,7 @@
   <java-symbol type="layout" name="notification_material_media_seekbar" />
   <java-symbol type="layout" name="resolver_list_per_profile" />
   <java-symbol type="layout" name="chooser_list_per_profile" />
+  <java-symbol type="layout" name="resolver_empty_states" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -3862,6 +3863,26 @@
   <java-symbol type="string" name="resolver_personal_tab" />
   <java-symbol type="string" name="resolver_work_tab" />
   <java-symbol type="id" name="stub" />
+  <java-symbol type="id" name="resolver_empty_state" />
+  <java-symbol type="id" name="resolver_empty_state_icon" />
+  <java-symbol type="id" name="resolver_empty_state_title" />
+  <java-symbol type="id" name="resolver_empty_state_subtitle" />
+  <java-symbol type="id" name="resolver_empty_state_button" />
+  <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
+  <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />
+  <java-symbol type="string" name="resolver_cant_share_cross_profile_explanation" />
+  <java-symbol type="string" name="resolver_turn_on_work_apps" />
+  <java-symbol type="string" name="resolver_turn_on_work_apps_explanation" />
+  <java-symbol type="string" name="resolver_no_apps_available" />
+  <java-symbol type="string" name="resolver_no_apps_available_explanation" />
+  <java-symbol type="string" name="resolver_no_apps_available_explanation" />
+  <java-symbol type="string" name="resolver_switch_on_work" />
+  <java-symbol type="drawable" name="ic_work_apps_off" />
+  <java-symbol type="drawable" name="ic_sharing_disabled" />
+  <java-symbol type="drawable" name="ic_no_apps" />
+  <java-symbol type="dimen" name="resolver_empty_state_height" />
+  <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
+  <java-symbol type="bool" name="sharesheet_show_content_preview" />
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
   <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />

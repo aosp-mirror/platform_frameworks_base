@@ -5341,6 +5341,24 @@
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
 
     <!-- ResolverActivity - profile tabs -->
+    <!-- Label for the perosnal tab of the share sheet and intent resolver [CHAR LIMIT=NONE] -->
     <string name="resolver_personal_tab">Personal</string>
+    <!-- Label for the work tab of the share sheet and intent resolver [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab">Work</string>
+    <!-- Label to indicate that the user cannot share with work apps [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_work_apps">Can\u2019t share with work apps</string>
+    <!-- Label to indicate that the user cannot share with personal apps [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_with_personal_apps">Can\u2019t share with personal apps</string>
+    <!-- Label to explain to the user that sharing between personal and work apps is not enabled by the IT admin [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_cross_profile_explanation">Your IT admin blocked sharing between personal and work apps</string>
+    <!-- Label to indicate that the user has to turn on work apps in order to access work data [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps">Turn on work apps</string>
+    <!-- Label to explain that the user has to turn on work apps in order to access work data [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps_explanation">Turn on work apps to access work apps &amp; contacts</string>
+    <!-- Label to indicate that no apps are resolved [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_apps_available">No apps available</string>
+    <!-- Label to explain that no apps are resolved [CHAR LIMIT=NONE] -->
+    <string name="resolver_no_apps_available_explanation">We couldn\u2019t find any apps</string>
+    <!-- Button which switches on the disabled work profile [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Switch on work</string>
 </resources>

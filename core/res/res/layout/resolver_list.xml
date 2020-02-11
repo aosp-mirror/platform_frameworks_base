@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:maxWidth="@dimen/resolver_max_width"
-    android:maxCollapsedHeight="192dp"
+    android:maxCollapsedHeight="@dimen/resolver_empty_state_height"
     android:maxCollapsedHeightSmall="56dp"
     android:id="@id/contentPanel">
 
@@ -91,7 +91,8 @@
             <TabWidget
                 android:id="@android:id/tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone">
             </TabWidget>
             <FrameLayout
                 android:id="@android:id/tabcontent"
@@ -101,6 +102,7 @@
                     android:id="@+id/profile_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="@dimen/resolver_empty_state_height"
                     android:divider="?attr/dividerVertical"
                     android:footerDividersEnabled="false"
                     android:headerDividersEnabled="false"
@@ -115,17 +117,6 @@
         android:layout_height="1dp"
         android:background="?attr/colorBackgroundFloating"
         android:foreground="?attr/dividerVertical" />
-
-    <TextView android:id="@+id/empty"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="?attr/colorBackgroundFloating"
-              android:elevation="@dimen/resolver_elevation"
-              android:layout_alwaysShow="true"
-              android:text="@string/noApplications"
-              android:padding="32dp"
-              android:gravity="center"
-              android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/button_bar"
