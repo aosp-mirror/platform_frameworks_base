@@ -1002,11 +1002,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
 
-            Rollback rollback = completeEnableRollback(newRollback);
-            if (rollback == null) {
+            if (!completeEnableRollback(newRollback)) {
                 result.offer(-1);
             } else {
-                result.offer(rollback.info.getRollbackId());
+                result.offer(newRollback.info.getRollbackId());
             }
         });
 
@@ -1167,10 +1166,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     // mRollbacks here and add it back in #completeEnableRollback later.
                     mRollbacks.remove(rollback);
                 }
-                // TODO: Now #completeEnableRollback returns the same rollback object as the
-                // parameter on success. It would be more readable to return a boolean to indicate
-                // success or failure.
-                if (completeEnableRollback(rollback) != null) {
+                if (completeEnableRollback(rollback)) {
                     makeRollbackAvailable(rollback);
                 }
             } else {
@@ -1190,11 +1186,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     /**
      * Add a rollback to the list of rollbacks. It does not make the rollback available yet.
      *
-     * @return the Rollback instance for a successfully enable-completed rollback,
-     * or null on error.
+     * @return {code true} if {code rollback} is successfully enable-completed,
+     * or {code false} otherwise.
      */
     @WorkerThread
-    private Rollback completeEnableRollback(Rollback rollback) {
+    private boolean completeEnableRollback(Rollback rollback) {
         if (LOCAL_LOGV) {
             Slog.v(TAG, "completeEnableRollback id=" + rollback.info.getRollbackId());
         }
@@ -1206,7 +1202,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         if (!rollback.allPackagesEnabled()) {
             Slog.e(TAG, "Failed to enable rollback for all packages in session.");
             rollback.delete(mAppDataRollbackHelper);
-            return null;
+            return false;
         }
 
         rollback.saveRollback();
@@ -1224,7 +1220,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             mRollbacks.add(rollback);
         }
 
-        return rollback;
+        return true;
     }
 
     @WorkerThread
