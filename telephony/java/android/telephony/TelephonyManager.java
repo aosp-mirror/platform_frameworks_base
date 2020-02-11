@@ -45,10 +45,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
@@ -10784,28 +10782,6 @@ public class TelephonyManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
         }
-    }
-
-    /**
-     * Get aggregated video call data usage since boot.
-     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
-     *
-     * @param how one of the NetworkStats.STATS_PER_* constants depending on whether the request is
-     * for data usage per uid or overall usage.
-     * @return Snapshot of video call data usage
-     * @hide
-     */
-    public NetworkStats getVtDataUsage(int how) {
-        boolean perUidStats = (how == NetworkStats.STATS_PER_UID);
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getVtDataUsage(getSubId(), perUidStats);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getVtDataUsage", e);
-        }
-        return null;
     }
 
     /**
