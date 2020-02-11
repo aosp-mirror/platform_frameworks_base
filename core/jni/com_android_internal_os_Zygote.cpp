@@ -72,9 +72,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <android-base/file.h>
 #include <android-base/logging.h>
 #include <android-base/properties.h>
-#include <android-base/file.h>
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
@@ -84,13 +84,13 @@
 #include <cutils/multiuser.h>
 #include <cutils/sockets.h>
 #include <private/android_filesystem_config.h>
-#include <utils/String8.h>
-#include <utils/Trace.h>
-#include <selinux/android.h>
-#include <seccomp_policy.h>
-#include <stats_event_list.h>
 #include <processgroup/processgroup.h>
 #include <processgroup/sched_policy.h>
+#include <seccomp_policy.h>
+#include <selinux/android.h>
+#include <stats_socket.h>
+#include <utils/String8.h>
+#include <utils/Trace.h>
 
 #include "core_jni_helpers.h"
 #include <nativehelper/JNIHelp.h>
@@ -1078,7 +1078,7 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
   __android_log_close();
-  stats_log_close();
+  AStatsSocket_close();
 
   // If this is the first fork for this zygote, create the open FD table.  If
   // it isn't, we just need to check whether the list of open files has changed
@@ -1639,7 +1639,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities, fail_fn);
 
   __android_log_close();
-  stats_log_close();
+  AStatsSocket_close();
 
   const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
   const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
