@@ -3806,7 +3806,6 @@ package android.location {
 
   public final class GnssCapabilities {
     method public boolean hasGeofencing();
-    method public boolean hasGnssAntennaInfo();
     method public boolean hasLowPowerMode();
     method public boolean hasMeasurementCorrections();
     method public boolean hasMeasurementCorrectionsExcessPathLength();

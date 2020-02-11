@@ -82,12 +82,6 @@ public final class GnssCapabilities {
      */
     public static final long MEASUREMENT_CORRECTIONS_REFLECTING_PLANE           = 1L << 8;
 
-    /**
-     * Bit mask indicating GNSS chipset supports GNSS antenna info.
-     * @hide
-     */
-    public static final long ANTENNA_INFO                                       = 1L << 9;
-
     /** @hide */
     public static final long INVALID_CAPABILITIES = -1;
 
@@ -171,13 +165,6 @@ public final class GnssCapabilities {
         return hasCapability(MEASUREMENT_CORRECTIONS_REFLECTING_PLANE);
     }
 
-    /**
-     * Returns {@code true} if GNSS chipset supports antenna info, {@code false} otherwise.
-     */
-    public boolean hasGnssAntennaInfo() {
-        return hasCapability(ANTENNA_INFO);
-    }
-
     @NonNull
     @Override
     public String toString() {
@@ -185,7 +172,6 @@ public final class GnssCapabilities {
         if (hasLowPowerMode()) sb.append("LOW_POWER_MODE ");
         if (hasSatelliteBlacklist()) sb.append("SATELLITE_BLACKLIST ");
         if (hasGeofencing()) sb.append("GEOFENCING ");
-        if (hasGnssAntennaInfo()) sb.append("ANTENNA_INFO ");
         if (hasMeasurements()) sb.append("MEASUREMENTS ");
         if (hasNavMessages()) sb.append("NAV_MESSAGES ");
         if (hasMeasurementCorrections()) sb.append("MEASUREMENT_CORRECTIONS ");

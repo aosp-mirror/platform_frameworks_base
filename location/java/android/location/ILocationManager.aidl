@@ -23,7 +23,6 @@ import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
 import android.location.IBatchedLocationCallback;
-import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
@@ -76,10 +75,6 @@ interface ILocationManager
             in String packageName);
     long getGnssCapabilities(in String packageName);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
-
-    boolean addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener,
-             String packageName, String featureId, String listenerIdentifier);
-    void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
 
     boolean addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener,
              String packageName, String featureId, String listenerIdentifier);
