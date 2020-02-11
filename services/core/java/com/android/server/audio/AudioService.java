@@ -1001,11 +1001,14 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.onAudioServerDied();
 
         // Restore call state
-        if (AudioSystem.setPhoneState(mMode) ==  AudioSystem.AUDIO_STATUS_OK) {
-            mModeLogger.log(new AudioEventLogger.StringEvent(
-                "onAudioServerDied causes setPhoneState(" + AudioSystem.modeToString(mMode) + ")"));
+        synchronized (mDeviceBroker.mSetModeLock) {
+            if (AudioSystem.setPhoneState(mMode, getModeOwnerUid())
+                    ==  AudioSystem.AUDIO_STATUS_OK) {
+                mModeLogger.log(new AudioEventLogger.StringEvent(
+                        "onAudioServerDied causes setPhoneState(" + AudioSystem.modeToString(mMode)
+                        + ", uid=" + getModeOwnerUid() + ")"));
+            }
         }
-
         final int forSys;
         synchronized (mSettingsLock) {
             forSys = mCameraSoundForced ?
@@ -3425,14 +3428,30 @@ public class AudioService extends IAudioService.Stub
         return modeOwnerPid;
     }
 
+    /**
+     * Return the uid of the current audio mode owner
+     * @return 0 if nobody owns the mode
+     */
+    /*package*/ int getModeOwnerUid() {
+        int modeOwnerUid = 0;
+        try {
+            modeOwnerUid = mSetModeDeathHandlers.get(0).getUid();
+        } catch (Exception e) {
+            // nothing to do, modeOwnerUid is not modified
+        }
+        return modeOwnerUid;
+    }
+
     private class SetModeDeathHandler implements IBinder.DeathRecipient {
-        private IBinder mCb; // To be notified of client's death
-        private int mPid;
+        private final IBinder mCb; // To be notified of client's death
+        private final int mPid;
+        private final int mUid;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
 
-        SetModeDeathHandler(IBinder cb, int pid) {
+        SetModeDeathHandler(IBinder cb, int pid, int uid) {
             mCb = cb;
             mPid = pid;
+            mUid = uid;
         }
 
         public void binderDied() {
@@ -3445,7 +3464,7 @@ public class AudioService extends IAudioService.Stub
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
                 } else {
-                    newModeOwnerPid = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid, TAG);
+                    newModeOwnerPid = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid, mUid, TAG);
                 }
             }
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
@@ -3469,6 +3488,10 @@ public class AudioService extends IAudioService.Stub
 
         public IBinder getBinder() {
             return mCb;
+        }
+
+        public int getUid() {
+            return mUid;
         }
     }
 
@@ -3518,7 +3541,8 @@ public class AudioService extends IAudioService.Stub
                         + " without permission or being mode owner");
                 return;
             }
-            newModeOwnerPid = setModeInt(mode, cb, callingPid, callingPackage);
+            newModeOwnerPid = setModeInt(
+                mode, cb, callingPid, Binder.getCallingUid(), callingPackage);
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
@@ -3530,9 +3554,11 @@ public class AudioService extends IAudioService.Stub
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
     @GuardedBy("mDeviceBroker.mSetModeLock")
-    private int setModeInt(int mode, IBinder cb, int pid, String caller) {
-        if (DEBUG_MODE) { Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid + ", caller="
-                + caller + ")"); }
+    private int setModeInt(int mode, IBinder cb, int pid, int uid, String caller) {
+        if (DEBUG_MODE) {
+            Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid
+                    + ", uid=" + uid + ", caller=" + caller + ")");
+        }
         int newModeOwnerPid = 0;
         if (cb == null) {
             Log.e(TAG, "setModeInt() called with null binder");
@@ -3569,7 +3595,7 @@ public class AudioService extends IAudioService.Stub
                 }
             } else {
                 if (hdlr == null) {
-                    hdlr = new SetModeDeathHandler(cb, pid);
+                    hdlr = new SetModeDeathHandler(cb, pid, uid);
                 }
                 // Register for client death notification
                 try {
@@ -3587,7 +3613,7 @@ public class AudioService extends IAudioService.Stub
 
             if (actualMode != mMode) {
                 final long identity = Binder.clearCallingIdentity();
-                status = AudioSystem.setPhoneState(actualMode);
+                status = AudioSystem.setPhoneState(actualMode, getModeOwnerUid());
                 Binder.restoreCallingIdentity(identity);
                 if (status == AudioSystem.AUDIO_STATUS_OK) {
                     if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + actualMode); }
@@ -6634,7 +6660,7 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
 
     final private AudioEventLogger mModeLogger = new AudioEventLogger(LOG_NB_EVENTS_PHONE_STATE,
-            "phone state (logged after successfull call to AudioSystem.setPhoneState(int))");
+            "phone state (logged after successful call to AudioSystem.setPhoneState(int, int))");
 
     // logs for wired + A2DP device connections:
     // - wired: logged before onSetWiredDeviceConnectionState() is executed
