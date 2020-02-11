@@ -8777,11 +8777,11 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner or a profile owner of an
      *                           organization-owned managed profile.
      */
-    public void setLockdownAdminConfiguredNetworks(@NonNull ComponentName admin, boolean lockdown) {
-        throwIfParentInstance("setLockdownAdminConfiguredNetworks");
+    public void setConfiguredNetworksLockdownState(@NonNull ComponentName admin, boolean lockdown) {
+        throwIfParentInstance("setConfiguredNetworksLockdownState");
         if (mService != null) {
             try {
-                mService.setLockdownAdminConfiguredNetworks(admin, lockdown);
+                mService.setConfiguredNetworksLockdownState(admin, lockdown);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8797,11 +8797,11 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner or a profile owner of an
      *                           organization-owned managed profile.
      */
-    public boolean isLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
-        throwIfParentInstance("setLockdownAdminConfiguredNetworks");
+    public boolean hasLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
+        throwIfParentInstance("hasLockdownAdminConfiguredNetworks");
         if (mService != null) {
             try {
-                return mService.isLockdownAdminConfiguredNetworks(admin);
+                return mService.hasLockdownAdminConfiguredNetworks(admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
