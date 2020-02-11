@@ -2422,6 +2422,17 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
+    public void setLocationEnabledForUser(boolean enabled, int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                    null);
+        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS,
+                "Requires WRITE_SECURE_SETTINGS permission");
+        mSettingsHelper.setLocationEnabled(enabled, userId);
+    }
+
+    @Override
     public boolean isLocationEnabledForUser(int userId) {
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false, "isLocationEnabledForUser", null);

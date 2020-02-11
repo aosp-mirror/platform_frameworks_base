@@ -135,6 +135,24 @@ public class SettingsHelper {
     }
 
     /**
+     * Set location enabled for a user.
+     */
+    public void setLocationEnabled(boolean enabled, int userId) {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.LOCATION_MODE,
+                    enabled
+                        ? Settings.Secure.LOCATION_MODE_ON
+                        : Settings.Secure.LOCATION_MODE_OFF,
+                    userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Add a listener for changes to the location enabled setting. Callbacks occur on an unspecified
      * thread.
      */
