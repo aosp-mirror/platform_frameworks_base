@@ -846,6 +846,11 @@ package android.content.integrity {
     method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
   }
 
+  public static final class IntegrityFormula.SourceStamp {
+    method @NonNull public static android.content.integrity.IntegrityFormula notTrusted();
+    method @NonNull public static android.content.integrity.IntegrityFormula stampCertificateHashEquals(@NonNull String);
+  }
+
   public final class Rule implements android.os.Parcelable {
     ctor public Rule(@NonNull android.content.integrity.IntegrityFormula, int);
     method public int describeContents();
