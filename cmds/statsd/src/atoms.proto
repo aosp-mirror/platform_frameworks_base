@@ -7911,6 +7911,10 @@ message SurfaceflingerStatsGlobalInfo {
     // Total time that was spent performing animations.
     // This is derived from the present-to-present layer histogram
     optional int64 animation_millis = 5;
+    // Total number of event connections tracked by SurfaceFlinger at the time
+    // of this pull. If this number grows prohibitively large, then this can
+    // cause jank due to resource contention.
+    optional int32 event_connection_count = 6;
 }
 
 /**
