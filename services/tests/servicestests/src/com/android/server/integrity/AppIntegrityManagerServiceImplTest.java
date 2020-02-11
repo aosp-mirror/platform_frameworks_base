@@ -40,6 +40,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -66,6 +68,7 @@ import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.testutils.TestUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,6 +80,8 @@ import org.mockito.junit.MockitoRule;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +91,9 @@ import java.util.Map;
 public class AppIntegrityManagerServiceImplTest {
     private static final String TEST_APP_PATH =
             "/data/local/tmp/AppIntegrityManagerServiceTestApp.apk";
+
+    private static final String TEST_APP_TWO_CERT_PATH =
+            "AppIntegrityManagerServiceImplTest/DummyAppTwoCerts.apk";
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
     private static final String VERSION = "version";
@@ -104,6 +112,11 @@ public class AppIntegrityManagerServiceImplTest {
     // We use SHA256 for package names longer than 32 characters.
     private static final String INSTALLER_SHA256 =
             "30F41A7CBF96EE736A54DD6DF759B50ED3CC126ABCEF694E167C324F5976C227";
+
+    private static final String DUMMY_APP_TWO_CERTS_CERT_1 =
+            "C0369C2A1096632429DFA8433068AECEAD00BAC337CA92A175036D39CC9AFE94";
+    private static final String DUMMY_APP_TWO_CERTS_CERT_2 =
+            "94366E0A80F3A3F0D8171A15760B88E228CD6E1101F0414C98878724FBE70147";
 
     private static final String PLAY_STORE_PKG = "com.android.vending";
     private static final String ADB_INSTALLER = "adb";
@@ -128,6 +141,7 @@ public class AppIntegrityManagerServiceImplTest {
 
     private PackageManager mSpyPackageManager;
     private File mTestApk;
+    private File mTestApkTwoCerts;
 
     private final Context mRealContext = InstrumentationRegistry.getTargetContext();
     // under test
@@ -136,6 +150,10 @@ public class AppIntegrityManagerServiceImplTest {
     @Before
     public void setup() throws Exception {
         mTestApk = new File(TEST_APP_PATH);
+        mTestApkTwoCerts = File.createTempFile("AppIntegrity", ".apk");
+        try (InputStream inputStream = mRealContext.getAssets().open(TEST_APP_TWO_CERT_PATH)) {
+            Files.copy(inputStream, mTestApkTwoCerts.toPath(), REPLACE_EXISTING);
+        }
 
         mService =
                 new AppIntegrityManagerServiceImpl(
@@ -152,6 +170,11 @@ public class AppIntegrityManagerServiceImplTest {
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockResources.getStringArray(anyInt())).thenReturn(new String[]{});
         when(mIntegrityFileManager.initialized()).thenReturn(true);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mTestApkTwoCerts.delete();
     }
 
     @Test
@@ -290,6 +313,29 @@ public class AppIntegrityManagerServiceImplTest {
         assertEquals(2, allowedInstallers.size());
         assertEquals(PLAY_STORE_CERT, allowedInstallers.get(PLAY_STORE_PKG));
         assertEquals(INSTALLER_CERTIFICATE_NOT_EVALUATED, allowedInstallers.get(ADB_INSTALLER));
+    }
+
+    @Test
+    public void handleBroadcast_correctArgs_multipleCerts() throws Exception {
+        whitelistUsAsRuleProvider();
+        makeUsSystemApp();
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mMockContext)
+                .registerReceiver(broadcastReceiverCaptor.capture(), any(), any(), any());
+        Intent intent = makeVerificationIntent();
+        intent.setDataAndType(Uri.fromFile(mTestApkTwoCerts), PACKAGE_MIME_TYPE);
+        when(mRuleEvaluationEngine.evaluate(any())).thenReturn(IntegrityCheckResult.allow());
+
+        broadcastReceiverCaptor.getValue().onReceive(mMockContext, intent);
+        runJobInHandler();
+
+        ArgumentCaptor<AppInstallMetadata> metadataCaptor =
+                ArgumentCaptor.forClass(AppInstallMetadata.class);
+        verify(mRuleEvaluationEngine).evaluate(metadataCaptor.capture());
+        AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
+        assertThat(appInstallMetadata.getAppCertificates()).containsExactly(
+                DUMMY_APP_TWO_CERTS_CERT_1, DUMMY_APP_TWO_CERTS_CERT_2);
     }
 
     @Test
