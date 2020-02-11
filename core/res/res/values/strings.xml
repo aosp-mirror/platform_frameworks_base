@@ -1156,6 +1156,8 @@
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_vibrator_state">Allows the app to access the vibrator state.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_callPhone">directly call phone numbers</string>

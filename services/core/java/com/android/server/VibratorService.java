@@ -42,11 +42,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IExternalVibratorService;
 import android.os.IVibratorService;
+import android.os.IVibratorStateListener;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -166,7 +168,11 @@ public class VibratorService extends IVibratorService.Stub
     private ExternalVibration mCurrentExternalVibration;
     private boolean mVibratorUnderExternalControl;
     private boolean mLowPowerMode;
+    @GuardedBy("mLock")
     private boolean mIsVibrating;
+    @GuardedBy("mLock")
+    private final RemoteCallbackList<IVibratorStateListener> mVibratorStateListeners =
+                new RemoteCallbackList<>();
     private int mHapticFeedbackIntensity;
     private int mNotificationIntensity;
     private int mRingIntensity;
@@ -519,6 +525,75 @@ public class VibratorService extends IVibratorService.Stub
     @Override // Binder call
     public boolean hasVibrator() {
         return doVibratorExists();
+    }
+
+    @Override // Binder call
+    public boolean isVibrating() {
+        if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
+            throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
+        }
+        synchronized (mLock) {
+            return mIsVibrating;
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void notifyStateListenerLocked(IVibratorStateListener listener) {
+        try {
+            listener.onVibrating(mIsVibrating);
+        } catch (RemoteException | RuntimeException e) {
+            Slog.e(TAG, "Vibrator callback failed to call", e);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void notifyStateListenersLocked() {
+        final int length = mVibratorStateListeners.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                final IVibratorStateListener listener =
+                        mVibratorStateListeners.getBroadcastItem(i);
+                notifyStateListenerLocked(listener);
+            }
+        } finally {
+            mVibratorStateListeners.finishBroadcast();
+        }
+    }
+
+    @Override // Binder call
+    public boolean registerVibratorStateListener(IVibratorStateListener listener) {
+        if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
+            throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
+        }
+        synchronized (mLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (!mVibratorStateListeners.register(listener)) {
+                    return false;
+                }
+                // Notify its callback after new client registered.
+                notifyStateListenerLocked(listener);
+                return true;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    @Override // Binder call
+    @GuardedBy("mLock")
+    public boolean unregisterVibratorStateListener(IVibratorStateListener listener) {
+        if (!hasPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)) {
+            throw new SecurityException("Requires ACCESS_VIBRATOR_STATE permission");
+        }
+        synchronized (mLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mVibratorStateListeners.unregister(listener);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     @Override // Binder call
@@ -1373,7 +1448,10 @@ public class VibratorService extends IVibratorService.Stub
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.VIBRATOR_STATE_CHANGED, uid, null,
                     FrameworkStatsLog.VIBRATOR_STATE_CHANGED__STATE__ON, millis);
             mCurVibUid = uid;
-            mIsVibrating = true;
+            if (!mIsVibrating) {
+                mIsVibrating = true;
+                notifyStateListenersLocked();
+            }
         } catch (RemoteException e) {
         }
     }
@@ -1387,7 +1465,10 @@ public class VibratorService extends IVibratorService.Stub
             } catch (RemoteException e) { }
             mCurVibUid = -1;
         }
-        mIsVibrating = false;
+        if (mIsVibrating) {
+            mIsVibrating = false;
+            notifyStateListenersLocked();
+        }
     }
 
     private void setVibratorUnderExternalControl(boolean externalControl) {
@@ -1414,6 +1495,8 @@ public class VibratorService extends IVibratorService.Stub
             pw.print("  mCurrentExternalVibration=" + mCurrentExternalVibration);
             pw.println("  mVibratorUnderExternalControl=" + mVibratorUnderExternalControl);
             pw.println("  mIsVibrating=" + mIsVibrating);
+            pw.println("  mVibratorStateListeners Count=" +
+                            mVibratorStateListeners.getRegisteredCallbackCount());
             pw.println("  mLowPowerMode=" + mLowPowerMode);
             pw.println("  mHapticFeedbackIntensity=" + mHapticFeedbackIntensity);
             pw.println("  mNotificationIntensity=" + mNotificationIntensity);
