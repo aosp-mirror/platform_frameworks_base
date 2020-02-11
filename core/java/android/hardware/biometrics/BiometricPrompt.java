@@ -25,7 +25,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.face.FaceManager;
@@ -280,12 +279,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Optional: If enabled, the user will first be prompted to authenticate with biometrics,
-         * but also given the option to authenticate with their device PIN, pattern, or password.
-         * Developers should first check {@link KeyguardManager#isDeviceSecure()} before enabling.
-         * If the device is not secure, {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL}
-         * will be given to {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
-         * Defaults to false.
+         * Optional: If enabled, the user will be given the option to authenticate with their device
+         * PIN, pattern, or password. Developers should first check {@link
+         * BiometricManager#canAuthenticate(int)} for {@link Authenticators#DEVICE_CREDENTIAL}
+         * before enabling. If the device is not secured with a credential,
+         * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} will be invoked
+         * with {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL}. Defaults to false.
          *
          * <p>Note that enabling this option replaces the negative button on the prompt with one
          * that allows the user to authenticate with their device credential, making it an error to
@@ -751,13 +750,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * <p>Per the Android CDD, only biometric authenticators that meet or exceed the requirements
      * for <strong>Strong</strong> are permitted to integrate with Keystore to perform related
      * cryptographic operations. Therefore, it is an error to call this method after explicitly
-     * calling {@link Builder#setAllowedAuthenticators(int)} with any value other than
+     * calling {@link Builder#setAllowedAuthenticators(int)} with any biometric strength other than
      * {@link Authenticators#BIOMETRIC_STRONG}.
      *
-     * @throws IllegalArgumentException If any of the arguments are null, if
-     * {@link Builder#setDeviceCredentialAllowed(boolean)} was explicitly set to true, or if
-     * {@link Builder#setAllowedAuthenticators(int)} was explicitly called with any value other than
-     * {@link Authenticators#BIOMETRIC_STRONG}.
+     * @throws IllegalArgumentException If any argument is null, or if the allowed biometric
+     * authenticator strength is explicitly set to {@link Authenticators#BIOMETRIC_WEAK}. Prior to
+     * {@link android.os.Build.VERSION_CODES#R}, this exception is also thrown if
+     * {@link Builder#setDeviceCredentialAllowed(boolean)} was explicitly set to true.
      *
      * @param crypto A cryptographic operation to be unlocked after successful authentication.
      * @param cancel An object that can be used to cancel authentication.
@@ -782,16 +781,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             throw new IllegalArgumentException("Must supply a callback");
         }
 
-        @Authenticators.Types int authenticators = mBundle.getInt(
+        // Disallow explicitly setting any non-Strong biometric authenticator types.
+        final @Authenticators.Types int authenticators = mBundle.getInt(
                 KEY_AUTHENTICATORS_ALLOWED, Authenticators.BIOMETRIC_STRONG);
-
-        if (mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL)
-                || (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0) {
-            throw new IllegalArgumentException("Device credential not supported with crypto");
-        }
-
-        // Disallow any non-Strong biometric authenticator types.
-        if ((authenticators & ~Authenticators.BIOMETRIC_STRONG) != 0) {
+        final int biometricStrength = authenticators & Authenticators.BIOMETRIC_WEAK;
+        if ((biometricStrength & ~Authenticators.BIOMETRIC_STRONG) != 0) {
             throw new IllegalArgumentException("Only Strong biometrics supported with crypto");
         }
 
