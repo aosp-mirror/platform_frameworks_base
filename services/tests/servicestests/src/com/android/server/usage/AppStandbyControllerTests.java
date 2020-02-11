@@ -66,6 +66,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.Display;
@@ -83,6 +84,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +103,8 @@ public class AppStandbyControllerTests {
     private static final int UID_EXEMPTED_1 = 10001;
     private static final int USER_ID = 0;
     private static final int USER_ID2 = 10;
+    private static final UserHandle USER_HANDLE_USER2 = new UserHandle(USER_ID2);
+    private static final int USER_ID3 = 11;
 
     private static final String PACKAGE_UNKNOWN = "com.example.unknown";
 
@@ -150,6 +154,8 @@ public class AppStandbyControllerTests {
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
         String mBoundWidgetPackage = PACKAGE_EXEMPTED_1;
+        int[] mRunningUsers = new int[] {USER_ID};
+        List<UserHandle> mCrossProfileTargets = Collections.emptyList();
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -212,7 +218,7 @@ public class AppStandbyControllerTests {
 
         @Override
         int[] getRunningUserIds() {
-            return new int[] {USER_ID};
+            return mRunningUsers;
         }
 
         @Override
@@ -246,6 +252,11 @@ public class AppStandbyControllerTests {
         @Override
         public boolean isDeviceIdleMode() {
             return false;
+        }
+
+        @Override
+        public List<UserHandle> getValidCrossProfileTargets(String pkg, int userId) {
+            return mCrossProfileTargets;
         }
 
         // Internal methods
@@ -379,10 +390,15 @@ public class AppStandbyControllerTests {
     }
 
     private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket) {
+        assertTimeout(controller, elapsedTime, bucket, USER_ID);
+    }
+
+    private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket,
+            int userId) {
         mInjector.mElapsedRealtime = elapsedTime;
-        controller.checkIdleStates(USER_ID);
+        controller.checkIdleStates(userId);
         assertEquals(bucket,
-                controller.getAppStandbyBucket(PACKAGE_1, USER_ID, mInjector.mElapsedRealtime,
+                controller.getAppStandbyBucket(PACKAGE_1, userId, mInjector.mElapsedRealtime,
                         false));
     }
 
@@ -397,7 +413,11 @@ public class AppStandbyControllerTests {
     }
 
     private int getStandbyBucket(AppStandbyController controller, String packageName) {
-        return controller.getAppStandbyBucket(packageName, USER_ID, mInjector.mElapsedRealtime,
+        return getStandbyBucket(USER_ID, controller, packageName);
+    }
+
+    private int getStandbyBucket(int userId, AppStandbyController controller, String packageName) {
+        return controller.getAppStandbyBucket(packageName, userId, mInjector.mElapsedRealtime,
                 true);
     }
 
@@ -1010,6 +1030,29 @@ public class AppStandbyControllerTests {
         assertIsNotActiveAdmin(ADMIN_PKG, USER_ID2);
         assertIsActiveAdmin(ADMIN_PKG, USER_ID);
         assertIsNotActiveAdmin(ADMIN_PKG2, USER_ID);
+    }
+
+    @Test
+    public void testUserInteraction_CrossProfile() throws Exception {
+        mInjector.mRunningUsers = new int[] {USER_ID, USER_ID2, USER_ID3};
+        mInjector.mCrossProfileTargets = Arrays.asList(USER_HANDLE_USER2);
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertEquals("Cross profile connected package bucket should be elevated on usage",
+                STANDBY_BUCKET_ACTIVE, getStandbyBucket(USER_ID2, mController, PACKAGE_1));
+        assertEquals("Not Cross profile connected package bucket should not be elevated on usage",
+                STANDBY_BUCKET_NEVER, getStandbyBucket(USER_ID3, mController, PACKAGE_1));
+
+        assertTimeout(mController, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE, USER_ID);
+        assertTimeout(mController, WORKING_SET_THRESHOLD - 1, STANDBY_BUCKET_ACTIVE, USER_ID2);
+
+        assertTimeout(mController, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET, USER_ID);
+        assertTimeout(mController, WORKING_SET_THRESHOLD + 1, STANDBY_BUCKET_WORKING_SET, USER_ID2);
+
+        mInjector.mCrossProfileTargets = Collections.emptyList();
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertEquals("No longer cross profile connected package bucket should not be "
+                        + "elevated on usage",
+                STANDBY_BUCKET_WORKING_SET, getStandbyBucket(USER_ID2, mController, PACKAGE_1));
     }
 
     private String getAdminAppsStr(int userId) {
