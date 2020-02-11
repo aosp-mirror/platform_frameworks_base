@@ -4523,7 +4523,11 @@ public final class Settings {
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
                         pkg.getPrivateFlags(), PRIVATE_FLAG_DUMP_SPEC); pw.println();
             }
-            pw.print(prefix); pw.print("  forceQueryable="); pw.println(ps.pkg.isForceQueryable());
+            pw.print(prefix); pw.print("  forceQueryable="); pw.print(ps.pkg.isForceQueryable());
+            if (ps.forceQueryableOverride) {
+                pw.print(" (override=true)");
+            }
+            pw.println();
             if (ps.pkg.getQueriesPackages() != null) {
                 pw.append(prefix).append("  queriesPackages=").println(ps.pkg.getQueriesPackages());
             }
