@@ -43,6 +43,15 @@ public abstract class LocationManagerInternal {
     public abstract void requestSetProviderAllowed(@NonNull String provider, boolean allowed);
 
     /**
+     * Returns true if the given provider is enabled for the given user.
+     *
+     * @param provider A location provider as listed by {@link LocationManager#getAllProviders()}
+     * @param userId   The user id to check
+     * @return True if the provider is enabled, false otherwise
+     */
+    public abstract boolean isProviderEnabledForUser(@NonNull String provider, int userId);
+
+    /**
      * Returns true if the given package belongs to a location provider, and so should be afforded
      * some special privileges.
      *

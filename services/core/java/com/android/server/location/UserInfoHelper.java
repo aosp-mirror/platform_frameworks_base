@@ -16,6 +16,9 @@
 
 package com.android.server.location;
 
+import static android.os.UserManager.DISALLOW_SHARE_LOCATION;
+
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -23,7 +26,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
@@ -36,6 +38,8 @@ import com.android.server.FgThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -47,15 +51,24 @@ public class UserInfoHelper {
     /**
      * Listener for current user changes.
      */
-    public interface UserChangedListener {
+    public interface UserListener {
+
+        int USER_SWITCHED = 1;
+        int USER_STARTED = 2;
+        int USER_STOPPED = 3;
+
+        @IntDef({USER_SWITCHED, USER_STARTED, USER_STOPPED})
+        @Retention(RetentionPolicy.SOURCE)
+        @interface UserChange {}
+
         /**
-         * Called when the current user changes.
+         * Called when something has changed about the given user.
          */
-        void onUserChanged(@UserIdInt int oldUserId, @UserIdInt int newUserId);
+        void onUserChanged(@UserIdInt int userId, @UserChange int change);
     }
 
     private final Context mContext;
-    private final CopyOnWriteArrayList<UserChangedListener> mListeners;
+    private final CopyOnWriteArrayList<UserListener> mListeners;
 
     @GuardedBy("this")
     @Nullable private UserManager mUserManager;
@@ -86,6 +99,8 @@ public class UserInfoHelper {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_STARTED);
+        intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
 
@@ -96,12 +111,24 @@ public class UserInfoHelper {
                 if (action == null) {
                     return;
                 }
+                int userId;
                 switch (action) {
                     case Intent.ACTION_USER_SWITCHED:
-                        int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                                UserHandle.USER_NULL);
+                        userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                         if (userId != UserHandle.USER_NULL) {
-                            onUserChanged(userId);
+                            onCurrentUserChanged(userId);
+                        }
+                        break;
+                    case Intent.ACTION_USER_STARTED:
+                        userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                        if (userId != UserHandle.USER_NULL) {
+                            onUserChanged(userId, UserListener.USER_STARTED);
+                        }
+                        break;
+                    case Intent.ACTION_USER_STOPPED:
+                        userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                        if (userId != UserHandle.USER_NULL) {
+                            onUserChanged(userId, UserListener.USER_STOPPED);
                         }
                         break;
                     case Intent.ACTION_MANAGED_PROFILE_ADDED:
@@ -118,18 +145,18 @@ public class UserInfoHelper {
     /**
      * Adds a listener for user changed events. Callbacks occur on an unspecified thread.
      */
-    public void addListener(UserChangedListener listener) {
+    public void addListener(UserListener listener) {
         mListeners.add(listener);
     }
 
     /**
      * Removes a listener for user changed events.
      */
-    public void removeListener(UserChangedListener listener) {
+    public void removeListener(UserListener listener) {
         mListeners.remove(listener);
     }
 
-    private void onUserChanged(@UserIdInt int newUserId) {
+    private void onCurrentUserChanged(@UserIdInt int newUserId) {
         if (newUserId == mCurrentUserId) {
             return;
         }
@@ -137,8 +164,13 @@ public class UserInfoHelper {
         int oldUserId = mCurrentUserId;
         mCurrentUserId = newUserId;
 
-        for (UserChangedListener listener : mListeners) {
-            listener.onUserChanged(oldUserId, newUserId);
+        onUserChanged(oldUserId, UserListener.USER_SWITCHED);
+        onUserChanged(newUserId, UserListener.USER_SWITCHED);
+    }
+
+    private void onUserChanged(@UserIdInt int userId, @UserListener.UserChange int change) {
+        for (UserListener listener : mListeners) {
+            listener.onUserChanged(userId, change);
         }
     }
 
@@ -151,51 +183,21 @@ public class UserInfoHelper {
     }
 
     /**
-     * Returns the user id of the current user.
+     * Returns an array of current user ids. This will always include the current user, and will
+     * also include any profiles of the current user.
      */
-    @UserIdInt
-    public int getCurrentUserId() {
-        return mCurrentUserId;
+    public int[] getCurrentUserIds() {
+        return getProfileUserIdsForParentUser(mCurrentUserId);
     }
 
     /**
      * Returns true if the given user id is either the current user or a profile of the current
      * user.
      */
-    public boolean isCurrentUserOrProfile(@UserIdInt int userId) {
+    public boolean isCurrentUserId(@UserIdInt int userId) {
         int currentUserId = mCurrentUserId;
         return userId == currentUserId || ArrayUtils.contains(
                 getProfileUserIdsForParentUser(currentUserId), userId);
-    }
-
-    /**
-     * Returns the parent user id of the given user id, or the user id itself if the user id either
-     * is a parent or has no profiles.
-     */
-    @UserIdInt
-    public int getParentUserId(@UserIdInt int userId) {
-        synchronized (this) {
-            if (userId == mCachedParentUserId || ArrayUtils.contains(mCachedProfileUserIds,
-                    userId)) {
-                return mCachedParentUserId;
-            }
-
-            Preconditions.checkState(mUserManager != null);
-        }
-
-        int parentUserId;
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            UserInfo userInfo = mUserManager.getProfileParent(userId);
-            parentUserId = userInfo != null ? userInfo.id : userId;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
-        // force profiles into cache
-        getProfileUserIdsForParentUser(parentUserId);
-        return parentUserId;
     }
 
     @GuardedBy("this")
@@ -225,8 +227,22 @@ public class UserInfoHelper {
      * Dump info for debugging.
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        int currentUserId = mCurrentUserId;
-        pw.println("Current User: " + currentUserId + " " + Arrays.toString(
-                getProfileUserIdsForParentUser(currentUserId)));
+        boolean systemRunning;
+        synchronized (this) {
+            systemRunning = mUserManager != null;
+        }
+
+        if (systemRunning) {
+            int[] currentUserIds = getProfileUserIdsForParentUser(mCurrentUserId);
+            pw.println("current users: " + Arrays.toString(currentUserIds));
+            for (int userId : currentUserIds) {
+                if (mUserManager.hasUserRestrictionForUser(DISALLOW_SHARE_LOCATION,
+                        UserHandle.of(userId))) {
+                    pw.println("  u" + userId + " restricted");
+                }
+            }
+        } else {
+            pw.println("current user: " + mCurrentUserId);
+        }
     }
 }

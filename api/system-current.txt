@@ -4136,7 +4136,7 @@ package android.location {
     method public boolean isComplete();
     method public void makeComplete();
     method public void setIsFromMockProvider(boolean);
-    field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
+    field @Deprecated public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
   public class LocationManager {
