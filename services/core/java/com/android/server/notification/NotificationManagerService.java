@@ -527,11 +527,11 @@ public class NotificationManagerService extends SystemService {
 
     private static class Archive {
         final int mBufferSize;
-        final ArrayDeque<StatusBarNotification> mBuffer;
+        final ArrayDeque<Pair<StatusBarNotification, Integer>> mBuffer;
 
         public Archive(int size) {
             mBufferSize = size;
-            mBuffer = new ArrayDeque<StatusBarNotification>(mBufferSize);
+            mBuffer = new ArrayDeque<>(mBufferSize);
         }
 
         public String toString() {
@@ -544,7 +544,7 @@ public class NotificationManagerService extends SystemService {
             return sb.toString();
         }
 
-        public void record(StatusBarNotification nr) {
+        public void record(StatusBarNotification nr, int reason) {
             if (mBuffer.size() == mBufferSize) {
                 mBuffer.removeFirst();
             }
@@ -552,21 +552,24 @@ public class NotificationManagerService extends SystemService {
             // We don't want to store the heavy bits of the notification in the archive,
             // but other clients in the system process might be using the object, so we
             // store a (lightened) copy.
-            mBuffer.addLast(nr.cloneLight());
+            mBuffer.addLast(new Pair<>(nr.cloneLight(), reason));
         }
 
-        public Iterator<StatusBarNotification> descendingIterator() {
+        public Iterator<Pair<StatusBarNotification, Integer>> descendingIterator() {
             return mBuffer.descendingIterator();
         }
 
-        public StatusBarNotification[] getArray(int count) {
+        public StatusBarNotification[] getArray(int count, boolean includeSnoozed) {
             if (count == 0) count = mBufferSize;
             final StatusBarNotification[] a
                     = new StatusBarNotification[Math.min(count, mBuffer.size())];
-            Iterator<StatusBarNotification> iter = descendingIterator();
+            Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
             int i=0;
             while (iter.hasNext() && i < count) {
-                a[i++] = iter.next();
+                Pair<StatusBarNotification, Integer> pair = iter.next();
+                if (pair.second != REASON_SNOOZED || includeSnoozed) {
+                    a[i++] = pair.first;
+                }
             }
             return a;
         }
@@ -3638,7 +3641,8 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         @RequiresPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
-        public StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count) {
+        public StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count,
+                boolean includeSnoozed) {
             // enforce() will ensure the calling uid has the correct permission
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_NOTIFICATIONS,
@@ -3651,7 +3655,7 @@ public class NotificationManagerService extends SystemService {
             if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
                     == AppOpsManager.MODE_ALLOWED) {
                 synchronized (mArchive) {
-                    tmp = mArchive.getArray(count);
+                    tmp = mArchive.getArray(count, includeSnoozed);
                 }
             }
             return tmp;
@@ -5199,10 +5203,10 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mMaxPackageEnqueueRate=" + mMaxPackageEnqueueRate);
                 }
                 pw.println("  mArchive=" + mArchive.toString());
-                Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
+                Iterator<Pair<StatusBarNotification, Integer>> iter = mArchive.descendingIterator();
                 int j=0;
                 while (iter.hasNext()) {
-                    final StatusBarNotification sbn = iter.next();
+                    final StatusBarNotification sbn = iter.next().first;
                     if (filter != null && !filter.matches(sbn)) continue;
                     pw.println("    " + sbn);
                     if (++j >= 5) {
@@ -7573,7 +7577,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // Save it for users of getHistoricalNotifications()
-        mArchive.record(r.getSbn());
+        mArchive.record(r.getSbn(), reason);
 
         final long now = System.currentTimeMillis();
         final LogMaker logMaker = r.getItemLogMaker()

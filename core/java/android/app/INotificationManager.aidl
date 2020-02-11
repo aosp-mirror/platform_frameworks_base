@@ -123,7 +123,7 @@ interface INotificationManager
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
     @UnsupportedAppUsage
-    StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
+    StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
 
     NotificationHistory getNotificationHistory(String callingPkg);
 
