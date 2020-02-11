@@ -77,6 +77,9 @@ public class GnssCapabilitiesProvider {
         if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_NAV_MESSAGES)) {
             gnssCapabilities |= GnssCapabilities.NAV_MESSAGES;
         }
+        if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_ANTENNA_INFO)) {
+            gnssCapabilities |= GnssCapabilities.ANTENNA_INFO;
+        }
 
         synchronized (this) {
             mGnssCapabilities &= ~GNSS_CAPABILITIES_TOP_HAL;
