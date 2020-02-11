@@ -30,6 +30,7 @@ import com.android.utils.blob.DummyBlobData;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,6 +90,7 @@ public class BlobStorePerfTests {
         runShellCommand("cmd jobscheduler run -f android 191934935");
     }
 
+    @Ignore
     @Test
     public void testComputeDigest() throws Exception {
         mAtraceUtils.startTrace(ATRACE_CATEGORY_SYSTEM_SERVER);
