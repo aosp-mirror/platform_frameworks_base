@@ -15,6 +15,8 @@
  */
 package com.android.internal.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 /**
  * @hide
  */
@@ -31,8 +33,15 @@ public class PhoneConstants {
      * ringing or waiting.</li>
      * </ul>
      */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/PhoneConstants$State;")
     public enum State {
-        IDLE, RINGING, OFFHOOK;
+        @UnsupportedAppUsage
+        IDLE,
+        @UnsupportedAppUsage
+        RINGING,
+        @UnsupportedAppUsage
+        OFFHOOK;
     };
 
     /**
@@ -40,14 +49,25 @@ public class PhoneConstants {
       * <ul>
       * <li>CONNECTED = IP traffic should be available</li>
       * <li>CONNECTING = Currently setting up data connection</li>
+      * <li>DISCONNECTING = IP temporarily available</li>
       * <li>DISCONNECTED = IP not available</li>
       * <li>SUSPENDED = connection is created but IP traffic is
       *                 temperately not available. i.e. voice call is in place
       *                 in 2G network</li>
       * </ul>
       */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/PhoneConstants$DataState;")
     public enum DataState {
-        CONNECTED, CONNECTING, DISCONNECTED, SUSPENDED;
+        @UnsupportedAppUsage
+        CONNECTED,
+        @UnsupportedAppUsage
+        CONNECTING,
+        @UnsupportedAppUsage
+        DISCONNECTED,
+        @UnsupportedAppUsage
+        SUSPENDED,
+        DISCONNECTING;
     };
 
     public static final String STATE_KEY = "state";
@@ -69,30 +89,22 @@ public class PhoneConstants {
     public static final int LTE_ON_CDMA_TRUE = RILConstants.LTE_ON_CDMA_TRUE;
 
     // Number presentation type for caller id display (From internal/Connection.java)
+    @UnsupportedAppUsage
     public static final int PRESENTATION_ALLOWED = 1;    // normal
+    @UnsupportedAppUsage
     public static final int PRESENTATION_RESTRICTED = 2; // block by user
+    @UnsupportedAppUsage
     public static final int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
+    @UnsupportedAppUsage
     public static final int PRESENTATION_PAYPHONE = 4;   // show pay phone info
-
-    // Sim activation type
-    public static final int SIM_ACTIVATION_TYPE_VOICE = 0;
-    public static final int SIM_ACTIVATION_TYPE_DATA = 1;
 
     public static final String PHONE_NAME_KEY = "phoneName";
     public static final String DATA_NETWORK_TYPE_KEY = "networkType";
-    public static final String DATA_FAILURE_CAUSE_KEY = "failCause";
     public static final String DATA_APN_TYPE_KEY = "apnType";
     public static final String DATA_APN_KEY = "apn";
-    public static final String DATA_LINK_PROPERTIES_KEY = "linkProperties";
-    public static final String DATA_NETWORK_CAPABILITIES_KEY = "networkCapabilities";
 
-    public static final String DATA_IFACE_NAME_KEY = "iface";
-    public static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
-    public static final String DATA_NETWORK_ROAMING_KEY = "networkRoaming";
     public static final String PHONE_IN_ECM_STATE = "phoneinECMState";
     public static final String PHONE_IN_EMERGENCY_CALL = "phoneInEmergencyCall";
-
-    public static final String REASON_LINK_PROPERTIES_CHANGED = "linkPropertiesChanged";
 
     /**
      * Return codes for supplyPinReturnResult and
@@ -143,6 +155,8 @@ public class PhoneConstants {
     public static final String APN_TYPE_EMERGENCY = "emergency";
     /** APN type for Mission Critical Services */
     public static final String APN_TYPE_MCX = "mcx";
+    /** APN type for XCAP */
+    public static final String APN_TYPE_XCAP = "xcap";
     /** Array of all APN types */
     public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
             APN_TYPE_MMS,
@@ -154,7 +168,8 @@ public class PhoneConstants {
             APN_TYPE_CBS,
             APN_TYPE_IA,
             APN_TYPE_EMERGENCY,
-            APN_TYPE_MCX
+            APN_TYPE_MCX,
+            APN_TYPE_XCAP,
     };
 
     public static final int RIL_CARD_MAX_APPS    = 8;
@@ -170,10 +185,6 @@ public class PhoneConstants {
     public static final String PHONE_KEY = "phone";
 
     public static final String SLOT_KEY  = "slot";
-
-    /** Fired when a subscriptions phone state changes. */
-    public static final String ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED =
-        "android.intent.action.SUBSCRIPTION_PHONE_STATE";
 
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?

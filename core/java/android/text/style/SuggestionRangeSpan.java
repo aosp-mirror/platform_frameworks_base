@@ -16,7 +16,7 @@
 
 package android.text.style;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;

@@ -16,7 +16,7 @@
 
 package android.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -304,7 +304,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     }
 
     /**
-     * Sets the <a href="http://technotes.googlecode.com/git/nextprotoneg.html">Next
+     * Sets the
+     * <a class="external" href="https://tools.ietf.org/id/draft-agl-tls-nextprotoneg-03.html">Next
      * Protocol Negotiation (NPN)</a> protocols that this peer is interested in.
      *
      * <p>For servers this is the sequence of protocols to advertise as

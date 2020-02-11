@@ -24,6 +24,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.R;
+
 import java.util.Locale;
 
 public class CarrierText extends TextView {

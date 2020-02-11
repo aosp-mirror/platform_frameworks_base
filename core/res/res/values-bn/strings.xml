@@ -1523,10 +1523,6 @@
     <string name="submit" msgid="1602335572089911941">"জমা দিন"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ড্রাইভিং অ্যাপ চালু আছে"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ড্রাইভিং অ্যাপ বন্ধ করতে ট্যাপ করুন।"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"টিথারিং বা হটস্পট সক্রিয় আছে"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"সেট আপ করার জন্য আলতো চাপুন৷"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"টিথারিং অক্ষম করা আছে"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"বিশদ বিবরণের জন্য প্রশাসকের সাথে যোগাযোগ করুন"</string>
     <string name="back_button_label" msgid="2300470004503343439">"ফিরুন"</string>
     <string name="next_button_label" msgid="1080555104677992408">"পরবর্তী"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"এড়িয়ে যান"</string>

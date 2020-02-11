@@ -162,7 +162,13 @@ public class EglHelper {
      * @return true if EglSurface is ready.
      */
     public boolean createEglSurface(SurfaceHolder surfaceHolder) {
-        mEglSurface = eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, null, 0);
+        if (hasEglDisplay()) {
+            mEglSurface = eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, null, 0);
+        } else {
+            Log.w(TAG, "mEglDisplay is null");
+            return false;
+        }
+
         if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
             Log.w(TAG, "createWindowSurface failed: " + GLUtils.getEGLErrorString(eglGetError()));
             return false;
@@ -209,7 +215,13 @@ public class EglHelper {
             attrib_list[idx++] = EGL_CONTEXT_PRIORITY_LOW_IMG;
         }
         attrib_list[idx++] = EGL_NONE;
-        mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attrib_list, 0);
+        if (hasEglDisplay()) {
+            mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attrib_list, 0);
+        } else {
+            Log.w(TAG, "mEglDisplay is null");
+            return false;
+        }
+
         if (mEglContext == EGL_NO_CONTEXT) {
             Log.w(TAG, "eglCreateContext failed: " + GLUtils.getEGLErrorString(eglGetError()));
             return false;
@@ -236,6 +248,14 @@ public class EglHelper {
     }
 
     /**
+     * Check if we have EglDisplay.
+     * @return true if EglDisplay is ready.
+     */
+    public boolean hasEglDisplay() {
+        return mEglDisplay != null;
+    }
+
+    /**
      * Swap buffer to display.
      * @return true if swap successfully.
      */
@@ -258,7 +278,9 @@ public class EglHelper {
         if (hasEglContext()) {
             destroyEglContext();
         }
-        eglTerminate(mEglDisplay);
+        if (hasEglDisplay()) {
+            eglTerminate(mEglDisplay);
+        }
         mEglReady = false;
     }
 

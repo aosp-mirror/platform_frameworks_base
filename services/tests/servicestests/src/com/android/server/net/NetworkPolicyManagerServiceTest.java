@@ -37,6 +37,7 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
+import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
@@ -111,8 +112,9 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.PersistableBundle;
 import android.os.PowerManagerInternal;
@@ -136,7 +138,6 @@ import android.util.RecurrenceRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.DeviceIdleController;
@@ -1047,7 +1048,7 @@ public class NetworkPolicyManagerServiceTest {
         // Define simple data plan
         final SubscriptionPlan plan = buildMonthlyDataPlan(
                 ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), DataUnit.MEGABYTES.toBytes(1800));
-        mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+        setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
                 mServiceContext.getOpPackageName());
 
         // We're 20% through the month (6 days)
@@ -1171,7 +1172,7 @@ public class NetworkPolicyManagerServiceTest {
         // Define simple data plan which gives us effectively 60MB/day
         final SubscriptionPlan plan = buildMonthlyDataPlan(
                 ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), DataUnit.MEGABYTES.toBytes(1800));
-        mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+        setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
                 mServiceContext.getOpPackageName());
 
         // We're 20% through the month (6 days)
@@ -1197,11 +1198,11 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1225,9 +1226,9 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.addEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1387,6 +1388,8 @@ public class NetworkPolicyManagerServiceTest {
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[0]);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{FAKE_SUB_ID});
         when(mTelephonyManager.getSubscriberId(FAKE_SUB_ID)).thenReturn(FAKE_SUBSCRIBER_ID);
+        when(mTelephonyManager.createForSubscriptionId(FAKE_SUB_ID))
+                .thenReturn(mock(TelephonyManager.class));
         PersistableBundle bundle = CarrierConfigManager.getDefaultConfig();
         when(mCarrierConfigManager.getConfigForSubId(FAKE_SUB_ID)).thenReturn(bundle);
         setNetworkPolicies(buildDefaultFakeMobilePolicy());
@@ -1398,12 +1401,14 @@ public class NetworkPolicyManagerServiceTest {
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[0]);
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{FAKE_SUB_ID});
         when(mTelephonyManager.getSubscriberId(FAKE_SUB_ID)).thenReturn(FAKE_SUBSCRIBER_ID);
+        when(mTelephonyManager.createForSubscriptionId(FAKE_SUB_ID))
+                .thenReturn(mock(TelephonyManager.class));
         when(mCarrierConfigManager.getConfigForSubId(FAKE_SUB_ID)).thenReturn(null);
         setNetworkPolicies(buildDefaultFakeMobilePolicy());
         // smoke test to make sure no errors are raised
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
@@ -1418,7 +1423,7 @@ public class NetworkPolicyManagerServiceTest {
         bundle.putLong(CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, -100);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
@@ -1437,7 +1442,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_USE_PLATFORM_DEFAULT);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
@@ -1459,7 +1464,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_THRESHOLD_DISABLED);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         // The policy still shouldn't change, because we don't want to overwrite user settings.
@@ -1476,7 +1481,7 @@ public class NetworkPolicyManagerServiceTest {
         bundle.putLong(CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, 9999);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(31, 9999, 9999, true);
@@ -1493,7 +1498,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_THRESHOLD_DISABLED);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(31, WARNING_DISABLED, LIMIT_DISABLED, true);
@@ -1510,7 +1515,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_THRESHOLD_DISABLED);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
         assertNetworkPolicyEquals(31, WARNING_DISABLED, LIMIT_DISABLED, true);
 
@@ -1525,7 +1530,7 @@ public class NetworkPolicyManagerServiceTest {
                 DATA_CYCLE_USE_PLATFORM_DEFAULT);
         mServiceContext.sendBroadcast(
                 new Intent(ACTION_CARRIER_CONFIG_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, FAKE_SUB_ID)
+                        .putExtra(CarrierConfigManager.EXTRA_SUBSCRIPTION_INDEX, FAKE_SUB_ID)
         );
 
         assertNetworkPolicyEquals(31, mDefaultWarningBytes, mDefaultLimitBytes,
@@ -1583,7 +1588,7 @@ public class NetworkPolicyManagerServiceTest {
             final SubscriptionPlan plan = buildMonthlyDataPlan(
                     ZonedDateTime.parse("2015-11-01T00:00:00.00Z"),
                     DataUnit.MEGABYTES.toBytes(1800));
-            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
+            setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
                     mServiceContext.getOpPackageName());
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
@@ -1604,7 +1609,7 @@ public class NetworkPolicyManagerServiceTest {
             final SubscriptionPlan plan = buildMonthlyDataPlan(
                     ZonedDateTime.parse("2015-11-01T00:00:00.00Z"),
                     DataUnit.MEGABYTES.toBytes(100));
-            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
+            setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
                     mServiceContext.getOpPackageName());
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
@@ -1620,7 +1625,7 @@ public class NetworkPolicyManagerServiceTest {
         {
             final SubscriptionPlan plan = buildMonthlyDataPlan(
                     ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), BYTES_UNLIMITED);
-            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
+            setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
                     mServiceContext.getOpPackageName());
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
@@ -1637,7 +1642,7 @@ public class NetworkPolicyManagerServiceTest {
         {
             final SubscriptionPlan plan = buildMonthlyDataPlan(
                     ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), BYTES_UNLIMITED);
-            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
+            setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
                     mServiceContext.getOpPackageName());
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
@@ -1676,6 +1681,59 @@ public class NetworkPolicyManagerServiceTest {
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
+    }
+
+    /**
+     * Test that when StatsProvider triggers limit reached, new limit will be calculated and
+     * re-armed.
+     */
+    @Test
+    public void testStatsProviderLimitReached() throws Exception {
+        final int CYCLE_DAY = 15;
+
+        final NetworkStats stats = new NetworkStats(0L, 1);
+        stats.addEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+                2999, 1, 2000, 1, 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats.getTotalBytes());
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats);
+
+        // Get active mobile network in place
+        expectMobileDefaults();
+        mService.updateNetworks();
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, Long.MAX_VALUE);
+
+        // Set limit to 10KB.
+        setNetworkPolicies(new NetworkPolicy(
+                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, WARNING_DISABLED, 10000L,
+                true));
+        postMsgAndWaitForCompletion();
+
+        // Verifies that remaining quota is set to providers.
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L);
+
+        reset(mStatsService);
+
+        // Increase the usage.
+        stats.addEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+                1000, 1, 999, 1, 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats.getTotalBytes());
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats);
+
+        // Simulates that limit reached fires earlier by provider, but actually the quota is not
+        // yet reached.
+        final NetworkPolicyManagerInternal npmi = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+        npmi.onStatsProviderLimitReached("TEST");
+
+        // Verifies that the limit reached leads to a force update and new limit should be set.
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).forceUpdate();
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).setStatsProviderLimit(TEST_IFACE, 10000L - 4999L - 1999L);
     }
 
     /**
@@ -1780,7 +1838,8 @@ public class NetworkPolicyManagerServiceTest {
         if (!roaming) {
             nc.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }
-        nc.setNetworkSpecifier(new StringNetworkSpecifier(String.valueOf(subId)));
+        nc.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                .setSubscriptionId(subId).build());
         return nc;
     }
 
@@ -1853,6 +1912,8 @@ public class NetworkPolicyManagerServiceTest {
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(
                 new int[] { TEST_SUB_ID });
         when(mTelephonyManager.getSubscriberId(TEST_SUB_ID)).thenReturn(TEST_IMSI);
+        when(mTelephonyManager.createForSubscriptionId(TEST_SUB_ID))
+                .thenReturn(mock(TelephonyManager.class));
         doNothing().when(mTelephonyManager).setPolicyDataEnabled(anyBoolean(), anyInt());
         expectNetworkState(false /* roaming */);
     }
@@ -1978,6 +2039,23 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private FutureIntent mRestrictBackgroundChanged;
+
+    private void postMsgAndWaitForCompletion() throws InterruptedException {
+        final Handler handler = mService.getHandlerForTesting();
+        final CountDownLatch latch = new CountDownLatch(1);
+        mService.getHandlerForTesting().post(latch::countDown);
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for the test msg to be handled");
+        }
+    }
+
+    private void setSubscriptionPlans(int subId, SubscriptionPlan[] plans, String callingPackage)
+            throws InterruptedException {
+        mService.setSubscriptionPlans(subId, plans, callingPackage);
+        // setSubscriptionPlans() triggers async events, wait for those to be completed before
+        // moving forward as they could interfere with the tests later.
+        postMsgAndWaitForCompletion();
+    }
 
     private void setRestrictBackground(boolean flag) throws Exception {
         mService.setRestrictBackground(flag);

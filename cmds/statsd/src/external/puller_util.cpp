@@ -18,8 +18,8 @@
 #include "Log.h"
 
 #include "StatsPullerManager.h"
+#include "atoms_info.h"
 #include "puller_util.h"
-#include "statslog.h"
 
 namespace android {
 namespace os {

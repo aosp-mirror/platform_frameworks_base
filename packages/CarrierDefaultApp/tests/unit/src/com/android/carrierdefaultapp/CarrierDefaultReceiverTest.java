@@ -15,18 +15,21 @@
  */
 package com.android.carrierdefaultapp;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.test.InstrumentationTestCase;
 
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.TelephonyIntents;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,10 +38,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
     @Mock
@@ -88,14 +87,12 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
                 .KEY_CARRIER_DEFAULT_ACTIONS_ON_REDIRECTION_STRING_ARRAY, new String[]{"4,1"});
         doReturn(b).when(mCarrierConfigMgr).getConfig();
 
-        Intent intent = new Intent(TelephonyIntents.ACTION_CARRIER_SIGNAL_REDIRECTED);
+        Intent intent = new Intent(TelephonyManager.ACTION_CARRIER_SIGNAL_REDIRECTED);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
-        Rlog.d(TAG, "OnReceive redirection intent");
         mReceiver.onReceive(mContext, intent);
 
         mContext.waitForMs(100);
 
-        Rlog.d(TAG, "verify carrier action: showPortalNotification");
         verify(mNotificationMgr, times(1)).notify(mString.capture(), mInt.capture(),
                 mNotification.capture());
         assertEquals(PORTAL_NOTIFICATION_ID, (int) mInt.getValue());
@@ -103,7 +100,6 @@ public class CarrierDefaultReceiverTest extends InstrumentationTestCase {
         PendingIntent pendingIntent = mNotification.getValue().contentIntent;
         assertNotNull(pendingIntent);
 
-        Rlog.d(TAG, "verify carrier action: disable all metered apns");
         verify(mTelephonyMgr).setCarrierDataEnabled(eq(false));
     }
 }

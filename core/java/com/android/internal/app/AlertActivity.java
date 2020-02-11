@@ -16,9 +16,9 @@
 
 package com.android.internal.app;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.Dialog;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -33,6 +33,10 @@ import android.view.accessibility.AccessibilityEvent;
  * @see #setupAlert()
  */
 public abstract class AlertActivity extends Activity implements DialogInterface {
+
+    @UnsupportedAppUsage
+    public AlertActivity() {
+    }
 
     /**
      * The model for the alert.

@@ -45,8 +45,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.LocaleProto;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -799,6 +799,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link ActivityInfo#CONFIG_ASSETS_PATHS}.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int assetsSeq;
 

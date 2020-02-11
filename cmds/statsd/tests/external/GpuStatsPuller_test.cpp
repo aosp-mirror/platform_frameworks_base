@@ -24,6 +24,7 @@
 #include <log/log.h>
 
 #include "src/external/GpuStatsPuller.h"
+#include "statslog.h"
 
 #ifdef __ANDROID__
 

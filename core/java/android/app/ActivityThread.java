@@ -32,7 +32,6 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -46,6 +45,7 @@ import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -714,6 +714,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     static final class CreateServiceData {
         @UnsupportedAppUsage
+        CreateServiceData() {
+        }
+        @UnsupportedAppUsage
         IBinder token;
         @UnsupportedAppUsage
         ServiceInfo info;
@@ -754,6 +757,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class AppBindData {
+        @UnsupportedAppUsage
+        AppBindData() {
+        }
         @UnsupportedAppUsage
         LoadedApk info;
         @UnsupportedAppUsage
@@ -1005,8 +1011,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
                 String buildSerial, AutofillOptions autofillOptions,
-                ContentCaptureOptions contentCaptureOptions,
-                long[] disabledCompatChanges) {
+                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1052,6 +1057,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.compatInfo = compatInfo;
             data.initProfilerInfo = profilerInfo;
             data.buildSerial = buildSerial;
+            data.autofillOptions = autofillOptions;
+            data.contentCaptureOptions = contentCaptureOptions;
             data.disabledCompatChanges = disabledCompatChanges;
             sendMessage(H.BIND_APPLICATION, data);
         }
@@ -6163,7 +6170,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (data.trackAllocation) {
             DdmVmInternal.enableRecentAllocations(true);
         }
-
         // Note when this process has started.
         Process.setStartTimes(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
 

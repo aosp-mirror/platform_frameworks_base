@@ -43,6 +43,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -272,14 +273,14 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public boolean areCaptionsEnabled() {
-        int currentValue = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_ENABLED, 0);
+        int currentValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ODI_CAPTIONS_ENABLED, 0, UserHandle.USER_CURRENT);
         return currentValue == 1;
     }
 
     public void setCaptionsEnabled(boolean isEnabled) {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_ENABLED, isEnabled ? 1 : 0);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ODI_CAPTIONS_ENABLED, isEnabled ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     @Override

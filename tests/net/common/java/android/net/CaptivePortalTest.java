@@ -44,6 +44,11 @@ public class CaptivePortalTest {
         }
 
         @Override
+        public void appRequest(final int request) throws RemoteException {
+            mCode = request;
+        }
+
+        @Override
         public void logEvent(int eventId, String packageName) throws RemoteException {
             mCode = eventId;
             mPackageName = packageName;
@@ -77,6 +82,12 @@ public class CaptivePortalTest {
     public void testUseNetwork() {
         final MyCaptivePortalImpl result = runCaptivePortalTest(c -> c.useNetwork());
         assertEquals(result.mCode, CaptivePortal.APP_RETURN_WANTED_AS_IS);
+    }
+
+    @Test
+    public void testReevaluateNetwork() {
+        final MyCaptivePortalImpl result = runCaptivePortalTest(c -> c.reevaluateNetwork());
+        assertEquals(result.mCode, CaptivePortal.APP_REQUEST_REEVALUATION_REQUIRED);
     }
 
     @Test

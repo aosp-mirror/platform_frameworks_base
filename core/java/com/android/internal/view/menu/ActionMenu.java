@@ -16,10 +16,7 @@
 
 package com.android.internal.view.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +26,9 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @hide

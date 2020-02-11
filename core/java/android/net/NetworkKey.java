@@ -16,17 +16,20 @@
 
 package android.net;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiSsid;
+import android.net.wifi.WifiManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -48,6 +51,13 @@ public class NetworkKey implements Parcelable {
     /** A wifi network, for which {@link #wifiKey} will be populated. */
     public static final int TYPE_WIFI = 1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"TYPE_"}, value = {
+            TYPE_WIFI
+    })
+    public @interface NetworkType {}
+
     /**
      * The type of this network.
      * @see #TYPE_WIFI
@@ -65,26 +75,28 @@ public class NetworkKey implements Parcelable {
      *
      * @return  A new {@link NetworkKey} instance or <code>null</code> if the given
      *          {@link ScanResult} instance is malformed.
-     * @hide
      */
     @Nullable
     public static NetworkKey createFromScanResult(@Nullable ScanResult result) {
-        if (result != null && result.wifiSsid != null) {
-            final String ssid = result.wifiSsid.toString();
-            final String bssid = result.BSSID;
-            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiSsid.NONE)
-                    && !TextUtils.isEmpty(bssid)) {
-                WifiKey wifiKey;
-                try {
-                    wifiKey = new WifiKey(String.format("\"%s\"", ssid), bssid);
-                } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "Unable to create WifiKey.", e);
-                    return null;
-                }
-                return new NetworkKey(wifiKey);
-            }
+        if (result == null) {
+            return null;
         }
-        return null;
+        final String ssid = result.SSID;
+        if (TextUtils.isEmpty(ssid) || ssid.equals(WifiManager.UNKNOWN_SSID)) {
+            return null;
+        }
+        final String bssid = result.BSSID;
+        if (TextUtils.isEmpty(bssid)) {
+            return null;
+        }
+
+        try {
+            final WifiKey wifiKey = new WifiKey(String.format("\"%s\"", ssid), bssid);
+            return new NetworkKey(wifiKey);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to create WifiKey.", e);
+            return null;
+        }
     }
 
     /**
@@ -100,7 +112,7 @@ public class NetworkKey implements Parcelable {
         if (wifiInfo != null) {
             final String ssid = wifiInfo.getSSID();
             final String bssid = wifiInfo.getBSSID();
-            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiSsid.NONE)
+            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiManager.UNKNOWN_SSID)
                     && !TextUtils.isEmpty(bssid)) {
                 WifiKey wifiKey;
                 try {

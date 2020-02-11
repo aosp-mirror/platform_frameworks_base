@@ -32,9 +32,11 @@ import static android.os.image.DynamicSystemClient.STATUS_IN_USE;
 import static android.os.image.DynamicSystemClient.STATUS_NOT_STARTED;
 import static android.os.image.DynamicSystemClient.STATUS_READY;
 
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_CANCELLED;
 import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_EXCEPTION;
-import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_INVALID_URL;
 import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_IO;
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_UNSUPPORTED_FORMAT;
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_UNSUPPORTED_URL;
 import static com.android.dynsystem.InstallationAsyncTask.RESULT_OK;
 
 import android.app.Notification;
@@ -44,6 +46,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -54,9 +57,12 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.image.DynamicSystemClient;
 import android.os.image.DynamicSystemManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -66,13 +72,14 @@ import java.util.ArrayList;
  * cancel and confirm commnands.
  */
 public class DynamicSystemInstallationService extends Service
-        implements InstallationAsyncTask.InstallStatusListener {
+        implements InstallationAsyncTask.ProgressListener {
 
     private static final String TAG = "DynSystemInstallationService";
 
-
     // TODO (b/131866826): This is currently for test only. Will move this to System API.
     static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
+    static final String KEY_DSU_SLOT = "KEY_DSU_SLOT";
+    static final String DEFAULT_DSU_SLOT = "dsu";
 
     /*
      * Intent actions
@@ -121,9 +128,12 @@ public class DynamicSystemInstallationService extends Service
     private DynamicSystemManager mDynSystem;
     private NotificationManager mNM;
 
-    private long mSystemSize;
-    private long mUserdataSize;
-    private long mInstalledSize;
+    private int mNumInstalledPartitions;
+
+    private String mCurrentPartitionName;
+    private long mCurrentPartitionSize;
+    private long mCurrentPartitionInstalledSize;
+
     private boolean mJustCancelledByUser;
 
     // This is for testing only now
@@ -139,10 +149,26 @@ public class DynamicSystemInstallationService extends Service
         prepareNotification();
 
         mDynSystem = (DynamicSystemManager) getSystemService(Context.DYNAMIC_SYSTEM_SERVICE);
+
+        // Install an HttpResponseCache in the application cache directory so we can cache
+        // gsi key revocation list. The http(s) protocol handler uses this cache transparently.
+        // The cache size is chosen heuristically. Since we don't have too much traffic right now,
+        // a moderate size of 1MiB should be enough.
+        try {
+            File httpCacheDir = new File(getCacheDir(), "httpCache");
+            long httpCacheSize = 1 * 1024 * 1024; // 1 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            Log.d(TAG, "HttpResponseCache.install() failed: " + e);
+        }
     }
 
     @Override
     public void onDestroy() {
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION_ID);
     }
@@ -176,8 +202,12 @@ public class DynamicSystemInstallationService extends Service
     }
 
     @Override
-    public void onProgressUpdate(long installedSize) {
-        mInstalledSize = installedSize;
+    public void onProgressUpdate(InstallationAsyncTask.Progress progress) {
+        mCurrentPartitionName = progress.mPartitionName;
+        mCurrentPartitionSize = progress.mPartitionSize;
+        mCurrentPartitionInstalledSize = progress.mInstalledSize;
+        mNumInstalledPartitions = progress.mNumInstalledPartitions;
+
         postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED, null);
     }
 
@@ -197,11 +227,16 @@ public class DynamicSystemInstallationService extends Service
         resetTaskAndStop();
 
         switch (result) {
+            case RESULT_CANCELLED:
+                postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
+                break;
+
             case RESULT_ERROR_IO:
                 postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_IO, detail);
                 break;
 
-            case RESULT_ERROR_INVALID_URL:
+            case RESULT_ERROR_UNSUPPORTED_URL:
+            case RESULT_ERROR_UNSUPPORTED_FORMAT:
                 postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_INVALID_URL, detail);
                 break;
 
@@ -209,12 +244,6 @@ public class DynamicSystemInstallationService extends Service
                 postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_EXCEPTION, detail);
                 break;
         }
-    }
-
-    @Override
-    public void onCancelled() {
-        resetTaskAndStop();
-        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
     }
 
     private void executeInstallCommand(Intent intent) {
@@ -234,12 +263,18 @@ public class DynamicSystemInstallationService extends Service
         }
 
         String url = intent.getDataString();
-        mSystemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
-        mUserdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
+        long systemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
+        long userdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
         mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
+        String dsuSlot = intent.getStringExtra(KEY_DSU_SLOT);
 
-        mInstallTask = new InstallationAsyncTask(
-                url, mSystemSize, mUserdataSize, this, mDynSystem, this);
+        if (TextUtils.isEmpty(dsuSlot)) {
+            dsuSlot = DEFAULT_DSU_SLOT;
+        }
+        // TODO: better constructor or builder
+        mInstallTask =
+                new InstallationAsyncTask(
+                        url, dsuSlot, systemSize, userdataSize, this, mDynSystem, this);
 
         mInstallTask.execute();
 
@@ -254,10 +289,11 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
+        stopForeground(true);
         mJustCancelledByUser = true;
 
         if (mInstallTask.cancel(false)) {
-            // Will cleanup and post status in onCancelled()
+            // Will stopSelf() in onResult()
             Log.d(TAG, "Cancel request filed successfully");
         } else {
             Log.e(TAG, "Trying to cancel installation while it's already completed.");
@@ -288,7 +324,7 @@ public class DynamicSystemInstallationService extends Service
     private void executeRebootToDynSystemCommand() {
         boolean enabled = false;
 
-        if (mInstallTask != null && mInstallTask.getResult() == RESULT_OK) {
+        if (mInstallTask != null && mInstallTask.isCompleted()) {
             enabled = mInstallTask.commit();
         } else if (isDynamicSystemInstalled()) {
             enabled = mDynSystem.setEnable(true, true);
@@ -380,8 +416,16 @@ public class DynamicSystemInstallationService extends Service
             case STATUS_IN_PROGRESS:
                 builder.setContentText(getString(R.string.notification_install_inprogress));
 
-                int max = (int) Math.max((mSystemSize + mUserdataSize) >> 20, 1);
-                int progress = (int) (mInstalledSize >> 20);
+                int max = 1024;
+                int progress = 0;
+
+                int currentMax = max >> (mNumInstalledPartitions + 1);
+                progress = max - currentMax * 2;
+
+                long currentProgress = (mCurrentPartitionInstalledSize >> 20) * currentMax
+                        / Math.max(mCurrentPartitionSize >> 20, 1);
+
+                progress += (int) currentProgress;
 
                 builder.setProgress(max, progress, false);
 
@@ -392,7 +436,9 @@ public class DynamicSystemInstallationService extends Service
                 break;
 
             case STATUS_READY:
-                builder.setContentText(getString(R.string.notification_install_completed));
+                String msgCompleted = getString(R.string.notification_install_completed);
+                builder.setContentText(msgCompleted)
+                        .setStyle(new Notification.BigTextStyle().bigText(msgCompleted));
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_discard),
@@ -405,7 +451,9 @@ public class DynamicSystemInstallationService extends Service
                 break;
 
             case STATUS_IN_USE:
-                builder.setContentText(getString(R.string.notification_dynsystem_in_use));
+                String msgInUse = getString(R.string.notification_dynsystem_in_use);
+                builder.setContentText(msgInUse)
+                        .setStyle(new Notification.BigTextStyle().bigText(msgInUse));
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_uninstall),
@@ -435,7 +483,49 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private void postStatus(int status, int cause, Throwable detail) {
-        Log.d(TAG, "postStatus(): statusCode=" + status + ", causeCode=" + cause);
+        String statusString;
+        String causeString;
+
+        switch (status) {
+            case STATUS_NOT_STARTED:
+                statusString = "NOT_STARTED";
+                break;
+            case STATUS_IN_PROGRESS:
+                statusString = "IN_PROGRESS";
+                break;
+            case STATUS_READY:
+                statusString = "READY";
+                break;
+            case STATUS_IN_USE:
+                statusString = "IN_USE";
+                break;
+            default:
+                statusString = "UNKNOWN";
+                break;
+        }
+
+        switch (cause) {
+            case CAUSE_INSTALL_COMPLETED:
+                causeString = "INSTALL_COMPLETED";
+                break;
+            case CAUSE_INSTALL_CANCELLED:
+                causeString = "INSTALL_CANCELLED";
+                break;
+            case CAUSE_ERROR_IO:
+                causeString = "ERROR_IO";
+                break;
+            case CAUSE_ERROR_INVALID_URL:
+                causeString = "ERROR_INVALID_URL";
+                break;
+            case CAUSE_ERROR_EXCEPTION:
+                causeString = "ERROR_EXCEPTION";
+                break;
+            default:
+                causeString = "CAUSE_NOT_SPECIFIED";
+                break;
+        }
+
+        Log.d(TAG, "status=" + statusString + ", cause=" + causeString);
 
         boolean notifyOnNotificationBar = true;
 
@@ -464,7 +554,8 @@ public class DynamicSystemInstallationService extends Service
             throws RemoteException {
         Bundle bundle = new Bundle();
 
-        bundle.putLong(DynamicSystemClient.KEY_INSTALLED_SIZE, mInstalledSize);
+        // TODO: send more info to the clients
+        bundle.putLong(DynamicSystemClient.KEY_INSTALLED_SIZE, mCurrentPartitionInstalledSize);
 
         if (detail != null) {
             bundle.putSerializable(DynamicSystemClient.KEY_EXCEPTION_DETAIL,
@@ -492,9 +583,7 @@ public class DynamicSystemInstallationService extends Service
                 return STATUS_IN_PROGRESS;
 
             case FINISHED:
-                int result = mInstallTask.getResult();
-
-                if (result == RESULT_OK) {
+                if (mInstallTask.isCompleted()) {
                     return STATUS_READY;
                 } else {
                     throw new IllegalStateException("A failed InstallationTask is not reset");

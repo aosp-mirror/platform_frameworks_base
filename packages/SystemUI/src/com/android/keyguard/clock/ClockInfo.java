@@ -25,12 +25,12 @@ import java.util.function.Supplier;
 final class ClockInfo {
 
     private final String mName;
-    private final String mTitle;
+    private final Supplier<String> mTitle;
     private final String mId;
     private final Supplier<Bitmap> mThumbnail;
     private final Supplier<Bitmap> mPreview;
 
-    private ClockInfo(String name, String title, String id,
+    private ClockInfo(String name, Supplier<String> title, String id,
             Supplier<Bitmap> thumbnail, Supplier<Bitmap> preview) {
         mName = name;
         mTitle = title;
@@ -50,7 +50,7 @@ final class ClockInfo {
      * Gets the name (title) of the clock face to be shown in the picker app.
      */
     String getTitle() {
-        return mTitle;
+        return mTitle.get();
     }
 
     /**
@@ -80,7 +80,7 @@ final class ClockInfo {
 
     static class Builder {
         private String mName;
-        private String mTitle;
+        private Supplier<String> mTitle;
         private String mId;
         private Supplier<Bitmap> mThumbnail;
         private Supplier<Bitmap> mPreview;
@@ -94,7 +94,7 @@ final class ClockInfo {
             return this;
         }
 
-        public Builder setTitle(String title) {
+        public Builder setTitle(Supplier<String> title) {
             mTitle = title;
             return this;
         }

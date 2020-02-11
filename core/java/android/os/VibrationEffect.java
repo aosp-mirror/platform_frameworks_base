@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
@@ -53,7 +54,7 @@ public abstract class VibrationEffect implements Parcelable {
     public static final int MAX_AMPLITUDE = 255;
 
     /**
-     * A click effect.
+     * A click effect. Use this effect as a baseline, as it's the most common type of click effect.
      *
      * @see #get(int)
      */
@@ -67,7 +68,7 @@ public abstract class VibrationEffect implements Parcelable {
     public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
-     * A tick effect.
+     * A tick effect. This effect is less strong compared to {@link #EFFECT_CLICK}.
      * @see #get(int)
      */
     public static final int EFFECT_TICK = Effect.TICK;
@@ -77,6 +78,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int EFFECT_THUD = Effect.THUD;
 
@@ -85,11 +87,12 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int EFFECT_POP = Effect.POP;
 
     /**
-     * A heavy click effect.
+     * A heavy click effect. This effect is stronger than {@link #EFFECT_CLICK}.
      * @see #get(int)
      */
     public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
@@ -126,6 +129,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(Uri, Context)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int[] RINGTONES = {
         Effect.RINGTONE_1,
@@ -493,6 +497,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mAmplitude);
         }
 
+        @UnsupportedAppUsage
         public static final @android.annotation.NonNull Parcelable.Creator<OneShot> CREATOR =
             new Parcelable.Creator<OneShot>() {
                 @Override

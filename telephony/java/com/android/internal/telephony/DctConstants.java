@@ -15,6 +15,8 @@
  */
 package com.android.internal.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 import com.android.internal.util.Protocol;
 
 /**
@@ -37,20 +39,34 @@ public class DctConstants {
      *      RETRYING or CONNECTING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/DctConstants$State;")
     public enum State {
+        @UnsupportedAppUsage
         IDLE,
+        @UnsupportedAppUsage
         CONNECTING,
+        @UnsupportedAppUsage
         RETRYING,
+        @UnsupportedAppUsage
         CONNECTED,
+        @UnsupportedAppUsage
         DISCONNECTING,
+        @UnsupportedAppUsage
         FAILED,
     }
 
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/DctConstants$Activity;")
     public enum Activity {
         NONE,
+        @UnsupportedAppUsage
         DATAIN,
+        @UnsupportedAppUsage
         DATAOUT,
+        @UnsupportedAppUsage
         DATAINANDOUT,
+        @UnsupportedAppUsage
         DORMANT
     }
 
@@ -95,6 +111,9 @@ public class DctConstants {
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
     public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 50;
     public static final int EVENT_DATA_ENABLED_OVERRIDE_RULES_CHANGED = BASE + 51;
+    public static final int EVENT_SERVICE_STATE_CHANGED = BASE + 52;
+    public static final int EVENT_5G_TIMER_HYSTERESIS = BASE + 53;
+    public static final int EVENT_5G_TIMER_WATCHDOG = BASE + 54;
 
     /***** Constants *****/
 

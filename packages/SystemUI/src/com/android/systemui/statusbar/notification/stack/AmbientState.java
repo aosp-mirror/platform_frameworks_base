@@ -24,7 +24,6 @@ import android.view.View;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -32,6 +31,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 
@@ -52,9 +52,8 @@ public class AmbientState {
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
-    private boolean mDark;
+    private boolean mDozing;
     private boolean mHideSensitive;
-    private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private float mStackTranslation;
     private int mLayoutHeight;
     private int mTopPadding;
@@ -79,15 +78,19 @@ public class AmbientState {
     private int mIntrinsicPadding;
     private int mExpandAnimationTopChange;
     private ExpandableNotificationRow mExpandingNotification;
-    private float mDarkAmount;
+    private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
+    private HeadsUpManager mHeadUpManager;
+    private Runnable mOnPulseHeightChangedListener;
 
     public AmbientState(
             Context context,
-            @NonNull SectionProvider sectionProvider) {
+            @NonNull SectionProvider sectionProvider,
+            HeadsUpManager headsUpManager) {
         mSectionProvider = sectionProvider;
+        mHeadUpManager = headsUpManager;
         reload(context);
     }
 
@@ -180,23 +183,23 @@ public class AmbientState {
         mDimmed = dimmed;
     }
 
-    /** In dark mode, we draw as little as possible, assuming a black background */
-    public void setDark(boolean dark) {
-        mDark = dark;
+    /** While dozing, we draw as little as possible, assuming a black background */
+    public void setDozing(boolean dozing) {
+        mDozing = dozing;
     }
 
-    /** Dark ratio of the status bar **/
-    public void setDarkAmount(float darkAmount) {
-        if (darkAmount == 1.0f && mDarkAmount != darkAmount) {
-            // Whenever we are fully dark, let's reset the pulseHeight again
-            mPulseHeight = MAX_PULSE_HEIGHT;
+    /** Hide ratio of the status bar **/
+    public void setHideAmount(float hidemount) {
+        if (hidemount == 1.0f && mHideAmount != hidemount) {
+            // Whenever we are fully hidden, let's reset the pulseHeight again
+            setPulseHeight(MAX_PULSE_HEIGHT);
         }
-        mDarkAmount = darkAmount;
+        mHideAmount = hidemount;
     }
 
-    /** Returns the dark ratio of the status bar */
-    public float getDarkAmount() {
-        return mDarkAmount;
+    /** Returns the hide ratio of the status bar */
+    public float getHideAmount() {
+        return mHideAmount;
     }
 
     public void setHideSensitive(boolean hideSensitive) {
@@ -217,8 +220,8 @@ public class AmbientState {
         return mDimmed && !(isPulseExpanding() && mDozeAmount == 1.0f);
     }
 
-    public boolean isDark() {
-        return mDark;
+    public boolean isDozing() {
+        return mDozing;
     }
 
     public boolean isHideSensitive() {
@@ -295,7 +298,7 @@ public class AmbientState {
     }
 
     public boolean isPulseExpanding() {
-        return mPulseHeight != MAX_PULSE_HEIGHT && mDozeAmount != 0.0f && mDarkAmount != 1.0f;
+        return mPulseHeight != MAX_PULSE_HEIGHT && mDozeAmount != 0.0f && mHideAmount != 1.0f;
     }
 
     public boolean isShadeExpanded() {
@@ -389,8 +392,7 @@ public class AmbientState {
     }
 
     public boolean hasPulsingNotifications() {
-        return mPulsing && mAmbientPulseManager != null
-                && mAmbientPulseManager.hasNotifications();
+        return mPulsing && mHeadUpManager != null && mHeadUpManager.hasNotifications();
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -405,10 +407,10 @@ public class AmbientState {
     }
 
     public boolean isPulsing(NotificationEntry entry) {
-        if (!mPulsing || mAmbientPulseManager == null) {
+        if (!mPulsing || mHeadUpManager == null) {
             return false;
         }
-        return mAmbientPulseManager.isAlerting(entry.key);
+        return mHeadUpManager.isAlerting(entry.key);
     }
 
     public boolean isPanelTracking() {
@@ -461,7 +463,7 @@ public class AmbientState {
      * @return whether a row is dozing and not pulsing right now
      */
     public boolean isDozingAndNotPulsing(ExpandableNotificationRow row) {
-        return isDark() && !isPulsing(row.getEntry());
+        return isDozing() && !isPulsing(row.getEntry());
     }
 
     public void setExpandAnimationTopChange(int expandAnimationTopChange) {
@@ -481,14 +483,15 @@ public class AmbientState {
     }
 
     /**
-     * @return {@code true } when shade is completely dark: in AOD or ambient display.
+     * @return {@code true } when shade is completely hidden: in AOD, ambient display or when
+     * bypassing.
      */
-    public boolean isFullyDark() {
-        return mDarkAmount == 1;
+    public boolean isFullyHidden() {
+        return mHideAmount == 1;
     }
 
-    public boolean isDarkAtAll() {
-        return mDarkAmount != 0;
+    public boolean isHiddenAtAll() {
+        return mHideAmount != 0;
     }
 
     public void setAppearing(boolean appearing) {
@@ -500,7 +503,20 @@ public class AmbientState {
     }
 
     public void setPulseHeight(float height) {
-        mPulseHeight = height;
+        if (height != mPulseHeight) {
+            mPulseHeight = height;
+            if (mOnPulseHeightChangedListener != null) {
+                mOnPulseHeightChangedListener.run();
+            }
+        }
+    }
+
+    public float getPulseHeight() {
+        if (mPulseHeight == MAX_PULSE_HEIGHT) {
+            // If we're not pulse expanding, the height should be 0
+            return 0;
+        }
+        return mPulseHeight;
     }
 
     public void setDozeAmount(float dozeAmount) {
@@ -508,7 +524,7 @@ public class AmbientState {
             mDozeAmount = dozeAmount;
             if (dozeAmount == 0.0f || dozeAmount == 1.0f) {
                 // We woke all the way up, let's reset the pulse height
-                mPulseHeight = MAX_PULSE_HEIGHT;
+                setPulseHeight(MAX_PULSE_HEIGHT);
             }
         }
     }
@@ -519,5 +535,13 @@ public class AmbientState {
      */
     public boolean isFullyAwake() {
         return mDozeAmount == 0.0f;
+    }
+
+    public void setOnPulseHeightChangedListener(Runnable onPulseHeightChangedListener) {
+        mOnPulseHeightChangedListener = onPulseHeightChangedListener;
+    }
+
+    public Runnable getOnPulseHeightChangedListener() {
+        return mOnPulseHeightChangedListener;
     }
 }

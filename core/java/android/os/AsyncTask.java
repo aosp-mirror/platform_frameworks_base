@@ -18,8 +18,8 @@ package android.os;
 
 import android.annotation.MainThread;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
@@ -38,9 +38,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <p>AsyncTask enables proper and easy use of the UI thread. This class allows you
- * to perform background operations and publish results on the UI thread without
- * having to manipulate threads and/or handlers.</p>
+ * <p>AsyncTask was intended to enable proper and easy use of the UI thread. However, the most
+ * common use case was for integrating into UI, and that would cause Context leaks, missed
+ * callbacks, or crashes on configuration changes. It also has inconsistent behavior on different
+ * versions of the platform, swallows exceptions from {@code doInBackground}, and does not provide
+ * much utility over using {@link Executor}s directly.</p>
  *
  * <p>AsyncTask is designed to be a helper class around {@link Thread} and {@link Handler}
  * and does not constitute a generic threading framework. AsyncTasks should ideally be
@@ -188,7 +190,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>If you truly want parallel execution, you can invoke
  * {@link #executeOnExecutor(java.util.concurrent.Executor, Object[])} with
  * {@link #THREAD_POOL_EXECUTOR}.</p>
+ *
+ * @deprecated Use the standard <code>java.util.concurrent</code> or
+ *   <a href="https://developer.android.com/topic/libraries/architecture/coroutines">
+ *   Kotlin concurrency utilities</a> instead.
  */
+@Deprecated
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
 
@@ -240,7 +247,13 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /**
      * An {@link Executor} that can be used to execute tasks in parallel.
+     *
+     * @deprecated Using a single thread pool for a general purpose results in suboptimal behavior
+     *   for different tasks. Small, CPU-bound tasks benefit from a bounded pool and queueing, and
+     *   long-running blocking tasks, such as network operations, benefit from many threads. Use or
+     *   create an {@link Executor} configured for your use case.
      */
+    @Deprecated
     public static final Executor THREAD_POOL_EXECUTOR;
 
     static {
@@ -254,7 +267,10 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /**
      * An {@link Executor} that executes tasks one at a time in serial
      * order.  This serialization is global to a particular process.
+     *
+     * @deprecated Globally serializing tasks results in excessive queuing for unrelated operations.
      */
+    @Deprecated
     public static final Executor SERIAL_EXECUTOR = new SerialExecutor();
 
     private static final int MESSAGE_POST_RESULT = 0x1;

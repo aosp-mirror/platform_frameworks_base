@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
 
 import java.text.BreakIterator;
@@ -45,6 +45,10 @@ public final class AccessibilityIterators {
      * @hide
      */
     public static abstract class AbstractTextSegmentIterator implements TextSegmentIterator {
+
+        @UnsupportedAppUsage
+        public AbstractTextSegmentIterator() {
+        }
 
         @UnsupportedAppUsage
         protected String mText;

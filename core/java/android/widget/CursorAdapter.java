@@ -16,8 +16,8 @@
 
 package android.widget;
 
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;

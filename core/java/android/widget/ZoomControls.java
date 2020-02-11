@@ -16,8 +16,8 @@
 
 package android.widget;
 
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;

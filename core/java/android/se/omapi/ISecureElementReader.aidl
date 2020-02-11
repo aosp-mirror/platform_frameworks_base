@@ -48,4 +48,10 @@ interface ISecureElementReader {
      */
     void closeSessions();
 
+    /**
+     * Closes all the sessions opened on this reader and resets the reader.
+     * All the channels opened by all these sessions will be closed.
+     * @return true if the reset is successful, false otherwise.
+     */
+    boolean reset();
 }

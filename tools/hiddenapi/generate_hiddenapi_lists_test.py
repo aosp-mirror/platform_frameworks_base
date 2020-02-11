@@ -53,14 +53,22 @@ class TestHiddenapiListGeneration(unittest.TestCase):
         # Test new additions.
         flags.parse_and_merge_csv([
             'A,' + FLAG_GREYLIST,
-            'B,' + FLAG_BLACKLIST + ',' + FLAG_GREYLIST_MAX_O ])
-        self.assertEqual(flags.generate_csv(),
-            [ 'A,' + FLAG_GREYLIST,
-              'B,' + FLAG_BLACKLIST + "," + FLAG_GREYLIST_MAX_O ])
+            'B,' + FLAG_BLACKLIST + ',' + FLAG_GREYLIST_MAX_O,
+            'C,' + FLAG_SYSTEM_API + ',' + FLAG_WHITELIST,
+            'D,' + FLAG_GREYLIST+ ',' + FLAG_TEST_API,
+            'E,' + FLAG_BLACKLIST+ ',' + FLAG_TEST_API,
+        ])
+        self.assertEqual(flags.generate_csv(), [
+            'A,' + FLAG_GREYLIST,
+            'B,' + FLAG_BLACKLIST + "," + FLAG_GREYLIST_MAX_O,
+            'C,' + FLAG_SYSTEM_API + ',' + FLAG_WHITELIST,
+            'D,' + FLAG_GREYLIST+ ',' + FLAG_TEST_API,
+            'E,' + FLAG_BLACKLIST+ ',' + FLAG_TEST_API,
+        ])
 
         # Test unknown flag.
         with self.assertRaises(AssertionError):
-            flags.parse_and_merge_csv([ 'C,foo' ])
+            flags.parse_and_merge_csv([ 'Z,foo' ])
 
     def test_assign_flag(self):
         flags = FlagsDict()

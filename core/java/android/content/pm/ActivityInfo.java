@@ -18,7 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -1237,6 +1237,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Determines whether the {@link Activity} is considered translucent or floating.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static boolean isTranslucentOrFloating(TypedArray attributes) {
         final boolean isTranslucent =

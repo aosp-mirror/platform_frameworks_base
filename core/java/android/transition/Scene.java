@@ -18,7 +18,7 @@ package android.transition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.util.SparseArray;

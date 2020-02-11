@@ -23,11 +23,12 @@ import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -126,7 +127,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This should only be modified by ConnectivityService, via setNetworkCapabilities().
     // TODO: make this private with a getter.
     public NetworkCapabilities networkCapabilities;
-    public final NetworkMisc networkMisc;
+    public final NetworkAgentConfig networkAgentConfig;
     // Indicates if netd has been told to create this Network. From this point on the appropriate
     // routing rules are setup and routes are added so packets can begin flowing over the Network.
     // This is a sticky bit; once set it is never cleared.
@@ -227,8 +228,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // validated).
     private boolean mLingering;
 
-    // This represents the last score received from the NetworkAgent.
-    private int currentScore;
+    // This represents the characteristics of a network that affects how good the network is
+    // considered for a particular use.
+    @NonNull
+    private NetworkScore mNetworkScore;
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
@@ -257,8 +260,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
-            NetworkMisc misc, ConnectivityService connService, INetd netd,
+            LinkProperties lp, NetworkCapabilities nc, @NonNull NetworkScore ns, Context context,
+            Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber) {
         this.messenger = messenger;
         asyncChannel = ac;
@@ -266,12 +269,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;
-        currentScore = score;
+        mNetworkScore = ns;
         clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
         mConnService = connService;
         mContext = context;
         mHandler = handler;
-        networkMisc = misc;
+        networkAgentConfig = config;
         this.factorySerialNumber = factorySerialNumber;
     }
 
@@ -288,21 +291,26 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      *
      * <p>If {@link NetworkMonitor#notifyNetworkCapabilitiesChanged(NetworkCapabilities)} fails,
      * the exception is logged but not reported to callers.
+     *
+     * @return the old capabilities of this network.
      */
-    public void setNetworkCapabilities(NetworkCapabilities nc) {
+    public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
+            @NonNull final NetworkCapabilities nc) {
+        final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
         final NetworkMonitorManager nm = mNetworkMonitor;
         if (nm != null) {
             nm.notifyNetworkCapabilitiesChanged(nc);
         }
+        return oldNc;
     }
 
     public ConnectivityService connService() {
         return mConnService;
     }
 
-    public NetworkMisc netMisc() {
-        return networkMisc;
+    public NetworkAgentConfig netAgentConfig() {
+        return networkAgentConfig;
     }
 
     public Handler handler() {
@@ -443,15 +451,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 && !isLingering();
     }
 
-    /**
-     * Returns whether this network is currently suspended. A network is suspended if it is still
-     * connected but data temporarily fails to transfer. See {@link NetworkInfo.State#SUSPENDED}
-     * and {@link NetworkCapabilities#NET_CAPABILITY_NOT_SUSPENDED}.
-     */
-    public boolean isSuspended() {
-        return networkInfo.getState() == NetworkInfo.State.SUSPENDED;
-    }
-
     // Does this network satisfy request?
     public boolean satisfies(NetworkRequest request) {
         return created &&
@@ -479,11 +478,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // selected and we're trying to see what its score could be. This ensures that we don't tear
         // down an explicitly selected network before the user gets a chance to prefer it when
         // a higher-scoring network (e.g., Ethernet) is available.
-        if (networkMisc.explicitlySelected && (networkMisc.acceptUnvalidated || pretendValidated)) {
+        if (networkAgentConfig.explicitlySelected
+                && (networkAgentConfig.acceptUnvalidated || pretendValidated)) {
             return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
         }
 
-        int score = currentScore;
+        int score = mNetworkScore.getIntExtension(NetworkScore.LEGACY_SCORE);
         if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
             score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }
@@ -512,15 +512,21 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return getCurrentScore(true);
     }
 
-    public void setCurrentScore(int newScore) {
-        currentScore = newScore;
+    public void setNetworkScore(@NonNull NetworkScore ns) {
+        mNetworkScore = ns;
+    }
+
+    @NonNull
+    public NetworkScore getNetworkScore() {
+        return mNetworkScore;
     }
 
     public NetworkState getNetworkState() {
         synchronized (this) {
             // Network objects are outwardly immutable so there is no point in duplicating.
             // Duplicating also precludes sharing socket factories and connection pools.
-            final String subscriberId = (networkMisc != null) ? networkMisc.subscriberId : null;
+            final String subscriberId = (networkAgentConfig != null)
+                    ? networkAgentConfig.subscriberId : null;
             return new NetworkState(new NetworkInfo(networkInfo),
                     new LinkProperties(linkProperties),
                     new NetworkCapabilities(networkCapabilities), network, subscriberId, null);
@@ -572,7 +578,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // semantics of WakeupMessage guarantee that if cancel is called then the alarm will
         // never call its callback (handleLingerComplete), even if it has already fired.
         // WakeupMessage makes no such guarantees about rescheduling a message, so if mLingerMessage
-        // has already been dispatched, rescheduling to some time in the future it won't stop it
+        // has already been dispatched, rescheduling to some time in the future won't stop it
         // from calling its callback immediately.
         if (mLingerMessage != null) {
             mLingerMessage.cancel();
@@ -628,13 +634,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  "
                 + "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  "
                 + "created{" + created + "} lingering{" + isLingering() + "} "
-                + "explicitlySelected{" + networkMisc.explicitlySelected + "} "
-                + "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} "
+                + "explicitlySelected{" + networkAgentConfig.explicitlySelected + "} "
+                + "acceptUnvalidated{" + networkAgentConfig.acceptUnvalidated + "} "
                 + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
                 + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
                 + "captivePortalValidationPending{" + captivePortalValidationPending + "} "
                 + "partialConnectivity{" + partialConnectivity + "} "
-                + "acceptPartialConnectivity{" + networkMisc.acceptPartialConnectivity + "} "
+                + "acceptPartialConnectivity{" + networkAgentConfig.acceptPartialConnectivity + "} "
                 + "clat{" + clatd + "} "
                 + "}";
     }

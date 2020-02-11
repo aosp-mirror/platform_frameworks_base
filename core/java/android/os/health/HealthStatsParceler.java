@@ -17,12 +17,9 @@
 package android.os.health;
 
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
-
-import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Class to allow sending the HealthStats through aidl generated glue.
@@ -41,6 +38,7 @@ public class HealthStatsParceler implements Parcelable {
     private HealthStatsWriter mWriter;
     private HealthStats mHealthStats;
 
+    @UnsupportedAppUsage
     public static final @android.annotation.NonNull Parcelable.Creator<HealthStatsParceler> CREATOR
             = new Parcelable.Creator<HealthStatsParceler>() {
         public HealthStatsParceler createFromParcel(Parcel in) {

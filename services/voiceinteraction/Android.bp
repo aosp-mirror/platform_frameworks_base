@@ -1,5 +1,12 @@
+filegroup {
+    name: "services.voiceinteraction-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.voiceinteraction",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.voiceinteraction-sources"],
     libs: ["services.core"],
 }

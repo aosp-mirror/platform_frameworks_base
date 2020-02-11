@@ -22,7 +22,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
 import android.os.Build;
 import android.os.Parcel;
@@ -2613,6 +2613,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #getActionButton()
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public final void setActionButton(int button) {
         nativeSetActionButton(mNativePtr, button);

@@ -16,6 +16,7 @@
 
 package com.android.connectivitymanagertest;
 
+import android.net.IpConfiguration;
 import android.net.IpConfiguration.IpAssignment;
 import android.net.IpConfiguration.ProxySettings;
 import android.net.LinkAddress;
@@ -136,7 +137,7 @@ public class WifiConfigurationHelper {
         config.enterpriseConfig.setPhase2Method(phase2);
         config.enterpriseConfig.setIdentity(identity);
         config.enterpriseConfig.setAnonymousIdentity(anonymousIdentity);
-        config.enterpriseConfig.setCaCertificateAlias(caCert);
+        config.enterpriseConfig.setCaCertificateAliases(new String[] {caCert});
         config.enterpriseConfig.setClientCertificateAlias(clientCert);
         return config;
     }
@@ -147,8 +148,12 @@ public class WifiConfigurationHelper {
     private static WifiConfiguration createGenericConfig(String ssid) {
         WifiConfiguration config = new WifiConfiguration();
         config.SSID = quotedString(ssid);
-        config.setIpAssignment(IpAssignment.DHCP);
-        config.setProxySettings(ProxySettings.NONE);
+
+        IpConfiguration ipConfiguration = config.getIpConfiguration();
+        ipConfiguration.setIpAssignment(IpAssignment.DHCP);
+        ipConfiguration.setProxySettings(ProxySettings.NONE);
+        config.setIpConfiguration(ipConfiguration);
+
         return config;
     }
 
@@ -237,6 +242,7 @@ public class WifiConfigurationHelper {
                 throw new IllegalArgumentException();
         }
 
+        IpConfiguration ipConfiguration = config.getIpConfiguration();
         if (jsonConfig.has("ip")) {
             StaticIpConfiguration staticIpConfig = new StaticIpConfiguration();
 
@@ -247,13 +253,14 @@ public class WifiConfigurationHelper {
             staticIpConfig.dnsServers.add(getInetAddress(jsonConfig.getString("dns1")));
             staticIpConfig.dnsServers.add(getInetAddress(jsonConfig.getString("dns2")));
 
-            config.setIpAssignment(IpAssignment.STATIC);
-            config.setStaticIpConfiguration(staticIpConfig);
+            ipConfiguration.setIpAssignment(IpAssignment.STATIC);
+            ipConfiguration.setStaticIpConfiguration(staticIpConfig);
         } else {
-            config.setIpAssignment(IpAssignment.DHCP);
+            ipConfiguration.setIpAssignment(IpAssignment.DHCP);
         }
+        ipConfiguration.setProxySettings(ProxySettings.NONE);
+        config.setIpConfiguration(ipConfiguration);
 
-        config.setProxySettings(ProxySettings.NONE);
         return config;
     }
 

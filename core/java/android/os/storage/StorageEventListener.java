@@ -16,7 +16,7 @@
 
 package android.os.storage;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Used for receiving notifications from the StorageManager
@@ -24,6 +24,11 @@ import android.annotation.UnsupportedAppUsage;
  * @hide
  */
 public class StorageEventListener {
+
+    @UnsupportedAppUsage
+    public StorageEventListener() {
+    }
+
     /**
      * Called when the detection state of a USB Mass Storage host has changed.
      * @param connected true if the USB mass storage is connected.

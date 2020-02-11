@@ -2648,9 +2648,11 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public boolean supportsCheckpoint() throws RemoteException {
-        // Only the system process is permitted to start checkpoints
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to check filesystem checkpoint support");
+        // Only the root, system_server and shell processes are permitted to start checkpoints
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID
+                && callingUid != Process.SHELL_UID) {
+            throw new SecurityException("no permission to start filesystem checkpoint");
         }
 
         return mVold.supportsCheckpoint();
@@ -2665,8 +2667,10 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public void startCheckpoint(int numTries) throws RemoteException {
-        // Only the system process is permitted to start checkpoints
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
+        // Only the root, system_server and shell processes are permitted to start checkpoints
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID
+                && callingUid != Process.SHELL_UID) {
             throw new SecurityException("no permission to start filesystem checkpoint");
         }
 
@@ -2784,6 +2788,24 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /*
+     * Clear disk encryption key bound to the associated token / secret pair. Removing the user
+     * binding of the Disk encryption key is done in two phases: first, this call will retrieve
+     * the disk encryption key using the provided token / secret pair and store it by
+     * encrypting it with a keymaster key not bound to the user, then fixateNewestUserKeyAuth
+     * is called to delete all other bindings of the disk encryption key.
+     */
+    @Override
+    public void clearUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+
+        try {
+            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+        }
+    }
+
+    /*
      * Delete all disk encryption token/secret pairs except the most recently added one
      */
     @Override
@@ -2803,12 +2825,6 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         if (StorageManager.isFileEncryptedNativeOrEmulated()) {
-            // When a user has secure lock screen, require secret to actually unlock.
-            // This check is mostly in place for emulation mode.
-            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
-                throw new IllegalStateException("Secret required to unlock secure user " + userId);
-            }
-
             try {
                 mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
                         encodeBytes(secret));

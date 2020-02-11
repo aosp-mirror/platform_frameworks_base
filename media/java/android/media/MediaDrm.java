@@ -21,17 +21,17 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.util.Log;
+
 import dalvik.system.CloseGuard;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;

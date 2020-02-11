@@ -116,7 +116,7 @@ public class BluetoothUtils {
         }
         return new Pair<>(
                 getBluetoothDrawable(context,
-                        com.android.internal.R.drawable.ic_settings_bluetooth),
+                        com.android.internal.R.drawable.ic_settings_bluetooth).mutate(),
                 context.getString(R.string.bluetooth_talkback_bluetooth));
     }
 

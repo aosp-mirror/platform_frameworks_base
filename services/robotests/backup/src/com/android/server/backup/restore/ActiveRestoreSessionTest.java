@@ -18,7 +18,7 @@ package com.android.server.backup.restore;
 
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThread;
 import static com.android.server.backup.testing.TestUtils.assertEventLogged;
 import static com.android.server.backup.testing.TestUtils.assertEventNotLogged;
 import static com.android.server.backup.testing.TransportData.backupTransport;
@@ -44,8 +44,8 @@ import android.app.backup.RestoreSet;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
@@ -98,7 +98,7 @@ public class ActiveRestoreSessionTest {
     @Mock private IBackupManagerMonitor mMonitor;
     private ShadowLooper mShadowBackupLooper;
     private ShadowApplication mShadowApplication;
-    private PowerManager.WakeLock mWakeLock;
+    private UserBackupManagerService.BackupWakeLock mWakeLock;
     private TransportData mTransport;
     private RestoreSet mRestoreSet1;
     private RestoreSet mRestoreSet2;
@@ -118,7 +118,8 @@ public class ActiveRestoreSessionTest {
 
         mShadowPackageManager = shadowOf(application.getPackageManager());
 
-        Looper backupLooper = startBackupThreadAndGetLooper();
+        HandlerThread handlerThread = startBackupThread(null);
+        Looper backupLooper = handlerThread.getLooper();
         mShadowBackupLooper = shadowOf(backupLooper);
 
         Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -129,7 +130,7 @@ public class ActiveRestoreSessionTest {
         // We need to mock BMS timeout parameters before initializing the BackupHandler since
         // the constructor of BackupHandler relies on it.
         when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
-        BackupHandler backupHandler = new BackupHandler(mBackupManagerService, backupLooper);
+        BackupHandler backupHandler = new BackupHandler(mBackupManagerService, handlerThread);
 
         mWakeLock = createBackupWakeLock(application);
 

@@ -19,6 +19,7 @@ package android.app;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
@@ -86,6 +87,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     private boolean mIsShutdown;
 
     private int mOwningUid;
+
+    @UnsupportedAppUsage
+    public UiAutomationConnection() {
+    }
 
     @Override
     public void connect(IAccessibilityServiceClient client, int flags) {

@@ -16,7 +16,7 @@
 
 package android.hardware.camera2.utils;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;

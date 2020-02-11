@@ -22,7 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -470,6 +470,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;
 
@@ -733,6 +734,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public @ApplicationInfoPrivateFlags int privateFlags;
 

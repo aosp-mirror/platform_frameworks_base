@@ -20,7 +20,7 @@ import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.ApkAssets;
@@ -145,6 +145,9 @@ public class ResourcesManager {
      * Resources and base configuration override associated with an Activity.
      */
     private static class ActivityResources {
+        @UnsupportedAppUsage
+        private ActivityResources() {
+        }
         public final Configuration overrideConfig = new Configuration();
         public final ArrayList<WeakReference<Resources>> activityResources = new ArrayList<>();
     }
@@ -162,6 +165,10 @@ public class ResourcesManager {
      */
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>>
             mAdjustedDisplays = new ArrayMap<>();
+
+    @UnsupportedAppUsage
+    public ResourcesManager() {
+    }
 
     @UnsupportedAppUsage
     public static ResourcesManager getInstance() {

@@ -19,8 +19,8 @@ package com.android.internal.os;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ApplicationLoaders;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.SharedLibraryInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -327,6 +327,22 @@ public class ZygoteInit {
             runtime.preloadDexCaches();
             Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
 
+            // If we are profiling the boot image, reset the Jit counters after preloading the
+            // classes. We want to preload for performance, and we can use method counters to
+            // infer what clases are used after calling resetJitCounters, for profile purposes.
+            // Can't use device_config since we are the zygote.
+            String prop = SystemProperties.get(
+                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
+            // Might be empty if the property is unset since the default is "".
+            if (prop.length() == 0) {
+                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
+            }
+            if ("true".equals(prop)) {
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
+                runtime.resetJitCounters();
+                Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+            }
+
             // Bring back root. We'll need it later if we're in the zygote.
             if (droppedPriviliges) {
                 try {
@@ -531,6 +547,7 @@ public class ZygoteInit {
              * Pass the remaining arguments to SystemServer.
              */
             return ZygoteInit.zygoteInit(parsedArgs.mTargetSdkVersion,
+                    parsedArgs.mDisabledCompatChanges,
                     parsedArgs.mRemainingArgs, cl);
         }
 
@@ -808,6 +825,18 @@ public class ZygoteInit {
         return result;
     }
 
+    /**
+     * This is the entry point for a Zygote process.  It creates the Zygote server, loads resources,
+     * and handles other tasks related to preparing the process for forking into applications.
+     *
+     * This process is started with a nice value of -20 (highest priority).  All paths that flow
+     * into new processes are required to either set the priority to the default value or terminate
+     * before executing any non-system code.  The native side of this occurs in SpecializeCommon,
+     * while the Java Language priority is changed in ZygoteInit.handleSystemServerProcess,
+     * ZygoteConnection.handleChildProc, and Zygote.usapMain.
+     *
+     * @param argv  Command line arguments used to specify the Zygote's configuration.
+     */
     @UnsupportedAppUsage
     public static void main(String argv[]) {
         ZygoteServer zygoteServer = null;
@@ -871,8 +900,6 @@ public class ZygoteInit {
                 EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                         SystemClock.uptimeMillis());
                 bootTimingsTraceLog.traceEnd(); // ZygotePreload
-            } else {
-                Zygote.resetNicePriority();
             }
 
             // Do an initial gc to clean up after startup
@@ -956,14 +983,16 @@ public class ZygoteInit {
      *
      * Current recognized args:
      * <ul>
-     *   <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
+     * <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
      * </ul>
      *
      * @param targetSdkVersion target SDK version
-     * @param argv arg strings
+     * @param disabledCompatChanges set of disabled compat changes for the process (all others
+     *                              are enabled)
+     * @param argv             arg strings
      */
-    public static final Runnable zygoteInit(int targetSdkVersion, String[] argv,
-            ClassLoader classLoader) {
+    public static final Runnable zygoteInit(int targetSdkVersion, long[] disabledCompatChanges,
+            String[] argv, ClassLoader classLoader) {
         if (RuntimeInit.DEBUG) {
             Slog.d(RuntimeInit.TAG, "RuntimeInit: Starting application from zygote");
         }
@@ -973,7 +1002,8 @@ public class ZygoteInit {
 
         RuntimeInit.commonInit();
         ZygoteInit.nativeZygoteInit();
-        return RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+        return RuntimeInit.applicationInit(targetSdkVersion, disabledCompatChanges, argv,
+                classLoader);
     }
 
     /**

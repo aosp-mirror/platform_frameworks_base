@@ -16,10 +16,10 @@
 
 package android.accounts;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * A {@link Parcelable} value type that contains information about an account authenticator.

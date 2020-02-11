@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -502,6 +502,19 @@ public class Binder implements IBinder {
     public static final native void restoreCallingWorkSource(long token);
 
     /**
+     * Mark as being built with VINTF-level stability promise. This API should
+     * only ever be invoked by the build system. It means that the interface
+     * represented by this binder is guaranteed to be kept stable for several
+     * years, and the build system also keeps snapshots of these APIs and
+     * invokes the AIDL compiler to make sure that these snapshots are
+     * backwards compatible. Instead of using this API, use an @VintfStability
+     * interface.
+     *
+     * @hide
+     */
+    public final native void markVintfStability();
+
+    /**
      * Flush any Binder commands pending in the current thread to the kernel
      * driver.  This can be
      * useful to call before performing an operation that may block for a long
@@ -899,6 +912,18 @@ public class Binder implements IBinder {
         pw.flush();
         resultReceiver.send(0, null);
     }
+
+    /** @hide */
+    @Override
+    public final native @Nullable IBinder getExtension();
+
+    /**
+     * Set the binder extension.
+     * This should be called immediately when the object is created.
+     *
+     * @hide
+     */
+    public final native void setExtension(@Nullable IBinder extension);
 
     /**
      * Default implementation rewinds the parcels and calls onTransact.  On

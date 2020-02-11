@@ -16,13 +16,12 @@
 
 package android.media;
 
-import java.nio.ByteBuffer;
-import java.lang.AutoCloseable;
-
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+
+import java.nio.ByteBuffer;
 
 /**
  * <p>A single complete image buffer to use with a media source such as a

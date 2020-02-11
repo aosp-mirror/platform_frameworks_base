@@ -26,4 +26,9 @@
     <color name="car_user_switcher_add_user_background_color">@*android:color/car_dark_blue_grey_600</color>
     <color name="car_user_switcher_add_user_add_sign_color">@*android:color/car_body1_light</color>
 
+    <!-- colors for unlock dialog -->
+    <color name="unlock_dialog_background_color">#ff282a2d</color>
+    <color name="unlock_dialog_message_text_default">@*android:color/car_grey_400</color>
+    <color name="unlock_dialog_enter_pin_text_color">#ff66b5ff</color>
+
 </resources>

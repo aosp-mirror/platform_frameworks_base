@@ -29,14 +29,24 @@ import java.util.List;
 @LargeTest
 public class LocalLogTest extends TestCase {
 
-    public void testA() {
+    public void testA_localTimestamps() {
+        boolean localTimestamps = true;
+        doTestA(localTimestamps);
+    }
+
+    public void testA_nonLocalTimestamps() {
+        boolean localTimestamps = false;
+        doTestA(localTimestamps);
+    }
+
+    private void doTestA(boolean localTimestamps) {
         String[] lines = {
-            "foo",
-            "bar",
-            "baz"
+                "foo",
+                "bar",
+                "baz"
         };
         String[] want = lines;
-        testcase(new LocalLog(10), lines, want);
+        testcase(new LocalLog(10, localTimestamps), lines, want);
     }
 
     public void testB() {

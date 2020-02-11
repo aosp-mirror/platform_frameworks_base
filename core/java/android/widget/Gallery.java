@@ -17,8 +17,8 @@
 package android.widget;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;

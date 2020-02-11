@@ -16,9 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Handler;
-import android.os.Message;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.lang.ref.WeakReference;
 
@@ -114,6 +112,7 @@ public class Registrant
         }
     }
 
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public Handler
     getHandler()
     {

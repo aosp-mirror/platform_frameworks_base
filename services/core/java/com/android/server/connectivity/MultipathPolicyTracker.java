@@ -26,6 +26,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
 import static com.android.server.net.NetworkPolicyManagerService.OPPORTUNISTIC_QUOTA_UNKNOWN;
@@ -46,19 +47,18 @@ import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
+import android.net.NetworkSpecifier;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
-import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
+import android.net.Uri;
 import android.os.BestClock;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.util.DataUnit;
 import android.util.DebugUtils;
-import android.util.Pair;
 import android.util.Range;
 import android.util.Slog;
 
@@ -74,7 +74,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -185,7 +184,6 @@ public class MultipathPolicyTracker {
     // Track information on mobile networks as they come and go.
     class MultipathTracker {
         final Network network;
-        final int subId;
         final String subscriberId;
 
         private long mQuota;
@@ -198,13 +196,14 @@ public class MultipathPolicyTracker {
         public MultipathTracker(Network network, NetworkCapabilities nc) {
             this.network = network;
             this.mNetworkCapabilities = new NetworkCapabilities(nc);
-            try {
-                subId = Integer.parseInt(
-                        ((StringNetworkSpecifier) nc.getNetworkSpecifier()).toString());
-            } catch (ClassCastException | NullPointerException | NumberFormatException e) {
+            NetworkSpecifier specifier = nc.getNetworkSpecifier();
+            int subId = INVALID_SUBSCRIPTION_ID;
+            if (specifier instanceof TelephonyNetworkSpecifier) {
+                subId = ((TelephonyNetworkSpecifier) specifier).getSubscriptionId();
+            } else {
                 throw new IllegalStateException(String.format(
-                        "Can't get subId from mobile network %s (%s): %s",
-                        network, nc, e.getMessage()));
+                        "Can't get subId from mobile network %s (%s)",
+                        network, nc));
             }
 
             TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);

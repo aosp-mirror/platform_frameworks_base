@@ -30,11 +30,12 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,12 +57,14 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     private ExpandableNotificationRow mFirst;
     private ExpandableNotificationRow mSecond;
     @Mock
-    private AmbientPulseManager mAmbientPulseManager;
+    private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private KeyguardBypassController mBypassController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mRoundnessManager = new NotificationRoundnessManager(mAmbientPulseManager);
+        mRoundnessManager = new NotificationRoundnessManager(mBypassController);
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
         mFirst = testHelper.createRow();
@@ -147,11 +150,15 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         NotificationEntry entry = mock(NotificationEntry.class);
         when(entry.getRow()).thenReturn(row);
 
-        mRoundnessManager.onAmbientStateChanged(entry, true);
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
+        row.setStatusBarStateController(mStatusBarStateController);
+        row.setHeadsUp(true);
+        mRoundnessManager.onHeadsUpStateChanged(entry, true);
         Assert.assertEquals(1f, row.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1f, row.getCurrentTopRoundness(), 0.0f);
 
-        mRoundnessManager.onAmbientStateChanged(entry, false);
+        row.setHeadsUp(false);
+        mRoundnessManager.onHeadsUpStateChanged(entry, false);
         Assert.assertEquals(0f, row.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0f, row.getCurrentTopRoundness(), 0.0f);
     }
@@ -256,15 +263,15 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testTrackingHeadsUpNotRoundedIfPushingDown() {
+    public void testTrackingHeadsUpPartiallyRoundedIfPushingDown() {
         mRoundnessManager.setExpanded(1.0f /* expandedHeight */, 0.5f /* appearFraction */);
         mRoundnessManager.setTrackingHeadsUp(mFirst);
         mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
                 createSection(mSecond, mSecond),
                 createSection(null, null)
         });
-        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
-        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+        Assert.assertEquals(0.5f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.5f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test

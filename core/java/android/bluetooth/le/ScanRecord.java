@@ -18,8 +18,8 @@ package android.bluetooth.le;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothUuid;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelUuid;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -154,7 +154,7 @@ public final class ScanRecord {
     }
 
     /**
-     * Returns the local name of the BLE device. The is a UTF-8 encoded string.
+     * Returns the local name of the BLE device. This is a UTF-8 encoded string.
      */
     @Nullable
     public String getDeviceName() {

@@ -19,9 +19,9 @@ package android.telephony.ims.feature;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.IInterface;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
@@ -30,6 +30,7 @@ import android.util.Log;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.util.RemoteCallbackListExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +44,7 @@ import java.util.Map;
  * @hide
  */
 @SystemApi
+@TestApi
 public abstract class ImsFeature {
 
     private static final String LOG_TAG = "ImsFeature";
@@ -58,15 +60,21 @@ public abstract class ImsFeature {
      * This feature supports emergency calling over MMTEL. If defined, the framework will try to
      * place an emergency call over IMS first. If it is not defined, the framework will only use
      * CSFB for emergency calling.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int FEATURE_EMERGENCY_MMTEL = 0;
     /**
      * This feature supports the MMTEL feature.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int FEATURE_MMTEL = 1;
     /**
      * This feature supports the RCS feature.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int FEATURE_RCS = 2;
     /**
      * Total number of features defined
@@ -114,18 +122,24 @@ public abstract class ImsFeature {
      * This {@link ImsFeature}'s state is unavailable and should not be communicated with. This will
      * remove all bindings back to the framework. Any attempt to communicate with the framework
      * during this time will result in an {@link IllegalStateException}.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int STATE_UNAVAILABLE = 0;
     /**
      * This {@link ImsFeature} state is initializing and should not be communicated with. This will
      * remove all bindings back to the framework. Any attempt to communicate with the framework
      * during this time will result in an {@link IllegalStateException}.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int STATE_INITIALIZING = 1;
     /**
      * This {@link ImsFeature} is ready for communication. Do not attempt to call framework methods
-     * until {@link #onFeatureReady()} is called.
+     * until {@see #onFeatureReady()} is called.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int STATE_READY = 2;
 
     /**
@@ -153,11 +167,15 @@ public abstract class ImsFeature {
 
     /**
      * The capability was unable to be changed.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int CAPABILITY_ERROR_GENERIC = -1;
     /**
      * The capability was able to be changed.
+     * @hide
      */
+    @SystemApi @TestApi
     public static final int CAPABILITY_SUCCESS = 0;
 
     /**
@@ -212,6 +230,7 @@ public abstract class ImsFeature {
     // Not Actually deprecated, but we need to remove it from the @SystemApi surface.
     @Deprecated
     @SystemApi // SystemApi only because it was leaked through type usage in a previous release.
+    @TestApi
     public static class Capabilities {
         /** @deprecated Use getters and accessors instead. */
         // Not actually deprecated, but we need to remove it from the @SystemApi surface eventually.
@@ -307,12 +326,12 @@ public abstract class ImsFeature {
     /** @hide */
     protected final Object mLock = new Object();
 
-    private final RemoteCallbackList<IImsFeatureStatusCallback> mStatusCallbacks =
-            new RemoteCallbackList<>();
+    private final RemoteCallbackListExt<IImsFeatureStatusCallback> mStatusCallbacks =
+            new RemoteCallbackListExt<>();
     private @ImsState int mState = STATE_UNAVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
-    private final RemoteCallbackList<IImsCapabilityCallback> mCapabilityCallbacks =
-            new RemoteCallbackList<>();
+    private final RemoteCallbackListExt<IImsCapabilityCallback> mCapabilityCallbacks =
+            new RemoteCallbackListExt<>();
     private Capabilities mCapabilityStatus = new Capabilities();
 
     /**
@@ -328,17 +347,20 @@ public abstract class ImsFeature {
      *
      * @see SubscriptionManager#getSubscriptionIds(int) for more information on getting the
      * subscription IDs associated with this slot.
+     * @hide
      */
+    @SystemApi @TestApi
     public final int getSlotIndex() {
         return mSlotId;
     }
 
     /**
-     * @return The current state of the feature, defined as {@link #STATE_UNAVAILABLE},
-     * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
+     * @return The current state of the ImsFeature, set previously by {@link #setFeatureState(int)}
+     * or {@link #STATE_UNAVAILABLE} if it has not been updated  yet.
      * @hide
      */
-    public int getFeatureState() {
+    @SystemApi @TestApi
+    public @ImsState int getFeatureState() {
         synchronized (mLock) {
             return mState;
         }
@@ -349,7 +371,9 @@ public abstract class ImsFeature {
      * stop communication, depending on the state sent.
      * @param state The ImsFeature's state, defined as {@link #STATE_UNAVAILABLE},
      * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
+     * @hide
      */
+    @SystemApi @TestApi
     public final void setFeatureState(@ImsState int state) {
         synchronized (mLock) {
             if (mState != state) {
@@ -388,7 +412,7 @@ public abstract class ImsFeature {
      * Internal method called by ImsFeature when setFeatureState has changed.
      */
     private void notifyFeatureState(@ImsState int state) {
-        mStatusCallbacks.broadcast((c) -> {
+        mStatusCallbacks.broadcastAction((c) -> {
             try {
                 c.notifyImsFeatureStatus(state);
             } catch (RemoteException e) {
@@ -467,7 +491,7 @@ public abstract class ImsFeature {
         synchronized (mLock) {
             mCapabilityStatus = caps.copy();
         }
-        mCapabilityCallbacks.broadcast((callback) -> {
+        mCapabilityCallbacks.broadcastAction((callback) -> {
             try {
                 callback.onCapabilitiesStatusChanged(caps.mCapabilities);
             } catch (RemoteException e) {

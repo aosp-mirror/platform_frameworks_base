@@ -19,7 +19,7 @@ package android.animation;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Looper;
 import android.os.Trace;
@@ -296,6 +296,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static void setDurationScale(float durationScale) {
         sDurationScale = durationScale;
@@ -304,6 +305,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static float getDurationScale() {
         return sDurationScale;

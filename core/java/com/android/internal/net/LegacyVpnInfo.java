@@ -16,8 +16,8 @@
 
 package com.android.internal.net;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,6 +44,10 @@ public class LegacyVpnInfo implements Parcelable {
     @UnsupportedAppUsage
     public int state = -1;
     public PendingIntent intent;
+
+    @UnsupportedAppUsage
+    public LegacyVpnInfo() {
+    }
 
     @Override
     public int describeContents() {

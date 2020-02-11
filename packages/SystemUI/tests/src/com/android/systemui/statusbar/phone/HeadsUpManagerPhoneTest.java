@@ -29,6 +29,7 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -55,12 +56,18 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private View mStatusBarWindowView;
     @Mock private VisualStabilityManager mVSManager;
     @Mock private StatusBar mBar;
+    @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private KeyguardBypassController mBypassController;
+    private boolean mLivesPastNormalTime;
 
     private final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(Context context, View statusBarWindowView,
                 NotificationGroupManager groupManager, StatusBar bar,
-                VisualStabilityManager vsManager) {
-            super(context, statusBarWindowView, groupManager, bar, vsManager);
+                VisualStabilityManager vsManager,
+                StatusBarStateController statusBarStateController,
+                KeyguardBypassController keyguardBypassController) {
+            super(context, statusBarStateController, keyguardBypassController);
+            setUp(statusBarWindowView, groupManager, bar, vsManager);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -72,13 +79,13 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Before
     public void setUp() {
-        AccessibilityManagerWrapper mAccessibilityMgr =
+        AccessibilityManagerWrapper accessibilityMgr =
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
-        when(mAccessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
+        when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
         when(mVSManager.isReorderingAllowed()).thenReturn(true);
         mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mStatusBarWindowView,
-                mGroupManager, mBar, mVSManager);
+                mGroupManager, mBar, mVSManager, mStatusBarStateController, mBypassController);
         super.setUp();
         mHeadsUpManager.mHandler = mTestHandler;
     }
@@ -121,5 +128,25 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
         // Notification is "behind" a higher priority notification so we can remove it immediately.
         assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.key));
+    }
+
+
+    @Test
+    public void testExtendHeadsUp() {
+        mHeadsUpManager.showNotification(mEntry);
+        Runnable pastNormalTimeRunnable =
+                () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.key);
+        mTestHandler.postDelayed(pastNormalTimeRunnable,
+                TEST_AUTO_DISMISS_TIME + mHeadsUpManager.mExtensionTime / 2);
+        mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_TIMEOUT_TIME);
+
+        mHeadsUpManager.extendHeadsUp();
+
+        // Wait for normal time runnable and extended remove runnable and process them on arrival.
+        TestableLooper.get(this).processMessages(2);
+
+        assertFalse("Test timed out", mTimedOut);
+        assertTrue("Pulse was not extended", mLivesPastNormalTime);
+        assertFalse(mHeadsUpManager.isAlerting(mEntry.key));
     }
 }

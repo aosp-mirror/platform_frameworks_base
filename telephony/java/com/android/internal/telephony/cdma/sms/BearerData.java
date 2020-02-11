@@ -16,11 +16,11 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.cdma.CdmaSmsCbProgramResults;
-import android.telephony.Rlog;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
@@ -30,7 +30,9 @@ import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
+import com.android.telephony.Rlog;
 
+import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -41,6 +43,10 @@ import java.util.ArrayList;
  */
 public final class BearerData {
     private final static String LOG_TAG = "BearerData";
+
+    @UnsupportedAppUsage
+    public BearerData() {
+    }
 
     /**
      * Bearer Data Subparameter Identifiers
@@ -95,6 +101,7 @@ public final class BearerData {
      * (Special rules apply for WAP-messages.)
      * (See 3GPP2 C.S0015-B, v2, 4.5.1)
      */
+    @UnsupportedAppUsage
     public int messageId;
 
     /**
@@ -106,7 +113,9 @@ public final class BearerData {
     public static final int PRIORITY_URGENT        = 0x2;
     public static final int PRIORITY_EMERGENCY     = 0x3;
 
+    @UnsupportedAppUsage
     public boolean priorityIndicatorSet = false;
+    @UnsupportedAppUsage
     public int priority = PRIORITY_NORMAL;
 
     /**
@@ -144,6 +153,7 @@ public final class BearerData {
     public static final int DISPLAY_MODE_USER           = 0x2;
 
     public boolean displayModeSet = false;
+    @UnsupportedAppUsage
     public int displayMode = DISPLAY_MODE_DEFAULT;
 
     /**
@@ -207,6 +217,7 @@ public final class BearerData {
      * presence of a UDH in the structured data, any existing setting
      * will be overwritten.
      */
+    @UnsupportedAppUsage
     public boolean hasUserDataHeader;
 
     /**
@@ -214,6 +225,7 @@ public final class BearerData {
      * (e.g. padding bits, user data, user data header, etc)
      * (See 3GPP2 C.S.0015-B, v2, 4.5.2)
      */
+    @UnsupportedAppUsage
     public UserData userData;
 
     /**
@@ -244,6 +256,7 @@ public final class BearerData {
 
         private ZoneId mZoneId;
 
+        @UnsupportedAppUsage
         public TimeStamp() {
             mZoneId = ZoneId.systemDefault();   // 3GPP2 timestamps use the local timezone
         }
@@ -272,6 +285,33 @@ public final class BearerData {
             return ts;
         }
 
+        public static TimeStamp fromMillis(long timeInMillis) {
+            TimeStamp ts = new TimeStamp();
+            LocalDateTime localDateTime =
+                    Instant.ofEpochMilli(timeInMillis).atZone(ts.mZoneId).toLocalDateTime();
+            int year = localDateTime.getYear();
+            if (year < 1996 || year > 2095) return null;
+            ts.year = year;
+            ts.month = localDateTime.getMonthValue();
+            ts.monthDay = localDateTime.getDayOfMonth();
+            ts.hour = localDateTime.getHour();
+            ts.minute = localDateTime.getMinute();
+            ts.second = localDateTime.getSecond();
+            return ts;
+        }
+
+        public byte[] toByteArray() {
+            int year = this.year % 100; // 00 - 99
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream(6);
+            outStream.write((((year / 10) & 0x0F) << 4) | ((year % 10) & 0x0F));
+            outStream.write((((month / 10) << 4) & 0xF0) | ((month % 10) & 0x0F));
+            outStream.write((((monthDay / 10) << 4) & 0xF0) | ((monthDay % 10) & 0x0F));
+            outStream.write((((hour / 10) << 4) & 0xF0) | ((hour % 10) & 0x0F));
+            outStream.write((((minute / 10) << 4) & 0xF0) | ((minute % 10) & 0x0F));
+            outStream.write((((second / 10) << 4) & 0xF0) | ((second % 10) & 0x0F));
+            return outStream.toByteArray();
+        }
+
         public long toMillis() {
             LocalDateTime localDateTime =
                     LocalDateTime.of(year, month + 1, monthDay, hour, minute, second);
@@ -295,6 +335,7 @@ public final class BearerData {
         }
     }
 
+    @UnsupportedAppUsage
     public TimeStamp msgCenterTimeStamp;
     public TimeStamp validityPeriodAbsolute;
     public TimeStamp deferredDeliveryTimeAbsolute;
@@ -383,6 +424,7 @@ public final class BearerData {
 
 
     private static class CodingException extends Exception {
+        @UnsupportedAppUsage
         public CodingException(String s) {
             super(s);
         }
@@ -476,6 +518,7 @@ public final class BearerData {
         outStream.skip(3);
     }
 
+    @UnsupportedAppUsage
     private static int countAsciiSeptets(CharSequence msg, boolean force) {
         int msgLen = msg.length();
         if (force) return msgLen;
@@ -518,6 +561,7 @@ public final class BearerData {
         return ted;
     }
 
+    @UnsupportedAppUsage
     private static byte[] encode7bitAscii(String msg, boolean force)
         throws CodingException
     {
@@ -941,6 +985,12 @@ public final class BearerData {
         }
     }
 
+    private static void encodeMsgCenterTimeStamp(BearerData bData, BitwiseOutputStream outStream)
+            throws BitwiseOutputStream.AccessException {
+        outStream.write(8, 6);
+        outStream.writeByteArray(8 * 6, bData.msgCenterTimeStamp.toByteArray());
+    };
+
     /**
      * Create serialized representation for BearerData object.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
@@ -949,6 +999,7 @@ public final class BearerData {
      *
      * @return byte array of raw encoded SMS bearer data.
      */
+    @UnsupportedAppUsage
     public static byte[] encode(BearerData bData) {
         bData.hasUserDataHeader = ((bData.userData != null) &&
                 (bData.userData.userDataHeader != null));
@@ -1003,6 +1054,10 @@ public final class BearerData {
             if (bData.serviceCategoryProgramResults != null) {
                 outStream.write(8, SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS);
                 encodeScpResults(bData, outStream);
+            }
+            if (bData.msgCenterTimeStamp != null) {
+                outStream.write(8, SUBPARAM_MESSAGE_CENTER_TIME_STAMP);
+                encodeMsgCenterTimeStamp(bData, outStream);
             }
             return outStream.toByteArray();
         } catch (BitwiseOutputStream.AccessException ex) {
@@ -1200,6 +1255,7 @@ public final class BearerData {
         }
     }
 
+    @UnsupportedAppUsage
     private static void decodeUserDataPayload(UserData userData, boolean hasUserDataHeader)
         throws CodingException
     {
@@ -1845,6 +1901,7 @@ public final class BearerData {
      * @return the number of bits to read from the stream
      * @throws CodingException if the specified encoding is not supported
      */
+    @UnsupportedAppUsage
     private static int getBitsForNumFields(int msgEncoding, int numFields)
             throws CodingException {
         switch (msgEncoding) {

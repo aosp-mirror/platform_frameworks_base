@@ -53,7 +53,7 @@ variants (like other form factors e.g. Car).
 ### Adding injection to a new SystemUI object
 
 Anything that depends on any `@Singleton` provider from SystemUIRootComponent
-should be declared as an `@Subcomponent` of the root component, this requires
+should be declared as a `@Subcomponent` of the root component. This requires
 declaring your own interface for generating your own modules or just the
 object you need injected. The subcomponent also needs to be added to
 SystemUIRootComponent in SystemUIFactory so it can be acquired.
@@ -203,6 +203,13 @@ public CustomView(@Named(VIEW_CONTEXT) Context themedViewContext, AttributeSet a
     //...
 }
 ```
+
+## Updating Dagger2
+
+Binaries can be downloaded from https://repo1.maven.org/maven2/com/google/dagger/ and then loaded
+into
+[/prebuilts/tools/common/m2/repository/com/google/dagger/](http://cs/android/prebuilts/tools/common/m2/repository/com/google/dagger/)
+
 
 ## TODO List
 

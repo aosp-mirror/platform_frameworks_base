@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"Dien in"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Bestuurprogram werk tans"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Tik om die bestuurprogram te verlaat."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Verbinding of Wi-Fi-warmkol aktief"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Tik om op te stel."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Verbinding is gedeaktiveer"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Kontak jou administrateur vir besonderhede"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Terug"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Volgende"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Slaan oor"</string>

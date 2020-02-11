@@ -103,6 +103,12 @@ public final class TvInputManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
+    @IntDef({DVB_DEVICE_DEMUX, DVB_DEVICE_DVR, DVB_DEVICE_FRONTEND})
+    public @interface DvbDeviceType {}
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({VIDEO_UNAVAILABLE_REASON_UNKNOWN, VIDEO_UNAVAILABLE_REASON_TUNING,
             VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL, VIDEO_UNAVAILABLE_REASON_BUFFERING,
             VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY})
@@ -1658,11 +1664,14 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns the list of currently available DVB devices on the system.
+     * Returns the list of currently available DVB frontend devices on the system.
      *
      * @return the list of {@link DvbDeviceInfo} objects representing available DVB devices.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.DVB_DEVICE)
+    @NonNull
     public List<DvbDeviceInfo> getDvbDeviceList() {
         try {
             return mService.getDvbDeviceList();
@@ -1672,23 +1681,29 @@ public final class TvInputManager {
     }
 
     /**
-     * Returns a {@link ParcelFileDescriptor} of a specified DVB device for a given
-     * {@link DvbDeviceInfo}
+     * Returns a {@link ParcelFileDescriptor} of a specified DVB device of a given type for a given
+     * {@link DvbDeviceInfo}.
      *
      * @param info A {@link DvbDeviceInfo} to open a DVB device.
-     * @param device A DVB device. The DVB device can be {@link #DVB_DEVICE_DEMUX},
-     *            {@link #DVB_DEVICE_DVR} or {@link #DVB_DEVICE_FRONTEND}.
+     * @param deviceType A DVB device type.
      * @return a {@link ParcelFileDescriptor} of a specified DVB device for a given
-     *         {@link DvbDeviceInfo}, or {@code null} if the given {@link DvbDeviceInfo} was invalid
-     *         or the specified DVB device was busy with a previous request.
+     * {@link DvbDeviceInfo}, or {@code null} if the given {@link DvbDeviceInfo}
+     * failed to open.
+     * @throws IllegalArgumentException if {@code deviceType} is invalid or the device is not found.
+
+     * @see <a href="https://www.linuxtv.org/docs/dvbapi/dvbapi.html">Linux DVB API v3</a>
      * @hide
      */
-    public ParcelFileDescriptor openDvbDevice(DvbDeviceInfo info, int device) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.DVB_DEVICE)
+    @Nullable
+    public ParcelFileDescriptor openDvbDevice(@NonNull DvbDeviceInfo info,
+            @DvbDeviceType int deviceType) {
         try {
-            if (DVB_DEVICE_START > device || DVB_DEVICE_END < device) {
-                throw new IllegalArgumentException("Invalid DVB device: " + device);
+            if (DVB_DEVICE_START > deviceType || DVB_DEVICE_END < deviceType) {
+                throw new IllegalArgumentException("Invalid DVB device: " + deviceType);
             }
-            return mService.openDvbDevice(info, device);
+            return mService.openDvbDevice(info, deviceType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

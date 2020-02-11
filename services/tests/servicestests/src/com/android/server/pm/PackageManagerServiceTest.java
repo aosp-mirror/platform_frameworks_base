@@ -118,17 +118,20 @@ public class PackageManagerServiceTest {
         String[] partitions = { "system", "vendor", "odm", "oem", "product", "system_ext" };
         String[] appdir = { "app", "priv-app" };
         for (int i = 0; i < partitions.length; i++) {
+            final PackageManagerService.SystemPartition systemPartition =
+                    PackageManagerService.SYSTEM_PARTITIONS.get(i);
             for (int j = 0; j < appdir.length; j++) {
                 String canonical = new File("/" + partitions[i]).getCanonicalPath();
                 String path = String.format("%s/%s/A.apk", canonical, appdir[j]);
 
-                Assert.assertEquals(j == 1 && i != 3,
-                    PackageManagerService.locationIsPrivileged(path));
+                Assert.assertEquals(j == 1 && i != 3, systemPartition.containsPrivPath(path));
 
-                Assert.assertEquals(i == 1 || i == 2, PackageManagerService.locationIsVendor(path));
-                Assert.assertEquals(i == 3, PackageManagerService.locationIsOem(path));
-                Assert.assertEquals(i == 4, PackageManagerService.locationIsProduct(path));
-                Assert.assertEquals(i == 5, PackageManagerService.locationIsSystemExt(path));
+                final int scanFlag = systemPartition.scanFlag;
+                Assert.assertEquals(i == 1, scanFlag == PackageManagerService.SCAN_AS_VENDOR);
+                Assert.assertEquals(i == 2, scanFlag == PackageManagerService.SCAN_AS_ODM);
+                Assert.assertEquals(i == 3, scanFlag == PackageManagerService.SCAN_AS_OEM);
+                Assert.assertEquals(i == 4, scanFlag == PackageManagerService.SCAN_AS_PRODUCT);
+                Assert.assertEquals(i == 5, scanFlag == PackageManagerService.SCAN_AS_SYSTEM_EXT);
             }
         }
     }

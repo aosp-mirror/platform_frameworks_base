@@ -3,8 +3,10 @@
 # Metrics
 joeo@google.com
 singhtejinder@google.com
+yanmin@google.com
 yaochen@google.com
 yro@google.com
+zhouwenjie@google.com
 
 # Settings UI
 per-file settings_enums.proto=tmfang@google.com
@@ -12,6 +14,7 @@ per-file settings_enums.proto=tmfang@google.com
 # Frameworks
 ogunwale@google.com
 jjaggi@google.com
+per-file usagestatsservice.proto, usagestatsservice_v2.proto = mwachens@google.com
 
 # Launcher
 hyunyoungs@google.com

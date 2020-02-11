@@ -16,10 +16,10 @@
 
 package com.android.systemui.classifier.brightline;
 
-import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 
 import com.android.systemui.classifier.Classifier;
+import com.android.systemui.util.ProximitySensor;
 
 import java.util.List;
 
@@ -98,9 +98,9 @@ abstract class FalsingClassifier {
     void onTouchEvent(MotionEvent motionEvent) {};
 
     /**
-     * Called whenever a SensorEvent occurs, specifically the ProximitySensor.
+     * Called when a ProximityEvent occurs (change in near/far).
      */
-    void onSensorEvent(SensorEvent sensorEvent) {};
+    void onProximityEvent(ProximitySensor.ProximityEvent proximityEvent) {};
 
     /**
      * The phone screen has turned on and we need to begin falsing detection.

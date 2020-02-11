@@ -16,10 +16,9 @@
 
 package android.net.wifi.p2p;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Parcelable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
-import android.net.wifi.p2p.WifiP2pDevice;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;

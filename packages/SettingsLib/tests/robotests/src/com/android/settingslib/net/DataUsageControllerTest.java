@@ -75,7 +75,7 @@ public class DataUsageControllerTest {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
+        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
         when(mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE))
                 .thenReturn(mSubscriptionManager);
         when(mContext.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);

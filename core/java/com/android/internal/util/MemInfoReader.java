@@ -16,12 +16,16 @@
 
 package com.android.internal.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Debug;
 import android.os.StrictMode;
 
 public final class MemInfoReader {
     final long[] mInfos = new long[Debug.MEMINFO_COUNT];
+
+    @UnsupportedAppUsage
+    public MemInfoReader() {
+    }
 
     @UnsupportedAppUsage
     public void readMemInfo() {
@@ -87,7 +91,15 @@ public final class MemInfoReader {
      * that are mapped in to processes.
      */
     public long getCachedSizeKb() {
-        return mInfos[Debug.MEMINFO_BUFFERS] + mInfos[Debug.MEMINFO_SLAB_RECLAIMABLE]
+        long kReclaimable = mInfos[Debug.MEMINFO_KRECLAIMABLE];
+
+        // Note: MEMINFO_KRECLAIMABLE includes MEMINFO_SLAB_RECLAIMABLE and ION pools.
+        // Fall back to using MEMINFO_SLAB_RECLAIMABLE in case of older kernels that do
+        // not include KReclaimable meminfo field.
+        if (kReclaimable == 0) {
+            kReclaimable = mInfos[Debug.MEMINFO_SLAB_RECLAIMABLE];
+        }
+        return mInfos[Debug.MEMINFO_BUFFERS] + kReclaimable
                 + mInfos[Debug.MEMINFO_CACHED] - mInfos[Debug.MEMINFO_MAPPED];
     }
 
@@ -95,9 +107,12 @@ public final class MemInfoReader {
      * Amount of RAM that is in use by the kernel for actual allocations.
      */
     public long getKernelUsedSizeKb() {
-        return mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB_UNRECLAIMABLE]
-                + mInfos[Debug.MEMINFO_VM_ALLOC_USED] + mInfos[Debug.MEMINFO_PAGE_TABLES]
-                + mInfos[Debug.MEMINFO_KERNEL_STACK];
+        long size = mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB_UNRECLAIMABLE]
+                + mInfos[Debug.MEMINFO_VM_ALLOC_USED] + mInfos[Debug.MEMINFO_PAGE_TABLES];
+        if (!Debug.isVmapStack()) {
+            size += mInfos[Debug.MEMINFO_KERNEL_STACK];
+        }
+        return size;
     }
 
     public long getSwapTotalSizeKb() {

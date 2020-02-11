@@ -38,11 +38,13 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.Temperature;
 import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 
@@ -250,6 +252,8 @@ public class ThermalManagerService extends SystemService {
         } finally {
             mThermalEventListeners.finishBroadcast();
         }
+        EventLog.writeEvent(EventLogTags.THERMAL_CHANGED, temperature.getName(),
+                temperature.getType(), temperature.getValue(), temperature.getStatus(), mStatus);
     }
 
     private void shutdownIfNeeded(Temperature temperature) {
@@ -860,10 +864,10 @@ public class ThermalManagerService extends SystemService {
                     mThermalHal11.linkToDeath(new DeathRecipient(),
                             THERMAL_HAL_DEATH_COOKIE);
                     mThermalHal11.registerThermalCallback(mThermalCallback11);
+                    Slog.i(TAG, "Thermal HAL 1.1 service connected, limited thermal functions "
+                            + "due to legacy API.");
                 } catch (NoSuchElementException | RemoteException e) {
-                    Slog.e(TAG,
-                            "Thermal HAL 1.1 service not connected, no thermal call back will be "
-                                    + "called.");
+                    Slog.e(TAG, "Thermal HAL 1.1 service not connected.");
                     mThermalHal11 = null;
                 }
                 return (mThermalHal11 != null);
@@ -978,8 +982,9 @@ public class ThermalManagerService extends SystemService {
                     mThermalHal20.linkToDeath(new DeathRecipient(), THERMAL_HAL_DEATH_COOKIE);
                     mThermalHal20.registerThermalChangedCallback(mThermalCallback20, false,
                             0 /* not used */);
+                    Slog.i(TAG, "Thermal HAL 2.0 service connected.");
                 } catch (NoSuchElementException | RemoteException e) {
-                    Slog.e(TAG, "Thermal HAL 2.0 service not connected, trying 1.1.");
+                    Slog.e(TAG, "Thermal HAL 2.0 service not connected.");
                     mThermalHal20 = null;
                 }
                 return (mThermalHal20 != null);

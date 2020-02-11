@@ -22,10 +22,10 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
+import dalvik.system.VMRuntime;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import dalvik.system.VMRuntime;
 
 /**
  * Provides various methods for obtaining and converting of instruction sets.
@@ -113,12 +113,15 @@ public class InstructionSets {
         return allInstructionSets;
     }
 
-    public static String getPrimaryInstructionSet(ApplicationInfo info) {
-        if (info.primaryCpuAbi == null) {
+    /**
+     * Calculates the primary instruction set based on the computed Abis of a given package.
+     */
+    public static String getPrimaryInstructionSet(PackageAbiHelper.Abis abis) {
+        if (abis.primary == null) {
             return getPreferredInstructionSet();
         }
 
-        return VMRuntime.getInstructionSet(info.primaryCpuAbi);
+        return VMRuntime.getInstructionSet(abis.primary);
     }
 
 }

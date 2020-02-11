@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.app.ActivityThread;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -84,17 +83,25 @@ public final class BluetoothLeScanner {
     private BluetoothAdapter mBluetoothAdapter;
     private final Map<ScanCallback, BleScanCallbackWrapper> mLeScanClients;
 
+    private final String mOpPackageName;
+    private final String mFeatureId;
+
     /**
      * Use {@link BluetoothAdapter#getBluetoothLeScanner()} instead.
      *
      * @param bluetoothManager BluetoothManager that conducts overall Bluetooth Management.
+     * @param opPackageName The opPackageName of the context this object was created from
+     * @param featureId  The featureId of the context this object was created from
      * @hide
      */
-    public BluetoothLeScanner(IBluetoothManager bluetoothManager) {
+    public BluetoothLeScanner(IBluetoothManager bluetoothManager,
+            @NonNull String opPackageName, @Nullable String featureId) {
         mBluetoothManager = bluetoothManager;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mHandler = new Handler(Looper.getMainLooper());
         mLeScanClients = new HashMap<ScanCallback, BleScanCallbackWrapper>();
+        mOpPackageName = opPackageName;
+        mFeatureId = featureId;
     }
 
     /**
@@ -246,8 +253,8 @@ public final class BluetoothLeScanner {
                 wrapper.startRegistration();
             } else {
                 try {
-                    gatt.startScanForIntent(callbackIntent, settings, filters,
-                            ActivityThread.currentOpPackageName());
+                    gatt.startScanForIntent(callbackIntent, settings, filters, mOpPackageName,
+                            mFeatureId);
                 } catch (RemoteException e) {
                     return ScanCallback.SCAN_FAILED_INTERNAL_ERROR;
                 }
@@ -288,7 +295,7 @@ public final class BluetoothLeScanner {
         IBluetoothGatt gatt;
         try {
             gatt = mBluetoothManager.getBluetoothGatt();
-            gatt.stopScanForIntent(callbackIntent, ActivityThread.currentOpPackageName());
+            gatt.stopScanForIntent(callbackIntent, mOpPackageName);
         } catch (RemoteException e) {
         }
     }
@@ -448,8 +455,7 @@ public final class BluetoothLeScanner {
                         } else {
                             mScannerId = scannerId;
                             mBluetoothGatt.startScan(mScannerId, mSettings, mFilters,
-                                    mResultStorages,
-                                    ActivityThread.currentOpPackageName());
+                                    mResultStorages, mOpPackageName, mFeatureId);
                         }
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);

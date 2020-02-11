@@ -16,19 +16,19 @@
 
 package com.android.internal.app;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.Toast;
 import android.util.Log;
-import android.location.LocationManager;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.location.GpsNetInitiatedHandler;

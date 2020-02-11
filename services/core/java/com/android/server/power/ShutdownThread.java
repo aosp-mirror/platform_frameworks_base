@@ -41,14 +41,15 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.util.TimingsTraceLog;
 import android.view.WindowManager;
 
-import com.android.internal.telephony.ITelephony;
-import com.android.server.RescueParty;
 import com.android.server.LocalServices;
+import com.android.server.RescueParty;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -444,6 +445,15 @@ public final class ShutdownThread extends Thread {
             SystemProperties.set(REBOOT_SAFEMODE_PROPERTY, "1");
         }
 
+        shutdownTimingLog.traceBegin("DumpPreRebootInfo");
+        try {
+            Slog.i(TAG, "Logging pre-reboot information...");
+            PreRebootLogger.log(mContext);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to log pre-reboot information", e);
+        }
+        shutdownTimingLog.traceEnd(); // DumpPreRebootInfo
+
         metricStarted(METRIC_SEND_BROADCAST);
         shutdownTimingLog.traceBegin("SendShutdownBroadcast");
         Log.i(TAG, "Sending shutdown broadcast...");
@@ -584,19 +594,15 @@ public final class ShutdownThread extends Thread {
                 TimingsTraceLog shutdownTimingsTraceLog = newTimingsLog();
                 boolean radioOff;
 
-                final ITelephony phone =
-                        ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
+                TelephonyManager telephonyManager = mContext.getSystemService(
+                        TelephonyManager.class);
 
-                try {
-                    radioOff = phone == null || !phone.needMobileRadioShutdown();
-                    if (!radioOff) {
-                        Log.w(TAG, "Turning off cellular radios...");
-                        metricStarted(METRIC_RADIO);
-                        phone.shutdownMobileRadios();
-                    }
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "RemoteException during radio shutdown", ex);
-                    radioOff = true;
+                radioOff = telephonyManager == null
+                        || !telephonyManager.isAnyRadioPoweredOn();
+                if (!radioOff) {
+                    Log.w(TAG, "Turning off cellular radios...");
+                    metricStarted(METRIC_RADIO);
+                    telephonyManager.shutdownAllRadios();
                 }
 
                 Log.i(TAG, "Waiting for Radio...");
@@ -611,12 +617,7 @@ public final class ShutdownThread extends Thread {
                     }
 
                     if (!radioOff) {
-                        try {
-                            radioOff = !phone.needMobileRadioShutdown();
-                        } catch (RemoteException ex) {
-                            Log.e(TAG, "RemoteException during radio shutdown", ex);
-                            radioOff = true;
-                        }
+                        radioOff = !telephonyManager.isAnyRadioPoweredOn();
                         if (radioOff) {
                             Log.i(TAG, "Radio turned off.");
                             metricEnded(METRIC_RADIO);

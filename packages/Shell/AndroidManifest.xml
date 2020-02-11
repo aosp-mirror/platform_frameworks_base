@@ -91,6 +91,7 @@
     <uses-permission android:name="android.permission.TEST_MANAGE_ROLLBACKS" />
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
+    <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.POWER_SAVER" />
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
@@ -108,6 +109,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
@@ -173,6 +175,8 @@
     <uses-permission android:name="android.permission.MANAGE_WIFI_WHEN_WIRELESS_CONSENT_REQUIRED" />
     <!-- Permission needed to invoke DynamicSystem (AOT) -->
     <uses-permission android:name="android.permission.INSTALL_DYNAMIC_SYSTEM" />
+    <!-- Used to clean up heap dumps on boot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
@@ -183,6 +187,9 @@
     <uses-permission android:name="android.permission.ENABLE_TEST_HARNESS_MODE" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
+
+    <!-- Permission required for storage tests - FuseDaemonHostTest -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
@@ -201,9 +208,33 @@
 
     <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
     <uses-permission android:name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE" />
-    
+
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
+
+    <!-- permissions required for CTS test - PhoneStateListenerTest -->
+    <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
+
+    <!-- Permissions required for ganting and logging -->
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
+
+    <!-- Permission required for CTS test - UiModeManagerTest -->
+    <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
+
+      <!-- Permission required for CTS test - CarModeInCallServiceTest -->
+    <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
+
+    <!-- Permission required for CTS test - TetheringManagerTest -->
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
+
+    <!-- Permissions required to test ambient display. -->
+    <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
+
+    <!-- Permission needed to test mainline permission module rollback -->
+    <uses-permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
@@ -231,11 +262,41 @@
             </intent-filter>
         </provider>
 
+        <provider android:name=".HeapDumpProvider"
+                  android:authorities="com.android.shell.heapdump"
+                  android:grantUriPermissions="true"
+                  android:exported="true" />
+
         <activity
             android:name=".BugreportWarningActivity"
+            android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />
+
+        <activity android:name=".HeapDumpActivity"
+                  android:theme="@*android:style/Theme.Translucent.NoTitleBar"
+                  android:label="@*android:string/dump_heap_title"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:noHistory="true"
+                  android:excludeFromRecents="true"
+                  android:exported="false" />
+
+        <!--
+        The following is used as a no-op/null home activity when
+        no other MAIN/HOME activity is present (e.g., in CSI).
+        -->
+        <activity android:name=".NullHome"
+                  android:excludeFromRecents="true"
+                  android:label=""
+                  android:screenOrientation="nosensor">
+            <!-- The priority here is set to be lower than that for Settings -->
+            <intent-filter android:priority="-1100">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <receiver
             android:name=".BugreportReceiver"
@@ -251,6 +312,16 @@
             android:permission="android.permission.DUMP">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".HeapDumpReceiver"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.android.internal.intent.action.HEAP_DUMP_FINISHED" />
+                <action android:name="com.android.shell.action.DELETE_HEAP_DUMP" />
             </intent-filter>
         </receiver>
 

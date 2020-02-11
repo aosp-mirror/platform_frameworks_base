@@ -42,6 +42,8 @@ import android.service.attention.AttentionService;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.wm.WindowManagerInternal;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +59,8 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Mock
     private AttentionManagerInternal mAttentionManagerInternal;
     @Mock
+    private WindowManagerInternal mWindowManagerInternal;
+    @Mock
     private Runnable mOnUserAttention;
     private TestableAttentionDetector mAttentionDetector;
     private long mAttentionTimeout;
@@ -71,6 +75,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
                 PackageManager.PERMISSION_GRANTED);
         when(mAttentionManagerInternal.checkAttention(anyLong(), any()))
                 .thenReturn(true);
+        when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(false);
         mAttentionDetector = new TestableAttentionDetector();
         mAttentionDetector.onWakefulnessChangeStarted(PowerManagerInternal.WAKEFULNESS_AWAKE);
         mAttentionDetector.setAttentionServiceSupported(true);
@@ -111,6 +116,15 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Test
     public void testOnUserActivity_doesntCheckIfNotSupported() {
         mAttentionDetector.setAttentionServiceSupported(false);
+        long when = registerAttention();
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
+        assertThat(mNextDimming).isEqualTo(when);
+    }
+
+    @Test
+    public void testOnUserActivity_doesntCheckIfInLockscreen() {
+        when(mWindowManagerInternal.isKeyguardShowingAndNotOccluded()).thenReturn(true);
+
         long when = registerAttention();
         verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
         assertThat(mNextDimming).isEqualTo(when);
@@ -299,6 +313,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
         TestableAttentionDetector() {
             super(AttentionDetectorTest.this.mOnUserAttention, new Object());
             mAttentionManager = mAttentionManagerInternal;
+            mWindowManager = mWindowManagerInternal;
             mPackageManager = AttentionDetectorTest.this.mPackageManager;
             mContentResolver = getContext().getContentResolver();
             mMaximumExtensionMillis = 10000L;

@@ -20,7 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;

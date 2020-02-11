@@ -17,7 +17,7 @@
 package android.text.method;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UProperty;
 import android.icu.text.BreakIterator;

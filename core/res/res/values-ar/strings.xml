@@ -1610,10 +1610,6 @@
     <string name="submit" msgid="1602335572089911941">"إرسال"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"تطبيق القيادة قيد التشغيل"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"انقر للخروج من تطبيق القيادة."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"النطاق أو نقطة الاتصال نشطة"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"انقر للإعداد."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"تم إيقاف التوصيل"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"اتصل بالمشرف للحصول على التفاصيل"</string>
     <string name="back_button_label" msgid="2300470004503343439">"رجوع"</string>
     <string name="next_button_label" msgid="1080555104677992408">"التالي"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"تخطي"</string>

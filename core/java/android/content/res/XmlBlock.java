@@ -20,7 +20,7 @@ import static android.content.res.Resources.ID_NULL;
 
 import android.annotation.AnyRes;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;

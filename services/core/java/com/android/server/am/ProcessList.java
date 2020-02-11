@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
+import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getFreeMemory;
@@ -76,6 +77,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
+import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.EventLog;
@@ -96,17 +98,16 @@ import com.android.internal.util.MemInfoReader;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.Watchdog;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -117,11 +118,6 @@ import java.util.List;
 
 /**
  * Activity manager code dealing with processes.
- *
- * Method naming convention:
- * <ul>
- * <li> Methods suffixed with "LS" should be called within the {@link #sLmkdSocketLock} lock.
- * </ul>
  */
 public final class ProcessList {
     static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
@@ -254,19 +250,35 @@ public final class ProcessList {
     private static final String PROPERTY_USE_APP_IMAGE_STARTUP_CACHE =
             "persist.device_config.runtime_native.use_app_image_startup_cache";
 
+    // The socket path for zygote to send unsolicited msg.
+    // Must keep sync with com_android_internal_os_Zygote.cpp.
+    private static final String UNSOL_ZYGOTE_MSG_SOCKET_PATH = "/data/system/unsolzygotesocket";
+
     // Low Memory Killer Daemon command codes.
-    // These must be kept in sync with the definitions in lmkd.c
+    // These must be kept in sync with lmk_cmd definitions in lmkd.h
     //
     // LMK_TARGET <minfree> <minkillprio> ... (up to 6 pairs)
     // LMK_PROCPRIO <pid> <uid> <prio>
     // LMK_PROCREMOVE <pid>
     // LMK_PROCPURGE
     // LMK_GETKILLCNT
+    // LMK_SUBSCRIBE
+    // LMK_PROCKILL
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
     static final byte LMK_PROCPURGE = 3;
     static final byte LMK_GETKILLCNT = 4;
+    static final byte LMK_SUBSCRIBE = 5;
+    static final byte LMK_PROCKILL = 6; // Note: this is an unsolicated command
+
+    // Low Memory Killer Daemon command codes.
+    // These must be kept in sync with async_event_type definitions in lmkd.h
+    //
+    static final int LMK_ASYNC_EVENT_KILL = 0;
+
+    // lmkd reconnect delay in msecs
+    private static final long LMKD_RECONNECT_DELAY_MS = 1000;
 
     ActivityManagerService mService = null;
 
@@ -302,16 +314,9 @@ public final class ProcessList {
 
     private boolean mHaveDisplaySize;
 
-    private static Object sLmkdSocketLock = new Object();
+    private static LmkdConnection sLmkdConnection = null;
 
-    @GuardedBy("sLmkdSocketLock")
-    private static LocalSocket sLmkdSocket;
-
-    @GuardedBy("sLmkdSocketLock")
-    private static OutputStream sLmkdOutputStream;
-
-    @GuardedBy("sLmkdSocketLock")
-    private static InputStream sLmkdInputStream;
+    private boolean mOomLevelsSet = false;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -369,6 +374,12 @@ public final class ProcessList {
     ActiveUids mActiveUids;
 
     /**
+     * The listener who is intereted with the lmkd kills.
+     */
+    @GuardedBy("mService")
+    private LmkdKillListener mLmkdKillListener = null;
+
+    /**
      * The currently running isolated processes.
      */
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
@@ -383,6 +394,37 @@ public final class ProcessList {
      */
     final ArrayMap<AppZygote, ArrayList<ProcessRecord>> mAppZygoteProcesses =
             new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
+
+    private PlatformCompat mPlatformCompat = null;
+
+    /**
+     * The server socket in system_server, zygote will connect to it
+     * in order to send unsolicited messages to system_server.
+     */
+    private LocalSocket mSystemServerSocketForZygote;
+
+    /**
+     * Maximum number of bytes that an incoming unsolicited zygote message could be.
+     * To be updated if new message type needs to be supported.
+     */
+    private static final int MAX_ZYGOTE_UNSOLICITED_MESSAGE_SIZE = 16;
+
+    /**
+     * The buffer to be used to receive the incoming unsolicited zygote message.
+     */
+    private final byte[] mZygoteUnsolicitedMessage = new byte[MAX_ZYGOTE_UNSOLICITED_MESSAGE_SIZE];
+
+    /**
+     * The buffer to be used to receive the SIGCHLD data, it includes pid/uid/status.
+     */
+    private final int[] mZygoteSigChldMessage = new int[3];
+
+    interface LmkdKillListener {
+        /**
+         * Called when there is a process kill by lmkd.
+         */
+        void onLmkdKillOccurred(int pid, int uid);
+    }
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -536,6 +578,8 @@ public final class ProcessList {
 
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
+        static final int LMKD_RECONNECT_MSG = 4001;
+        static final int LMKD_PROC_KILLED_MSG = 4002;
 
         public KillHandler(Looper looper) {
             super(looper, null, true);
@@ -548,6 +592,18 @@ public final class ProcessList {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "killProcessGroup");
                     Process.killProcessGroup(msg.arg1 /* uid */, msg.arg2 /* pid */);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                case LMKD_RECONNECT_MSG:
+                    if (!sLmkdConnection.connect()) {
+                        Slog.i(TAG, "Failed to connect to lmkd, retry after "
+                                + LMKD_RECONNECT_DELAY_MS + " ms");
+                        // retry after LMKD_RECONNECT_DELAY_MS
+                        sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
+                                KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
+                    }
+                    break;
+                case LMKD_PROC_KILLED_MSG:
+                    handleLmkdProcKilled(msg.arg1 /* pid */, msg.arg2 /* uid */);
                     break;
 
                 default:
@@ -565,15 +621,68 @@ public final class ProcessList {
         updateOomLevels(0, 0, false);
     }
 
-    void init(ActivityManagerService service, ActiveUids activeUids) {
+    void init(ActivityManagerService service, ActiveUids activeUids,
+            PlatformCompat platformCompat) {
         mService = service;
         mActiveUids = activeUids;
+        mPlatformCompat = platformCompat;
 
         if (sKillHandler == null) {
             sKillThread = new ServiceThread(TAG + ":kill",
                     THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
             sKillThread.start();
             sKillHandler = new KillHandler(sKillThread.getLooper());
+            sLmkdConnection = new LmkdConnection(sKillThread.getLooper().getQueue(),
+                    new LmkdConnection.LmkdConnectionListener() {
+                        @Override
+                        public boolean onConnect(OutputStream ostream) {
+                            Slog.i(TAG, "Connection with lmkd established");
+                            return onLmkdConnect(ostream);
+                        }
+                        @Override
+                        public void onDisconnect() {
+                            Slog.w(TAG, "Lost connection to lmkd");
+                            // start reconnection after delay to let lmkd restart
+                            sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
+                                    KillHandler.LMKD_RECONNECT_MSG), LMKD_RECONNECT_DELAY_MS);
+                        }
+                        @Override
+                        public boolean isReplyExpected(ByteBuffer replyBuf,
+                                ByteBuffer dataReceived, int receivedLen) {
+                            // compare the preambule (currently one integer) to check if
+                            // this is the reply packet we are waiting for
+                            return (receivedLen == replyBuf.array().length
+                                    && dataReceived.getInt(0) == replyBuf.getInt(0));
+                        }
+
+                        @Override
+                        public boolean handleUnsolicitedMessage(ByteBuffer dataReceived,
+                                int receivedLen) {
+                            if (receivedLen < 4) {
+                                return false;
+                            }
+                            switch (dataReceived.getInt(0)) {
+                                case LMK_PROCKILL:
+                                    if (receivedLen != 12) {
+                                        return false;
+                                    }
+                                    sKillHandler.obtainMessage(KillHandler.LMKD_PROC_KILLED_MSG,
+                                            dataReceived.getInt(4), dataReceived.getInt(8))
+                                            .sendToTarget();
+                                    return true;
+                                default:
+                                    return false;
+                            }
+                        }
+                    }
+            );
+            // Start listening on incoming connections from zygotes.
+            mSystemServerSocketForZygote = createSystemServerSocketForZygote();
+            if (mSystemServerSocketForZygote != null) {
+                sKillHandler.getLooper().getQueue().addOnFileDescriptorEventListener(
+                        mSystemServerSocketForZygote.getFileDescriptor(),
+                        EVENT_INPUT, this::handleZygoteMessages);
+            }
         }
     }
 
@@ -679,6 +788,7 @@ public final class ProcessList {
 
             writeLmkd(buf, null);
             SystemProperties.set("sys.sysctl.extra_free_kbytes", Integer.toString(reserve));
+            mOomLevelsSet = true;
         }
         // GB: 2048,3072,4096,6144,7168,8192
         // HC: 8192,10240,12288,14336,16384,20480
@@ -1218,93 +1328,55 @@ public final class ProcessList {
         buf.putInt(LMK_GETKILLCNT);
         buf.putInt(min_oom_adj);
         buf.putInt(max_oom_adj);
-        if (writeLmkd(buf, repl)) {
-            int i = repl.getInt();
-            if (i != LMK_GETKILLCNT) {
-                Slog.e("ActivityManager", "Failed to get kill count, code mismatch");
-                return null;
-            }
+        // indicate what we are waiting for
+        repl.putInt(LMK_GETKILLCNT);
+        repl.rewind();
+        if (writeLmkd(buf, repl) && repl.getInt() == LMK_GETKILLCNT) {
             return new Integer(repl.getInt());
         }
         return null;
     }
 
-    @GuardedBy("sLmkdSocketLock")
-    private static boolean openLmkdSocketLS() {
+    boolean onLmkdConnect(OutputStream ostream) {
         try {
-            sLmkdSocket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
-            sLmkdSocket.connect(
-                new LocalSocketAddress("lmkd",
-                        LocalSocketAddress.Namespace.RESERVED));
-            sLmkdOutputStream = sLmkdSocket.getOutputStream();
-            sLmkdInputStream = sLmkdSocket.getInputStream();
-        } catch (IOException ex) {
-            Slog.w(TAG, "lowmemorykiller daemon socket open failed");
-            sLmkdSocket = null;
-            return false;
-        }
-
-        return true;
-    }
-
-    // Never call directly, use writeLmkd() instead
-    @GuardedBy("sLmkdSocketLock")
-    private static boolean writeLmkdCommandLS(ByteBuffer buf) {
-        try {
-            sLmkdOutputStream.write(buf.array(), 0, buf.position());
-        } catch (IOException ex) {
-            Slog.w(TAG, "Error writing to lowmemorykiller socket");
-            IoUtils.closeQuietly(sLmkdSocket);
-            sLmkdSocket = null;
-            return false;
-        }
-        return true;
-    }
-
-    // Never call directly, use writeLmkd() instead
-    @GuardedBy("sLmkdSocketLock")
-    private static boolean readLmkdReplyLS(ByteBuffer buf) {
-        int len;
-        try {
-            len = sLmkdInputStream.read(buf.array(), 0, buf.array().length);
-            if (len == buf.array().length) {
-                return true;
+            // Purge any previously registered pids
+            ByteBuffer buf = ByteBuffer.allocate(4);
+            buf.putInt(LMK_PROCPURGE);
+            ostream.write(buf.array(), 0, buf.position());
+            if (mOomLevelsSet) {
+                // Reset oom_adj levels
+                buf = ByteBuffer.allocate(4 * (2 * mOomAdj.length + 1));
+                buf.putInt(LMK_TARGET);
+                for (int i = 0; i < mOomAdj.length; i++) {
+                    buf.putInt((mOomMinFree[i] * 1024) / PAGE_SIZE);
+                    buf.putInt(mOomAdj[i]);
+                }
+                ostream.write(buf.array(), 0, buf.position());
             }
+            // Subscribe for kill event notifications
+            buf = ByteBuffer.allocate(4 * 2);
+            buf.putInt(LMK_SUBSCRIBE);
+            buf.putInt(LMK_ASYNC_EVENT_KILL);
+            ostream.write(buf.array(), 0, buf.position());
         } catch (IOException ex) {
-            Slog.w(TAG, "Error reading from lowmemorykiller socket");
+            return false;
         }
-
-        IoUtils.closeQuietly(sLmkdSocket);
-        sLmkdSocket = null;
-        return false;
+        return true;
     }
 
     private static boolean writeLmkd(ByteBuffer buf, ByteBuffer repl) {
-        synchronized (sLmkdSocketLock) {
-            for (int i = 0; i < 3; i++) {
-                if (sLmkdSocket == null) {
-                    if (openLmkdSocketLS() == false) {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ie) {
-                        }
-                        continue;
-                    }
+        if (!sLmkdConnection.isConnected()) {
+            // try to connect immediately and then keep retrying
+            sKillHandler.sendMessage(
+                    sKillHandler.obtainMessage(KillHandler.LMKD_RECONNECT_MSG));
 
-                    // Purge any previously registered pids
-                    ByteBuffer purge_buf = ByteBuffer.allocate(4);
-                    purge_buf.putInt(LMK_PROCPURGE);
-                    if (writeLmkdCommandLS(purge_buf) == false) {
-                        // Write failed, skip the rest and retry
-                        continue;
-                    }
-                }
-                if (writeLmkdCommandLS(buf) && (repl == null || readLmkdReplyLS(repl))) {
-                    return true;
-                }
+            // wait for connection retrying 3 times (up to 3 seconds)
+            if (!sLmkdConnection.waitForConnection(3 * LMKD_RECONNECT_DELAY_MS)) {
+                return false;
             }
         }
-        return false;
+
+        return sLmkdConnection.exchange(buf, repl);
     }
 
     static void killProcessGroup(int uid, int pid) {
@@ -1329,7 +1401,7 @@ public final class ProcessList {
             final int procCount = procs.size();
             for (int i = 0; i < procCount; i++) {
                 final int procUid = procs.keyAt(i);
-                if (UserHandle.isApp(procUid) || !UserHandle.isSameUser(procUid, uid)) {
+                if (!UserHandle.isCore(procUid) || !UserHandle.isSameUser(procUid, uid)) {
                     // Don't use an app process or different user process for system component.
                     continue;
                 }
@@ -1419,15 +1491,11 @@ public final class ProcessList {
 
     /**
      * @return {@code true} if process start is successful, false otherwise.
-     * @param app
-     * @param hostingRecord
-     * @param disableHiddenApiChecks
-     * @param abiOverride
      */
     @GuardedBy("mService")
     boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
-            boolean disableHiddenApiChecks, boolean mountExtStorageFull,
-            String abiOverride) {
+            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
+            boolean mountExtStorageFull, String abiOverride) {
         if (app.pendingStart) {
             return true;
         }
@@ -1572,6 +1640,10 @@ public final class ProcessList {
                     throw new IllegalStateException("Invalid API policy: " + policy);
                 }
                 runtimeFlags |= policyBits;
+
+                if (disableTestApiChecks) {
+                    runtimeFlags |= Zygote.DISABLE_TEST_API_ENFORCEMENT_POLICY;
+                }
             }
 
             String useAppImageCache = SystemProperties.get(
@@ -1656,6 +1728,10 @@ public final class ProcessList {
         if (app.pid != 0) {
             Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
                     + " with non-zero pid:" + app.pid);
+        }
+        app.mDisabledCompatChanges = null;
+        if (mPlatformCompat != null) {
+            app.mDisabledCompatChanges = mPlatformCompat.getDisabledChanges(app.info);
         }
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingRecord, seInfo, startTime);
@@ -1811,8 +1887,8 @@ public final class ProcessList {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, app.info.packageName,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        app.info.dataDir, null, app.info.packageName, app.mDisabledCompatChanges,
+                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
@@ -1820,14 +1896,15 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        /*useUsapPool=*/ false,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        /*useUsapPool=*/ false, app.mDisabledCompatChanges,
+                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+                        app.mDisabledCompatChanges,
+                        new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;
@@ -1845,7 +1922,8 @@ public final class ProcessList {
     final boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
             String abiOverride) {
         return startProcessLocked(app, hostingRecord,
-                false /* disableHiddenApiChecks */, false /* mountExtStorageFull */, abiOverride);
+                false /* disableHiddenApiChecks */, false /* disableTestApiChecks */,
+                false /* mountExtStorageFull */, abiOverride);
     }
 
     @GuardedBy("mService")
@@ -2097,10 +2175,10 @@ public final class ProcessList {
                     }
                 }
             }
-            if (lrui <= mLruProcessActivityStart) {
+            if (lrui < mLruProcessActivityStart) {
                 mLruProcessActivityStart--;
             }
-            if (lrui <= mLruProcessServiceStart) {
+            if (lrui < mLruProcessServiceStart) {
                 mLruProcessServiceStart--;
             }
             mLruProcesses.remove(lrui);
@@ -2632,7 +2710,7 @@ public final class ProcessList {
                         if (!moved) {
                             // Goes to the end of the group.
                             mLruProcesses.remove(i);
-                            mLruProcesses.add(endIndex - 1, subProc);
+                            mLruProcesses.add(endIndex, subProc);
                             if (DEBUG_LRU) Slog.d(TAG_LRU,
                                     "Moving " + subProc
                                             + " from position " + i + " to end of group @ "
@@ -2877,15 +2955,6 @@ public final class ProcessList {
                     pos--;
                 }
                 mLruProcesses.add(pos, app);
-                if (pos == mLruProcessActivityStart) {
-                    mLruProcessActivityStart++;
-                }
-                if (pos == mLruProcessServiceStart) {
-                    // Unless {@code #hasService} is implemented, currently the starting position
-                    // for activity and service are the same, so the incoming position may equal to
-                    // the starting position of service.
-                    mLruProcessServiceStart++;
-                }
                 // If this process is part of a group, need to pull up any other processes
                 // in that group to be with it.
                 int endIndex = pos - 1;
@@ -3211,5 +3280,91 @@ public final class ProcessList {
             }
             mService.doStopUidLocked(uidRec.uid, uidRec);
         }
+    }
+
+    void setLmkdKillListener(final LmkdKillListener listener) {
+        synchronized (mService) {
+            mLmkdKillListener = listener;
+        }
+    }
+
+    private void handleLmkdProcKilled(final int pid, final int uid) {
+        // Log only now
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "lmkd kill: pid=" + pid + " uid=" + uid);
+        }
+
+        if (mService == null) {
+            return;
+        }
+        // Notify any interesed party regarding the lmkd kills
+        synchronized (mService) {
+            final LmkdKillListener listener = mLmkdKillListener;
+            if (listener != null) {
+                mService.mHandler.post(()-> listener.onLmkdKillOccurred(pid, uid));
+            }
+        }
+    }
+
+    private void handleZygoteSigChld(int pid, int uid, int status) {
+        // Just log it now.
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "Got SIGCHLD from zygote: pid=" + pid + ", uid=" + uid
+                    + ", status=" + Integer.toHexString(status));
+        }
+    }
+
+    /**
+     * Create a server socket in system_server, zygote will connect to it
+     * in order to send unsolicited messages to system_server.
+     */
+    private LocalSocket createSystemServerSocketForZygote() {
+        // The file system entity for this socket is created with 0666 perms, owned
+        // by system:system. selinux restricts things so that only zygotes can
+        // access it.
+        final File socketFile = new File(UNSOL_ZYGOTE_MSG_SOCKET_PATH);
+        if (socketFile.exists()) {
+            socketFile.delete();
+        }
+
+        LocalSocket serverSocket = null;
+        try {
+            serverSocket = new LocalSocket(LocalSocket.SOCKET_DGRAM);
+            serverSocket.bind(new LocalSocketAddress(
+                    UNSOL_ZYGOTE_MSG_SOCKET_PATH, LocalSocketAddress.Namespace.FILESYSTEM));
+            Os.chmod(UNSOL_ZYGOTE_MSG_SOCKET_PATH, 0666);
+        } catch (Exception e) {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException ex) {
+                }
+                serverSocket = null;
+            }
+        }
+        return serverSocket;
+    }
+
+    /**
+     * Handle the unsolicited message from zygote.
+     */
+    private int handleZygoteMessages(FileDescriptor fd, int events) {
+        final int eventFd = fd.getInt$();
+        if ((events & EVENT_INPUT) != 0) {
+            // An incoming message from zygote
+            try {
+                final int len = Os.read(fd, mZygoteUnsolicitedMessage, 0,
+                        mZygoteUnsolicitedMessage.length);
+                if (len > 0 && mZygoteSigChldMessage.length == Zygote.nativeParseSigChld(
+                        mZygoteUnsolicitedMessage, len, mZygoteSigChldMessage)) {
+                    handleZygoteSigChld(mZygoteSigChldMessage[0] /* pid */,
+                            mZygoteSigChldMessage[1] /* uid */,
+                            mZygoteSigChldMessage[2] /* status */);
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception in reading unsolicited zygote message: " + e);
+            }
+        }
+        return EVENT_INPUT;
     }
 }

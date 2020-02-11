@@ -16,9 +16,6 @@
 
 package com.android.server.om;
 
-import static android.content.Context.IDMAP_SERVICE;
-import static android.text.format.DateUtils.SECOND_IN_MILLIS;
-
 import static com.android.server.om.OverlayManagerService.DEBUG;
 import static com.android.server.om.OverlayManagerService.TAG;
 
@@ -27,15 +24,11 @@ import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Build.VERSION_CODES;
-import android.os.IBinder;
 import android.os.IIdmap2;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.internal.os.BackgroundThread;
 import com.android.server.om.OverlayManagerServiceImpl.PackageManagerHelper;
 import com.android.server.pm.Installer;
 
@@ -51,11 +44,6 @@ import java.io.File;
  */
 class IdmapManager {
     private static final boolean FEATURE_FLAG_IDMAP2 = true;
-
-    private final Installer mInstaller;
-    private final PackageManagerHelper mPackageManager;
-    private IIdmap2 mIdmap2Service;
-
     private static final boolean VENDOR_IS_Q_OR_LATER;
     static {
         final String value = SystemProperties.get("ro.vndk.version", "29");
@@ -70,12 +58,14 @@ class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
+    private final Installer mInstaller;
+    private final PackageManagerHelper mPackageManager;
+    private final IdmapDaemon mIdmapDaemon;
+
     IdmapManager(final Installer installer, final PackageManagerHelper packageManager) {
         mInstaller = installer;
         mPackageManager = packageManager;
-        if (FEATURE_FLAG_IDMAP2) {
-            connectToIdmap2d();
-        }
+        mIdmapDaemon = IdmapDaemon.getInstance();
     }
 
     boolean createIdmap(@NonNull final PackageInfo targetPackage,
@@ -91,11 +81,11 @@ class IdmapManager {
             if (FEATURE_FLAG_IDMAP2) {
                 int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
                 boolean enforce = enforceOverlayable(overlayPackage);
-                if (mIdmap2Service.verifyIdmap(overlayPath, policies, enforce, userId)) {
+                if (mIdmapDaemon.verifyIdmap(overlayPath, policies, enforce, userId)) {
                     return true;
                 }
-                return mIdmap2Service.createIdmap(targetPath, overlayPath, policies, enforce,
-                    userId) != null;
+                return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
+                        enforce, userId) != null;
             } else {
                 mInstaller.idmap(targetPath, overlayPath, sharedGid);
                 return true;
@@ -113,7 +103,7 @@ class IdmapManager {
         }
         try {
             if (FEATURE_FLAG_IDMAP2) {
-                return mIdmap2Service.removeIdmap(oi.baseCodePath, userId);
+                return mIdmapDaemon.removeIdmap(oi.baseCodePath, userId);
             } else {
                 mInstaller.removeIdmap(oi.baseCodePath);
                 return true;
@@ -137,7 +127,7 @@ class IdmapManager {
             final int userId) {
         if (FEATURE_FLAG_IDMAP2) {
             try {
-                return mIdmap2Service.getIdmapPath(overlayPackagePath, userId);
+                return mIdmapDaemon.getIdmapPath(overlayPackagePath, userId);
             } catch (Exception e) {
                 Slog.w(TAG, "failed to get idmap path for " + overlayPackagePath + ": "
                         + e.getMessage());
@@ -148,35 +138,6 @@ class IdmapManager {
             sb.append(overlayPackagePath.substring(1).replace('/', '@'));
             sb.append("@idmap");
             return sb.toString();
-        }
-    }
-
-    private void connectToIdmap2d() {
-        IBinder binder = ServiceManager.getService(IDMAP_SERVICE);
-        if (binder != null) {
-            try {
-                binder.linkToDeath(new IBinder.DeathRecipient() {
-                    @Override
-                    public void binderDied() {
-                        Slog.w(TAG, "service '" + IDMAP_SERVICE + "' died; reconnecting...");
-                        connectToIdmap2d();
-                    }
-
-                }, 0);
-            } catch (RemoteException e) {
-                binder = null;
-            }
-        }
-        if (binder != null) {
-            mIdmap2Service = IIdmap2.Stub.asInterface(binder);
-            if (DEBUG) {
-                Slog.d(TAG, "service '" + IDMAP_SERVICE + "' connected");
-            }
-        } else {
-            Slog.w(TAG, "service '" + IDMAP_SERVICE + "' not found; trying again...");
-            BackgroundThread.getHandler().postDelayed(() -> {
-                connectToIdmap2d();
-            }, SECOND_IN_MILLIS);
         }
     }
 

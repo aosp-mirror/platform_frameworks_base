@@ -3,7 +3,7 @@ android_app {
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",
-    product_specific: true,
+    system_ext_specific: true,
     privileged: true,
     optimize: {
         proguard_flags_files: ["proguard.flags"],

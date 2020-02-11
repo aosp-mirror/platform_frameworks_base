@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * @hide

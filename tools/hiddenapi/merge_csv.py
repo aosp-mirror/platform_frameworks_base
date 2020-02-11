@@ -21,20 +21,19 @@ import csv
 import sys
 
 csv_readers = [
-    csv.DictReader(open(csv_file, 'rb'), delimiter=',', quotechar='|')
+    csv.DictReader(open(csv_file, 'r'), delimiter=',', quotechar='|')
     for csv_file in sys.argv[1:]
 ]
 
 # Build union of all columns from source files:
 headers = set()
 for reader in csv_readers:
-  headers = headers.union(reader.fieldnames)
+    headers = headers.union(reader.fieldnames)
 
 # Concatenate all files to output:
-out = csv.DictWriter(sys.stdout, delimiter=',', quotechar='|', fieldnames = sorted(headers))
+out = csv.DictWriter(sys.stdout, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL,
+                     dialect='unix', fieldnames=sorted(headers))
 out.writeheader()
 for reader in csv_readers:
-  for row in reader:
-    out.writerow(row)
-
-
+    for row in reader:
+        out.writerow(row)

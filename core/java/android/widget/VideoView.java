@@ -17,8 +17,8 @@
 package android.widget;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;

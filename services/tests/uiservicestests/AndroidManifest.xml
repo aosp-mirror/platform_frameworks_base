@@ -28,6 +28,8 @@
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY" />
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT"/>

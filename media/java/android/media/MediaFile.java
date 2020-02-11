@@ -20,7 +20,7 @@ import static android.content.ContentResolver.MIME_TYPE_DEFAULT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.mtp.MtpConstants;
 
 import libcore.content.type.MimeMap;
@@ -78,6 +78,10 @@ public class MediaFile {
     // maps MTP format code to mime type
     @UnsupportedAppUsage
     private static final HashMap<Integer, String> sFormatToMimeTypeMap = new HashMap<>();
+
+    @UnsupportedAppUsage
+    public MediaFile() {
+    }
 
     /** @deprecated file types no longer exist */
     @Deprecated

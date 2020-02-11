@@ -236,15 +236,13 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        if (!isInArea(area, this)) {
-            return;
-        }
-
-        mWifiIcon.setImageTintList(ColorStateList.valueOf(getTint(area, this, tint)));
-        mIn.setImageTintList(ColorStateList.valueOf(getTint(area, this, tint)));
-        mOut.setImageTintList(ColorStateList.valueOf(getTint(area, this, tint)));
-        mDotView.setDecorColor(tint);
-        mDotView.setIconColor(tint, false);
+        int areaTint = getTint(area, this, tint);
+        ColorStateList color = ColorStateList.valueOf(areaTint);
+        mWifiIcon.setImageTintList(color);
+        mIn.setImageTintList(color);
+        mOut.setImageTintList(color);
+        mDotView.setDecorColor(areaTint);
+        mDotView.setIconColor(areaTint, false);
     }
 
 

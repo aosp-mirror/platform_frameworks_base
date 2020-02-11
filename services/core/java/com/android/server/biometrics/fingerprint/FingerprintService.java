@@ -176,6 +176,7 @@ public class FingerprintService extends BiometricServiceBase {
      * Receives the incoming binder calls from FingerprintManager.
      */
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
+        private static final int ENROLL_TIMEOUT_SEC = 60;
 
         /**
          * The following methods contain common code which is shared in biometrics/common.
@@ -203,7 +204,8 @@ public class FingerprintService extends BiometricServiceBase {
             final int groupId = userId; // default group for fingerprint enrollment
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
                     mHalDeviceId, token, new ServiceListenerImpl(receiver), mCurrentUserId, groupId,
-                    cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */) {
+                    cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */,
+                    ENROLL_TIMEOUT_SEC) {
                 @Override
                 public boolean shouldVibrate() {
                     return true;
@@ -1035,8 +1037,7 @@ public class FingerprintService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
-        pw.println("HAL Deaths: " + mHALDeathCount);
-        mHALDeathCount = 0;
+        pw.println("HAL deaths since last reboot: " + mHALDeathCount);
     }
 
     private void dumpProto(FileDescriptor fd) {

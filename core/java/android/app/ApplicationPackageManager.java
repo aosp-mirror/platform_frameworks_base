@@ -20,9 +20,9 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -3115,6 +3115,15 @@ public class ApplicationPackageManager extends PackageManager {
     public String getAppPredictionServicePackageName() {
         try {
             return mPM.getAppPredictionServicePackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public String[] getTelephonyPackageNames() {
+        try {
+            return mPM.getTelephonyPackageNames();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

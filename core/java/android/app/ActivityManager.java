@@ -27,7 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -152,6 +152,12 @@ public class ActivityManager {
      * @hide
      */
     public static final int INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL = 1 << 1;
+
+    /**
+     * Disable test API access for the newly started instrumentation.
+     * @hide
+     */
+    public static final int INSTR_FLAG_DISABLE_TEST_API_CHECKS = 1 << 2;
 
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
@@ -925,7 +931,7 @@ public class ActivityManager {
      * (which tends to consume a lot more RAM).
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     static public boolean isHighEndGfx() {
         return !isLowRamDeviceStatic()
                 && !RoSystemProperties.CONFIG_AVOID_GFX_ACCEL
@@ -2893,6 +2899,7 @@ public class ActivityManager {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 

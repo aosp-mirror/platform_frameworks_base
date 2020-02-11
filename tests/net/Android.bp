@@ -5,18 +5,15 @@ java_defaults {
     name: "FrameworksNetTests-jni-defaults",
     jni_libs: [
         "ld-android",
-        "libartbase",
         "libbacktrace",
         "libbase",
         "libbinder",
-        "libbinderthreadstate",
         "libbpf",
         "libbpf_android",
         "libc++",
         "libcgrouprc",
         "libcrypto",
         "libcutils",
-        "libdexfile",
         "libdl_android",
         "libhidl-gen-utils",
         "libhidlbase",
@@ -39,14 +36,17 @@ java_defaults {
         "libvndksupport",
         "libziparchive",
         "libz",
-        "netd_aidl_interface-V2-cpp",
+        "netd_aidl_interface-cpp",
     ],
 }
 
 android_test {
     name: "FrameworksNetTests",
     defaults: ["FrameworksNetTests-jni-defaults"],
-    srcs: ["java/**/*.java", "java/**/*.kt"],
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.kt",
+    ],
     platform_apis: true,
     test_suites: ["device-tests"],
     certificate: "platform",

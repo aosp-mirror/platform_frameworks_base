@@ -53,7 +53,11 @@ import java.util.List;
  * Displays a list of all activities which can be performed
  * for a given intent. Launches when clicked.
  *
+ * @deprecated Applications can implement this UI themselves using
+ *   {@link androidx.recyclerview.widget.RecyclerView} and
+ *   {@link android.content.pm.PackageManager#queryIntentActivities(Intent, int)}
  */
+@Deprecated
 public abstract class LauncherActivity extends ListActivity {
     Intent mIntent;
     PackageManager mPackageManager;

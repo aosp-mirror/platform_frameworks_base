@@ -32,9 +32,9 @@ import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_ALL;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
-import static android.net.wifi.WifiInfo.removeDoubleQuotes;
+import static android.net.wifi.WifiInfo.sanitizeSsid;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.BackupUtils;
@@ -48,6 +48,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -400,7 +401,7 @@ public class NetworkTemplate implements Parcelable {
         switch (ident.mType) {
             case TYPE_WIFI:
                 return Objects.equals(
-                        removeDoubleQuotes(mNetworkId), removeDoubleQuotes(ident.mNetworkId));
+                        sanitizeSsid(mNetworkId), sanitizeSsid(ident.mNetworkId));
             default:
                 return false;
         }
@@ -481,17 +482,39 @@ public class NetworkTemplate implements Parcelable {
      * For example, given an incoming template matching B, and the currently
      * active merge set [A,B], we'd return a new template that primarily matches
      * A, but also matches B.
+     * TODO: remove and use {@link #normalize(NetworkTemplate, List)}.
      */
     @UnsupportedAppUsage
     public static NetworkTemplate normalize(NetworkTemplate template, String[] merged) {
-        if (template.isMatchRuleMobile() && ArrayUtils.contains(merged, template.mSubscriberId)) {
-            // Requested template subscriber is part of the merge group; return
-            // a template that matches all merged subscribers.
-            return new NetworkTemplate(template.mMatchRule, merged[0], merged,
-                    template.mNetworkId);
-        } else {
-            return template;
+        return normalize(template, Arrays.<String[]>asList(merged));
+    }
+
+    /**
+     * Examine the given template and normalize if it refers to a "merged"
+     * mobile subscriber. We pick the "lowest" merged subscriber as the primary
+     * for key purposes, and expand the template to match all other merged
+     * subscribers.
+     *
+     * There can be multiple merged subscriberIds for multi-SIM devices.
+     *
+     * <p>
+     * For example, given an incoming template matching B, and the currently
+     * active merge set [A,B], we'd return a new template that primarily matches
+     * A, but also matches B.
+     */
+    public static NetworkTemplate normalize(NetworkTemplate template, List<String[]> mergedList) {
+        if (!template.isMatchRuleMobile()) return template;
+
+        for (String[] merged : mergedList) {
+            if (ArrayUtils.contains(merged, template.mSubscriberId)) {
+                // Requested template subscriber is part of the merge group; return
+                // a template that matches all merged subscribers.
+                return new NetworkTemplate(template.mMatchRule, merged[0], merged,
+                        template.mNetworkId);
+            }
         }
+
+        return template;
     }
 
     @UnsupportedAppUsage

@@ -16,7 +16,10 @@
 
 package com.android.internal.telephony;
 
-import android.telephony.TelephonyManager;
+import android.compat.annotation.UnsupportedAppUsage;
+import android.sysprop.TelephonyProperties;
+
+import java.util.Optional;
 
 /**
  * {@hide}
@@ -230,8 +233,11 @@ public interface RILConstants {
     /** NR 5G, LTE, TD-SCDMA, CDMA, EVDO, GSM and WCDMA */
     int NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 33;
 
-    int PREFERRED_NETWORK_MODE = Integer.parseInt(TelephonyManager.getTelephonyProperty(0,
-            "ro.telephony.default_network", Integer.toString(NETWORK_MODE_WCDMA_PREF)));
+    @UnsupportedAppUsage
+    int PREFERRED_NETWORK_MODE = Optional.of(TelephonyProperties.default_network())
+            .filter(list -> !list.isEmpty())
+            .map(list -> list.get(0))
+            .orElse(NETWORK_MODE_WCDMA_PREF);
 
     int BAND_MODE_UNSPECIFIED = 0;      //"unspecified" (selected by baseband automatically)
     int BAND_MODE_EURO = 1;             //"EURO band" (GSM-900 / DCS-1800 / WCDMA-IMT-2000)
@@ -471,6 +477,7 @@ public interface RILConstants {
     int RIL_REQUEST_STOP_KEEPALIVE = 145;
     int RIL_REQUEST_ENABLE_MODEM = 146;
     int RIL_REQUEST_GET_MODEM_STATUS = 147;
+    int RIL_REQUEST_CDMA_SEND_SMS_EXPECT_MORE = 148;
 
     /* The following requests are not defined in RIL.h */
     int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
@@ -482,6 +489,8 @@ public interface RILConstants {
     int RIL_REQUEST_EMERGENCY_DIAL = 205;
     int RIL_REQUEST_GET_PHONE_CAPABILITY = 206;
     int RIL_REQUEST_SWITCH_DUAL_SIM_CONFIG = 207;
+    int RIL_REQUEST_ENABLE_UICC_APPLICATIONS = 208;
+    int RIL_REQUEST_GET_UICC_APPLICATIONS_ENABLEMENT = 209;
 
     /* Responses begin */
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
@@ -545,4 +554,6 @@ public interface RILConstants {
     int RIL_UNSOL_ICC_SLOT_STATUS = 1100;
     int RIL_UNSOL_PHYSICAL_CHANNEL_CONFIG = 1101;
     int RIL_UNSOL_EMERGENCY_NUMBER_LIST = 1102;
+    int RIL_UNSOL_UICC_APPLICATIONS_ENABLEMENT_CHANGED = 1103;
+    int RIL_UNSOL_REGISTRATION_FAILED = 1104;
 }

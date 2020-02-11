@@ -83,6 +83,11 @@ public class SectionHeaderView extends ActivatableNotificationView {
         bindContents();
     }
 
+    @Override
+    public boolean isTransparent() {
+        return true;
+    }
+
     /** Must be called whenever the UI mode changes (i.e. when we enter night mode). */
     void onUiModeChanged() {
         updateBackgroundColors();

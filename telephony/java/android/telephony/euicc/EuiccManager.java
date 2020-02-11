@@ -32,11 +32,15 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
+import android.telephony.euicc.EuiccCardManager.ResetOption;
 
 import com.android.internal.telephony.euicc.IEuiccController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * EuiccManager is the application interface to eUICCs, or eSIMs/embedded SIMs.
@@ -186,6 +190,29 @@ public class EuiccManager {
     @SystemApi
     public static final String ACTION_RENAME_SUBSCRIPTION_PRIVILEGED =
             "android.telephony.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
+
+    /**
+     * Intent action sent by a carrier app to launch the eSIM activation flow provided by the LPA UI
+     * (LUI). The carrier app must send this intent with one of the following:
+     *
+     * <p>{@link #EXTRA_USE_QR_SCANNER} not set or set to false: The LPA should try to get an
+     * activation code from the carrier app by binding to the carrier app service implementing
+     * {@link android.service.euicc.EuiccService#ACTION_BIND_CARRIER_PROVISIONING_SERVICE}.
+     * <p>{@link #EXTRA_USE_QR_SCANNER} set to true: The LPA should launch a QR scanner for the user
+     * to scan an eSIM profile QR code.
+     *
+     * <p>Upon completion, the LPA should return one of the following results to the carrier app:
+     *
+     * <p>{@code Activity.RESULT_OK}: The LPA has succeeded in downloading the new eSIM profile.
+     * <p>{@code Activity.RESULT_CANCELED}: The carrier app should treat this as if the user pressed
+     * the back button.
+     * <p>Anything else: The carrier app should treat this as an error.
+     *
+     * <p>LPA needs to check if caller's package name is allowed to perform this action.
+     **/
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_START_EUICC_ACTIVATION =
+            "android.telephony.euicc.action.START_EUICC_ACTIVATION";
 
     /**
      * Result code for an operation indicating that the operation succeeded.
@@ -341,9 +368,19 @@ public class EuiccManager {
      *
      * @hide
      */
-    // TODO: Make this a @SystemApi.
+    @SystemApi
     public static final String EXTRA_PHYSICAL_SLOT_ID =
             "android.telephony.euicc.extra.PHYSICAL_SLOT_ID";
+
+
+    /**
+     * Key for an extra set on actions {@link #ACTION_START_EUICC_ACTIVATION} providing a boolean
+     * value of whether to start eSIM activation with QR scanner.
+     *
+     * <p>Expected type of the extra data: boolean
+     **/
+    public static final String EXTRA_USE_QR_SCANNER =
+            "android.telephony.euicc.extra.USE_QR_SCANNER";
 
     /**
      * Optional meta-data attribute for a carrier app providing an icon to use to represent the
@@ -821,23 +858,54 @@ public class EuiccManager {
     }
 
     /**
-     * Erase all subscriptions and reset the eUICC.
+     * Erase all operational subscriptions and reset the eUICC.
      *
      * <p>Requires that the calling app has the
      * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
+     * and use {@link #eraseSubscriptions(int, PendingIntent)} instead
+     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void eraseSubscriptions(PendingIntent callbackIntent) {
+    @Deprecated
+    public void eraseSubscriptions(@NonNull PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
             getIEuiccController().eraseSubscriptions(mCardId, callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Erase all specific subscriptions and reset the eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @param options flag indicating specific set of subscriptions to erase
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void eraseSubscriptions(
+            @ResetOption int options, @NonNull PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            getIEuiccController().eraseSubscriptionsWithOptions(mCardId, options, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -868,6 +936,138 @@ public class EuiccManager {
         }
         try {
             getIEuiccController().retainSubscriptionsForFactoryReset(mCardId, callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the supported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * <p>The supported country list will be replaced by {@code supportedCountries}. For how we
+     * determine whether a country is supported please check {@link #isSupportedCountry}.
+     *
+     * @param supportedCountries is a list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void setSupportedCountries(@NonNull List<String> supportedCountries) {
+        if (!isEnabled()) {
+            return;
+        }
+        try {
+            getIEuiccController().setSupportedCountries(
+                    true /* isSupported */,
+                    supportedCountries.stream()
+                        .map(String::toUpperCase).collect(Collectors.toList()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the unsupported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * <p>The unsupported country list will be replaced by {@code unsupportedCountries}. For how we
+     * determine whether a country is supported please check {@link #isSupportedCountry}.
+     *
+     * @param unsupportedCountries is a list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void setUnsupportedCountries(@NonNull List<String> unsupportedCountries) {
+        if (!isEnabled()) {
+            return;
+        }
+        try {
+            getIEuiccController().setSupportedCountries(
+                    false /* isSupported */,
+                    unsupportedCountries.stream()
+                        .map(String::toUpperCase).collect(Collectors.toList()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the supported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @return list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    @NonNull
+    public List<String> getSupportedCountries() {
+        if (!isEnabled()) {
+            return Collections.emptyList();
+        }
+        try {
+            return getIEuiccController().getSupportedCountries(true /* isSupported */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the unsupported countries for eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @return list of strings contains country ISO codes in uppercase.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    @NonNull
+    public List<String> getUnsupportedCountries() {
+        if (!isEnabled()) {
+            return Collections.emptyList();
+        }
+        try {
+            return getIEuiccController().getSupportedCountries(false /* isSupported */);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the given country supports eUICC.
+     *
+     * <p>Supported country list has a higher prority than unsupported country list. If the
+     * supported country list is not empty, {@code countryIso} will be considered as supported when
+     * it exists in the supported country list. Otherwise {@code countryIso} is not supported. If
+     * the supported country list is empty, {@code countryIso} will be considered as supported if it
+     * does not exist in the unsupported country list. Otherwise {@code countryIso} is not
+     * supported. If both supported and unsupported country lists are empty, then all countries are
+     * consider be supported. For how to set supported and unsupported country list, please check
+     * {@link #setSupportedCountries} and {@link #setUnsupportedCountries}.
+     *
+     * @param countryIso should be the ISO-3166 country code is provided in uppercase 2 character
+     * format.
+     * @return whether the given country supports eUICC or not.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public boolean isSupportedCountry(@NonNull String countryIso) {
+        if (!isEnabled()) {
+            return false;
+        }
+        try {
+            return getIEuiccController().isSupportedCountry(countryIso.toUpperCase());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

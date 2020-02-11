@@ -16,7 +16,7 @@
 
 package android.content.res;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 
 /**
@@ -26,6 +26,11 @@ import android.content.pm.ActivityInfo.Config;
  * @hide For internal use only.
  */
 public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<ConstantState<T>> {
+
+    @UnsupportedAppUsage
+    public ConfigurationBoundResourceCache() {
+    }
+
     /**
      * If the resource is cached, creates and returns a new instance of it.
      *

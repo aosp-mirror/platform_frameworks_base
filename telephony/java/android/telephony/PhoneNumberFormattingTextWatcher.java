@@ -16,14 +16,13 @@
 
 package android.telephony;
 
-import com.android.i18n.phonenumbers.AsYouTypeFormatter;
-import com.android.i18n.phonenumbers.PhoneNumberUtil;
-
-import android.annotation.UnsupportedAppUsage;
-import android.telephony.PhoneNumberUtils;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextWatcher;
+
+import com.android.i18n.phonenumbers.AsYouTypeFormatter;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
 
 import java.util.Locale;
 

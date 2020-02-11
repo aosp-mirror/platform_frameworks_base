@@ -16,9 +16,10 @@
 
 package android.os;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 import com.google.android.collect.Maps;
 
-import android.annotation.UnsupportedAppUsage;
 import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 

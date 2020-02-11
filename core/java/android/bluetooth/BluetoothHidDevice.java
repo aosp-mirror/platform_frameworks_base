@@ -16,8 +16,12 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -36,6 +40,7 @@ import java.util.concurrent.Executor;
  */
 public final class BluetoothHidDevice implements BluetoothProfile {
     private static final String TAG = BluetoothHidDevice.class.getSimpleName();
+    private static final boolean DBG = false;
 
     /**
      * Intent used to broadcast the change in connection state of the Input Host profile.
@@ -681,5 +686,63 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         }
 
         return result;
+    }
+
+    /**
+     * Connects Hid Device if connectionPolicy is {@link BluetoothProfile#CONNECTION_POLICY_ALLOWED}
+     * and disconnects Hid device if connectionPolicy is
+     * {@link BluetoothProfile#CONNECTION_POLICY_FORBIDDEN}.
+     *
+     * <p> The device should already be paired.
+     * Connection policy can be one of:
+     * {@link BluetoothProfile#CONNECTION_POLICY_ALLOWED},
+     * {@link BluetoothProfile#CONNECTION_POLICY_FORBIDDEN},
+     * {@link BluetoothProfile#CONNECTION_POLICY_UNKNOWN}
+     *
+     * @param device Paired bluetooth device
+     * @param connectionPolicy determines whether hid device should be connected or disconnected
+     * @return true if hid device is connected or disconnected, false otherwise
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
+            @ConnectionPolicy int connectionPolicy) {
+        log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
+        try {
+            final IBluetoothHidDevice service = getService();
+            if (service != null && isEnabled()
+                    && isValidDevice(device)) {
+                if (connectionPolicy != BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
+                        && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
+                    return false;
+                }
+                return service.setConnectionPolicy(device, connectionPolicy);
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
+        }
+    }
+
+    private boolean isEnabled() {
+        if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+        return false;
+    }
+
+    private boolean isValidDevice(BluetoothDevice device) {
+        if (device == null) return false;
+
+        if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
+        return false;
+    }
+
+    private static void log(String msg) {
+        if (DBG) {
+            Log.d(TAG, msg);
+        }
     }
 }

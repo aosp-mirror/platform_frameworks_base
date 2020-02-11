@@ -359,7 +359,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mNetworkScoreManager.registerNetworkScoreCache(
                 NetworkKey.TYPE_WIFI,
                 mScoreCache,
-                NetworkScoreManager.CACHE_FILTER_SCAN_RESULTS);
+                NetworkScoreManager.SCORE_FILTER_SCAN_RESULTS);
     }
 
     private void requestScoresForNetworkKeys(Collection<NetworkKey> keys) {

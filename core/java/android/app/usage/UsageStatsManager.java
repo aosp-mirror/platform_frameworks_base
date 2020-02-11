@@ -23,9 +23,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Build;
@@ -1041,8 +1041,11 @@ public final class UsageStatsManager {
 
     /**
      * Inform usage stats that the carrier privileged apps access rules have changed.
+     * <p> The caller must have {@link android.Manifest.permission#BIND_CARRIER_SERVICES} </p>
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BIND_CARRIER_SERVICES)
     public void onCarrierPrivilegedAppsChanged() {
         try {
             mService.onCarrierPrivilegedAppsChanged();

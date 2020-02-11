@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Chức năng điểm truy cập Internet hoặc điểm phát sóng đang hoạt động"</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"Nhấn để thiết lập."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Đã tắt tính năng chia sẻ kết nối"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Hãy liên hệ với quản trị viên của bạn để biết chi tiết"</string>
+</resources>

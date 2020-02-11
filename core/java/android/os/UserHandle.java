@@ -20,8 +20,8 @@ import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.PrintWriter;
 
@@ -171,6 +171,7 @@ public final class UserHandle implements Parcelable {
      * "it's system", because of isolated UIDs. Use {@link #isCore} for that.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static boolean isApp(int uid) {
         if (uid > 0) {
@@ -354,6 +355,7 @@ public final class UserHandle implements Parcelable {
      * components -- user, app, isolated, etc.
      * @hide
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void formatUid(PrintWriter pw, int uid) {
         if (uid < Process.FIRST_APPLICATION_UID) {
             pw.print(uid);

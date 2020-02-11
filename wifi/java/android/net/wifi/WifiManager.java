@@ -29,8 +29,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -38,6 +38,7 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.NetworkStack;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
@@ -532,19 +533,25 @@ public class WifiManager {
     @SystemApi
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     /**
-     * The interface used for the softap.
+     * The lookup key for a String extra that stores the interface name used for the Soft AP.
+     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
+     * Retrieve its value with {@link android.content.Intent#getStringExtra(String)}.
      *
      * @hide
      */
-    public static final String EXTRA_WIFI_AP_INTERFACE_NAME = "wifi_ap_interface_name";
+    @SystemApi
+    public static final String EXTRA_WIFI_AP_INTERFACE_NAME =
+            "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
     /**
-     * The intended ip mode for this softap.
-     * @see #IFACE_IP_MODE_TETHERED
-     * @see #IFACE_IP_MODE_LOCAL_ONLY
+     * The lookup key for an int extra that stores the intended IP mode for this Soft AP.
+     * One of {@link #IFACE_IP_MODE_TETHERED} or {@link #IFACE_IP_MODE_LOCAL_ONLY}.
+     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
+     * Retrieve its value with {@link android.content.Intent#getIntExtra(String, int)}.
      *
      * @hide
      */
-    public static final String EXTRA_WIFI_AP_MODE = "wifi_ap_mode";
+    @SystemApi
+    public static final String EXTRA_WIFI_AP_MODE = "android.net.wifi.extra.WIFI_AP_MODE";
 
     /** @hide */
     @IntDef(flag = false, prefix = { "WIFI_AP_STATE_" }, value = {
@@ -634,41 +641,62 @@ public class WifiManager {
      */
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"IFACE_IP_MODE_"}, value = {
+            IFACE_IP_MODE_UNSPECIFIED,
+            IFACE_IP_MODE_CONFIGURATION_ERROR,
+            IFACE_IP_MODE_TETHERED,
+            IFACE_IP_MODE_LOCAL_ONLY})
+    public @interface IfaceIpMode {}
+
     /**
      * Interface IP mode unspecified.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
+    @SystemApi
     public static final int IFACE_IP_MODE_UNSPECIFIED = -1;
 
     /**
      * Interface IP mode for configuration error.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
+    @SystemApi
     public static final int IFACE_IP_MODE_CONFIGURATION_ERROR = 0;
 
     /**
      * Interface IP mode for tethering.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
+    @SystemApi
     public static final int IFACE_IP_MODE_TETHERED = 1;
 
     /**
      * Interface IP mode for Local Only Hotspot.
      *
-     * @see updateInterfaceIpState(String, int)
+     * @see #updateInterfaceIpState(String, int)
      *
      * @hide
      */
+    @SystemApi
     public static final int IFACE_IP_MODE_LOCAL_ONLY = 2;
+
+    /**
+     * Broadcast intent action indicating that the wifi network settings
+     * had been reset.
+     * @hide
+     */
+    public static final String WIFI_NETWORK_SETTINGS_RESET_ACTION =
+            "android.net.wifi.action.NETWORK_SETTINGS_RESET";
 
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
@@ -1100,6 +1128,9 @@ public class WifiManager {
      */
     private static final int MAX_ACTIVE_LOCKS = 50;
 
+    /** Indicates an invalid SSID. */
+    public static final String UNKNOWN_SSID = "<unknown ssid>";
+
     /* Number of currently active WifiLocks and MulticastLocks */
     @UnsupportedAppUsage
     private int mActiveLockCount;
@@ -1169,6 +1200,7 @@ public class WifiManager {
      * <li>allowedAuthAlgorithms</li>
      * <li>allowedPairwiseCiphers</li>
      * <li>allowedGroupCiphers</li>
+     * <li>status</li>
      * </ul>
      * @return a list of network configurations in the form of a list
      * of {@link WifiConfiguration} objects.
@@ -2298,7 +2330,7 @@ public class WifiManager {
      * <p>
      * In the connected state, access to the SSID and BSSID requires
      * the same permissions as {@link #getScanResults}. If such access is not allowed,
-     * {@link WifiInfo#getSSID} will return {@code "<unknown ssid>"} and
+     * {@link WifiInfo#getSSID} will return {@link #UNKNOWN_SSID} and
      * {@link WifiInfo#getBSSID} will return {@code "02:00:00:00:00:00"}.
      *
      * @return the Wi-Fi information, contained in {@link WifiInfo}.
@@ -2530,16 +2562,21 @@ public class WifiManager {
     /**
      * Call allowing ConnectivityService to update WifiService with interface mode changes.
      *
-     * The possible modes include: {@link IFACE_IP_MODE_TETHERED},
-     *                             {@link IFACE_IP_MODE_LOCAL_ONLY},
-     *                             {@link IFACE_IP_MODE_CONFIGURATION_ERROR}
-     *
-     * @param ifaceName String name of the updated interface
-     * @param mode int representing the new mode
+     * @param ifaceName String name of the updated interface, or null to represent all interfaces
+     * @param mode int representing the new mode, one of:
+     *             {@link #IFACE_IP_MODE_TETHERED},
+     *             {@link #IFACE_IP_MODE_LOCAL_ONLY},
+     *             {@link #IFACE_IP_MODE_CONFIGURATION_ERROR},
+     *             {@link #IFACE_IP_MODE_UNSPECIFIED}
      *
      * @hide
      */
-    public void updateInterfaceIpState(String ifaceName, int mode) {
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
+    public void updateInterfaceIpState(@Nullable String ifaceName, @IfaceIpMode int mode) {
         try {
             mService.updateInterfaceIpState(ifaceName, mode);
         } catch (RemoteException e) {
@@ -2548,15 +2585,21 @@ public class WifiManager {
     }
 
     /**
-     * Start SoftAp mode with the specified configuration.
-     * Note that starting in access point mode disables station
-     * mode operation
-     * @param wifiConfig SSID, security and channel details as
-     *        part of WifiConfiguration
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     * Start Soft AP (hotspot) mode with the specified configuration.
+     * Note that starting Soft AP mode may disable station mode operation if the device does not
+     * support concurrency.
+     * @param wifiConfig SSID, security and channel details as part of WifiConfiguration, or null to
+     *                   use the persisted Soft AP configuration that was previously set using
+     *                   {@link #setWifiApConfiguration(WifiConfiguration)}.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
     public boolean startSoftAp(@Nullable WifiConfiguration wifiConfig) {
         try {
             return mService.startSoftAp(wifiConfig);
@@ -2572,6 +2615,11 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
     public boolean stopSoftAp() {
         try {
             return mService.stopSoftAp();
@@ -3073,29 +3121,31 @@ public class WifiManager {
 
     /**
      * Base class for soft AP callback. Should be extended by applications and set when calling
-     * {@link WifiManager#registerSoftApCallback(SoftApCallback, Handler)}.
+     * {@link WifiManager#registerSoftApCallback(Executor, SoftApCallback)}.
      *
      * @hide
      */
+    @SystemApi
     public interface SoftApCallback {
         /**
          * Called when soft AP state changes.
          *
-         * @param state new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
-         *        {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
-         *        {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
+         * @param state         new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
+         *                      {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
+         *                      {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
          * @param failureReason reason when in failed state. One of
-         *        {@link #SAP_START_FAILURE_GENERAL}, {@link #SAP_START_FAILURE_NO_CHANNEL}
+         *                      {@link #SAP_START_FAILURE_GENERAL},
+         *                      {@link #SAP_START_FAILURE_NO_CHANNEL}
          */
-        public abstract void onStateChanged(@WifiApState int state,
+        void onStateChanged(@WifiApState int state,
                 @SapStartFailure int failureReason);
 
         /**
-         * Called when number of connected clients to soft AP changes.
+         * Called when the connected clients to soft AP changes.
          *
-         * @param numClients number of connected clients
+         * @param clients the currently connected clients
          */
-        public abstract void onNumClientsChanged(int numClients);
+        void onConnectedClientsChanged(@NonNull List<WifiClient> clients);
     }
 
     /**
@@ -3104,11 +3154,11 @@ public class WifiManager {
      * @hide
      */
     private class SoftApCallbackProxy extends ISoftApCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final SoftApCallback mCallback;
 
-        SoftApCallbackProxy(Looper looper, SoftApCallback callback) {
-            mHandler = new Handler(looper);
+        SoftApCallbackProxy(Executor executor, SoftApCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
@@ -3118,18 +3168,23 @@ public class WifiManager {
                 Log.v(TAG, "SoftApCallbackProxy: onStateChanged: state=" + state
                         + ", failureReason=" + failureReason);
             }
-            mHandler.post(() -> {
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onStateChanged(state, failureReason);
             });
         }
 
         @Override
-        public void onNumClientsChanged(int numClients) {
+        public void onConnectedClientsChanged(List<WifiClient> clients) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "SoftApCallbackProxy: onNumClientsChanged: numClients=" + numClients);
+                Log.v(TAG, "SoftApCallbackProxy: onConnectedClientsChanged: clients="
+                        + clients.size() + " clients");
             }
-            mHandler.post(() -> {
-                mCallback.onNumClientsChanged(numClients);
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onConnectedClientsChanged(clients);
             });
         }
     }
@@ -3139,29 +3194,30 @@ public class WifiManager {
      * soft AP state and number of connected devices immediately after a successful call to this API
      * via callback. Note that receiving an immediate WIFI_AP_STATE_FAILED value for soft AP state
      * indicates that the latest attempt to start soft AP has failed. Caller can unregister a
-     * previously registered callback using {@link unregisterSoftApCallback}
+     * previously registered callback using {@link #unregisterSoftApCallback}
      * <p>
      * Applications should have the
      * {@link android.Manifest.permission#NETWORK_SETTINGS NETWORK_SETTINGS} permission. Callers
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
+     * @param executor The Executor on whose thread to execute the callbacks of the {@code callback}
+     *                 object.
      * @param callback Callback for soft AP events
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
-     *                 object. If null, then the application's main thread will be used.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@NonNull SoftApCallback callback,
-                                       @Nullable Handler handler) {
+    public void registerSoftApCallback(@NonNull @CallbackExecutor Executor executor,
+                                       @NonNull SoftApCallback callback) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
-        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", handler=" + handler);
+        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 
-        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
-            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(looper, callback),
+            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(executor, callback),
                     callback.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

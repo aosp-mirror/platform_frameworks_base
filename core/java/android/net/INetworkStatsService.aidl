@@ -23,6 +23,8 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.net.netstats.provider.INetworkStatsProvider;
+import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.os.IBinder;
 import android.os.Messenger;
 import com.android.internal.net.VpnInfo;
@@ -89,4 +91,7 @@ interface INetworkStatsService {
     /** Get the total network stats information since boot */
     long getTotalStats(int type);
 
+    /** Registers a network stats provider */
+    INetworkStatsProviderCallback registerNetworkStatsProvider(String tag,
+            in INetworkStatsProvider provider);
 }

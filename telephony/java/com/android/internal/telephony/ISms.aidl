@@ -1,29 +1,28 @@
 /*
-** Copyright 2007, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+ * Copyright 2007, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.telephony.IFinancialSmsCallback;
 import com.android.internal.telephony.SmsRawData;
 
 /**
- * Interface for applications to access the ICC phone book.
+ * Service interface to handle SMS API requests
  *
  * See also SmsManager.java.
  */
@@ -543,6 +542,13 @@ interface ISms {
                 in List<PendingIntent> deliveryIntents);
 
     /**
+     * Get carrier-dependent configuration values.
+     *
+     * @param subId the subscription Id
+     */
+    Bundle getCarrierConfigValuesForSubscriber(int subId);
+
+    /**
      * Create an app-only incoming SMS request for the calling package.
      *
      * If an incoming text contains the token returned by this method the provided
@@ -570,20 +576,37 @@ interface ISms {
             int subId, String callingPkg, String prefixes, in PendingIntent intent);
 
     /**
-     * Get sms inbox messages for the calling financial app.
-     *
-     * @param subId the SIM id.
-     * @param callingPkg the package name of the calling app.
-     * @param params parameters to filter the sms messages.
-     * @param callback the callback interface to deliver the result.
-     */
-    void getSmsMessagesForFinancialApp(
-        int subId, String callingPkg, in Bundle params, in IFinancialSmsCallback callback);
-
-    /**
      * Check if the destination is a possible premium short code.
      *
      * @param destAddress the destination address to test for possible short code
      */
-    int checkSmsShortCodeDestination(int subId, String callingApk, String destAddress, String countryIso);
+    int checkSmsShortCodeDestination(int subId, String callingApk, String callingFeatureId,
+            String destAddress, String countryIso);
+
+    /**
+     * Gets the SMSC address from (U)SIM.
+     *
+     * @param subId the subscription Id.
+     * @param callingPackage the package name of the calling app.
+     * @return the SMSC address string, null if failed.
+     */
+    String getSmscAddressFromIccEfForSubscriber(int subId, String callingPackage);
+
+    /**
+     * Sets the SMSC address on (U)SIM.
+     *
+     * @param smsc the SMSC address string.
+     * @param subId the subscription Id.
+     * @param callingPackage the package name of the calling app.
+     * @return true for success, false otherwise.
+     */
+    boolean setSmscAddressOnIccEfForSubscriber(String smsc, int subId, String callingPackage);
+
+    /**
+     * Get the capacity count of sms on Icc card.
+     *
+     * @param subId for subId which getSmsCapacityOnIcc is queried.
+     * @return capacity of ICC
+     */
+    int getSmsCapacityOnIccForSubscriber(int subId);
 }

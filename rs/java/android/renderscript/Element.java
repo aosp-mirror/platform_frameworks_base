@@ -16,7 +16,7 @@
 
 package android.renderscript;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * <p>An Element represents one item within an {@link

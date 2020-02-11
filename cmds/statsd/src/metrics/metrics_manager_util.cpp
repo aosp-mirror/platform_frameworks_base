@@ -32,8 +32,8 @@
 #include "../metrics/GaugeMetricProducer.h"
 #include "../metrics/ValueMetricProducer.h"
 
+#include "atoms_info.h"
 #include "stats_util.h"
-#include "statslog.h"
 
 #include <inttypes.h>
 

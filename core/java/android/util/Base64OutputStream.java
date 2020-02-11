@@ -16,7 +16,8 @@
 
 package android.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

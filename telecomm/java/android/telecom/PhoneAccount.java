@@ -16,7 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -329,7 +331,17 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_EMERGENCY_PREFERRED = 0x2000;
 
-    /* NEXT CAPABILITY: 0x4000 */
+    /**
+     * An adhoc conference call is established by providing a list of addresses to
+     * {@code TelecomManager#startConference(List<Uri>, int videoState)} where the
+     * {@link ConnectionService} is responsible for connecting all indicated participants
+     * to a conference simultaneously.
+     * This is in contrast to conferences formed by merging calls together (e.g. using
+     * {@link android.telecom.Call#mergeConference()}).
+     */
+    public static final int CAPABILITY_ADHOC_CONFERENCE_CALLING = 0x4000;
+
+    /* NEXT CAPABILITY: 0x8000 */
 
     /**
      * URI scheme for telephone number URIs.
@@ -592,12 +604,17 @@ public final class PhoneAccount implements Parcelable {
          * only be one {@link PhoneAccount} with a non-empty group number registered to Telecom at a
          * time. By default, there is no group Id for a {@link PhoneAccount} (an empty String). Only
          * grouped {@link PhoneAccount}s with the same {@link ConnectionService} can be replaced.
+         * <p>
+         * Note: This is an API specific to the Telephony stack.
+         *
          * @param groupId The group Id of the {@link PhoneAccount} that will replace any other
          * registered {@link PhoneAccount} in Telecom with the same Group Id.
          * @return The builder
          * @hide
          */
-        public Builder setGroupId(String groupId) {
+        @SystemApi
+        @TestApi
+        public @NonNull Builder setGroupId(@NonNull String groupId) {
             if (groupId != null) {
                 mGroupId = groupId;
             } else {
@@ -1046,6 +1063,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_RTT)) {
             sb.append("Rtt");
+        }
+        if (hasCapabilities(CAPABILITY_ADHOC_CONFERENCE_CALLING)) {
+            sb.append("AdhocConf");
         }
         return sb.toString();
     }

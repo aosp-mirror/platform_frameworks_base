@@ -16,9 +16,9 @@
 
 package com.android.internal.view.menu;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.DialogInterface;
 import android.os.IBinder;
 import android.view.KeyEvent;

@@ -60,6 +60,18 @@ public class CaptivePortal implements Parcelable {
     @SystemApi
     @TestApi
     public static final int APP_RETURN_WANTED_AS_IS = 2;
+    /** Event offset of request codes from captive portal application. */
+    private static final int APP_REQUEST_BASE = 100;
+    /**
+     * Request code from the captive portal application, indicating that the network condition may
+     * have changed and the network should be re-validated.
+     * @see ICaptivePortal#appRequest(int)
+     * @see android.net.INetworkMonitor#forceReevaluation(int)
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int APP_REQUEST_REEVALUATION_REQUIRED = APP_REQUEST_BASE + 0;
 
     private final IBinder mBinder;
 
@@ -131,6 +143,19 @@ public class CaptivePortal implements Parcelable {
     public void useNetwork() {
         try {
             ICaptivePortal.Stub.asInterface(mBinder).appResponse(APP_RETURN_WANTED_AS_IS);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Request that the system reevaluates the captive portal status.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void reevaluateNetwork() {
+        try {
+            ICaptivePortal.Stub.asInterface(mBinder).appRequest(APP_REQUEST_REEVALUATION_REQUIRED);
         } catch (RemoteException e) {
         }
     }

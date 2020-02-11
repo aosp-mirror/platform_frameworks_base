@@ -46,7 +46,6 @@ android_test {
         "libbacktrace",
         "libbase",
         "libbinder",
-        "libbinderthreadstate",
         "libc++",
         "libcutils",
         "liblog",
@@ -55,6 +54,6 @@ android_test {
         "libui",
         "libunwindstack",
         "libutils",
-        "netd_aidl_interface-V2-cpp",
+        "netd_aidl_interface-cpp",
     ],
 }

@@ -18,10 +18,10 @@ package com.android.internal.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -58,8 +58,10 @@ import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.GpsBatteryStats;
 import android.os.connectivity.WifiBatteryStats;
 import android.provider.Settings;
+import android.telephony.CellSignalStrength;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
+import android.telephony.ModemActivityInfo.TransmitPower;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -830,7 +832,7 @@ public class BatteryStatsImpl extends BatteryStats {
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
     final StopwatchTimer[] mPhoneSignalStrengthsTimer =
-            new StopwatchTimer[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+            new StopwatchTimer[CellSignalStrength.getNumSignalStrengthLevels()];
 
     StopwatchTimer mPhoneSignalScanningTimer;
 
@@ -905,8 +907,6 @@ public class BatteryStatsImpl extends BatteryStats {
     int mBluetoothScanNesting;
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected StopwatchTimer mBluetoothScanTimer;
-
-    boolean mIsCellularTxPowerHigh = false;
 
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTime;
@@ -5132,7 +5132,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     void stopAllPhoneSignalStrengthTimersLocked(int except) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
-        for (int i = 0; i < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             if (i == except) {
                 continue;
             }
@@ -5147,7 +5147,7 @@ public class BatteryStatsImpl extends BatteryStats {
             // In this case we will always be STATE_OUT_OF_SERVICE, so need
             // to infer that we are scanning from other data.
             if (state == ServiceState.STATE_OUT_OF_SERVICE
-                    && signalBin > SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+                    && signalBin > CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
                 state = ServiceState.STATE_IN_SERVICE;
             }
         }
@@ -5170,7 +5170,7 @@ public class BatteryStatsImpl extends BatteryStats {
             // In this case we will always be STATE_OUT_OF_SERVICE, so need
             // to infer that we are scanning from other data.
             if (state == ServiceState.STATE_OUT_OF_SERVICE
-                    && strengthBin > SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+                    && strengthBin > CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
                 state = ServiceState.STATE_IN_SERVICE;
             }
         }
@@ -5187,7 +5187,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // bin and have the scanning bit set.
         } else if (state == ServiceState.STATE_OUT_OF_SERVICE) {
             scanning = true;
-            strengthBin = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            strengthBin = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
             if (!mPhoneSignalScanningTimer.isRunningLocked()) {
                 mHistoryCur.states |= HistoryItem.STATE_PHONE_SCANNING_FLAG;
                 newHistory = true;
@@ -5261,16 +5261,26 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @UnsupportedAppUsage
-    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData) {
+    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData, int serviceType) {
         // BatteryStats uses 0 to represent no network type.
         // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
         // Unknown is included in DATA_CONNECTION_OTHER.
-        int bin = DATA_CONNECTION_NONE;
+        int bin = DATA_CONNECTION_OUT_OF_SERVICE;
         if (hasData) {
-            if (dataType > 0 && dataType <= TelephonyManager.MAX_NETWORK_TYPE) {
+            if (dataType > 0 && dataType <= TelephonyManager.getAllNetworkTypes().length) {
                 bin = dataType;
             } else {
-                bin = DATA_CONNECTION_OTHER;
+                switch (serviceType) {
+                    case ServiceState.STATE_OUT_OF_SERVICE:
+                        bin = DATA_CONNECTION_OUT_OF_SERVICE;
+                        break;
+                    case ServiceState.STATE_EMERGENCY_ONLY:
+                        bin = DATA_CONNECTION_EMERGENCY_SERVICE;
+                        break;
+                    default:
+                        bin = DATA_CONNECTION_OTHER;
+                        break;
+                }
             }
         }
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
@@ -9777,7 +9787,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer = new StopwatchTimer(mClocks, null, -15, null, mOnBatteryTimeBase);
         mDeviceIdlingTimer = new StopwatchTimer(mClocks, null, -12, null, mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(mClocks, null, -3, null, mOnBatteryTimeBase);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(mClocks, null, -200-i, null,
                     mOnBatteryTimeBase);
         }
@@ -10486,7 +10496,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mFlashlightOnTimer.reset(false);
         mCameraOnTimer.reset(false);
         mBluetoothScanTimer.reset(false);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             mPhoneSignalStrengthsTimer[i].reset(false);
         }
         mPhoneSignalScanningTimer.reset(false);
@@ -10969,7 +10979,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private ModemActivityInfo mLastModemActivityInfo =
-            new ModemActivityInfo(0, 0, 0, new int[0], 0, 0);
+            new ModemActivityInfo(0, 0, 0, new int[0], 0);
 
     private ModemActivityInfo getDeltaModemActivityInfo(ModemActivityInfo activityInfo) {
         if (activityInfo == null) {
@@ -10977,15 +10987,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
         for (int i = 0; i < ModemActivityInfo.TX_POWER_LEVELS; i++) {
-            txTimeMs[i] = activityInfo.getTxTimeMillis()[i]
-                    - mLastModemActivityInfo.getTxTimeMillis()[i];
+            txTimeMs[i] = activityInfo.getTransmitPowerInfo().get(i).getTimeInMillis()
+                    - mLastModemActivityInfo.getTransmitPowerInfo().get(i).getTimeInMillis();
         }
         ModemActivityInfo deltaInfo = new ModemActivityInfo(activityInfo.getTimestamp(),
                 activityInfo.getSleepTimeMillis() - mLastModemActivityInfo.getSleepTimeMillis(),
                 activityInfo.getIdleTimeMillis() - mLastModemActivityInfo.getIdleTimeMillis(),
                 txTimeMs,
-                activityInfo.getRxTimeMillis() - mLastModemActivityInfo.getRxTimeMillis(),
-                activityInfo.getEnergyUsed() - mLastModemActivityInfo.getEnergyUsed());
+                activityInfo.getReceiveTimeMillis() - mLastModemActivityInfo.getReceiveTimeMillis());
         mLastModemActivityInfo = activityInfo;
         return deltaInfo;
     }
@@ -11028,10 +11037,11 @@ public class BatteryStatsImpl extends BatteryStats {
                         deltaInfo.getIdleTimeMillis());
                 mModemActivity.getSleepTimeCounter().addCountLocked(
                         deltaInfo.getSleepTimeMillis());
-                mModemActivity.getRxTimeCounter().addCountLocked(deltaInfo.getRxTimeMillis());
+                mModemActivity.getRxTimeCounter().addCountLocked(deltaInfo.getReceiveTimeMillis());
                 for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                     mModemActivity.getTxTimeCounters()[lvl]
-                        .addCountLocked(deltaInfo.getTxTimeMillis()[lvl]);
+                        .addCountLocked(deltaInfo.getTransmitPowerInfo()
+                            .get(lvl).getTimeInMillis());
                 }
 
                 // POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
@@ -11043,13 +11053,14 @@ public class BatteryStatsImpl extends BatteryStats {
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_SLEEP)
                             + deltaInfo.getIdleTimeMillis() *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE)
-                            + deltaInfo.getRxTimeMillis() *
+                            + deltaInfo.getReceiveTimeMillis() *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX);
-                    int[] txTimeMs = deltaInfo.getTxTimeMillis();
-                    for (int i = 0; i < Math.min(txTimeMs.length,
+
+                    List<TransmitPower> txPowerInfo = deltaInfo.getTransmitPowerInfo();
+                    for (int i = 0; i < Math.min(txPowerInfo.size(),
                             SignalStrength.NUM_SIGNAL_STRENGTH_BINS); i++) {
-                        energyUsed += txTimeMs[i] * mPowerProfile.getAveragePower(
-                                PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
+                        energyUsed += txPowerInfo.get(i).getTimeInMillis() * mPowerProfile
+                            .getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
                     }
 
                     // We store the power drain as mAms.
@@ -11138,15 +11149,16 @@ public class BatteryStatsImpl extends BatteryStats {
                             ControllerActivityCounterImpl activityCounter =
                                     u.getOrCreateModemControllerActivityLocked();
                             if (totalRxPackets > 0 && entry.rxPackets > 0) {
-                                final long rxMs = (entry.rxPackets * deltaInfo.getRxTimeMillis())
-                                        / totalRxPackets;
+                                final long rxMs = (entry.rxPackets
+                                    * deltaInfo.getReceiveTimeMillis()) / totalRxPackets;
                                 activityCounter.getRxTimeCounter().addCountLocked(rxMs);
                             }
 
                             if (totalTxPackets > 0 && entry.txPackets > 0) {
                                 for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                                     long txMs =
-                                            entry.txPackets * deltaInfo.getTxTimeMillis()[lvl];
+                                            entry.txPackets * deltaInfo.getTransmitPowerInfo()
+                                                .get(lvl).getTimeInMillis();
                                     txMs /= totalTxPackets;
                                     activityCounter.getTxTimeCounters()[lvl].addCountLocked(txMs);
                                 }
@@ -11177,32 +11189,23 @@ public class BatteryStatsImpl extends BatteryStats {
         if (activityInfo == null) {
             return;
         }
-        int[] txTimeMs = activityInfo.getTxTimeMillis();
-        if (txTimeMs == null || txTimeMs.length != ModemActivityInfo.TX_POWER_LEVELS) {
+        List<TransmitPower> txPowerInfo = activityInfo.getTransmitPowerInfo();
+        if (txPowerInfo == null || txPowerInfo.size() != ModemActivityInfo.TX_POWER_LEVELS) {
             return;
         }
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         int levelMaxTimeSpent = 0;
-        for (int i = 1; i < txTimeMs.length; i++) {
-            if (txTimeMs[i] > txTimeMs[levelMaxTimeSpent]) {
+        for (int i = 1; i < txPowerInfo.size(); i++) {
+            if (txPowerInfo.get(i).getTimeInMillis() > txPowerInfo.get(levelMaxTimeSpent)
+                .getTimeInMillis()) {
                 levelMaxTimeSpent = i;
             }
         }
         if (levelMaxTimeSpent == ModemActivityInfo.TX_POWER_LEVELS - 1) {
-            if (!mIsCellularTxPowerHigh) {
-                mHistoryCur.states2 |= HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
-                addHistoryRecordLocked(elapsedRealtime, uptime);
-                mIsCellularTxPowerHigh = true;
-            }
-            return;
-        }
-        if (mIsCellularTxPowerHigh) {
-            mHistoryCur.states2 &= ~HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
+            mHistoryCur.states2 |= HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            mIsCellularTxPowerHigh = false;
         }
-        return;
     }
 
     private final class BluetoothActivityInfoCache {
@@ -12606,7 +12609,8 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < timeInRatMs.length; i++) {
            timeInRatMs[i] = getPhoneDataConnectionTime(i, rawRealTime, which) / 1000;
         }
-        long[] timeInRxSignalStrengthLevelMs = new long[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+        long[] timeInRxSignalStrengthLevelMs =
+                new long[CellSignalStrength.getNumSignalStrengthLevels()];
         for (int i = 0; i < timeInRxSignalStrengthLevelMs.length; i++) {
            timeInRxSignalStrengthLevelMs[i]
                = getPhoneSignalStrengthTime(i, rawRealTime, which) / 1000;
@@ -13610,7 +13614,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer.readSummaryFromParcelLocked(in);
         mDeviceIdlingTimer.readSummaryFromParcelLocked(in);
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             mPhoneSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
         }
         mPhoneSignalScanningTimer.readSummaryFromParcelLocked(in);
@@ -13660,7 +13664,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer.readSummaryFromParcelLocked(in);
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer.readSummaryFromParcelLocked(in);
-        mIsCellularTxPowerHigh = false;
 
         int NRPMS = in.readInt();
         if (NRPMS > 10000) {
@@ -14096,7 +14099,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mDeviceIdlingTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         mPhoneSignalScanningTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -14574,7 +14577,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mOnBatteryTimeBase, in);
         mDeviceIdlingTimer = new StopwatchTimer(mClocks, null, -12, null, mOnBatteryTimeBase, in);
         mPhoneOnTimer = new StopwatchTimer(mClocks, null, -3, null, mOnBatteryTimeBase, in);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(mClocks, null, -200-i,
                     null, mOnBatteryTimeBase, in);
         }
@@ -14644,7 +14647,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer = new StopwatchTimer(mClocks, null, -13, null, mOnBatteryTimeBase, in);
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase, in);
-        mIsCellularTxPowerHigh = false;
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
@@ -14794,7 +14796,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer.writeToParcel(out, uSecRealtime);
         mDeviceIdlingTimer.writeToParcel(out, uSecRealtime);
         mPhoneOnTimer.writeToParcel(out, uSecRealtime);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             mPhoneSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
         }
         mPhoneSignalScanningTimer.writeToParcel(out, uSecRealtime);
@@ -14985,7 +14987,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mDeviceIdlingTimer.logState(pr, "  ");
             pr.println("*** Phone timer:");
             mPhoneOnTimer.logState(pr, "  ");
-            for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+            for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
                 pr.println("*** Phone signal strength #" + i + ":");
                 mPhoneSignalStrengthsTimer[i].logState(pr, "  ");
             }

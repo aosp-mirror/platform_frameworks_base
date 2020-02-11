@@ -16,7 +16,6 @@
 
 cc_defaults {
     name: "viewcompiler_defaults",
-    defaults: ["libdexfile_static_defaults"],
     header_libs: [
         "libbase_headers",
     ],
@@ -30,6 +29,7 @@ cc_defaults {
         "liblog",
         "libutils",
         "libziparchive",
+        "libz",
     ],
     cppflags: ["-std=c++17"],
     target: {

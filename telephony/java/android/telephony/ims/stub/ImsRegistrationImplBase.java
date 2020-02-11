@@ -18,15 +18,17 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.RegistrationManager;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.util.RemoteCallbackListExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,6 +39,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
 public class ImsRegistrationImplBase {
 
     private static final String LOG_TAG = "ImsRegistrationImplBase";
@@ -72,9 +75,6 @@ public class ImsRegistrationImplBase {
     // with NOT_REGISTERED in the case where the ImsService has not updated the registration state
     // yet.
     private static final int REGISTRATION_STATE_UNKNOWN = -1;
-    private static final int REGISTRATION_STATE_NOT_REGISTERED = 0;
-    private static final int REGISTRATION_STATE_REGISTERING = 1;
-    private static final int REGISTRATION_STATE_REGISTERED = 2;
 
     private final IImsRegistration mBinder = new IImsRegistration.Stub() {
 
@@ -94,8 +94,8 @@ public class ImsRegistrationImplBase {
         }
     };
 
-    private final RemoteCallbackList<IImsRegistrationCallback> mCallbacks
-            = new RemoteCallbackList<>();
+    private final RemoteCallbackListExt<IImsRegistrationCallback> mCallbacks =
+            new RemoteCallbackListExt<>();
     private final Object mLock = new Object();
     // Locked on mLock
     private @ImsRegistrationTech
@@ -128,8 +128,8 @@ public class ImsRegistrationImplBase {
      * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
      */
     public final void onRegistered(@ImsRegistrationTech int imsRadioTech) {
-        updateToState(imsRadioTech, REGISTRATION_STATE_REGISTERED);
-        mCallbacks.broadcast((c) -> {
+        updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERED);
+        mCallbacks.broadcastAction((c) -> {
             try {
                 c.onRegistered(imsRadioTech);
             } catch (RemoteException e) {
@@ -146,8 +146,8 @@ public class ImsRegistrationImplBase {
      * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
      */
     public final void onRegistering(@ImsRegistrationTech int imsRadioTech) {
-        updateToState(imsRadioTech, REGISTRATION_STATE_REGISTERING);
-        mCallbacks.broadcast((c) -> {
+        updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERING);
+        mCallbacks.broadcastAction((c) -> {
             try {
                 c.onRegistering(imsRadioTech);
             } catch (RemoteException e) {
@@ -175,7 +175,7 @@ public class ImsRegistrationImplBase {
      */
     public final void onDeregistered(ImsReasonInfo info) {
         updateToDisconnectedState(info);
-        mCallbacks.broadcast((c) -> {
+        mCallbacks.broadcastAction((c) -> {
             try {
                 c.onDeregistered(info);
             } catch (RemoteException e) {
@@ -194,7 +194,7 @@ public class ImsRegistrationImplBase {
      */
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
-        mCallbacks.broadcast((c) -> {
+        mCallbacks.broadcastAction((c) -> {
             try {
                 c.onTechnologyChangeFailed(imsRadioTech, info);
             } catch (RemoteException e) {
@@ -210,7 +210,7 @@ public class ImsRegistrationImplBase {
      * @param uris
      */
     public final void onSubscriberAssociatedUriChanged(Uri[] uris) {
-        mCallbacks.broadcast((c) -> {
+        mCallbacks.broadcastAction((c) -> {
             try {
                 c.onSubscriberAssociatedUriChanged(uris);
             } catch (RemoteException e) {
@@ -230,7 +230,8 @@ public class ImsRegistrationImplBase {
 
     private void updateToDisconnectedState(ImsReasonInfo info) {
         synchronized (mLock) {
-            updateToState(REGISTRATION_TECH_NONE, REGISTRATION_STATE_NOT_REGISTERED);
+            updateToState(REGISTRATION_TECH_NONE,
+                    RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
             if (info != null) {
                 mLastDisconnectCause = info;
             } else {
@@ -264,15 +265,15 @@ public class ImsRegistrationImplBase {
             disconnectInfo = mLastDisconnectCause;
         }
         switch (state) {
-            case REGISTRATION_STATE_NOT_REGISTERED: {
+            case RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED: {
                 c.onDeregistered(disconnectInfo);
                 break;
             }
-            case REGISTRATION_STATE_REGISTERING: {
+            case RegistrationManager.REGISTRATION_STATE_REGISTERING: {
                 c.onRegistering(getConnectionType());
                 break;
             }
-            case REGISTRATION_STATE_REGISTERED: {
+            case RegistrationManager.REGISTRATION_STATE_REGISTERED: {
                 c.onRegistered(getConnectionType());
                 break;
             }

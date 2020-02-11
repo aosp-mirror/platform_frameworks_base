@@ -50,8 +50,22 @@ public interface DozeHost {
      */
     void onSlpiTap(float x, float y);
 
+    /**
+     * Artificially dim down the the display by changing scrim opacities.
+     * @param scrimOpacity opacity from 0 to 1.
+     */
     default void setAodDimmingScrim(float scrimOpacity) {}
+
+    /**
+     * Sets the actual display brightness.
+     * @param value from 0 to 255.
+     */
     void setDozeScreenBrightness(int value);
+
+    /**
+     * Makes scrims black and changes animation durations.
+     */
+    default void prepareForGentleWakeUp() {}
 
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
@@ -63,8 +77,10 @@ public interface DozeHost {
     interface Callback {
         /**
          * Called when a high priority notification is added.
+         * @param onPulseSuppressedListener A listener that is invoked if the pulse is being
+         *                                  supressed.
          */
-        default void onNotificationAlerted() {}
+        default void onNotificationAlerted(Runnable onPulseSuppressedListener) {}
 
         /**
          * Called when battery state or power save mode changes.

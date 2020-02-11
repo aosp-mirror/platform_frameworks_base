@@ -16,13 +16,13 @@
 
 package android.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-
-import android.annotation.UnsupportedAppUsage;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
+
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 

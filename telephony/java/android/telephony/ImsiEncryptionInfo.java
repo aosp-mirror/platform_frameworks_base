@@ -15,9 +15,11 @@
  */
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import java.util.Date;
 import android.util.Log;
 
 import java.security.KeyFactory;
@@ -25,17 +27,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Date;
 
 /**
  * Class to represent information sent by the carrier, which will be used to encrypt
  * the IMSI + IMPI. The ecryption is being done by WLAN, and the modem.
- *
  * @hide
  */
+@SystemApi
 public final class ImsiEncryptionInfo implements Parcelable {
 
     private static final String LOG_TAG = "ImsiEncryptionInfo";
-
 
     private final String mcc;
     private final String mnc;
@@ -45,11 +47,13 @@ public final class ImsiEncryptionInfo implements Parcelable {
     //Date-Time in UTC when the key will expire.
     private final Date expirationTime;
 
+    /** @hide */
     public ImsiEncryptionInfo(String mcc, String mnc, int keyType, String keyIdentifier,
                               byte[] key, Date expirationTime) {
         this(mcc, mnc, keyType, keyIdentifier, makeKeyObject(key), expirationTime);
     }
 
+    /** @hide */
     public ImsiEncryptionInfo(String mcc, String mnc, int keyType, String keyIdentifier,
                               PublicKey publicKey, Date expirationTime) {
         // todo need to validate that ImsiEncryptionInfo is being created with the correct params.
@@ -63,6 +67,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         this.expirationTime = expirationTime;
     }
 
+    /** @hide */
     public ImsiEncryptionInfo(Parcel in) {
         int length = in.readInt();
         byte b[] = new byte[length];
@@ -75,26 +80,40 @@ public final class ImsiEncryptionInfo implements Parcelable {
         expirationTime = new Date(in.readLong());
     }
 
+    /** @hide */
     public String getMnc() {
         return this.mnc;
     }
 
+    /** @hide */
     public String getMcc() {
         return this.mcc;
     }
 
+    /**
+     * Returns key identifier, a string that helps the authentication server to locate the
+     * private key to decrypt the permanent identity, or {@code null} when uavailable.
+     */
+    @Nullable
     public String getKeyIdentifier() {
         return this.keyIdentifier;
     }
 
+    /** @hide */
     public int getKeyType() {
         return this.keyType;
     }
 
+    /**
+     * Returns the carrier public key that is used for the IMSI encryption,
+     * or {@code null} when uavailable.
+     */
+    @Nullable
     public PublicKey getPublicKey() {
         return this.publicKey;
     }
 
+    /** @hide */
     public Date getExpirationTime() {
         return this.expirationTime;
     }
@@ -115,7 +134,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         return 0;
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<ImsiEncryptionInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<ImsiEncryptionInfo> CREATOR =
             new Parcelable.Creator<ImsiEncryptionInfo>() {
                 @Override
                 public ImsiEncryptionInfo createFromParcel(Parcel in) {
@@ -129,7 +148,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
             };
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         byte[] b = publicKey.getEncoded();
         dest.writeInt(b.length);
         dest.writeByteArray(b);

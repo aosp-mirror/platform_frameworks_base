@@ -17,7 +17,7 @@
 
 package com.android.internal.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ShellCommand;
 
 import java.io.PrintStream;
@@ -39,6 +39,10 @@ public abstract class BaseCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
 
     private String[] mRawArgs;
+
+    @UnsupportedAppUsage
+    public BaseCommand() {
+    }
 
     /**
      * Call to run the command.

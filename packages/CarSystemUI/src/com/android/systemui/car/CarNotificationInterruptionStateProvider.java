@@ -18,14 +18,24 @@ package com.android.systemui.car;
 
 import android.content.Context;
 
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** Auto-specific implementation of {@link NotificationInterruptionStateProvider}. */
+@Singleton
 public class CarNotificationInterruptionStateProvider extends
         NotificationInterruptionStateProvider {
-    public CarNotificationInterruptionStateProvider(Context context) {
-        super(context);
+
+    @Inject
+    public CarNotificationInterruptionStateProvider(Context context,
+            NotificationFilter filter,
+            StatusBarStateController stateController) {
+        super(context, filter, stateController);
     }
 
     @Override

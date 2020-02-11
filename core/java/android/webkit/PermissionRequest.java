@@ -32,7 +32,7 @@ import android.net.Uri;
  * avoid unintentionally granting requests for new permissions, you should pass the
  * specific permissions you intend to grant to {@link #grant(String[]) grant()},
  * and avoid writing code like this example:
- * <pre>
+ * <pre class="prettyprint">
  * permissionRequest.grant(permissionRequest.getResources())  // This is wrong!!!
  * </pre>
  * See the WebView's release notes for information about new protected resources.

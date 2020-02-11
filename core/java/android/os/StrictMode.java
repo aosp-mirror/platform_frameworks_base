@@ -20,10 +20,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -1892,6 +1892,7 @@ public final class StrictMode {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     public static void conditionallyCheckInstanceCounts() {
         VmPolicy policy = getVmPolicy();
@@ -2751,6 +2752,7 @@ public final class StrictMode {
         }
 
         /** Create an instance of ViolationInfo initialized from a Parcel. */
+        @UnsupportedAppUsage
         public ViolationInfo(Parcel in) {
             this(in, false);
         }

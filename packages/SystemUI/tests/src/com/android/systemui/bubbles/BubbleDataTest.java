@@ -887,7 +887,7 @@ public class BubbleDataTest extends SysuiTestCase {
 
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
         setPostTime(entry, postTime);
-        mBubbleData.notificationEntryUpdated(entry);
+        mBubbleData.notificationEntryUpdated(entry, /* suppressFlyout=*/ false);
     }
 
     private void changeExpandedStateAtTime(boolean shouldBeExpanded, long time) {

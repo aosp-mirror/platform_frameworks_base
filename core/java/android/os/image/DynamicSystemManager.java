@@ -101,19 +101,33 @@ public class DynamicSystemManager {
         }
     }
     /**
+     * Start DynamicSystem installation.
+     *
+     * @return true if the call succeeds
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean startInstallation(String dsuSlot) {
+        try {
+            return mService.startInstallation(dsuSlot);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+    /**
      * Start DynamicSystem installation. This call may take an unbounded amount of time. The caller
      * may use another thread to call the getStartProgress() to get the progress.
      *
-     * @param systemSize system size in bytes
-     * @param userdataSize userdata size in bytes
+     * @param name The DSU partition name
+     * @param size Size of the DSU image in bytes
+     * @param readOnly True if the partition is read only, e.g. system.
      * @return {@code true} if the call succeeds. {@code false} either the device does not contain
      *     enough space or a DynamicSystem is currently in use where the {@link #isInUse} would be
      *     true.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public Session startInstallation(long systemSize, long userdataSize) {
+    public Session createPartition(String name, long size, boolean readOnly) {
         try {
-            if (mService.startInstallation(systemSize, userdataSize)) {
+            if (mService.createPartition(name, size, readOnly)) {
                 return new Session();
             } else {
                 return null;
@@ -122,7 +136,18 @@ public class DynamicSystemManager {
             throw new RuntimeException(e.toString());
         }
     }
-
+    /**
+     * Finish a previously started installation. Installations without a cooresponding
+     * finishInstallation() will be cleaned up during device boot.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean finishInstallation() {
+        try {
+            return mService.finishInstallation();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
     /**
      * Query the progress of the current installation operation. This can be called while the
      * installation is in progress.

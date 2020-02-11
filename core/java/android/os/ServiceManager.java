@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -100,6 +100,10 @@ public final class ServiceManager {
     public static final StatLogger sStatLogger = new StatLogger(new String[] {
             "getService()",
     });
+
+    @UnsupportedAppUsage
+    public ServiceManager() {
+    }
 
     @UnsupportedAppUsage
     private static IServiceManager getIServiceManager() {

@@ -16,7 +16,8 @@
 
 package android.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.NonNull;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -27,7 +28,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Protocol;
 
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @hide
  **/
 public class NetworkFactory extends Handler {
-    /** @hide */
+    /* TODO: delete when all callers have migrated to NetworkProvider IDs. */
     public static class SerialNumber {
         // Guard used by no network factory.
         public static final int NONE = -1;
@@ -91,8 +91,8 @@ public class NetworkFactory extends Handler {
      *            with the same NetworkRequest but an updated score.
      *            Also, network conditions may change for this bearer
      *            allowing for a better score in the future.
-     * msg.arg2 = the serial number of the factory currently responsible for the
-     *            NetworkAgent handling this request, or SerialNumber.NONE if none.
+     * msg.arg2 = the ID of the NetworkProvider currently responsible for the
+     *            NetworkAgent handling this request, or NetworkProvider.ID_NONE if none.
      */
     public static final int CMD_REQUEST_NETWORK = BASE;
 
@@ -115,16 +115,8 @@ public class NetworkFactory extends Handler {
      */
     private static final int CMD_SET_FILTER = BASE + 3;
 
-    /**
-     * Sent by NetworkFactory to ConnectivityService to indicate that a request is
-     * unfulfillable.
-     * @see #releaseRequestAsUnfulfillableByAnyFactory(NetworkRequest).
-     */
-    public static final int EVENT_UNFULFILLABLE_REQUEST = BASE + 4;
-
     private final Context mContext;
     private final ArrayList<Message> mPreConnectedQueue = new ArrayList<Message>();
-    private AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
 
     private final SparseArray<NetworkRequestInfo> mNetworkRequests =
@@ -135,7 +127,8 @@ public class NetworkFactory extends Handler {
 
     private int mRefCount = 0;
     private Messenger mMessenger = null;
-    private int mSerialNumber;
+    private NetworkProvider mProvider = null;
+    private int mProviderId;
 
     @UnsupportedAppUsage
     public NetworkFactory(Looper looper, Context context, String logTag,
@@ -147,55 +140,43 @@ public class NetworkFactory extends Handler {
     }
 
     public void register() {
-        if (DBG) log("Registering NetworkFactory");
-        if (mMessenger == null) {
-            mMessenger = new Messenger(this);
-            mSerialNumber = ConnectivityManager.from(mContext).registerNetworkFactory(mMessenger,
-                    LOG_TAG);
+        if (mProvider != null) {
+            Log.e(LOG_TAG, "Ignoring attempt to register already-registered NetworkFactory");
+            return;
         }
+        if (DBG) log("Registering NetworkFactory");
+
+        mProvider = new NetworkProvider(mContext, NetworkFactory.this.getLooper(), LOG_TAG) {
+            @Override
+            public void onNetworkRequested(@NonNull NetworkRequest request, int score,
+                    int servingProviderId) {
+                handleAddRequest((NetworkRequest) request, score, servingProviderId);
+            }
+
+            @Override
+            public void onRequestWithdrawn(@NonNull NetworkRequest request) {
+                handleRemoveRequest(request);
+            }
+        };
+
+        mMessenger = new Messenger(this);
+        mProviderId = ConnectivityManager.from(mContext).registerNetworkProvider(mProvider);
     }
 
     public void unregister() {
-        if (DBG) log("Unregistering NetworkFactory");
-        if (mMessenger != null) {
-            ConnectivityManager.from(mContext).unregisterNetworkFactory(mMessenger);
-            mMessenger = null;
+        if (mProvider == null) {
+            Log.e(LOG_TAG, "Ignoring attempt to unregister unregistered NetworkFactory");
+            return;
         }
+        if (DBG) log("Unregistering NetworkFactory");
+
+        ConnectivityManager.from(mContext).unregisterNetworkProvider(mProvider);
+        mProvider = null;
     }
 
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
-                if (mAsyncChannel != null) {
-                    log("Received new connection while already connected!");
-                    break;
-                }
-                if (VDBG) log("NetworkFactory fully connected");
-                AsyncChannel ac = new AsyncChannel();
-                ac.connected(null, this, msg.replyTo);
-                ac.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
-                        AsyncChannel.STATUS_SUCCESSFUL);
-                mAsyncChannel = ac;
-                for (Message m : mPreConnectedQueue) {
-                    ac.sendMessage(m);
-                }
-                mPreConnectedQueue.clear();
-                break;
-            }
-            case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
-                if (VDBG) log("CMD_CHANNEL_DISCONNECT");
-                if (mAsyncChannel != null) {
-                    mAsyncChannel.disconnect();
-                    mAsyncChannel = null;
-                }
-                break;
-            }
-            case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                if (DBG) log("NetworkFactory channel lost");
-                mAsyncChannel = null;
-                break;
-            }
             case CMD_REQUEST_NETWORK: {
                 handleAddRequest((NetworkRequest) msg.obj, msg.arg1, msg.arg2);
                 break;
@@ -219,13 +200,13 @@ public class NetworkFactory extends Handler {
         public final NetworkRequest request;
         public int score;
         public boolean requested; // do we have a request outstanding, limited by score
-        public int factorySerialNumber;
+        public int providerId;
 
-        NetworkRequestInfo(NetworkRequest request, int score, int factorySerialNumber) {
+        NetworkRequestInfo(NetworkRequest request, int score, int providerId) {
             this.request = request;
             this.score = score;
             this.requested = false;
-            this.factorySerialNumber = factorySerialNumber;
+            this.providerId = providerId;
         }
 
         @Override
@@ -240,8 +221,6 @@ public class NetworkFactory extends Handler {
      *
      * @param request the request to handle.
      * @param score the score of the NetworkAgent currently satisfying this request.
-     * @param servingFactorySerialNumber the serial number of the NetworkFactory that
-     *         created the NetworkAgent currently satisfying this request.
      */
     // TODO : remove this method. It is a stopgap measure to help sheperding a number
     // of dependent changes that would conflict throughout the automerger graph. Having this
@@ -249,7 +228,7 @@ public class NetworkFactory extends Handler {
     // the entire tree.
     @VisibleForTesting
     protected void handleAddRequest(NetworkRequest request, int score) {
-        handleAddRequest(request, score, SerialNumber.NONE);
+        handleAddRequest(request, score, NetworkProvider.ID_NONE);
     }
 
     /**
@@ -258,27 +237,26 @@ public class NetworkFactory extends Handler {
      *
      * @param request the request to handle.
      * @param score the score of the NetworkAgent currently satisfying this request.
-     * @param servingFactorySerialNumber the serial number of the NetworkFactory that
-     *         created the NetworkAgent currently satisfying this request.
+     * @param servingProviderId the ID of the NetworkProvider that created the NetworkAgent
+     *        currently satisfying this request.
      */
     @VisibleForTesting
-    protected void handleAddRequest(NetworkRequest request, int score,
-            int servingFactorySerialNumber) {
+    protected void handleAddRequest(NetworkRequest request, int score, int servingProviderId) {
         NetworkRequestInfo n = mNetworkRequests.get(request.requestId);
         if (n == null) {
             if (DBG) {
                 log("got request " + request + " with score " + score
-                        + " and serial " + servingFactorySerialNumber);
+                        + " and providerId " + servingProviderId);
             }
-            n = new NetworkRequestInfo(request, score, servingFactorySerialNumber);
+            n = new NetworkRequestInfo(request, score, servingProviderId);
             mNetworkRequests.put(n.request.requestId, n);
         } else {
             if (VDBG) {
                 log("new score " + score + " for exisiting request " + request
-                        + " with serial " + servingFactorySerialNumber);
+                        + " and providerId " + servingProviderId);
             }
             n.score = score;
-            n.factorySerialNumber = servingFactorySerialNumber;
+            n.providerId = servingProviderId;
         }
         if (VDBG) log("  my score=" + mScore + ", my filter=" + mCapabilityFilter);
 
@@ -333,8 +311,8 @@ public class NetworkFactory extends Handler {
             log(" n.requests = " + n.requested);
             log(" n.score = " + n.score);
             log(" mScore = " + mScore);
-            log(" n.factorySerialNumber = " + n.factorySerialNumber);
-            log(" mSerialNumber = " + mSerialNumber);
+            log(" n.providerId = " + n.providerId);
+            log(" mProviderId = " + mProviderId);
         }
         if (shouldNeedNetworkFor(n)) {
             if (VDBG) log("  needNetworkFor");
@@ -355,7 +333,7 @@ public class NetworkFactory extends Handler {
             // If the score of this request is higher or equal to that of this factory and some
             // other factory is responsible for it, then this factory should not track the request
             // because it has no hope of satisfying it.
-            && (n.score < mScore || n.factorySerialNumber == mSerialNumber)
+            && (n.score < mScore || n.providerId == mProviderId)
             // If this factory can't satisfy the capability needs of this request, then it
             // should not be tracked.
             && n.request.networkCapabilities.satisfiedByNetworkCapabilities(mCapabilityFilter)
@@ -373,7 +351,7 @@ public class NetworkFactory extends Handler {
             //   assigned to the factory
             // - This factory can't satisfy the capability needs of the request
             // - The concrete implementation of the factory rejects the request
-            && ((n.score > mScore && n.factorySerialNumber != mSerialNumber)
+            && ((n.score > mScore && n.providerId != mProviderId)
                     || !n.request.networkCapabilities.satisfiedByNetworkCapabilities(
                             mCapabilityFilter)
                     || !acceptRequest(n.request, n.score));
@@ -408,12 +386,7 @@ public class NetworkFactory extends Handler {
     protected void releaseRequestAsUnfulfillableByAnyFactory(NetworkRequest r) {
         post(() -> {
             if (DBG) log("releaseRequestAsUnfulfillableByAnyFactory: " + r);
-            Message msg = obtainMessage(EVENT_UNFULFILLABLE_REQUEST, r);
-            if (mAsyncChannel != null) {
-                mAsyncChannel.sendMessage(msg);
-            } else {
-                mPreConnectedQueue.add(msg);
-            }
+            ConnectivityManager.from(mContext).declareNetworkRequestUnfulfillable(r);
         });
     }
 
@@ -444,8 +417,13 @@ public class NetworkFactory extends Handler {
         return mNetworkRequests.size();
     }
 
+    /* TODO: delete when all callers have migrated to NetworkProvider IDs. */
     public int getSerialNumber() {
-        return mSerialNumber;
+        return mProviderId;
+    }
+
+    public int getProviderId() {
+        return mProviderId;
     }
 
     protected void log(String s) {
@@ -465,8 +443,8 @@ public class NetworkFactory extends Handler {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("{").append(LOG_TAG).append(" - mSerialNumber=")
-                .append(mSerialNumber).append(", ScoreFilter=")
+        StringBuilder sb = new StringBuilder("{").append(LOG_TAG).append(" - mProviderId=")
+                .append(mProviderId).append(", ScoreFilter=")
                 .append(mScore).append(", Filter=").append(mCapabilityFilter).append(", requests=")
                 .append(mNetworkRequests.size()).append(", refCount=").append(mRefCount)
                 .append("}");

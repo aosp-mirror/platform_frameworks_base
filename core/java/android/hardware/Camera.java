@@ -16,14 +16,20 @@
 
 package android.hardware;
 
-import static android.system.OsConstants.*;
+import static android.system.OsConstants.EACCES;
+import static android.system.OsConstants.EBUSY;
+import static android.system.OsConstants.EINVAL;
+import static android.system.OsConstants.ENODEV;
+import static android.system.OsConstants.ENOSYS;
+import static android.system.OsConstants.EOPNOTSUPP;
+import static android.system.OsConstants.EUSERS;
 
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.Point;

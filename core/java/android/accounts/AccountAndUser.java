@@ -16,7 +16,7 @@
 
 package android.accounts;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Used to store the Account and the UserId this account is associated with.

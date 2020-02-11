@@ -19,7 +19,7 @@ package com.android.internal.widget;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -624,6 +624,13 @@ public class LockPatternView extends View {
         clearPatternDrawLookup();
         mPatternDisplayMode = DisplayMode.Correct;
         invalidate();
+    }
+
+    /**
+     * If there are any cells being drawn.
+     */
+    public boolean isEmpty() {
+        return mPattern.isEmpty();
     }
 
     /**

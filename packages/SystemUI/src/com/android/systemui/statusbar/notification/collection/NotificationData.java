@@ -122,8 +122,6 @@ public class NotificationData {
             } else if (aHeadsUp) {
                 // Provide consistent ranking with headsUpManager
                 return mHeadsUpManager.compare(a, b);
-            } else if (a.getRow().showingAmbientPulsing() != b.getRow().showingAmbientPulsing()) {
-                return a.getRow().showingAmbientPulsing() ? -1 : 1;
             } else if (aMedia != bMedia) {
                 // Upsort current media notification.
                 return aMedia ? -1 : 1;
@@ -203,6 +201,9 @@ public class NotificationData {
             removed = mEntries.remove(key);
         }
         if (removed == null) return null;
+        // NEM may pass us a null ranking map if removing a lifetime-extended notification,
+        // so use the most recent ranking
+        if (ranking == null) ranking = mRankingMap;
         mGroupManager.onEntryRemoved(removed);
         updateRankingAndSort(ranking);
         return removed;

@@ -1,5 +1,12 @@
+filegroup {
+    name: "services.appprediction-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.appprediction",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.appprediction-sources"],
     libs: ["services.core"],
 }

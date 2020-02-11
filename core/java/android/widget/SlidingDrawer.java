@@ -17,7 +17,7 @@
 package android.widget;
 
 import android.R;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;

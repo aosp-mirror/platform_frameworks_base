@@ -567,7 +567,6 @@ public class NotificationChildrenContainer extends ViewGroup {
                     ? parentState.zTranslation
                     : 0;
             childState.dimmed = parentState.dimmed;
-            childState.dark = parentState.dark;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;
@@ -662,8 +661,10 @@ public class NotificationChildrenContainer extends ViewGroup {
                 && !showingAsLowPriority()) {
             return NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
         }
-        if (mIsLowPriority || !mContainingNotification.isOnKeyguard()
-                && (mContainingNotification.isExpanded() || mContainingNotification.isHeadsUp())) {
+        if (mIsLowPriority
+                || (!mContainingNotification.isOnKeyguard() && mContainingNotification.isExpanded())
+                || (mContainingNotification.isHeadsUpState()
+                        && mContainingNotification.canShowHeadsUp())) {
             return NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED;
         }
         return NUMBER_OF_CHILDREN_WHEN_COLLAPSED;
@@ -1066,6 +1067,11 @@ public class NotificationChildrenContainer extends ViewGroup {
                 false /* likeHighPriority */);
     }
 
+    public int getCollapsedHeightWithoutHeader() {
+        return getMinHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */),
+                false /* likeHighPriority */, 0);
+    }
+
     /**
      * Get the minimum Height for this group.
      *
@@ -1073,10 +1079,22 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @param likeHighPriority if the height should be calculated as if it were not low priority
      */
     private int getMinHeight(int maxAllowedVisibleChildren, boolean likeHighPriority) {
+        return getMinHeight(maxAllowedVisibleChildren, likeHighPriority, mCurrentHeaderTranslation);
+    }
+
+    /**
+     * Get the minimum Height for this group.
+     *
+     * @param maxAllowedVisibleChildren the number of children that should be visible
+     * @param likeHighPriority if the height should be calculated as if it were not low priority
+     * @param headerTranslation the translation amount of the header
+     */
+    private int getMinHeight(int maxAllowedVisibleChildren, boolean likeHighPriority,
+            int headerTranslation) {
         if (!likeHighPriority && showingAsLowPriority()) {
             return mNotificationHeaderLowPriority.getHeight();
         }
-        int minExpandHeight = mNotificationHeaderMargin + mCurrentHeaderTranslation;
+        int minExpandHeight = mNotificationHeaderMargin + headerTranslation;
         int visibleChildren = 0;
         boolean firstChild = true;
         int childCount = mChildren.size();

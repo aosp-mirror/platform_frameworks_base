@@ -17,7 +17,7 @@
 package android.webkit;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +50,11 @@ public final class CacheManager {
      */
     @Deprecated
     public static class CacheResult {
+
+        @UnsupportedAppUsage
+        public CacheResult() {
+        }
+
         // these fields are saved to the database
         @UnsupportedAppUsage
         int httpStatusCode;

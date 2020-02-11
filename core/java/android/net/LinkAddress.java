@@ -19,6 +19,7 @@ package android.net;
 import static android.system.OsConstants.IFA_F_DADFAILED;
 import static android.system.OsConstants.IFA_F_DEPRECATED;
 import static android.system.OsConstants.IFA_F_OPTIMISTIC;
+import static android.system.OsConstants.IFA_F_PERMANENT;
 import static android.system.OsConstants.IFA_F_TENTATIVE;
 import static android.system.OsConstants.RT_SCOPE_HOST;
 import static android.system.OsConstants.RT_SCOPE_LINK;
@@ -30,10 +31,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.Pair;
 
 import java.net.Inet4Address;
@@ -41,6 +43,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
+import java.util.Objects;
 
 /**
  * Identifies an IP address on a network link.
@@ -58,6 +61,21 @@ import java.net.UnknownHostException;
  * </ul>
  */
 public class LinkAddress implements Parcelable {
+
+    /**
+     * Indicates the deprecation or expiration time is unknown
+     * @hide
+     */
+    @SystemApi
+    public static final long LIFETIME_UNKNOWN = -1;
+
+    /**
+     * Indicates this address is permanent.
+     * @hide
+     */
+    @SystemApi
+    public static final long LIFETIME_PERMANENT = Long.MAX_VALUE;
+
     /**
      * IPv4 or IPv6 address.
      */
@@ -71,7 +89,9 @@ public class LinkAddress implements Parcelable {
     private int prefixLength;
 
     /**
-     * Address flags. A bitmask of IFA_F_* values.
+     * Address flags. A bitmask of {@code IFA_F_*} values. Note that {@link #getFlags()} may not
+     * return these exact values. For example, it may set or clear the {@code IFA_F_DEPRECATED}
+     * flag depending on the current preferred lifetime.
      */
     private int flags;
 
@@ -79,6 +99,23 @@ public class LinkAddress implements Parcelable {
      * Address scope. One of the RT_SCOPE_* constants.
      */
     private int scope;
+
+    /**
+     * The time, as reported by {@link SystemClock#elapsedRealtime}, when this LinkAddress will be
+     * or was deprecated. At the time existing connections can still use this address until it
+     * expires, but new connections should use the new address. {@link #LIFETIME_UNKNOWN} indicates
+     * this information is not available. {@link #LIFETIME_PERMANENT} indicates this
+     * {@link LinkAddress} will never be deprecated.
+     */
+    private long deprecationTime;
+
+    /**
+     * The time, as reported by {@link SystemClock#elapsedRealtime}, when this {@link LinkAddress}
+     * will expire and be removed from the interface. {@link #LIFETIME_UNKNOWN} indicates this
+     * information is not available. {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress}
+     * will never expire.
+     */
+    private long expirationTime;
 
     /**
      * Utility function to determines the scope of a unicast address. Per RFC 4291 section 2.5 and
@@ -152,7 +189,8 @@ public class LinkAddress implements Parcelable {
     /**
      * Utility function for the constructors.
      */
-    private void init(InetAddress address, int prefixLength, int flags, int scope) {
+    private void init(InetAddress address, int prefixLength, int flags, int scope,
+                      long deprecationTime, long expirationTime) {
         if (address == null ||
                 address.isMulticastAddress() ||
                 prefixLength < 0 ||
@@ -161,15 +199,42 @@ public class LinkAddress implements Parcelable {
             throw new IllegalArgumentException("Bad LinkAddress params " + address +
                     "/" + prefixLength);
         }
+
+        // deprecation time and expiration time must be both provided, or neither.
+        if ((deprecationTime == LIFETIME_UNKNOWN) != (expirationTime == LIFETIME_UNKNOWN)) {
+            throw new IllegalArgumentException(
+                    "Must not specify only one of deprecation time and expiration time");
+        }
+
+        // deprecation time needs to be a positive value.
+        if (deprecationTime != LIFETIME_UNKNOWN && deprecationTime < 0) {
+            throw new IllegalArgumentException("invalid deprecation time " + deprecationTime);
+        }
+
+        // expiration time needs to be a positive value.
+        if (expirationTime != LIFETIME_UNKNOWN && expirationTime < 0) {
+            throw new IllegalArgumentException("invalid expiration time " + expirationTime);
+        }
+
+        // expiration time can't be earlier than deprecation time
+        if (deprecationTime != LIFETIME_UNKNOWN && expirationTime != LIFETIME_UNKNOWN
+                && expirationTime < deprecationTime) {
+            throw new IllegalArgumentException("expiration earlier than deprecation ("
+                    + deprecationTime + ", " + expirationTime + ")");
+        }
+
         this.address = address;
         this.prefixLength = prefixLength;
         this.flags = flags;
         this.scope = scope;
+        this.deprecationTime = deprecationTime;
+        this.expirationTime = expirationTime;
     }
 
     /**
      * Constructs a new {@code LinkAddress} from an {@code InetAddress} and prefix length, with
      * the specified flags and scope. Flags and scope are not checked for validity.
+     *
      * @param address The IP address.
      * @param prefixLength The prefix length. Must be &gt;= 0 and &lt;= (32 or 128) (IPv4 or IPv6).
      * @param flags A bitmask of {@code IFA_F_*} values representing properties of the address.
@@ -181,7 +246,39 @@ public class LinkAddress implements Parcelable {
     @TestApi
     public LinkAddress(@NonNull InetAddress address, @IntRange(from = 0, to = 128) int prefixLength,
             int flags, int scope) {
-        init(address, prefixLength, flags, scope);
+        init(address, prefixLength, flags, scope, LIFETIME_UNKNOWN, LIFETIME_UNKNOWN);
+    }
+
+    /**
+     * Constructs a new {@code LinkAddress} from an {@code InetAddress}, prefix length, with
+     * the specified flags, scope, deprecation time, and expiration time. Flags and scope are not
+     * checked for validity. The value of the {@code IFA_F_DEPRECATED} and {@code IFA_F_PERMANENT}
+     * flag will be adjusted based on the passed-in lifetimes.
+     *
+     * @param address The IP address.
+     * @param prefixLength The prefix length. Must be &gt;= 0 and &lt;= (32 or 128) (IPv4 or IPv6).
+     * @param flags A bitmask of {@code IFA_F_*} values representing properties of the address.
+     * @param scope An integer defining the scope in which the address is unique (e.g.,
+     *              {@link OsConstants#RT_SCOPE_LINK} or {@link OsConstants#RT_SCOPE_SITE}).
+     * @param deprecationTime The time, as reported by {@link SystemClock#elapsedRealtime}, when
+     *                        this {@link LinkAddress} will be or was deprecated. At the time
+     *                        existing connections can still use this address until it expires, but
+     *                        new connections should use the new address. {@link #LIFETIME_UNKNOWN}
+     *                        indicates this information is not available.
+     *                        {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress} will
+     *                        never be deprecated.
+     * @param expirationTime The time, as reported by {@link SystemClock#elapsedRealtime}, when this
+     *                       {@link LinkAddress} will expire and be removed from the interface.
+     *                       {@link #LIFETIME_UNKNOWN} indicates this information is not available.
+     *                       {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress} will
+     *                       never expire.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public LinkAddress(@NonNull InetAddress address, @IntRange(from = 0, to = 128) int prefixLength,
+                       int flags, int scope, long deprecationTime, long expirationTime) {
+        init(address, prefixLength, flags, scope, deprecationTime, expirationTime);
     }
 
     /**
@@ -237,7 +334,7 @@ public class LinkAddress implements Parcelable {
         // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
         // TODO: consider rejecting mapped IPv4 addresses such as "::ffff:192.0.2.5/24".
         Pair<InetAddress, Integer> ipAndMask = NetworkUtils.parseIpAndMask(address);
-        init(ipAndMask.first, ipAndMask.second, flags, scope);
+        init(ipAndMask.first, ipAndMask.second, flags, scope, LIFETIME_UNKNOWN, LIFETIME_UNKNOWN);
     }
 
     /**
@@ -265,10 +362,12 @@ public class LinkAddress implements Parcelable {
             return false;
         }
         LinkAddress linkAddress = (LinkAddress) obj;
-        return this.address.equals(linkAddress.address) &&
-            this.prefixLength == linkAddress.prefixLength &&
-            this.flags == linkAddress.flags &&
-            this.scope == linkAddress.scope;
+        return this.address.equals(linkAddress.address)
+                && this.prefixLength == linkAddress.prefixLength
+                && this.flags == linkAddress.flags
+                && this.scope == linkAddress.scope
+                && this.deprecationTime == linkAddress.deprecationTime
+                && this.expirationTime == linkAddress.expirationTime;
     }
 
     /**
@@ -276,7 +375,7 @@ public class LinkAddress implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return address.hashCode() + 11 * prefixLength + 19 * flags + 43 * scope;
+        return Objects.hash(address, prefixLength, flags, scope, deprecationTime, expirationTime);
     }
 
     /**
@@ -329,6 +428,25 @@ public class LinkAddress implements Parcelable {
      * Returns the flags of this {@code LinkAddress}.
      */
     public int getFlags() {
+        int flags = this.flags;
+        if (deprecationTime != LIFETIME_UNKNOWN) {
+            if (SystemClock.elapsedRealtime() >= deprecationTime) {
+                flags |= IFA_F_DEPRECATED;
+            } else {
+                // If deprecation time is in the future, or permanent.
+                flags &= ~IFA_F_DEPRECATED;
+            }
+        }
+
+        if (expirationTime == LIFETIME_PERMANENT) {
+            flags |= IFA_F_PERMANENT;
+        } else if (expirationTime != LIFETIME_UNKNOWN) {
+            // If we know this address expired or will expire in the future, then this address
+            // should not be permanent.
+            flags &= ~IFA_F_PERMANENT;
+        }
+
+        // Do no touch the original flags. Return the adjusted flags here.
         return flags;
     }
 
@@ -340,7 +458,42 @@ public class LinkAddress implements Parcelable {
     }
 
     /**
-     * Returns true if this {@code LinkAddress} is global scope and preferred.
+     * Get the deprecation time, as reported by {@link SystemClock#elapsedRealtime}, when this
+     * {@link LinkAddress} will be or was deprecated. At the time existing connections can still use
+     * this address until it expires, but new connections should use the new address.
+     *
+     * @return The deprecation time in milliseconds. {@link #LIFETIME_UNKNOWN} indicates this
+     * information is not available. {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress}
+     * will never be deprecated.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public long getDeprecationTime() {
+        return deprecationTime;
+    }
+
+    /**
+     * Get the expiration time, as reported by {@link SystemClock#elapsedRealtime}, when this
+     * {@link LinkAddress} will expire and be removed from the interface.
+     *
+     * @return The expiration time in milliseconds. {@link #LIFETIME_UNKNOWN} indicates this
+     * information is not available. {@link #LIFETIME_PERMANENT} indicates this {@link LinkAddress}
+     * will never expire.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public long getExpirationTime() {
+        return expirationTime;
+    }
+
+    /**
+     * Returns true if this {@code LinkAddress} is global scope and preferred (i.e., not currently
+     * deprecated).
+     *
      * @hide
      */
     @TestApi
@@ -352,6 +505,7 @@ public class LinkAddress implements Parcelable {
          * state has cleared either DAD has succeeded or failed, and both
          * flags are cleared regardless).
          */
+        int flags = getFlags();
         return (scope == RT_SCOPE_UNIVERSE
                 && !isIpv6ULA()
                 && (flags & (IFA_F_DADFAILED | IFA_F_DEPRECATED)) == 0L
@@ -373,6 +527,8 @@ public class LinkAddress implements Parcelable {
         dest.writeInt(prefixLength);
         dest.writeInt(this.flags);
         dest.writeInt(scope);
+        dest.writeLong(deprecationTime);
+        dest.writeLong(expirationTime);
     }
 
     /**
@@ -392,7 +548,10 @@ public class LinkAddress implements Parcelable {
                 int prefixLength = in.readInt();
                 int flags = in.readInt();
                 int scope = in.readInt();
-                return new LinkAddress(address, prefixLength, flags, scope);
+                long deprecationTime = in.readLong();
+                long expirationTime = in.readLong();
+                return new LinkAddress(address, prefixLength, flags, scope, deprecationTime,
+                        expirationTime);
             }
 
             public LinkAddress[] newArray(int size) {

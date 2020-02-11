@@ -54,11 +54,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of notifications.
  * It also handles tasks such as their inflation and their interaction with other
  * Notification.*Manager objects.
  */
+@Singleton
 public class NotificationEntryManager implements
         Dumpable,
         NotificationContentInflater.InflationCallback,
@@ -85,7 +89,6 @@ public class NotificationEntryManager implements
     private NotificationRowBinder mNotificationRowBinder;
 
     private NotificationPresenter mPresenter;
-    private NotificationListenerService.RankingMap mLatestRankingMap;
     @VisibleForTesting
     protected NotificationData mNotificationData;
 
@@ -118,6 +121,7 @@ public class NotificationEntryManager implements
         }
     }
 
+    @Inject
     public NotificationEntryManager(Context context) {
         mNotificationData = new NotificationData();
     }
@@ -163,8 +167,7 @@ public class NotificationEntryManager implements
     /** Adds a {@link NotificationLifetimeExtender}. */
     public void addNotificationLifetimeExtender(NotificationLifetimeExtender extender) {
         mNotificationLifetimeExtenders.add(extender);
-        extender.setCallback(key -> removeNotification(key, mLatestRankingMap,
-                UNDEFINED_DISMISS_REASON));
+        extender.setCallback(key -> removeNotification(key, null, UNDEFINED_DISMISS_REASON));
     }
 
     public NotificationData getNotificationData() {
@@ -276,10 +279,24 @@ public class NotificationEntryManager implements
         }
 
         final NotificationEntry entry = mNotificationData.get(key);
-
-        abortExistingInflation(key);
-
         boolean lifetimeExtended = false;
+
+        // Notification was canceled before it got inflated
+        if (entry == null) {
+            NotificationEntry pendingEntry = mPendingNotifications.get(key);
+            if (pendingEntry != null) {
+                for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
+                    if (extender.shouldExtendLifetimeForPendingNotification(pendingEntry)) {
+                        extendLifetime(pendingEntry, extender);
+                        lifetimeExtended = true;
+                    }
+                }
+            }
+        }
+
+        if (!lifetimeExtended) {
+            abortExistingInflation(key);
+        }
 
         if (entry != null) {
             // If a manager needs to keep the notification around for whatever reason, we
@@ -288,7 +305,6 @@ public class NotificationEntryManager implements
             if (!forceRemove && !entryDismissed) {
                 for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
                     if (extender.shouldExtendLifetime(entry)) {
-                        mLatestRankingMap = ranking;
                         extendLifetime(entry, extender);
                         lifetimeExtended = true;
                         break;

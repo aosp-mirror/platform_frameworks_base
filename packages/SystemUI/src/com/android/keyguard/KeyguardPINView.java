@@ -24,6 +24,7 @@ import android.view.animation.AnimationUtils;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
+import com.android.systemui.R;
 
 /**
  * Displays a PIN pad for unlocking.

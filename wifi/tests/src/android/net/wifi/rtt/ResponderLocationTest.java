@@ -37,7 +37,7 @@ import java.util.List;
  */
 @RunWith(JUnit4.class)
 public class ResponderLocationTest {
-    private static final double LATLNG_TOLERANCE_DEGREES = 0.00001;
+    private static final double LATLNG_TOLERANCE_DEGREES = 0.000_000_05D; // 5E-8 = 6mm of meridian
     private static final double ALT_TOLERANCE_METERS = 0.01;
     private static final double HEIGHT_TOLERANCE_METERS = 0.01;
     private static final int INDEX_ELEMENT_TYPE = 2;
@@ -103,7 +103,7 @@ public class ResponderLocationTest {
     private static final byte[] sTestBssidListSE = {
             (byte) 0x07, // Subelement BSSID list
             (byte) 13, // length dependent on number of BSSIDs in list
-            (byte) 0x02, // Number of BSSIDs in list
+            (byte) 0x00, // List is explicit; no expansion of list required
             (byte) 0x01, // BSSID #1 (MSB)
             (byte) 0x02,
             (byte) 0x03,
@@ -266,11 +266,11 @@ public class ResponderLocationTest {
         assertTrue(valid);
         assertTrue(lciValid);
         assertFalse(zValid);
-        assertEquals(0.0009765625, responderLocation.getLatitudeUncertainty());
-        assertEquals(-33.857009, responderLocation.getLatitude(),
+        assertEquals(0.0009765625D, responderLocation.getLatitudeUncertainty());
+        assertEquals(-33.8570095D, responderLocation.getLatitude(),
                 LATLNG_TOLERANCE_DEGREES);
-        assertEquals(0.0009765625, responderLocation.getLongitudeUncertainty());
-        assertEquals(151.215200, responderLocation.getLongitude(),
+        assertEquals(0.0009765625D, responderLocation.getLongitudeUncertainty());
+        assertEquals(151.2152005D, responderLocation.getLongitude(),
                 LATLNG_TOLERANCE_DEGREES);
         assertEquals(1, responderLocation.getAltitudeType());
         assertEquals(64.0, responderLocation.getAltitudeUncertainty());
@@ -282,11 +282,11 @@ public class ResponderLocationTest {
         assertEquals(1, responderLocation.getLciVersion());
 
         // Testing Location Object
-        assertEquals(-33.857009, location.getLatitude(),
+        assertEquals(-33.8570095D, location.getLatitude(),
                 LATLNG_TOLERANCE_DEGREES);
-        assertEquals(151.215200, location.getLongitude(),
+        assertEquals(151.2152005D, location.getLongitude(),
                 LATLNG_TOLERANCE_DEGREES);
-        assertEquals((0.0009765625 + 0.0009765625) / 2, location.getAccuracy(),
+        assertEquals((0.0009765625D + 0.0009765625D) / 2, location.getAccuracy(),
                 LATLNG_TOLERANCE_DEGREES);
         assertEquals(11.2, location.getAltitude(), ALT_TOLERANCE_METERS);
         assertEquals(64.0, location.getVerticalAccuracyMeters(), ALT_TOLERANCE_METERS);

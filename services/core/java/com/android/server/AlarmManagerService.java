@@ -2167,8 +2167,9 @@ class AlarmManagerService extends SystemService {
         @Override
         public long currentNetworkTimeMillis() {
             final NtpTrustedTime time = NtpTrustedTime.getInstance(getContext());
-            if (time.hasCache()) {
-                return time.currentTimeMillis();
+            NtpTrustedTime.TimeResult ntpResult = time.getCachedTimeResult();
+            if (ntpResult != null) {
+                return ntpResult.currentTimeMillis();
             } else {
                 throw new ParcelableException(new DateTimeException("Missing NTP fix"));
             }

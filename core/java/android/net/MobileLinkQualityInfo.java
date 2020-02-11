@@ -16,7 +16,7 @@
 
 package android.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 
 /**
@@ -39,6 +39,10 @@ public class MobileLinkQualityInfo extends LinkQualityInfo {
     private int mLteRsrq = UNKNOWN_INT;
     private int mLteRssnr = UNKNOWN_INT;
     private int mLteCqi = UNKNOWN_INT;
+
+    @UnsupportedAppUsage
+    public MobileLinkQualityInfo() {
+    }
 
     /**
      * Implement the Parcelable interface.

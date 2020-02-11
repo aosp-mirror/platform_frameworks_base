@@ -17,7 +17,7 @@
 package android.text;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.BaseCanvas;
 import android.graphics.Paint;
 import android.util.Log;

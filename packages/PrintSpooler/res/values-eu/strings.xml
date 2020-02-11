@@ -32,7 +32,7 @@
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> orriko tartea"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"adib., 1-5, 8,11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"Inprimatze-aurrebista"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"Aurrebista ikusteko, instalatu PDF ikustailea"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"Aurrebista ikusteko, instalatu PDF dokumentuen ikustailea"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Inprimatzeko aplikazioak matxura izan du"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Inprimatze-lana sortzen"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"Gorde PDF gisa"</string>

@@ -16,12 +16,16 @@
 
 package com.android.internal.compat;
 
+import android.annotation.IntDef;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,11 +41,11 @@ public final class ChangeReporter {
     private static final String TAG = "CompatibilityChangeReporter";
     private int mSource;
 
-    private final class ChangeReport {
+    private static final class ChangeReport {
         long mChangeId;
         int mState;
 
-        ChangeReport(long changeId, int state) {
+        ChangeReport(long changeId, @State int state) {
             mChangeId = changeId;
             mState = state;
         }
@@ -65,9 +69,13 @@ public final class ChangeReporter {
     @GuardedBy("mReportedChanges")
     private final Map<Integer, Set<ChangeReport>> mReportedChanges;
 
-    public ChangeReporter(int source) {
+    // When true will of every time to debug (logcat).
+    private boolean mDebugLogAll;
+
+    public ChangeReporter(@Source int source) {
         mSource = source;
         mReportedChanges =  new HashMap<>();
+        mDebugLogAll = false;
     }
 
     /**
@@ -79,20 +87,76 @@ public final class ChangeReporter {
      * @param state    of the reported change - enabled/disabled/only logged
      */
     public void reportChange(int uid, long changeId, int state) {
-        ChangeReport report = new ChangeReport(changeId, state);
+        if (shouldWriteToStatsLog(uid, changeId, state)) {
+            StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
+                    state, mSource);
+        }
+        if (shouldWriteToDebug(uid, changeId, state)) {
+            debugLog(uid, changeId, state);
+        }
+        markAsReported(uid, new ChangeReport(changeId, state));
+    }
+
+    /**
+     * Start logging all the time to logcat.
+     */
+    public void startDebugLogAll() {
+        mDebugLogAll = true;
+    }
+
+    /**
+     * Stop logging all the time to logcat.
+     */
+    public void stopDebugLogAll() {
+        mDebugLogAll = false;
+    }
+
+
+    /**
+     * Returns whether the next report should be logged to statsLog.
+     *
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
+     * @return true if the report should be logged
+     */
+    @VisibleForTesting
+    public boolean shouldWriteToStatsLog(int uid, long changeId, int state) {
+        return !isAlreadyReported(uid, new ChangeReport(changeId, state));
+    }
+
+    /**
+     * Returns whether the next report should be logged to logcat.
+     *
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
+     * @return true if the report should be logged
+     */
+    @VisibleForTesting
+    public boolean shouldWriteToDebug(int uid, long changeId, int state) {
+        return mDebugLogAll || !isAlreadyReported(uid, new ChangeReport(changeId, state));
+    }
+
+    private boolean isAlreadyReported(int uid, ChangeReport report) {
+        synchronized (mReportedChanges) {
+            Set<ChangeReport> reportedChangesForUid = mReportedChanges.get(uid);
+            if (reportedChangesForUid == null) {
+                return false;
+            } else {
+                return reportedChangesForUid.contains(report);
+            }
+        }
+    }
+
+    private void markAsReported(int uid, ChangeReport report) {
         synchronized (mReportedChanges) {
             Set<ChangeReport> reportedChangesForUid = mReportedChanges.get(uid);
             if (reportedChangesForUid == null) {
                 mReportedChanges.put(uid, new HashSet<ChangeReport>());
                 reportedChangesForUid = mReportedChanges.get(uid);
             }
-            if (!reportedChangesForUid.contains(report)) {
-                debugLog(uid, changeId, state);
-                StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
-                        state, mSource);
-                reportedChangesForUid.add(report);
-            }
-
+            reportedChangesForUid.add(report);
         }
     }
 
@@ -113,7 +177,7 @@ public final class ChangeReporter {
     private void debugLog(int uid, long changeId, int state) {
         String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
-        if (mSource == StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER) {
+        if (mSource == SOURCE_SYSTEM_SERVER) {
             Slog.d(TAG, message);
         } else {
             Log.d(TAG, message);
@@ -122,21 +186,56 @@ public final class ChangeReporter {
     }
 
     /**
-     * Transforms StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE enum to a string.
+     * Transforms {@link #ChangeReporter.State} enum to a string.
      *
      * @param state to transform
      * @return a string representing the state
      */
-    private static String stateToString(int state) {
+    private static String stateToString(@State int state) {
         switch (state) {
-            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED:
+            case STATE_LOGGED:
                 return "LOGGED";
-            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED:
+            case STATE_ENABLED:
                 return "ENABLED";
-            case StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED:
+            case STATE_DISABLED:
                 return "DISABLED";
             default:
                 return "UNKNOWN";
         }
+    }
+
+    /** These values should be kept in sync with those in atoms.proto */
+    public static final int STATE_UNKNOWN_STATE =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__UNKNOWN_STATE;
+    public static final int STATE_ENABLED =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED;
+    public static final int STATE_DISABLED =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED;
+    public static final int STATE_LOGGED =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED;
+    public static final int SOURCE_UNKNOWN_SOURCE =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__UNKNOWN_SOURCE;
+    public static final int SOURCE_APP_PROCESS =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS;
+    public static final int SOURCE_SYSTEM_SERVER =
+                            StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "STATE_" }, value = {
+            STATE_UNKNOWN_STATE,
+            STATE_ENABLED,
+            STATE_DISABLED,
+            STATE_LOGGED
+    })
+    public @interface State {
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+            SOURCE_UNKNOWN_SOURCE,
+            SOURCE_APP_PROCESS,
+            SOURCE_SYSTEM_SERVER
+    })
+    public @interface Source {
     }
 }

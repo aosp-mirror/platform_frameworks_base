@@ -133,8 +133,8 @@ public class ZigZagClassifierTest extends ClassifierTest {
         // This test looks just like testPass_horizontalZigZagVerticalStraight but with
         // a shorter y range, making it look more crooked.
         appendMoveEvent(0, 0);
-        appendMoveEvent(5, 10);
-        appendMoveEvent(-5, 20);
+        appendMoveEvent(6, 10);
+        appendMoveEvent(-6, 20);
         assertThat(mClassifier.isFalseTouch(), is(true));
     }
 

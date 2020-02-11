@@ -16,7 +16,7 @@
 
 package android.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -76,6 +76,10 @@ public class SntpClient {
         public InvalidServerReplyException(String message) {
             super(message);
         }
+    }
+
+    @UnsupportedAppUsage
+    public SntpClient() {
     }
 
     /**

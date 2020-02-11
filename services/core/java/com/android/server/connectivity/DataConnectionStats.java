@@ -16,6 +16,9 @@
 
 package com.android.server.connectivity;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -31,8 +35,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.server.am.BatteryStatsService;
 
 public class DataConnectionStats extends BroadcastReceiver {
@@ -44,7 +46,7 @@ public class DataConnectionStats extends BroadcastReceiver {
     private final Handler mListenerHandler;
     private final PhoneStateListener mPhoneStateListener;
 
-    private IccCardConstants.State mSimState = IccCardConstants.State.READY;
+    private int mSimState = TelephonyManager.SIM_STATE_READY;
     private SignalStrength mSignalStrength;
     private ServiceState mServiceState;
     private int mDataState = TelephonyManager.DATA_DISCONNECTED;
@@ -66,7 +68,7 @@ public class DataConnectionStats extends BroadcastReceiver {
               | PhoneStateListener.LISTEN_DATA_ACTIVITY);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        filter.addAction(Intent.ACTION_SIM_STATE_CHANGED);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         mContext.registerReceiver(this, filter, null /* broadcastPermission */, mListenerHandler);
@@ -75,7 +77,7 @@ public class DataConnectionStats extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
+        if (action.equals(Intent.ACTION_SIM_STATE_CHANGED)) {
             updateSimState(intent);
             notePhoneDataConnectionState();
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
@@ -88,39 +90,43 @@ public class DataConnectionStats extends BroadcastReceiver {
         if (mServiceState == null) {
             return;
         }
-        boolean simReadyOrUnknown = mSimState == IccCardConstants.State.READY
-                || mSimState == IccCardConstants.State.UNKNOWN;
+        boolean simReadyOrUnknown = mSimState == TelephonyManager.SIM_STATE_READY
+                || mSimState == TelephonyManager.SIM_STATE_UNKNOWN;
         boolean visible = (simReadyOrUnknown || isCdma()) // we only check the sim state for GSM
                 && hasService()
                 && mDataState == TelephonyManager.DATA_CONNECTED;
-        int networkType = mServiceState.getDataNetworkType();
+        NetworkRegistrationInfo regInfo =
+                mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
+        int networkType = regInfo == null ? TelephonyManager.NETWORK_TYPE_UNKNOWN
+                : regInfo.getAccessNetworkTechnology();
         if (DEBUG) Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
                 networkType, visible ? "" : "not "));
         try {
-            mBatteryStats.notePhoneDataConnectionState(networkType, visible);
+            mBatteryStats.notePhoneDataConnectionState(networkType, visible,
+                    mServiceState.getState());
         } catch (RemoteException e) {
             Log.w(TAG, "Error noting data connection state", e);
         }
     }
 
     private final void updateSimState(Intent intent) {
-        String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-        if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
-            mSimState = IccCardConstants.State.ABSENT;
-        } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
-            mSimState = IccCardConstants.State.READY;
-        } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+        String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
+        if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
+            mSimState = TelephonyManager.SIM_STATE_ABSENT;
+        } else if (Intent.SIM_STATE_READY.equals(stateExtra)) {
+            mSimState = TelephonyManager.SIM_STATE_READY;
+        } else if (Intent.SIM_STATE_LOCKED.equals(stateExtra)) {
             final String lockedReason =
-                    intent.getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
-            if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
-                mSimState = IccCardConstants.State.PIN_REQUIRED;
-            } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
-                mSimState = IccCardConstants.State.PUK_REQUIRED;
+                    intent.getStringExtra(Intent.EXTRA_SIM_LOCKED_REASON);
+            if (Intent.SIM_LOCKED_ON_PIN.equals(lockedReason)) {
+                mSimState = TelephonyManager.SIM_STATE_PIN_REQUIRED;
+            } else if (Intent.SIM_LOCKED_ON_PUK.equals(lockedReason)) {
+                mSimState = TelephonyManager.SIM_STATE_PUK_REQUIRED;
             } else {
-                mSimState = IccCardConstants.State.NETWORK_LOCKED;
+                mSimState = TelephonyManager.SIM_STATE_NETWORK_LOCKED;
             }
         } else {
-            mSimState = IccCardConstants.State.UNKNOWN;
+            mSimState = TelephonyManager.SIM_STATE_UNKNOWN;
         }
     }
 

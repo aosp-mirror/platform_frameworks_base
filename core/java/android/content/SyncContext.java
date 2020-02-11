@@ -16,10 +16,10 @@
 
 package android.content;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.IBinder;
 
 public class SyncContext {
     private ISyncContext mSyncContext;

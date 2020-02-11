@@ -446,7 +446,9 @@ public final class BroadcastQueue {
         mHandler.removeCallbacksAndMessages(msgToken);
         // ...then schedule the removal of the token after the extended timeout
         mHandler.postAtTime(() -> {
-            app.removeAllowBackgroundActivityStartsToken(r);
+            synchronized (mService) {
+                app.removeAllowBackgroundActivityStartsToken(r);
+            }
         }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
     }
 

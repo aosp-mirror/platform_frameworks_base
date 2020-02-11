@@ -379,6 +379,7 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
   int errorCount = 0;
   const bool dbg = false;
 
+  int maxPushedAtomId = 2;
   for (int i = 0; i < descriptor->field_count(); i++) {
     const FieldDescriptor *atomField = descriptor->field(i);
 
@@ -433,7 +434,7 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
     AtomDecl nonChainedAtomDecl(atomField->number(), atomField->name(), atom->name());
     vector<java_type_t> nonChainedSignature;
     if (get_non_chained_node(atom, &nonChainedAtomDecl, &nonChainedSignature)) {
-        auto it = atoms->non_chained_signatures_to_modules.find(signature);
+        auto it = atoms->non_chained_signatures_to_modules.find(nonChainedSignature);
         if (it == atoms->non_chained_signatures_to_modules.end()) {
             set<string> modules_non_chained;
             if (atomDecl.hasModule) {
@@ -447,7 +448,13 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
         }
         atoms->non_chained_decls.insert(nonChainedAtomDecl);
     }
+
+    if (atomDecl.code < PULL_ATOM_START_ID && atomDecl.code > maxPushedAtomId) {
+        maxPushedAtomId = atomDecl.code;
+    }
   }
+
+  atoms->maxPushedAtomId = maxPushedAtomId;
 
   if (dbg) {
     printf("signatures = [\n");

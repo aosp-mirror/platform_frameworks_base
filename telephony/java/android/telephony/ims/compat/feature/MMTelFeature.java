@@ -17,11 +17,15 @@
 package android.telephony.ims.compat.feature;
 
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Message;
 import android.os.RemoteException;
-
-import android.annotation.UnsupportedAppUsage;
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.stub.ImsEcbmImplBase;
+import android.telephony.ims.stub.ImsMultiEndpointImplBase;
+import android.telephony.ims.stub.ImsUtImplBase;
+
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsConfig;
@@ -30,11 +34,6 @@ import com.android.ims.internal.IImsMMTelFeature;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsUt;
-import android.telephony.ims.ImsCallSession;
-import android.telephony.ims.compat.stub.ImsCallSessionImplBase;
-import android.telephony.ims.stub.ImsEcbmImplBase;
-import android.telephony.ims.stub.ImsMultiEndpointImplBase;
-import android.telephony.ims.stub.ImsUtImplBase;
 
 /**
  * Base implementation for MMTel.
@@ -48,6 +47,10 @@ public class MMTelFeature extends ImsFeature {
 
     // Lock for feature synchronization
     private final Object mLock = new Object();
+
+    @UnsupportedAppUsage
+    public MMTelFeature() {
+    }
 
     private final IImsMMTelFeature mImsMMTelBinder = new IImsMMTelFeature.Stub() {
 

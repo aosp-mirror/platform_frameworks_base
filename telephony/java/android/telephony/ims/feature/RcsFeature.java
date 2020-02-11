@@ -20,8 +20,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
@@ -32,7 +32,7 @@ import android.telephony.ims.stub.RcsPresenceExchangeImplBase;
 import android.telephony.ims.stub.RcsSipOptionsImplBase;
 import android.util.Log;
 
-import com.android.internal.util.FunctionalUtils;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -42,6 +42,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
@@ -49,6 +50,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 public class RcsFeature extends ImsFeature {
 
     private static final String LOG_TAG = "RcsFeature";
@@ -148,13 +150,13 @@ public class RcsFeature extends ImsFeature {
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
-        private void executeMethodAsync(FunctionalUtils.ThrowingRunnable r, String errorLogName)
+        private void executeMethodAsync(Runnable r, String errorLogName)
                 throws RemoteException {
             // call with a clean calling identity on the executor and wait indefinitely for the
             // future to return.
             try {
                 CompletableFuture.runAsync(
-                        () -> Binder.withCleanCallingIdentity(r), mExecutor).join();
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
             } catch (CancellationException | CompletionException e) {
                 Log.w(LOG_TAG, "RcsFeatureBinder - " + errorLogName + " exception: "
                         + e.getMessage());
@@ -162,12 +164,12 @@ public class RcsFeature extends ImsFeature {
             }
         }
 
-        private <T> T executeMethodAsyncForResult(FunctionalUtils.ThrowingSupplier<T> r,
+        private <T> T executeMethodAsyncForResult(Supplier<T> r,
                 String errorLogName) throws RemoteException {
             // call with a clean calling identity on the executor and wait indefinitely for the
             // future to return.
             CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> Binder.withCleanCallingIdentity(r), mExecutor);
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
             try {
                 return future.get();
             } catch (ExecutionException | InterruptedException e) {
@@ -197,16 +199,21 @@ public class RcsFeature extends ImsFeature {
         /** @hide*/
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(prefix = "CAPABILITY_TYPE_", flag = true, value = {
+                CAPABILITY_TYPE_NONE,
                 CAPABILITY_TYPE_OPTIONS_UCE,
                 CAPABILITY_TYPE_PRESENCE_UCE
         })
         public @interface RcsImsCapabilityFlag {}
 
         /**
+         * Undefined capability type for initialization
+         */
+        public static final int CAPABILITY_TYPE_NONE = 0;
+
+        /**
          * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
          * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
          * If not set, this RcsFeature should not service capability requests.
-         * @hide
          */
         public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1 << 0;
 
@@ -215,33 +222,27 @@ public class RcsFeature extends ImsFeature {
          * framework. If set, the RcsFeature should support capability exchange using a presence
          * server. If not set, this RcsFeature should not publish capabilities or service capability
          * requests using presence.
-         * @hide
          */
         public static final int CAPABILITY_TYPE_PRESENCE_UCE =  1 << 1;
 
-        /**@hide*/
         public RcsImsCapabilities(@RcsImsCapabilityFlag int capabilities) {
             super(capabilities);
         }
 
-        /**@hide*/
         private RcsImsCapabilities(Capabilities c) {
             super(c.getMask());
         }
 
-        /**@hide*/
         @Override
         public void addCapabilities(@RcsImsCapabilityFlag int capabilities) {
             super.addCapabilities(capabilities);
         }
 
-        /**@hide*/
         @Override
         public void removeCapabilities(@RcsImsCapabilityFlag int capabilities) {
             super.removeCapabilities(capabilities);
         }
 
-        /**@hide*/
         @Override
         public boolean isCapable(@RcsImsCapabilityFlag int capabilities) {
             return super.isCapable(capabilities);
@@ -289,7 +290,7 @@ public class RcsFeature extends ImsFeature {
      * @hide
      */
     @Override
-    public final RcsImsCapabilities queryCapabilityStatus() {
+    public @NonNull final RcsImsCapabilities queryCapabilityStatus() {
         return new RcsImsCapabilities(super.queryCapabilityStatus());
     }
 
@@ -337,8 +338,8 @@ public class RcsFeature extends ImsFeature {
      * @hide
      */
     @Override
-    public void changeEnabledCapabilities(CapabilityChangeRequest request,
-            CapabilityCallbackProxy c) {
+    public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
+            @NonNull CapabilityCallbackProxy c) {
         // Base Implementation - Override to provide functionality
     }
 
@@ -355,7 +356,7 @@ public class RcsFeature extends ImsFeature {
      * it is supported by the device.
      * @hide
      */
-    public RcsSipOptionsImplBase getOptionsExchangeImpl() {
+    public @NonNull RcsSipOptionsImplBase getOptionsExchangeImpl() {
         // Base Implementation, override to implement functionality
         return new RcsSipOptionsImplBase();
     }
@@ -371,7 +372,7 @@ public class RcsFeature extends ImsFeature {
      * exchange if it is supported by the device.
      * @hide
      */
-    public RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
+    public @NonNull RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
         // Base Implementation, override to implement functionality.
         return new RcsPresenceExchangeImplBase();
     }

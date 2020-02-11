@@ -170,6 +170,21 @@ oneway interface ITaskStackListener {
      */
     void onBackPressedOnTaskRoot(in ActivityManager.RunningTaskInfo taskInfo);
 
+    /*
+     * Called when contents are drawn for the first time on a display which can only contain one
+     * task.
+     *
+     * @param displayId the id of the display on which contents are drawn.
+     */
+    void onSingleTaskDisplayDrawn(int displayId);
+
+    /*
+     * Called when the last task is removed from a display which can only contain one task.
+     *
+     * @param displayId the id of the display from which the window is removed.
+     */
+    void onSingleTaskDisplayEmpty(int displayId);
+
     /**
      * Called when a task is reparented to a stack on a different display.
      *

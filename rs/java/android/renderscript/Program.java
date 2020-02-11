@@ -17,13 +17,13 @@
 package android.renderscript;
 
 
+import android.compat.annotation.UnsupportedAppUsage;
+import android.content.res.Resources;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
-import android.annotation.UnsupportedAppUsage;
-import android.content.res.Resources;
-import android.util.Log;
 
 
 /**

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2019 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:tint="?android:attr/colorControlNormal"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <group
+        android:scaleX="-1"
+        android:translateX="-12.000000"
+        android:translateY="-12.000000" >
+        <path
+            android:fillType="evenOdd"
+            android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z"
+            android:strokeWidth="1" />
+    </group>
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M13.0016705,11.5012475 L15.3917467,11.5012475 C15.9314188,11.5012475 16.206996,12.1426752 15.8165949,12.5140281 L12.4292913,15.822445 C12.1961989,16.0553846 11.8138355,16.0598858 11.5761501,15.8314475 C11.5738536,15.8280716 11.5704089,15.8258209 11.5681124,15.822445 L8.17851232,12.5117775 C7.79729714,12.1392993 8.06713319,11.5012475 8.60565705,11.5012475 L11.002341,11.5012475 L11.002341,2.99966471 C11.002341,2.44756514 11.4499062,2 12.0020057,2 C12.5541053,2 13.0016705,2.44756514 13.0016705,2.99966471 L13.0016705,11.5012475 Z M15,2.46 L15,4.59 C17.93,5.78 20,8.65 20,12 C20,16.41 16.41,20 12,20 C7.59,20 4,16.41 4,12 C4,8.65 6.07,5.78 9,4.59 L9,2.46 C4.94,3.74 2,7.53 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,7.53 19.06,3.74 15,2.46 Z"
+        android:strokeWidth="1" />
+</vector>

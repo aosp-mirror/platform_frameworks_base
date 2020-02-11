@@ -16,6 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -42,6 +46,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
     static final String NAME = "HearingAid";
     private final LocalBluetoothProfileManager mProfileManager;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     // Order of this profile in device profiles list
     private static final int ORDINAL = 1;
@@ -94,7 +99,8 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         mContext = context;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.getProfileProxy(context,
                 new HearingAidServiceListener(), BluetoothProfile.HEARING_AID);
     }
 
@@ -145,20 +151,6 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         return mService.getDevicesMatchingConnectionStates(states);
     }
 
-    public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.connect(device);
-    }
-
-    public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        // Downgrade priority as user is disconnecting the hearing aid.
-        if (mService.getPriority(device) > BluetoothProfile.PRIORITY_ON){
-            mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
-        }
-        return mService.disconnect(device);
-    }
-
     public int getConnectionStatus(BluetoothDevice device) {
         if (mService == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -167,8 +159,10 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.setActiveDevice(device);
+        if (mBluetoothAdapter == null) {
+            return false;
+        }
+        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_ALL);
     }
 
     public List<BluetoothDevice> getActiveDevices() {
@@ -176,32 +170,37 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         return mService.getActiveDevices();
     }
 
-    public boolean isPreferred(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
+    @Override
+    public boolean isEnabled(BluetoothDevice device) {
+        if (mService == null) {
+            return false;
+        }
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
-    public int getPreferred(BluetoothDevice device) {
-        if (mService == null) return BluetoothProfile.PRIORITY_OFF;
-        return mService.getPriority(device);
+    @Override
+    public int getConnectionPolicy(BluetoothDevice device) {
+        if (mService == null) {
+            return CONNECTION_POLICY_FORBIDDEN;
+        }
+        return mService.getConnectionPolicy(device);
     }
 
-    public void setPreferred(BluetoothDevice device, boolean preferred) {
-        if (mService == null) return;
-        if (preferred) {
-            if (mService.getPriority(device) < BluetoothProfile.PRIORITY_ON) {
-                mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
+    @Override
+    public boolean setEnabled(BluetoothDevice device, boolean enabled) {
+        boolean isEnabled = false;
+        if (mService == null) {
+            return false;
+        }
+        if (enabled) {
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            mService.setPriority(device, BluetoothProfile.PRIORITY_OFF);
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
-    }
 
-    public int getVolume() {
-        if (mService == null) {
-            return 0;
-        }
-        return mService.getVolume();
+        return isEnabled;
     }
 
     public void setVolume(int volume) {
@@ -216,20 +215,6 @@ public class HearingAidProfile implements LocalBluetoothProfile {
             return BluetoothHearingAid.HI_SYNC_ID_INVALID;
         }
         return mService.getHiSyncId(device);
-    }
-
-    public int getDeviceSide(BluetoothDevice device) {
-        if (mService == null) {
-            return BluetoothHearingAid.SIDE_LEFT;
-        }
-        return mService.getDeviceSide(device);
-    }
-
-    public int getDeviceMode(BluetoothDevice device) {
-        if (mService == null) {
-            return BluetoothHearingAid.MODE_MONAURAL;
-        }
-        return mService.getDeviceMode(device);
     }
 
     public String toString() {

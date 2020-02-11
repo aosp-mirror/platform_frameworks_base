@@ -24,10 +24,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -191,7 +188,7 @@ public class GlobalActionPerformer {
         ScreenshotHelper screenshotHelper = (mScreenshotHelperSupplier != null)
                 ? mScreenshotHelperSupplier.get() : new ScreenshotHelper(mContext);
         screenshotHelper.takeScreenshot(android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
-                true, true, new Handler(Looper.getMainLooper()));
+                true, true, new Handler(Looper.getMainLooper()), null);
         return true;
     }
 }

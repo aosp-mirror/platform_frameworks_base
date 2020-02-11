@@ -26,6 +26,7 @@
 
 #include <gui/IProducerListener.h>
 #include <gui/Surface.h>
+#include <ui/PublicFormat.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
@@ -126,7 +127,7 @@ private:
             Condition mCondition;
             std::deque<wp<Surface>> mQueue;
 
-            static const nsecs_t kWaitDuration = 20000000; // 20 ms
+            static const nsecs_t kWaitDuration = 500000000; // 500 ms
         };
         sp<DetachThread> mThread;
 
@@ -401,8 +402,28 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
             return 0;
         }
     } else {
+        // Set consumer buffer format to user specified format
+        PublicFormat publicFormat = static_cast<PublicFormat>(userFormat);
+        int nativeFormat = mapPublicFormatToHalFormat(publicFormat);
+        android_dataspace nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
+        res = native_window_set_buffers_format(anw.get(), nativeFormat);
+        if (res != OK) {
+            ALOGE("%s: Unable to configure consumer native buffer format to %#x",
+                    __FUNCTION__, nativeFormat);
+            jniThrowRuntimeException(env, "Failed to set Surface format");
+            return 0;
+        }
+
+        res = native_window_set_buffers_data_space(anw.get(), nativeDataspace);
+        if (res != OK) {
+            ALOGE("%s: Unable to configure consumer dataspace %#x",
+                    __FUNCTION__, nativeDataspace);
+            jniThrowRuntimeException(env, "Failed to set Surface dataspace");
+            return 0;
+        }
         surfaceFormat = userFormat;
     }
+
     ctx->setBufferFormat(surfaceFormat);
     env->SetIntField(thiz,
             gImageWriterClassInfo.mWriterFormat, reinterpret_cast<jint>(surfaceFormat));

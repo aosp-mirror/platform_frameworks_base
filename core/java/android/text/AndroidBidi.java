@@ -16,7 +16,7 @@
 
 package android.text;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UCharacterDirection;
 import android.icu.lang.UProperty;

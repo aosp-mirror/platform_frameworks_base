@@ -18,18 +18,17 @@
 #define LOG_TAG "StatsLog_println"
 
 #include <assert.h>
-#include <cutils/properties.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include "utils/misc.h"
 #include "core_jni_helpers.h"
-#include "stats_event_list.h"
+#include "stats_buffer_writer.h"
 
 namespace android {
 
-static void android_util_StatsLog_writeRaw(JNIEnv* env, jobject clazz, jbyteArray buf, jint size)
-{
+static void android_util_StatsLog_write(JNIEnv* env, jobject clazz, jbyteArray buf, jint size,
+        jint atomId) {
     if (buf == NULL) {
         return;
     }
@@ -42,13 +41,8 @@ static void android_util_StatsLog_writeRaw(JNIEnv* env, jobject clazz, jbyteArra
     if (bufferArray == NULL) {
         return;
     }
-    const uint32_t statsEventTag = 1937006964;
-    struct iovec vec[2];
-    vec[0].iov_base = (void*) &statsEventTag;
-    vec[0].iov_len = sizeof(statsEventTag);
-    vec[1].iov_base = (void*) bufferArray;
-    vec[1].iov_len = size;
-    write_to_statsd(vec, 2);
+
+    write_buffer_to_statsd((void*) bufferArray, size, atomId);
 
     env->ReleaseByteArrayElements(buf, bufferArray, 0);
 }
@@ -58,7 +52,7 @@ static void android_util_StatsLog_writeRaw(JNIEnv* env, jobject clazz, jbyteArra
  */
 static const JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
-    { "writeRaw", "([BI)V", (void*) android_util_StatsLog_writeRaw },
+    { "writeImpl", "([BII)V", (void*) android_util_StatsLog_write },
 };
 
 int register_android_util_StatsLog(JNIEnv* env)

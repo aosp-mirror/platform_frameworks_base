@@ -57,7 +57,7 @@ public final class ClockInfoTest extends SysuiTestCase {
     @Test
     public void testGetTitle() {
         final String title = "title";
-        ClockInfo info = ClockInfo.builder().setTitle(title).build();
+        ClockInfo info = ClockInfo.builder().setTitle(() -> title).build();
         assertThat(info.getTitle()).isEqualTo(title);
     }
 

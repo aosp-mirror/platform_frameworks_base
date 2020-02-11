@@ -22,7 +22,7 @@ import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentInterface;
 import android.content.ContentResolver;
 import android.content.Context;

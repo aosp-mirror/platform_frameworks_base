@@ -52,8 +52,8 @@ class SmallClockPositionTest : SysuiTestCase() {
     fun darkPosition() {
         // GIVEN on AOD
         position.setDarkAmount(1f)
-        // THEN Y position is statusBarHeight + lockPadding + burnInY (100 + 15 + 20 = 135)
-        assertThat(position.preferredY).isEqualTo(135)
+        // THEN Y is sum of statusBarHeight, lockPadding, lockHeight, lockPadding, burnInY
+        assertThat(position.preferredY).isEqualTo(185)
     }
 
     @Test

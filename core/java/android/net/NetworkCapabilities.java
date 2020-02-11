@@ -21,11 +21,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
@@ -35,6 +36,9 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -55,12 +59,10 @@ import java.util.StringJoiner;
  */
 public final class NetworkCapabilities implements Parcelable {
     private static final String TAG = "NetworkCapabilities";
-    private static final int INVALID_UID = -1;
 
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
+    // Set to true when private DNS is broken.
+    private boolean mPrivateDnsBroken;
+
     public NetworkCapabilities() {
         clearAll();
         mNetworkCapabilities = DEFAULT_CAPABILITIES;
@@ -75,7 +77,6 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Completely clears the contents of this object, removing even the capabilities that are set
      * by default when the object is constructed.
-     * @hide
      */
     public void clearAll() {
         mNetworkCapabilities = mTransportTypes = mUnwantedNetworkCapabilities = 0;
@@ -84,8 +85,10 @@ public final class NetworkCapabilities implements Parcelable {
         mTransportInfo = null;
         mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
         mUids = null;
-        mEstablishingVpnAppUid = INVALID_UID;
+        mAdministratorUids.clear();
+        mOwnerUid = Process.INVALID_UID;
         mSSID = null;
+        mPrivateDnsBroken = false;
     }
 
     /**
@@ -101,9 +104,11 @@ public final class NetworkCapabilities implements Parcelable {
         mTransportInfo = nc.mTransportInfo;
         mSignalStrength = nc.mSignalStrength;
         setUids(nc.mUids); // Will make the defensive copy
-        mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
+        setAdministratorUids(nc.mAdministratorUids);
+        mOwnerUid = nc.mOwnerUid;
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
         mSSID = nc.mSSID;
+        mPrivateDnsBroken = nc.mPrivateDnsBroken;
     }
 
     /**
@@ -397,16 +402,15 @@ public final class NetworkCapabilities implements Parcelable {
      * Adds the given capability to this {@code NetworkCapability} instance.
      * Multiple capabilities may be applied sequentially.  Note that when searching
      * for a network to satisfy a request, all capabilities requested must be satisfied.
-     * <p>
-     * If the given capability was previously added to the list of unwanted capabilities
-     * then the capability will also be removed from the list of unwanted capabilities.
      *
      * @param capability the capability to be added.
      * @return This NetworkCapabilities instance, to facilitate chaining.
-     * @hide
      */
-    @UnsupportedAppUsage
     public @NonNull NetworkCapabilities addCapability(@NetCapability int capability) {
+        // If the given capability was previously added to the list of unwanted capabilities
+        // then the capability will also be removed from the list of unwanted capabilities.
+        // TODO: Consider adding unwanted capabilities to the public API and mention this
+        // in the documentation.
         checkValidCapability(capability);
         mNetworkCapabilities |= 1 << capability;
         mUnwantedNetworkCapabilities &= ~(1 << capability);  // remove from unwanted capability list
@@ -434,16 +438,13 @@ public final class NetworkCapabilities implements Parcelable {
 
     /**
      * Removes (if found) the given capability from this {@code NetworkCapability} instance.
-     * <p>
-     * Note that this method removes capabilities that were added via {@link #addCapability(int)},
-     * {@link #addUnwantedCapability(int)} or {@link #setCapabilities(int[], int[])} .
      *
      * @param capability the capability to be removed.
      * @return This NetworkCapabilities instance, to facilitate chaining.
-     * @hide
      */
-    @UnsupportedAppUsage
     public @NonNull NetworkCapabilities removeCapability(@NetCapability int capability) {
+        // Note that this method removes capabilities that were added via addCapability(int),
+        // addUnwantedCapability(int) or setCapabilities(int[], int[]).
         checkValidCapability(capability);
         final long mask = ~(1 << capability);
         mNetworkCapabilities &= mask;
@@ -455,7 +456,6 @@ public final class NetworkCapabilities implements Parcelable {
      * Sets (or clears) the given capability on this {@link NetworkCapabilities}
      * instance.
      *
-     * @hide
      */
     public @NonNull NetworkCapabilities setCapability(@NetCapability int capability,
             boolean value) {
@@ -473,6 +473,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return an array of capability values for this instance.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public @NetCapability int[] getCapabilities() {
         return BitUtils.unpackBits(mNetworkCapabilities);
@@ -557,6 +558,9 @@ public final class NetworkCapabilities implements Parcelable {
         }
         if (mLinkUpBandwidthKbps != 0 || mLinkDownBandwidthKbps != 0) return "link bandwidth";
         if (hasSignalStrength()) return "signalStrength";
+        if (isPrivateDnsBroken()) {
+            return "privateDnsBroken";
+        }
         return null;
     }
 
@@ -588,15 +592,14 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if all the capabilities it provides are
-     * typically provided by restricted networks.
+     * Deduces that all the capabilities it provides are typically provided by restricted networks
+     * or not.
      *
-     * TODO: consider:
-     * - Renaming it to guessRestrictedCapability and make it set the
-     *   restricted capability bit in addition to clearing it.
+     * @return {@code true} if the network should be restricted.
      * @hide
      */
-    public void maybeMarkCapabilitiesRestricted() {
+    @SystemApi
+    public boolean deduceRestrictedCapability() {
         // Check if we have any capability that forces the network to be restricted.
         final boolean forceRestrictedCapability =
                 (mNetworkCapabilities & FORCE_RESTRICTED_CAPABILITIES) != 0;
@@ -610,8 +613,17 @@ public final class NetworkCapabilities implements Parcelable {
         final boolean hasRestrictedCapabilities =
                 (mNetworkCapabilities & RESTRICTED_CAPABILITIES) != 0;
 
-        if (forceRestrictedCapability
-                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities)) {
+        return forceRestrictedCapability
+                || (hasRestrictedCapabilities && !hasUnrestrictedCapabilities);
+    }
+
+    /**
+     * Removes the NET_CAPABILITY_NOT_RESTRICTED capability if deducing the network is restricted.
+     *
+     * @hide
+     */
+    public void maybeMarkCapabilitiesRestricted() {
+        if (deduceRestrictedCapability()) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
     }
@@ -713,9 +725,7 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @param transportType the transport type to be added.
      * @return This NetworkCapabilities instance, to facilitate chaining.
-     * @hide
      */
-    @UnsupportedAppUsage
     public @NonNull NetworkCapabilities addTransportType(@Transport int transportType) {
         checkValidTransportType(transportType);
         mTransportTypes |= 1 << transportType;
@@ -800,31 +810,76 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * UID of the app that manages this network, or INVALID_UID if none/unknown.
+     * UID of the app that owns this network, or INVALID_UID if none/unknown.
      *
-     * This field keeps track of the UID of the app that created this network and is in charge
-     * of managing it. In the practice, it is used to store the UID of VPN apps so it is named
-     * accordingly, but it may be renamed if other mechanisms are offered for third party apps
-     * to create networks.
-     *
-     * Because this field is only used in the services side (and to avoid apps being able to
-     * set this to whatever they want), this field is not parcelled and will not be conserved
-     * across the IPC boundary.
-     * @hide
+     * <p>This field keeps track of the UID of the app that created this network and is in charge of
+     * its lifecycle. This could be the UID of apps such as the Wifi network suggestor, the running
+     * VPN, or Carrier Service app managing a cellular data connection.
      */
-    private int mEstablishingVpnAppUid = INVALID_UID;
+    private int mOwnerUid = Process.INVALID_UID;
 
     /**
-     * Set the UID of the managing app.
-     * @hide
+     * Set the UID of the owner app.
      */
-    public void setEstablishingVpnAppUid(final int uid) {
-        mEstablishingVpnAppUid = uid;
+    public void setOwnerUid(final int uid) {
+        mOwnerUid = uid;
     }
 
-    /** @hide */
-    public int getEstablishingVpnAppUid() {
-        return mEstablishingVpnAppUid;
+    /**
+     * Retrieves the UID of the owner app.
+     */
+    public int getOwnerUid() {
+        return mOwnerUid;
+    }
+
+    /**
+     * UIDs of packages that are administrators of this network, or empty if none.
+     *
+     * <p>This field tracks the UIDs of packages that have permission to manage this network.
+     *
+     * <p>Network owners will also be listed as administrators.
+     *
+     * <p>For NetworkCapability instances being sent from the System Server, this value MUST be
+     * empty unless the destination is 1) the System Server, or 2) Telephony. In either case, the
+     * receiving entity must have the ACCESS_FINE_LOCATION permission and target R+.
+     */
+    private final List<Integer> mAdministratorUids = new ArrayList<>();
+
+    /**
+     * Sets the list of UIDs that are administrators of this network.
+     *
+     * <p>UIDs included in administratorUids gain administrator privileges over this Network.
+     * Examples of UIDs that should be included in administratorUids are:
+     * <ul>
+     *     <li>Carrier apps with privileges for the relevant subscription
+     *     <li>Active VPN apps
+     *     <li>Other application groups with a particular Network-related role
+     * </ul>
+     *
+     * <p>In general, user-supplied networks (such as WiFi networks) do not have an administrator.
+     *
+     * <p>An app is granted owner privileges over Networks that it supplies. The owner UID MUST
+     * always be included in administratorUids.
+     *
+     * @param administratorUids the UIDs to be set as administrators of this Network.
+     * @hide
+     */
+    @SystemApi
+    public void setAdministratorUids(@NonNull final List<Integer> administratorUids) {
+        mAdministratorUids.clear();
+        mAdministratorUids.addAll(administratorUids);
+    }
+
+    /**
+     * Retrieves the list of UIDs that are administrators of this Network.
+     *
+     * @return the List of UIDs that are administrators of this Network
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public List<Integer> getAdministratorUids() {
+        return Collections.unmodifiableList(mAdministratorUids);
     }
 
     /**
@@ -854,7 +909,6 @@ public final class NetworkCapabilities implements Parcelable {
      * fast backhauls and slow backhauls.
      *
      * @param upKbps the estimated first hop upstream (device to network) bandwidth.
-     * @hide
      */
     public @NonNull NetworkCapabilities setLinkUpstreamBandwidthKbps(int upKbps) {
         mLinkUpBandwidthKbps = upKbps;
@@ -884,7 +938,6 @@ public final class NetworkCapabilities implements Parcelable {
      * fast backhauls and slow backhauls.
      *
      * @param downKbps the estimated first hop downstream (network to device) bandwidth.
-     * @hide
      */
     public @NonNull NetworkCapabilities setLinkDownstreamBandwidthKbps(int downKbps) {
         mLinkDownBandwidthKbps = downKbps;
@@ -943,9 +996,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @param networkSpecifier A concrete, parcelable framework class that extends
      *                         NetworkSpecifier.
      * @return This NetworkCapabilities instance, to facilitate chaining.
-     * @hide
      */
-    public @NonNull NetworkCapabilities setNetworkSpecifier(NetworkSpecifier networkSpecifier) {
+    public @NonNull NetworkCapabilities setNetworkSpecifier(
+            @NonNull NetworkSpecifier networkSpecifier) {
         if (networkSpecifier != null && Long.bitCount(mTransportTypes) != 1) {
             throw new IllegalStateException("Must have a single transport specified to use " +
                     "setNetworkSpecifier");
@@ -964,7 +1017,8 @@ public final class NetworkCapabilities implements Parcelable {
      * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public @NonNull NetworkCapabilities setTransportInfo(TransportInfo transportInfo) {
+    @SystemApi
+    public @NonNull NetworkCapabilities setTransportInfo(@NonNull TransportInfo transportInfo) {
         mTransportInfo = transportInfo;
         return this;
     }
@@ -974,9 +1028,7 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @return The optional {@link NetworkSpecifier} specifying the bearer specific network
      *         specifier or {@code null}. See {@link #setNetworkSpecifier}.
-     * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public @Nullable NetworkSpecifier getNetworkSpecifier() {
         return mNetworkSpecifier;
     }
@@ -1045,9 +1097,7 @@ public final class NetworkCapabilities implements Parcelable {
      * effect when requesting a callback.
      *
      * @param signalStrength the bearer-specific signal strength.
-     * @hide
      */
-    @UnsupportedAppUsage
     public @NonNull NetworkCapabilities setSignalStrength(int signalStrength) {
         mSignalStrength = signalStrength;
         return this;
@@ -1102,7 +1152,7 @@ public final class NetworkCapabilities implements Parcelable {
      * member is null, then the network is not restricted by app UID. If it's an empty list, then
      * it means nobody can use it.
      * As a special exception, the app managing this network (as identified by its UID stored in
-     * mEstablishingVpnAppUid) can always see this network. This is embodied by a special check in
+     * mOwnerUid) can always see this network. This is embodied by a special check in
      * satisfiedByUids. That still does not mean the network necessarily <strong>applies</strong>
      * to the app that manages it as determined by #appliesToUid.
      * <p>
@@ -1209,7 +1259,7 @@ public final class NetworkCapabilities implements Parcelable {
      * in the passed nc (representing the UIDs that this network is available to).
      * <p>
      * As a special exception, the UID that created the passed network (as represented by its
-     * mEstablishingVpnAppUid field) always satisfies a NetworkRequest requiring it (of LISTEN
+     * mOwnerUid field) always satisfies a NetworkRequest requiring it (of LISTEN
      * or REQUEST types alike), even if the network does not apply to it. That is so a VPN app
      * can see its own network when it listens for it.
      * <p>
@@ -1220,7 +1270,7 @@ public final class NetworkCapabilities implements Parcelable {
     public boolean satisfiedByUids(@NonNull NetworkCapabilities nc) {
         if (null == nc.mUids || null == mUids) return true; // The network satisfies everything.
         for (UidRange requiredRange : mUids) {
-            if (requiredRange.contains(nc.mEstablishingVpnAppUid)) return true;
+            if (requiredRange.contains(nc.mOwnerUid)) return true;
             if (!nc.appliesToUidRange(requiredRange)) {
                 return false;
             }
@@ -1273,6 +1323,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Sets the SSID of this network.
      * @hide
      */
+    @SystemApi
     public @NonNull NetworkCapabilities setSSID(@Nullable String ssid) {
         mSSID = ssid;
         return this;
@@ -1282,6 +1333,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Gets the SSID of this network, or null if none or unknown.
      * @hide
      */
+    @SystemApi
     public @Nullable String getSSID() {
         return mSSID;
     }
@@ -1443,7 +1495,8 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsSpecifier(that)
                 && equalsTransportInfo(that)
                 && equalsUids(that)
-                && equalsSSID(that));
+                && equalsSSID(that)
+                && equalsPrivateDnsBroken(that));
     }
 
     @Override
@@ -1460,13 +1513,15 @@ public final class NetworkCapabilities implements Parcelable {
                 + (mSignalStrength * 29)
                 + Objects.hashCode(mUids) * 31
                 + Objects.hashCode(mSSID) * 37
-                + Objects.hashCode(mTransportInfo) * 41;
+                + Objects.hashCode(mTransportInfo) * 41
+                + Objects.hashCode(mPrivateDnsBroken) * 43;
     }
 
     @Override
     public int describeContents() {
         return 0;
     }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mNetworkCapabilities);
@@ -1479,6 +1534,9 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mSignalStrength);
         dest.writeArraySet(mUids);
         dest.writeString(mSSID);
+        dest.writeBoolean(mPrivateDnsBroken);
+        dest.writeList(mAdministratorUids);
+        dest.writeInt(mOwnerUid);
     }
 
     public static final @android.annotation.NonNull Creator<NetworkCapabilities> CREATOR =
@@ -1498,6 +1556,9 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mUids = (ArraySet<UidRange>) in.readArraySet(
                         null /* ClassLoader, null for default */);
                 netCap.mSSID = in.readString();
+                netCap.mPrivateDnsBroken = in.readBoolean();
+                netCap.setAdministratorUids(in.readArrayList(null));
+                netCap.mOwnerUid = in.readInt();
                 return netCap;
             }
             @Override
@@ -1547,12 +1608,20 @@ public final class NetworkCapabilities implements Parcelable {
                 sb.append(" Uids: <").append(mUids).append(">");
             }
         }
-        if (mEstablishingVpnAppUid != INVALID_UID) {
-            sb.append(" EstablishingAppUid: ").append(mEstablishingVpnAppUid);
+        if (mOwnerUid != Process.INVALID_UID) {
+            sb.append(" OwnerUid: ").append(mOwnerUid);
+        }
+
+        if (!mAdministratorUids.isEmpty()) {
+            sb.append(" AdministratorUids: ").append(mAdministratorUids);
         }
 
         if (null != mSSID) {
             sb.append(" SSID: ").append(mSSID);
+        }
+
+        if (mPrivateDnsBroken) {
+            sb.append(" Private DNS is broken");
         }
 
         sb.append("]");
@@ -1705,5 +1774,29 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public boolean isMetered() {
         return !hasCapability(NET_CAPABILITY_NOT_METERED);
+    }
+
+    /**
+     * Check if private dns is broken.
+     *
+     * @return {@code true} if {@code mPrivateDnsBroken} is set when private DNS is broken.
+     * @hide
+     */
+    public boolean isPrivateDnsBroken() {
+        return mPrivateDnsBroken;
+    }
+
+    /**
+     * Set mPrivateDnsBroken to true when private dns is broken.
+     *
+     * @param broken the status of private DNS to be set.
+     * @hide
+     */
+    public void setPrivateDnsBroken(boolean broken) {
+        mPrivateDnsBroken = broken;
+    }
+
+    private boolean equalsPrivateDnsBroken(NetworkCapabilities nc) {
+        return mPrivateDnsBroken == nc.mPrivateDnsBroken;
     }
 }

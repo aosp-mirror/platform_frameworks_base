@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Build;

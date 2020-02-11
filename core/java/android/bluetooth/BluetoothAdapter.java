@@ -25,8 +25,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.bluetooth.BluetoothProfile.ConnectionPolicy;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.PeriodicAdvertisingManager;
@@ -35,6 +35,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -456,6 +457,37 @@ public final class BluetoothAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface IoCapability {}
 
+    /** @hide */
+    @IntDef(prefix = "ACTIVE_DEVICE_", value = {ACTIVE_DEVICE_AUDIO,
+            ACTIVE_DEVICE_PHONE_CALL, ACTIVE_DEVICE_ALL})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ActiveDeviceUse {}
+
+    /**
+     * Use the specified device for audio (a2dp and hearing aid profile)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_AUDIO = 0;
+
+    /**
+     * Use the specified device for phone calls (headset profile and hearing
+     * aid profile)
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_PHONE_CALL = 1;
+
+    /**
+     * Use the specified device for a2dp, hearing aid profile, and headset profile
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ACTIVE_DEVICE_ALL = 2;
+
     /**
      * Broadcast Action: The local Bluetooth adapter has started the remote
      * device discovery process.
@@ -815,7 +847,8 @@ public final class BluetoothAdapter {
         }
         synchronized (mLock) {
             if (sBluetoothLeScanner == null) {
-                sBluetoothLeScanner = new BluetoothLeScanner(mManagerService);
+                sBluetoothLeScanner = new BluetoothLeScanner(mManagerService, getOpPackageName(),
+                        getFeatureId());
             }
         }
         return sBluetoothLeScanner;
@@ -830,18 +863,7 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isEnabled() {
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                return mService.isEnabled();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-
-        return false;
+        return getState() == BluetoothAdapter.STATE_ON;
     }
 
     /**
@@ -1189,19 +1211,18 @@ public final class BluetoothAdapter {
     /**
      * Factory reset bluetooth settings.
      *
-     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}
-     * permission
-     *
      * @return true to indicate that the config file was successfully cleared
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean factoryReset() {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
                 return mService.factoryReset();
             }
+            Log.e(TAG, "factoryReset(): IBluetooth Service is null");
             SystemProperties.set("persist.bluetooth.factoryreset", "true");
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1214,13 +1235,12 @@ public final class BluetoothAdapter {
     /**
      * Get the UUIDs supported by the local Bluetooth adapter.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
-     *
      * @return the UUIDs supported by the local Bluetooth Adapter.
      * @hide
      */
     @UnsupportedAppUsage
-    public ParcelUuid[] getUuids() {
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public @Nullable ParcelUuid[] getUuids() {
         if (getState() != STATE_ON) {
             return null;
         }
@@ -1465,6 +1485,56 @@ public final class BluetoothAdapter {
      * <p>The Bluetooth scan mode determines if the local adapter is
      * connectable and/or discoverable from remote Bluetooth devices.
      * <p>For privacy reasons, discoverable mode is automatically turned off
+     * after <code>durationMillis</code> milliseconds. For example, 120000 milliseconds should be
+     * enough for a remote device to initiate and complete its discovery process.
+     * <p>Valid scan mode values are:
+     * {@link #SCAN_MODE_NONE},
+     * {@link #SCAN_MODE_CONNECTABLE},
+     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
+     * <p>If Bluetooth state is not {@link #STATE_ON}, this API
+     * will return false. After turning on Bluetooth,
+     * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
+     * to get the updated value.
+     * <p>Applications cannot set the scan mode. They should use
+     * <code>startActivityForResult(
+     * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
+     * </code>instead.
+     *
+     * @param mode valid scan mode
+     * @param durationMillis time in milliseconds to apply scan mode, only used for {@link
+     * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}
+     * @return true if the scan mode was set, false otherwise
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setScanMode(@ScanMode int mode, long durationMillis) {
+        if (getState() != STATE_ON) {
+            return false;
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                int durationSeconds = Math.toIntExact(durationMillis / 1000);
+                return mService.setScanMode(mode, durationSeconds);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } catch (ArithmeticException ex) {
+            Log.e(TAG, "setScanMode: Duration in seconds outside of the bounds of an int");
+            throw new IllegalArgumentException("Duration not in bounds. In seconds, the "
+                    + "durationMillis must be in the range of an int");
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Set the Bluetooth scan mode of the local Bluetooth adapter.
+     * <p>The Bluetooth scan mode determines if the local adapter is
+     * connectable and/or discoverable from remote Bluetooth devices.
+     * <p>For privacy reasons, discoverable mode is automatically turned off
      * after <code>duration</code> seconds. For example, 120 seconds should be
      * enough for a remote device to initiate and complete its discovery
      * process.
@@ -1476,28 +1546,25 @@ public final class BluetoothAdapter {
      * will return false. After turning on Bluetooth,
      * wait for {@link #ACTION_STATE_CHANGED} with {@link #STATE_ON}
      * to get the updated value.
-     * <p>Requires {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
      * <p>Applications cannot set the scan mode. They should use
      * <code>startActivityForResult(
      * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
      * </code>instead.
      *
      * @param mode valid scan mode
-     * @param duration time in seconds to apply scan mode, only used for {@link
-     * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @UnsupportedAppUsage(publicAlternatives = "Use {@link #ACTION_REQUEST_DISCOVERABLE}, which "
-            + "shows UI that confirms the user wants to go into discoverable mode.")
-    public boolean setScanMode(@ScanMode int mode, int duration) {
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setScanMode(@ScanMode int mode) {
         if (getState() != STATE_ON) {
             return false;
         }
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.setScanMode(mode, duration);
+                return mService.setScanMode(mode, getDiscoverableTimeout());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1505,16 +1572,6 @@ public final class BluetoothAdapter {
             mServiceLock.readLock().unlock();
         }
         return false;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage
-    public boolean setScanMode(int mode) {
-        if (getState() != STATE_ON) {
-            return false;
-        }
-        /* getDiscoverableTimeout() to use the latest from NV than use 0 */
-        return setScanMode(mode, getDiscoverableTimeout());
     }
 
     /** @hide */
@@ -1562,6 +1619,8 @@ public final class BluetoothAdapter {
      * been called recently.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public long getDiscoveryEndMillis() {
         try {
             mServiceLock.readLock().lock();
@@ -1591,6 +1650,15 @@ public final class BluetoothAdapter {
             return mContext.getOpPackageName();
         }
         return ActivityThread.currentOpPackageName();
+    }
+
+    private String getFeatureId() {
+        // Workaround for legacy API for getting a BluetoothAdapter not
+        // passing a context
+        if (mContext != null) {
+            return null;
+        }
+        return null;
     }
 
     /**
@@ -1630,7 +1698,7 @@ public final class BluetoothAdapter {
         try {
             mServiceLock.readLock().lock();
             if (mService != null) {
-                return mService.startDiscovery(getOpPackageName());
+                return mService.startDiscovery(getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -1707,6 +1775,146 @@ public final class BluetoothAdapter {
         } finally {
             mServiceLock.readLock().unlock();
         }
+        return false;
+    }
+
+    /**
+     * Removes the active device for the grouping of @ActiveDeviceUse specified
+     *
+     * @param profiles represents the purpose for which we are setting this as the active device.
+     *                 Possible values are:
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_AUDIO},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_PHONE_CALL},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_ALL}
+     * @return false on immediate error, true otherwise
+     * @throws IllegalArgumentException if device is null or profiles is not one of
+     * {@link ActiveDeviceUse}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean removeActiveDevice(@ActiveDeviceUse int profiles) {
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            Log.e(TAG, "Invalid profiles param value in removeActiveDevice");
+            throw new IllegalArgumentException("Profiles must be one of "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_AUDIO, "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL, or "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_ALL");
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.removeActiveDevice(profiles);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return false;
+    }
+
+    /**
+     * Sets device as the active devices for the profiles passed into the function
+     *
+     * @param device is the remote bluetooth device
+     * @param profiles represents the purpose for which we are setting this as the active device.
+     *                 Possible values are:
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_AUDIO},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_PHONE_CALL},
+     *                 {@link BluetoothAdapter#ACTIVE_DEVICE_ALL}
+     * @return false on immediate error, true otherwise
+     * @throws IllegalArgumentException if device is null or profiles is not one of
+     * {@link ActiveDeviceUse}
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setActiveDevice(@NonNull BluetoothDevice device,
+            @ActiveDeviceUse int profiles) {
+        if (device == null) {
+            Log.e(TAG, "setActiveDevice: Null device passed as parameter");
+            throw new IllegalArgumentException("device cannot be null");
+        }
+        if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
+                && profiles != ACTIVE_DEVICE_ALL) {
+            Log.e(TAG, "Invalid profiles param value in setActiveDevice");
+            throw new IllegalArgumentException("Profiles must be one of "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_AUDIO, "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_PHONE_CALL, or "
+                    + "BluetoothAdapter.ACTIVE_DEVICE_ALL");
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.setActiveDevice(device, profiles);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return false;
+    }
+
+    /**
+     * Connects all enabled and supported bluetooth profiles between the local and remote device.
+     * Connection is asynchronous and you should listen to each profile's broadcast intent
+     * ACTION_CONNECTION_STATE_CHANGED to verify whether connection was successful. For example,
+     * to verify a2dp is connected, you would listen for
+     * {@link BluetoothA2dp#ACTION_CONNECTION_STATE_CHANGED}
+     *
+     * @param device is the remote device with which to connect these profiles
+     * @return true if message sent to try to connect all profiles, false if an error occurred
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean connectAllEnabledProfiles(@NonNull BluetoothDevice device) {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.connectAllEnabledProfiles(device);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return false;
+    }
+
+    /**
+     * Disconnects all enabled and supported bluetooth profiles between the local and remote device.
+     * Disconnection is asynchronous and you should listen to each profile's broadcast intent
+     * ACTION_CONNECTION_STATE_CHANGED to verify whether disconnection was successful. For example,
+     * to verify a2dp is disconnected, you would listen for
+     * {@link BluetoothA2dp#ACTION_CONNECTION_STATE_CHANGED}
+     *
+     * @param device is the remote device with which to disconnect these profiles
+     * @return true if message sent to try to disconnect all profiles, false if an error occurred
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean disconnectAllEnabledProfiles(@NonNull BluetoothDevice device) {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.disconnectAllEnabledProfiles(device);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
         return false;
     }
 
@@ -2022,6 +2230,33 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Fetches a list of the most recently connected bluetooth devices ordered by how recently they
+     * were connected with most recently first and least recently last
+     *
+     * @return {@link List} of bonded {@link BluetoothDevice} ordered by how recently they were
+     * connected
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public @NonNull List<BluetoothDevice> getMostRecentlyConnectedDevices() {
+        if (getState() != STATE_ON) {
+            return new ArrayList<>();
+        }
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.getMostRecentlyConnectedDevices();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
      * Return the set of {@link BluetoothDevice} objects that are bonded
      * (paired) to the local adapter.
      * <p>If Bluetooth state is not {@link #STATE_ON}, this API
@@ -2060,7 +2295,7 @@ public final class BluetoothAdapter {
      * BluetoothProfile}.
      * @hide
      */
-    public List<Integer> getSupportedProfiles() {
+    public @NonNull List<Integer> getSupportedProfiles() {
         final ArrayList<Integer> supportedProfiles = new ArrayList<Integer>();
 
         try {
@@ -2531,6 +2766,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.PBAP) {
+            BluetoothPbap pbap = new BluetoothPbap(context, listener);
+            return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             Log.e(TAG, "getProfileProxy(): BluetoothHealth is deprecated");
             return false;
@@ -2602,6 +2840,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.PAN:
                 BluetoothPan pan = (BluetoothPan) proxy;
                 pan.close();
+                break;
+            case BluetoothProfile.PBAP:
+                BluetoothPbap pbap = (BluetoothPbap) proxy;
+                pbap.close();
                 break;
             case BluetoothProfile.GATT:
                 BluetoothGatt gatt = (BluetoothGatt) proxy;
@@ -3089,18 +3331,6 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, listenUsingL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingL2capCoc(int transport)
-            throws IOException {
-        Log.e(TAG, "listenUsingL2capCoc: PLEASE USE THE OFFICIAL API, listenUsingL2capChannel");
-        return listenUsingL2capChannel();
-    }
-
-    /**
      * Create an insecure L2CAP Connection-oriented Channel (CoC) {@link BluetoothServerSocket} and
      * assign a dynamic PSM value. This socket can be used to listen for incoming connections. The
      * supported Bluetooth transport is LE only.
@@ -3144,19 +3374,6 @@ public final class BluetoothAdapter {
         socket.setChannel(assignedPsm);
 
         return socket;
-    }
-
-    /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, listenUsingInsecureL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingInsecureL2capCoc(int transport)
-            throws IOException {
-        Log.e(TAG, "listenUsingInsecureL2capCoc: PLEASE USE THE OFFICIAL API, "
-                    + "listenUsingInsecureL2capChannel");
-        return listenUsingInsecureL2capChannel();
     }
 
     /**
@@ -3307,5 +3524,49 @@ public final class BluetoothAdapter {
          */
         void onMetadataChanged(@NonNull BluetoothDevice device, int key,
                 @Nullable byte[] value);
+    }
+
+    /**
+     * Converts old constant of priority to the new for connection policy
+     *
+     * @param priority is the priority to convert to connection policy
+     * @return the equivalent connection policy constant to the priority
+     *
+     * @hide
+     */
+    public static @ConnectionPolicy int priorityToConnectionPolicy(int priority) {
+        switch(priority) {
+            case BluetoothProfile.PRIORITY_AUTO_CONNECT:
+                return BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+            case BluetoothProfile.PRIORITY_ON:
+                return BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+            case BluetoothProfile.PRIORITY_OFF:
+                return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            case BluetoothProfile.PRIORITY_UNDEFINED:
+                return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;
+            default:
+                Log.e(TAG, "setPriority: Invalid priority: " + priority);
+                return BluetoothProfile.CONNECTION_POLICY_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts new constant of connection policy to the old for priority
+     *
+     * @param connectionPolicy is the connection policy to convert to priority
+     * @return the equivalent priority constant to the connectionPolicy
+     *
+     * @hide
+     */
+    public static int connectionPolicyToPriority(@ConnectionPolicy int connectionPolicy) {
+        switch(connectionPolicy) {
+            case BluetoothProfile.CONNECTION_POLICY_ALLOWED:
+                return BluetoothProfile.PRIORITY_ON;
+            case BluetoothProfile.CONNECTION_POLICY_FORBIDDEN:
+                return BluetoothProfile.PRIORITY_OFF;
+            case BluetoothProfile.CONNECTION_POLICY_UNKNOWN:
+                return BluetoothProfile.PRIORITY_UNDEFINED;
+        }
+        return BluetoothProfile.PRIORITY_UNDEFINED;
     }
 }

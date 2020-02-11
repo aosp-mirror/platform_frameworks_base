@@ -33,10 +33,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -145,6 +145,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -942,6 +943,10 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     boolean mEnterAnimationComplete;
 
+    /** Track last dispatched multi-window and PiP mode to client, internal debug purpose **/
+    private Boolean mLastDispatchedIsInMultiWindowMode;
+    private Boolean mLastDispatchedIsInPictureInPictureMode;
+
     private static native String getDlWarning();
 
     /** Return the intent that started this activity. */
@@ -1546,7 +1551,9 @@ public class Activity extends ContextThemeWrapper
      * had previously been frozen by {@link #onSaveInstanceState}.
      *
      * <p>This method is called between {@link #onStart} and
-     * {@link #onPostCreate}.
+     * {@link #onPostCreate}. This method is called only when recreating
+     * an activity; the method isn't invoked if {@link #onStart} is called for
+     * any other reason.</p>
      *
      * @param savedInstanceState the data most recently supplied in {@link #onSaveInstanceState}.
      *
@@ -2795,6 +2802,7 @@ public class Activity extends ContextThemeWrapper
      * @see View#onMovedToDisplay(int, Configuration)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public void onMovedToDisplay(int displayId, Configuration config) {
     }
@@ -3653,6 +3661,22 @@ public class Activity extends ContextThemeWrapper
         return false;
     }
 
+    private static final class RequestFinishCallback extends IRequestFinishCallback.Stub {
+        private final WeakReference<Activity> mActivityRef;
+
+        RequestFinishCallback(WeakReference<Activity> activityRef) {
+            mActivityRef = activityRef;
+        }
+
+        @Override
+        public void requestFinish() {
+            Activity activity = mActivityRef.get();
+            if (activity != null) {
+                activity.mHandler.post(activity::finishAfterTransition);
+            }
+        }
+    }
+
     /**
      * Called when the activity has detected the user's press of the back
      * key.  The default implementation simply finishes the current activity,
@@ -3678,11 +3702,7 @@ public class Activity extends ContextThemeWrapper
             // while at the root of the task. This call allows ActivityTaskManager
             // to intercept or defer finishing.
             ActivityTaskManager.getService().onBackPressedOnTaskRoot(mToken,
-                    new IRequestFinishCallback.Stub() {
-                        public void requestFinish() {
-                            mHandler.post(() -> finishAfterTransition());
-                        }
-                    });
+                    new RequestFinishCallback(new WeakReference<>(this)));
         } catch (RemoteException e) {
             finishAfterTransition();
         }
@@ -6983,6 +7003,10 @@ public class Activity extends ContextThemeWrapper
                 writer.print(mResumed); writer.print(" mStopped=");
                 writer.print(mStopped); writer.print(" mFinished=");
                 writer.println(mFinished);
+        writer.print(innerPrefix); writer.print("mLastDispatchedIsInMultiWindowMode=");
+                writer.print(mLastDispatchedIsInMultiWindowMode);
+                writer.print(" mLastDispatchedIsInPictureInPictureMode=");
+                writer.println(mLastDispatchedIsInPictureInPictureMode);
         writer.print(innerPrefix); writer.print("mChangingConfigurations=");
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
@@ -8059,6 +8083,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onMultiWindowModeChanged();
         }
+        mLastDispatchedIsInMultiWindowMode = isInMultiWindowMode;
         onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
     }
 
@@ -8071,6 +8096,7 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             mWindow.onPictureInPictureModeChanged(isInPictureInPictureMode);
         }
+        mLastDispatchedIsInPictureInPictureMode = isInPictureInPictureMode;
         onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
 

@@ -16,14 +16,18 @@
 
 package com.android.keyguard;
 
+import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
+import static android.telephony.SubscriptionManager.NAME_SOURCE_DEFAULT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +45,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.telephony.ServiceState;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -52,6 +57,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,6 +66,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
@@ -71,7 +79,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // new tests.
 @RunWithLooper(setAsMainLooper = true)
 public class KeyguardUpdateMonitorTest extends SysuiTestCase {
-
+    private static final String TEST_CARRIER = "TEST_CARRIER";
+    private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
+    private static final int TEST_CARRIER_ID = 1;
+    private static final String TEST_GROUP_UUID = "59b5c870-fc4c-47a4-a99e-9db826b48b24";
+    private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(1, "", 0,
+            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT, 0xFFFFFF, "",
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, 0);
+    private static final SubscriptionInfo TEST_SUBSCRIPTION_2 = new SubscriptionInfo(2, "", 0,
+            TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_DEFAULT, 0xFFFFFF, "",
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, 0);
     @Mock
     private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
     @Mock
@@ -88,6 +107,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private UserManager mUserManager;
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private SubscriptionManager mSubscriptionManager;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -99,7 +122,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(context.getPackageManager()).thenReturn(mPackageManager);
         doAnswer(invocation -> {
             IBiometricEnabledOnKeyguardCallback callback = invocation.getArgument(0);
-            callback.onChanged(BiometricSourceType.FACE, true /* enabled */);
+            callback.onChanged(BiometricSourceType.FACE, true /* enabled */,
+                    KeyguardUpdateMonitor.getCurrentUser());
             return null;
         }).when(mBiometricManager).registerEnabledOnKeyguardCallback(any());
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
@@ -114,6 +138,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         context.addMockSystemService(FaceManager.class, mFaceManager);
         context.addMockSystemService(UserManager.class, mUserManager);
         context.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
+        context.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
 
         mTestableLooper = TestableLooper.get(this);
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
@@ -128,7 +153,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         Assert.assertTrue("onSimStateChanged not called",
                 mKeyguardUpdateMonitor.hasSimStateJustChanged());
 
-        intent.putExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, true);
+        intent.putExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, true);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
         Assert.assertFalse("onSimStateChanged should have been skipped",
@@ -314,13 +339,44 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void skipsAuthentication_whenEncryptedKeyguard() {
-        reset(mUserManager);
-        when(mUserManager.isUserUnlocked(anyInt())).thenReturn(false);
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
 
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any());
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void requiresAuthentication_whenEncryptedKeyguard_andBypass() {
+        testStrongAuthExceptOnBouncer(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+    }
+
+    @Test
+    public void requiresAuthentication_whenTimeoutKeyguard_andBypass() {
+        testStrongAuthExceptOnBouncer(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
+    }
+
+    private void testStrongAuthExceptOnBouncer(int strongAuth) {
+        when(mKeyguardBypassController.canBypass()).thenReturn(true);
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
+
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+
+        // Stop scanning when bouncer becomes visible
+        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true /* showingBouncer */);
+        mTestableLooper.processAllMessages();
+        clearInvocations(mFaceManager);
+        mKeyguardUpdateMonitor.requestFaceAuth();
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test
@@ -329,6 +385,50 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
         verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testTriesToAuthenticate_whenTrustOnAgentKeyguard_ifBypass() {
+        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mKeyguardBypassController.canBypass()).thenReturn(true);
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenTrustAgentOnKeyguard_withoutBypass() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenLockdown() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
+    }
+
+    @Test
+    public void testIgnoresAuth_whenLockout() {
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp();
+        mTestableLooper.processAllMessages();
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT);
+
+        mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
+        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
     }
 
     @Test
@@ -359,6 +459,22 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         int user = KeyguardUpdateMonitor.getCurrentUser();
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */);
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testGetSubscriptionInfo_whenInGroupedSubWithOpportunistic() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        list.add(TEST_SUBSCRIPTION_2);
+        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
+        mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
+                TEST_SUBSCRIPTION_2.getSubscriptionId());
+        mTestableLooper.processAllMessages();
+
+        List<SubscriptionInfo> listToVerify = mKeyguardUpdateMonitor
+                .getFilteredSubscriptionInfo(false);
+        assertThat(listToVerify.size()).isEqualTo(1);
+        assertThat(listToVerify.get(0)).isEqualTo(TEST_SUBSCRIPTION_2);
     }
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {

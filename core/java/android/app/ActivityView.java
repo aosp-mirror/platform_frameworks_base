@@ -120,6 +120,10 @@ public class ActivityView extends ViewGroup {
 
         mActivityTaskManager = ActivityTaskManager.getService();
         mSurfaceView = new SurfaceView(context);
+        // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha
+        // as master to synchronize surface view's alpha value.
+        mSurfaceView.setAlpha(super.getAlpha());
+        mSurfaceView.setUseAlpha();
         mSurfaceCallback = new SurfaceCallback();
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
         addView(mSurfaceView);
@@ -344,6 +348,27 @@ public class ActivityView extends ViewGroup {
     @Override
     public void onLayout(boolean changed, int l, int t, int r, int b) {
         mSurfaceView.layout(0 /* left */, 0 /* top */, r - l /* right */, b - t /* bottom */);
+    }
+
+    /**
+     * Sets the alpha value when the content of {@link SurfaceView} needs to show or hide.
+     * <p>Note: The surface view may ignore the alpha value in some cases. Refer to
+     * {@link SurfaceView#setAlpha} for more details.
+     *
+     * @param alpha The opacity of the view.
+     */
+    @Override
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
+
+        if (mSurfaceView != null) {
+            mSurfaceView.setAlpha(alpha);
+        }
+    }
+
+    @Override
+    public float getAlpha() {
+        return mSurfaceView.getAlpha();
     }
 
     @Override

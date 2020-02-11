@@ -295,6 +295,7 @@ public class BtHelper {
                             && mScoAudioState != SCO_STATE_DEACTIVATE_REQ) {
                         mScoAudioState = SCO_STATE_ACTIVE_EXTERNAL;
                     }
+                    broadcast = false;
                     break;
                 default:
                     // do not broadcast CONNECTING or invalid state

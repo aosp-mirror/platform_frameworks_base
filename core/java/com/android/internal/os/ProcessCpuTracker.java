@@ -16,9 +16,14 @@
 
 package com.android.internal.os;
 
-import static android.os.Process.*;
+import static android.os.Process.PROC_COMBINE;
+import static android.os.Process.PROC_OUT_FLOAT;
+import static android.os.Process.PROC_OUT_LONG;
+import static android.os.Process.PROC_OUT_STRING;
+import static android.os.Process.PROC_PARENS;
+import static android.os.Process.PROC_SPACE_TERM;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;

@@ -22,10 +22,9 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.AmbientPulseManager;
-import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -46,8 +45,7 @@ import javax.inject.Singleton;
  * A class to handle notifications and their corresponding groups.
  */
 @Singleton
-public class NotificationGroupManager implements OnHeadsUpChangedListener,
-        OnAmbientChangedListener, StateListener {
+public class NotificationGroupManager implements OnHeadsUpChangedListener, StateListener {
 
     private static final String TAG = "NotificationGroupManager";
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
@@ -55,12 +53,19 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
-    private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private boolean mIsUpdatingUnchangedGroup;
+    @Nullable private BubbleController mBubbleController = null;
 
     @Inject
-    public NotificationGroupManager() {
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+    public NotificationGroupManager(StatusBarStateController statusBarStateController) {
+        statusBarStateController.addCallback(this);
+    }
+
+    private BubbleController getBubbleController() {
+        if (mBubbleController == null) {
+            mBubbleController = Dependency.get(BubbleController.class);
+        }
+        return mBubbleController;
     }
 
     /**
@@ -191,12 +196,22 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (group == null) {
             return;
         }
+        int childCount = 0;
+        boolean hasBubbles = false;
+        for (String key : group.children.keySet()) {
+            if (!getBubbleController().isBubbleNotificationSuppressedFromShade(key)) {
+                childCount++;
+            } else {
+                hasBubbles = true;
+            }
+        }
+
         boolean prevSuppressed = group.suppressed;
         group.suppressed = group.summary != null && !group.expanded
-                && (group.children.size() == 1
-                || (group.children.size() == 0
+                && (childCount == 1
+                || (childCount == 0
                         && group.summary.notification.getNotification().isGroupSummary()
-                        && hasIsolatedChildren(group)));
+                        && (hasIsolatedChildren(group) || hasBubbles)));
         if (prevSuppressed != group.suppressed) {
             for (OnGroupChangeListener listener : mListeners) {
                 if (!mIsUpdatingUnchangedGroup) {
@@ -385,6 +400,17 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     /**
+     * If there is a {@link NotificationGroup} associated with the provided entry, this method
+     * will update the suppression of that group.
+     */
+    public void updateSuppression(NotificationEntry entry) {
+        NotificationGroup group = mGroupMap.get(getGroupKey(entry.notification));
+        if (group != null) {
+            updateSuppression(group);
+        }
+    }
+
+    /**
      * Get the group key. May differ from the one in the notification due to the notification
      * being temporarily isolated.
      *
@@ -439,23 +465,6 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-    }
-
-    @Override
-    public void onHeadsUpPinned(NotificationEntry entry) {
-    }
-
-    @Override
-    public void onHeadsUpUnPinned(NotificationEntry entry) {
-    }
-
-    @Override
-    public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
-        onAlertStateChanged(entry, isAmbient);
-    }
-
-    @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         onAlertStateChanged(entry, isHeadsUp);
     }
@@ -485,7 +494,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
             return false;
         }
-        if (!mHeadsUpManager.isAlerting(entry.key) && !mAmbientPulseManager.isAlerting(entry.key)) {
+        if (!mHeadsUpManager.isAlerting(entry.key)) {
             return false;
         }
         return (sbn.getNotification().fullScreenIntent != null
@@ -586,6 +595,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
                         ? Log.getStackTraceString(child.getDebugThrowable())
                         : "");
             }
+            result += "\n    summary suppressed: " + suppressed;
             return result;
         }
     }

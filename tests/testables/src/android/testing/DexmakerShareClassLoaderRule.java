@@ -20,6 +20,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import libcore.util.SneakyThrow;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -55,7 +57,11 @@ public class DexmakerShareClassLoaderRule implements TestRule {
      * WARNING: This is absolutely incompatible with running tests in parallel!
      */
     public static void runWithDexmakerShareClassLoader(Runnable r) {
-        apply(r::run).run();
+        try {
+            apply(r::run).run();
+        } catch (Throwable t) {
+            SneakyThrow.sneakyThrow(t);
+        }
     }
 
     /**

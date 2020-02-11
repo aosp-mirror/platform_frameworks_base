@@ -10,5 +10,5 @@ android_app {
         proguard_flags_files: ["proguard.flags"],
     },
 
-    product_specific: true,
+    system_ext_specific: true,
 }

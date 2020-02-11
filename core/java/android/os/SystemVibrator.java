@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.util.Log;
@@ -70,6 +70,21 @@ public class SystemVibrator extends Vibrator {
     }
 
     @Override
+    public boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, VibrationEffect effect,
+            AudioAttributes attributes) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to set always-on effect; no vibrator service.");
+            return false;
+        }
+        try {
+            return mService.setAlwaysOnEffect(uid, opPkg, alwaysOnId, effect, attributes);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to set always-on effect.", e);
+        }
+        return false;
+    }
+
+    @Override
     public void vibrate(int uid, String opPkg, VibrationEffect effect,
             String reason, AudioAttributes attributes) {
         if (mService == null) {
@@ -77,14 +92,10 @@ public class SystemVibrator extends Vibrator {
             return;
         }
         try {
-            mService.vibrate(uid, opPkg, effect, usageForAttributes(attributes), reason, mToken);
+            mService.vibrate(uid, opPkg, effect, attributes, reason, mToken);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to vibrate.", e);
         }
-    }
-
-    private static int usageForAttributes(AudioAttributes attributes) {
-        return attributes != null ? attributes.getUsage() : AudioAttributes.USAGE_UNKNOWN;
     }
 
     @Override

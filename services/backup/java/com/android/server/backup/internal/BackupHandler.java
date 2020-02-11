@@ -23,7 +23,7 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -83,19 +83,47 @@ public class BackupHandler extends Handler {
     // backup task state machine tick
     public static final int MSG_BACKUP_RESTORE_STEP = 20;
     public static final int MSG_OP_COMPLETE = 21;
+    // Release the wakelock. This is used to ensure we don't hold it after
+    // a user is removed. This will also terminate the looper thread.
+    public static final int MSG_STOP = 22;
 
     private final UserBackupManagerService backupManagerService;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public BackupHandler(UserBackupManagerService backupManagerService, Looper looper) {
-        super(looper);
+    private final HandlerThread mBackupThread;
+    private volatile boolean mIsStopping = false;
+
+    public BackupHandler(
+            UserBackupManagerService backupManagerService, HandlerThread backupThread) {
+        super(backupThread.getLooper());
+        mBackupThread = backupThread;
         this.backupManagerService = backupManagerService;
         mAgentTimeoutParameters = Preconditions.checkNotNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
     }
 
+    /**
+     * Put the BackupHandler into a stopping state where the remaining messages on the queue will be
+     * silently dropped and the {@link WakeLock} held by the {@link UserBackupManagerService} will
+     * then be released.
+     */
+    public void stop() {
+        mIsStopping = true;
+        sendMessage(obtainMessage(BackupHandler.MSG_STOP));
+    }
+
     public void handleMessage(Message msg) {
+        if (msg.what == MSG_STOP) {
+            Slog.v(TAG, "Stopping backup handler");
+            backupManagerService.getWakelock().quit();
+            mBackupThread.quitSafely();
+        }
+
+        if (mIsStopping) {
+            // If we're finishing all other types of messages should be ignored
+            return;
+        }
 
         TransportManager transportManager = backupManagerService.getTransportManager();
         switch (msg.what) {

@@ -43,12 +43,14 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
+#include <dmabufinfo/dmabufinfo.h>
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
 #include <android-base/strings.h>
 #include "android_os_Debug.h"
+#include <vintf/VintfObject.h>
 
 namespace android
 {
@@ -191,7 +193,8 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
 {
     int err = memtrack_proc_get(p, pid);
     if (err != 0) {
-        ALOGW("failed to get memory consumption info: %d", err);
+        // The memtrack HAL may not be available, do not log to avoid flooding
+        // logcat.
         return err;
     }
 
@@ -560,6 +563,7 @@ enum {
     MEMINFO_VMALLOC_USED,
     MEMINFO_PAGE_TABLES,
     MEMINFO_KERNEL_STACK,
+    MEMINFO_KERNEL_RECLAIMABLE,
     MEMINFO_COUNT
 };
 
@@ -591,7 +595,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
     if (outArray != NULL) {
         outLen = MEMINFO_COUNT;
         for (int i = 0; i < outLen; i++) {
-            if (i == MEMINFO_VMALLOC_USED) {
+            if (i == MEMINFO_VMALLOC_USED && mem[i] == 0) {
                 outArray[i] = smi.ReadVmallocInfo() / 1024;
                 continue;
             }
@@ -778,6 +782,76 @@ static jlong android_os_Debug_getFreeZramKb(JNIEnv* env, jobject clazz) {
     return zramFreeKb;
 }
 
+static jlong android_os_Debug_getIonHeapsSizeKb(JNIEnv* env, jobject clazz) {
+    jlong heapsSizeKb = 0;
+    uint64_t size;
+
+    if (meminfo::ReadIonHeapsSizeKb(&size)) {
+        heapsSizeKb = size;
+    }
+
+    return heapsSizeKb;
+}
+
+static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
+    jlong poolsSizeKb = 0;
+    uint64_t size;
+
+    if (meminfo::ReadIonPoolsSizeKb(&size)) {
+        poolsSizeKb = size;
+    }
+
+    return poolsSizeKb;
+}
+
+static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
+    jlong ionPss = 0;
+    std::vector<dmabufinfo::DmaBuffer> dmabufs;
+
+    std::unique_ptr<DIR, int (*)(DIR*)> dir(opendir("/proc"), closedir);
+    if (!dir) {
+        LOG(ERROR) << "Failed to open /proc directory";
+        return false;
+    }
+
+    struct dirent* dent;
+    while ((dent = readdir(dir.get()))) {
+        if (dent->d_type != DT_DIR) continue;
+
+        int pid = atoi(dent->d_name);
+        if (pid == 0) {
+            continue;
+        }
+
+        if (!AppendDmaBufInfo(pid, &dmabufs, false)) {
+            LOG(ERROR) << "Failed to read maps for pid " << pid;
+        }
+    }
+
+    for (const dmabufinfo::DmaBuffer& buf : dmabufs) {
+        ionPss += buf.size() / 1024;
+    }
+
+    return ionPss;
+}
+
+static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
+{
+    static enum {
+        CONFIG_UNKNOWN,
+        CONFIG_SET,
+        CONFIG_UNSET,
+    } cfg_state = CONFIG_UNKNOWN;
+
+    if (cfg_state == CONFIG_UNKNOWN) {
+        const std::map<std::string, std::string> configs =
+            vintf::VintfObject::GetInstance()->getRuntimeInfo()->kernelConfigs();
+        std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
+        cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
+    }
+    return cfg_state == CONFIG_SET;
+}
+
 /*
  * JNI registration.
  */
@@ -821,6 +895,14 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getUnreachableMemory },
     { "getZramFreeKb", "()J",
             (void*)android_os_Debug_getFreeZramKb },
+    { "getIonHeapsSizeKb", "()J",
+            (void*)android_os_Debug_getIonHeapsSizeKb },
+    { "getIonPoolsSizeKb", "()J",
+            (void*)android_os_Debug_getIonPoolsSizeKb },
+    { "getIonMappedSizeKb", "()J",
+            (void*)android_os_Debug_getIonMappedSizeKb },
+    { "isVmapStack", "()Z",
+            (void*)android_os_Debug_isVmapStack },
 };
 
 int register_android_os_Debug(JNIEnv *env)

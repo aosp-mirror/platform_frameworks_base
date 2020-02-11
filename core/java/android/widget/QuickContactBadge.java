@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;

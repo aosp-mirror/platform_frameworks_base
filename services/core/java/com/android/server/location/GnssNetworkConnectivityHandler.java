@@ -321,7 +321,11 @@ class GnssNetworkConnectivityHandler {
 
     private void handleUpdateNetworkState(Network network, boolean isConnected,
             NetworkCapabilities capabilities) {
-        boolean networkAvailable = isConnected && TelephonyManager.getDefault().getDataEnabled();
+        boolean networkAvailable = false;
+        TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+        if (telephonyManager != null) {
+            networkAvailable = isConnected && telephonyManager.getDataEnabled();
+        }
         NetworkAttributes networkAttributes = updateTrackedNetworksState(isConnected, network,
                 capabilities);
         String apn = networkAttributes.mApn;

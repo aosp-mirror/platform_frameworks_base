@@ -16,18 +16,16 @@
 
 package android.telephony;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.DisconnectCause;
-import android.telephony.PreciseDisconnectCause;
+import android.telephony.Annotation.DisconnectCauses;
+import android.telephony.Annotation.PreciseCallStates;
+import android.telephony.Annotation.PreciseDisconnectCauses;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -41,28 +39,12 @@ import java.util.Objects;
  *   <li>Precise background call state.
  * </ul>
  *
- * @see android.telephony.TelephonyManager.CallState which contains generic call states.
+ * @see android.telephony.Annotation.CallState which contains generic call states.
  *
  * @hide
  */
 @SystemApi
 public final class PreciseCallState implements Parcelable {
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"PRECISE_CALL_STATE_"},
-            value = {
-                    PRECISE_CALL_STATE_NOT_VALID,
-                    PRECISE_CALL_STATE_IDLE,
-                    PRECISE_CALL_STATE_ACTIVE,
-                    PRECISE_CALL_STATE_HOLDING,
-                    PRECISE_CALL_STATE_DIALING,
-                    PRECISE_CALL_STATE_ALERTING,
-                    PRECISE_CALL_STATE_INCOMING,
-                    PRECISE_CALL_STATE_WAITING,
-                    PRECISE_CALL_STATE_DISCONNECTED,
-                    PRECISE_CALL_STATE_DISCONNECTING})
-    public @interface State {}
 
     /** Call state is not valid (Not received a call state). */
     public static final int PRECISE_CALL_STATE_NOT_VALID =      -1;
@@ -85,21 +67,29 @@ public final class PreciseCallState implements Parcelable {
     /** Call state: Disconnecting. */
     public static final int PRECISE_CALL_STATE_DISCONNECTING =  8;
 
-    private @State int mRingingCallState = PRECISE_CALL_STATE_NOT_VALID;
-    private @State int mForegroundCallState = PRECISE_CALL_STATE_NOT_VALID;
-    private @State int mBackgroundCallState = PRECISE_CALL_STATE_NOT_VALID;
-    private int mDisconnectCause = DisconnectCause.NOT_VALID;
-    private int mPreciseDisconnectCause = PreciseDisconnectCause.NOT_VALID;
+    private @PreciseCallStates int mRingingCallState = PRECISE_CALL_STATE_NOT_VALID;
+    private @PreciseCallStates int mForegroundCallState = PRECISE_CALL_STATE_NOT_VALID;
+    private @PreciseCallStates int mBackgroundCallState = PRECISE_CALL_STATE_NOT_VALID;
+    private @DisconnectCauses int mDisconnectCause = DisconnectCause.NOT_VALID;
+    private @PreciseDisconnectCauses int mPreciseDisconnectCause = PreciseDisconnectCause.NOT_VALID;
 
     /**
-     * Constructor
+     * Construct PreciseCallState with parameters
+     *
+     * @param ringingCall ring call state
+     * @param foregroundCall foreground call state
+     * @param backgroundCall background call state
+     * @param disconnectCause disconnect cause
+     * @param preciseDisconnectCause precise disconnect cause
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public PreciseCallState(@State int ringingCall, @State int foregroundCall,
-                            @State int backgroundCall, int disconnectCause,
-                            int preciseDisconnectCause) {
+    @SystemApi
+    public PreciseCallState(@PreciseCallStates int ringingCall,
+                            @PreciseCallStates int foregroundCall,
+                            @PreciseCallStates int backgroundCall,
+                            @DisconnectCauses int disconnectCause,
+                            @PreciseDisconnectCauses int preciseDisconnectCause) {
         mRingingCallState = ringingCall;
         mForegroundCallState = foregroundCall;
         mBackgroundCallState = backgroundCall;
@@ -131,21 +121,21 @@ public final class PreciseCallState implements Parcelable {
     /**
      * Returns the precise ringing call state.
      */
-    public @State int getRingingCallState() {
+    public @PreciseCallStates int getRingingCallState() {
         return mRingingCallState;
     }
 
     /**
      * Returns the precise foreground call state.
      */
-    public @State int getForegroundCallState() {
+    public @PreciseCallStates int getForegroundCallState() {
         return mForegroundCallState;
     }
 
     /**
      * Returns the precise background call state.
      */
-    public @State int getBackgroundCallState() {
+    public @PreciseCallStates int getBackgroundCallState() {
         return mBackgroundCallState;
     }
 
