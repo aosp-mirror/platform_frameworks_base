@@ -279,10 +279,8 @@ public final class Zygote {
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir, isTopApp,
                 pkgDataInfoList);
-        // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Zygote.disableExecuteOnly(targetSdkVersion);
-            Trace.setTracingEnabled(true, runtimeFlags);
 
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -333,9 +331,6 @@ public final class Zygote {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                 niceName, startChildZygote, instructionSet, appDataDir, isTopApp,
                 pkgDataInfoList);
-
-        // Enable tracing as soon as possible for the child process.
-        Trace.setTracingEnabled(true, runtimeFlags);
 
         // Note that this event ends at the end of handleChildProc.
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
@@ -392,11 +387,6 @@ public final class Zygote {
         int pid = nativeForkSystemServer(
                 uid, gid, gids, runtimeFlags, rlimits,
                 permittedCapabilities, effectiveCapabilities);
-
-        // Enable tracing as soon as we enter the system_server.
-        if (pid == 0) {
-            Trace.setTracingEnabled(true, runtimeFlags);
-        }
 
         // Set the Java Language thread priority to the default value for new apps.
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
