@@ -596,7 +596,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 return mDefaultServiceState;
             }
             String textClassifierServicePackageOverride =
-                    mSettings.getTextClassifierServicePackageOverride();
+                    Binder.withCleanCallingIdentity(
+                            mSettings::getTextClassifierServicePackageOverride);
             if (!TextUtils.isEmpty(textClassifierServicePackageOverride)) {
                 if (textClassifierServicePackageOverride.equals(mDefaultTextClassifierPackage)) {
                     return mDefaultServiceState;
