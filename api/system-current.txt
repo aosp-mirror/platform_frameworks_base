@@ -311,10 +311,12 @@ package android.app {
     method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
     method @RequiresPermission(android.Manifest.permission.KILL_UID) public void killUid(int, String);
+    method public void registerHomeVisibilityObserver(@NonNull android.app.HomeVisibilityObserver);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public void setDeviceLocales(@NonNull android.os.LocaleList);
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
+    method public void unregisterHomeVisibilityObserver(@NonNull android.app.HomeVisibilityObserver);
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
@@ -499,6 +501,11 @@ package android.app {
 
   public class DownloadManager {
     field public static final String ACTION_DOWNLOAD_COMPLETED = "android.intent.action.DOWNLOAD_COMPLETED";
+  }
+
+  public abstract class HomeVisibilityObserver {
+    ctor public HomeVisibilityObserver();
+    method public abstract void onHomeVisibilityChanged(boolean);
   }
 
   public abstract class InstantAppResolverService extends android.app.Service {
