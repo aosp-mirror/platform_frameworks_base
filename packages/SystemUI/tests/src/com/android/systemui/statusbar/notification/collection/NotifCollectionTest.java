@@ -46,9 +46,12 @@ import static org.mockito.Mockito.when;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationStats;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
@@ -734,6 +737,78 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDismissingSummaryDoesNotDismissForegroundServiceChildren() {
+        // GIVEN a collection with three grouped notifs in it
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setFlag(mContext, Notification.FLAG_FOREGROUND_SERVICE, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the foreground service child is not dismissed
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
+    }
+
+    @Test
+    public void testDismissingSummaryDoesNotDismissBubbledChildren() {
+        // GIVEN a collection with three grouped notifs in it
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setFlag(mContext, Notification.FLAG_BUBBLE, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the bubbled child is not dismissed
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
+    }
+
+    @Test
+    public void testDismissingSummaryDoesNotDismissDuplicateSummaries() {
+        // GIVEN a group with a two summaries
+        CollectionEvent notif0 = postNotif(
+                buildNotif(TEST_PACKAGE, 0)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif1 = postNotif(
+                buildNotif(TEST_PACKAGE, 1)
+                        .setGroup(mContext, GROUP_1)
+                        .setGroupSummary(mContext, true));
+        CollectionEvent notif2 = postNotif(
+                buildNotif(TEST_PACKAGE, 2)
+                        .setGroup(mContext, GROUP_1));
+
+        // WHEN the first summary is dismissed
+        mCollection.dismissNotification(notif0.entry, defaultStats(notif0.entry));
+
+        // THEN the second summary is not auto-dismissed (but the child is)
+        assertEquals(DISMISSED, notif0.entry.getDismissState());
+        assertEquals(NOT_DISMISSED, notif1.entry.getDismissState());
+        assertEquals(PARENT_DISMISSED, notif2.entry.getDismissState());
+    }
+
+    @Test
     public void testLifetimeExtendersAreQueriedWhenNotifRemoved() {
         // GIVEN a couple notifications and a few lifetime extenders
         mExtender1.shouldExtendLifetime = true;
@@ -1000,6 +1075,13 @@ public class NotifCollectionTest extends SysuiTestCase {
                 NotificationVisibility.obtain(entry.getKey(), 7, 2, true));
     }
 
+    public CollectionEvent postNotif(NotificationEntryBuilder builder) {
+        clearInvocations(mCollectionListener);
+        NotifEvent rawEvent = mNoMan.postNotif(builder);
+        verify(mCollectionListener).onEntryAdded(mEntryCaptor.capture());
+        return new CollectionEvent(rawEvent, requireNonNull(mEntryCaptor.getValue()));
+    }
+
     private static class RecordingCollectionListener implements NotifCollectionListener {
         private final Map<String, NotificationEntry> mLastSeenEntries = new ArrayMap<>();
 
@@ -1014,6 +1096,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         @Override
         public void onEntryUpdated(NotificationEntry entry) {
+            mLastSeenEntries.put(entry.getKey(), entry);
         }
 
         @Override
@@ -1095,6 +1178,26 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         @Override
         public void cancelDismissInterception(NotificationEntry entry) {
+        }
+    }
+
+    /**
+     * Wrapper around {@link NotifEvent} that adds the NotificationEntry that the collection under
+     * test creates.
+     */
+    private static class CollectionEvent {
+        public final String key;
+        public final StatusBarNotification sbn;
+        public final Ranking ranking;
+        public final RankingMap rankingMap;
+        public final NotificationEntry entry;
+
+        private CollectionEvent(NotifEvent rawEvent, NotificationEntry entry) {
+            this.key = rawEvent.key;
+            this.sbn = rawEvent.sbn;
+            this.ranking = rawEvent.ranking;
+            this.rankingMap = rawEvent.rankingMap;
+            this.entry = entry;
         }
     }
 
