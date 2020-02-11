@@ -149,7 +149,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         }
 
         if (mBlurUtils.supportsBlursOnWindows()) {
-            background.setAlpha((int) (ScrimController.GRADIENT_SCRIM_ALPHA_BUSY * 255));
+            background.setAlpha((int) (ScrimController.BUSY_SCRIM_ALPHA * 255));
             mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
                         mBlurUtils.radiusForRatio(1));
         } else {

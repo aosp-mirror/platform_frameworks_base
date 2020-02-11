@@ -107,7 +107,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * Default alpha value for most scrims.
      */
-    public static final float GRADIENT_SCRIM_ALPHA = 0.2f;
+    public static final float SCRIM_ALPHA = 0.2f;
     /**
      * Scrim opacity when the phone is about to wake-up.
      */
@@ -116,12 +116,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
      */
-    public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.7f;
+    public static final float BUSY_SCRIM_ALPHA = 0.54f;
 
     /**
      * The most common scrim, the one under the keyguard.
      */
-    protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = GRADIENT_SCRIM_ALPHA;
+    protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = SCRIM_ALPHA;
 
     static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
@@ -481,7 +481,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mBehindAlpha = behindFraction * GRADIENT_SCRIM_ALPHA_BUSY;
+            mBehindAlpha = behindFraction * BUSY_SCRIM_ALPHA;
             mInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING) {
             // Either darken of make the scrim transparent when you
@@ -489,7 +489,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             float interpolatedFract = getInterpolatedFraction();
             float alphaBehind = mState.getBehindAlpha();
             if (mDarkenWhileDragging) {
-                mBehindAlpha = MathUtils.lerp(GRADIENT_SCRIM_ALPHA_BUSY, alphaBehind,
+                mBehindAlpha = MathUtils.lerp(BUSY_SCRIM_ALPHA, alphaBehind,
                         interpolatedFract);
                 mInFrontAlpha = mState.getFrontAlpha();
             } else {

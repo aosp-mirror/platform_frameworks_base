@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
+import android.view.Choreographer;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 
@@ -202,5 +203,12 @@ public class DependencyProvider {
     @Provides
     public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
+    }
+
+    /** */
+    @Singleton
+    @Provides
+    public Choreographer providesChoreographer() {
+        return Choreographer.getInstance();
     }
 }

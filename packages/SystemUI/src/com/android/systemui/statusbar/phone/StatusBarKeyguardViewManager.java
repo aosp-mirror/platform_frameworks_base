@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 import static android.view.WindowInsets.Type.navigationBars;
+
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_UNLOCK_FADING;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
