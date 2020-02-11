@@ -23,6 +23,7 @@ import static com.android.server.integrity.model.ComponentBitSize.COMPOUND_FORMU
 import static com.android.server.integrity.model.ComponentBitSize.CONNECTOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.EFFECT_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.FORMAT_VERSION_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.INSTALLER_ALLOWED_BY_MANIFEST_START;
 import static com.android.server.integrity.model.ComponentBitSize.IS_HASHED_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
@@ -35,6 +36,7 @@ import static com.android.server.integrity.parser.BinaryFileOperations.getString
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
+import android.content.integrity.InstallerAllowedByManifestFormula;
 import android.content.integrity.IntegrityFormula;
 import android.content.integrity.Rule;
 
@@ -140,6 +142,8 @@ public class RuleBinaryParser implements RuleParser {
                 return parseCompoundFormula(bitInputStream);
             case COMPOUND_FORMULA_END:
                 return null;
+            case INSTALLER_ALLOWED_BY_MANIFEST_START:
+                return new InstallerAllowedByManifestFormula();
             default:
                 throw new IllegalArgumentException(
                         String.format("Unknown formula separator: %s", separator));

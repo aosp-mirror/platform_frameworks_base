@@ -42,66 +42,88 @@ import java.util.Arrays;
 @VisibleForTesting
 public abstract class IntegrityFormula {
 
-    /**
-     * A static formula base for package name formulas.
-     *
-     * This formulation is incomplete and should always be used with {@code equals} formulation.
-     * Evaluates to false when used directly and cannot be written as a parcel.
-     */
-    @NonNull
-    public static final IntegrityFormula PACKAGE_NAME =
-            new StringAtomicFormula(AtomicFormula.PACKAGE_NAME);
+    /** Factory class for creating integrity formulas based on the app being installed. */
+    public static final class Application {
+        /** Returns an integrity formula that checks the equality to a package name. */
+        @NonNull
+        public static IntegrityFormula packageNameEquals(@NonNull String packageName) {
+            return new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, packageName);
+        }
 
-    /**
-     * A static formula base for app certificate formulas.
-     *
-     * This formulation is incomplete and should always be used with {@code equals} formulation.
-     * Evaluates to false when used directly and cannot be written as a parcel.
-     */
-    @NonNull
-    public static final IntegrityFormula APP_CERTIFICATE =
-            new StringAtomicFormula(AtomicFormula.APP_CERTIFICATE);
+        /**
+         * Returns an integrity formula that checks if the app certificates contain {@code
+         * appCertificate}.
+         */
+        @NonNull
+        public static IntegrityFormula certificatesContain(@NonNull String appCertificate) {
+            return new StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, appCertificate);
+        }
 
-    /**
-     * A static formula base for installer name formulas.
-     *
-     * This formulation is incomplete and should always be used with {@code equals} formulation.
-     * Evaluates to false when used directly and cannot be written as a parcel.
-     */
-    @NonNull
-    public static final IntegrityFormula INSTALLER_NAME =
-            new StringAtomicFormula(AtomicFormula.INSTALLER_NAME);
+        /** Returns an integrity formula that checks the equality to a version code. */
+        @NonNull
+        public static IntegrityFormula versionCodeEquals(@NonNull long versionCode) {
+            return new LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, versionCode);
+        }
 
-    /**
-     * A static formula base for installer certificate formulas.
-     *
-     * This formulation is incomplete and should always be used with {@code equals} formulation.
-     * Evaluates to false when used directly and cannot be written as a parcel.
-     */
-    @NonNull
-    public static final IntegrityFormula INSTALLER_CERTIFICATE =
-            new StringAtomicFormula(AtomicFormula.INSTALLER_CERTIFICATE);
+        /**
+         * Returns an integrity formula that checks the app's version code is greater than the
+         * provided value.
+         */
+        @NonNull
+        public static IntegrityFormula versionCodeGreaterThan(@NonNull long versionCode) {
+            return new LongAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.GT, versionCode);
+        }
 
-    /**
-     * A static formula base for version code name formulas.
-     *
-     * This formulation is incomplete and should always be used with {@code equals},
-     * {@code greaterThan} and {@code greaterThanEquals} formulation. Evaluates to false when used
-     * directly and cannot be written as a parcel.
-     */
-    @NonNull
-    public static final IntegrityFormula VERSION_CODE =
-            new LongAtomicFormula(AtomicFormula.VERSION_CODE);
+        /**
+         * Returns an integrity formula that checks the app's version code is greater than or equal
+         * to the provided value.
+         */
+        @NonNull
+        public static IntegrityFormula versionCodeGreaterThanOrEqualTo(@NonNull long versionCode) {
+            return new LongAtomicFormula(
+                    AtomicFormula.VERSION_CODE, AtomicFormula.GTE, versionCode);
+        }
 
-    /**
-     * A static formula base for pre-installed status formulas.
-     *
-     * This formulation is incomplete and should always be used with {@code equals} formulation.
-     * Evaluates to false when used directly and cannot be written as a parcel.
-     */
-    @NonNull
-    public static final IntegrityFormula PRE_INSTALLED =
-            new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED);
+        /** Returns an integrity formula that is valid when app is pre-installed. */
+        @NonNull
+        public static IntegrityFormula isPreInstalled() {
+            return new BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true);
+        }
+
+        private Application() {
+        }
+    }
+
+    /** Factory class for creating integrity formulas based on installer. */
+    public static final class Installer {
+        /** Returns an integrity formula that checks the equality to an installer name. */
+        @NonNull
+        public static IntegrityFormula packageNameEquals(@NonNull String installerName) {
+            return new StringAtomicFormula(AtomicFormula.INSTALLER_NAME, installerName);
+        }
+
+        /**
+         * An static formula that evaluates to true if the installer is NOT allowed according to the
+         * "allowed installer" field in the android manifest.
+         */
+        @NonNull
+        public static IntegrityFormula notAllowedByManifest() {
+            return not(new InstallerAllowedByManifestFormula());
+        }
+
+        /**
+         * Returns an integrity formula that checks if the installer certificates contain {@code
+         * installerCertificate}.
+         */
+        @NonNull
+        public static IntegrityFormula certificatesContain(@NonNull String installerCertificate) {
+            return new StringAtomicFormula(AtomicFormula.INSTALLER_CERTIFICATE,
+                    installerCertificate);
+        }
+
+        private Installer() {
+        }
+    }
 
     /** @hide */
     @IntDef(
@@ -109,10 +131,12 @@ public abstract class IntegrityFormula {
                     COMPOUND_FORMULA_TAG,
                     STRING_ATOMIC_FORMULA_TAG,
                     LONG_ATOMIC_FORMULA_TAG,
-                    BOOLEAN_ATOMIC_FORMULA_TAG
+                    BOOLEAN_ATOMIC_FORMULA_TAG,
+                    INSTALLER_ALLOWED_BY_MANIFEST_FORMULA_TAG
             })
     @Retention(RetentionPolicy.SOURCE)
-    @interface Tag {}
+    @interface Tag {
+    }
 
     /** @hide */
     public static final int COMPOUND_FORMULA_TAG = 0;
@@ -122,6 +146,8 @@ public abstract class IntegrityFormula {
     public static final int LONG_ATOMIC_FORMULA_TAG = 2;
     /** @hide */
     public static final int BOOLEAN_ATOMIC_FORMULA_TAG = 3;
+    /** @hide */
+    public static final int INSTALLER_ALLOWED_BY_MANIFEST_FORMULA_TAG = 4;
 
     /**
      * Returns the tag that identifies the current class.
@@ -135,14 +161,14 @@ public abstract class IntegrityFormula {
      *
      * @hide
      */
-    public abstract @Tag boolean matches(AppInstallMetadata appInstallMetadata);
+    public abstract boolean matches(AppInstallMetadata appInstallMetadata);
 
     /**
      * Returns true when the formula (or one of its atomic formulas) has app certificate as key.
      *
      * @hide
      */
-    public abstract @Tag boolean isAppCertificateFormula();
+    public abstract boolean isAppCertificateFormula();
 
     /**
      * Returns true when the formula (or one of its atomic formulas) has installer package name
@@ -150,7 +176,7 @@ public abstract class IntegrityFormula {
      *
      * @hide
      */
-    public abstract @Tag boolean isInstallerFormula();
+    public abstract boolean isInstallerFormula();
 
     /**
      * Write an {@link IntegrityFormula} to {@link android.os.Parcel}.
@@ -159,7 +185,6 @@ public abstract class IntegrityFormula {
      * {@link Parcelable}.
      *
      * @throws IllegalArgumentException if {@link IntegrityFormula} is not a recognized subclass
-     *
      * @hide
      */
     public static void writeToParcel(
@@ -192,70 +217,6 @@ public abstract class IntegrityFormula {
             default:
                 throw new IllegalArgumentException("Unknown formula tag " + tag);
         }
-    }
-
-    /**
-     * Returns an integrity formula that evaluates to true when value of the key matches to the
-     * provided string value.
-     *
-     * <p>The value will be hashed with SHA256 and the hex digest will be computed; for
-     * all cases except when the key is PACKAGE_NAME or INSTALLER_NAME and the value is less than
-     * 32 characters.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the key is not string typed.
-     */
-    @NonNull
-    public IntegrityFormula equalTo(@NonNull String value) {
-        AtomicFormula baseFormula = (AtomicFormula) this;
-        return new AtomicFormula.StringAtomicFormula(baseFormula.getKey(), value);
-    }
-
-    /**
-     * Returns an integrity formula that evaluates to true when the boolean value of the key matches
-     * the provided boolean value. It can only be used with the boolean comparison keys.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the key is not boolean typed.
-     */
-    @NonNull
-    public IntegrityFormula equalTo(boolean value) {
-        AtomicFormula baseFormula = (AtomicFormula) this;
-        return new AtomicFormula.BooleanAtomicFormula(baseFormula.getKey(), value);
-    }
-
-    /**
-     * Returns a formula that evaluates to true when the value of the key in the package being
-     * installed is equal to {@code value}.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the key is not long typed.
-     */
-    @NonNull
-    public IntegrityFormula equalTo(long value) {
-        AtomicFormula baseFormula = (AtomicFormula) this;
-        return new AtomicFormula.LongAtomicFormula(baseFormula.getKey(), AtomicFormula.EQ, value);
-    }
-
-    /**
-     * Returns a formula that evaluates to true when the value of the key in the package being
-     * installed is greater than {@code value}.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the key is not long typed.
-     */
-    @NonNull
-    public IntegrityFormula greaterThan(long value) {
-        AtomicFormula baseFormula = (AtomicFormula) this;
-        return new AtomicFormula.LongAtomicFormula(baseFormula.getKey(), AtomicFormula.GT, value);
-    }
-
-    /**
-     * Returns a formula that evaluates to true when the value of the key in the package being
-     * installed is greater than or equals to the {@code value}.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the key is not long typed.
-     */
-    @NonNull
-    public IntegrityFormula greaterThanOrEquals(long value) {
-        AtomicFormula baseFormula = (AtomicFormula) this;
-        return new AtomicFormula.LongAtomicFormula(baseFormula.getKey(), AtomicFormula.GTE, value);
     }
 
     /**

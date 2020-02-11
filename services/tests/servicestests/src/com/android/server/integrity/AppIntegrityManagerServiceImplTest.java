@@ -211,7 +211,8 @@ public class AppIntegrityManagerServiceImplTest {
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
                 Arrays.asList(
-                        new Rule(IntegrityFormula.PACKAGE_NAME.equalTo(PACKAGE_NAME), Rule.DENY));
+                        new Rule(IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
+                                Rule.DENY));
 
         mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
         runJobInHandler();
@@ -230,7 +231,8 @@ public class AppIntegrityManagerServiceImplTest {
         IntentSender mockReceiver = mock(IntentSender.class);
         List<Rule> rules =
                 Arrays.asList(
-                        new Rule(IntegrityFormula.PACKAGE_NAME.equalTo(PACKAGE_NAME), Rule.DENY));
+                        new Rule(IntegrityFormula.Application.packageNameEquals(PACKAGE_NAME),
+                                Rule.DENY));
 
         mService.updateRuleSet(VERSION, new ParceledListSlice<>(rules), mockReceiver);
         runJobInHandler();
@@ -390,7 +392,7 @@ public class AppIntegrityManagerServiceImplTest {
     public void getCurrentRules() throws Exception {
         whitelistUsAsRuleProvider();
         makeUsSystemApp();
-        Rule rule = new Rule(IntegrityFormula.PACKAGE_NAME.equalTo("package"), Rule.DENY);
+        Rule rule = new Rule(IntegrityFormula.Application.packageNameEquals("package"), Rule.DENY);
         when(mIntegrityFileManager.readRules(any())).thenReturn(Arrays.asList(rule));
 
         assertThat(mService.getCurrentRules().getList()).containsExactly(rule);
