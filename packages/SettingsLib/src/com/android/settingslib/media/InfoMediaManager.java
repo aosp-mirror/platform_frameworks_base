@@ -74,13 +74,6 @@ public class InfoMediaManager extends MediaManager {
         refreshDevices();
     }
 
-    @VisibleForTesting
-    String getControlCategoryByPackageName(String packageName) {
-        //TODO(b/117129183): Use package name to get ControlCategory.
-        //Since api not ready, return fixed ControlCategory for prototype.
-        return "com.google.android.gms.cast.CATEGORY_CAST";
-    }
-
     @Override
     public void stopScan() {
         mRouterManager.unregisterCallback(mMediaRouterCallback);
@@ -190,6 +183,11 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onRoutesChanged(List<MediaRoute2Info> routes) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onRoutesRemoved(List<MediaRoute2Info> routes) {
             refreshDevices();
         }
     }
