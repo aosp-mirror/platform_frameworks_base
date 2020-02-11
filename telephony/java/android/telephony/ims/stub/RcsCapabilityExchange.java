@@ -17,8 +17,6 @@
 package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.aidl.IRcsFeatureListener;
@@ -34,8 +32,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@SystemApi
-@TestApi
 public class RcsCapabilityExchange {
 
     /**  Service is unknown. */
