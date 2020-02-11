@@ -490,6 +490,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         SYSTEM_SETTINGS_WHITELIST = new ArraySet<>();
         SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS);
+        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS_FLOAT);
         SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
         SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
 

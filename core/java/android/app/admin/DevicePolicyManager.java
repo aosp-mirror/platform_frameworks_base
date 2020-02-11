@@ -8723,6 +8723,7 @@ public class DevicePolicyManager {
     @StringDef({
             Settings.System.SCREEN_BRIGHTNESS_MODE,
             Settings.System.SCREEN_BRIGHTNESS,
+            Settings.System.SCREEN_BRIGHTNESS_FLOAT,
             Settings.System.SCREEN_OFF_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)

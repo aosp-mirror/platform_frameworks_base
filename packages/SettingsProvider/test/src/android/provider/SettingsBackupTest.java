@@ -99,7 +99,9 @@ public class SettingsBackupTest {
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
                     Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
-                    Settings.System.PEAK_REFRESH_RATE // depends on hardware capabilities
+                    Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
+                    Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT
                     );
 
     private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
