@@ -342,9 +342,43 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private final Object mPackagesLock = new Object();
 
+    /**
+     * mLocalUnlockedUsers affects the return value of isUserUnlocked.  If
+     * any value in the array changes, then the binder cache for
+     * isUserUnlocked must be invalidated.  When adding mutating methods to
+     * WatchedLockedUsers, be sure to invalidate the cache in the new
+     * methods.
+     */
+    private class WatchedLockedUsers {
+        private int[] users = EmptyArray.INT;
+        public WatchedLockedUsers() {
+        }
+        public void append(int userId) {
+            users = ArrayUtils.appendInt(users, userId);
+            invalidateIsUserUnlockedCache();
+        }
+        public void remove(int userId) {
+            users = ArrayUtils.removeInt(users, userId);
+            invalidateIsUserUnlockedCache();
+        }
+        public boolean contains(int userId) {
+            return ArrayUtils.contains(users, userId);
+        }
+        public int[] all() {
+            return users;
+        }
+        @Override
+        public String toString() {
+            return Arrays.toString(users);
+        }
+        private void invalidateIsUserUnlockedCache() {
+            UserManager.invalidateIsUserUnlockedCache();
+        }
+    }
+
     /** Set of users that we know are unlocked. */
     @GuardedBy("mLock")
-    private int[] mLocalUnlockedUsers = EmptyArray.INT;
+    private WatchedLockedUsers mLocalUnlockedUsers = new WatchedLockedUsers();
     /** Set of users that system knows are unlocked. */
     @GuardedBy("mLock")
     private int[] mSystemUnlockedUsers = EmptyArray.INT;
@@ -3042,7 +3076,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers = ArrayUtils.appendInt(mLocalUnlockedUsers, userId);
+            mLocalUnlockedUsers.append(userId);
         }
     }
 
@@ -3058,14 +3092,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         synchronized (mLock) {
-            mLocalUnlockedUsers = ArrayUtils.removeInt(mLocalUnlockedUsers, userId);
+            mLocalUnlockedUsers.remove(userId);
         }
     }
 
     @Override
     public boolean isUserKeyUnlocked(int userId) {
         synchronized (mLock) {
-            return ArrayUtils.contains(mLocalUnlockedUsers, userId);
+            return mLocalUnlockedUsers.contains(userId);
         }
     }
 
@@ -4177,7 +4211,7 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             pw.println();
-            pw.println("Local unlocked users: " + Arrays.toString(mLocalUnlockedUsers));
+            pw.println("Local unlocked users: " + mLocalUnlockedUsers);
             pw.println("System unlocked users: " + Arrays.toString(mSystemUnlockedUsers));
 
             final ContentResolver cr = mContext.getContentResolver();
