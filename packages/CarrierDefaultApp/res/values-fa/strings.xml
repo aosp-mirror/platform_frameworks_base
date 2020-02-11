@@ -10,7 +10,7 @@
     <!-- no translation found for no_data_notification_detail (3112125343857014825) -->
     <skip />
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"بدون اتصال داده دستگاه همراه"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"‏افزودن طرح داده یا رومینگ ازطریق %s"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"‏افزودن طرح داده یا فراگردی ازطریق %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"وضعیت داده تلفن همراه"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"ورود به سیستم شبکه تلفن همراه"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"شبکه‌ای که می‌خواهید به آن بپیوندید مشکلات امنیتی دارد."</string>
