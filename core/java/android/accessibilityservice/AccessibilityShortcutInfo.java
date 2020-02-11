@@ -76,6 +76,16 @@ public final class AccessibilityShortcutInfo {
     private final int mDescriptionResId;
 
     /**
+     * Resource id of the animated image of the accessibility shortcut target.
+     */
+    private final int mAnimatedImageRes;
+
+    /**
+     * Resource id of the html description of the accessibility shortcut target.
+     */
+    private final int mHtmlDescriptionRes;
+
+    /**
      * Creates a new instance.
      *
      * @param context Context for accessing resources.
@@ -119,6 +129,14 @@ public final class AccessibilityShortcutInfo {
             // Gets summary
             mSummaryResId = asAttributes.getResourceId(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_summary, 0);
+            // Gets animated image
+            mAnimatedImageRes = asAttributes.getResourceId(
+                    com.android.internal.R.styleable
+                            .AccessibilityShortcutTarget_animatedImageDrawable, 0);
+            // Gets html description
+            mHtmlDescriptionRes = asAttributes.getResourceId(
+                    com.android.internal.R.styleable.AccessibilityShortcutTarget_htmlDescription,
+                    0);
             asAttributes.recycle();
 
             if (mDescriptionResId == 0 || mSummaryResId == 0) {
@@ -169,6 +187,25 @@ public final class AccessibilityShortcutInfo {
     @Nullable
     public String loadDescription(@NonNull PackageManager packageManager) {
         return loadResourceString(packageManager, mActivityInfo, mDescriptionResId);
+    }
+
+    /**
+     * The animated image resource id of the accessibility shortcut target.
+     *
+     * @return The animated image resource id.
+     */
+    public int getAnimatedImageRes() {
+        return mAnimatedImageRes;
+    }
+
+    /**
+     * The localized html description of the accessibility shortcut target.
+     *
+     * @return The localized html description.
+     */
+    @Nullable
+    public String loadHtmlDescription(@NonNull PackageManager packageManager) {
+        return loadResourceString(packageManager, mActivityInfo, mHtmlDescriptionRes);
     }
 
     /**

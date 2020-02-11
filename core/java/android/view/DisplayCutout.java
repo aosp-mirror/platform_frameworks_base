@@ -31,18 +31,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.Region;
-import android.graphics.Region.Op;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
-import android.util.PathParser;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
@@ -63,10 +57,6 @@ import java.util.List;
 public final class DisplayCutout {
 
     private static final String TAG = "DisplayCutout";
-    private static final String BOTTOM_MARKER = "@bottom";
-    private static final String DP_MARKER = "@dp";
-    private static final String RIGHT_MARKER = "@right";
-    private static final String LEFT_MARKER = "@left";
 
     /**
      * Category for overlays that allow emulating a display cutout on devices that don't have
@@ -703,77 +693,16 @@ public final class DisplayCutout {
             }
         }
 
-        Path p = null;
-        Rect boundTop = null;
-        Rect boundBottom = null;
-        Rect safeInset = new Rect();
-        String bottomSpec = null;
-        if (!TextUtils.isEmpty(spec)) {
-            spec = spec.trim();
-            final float offsetX;
-            if (spec.endsWith(RIGHT_MARKER)) {
-                offsetX = displayWidth;
-                spec = spec.substring(0, spec.length() - RIGHT_MARKER.length()).trim();
-            } else if (spec.endsWith(LEFT_MARKER)) {
-                offsetX = 0;
-                spec = spec.substring(0, spec.length() - LEFT_MARKER.length()).trim();
-            } else {
-                offsetX = displayWidth / 2f;
-            }
-            final boolean inDp = spec.endsWith(DP_MARKER);
-            if (inDp) {
-                spec = spec.substring(0, spec.length() - DP_MARKER.length());
-            }
+        spec = spec.trim();
 
-            if (spec.contains(BOTTOM_MARKER)) {
-                String[] splits = spec.split(BOTTOM_MARKER, 2);
-                spec = splits[0].trim();
-                bottomSpec = splits[1].trim();
-            }
+        CutoutSpecification cutoutSpec = new CutoutSpecification.Parser(density,
+                displayWidth, displayHeight).parse(spec);
+        Rect safeInset = cutoutSpec.getSafeInset();
+        final Rect boundLeft = cutoutSpec.getLeftBound();
+        final Rect boundTop = cutoutSpec.getTopBound();
+        final Rect boundRight = cutoutSpec.getRightBound();
+        final Rect boundBottom = cutoutSpec.getBottomBound();
 
-            final Matrix m = new Matrix();
-            final Region r = Region.obtain();
-            if (!spec.isEmpty()) {
-                try {
-                    p = PathParser.createPathFromPathData(spec);
-                } catch (Throwable e) {
-                    Log.wtf(TAG, "Could not inflate cutout: ", e);
-                }
-
-                if (p != null) {
-                    if (inDp) {
-                        m.postScale(density, density);
-                    }
-                    m.postTranslate(offsetX, 0);
-                    p.transform(m);
-
-                    boundTop = new Rect();
-                    toRectAndAddToRegion(p, r, boundTop);
-                    safeInset.top = boundTop.bottom;
-                }
-            }
-
-            if (bottomSpec != null) {
-                int bottomInset = 0;
-                Path bottomPath = null;
-                try {
-                    bottomPath = PathParser.createPathFromPathData(bottomSpec);
-                } catch (Throwable e) {
-                    Log.wtf(TAG, "Could not inflate bottom cutout: ", e);
-                }
-
-                if (bottomPath != null) {
-                    // Keep top transform
-                    m.postTranslate(0, displayHeight);
-                    bottomPath.transform(m);
-                    p.addPath(bottomPath);
-                    boundBottom = new Rect();
-                    toRectAndAddToRegion(bottomPath, r, boundBottom);
-                    bottomInset = displayHeight - boundBottom.top;
-                }
-                safeInset.bottom = bottomInset;
-            }
-        }
 
         if (!waterfallInsets.equals(Insets.NONE)) {
             safeInset.set(
@@ -784,9 +713,9 @@ public final class DisplayCutout {
         }
 
         final DisplayCutout cutout = new DisplayCutout(
-                safeInset, waterfallInsets, null /* boundLeft */, boundTop,
-                null /* boundRight */, boundBottom, false /* copyArguments */);
-        final Pair<Path, DisplayCutout> result = new Pair<>(p, cutout);
+                safeInset, waterfallInsets, boundLeft, boundTop,
+                boundRight, boundBottom, false /* copyArguments */);
+        final Pair<Path, DisplayCutout> result = new Pair<>(cutoutSpec.getPath(), cutout);
         synchronized (CACHE_LOCK) {
             sCachedSpec = spec;
             sCachedDisplayWidth = displayWidth;
@@ -797,14 +726,6 @@ public final class DisplayCutout {
         }
         return result;
     }
-
-    private static void toRectAndAddToRegion(Path p, Region inoutRegion, Rect inoutRect) {
-        final RectF rectF = new RectF();
-        p.computeBounds(rectF, false /* unused */);
-        rectF.round(inoutRect);
-        inoutRegion.op(inoutRect, Op.UNION);
-    }
-
 
     private static Insets loadWaterfallInset(Resources res) {
         return Insets.of(

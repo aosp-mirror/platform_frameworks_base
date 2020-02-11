@@ -6163,4 +6163,50 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Enable/disable wifi auto wakeup feature.
+     *
+     * <p>
+     * The feature is described in
+     * <a href="Wi-Fi Turn on automatically">
+     * https://source.android.com/devices/tech/connect/wifi-infrastructure
+     * #turn_on_wi-fi_automatically
+     * </a>
+     *
+     * @param enable true to enable, false to disable.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void setAutoWakeupEnabled(boolean enable) {
+        try {
+            mService.setAutoWakeupEnabled(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the persisted Wi-Fi auto wakeup feature state. Defaults to false, unless changed by the
+     * user via Settings.
+     *
+     * <p>
+     * The feature is described in
+     * <a href="Wi-Fi Turn on automatically">
+     * https://source.android.com/devices/tech/connect/wifi-infrastructure
+     * #turn_on_wi-fi_automatically
+     * </a>
+     *
+     * @return true to indicate that wakeup feature is enabled, false to indicate that wakeup
+     * feature is disabled.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public boolean isAutoWakeupEnabled() {
+        try {
+            return mService.isAutoWakeupEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

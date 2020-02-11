@@ -1471,10 +1471,10 @@ package android.bluetooth {
 
   public final class BluetoothA2dpSink implements android.bluetooth.BluetoothProfile {
     method public void finalize();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isAudioPlaying(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
-    field @RequiresPermission(android.Manifest.permission.BLUETOOTH) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isAudioPlaying(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@Nullable android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
   }
 
   public final class BluetoothAdapter {
@@ -1647,9 +1647,9 @@ package android.bluetooth {
   }
 
   public class BluetoothPbap implements android.bluetooth.BluetoothProfile {
-    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
-    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
   }
 
   public interface BluetoothProfile {
@@ -2007,18 +2007,15 @@ package android.content.pm {
   }
 
   public final class InstallationFile implements android.os.Parcelable {
-    ctor public InstallationFile(@NonNull String, long, @Nullable byte[]);
+    ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
     method public int describeContents();
-    method public int getFileType();
+    method public long getLengthBytes();
+    method public int getLocation();
     method @Nullable public byte[] getMetadata();
     method @NonNull public String getName();
-    method public long getSize();
+    method @Nullable public byte[] getSignature();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallationFile> CREATOR;
-    field public static final int FILE_TYPE_APK = 0; // 0x0
-    field public static final int FILE_TYPE_LIB = 1; // 0x1
-    field public static final int FILE_TYPE_OBB = 2; // 0x2
-    field public static final int FILE_TYPE_UNKNOWN = -1; // 0xffffffff
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -4854,6 +4851,8 @@ package android.media.tv.tuner {
 
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @NonNull String, int, @Nullable android.media.tv.tuner.Tuner.OnResourceLostListener);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelScanning();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelTuning();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int connectCiCam(int);
@@ -4874,8 +4873,6 @@ package android.media.tv.tuner {
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setLna(boolean);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopScan();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int stopTune();
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
   }
@@ -7717,6 +7714,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveBackupData();
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveSoftApBackupData();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setAutoWakeupEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
@@ -8242,8 +8240,8 @@ package android.net.wifi.wificond {
   public final class NativeScanResult implements android.os.Parcelable {
     ctor public NativeScanResult();
     method public int describeContents();
-    method @NonNull public byte[] getBssid();
-    method @NonNull public int getCapabilities();
+    method @Nullable public android.net.MacAddress getBssid();
+    method public int getCapabilities();
     method public int getFrequencyMhz();
     method @NonNull public byte[] getInformationElements();
     method @NonNull public java.util.List<android.net.wifi.wificond.RadioChainInfo> getRadioChainInfos();
@@ -8252,15 +8250,31 @@ package android.net.wifi.wificond {
     method public long getTsf();
     method public boolean isAssociated();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BSS_CAPABILITY_APSD = 2048; // 0x800
+    field public static final int BSS_CAPABILITY_CF_POLLABLE = 4; // 0x4
+    field public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 8; // 0x8
+    field public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 128; // 0x80
+    field public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 16384; // 0x4000
+    field public static final int BSS_CAPABILITY_DSSS_OFDM = 8192; // 0x2000
+    field public static final int BSS_CAPABILITY_ESS = 1; // 0x1
+    field public static final int BSS_CAPABILITY_IBSS = 2; // 0x2
+    field public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 32768; // 0x8000
+    field public static final int BSS_CAPABILITY_PBCC = 64; // 0x40
+    field public static final int BSS_CAPABILITY_PRIVACY = 16; // 0x10
+    field public static final int BSS_CAPABILITY_QOS = 512; // 0x200
+    field public static final int BSS_CAPABILITY_RADIO_MANAGEMENT = 4096; // 0x1000
+    field public static final int BSS_CAPABILITY_SHORT_PREAMBLE = 32; // 0x20
+    field public static final int BSS_CAPABILITY_SHORT_SLOT_TIME = 1024; // 0x400
+    field public static final int BSS_CAPABILITY_SPECTRUM_MANAGEMENT = 256; // 0x100
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeScanResult> CREATOR;
   }
 
   public final class NativeWifiClient implements android.os.Parcelable {
-    ctor public NativeWifiClient(@NonNull byte[]);
+    ctor public NativeWifiClient(@Nullable android.net.MacAddress);
     method public int describeContents();
+    method @Nullable public android.net.MacAddress getMacAddress();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.wificond.NativeWifiClient> CREATOR;
-    field @NonNull public final byte[] macAddress;
   }
 
   public final class PnoNetwork implements android.os.Parcelable {
@@ -8305,7 +8319,7 @@ package android.net.wifi.wificond {
   public class WifiCondManager {
     method public void abortScan(@NonNull String);
     method public void enableVerboseLogging(boolean);
-    method @NonNull public java.util.List<java.lang.Integer> getChannelsMhzForBand(int);
+    method @NonNull public int[] getChannelsMhzForBand(int);
     method @Nullable public android.net.wifi.wificond.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.wificond.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.wificond.WifiCondManager.TxPacketCounters getTxPacketCounters(@NonNull String);
@@ -9680,7 +9694,6 @@ package android.provider {
     field public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
-    field public static final String NETWORK_RECOMMENDATIONS_ENABLED = "network_recommendations_enabled";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
     field public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
@@ -9695,7 +9708,7 @@ package android.provider {
     field public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
     field public static final String WIFI_SCORE_PARAMS = "wifi_score_params";
     field public static final String WIFI_VERBOSE_LOGGING_ENABLED = "wifi_verbose_logging_enabled";
-    field public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
+    field @Deprecated public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
@@ -10317,7 +10330,7 @@ package android.service.dataloader {
 
   public abstract class DataLoaderService extends android.app.Service {
     ctor public DataLoaderService();
-    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader();
+    method @Nullable public android.service.dataloader.DataLoaderService.DataLoader onCreateDataLoader(@NonNull android.content.pm.DataLoaderParams);
   }
 
   public static interface DataLoaderService.DataLoader {

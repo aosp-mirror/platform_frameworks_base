@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Жұмыс профилі қосылсын ба?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Жұмыс қолданбалары, хабарландырулар, деректер және басқа да жұмыс профильдерінің мүмкіндіктері қосылады"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Қосу"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Қолданба қолжетімді емес"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> қазір қолжетімді емес."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Қолданба Android жүйесінің ескі нұсқасына арналған және дұрыс жұмыс істемеуі мүмкін. Жаңартылған нұсқаны тексеріңіз немесе әзірлеушіге хабарласыңыз."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Жаңартылған нұсқаны тексеру"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Сізде жаңа хабарлар бар"</string>

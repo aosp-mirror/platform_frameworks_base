@@ -20,15 +20,19 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import android.app.Activity;
 import android.app.UiAutomation;
+import android.content.Context;
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.ParcelFileDescriptor;
 import android.perftests.utils.PerfTestActivity;
+import android.provider.Settings;
 
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import androidx.test.runner.lifecycle.Stage;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -52,16 +56,34 @@ public class WindowManagerPerfTestBase {
      */
     static final File BASE_OUT_PATH = new File("/data/local/CorePerfTests");
 
+    private static int sOriginalStayOnWhilePluggedIn;
+
     @BeforeClass
     public static void setUpOnce() {
+        final Context context = getInstrumentation().getContext();
+        sOriginalStayOnWhilePluggedIn = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
+        // Keep the device awake during testing.
+        setStayOnWhilePluggedIn(BatteryManager.BATTERY_PLUGGED_USB);
+
         if (!BASE_OUT_PATH.exists()) {
             executeShellCommand("mkdir -p " + BASE_OUT_PATH);
         }
         // In order to be closer to the real use case.
         executeShellCommand("input keyevent KEYCODE_WAKEUP");
         executeShellCommand("wm dismiss-keyguard");
-        getInstrumentation().getContext().startActivity(new Intent(Intent.ACTION_MAIN)
+        context.startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        setStayOnWhilePluggedIn(sOriginalStayOnWhilePluggedIn);
+    }
+
+    private static void setStayOnWhilePluggedIn(int value) {
+        executeShellCommand(String.format("settings put global %s %d",
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN, value));
     }
 
     /**
@@ -97,7 +119,7 @@ public class WindowManagerPerfTestBase {
      */
     static class PerfTestActivityRule extends ActivityTestRule<PerfTestActivity> {
         private final Intent mStartIntent =
-                new Intent().putExtra(PerfTestActivity.INTENT_EXTRA_KEEP_SCREEN_ON, true);
+                new Intent(getInstrumentation().getTargetContext(), PerfTestActivity.class);
         private final LifecycleListener mLifecycleListener = new LifecycleListener();
 
         PerfTestActivityRule() {

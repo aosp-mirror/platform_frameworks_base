@@ -31,43 +31,27 @@ import java.net.URL;
 public class PacService extends Service {
     private static final String TAG = "PacService";
 
-    private PacNative mPacNative;
-    private ProxyServiceStub mStub;
+    private PacNative mPacNative = PacNative.getInstance();
+    private ProxyServiceStub mStub = new ProxyServiceStub();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (mPacNative == null) {
-            mPacNative = new PacNative();
-            mStub = new ProxyServiceStub(mPacNative);
-        }
+        mPacNative.startPacSupport();
     }
 
     @Override
     public void onDestroy() {
+        mPacNative.stopPacSupport();
         super.onDestroy();
-        if (mPacNative != null) {
-            mPacNative.stopPacSupport();
-            mPacNative = null;
-            mStub = null;
-        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (mPacNative == null) {
-            mPacNative = new PacNative();
-            mStub = new ProxyServiceStub(mPacNative);
-        }
         return mStub;
     }
 
-    private static class ProxyServiceStub extends IProxyService.Stub {
-        private final PacNative mPacNative;
-
-        public ProxyServiceStub(PacNative pacNative) {
-            mPacNative = pacNative;
-        }
+    private class ProxyServiceStub extends IProxyService.Stub {
 
         @Override
         public String resolvePacFile(String host, String url) throws RemoteException {
@@ -102,20 +86,12 @@ public class PacService extends Service {
 
         @Override
         public void startPacSystem() throws RemoteException {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                Log.e(TAG, "Only system user is allowed to call startPacSystem");
-                throw new SecurityException();
-            }
-            mPacNative.startPacSupport();
+            //TODO: remove
         }
 
         @Override
         public void stopPacSystem() throws RemoteException {
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                Log.e(TAG, "Only system user is allowed to call stopPacSystem");
-                throw new SecurityException();
-            }
-            mPacNative.stopPacSupport();
+            //TODO: remove
         }
     }
 }

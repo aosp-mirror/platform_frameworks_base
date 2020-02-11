@@ -45,6 +45,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubblesTestActivity;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -91,6 +92,7 @@ public class NotificationTestHelper {
     private final NotifBindPipeline mBindPipeline;
     private final NotificationEntryListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
+    private StatusBarStateController mStatusBarStateController;
 
     public NotificationTestHelper(Context context, TestableDependency dependency) {
         mContext = context;
@@ -98,9 +100,9 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(SmartReplyController.class);
-        StatusBarStateController stateController = mock(StatusBarStateController.class);
-        mGroupManager = new NotificationGroupManager(stateController);
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, stateController,
+        mStatusBarStateController = mock(StatusBarStateController.class);
+        mGroupManager = new NotificationGroupManager(mStatusBarStateController);
+        mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarStateController,
                 mock(KeyguardBypassController.class));
         mHeadsUpManager.setUp(null, mGroupManager, null, null);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
@@ -321,6 +323,10 @@ public class NotificationTestHelper {
         return notificationBuilder.build();
     }
 
+    public StatusBarStateController getStatusBarStateController() {
+        return mStatusBarStateController;
+    }
+
     private ExpandableNotificationRow generateRow(
             Notification notification,
             String pkg,
@@ -382,7 +388,11 @@ public class NotificationTestHelper {
                 mGroupManager,
                 mHeadsUpManager,
                 mBindStage,
-                mock(OnExpandClickListener.class));
+                mock(OnExpandClickListener.class),
+                mock(NotificationMediaManager.class),
+                mock(ExpandableNotificationRow.OnAppOpsClickListener.class),
+                mock(FalsingManager.class),
+                mStatusBarStateController);
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
         inflateAndWait(entry, mBindStage);

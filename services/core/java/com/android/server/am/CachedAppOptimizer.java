@@ -946,6 +946,15 @@ public final class CachedAppOptimizer {
                 }
 
                 EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
+
+                // See above for why we're not taking mPhenotypeFlagLock here
+                if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.APP_FREEZE_CHANGED,
+                            FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__FREEZE_APP,
+                            pid,
+                            name,
+                            unfrozenDuration);
+                }
             }
         }
 
@@ -994,6 +1003,16 @@ public final class CachedAppOptimizer {
                 }
 
                 EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, name);
+
+                // See above for why we're not taking mPhenotypeFlagLock here
+                if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.APP_FREEZE_CHANGED,
+                            FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__UNFREEZE_APP,
+                            pid,
+                            name,
+                            frozenDuration);
+                }
             }
         }
     }

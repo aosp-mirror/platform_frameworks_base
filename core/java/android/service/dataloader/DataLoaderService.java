@@ -90,7 +90,7 @@ public abstract class DataLoaderService extends Service {
      * @hide
      */
     @SystemApi
-    public @Nullable DataLoader onCreateDataLoader() {
+    public @Nullable DataLoader onCreateDataLoader(@NonNull DataLoaderParams dataLoaderParams) {
         return null;
     }
 

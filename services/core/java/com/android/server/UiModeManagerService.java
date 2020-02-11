@@ -302,14 +302,18 @@ final class UiModeManagerService extends SystemService {
     private final ContentObserver mDarkThemeObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            int mode = Secure.getIntForUser(getContext().getContentResolver(), Secure.UI_NIGHT_MODE,
-                    mNightMode, 0);
-            if (mode == MODE_NIGHT_AUTO || mode == MODE_NIGHT_CUSTOM) {
-                mode = MODE_NIGHT_YES;
-            }
-            SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
+            updateSystemProperties();
         }
     };
+
+    private void updateSystemProperties() {
+        int mode = Secure.getIntForUser(getContext().getContentResolver(), Secure.UI_NIGHT_MODE,
+                mNightMode, 0);
+        if (mode == MODE_NIGHT_AUTO || mode == MODE_NIGHT_CUSTOM) {
+            mode = MODE_NIGHT_YES;
+        }
+        SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
+    }
 
     @Override
     public void onSwitchUser(int userHandle) {
@@ -392,6 +396,7 @@ final class UiModeManagerService extends SystemService {
 
         context.getContentResolver().registerContentObserver(Secure.getUriFor(Secure.UI_NIGHT_MODE),
                 false, mDarkThemeObserver, 0);
+        updateSystemProperties();
     }
 
     @VisibleForTesting
@@ -1261,9 +1266,8 @@ final class UiModeManagerService extends SystemService {
             if (Sandman.shouldStartDockApp(getContext(), homeIntent)) {
                 try {
                     int result = ActivityTaskManager.getService().startActivityWithConfig(
-                            null, getContext().getBasePackageName(), getContext().getFeatureId(),
-                            homeIntent, null, null, null, 0, 0, mConfiguration, null,
-                            UserHandle.USER_CURRENT);
+                            null, getContext().getBasePackageName(), homeIntent, null, null, null,
+                            0, 0, mConfiguration, null, UserHandle.USER_CURRENT);
                     if (ActivityManager.isStartResultSuccessful(result)) {
                         dockAppStarted = true;
                     } else if (result != ActivityManager.START_INTENT_NOT_RESOLVED) {

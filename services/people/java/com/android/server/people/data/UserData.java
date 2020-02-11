@@ -19,16 +19,25 @@ package com.android.server.people.data;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
+import java.io.File;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 
 /** The data associated with a user profile. */
 class UserData {
 
     private final @UserIdInt int mUserId;
+
+    private final File mPerUserPeopleDataDir;
+
+    private final ScheduledExecutorService mScheduledExecutorService;
+
+    private final ContactsQueryHelper mHelper;
 
     private boolean mIsUnlocked;
 
@@ -40,8 +49,12 @@ class UserData {
     @Nullable
     private String mDefaultSmsApp;
 
-    UserData(@UserIdInt int userId) {
+    UserData(@UserIdInt int userId, @NonNull ScheduledExecutorService scheduledExecutorService,
+            ContactsQueryHelper helper) {
         mUserId = userId;
+        mPerUserPeopleDataDir = new File(Environment.getDataSystemCeDirectory(mUserId), "people");
+        mScheduledExecutorService = scheduledExecutorService;
+        mHelper = helper;
     }
 
     @UserIdInt int getUserId() {
@@ -56,6 +69,13 @@ class UserData {
 
     void setUserUnlocked() {
         mIsUnlocked = true;
+
+        // Ensures per user root directory for people data is present, and attempt to load
+        // data from disk.
+        mPerUserPeopleDataDir.mkdirs();
+        for (PackageData packageData : mPackageDataMap.values()) {
+            packageData.loadFromDisk();
+        }
     }
 
     void setUserStopped() {
@@ -103,7 +123,8 @@ class UserData {
     }
 
     private PackageData createPackageData(String packageName) {
-        return new PackageData(packageName, mUserId, this::isDefaultDialer, this::isDefaultSmsApp);
+        return new PackageData(packageName, mUserId, this::isDefaultDialer, this::isDefaultSmsApp,
+                mScheduledExecutorService, mPerUserPeopleDataDir, mHelper);
     }
 
     private boolean isDefaultDialer(String packageName) {

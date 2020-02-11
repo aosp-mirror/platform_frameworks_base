@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -169,10 +171,11 @@ public final class IncrementalStorage {
      * @param path             Relative path of the new file.
      * @param size             Size of the new file in bytes.
      * @param metadata         Metadata bytes.
+     * @param v4signatureBytes Serialized V4SignatureProto.
      */
     public void makeFile(@NonNull String path, long size, @Nullable UUID id,
-            @Nullable byte[] metadata, int hashAlgorithm, @Nullable byte[] rootHash,
-            @Nullable byte[] additionalData, @Nullable byte[] signature) throws IOException {
+            @Nullable byte[] metadata, @Nullable byte[] v4signatureBytes)
+            throws IOException {
         try {
             if (id == null && metadata == null) {
                 throw new IOException("File ID and metadata cannot both be null");
@@ -181,13 +184,7 @@ public final class IncrementalStorage {
             params.size = size;
             params.metadata = (metadata == null ? new byte[0] : metadata);
             params.fileId = idToBytes(id);
-            if (hashAlgorithm != 0 || signature != null) {
-                params.signature = new IncrementalSignature();
-                params.signature.hashAlgorithm = hashAlgorithm;
-                params.signature.rootHash = rootHash;
-                params.signature.additionalData = additionalData;
-                params.signature.signature = signature;
-            }
+            params.signature = parseV4Signature(v4signatureBytes);
             int res = mService.makeFile(mId, path, params);
             if (res != 0) {
                 throw new IOException("makeFile() failed with errno " + -res);
@@ -196,6 +193,7 @@ public final class IncrementalStorage {
             e.rethrowFromSystemServer();
         }
     }
+
 
     /**
      * Creates a file in Incremental storage. The content of the file is mapped from a range inside
@@ -349,6 +347,37 @@ public final class IncrementalStorage {
         }
     }
 
+    /**
+     * Returns the metadata object of an IncFs File.
+     *
+     * @param id The file id.
+     * @return Byte array that contains metadata bytes.
+     */
+    @Nullable
+    public byte[] getFileMetadata(@NonNull UUID id) {
+        try {
+            final byte[] rawId = idToBytes(id);
+            return mService.getMetadataById(mId, rawId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    /**
+     * Informs the data loader service associated with the current storage to start data loader
+     *
+     * @return True if data loader is successfully started.
+     */
+    public boolean startLoading() {
+        try {
+            return mService.startLoading(mId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
     private static final int UUID_BYTE_SIZE = 16;
 
     /**
@@ -386,35 +415,44 @@ public final class IncrementalStorage {
         return new UUID(msb, lsb);
     }
 
-    /**
-     * Returns the metadata object of an IncFs File.
-     *
-     * @param id The file id.
-     * @return Byte array that contains metadata bytes.
-     */
-    @Nullable
-    public byte[] getFileMetadata(@NonNull UUID id) {
-        try {
-            final byte[] rawId = idToBytes(id);
-            return mService.getMetadataById(mId, rawId);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
-        }
-    }
+    private static final int INCFS_HASH_SHA256 = 1;
+    private static final int INCFS_MAX_HASH_SIZE = 32; // SHA256
+    private static final int INCFS_MAX_ADD_DATA_SIZE = 128;
 
     /**
-     * Informs the data loader service associated with the current storage to start data loader
-     *
-     * @return True if data loader is successfully started.
+     * Deserialize and validate v4 signature bytes.
      */
-    public boolean startLoading() {
-        try {
-            return mService.startLoading(mId);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
+    private static IncrementalSignature parseV4Signature(@Nullable byte[] v4signatureBytes)
+            throws IOException {
+        if (v4signatureBytes == null) {
+            return null;
         }
+
+        final V4Signature signature;
+        try (DataInputStream input = new DataInputStream(
+                new ByteArrayInputStream(v4signatureBytes))) {
+            signature = V4Signature.readFrom(input);
+        }
+
+        final byte[] rootHash = signature.verityRootHash;
+        final byte[] additionalData = signature.v3Digest;
+        final byte[] pkcs7Signature = signature.pkcs7SignatureBlock;
+
+        if (rootHash.length != INCFS_MAX_HASH_SIZE) {
+            throw new IOException("rootHash has to be " + INCFS_MAX_HASH_SIZE + " bytes");
+        }
+        if (additionalData.length > INCFS_MAX_ADD_DATA_SIZE) {
+            throw new IOException(
+                    "additionalData has to be at most " + INCFS_MAX_ADD_DATA_SIZE + " bytes");
+        }
+
+        IncrementalSignature result = new IncrementalSignature();
+        result.hashAlgorithm = INCFS_HASH_SHA256;
+        result.rootHash = rootHash;
+        result.additionalData = additionalData;
+        result.signature = pkcs7Signature;
+
+        return result;
     }
 
     /**

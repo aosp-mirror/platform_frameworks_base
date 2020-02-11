@@ -187,6 +187,7 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -309,6 +310,8 @@ public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowManagerService" : TAG_WM;
 
+    private static final String WM_USE_BLAST_ADAPTER_FLAG = "wm_use_blast_adapter";
+
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
@@ -412,6 +415,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
+
+    final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
     // TODO: eventually unify all keyguard state in a common place instead of having it spread over
@@ -622,6 +627,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // The root of the device window hierarchy.
     RootWindowContainer mRoot;
+
+    // Whether the system should use BLAST for ViewRootImpl
+    final boolean mUseBLAST;
 
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
@@ -1137,6 +1145,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
+        mUseBLAST = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
+                    WM_USE_BLAST_ADAPTER_FLAG, false);
+
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
 
@@ -1255,6 +1267,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         mEmbeddedWindowController = new EmbeddedWindowController(mGlobalLock);
+
+        mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
+                mContext.getResources());
+
         setGlobalShadowSettings();
     }
 
@@ -5051,6 +5067,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public boolean useBLAST() {
+        return mUseBLAST;
+    }
+
+    @Override
     public void getInitialDisplaySize(int displayId, Point size) {
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
@@ -8021,7 +8042,11 @@ public class WindowManagerService extends IWindowManager.Stub
             int displayId, Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper displayCutout) {
         synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                throw new WindowManager.InvalidDisplayException("Display#" + displayId
+                        + "could not be found!");
+            }
             final WindowToken windowToken = dc.getWindowToken(attrs.token);
             final ActivityRecord activity;
             if (windowToken != null && windowToken.asActivityRecord() != null) {

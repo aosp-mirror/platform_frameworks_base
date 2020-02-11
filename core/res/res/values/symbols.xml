@@ -1213,6 +1213,8 @@
   <java-symbol type="string" name="device_ownership_relinquished" />
   <java-symbol type="string" name="network_logging_notification_title" />
   <java-symbol type="string" name="network_logging_notification_text" />
+  <java-symbol type="string" name="location_changed_notification_title" />
+  <java-symbol type="string" name="location_changed_notification_text" />
   <java-symbol type="string" name="personal_apps_suspended_notification_title" />
   <java-symbol type="string" name="personal_apps_suspended_notification_text" />
   <java-symbol type="string" name="factory_reset_warning" />
@@ -3037,7 +3039,7 @@
   <java-symbol type="bool" name="config_pinnerCameraApp" />
   <java-symbol type="bool" name="config_pinnerHomeApp" />
   <java-symbol type="bool" name="config_pinnerAssistantApp" />
-  <java-symbol type="array" name="config_apexBootImagePinnerServiceFiles" />
+  <java-symbol type="array" name="config_jitzygoteBootImagePinnerServiceFiles" />
 
   <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
 
@@ -3863,6 +3865,8 @@
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
   <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />
+
+  <java-symbol type="string" name="config_deviceSpecificDisplayAreaPolicyProvider" />
 
   <!-- Whether to expand the lock screen user switcher by default -->
   <java-symbol type="bool" name="config_expandLockScreenUserSwitcher" />

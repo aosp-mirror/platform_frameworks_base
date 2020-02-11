@@ -8951,7 +8951,8 @@ public class DevicePolicyManager {
      *
      * <strong>Note: Starting from Android R, apps should no longer call this method with the
      * setting {@link android.provider.Settings.Secure#LOCATION_MODE}, which is deprecated. Instead,
-     * device owners should call {@link #setLocationEnabled(ComponentName, boolean)}.
+     * device owners should call {@link #setLocationEnabled(ComponentName, boolean)}. This will be
+     * enforced for all apps targeting Android R or above.
      * </strong>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -8961,6 +8962,7 @@ public class DevicePolicyManager {
      */
     public void setSecureSetting(@NonNull ComponentName admin, String setting, String value) {
         throwIfParentInstance("setSecureSetting");
+
         if (mService != null) {
             try {
                 mService.setSecureSetting(admin, setting, value);
@@ -9461,16 +9463,6 @@ public class DevicePolicyManager {
      * application built with a {@code targetSdkVersion} &lt;
      * {@link android.os.Build.VERSION_CODES#M} the app-op matching the permission is set to
      * {@link android.app.AppOpsManager#MODE_IGNORED}, but the permission stays granted.
-     *
-     * NOTE: Starting from Android R, location-related permissions cannot be granted by the
-     * admin: Calling this method with {@link #PERMISSION_GRANT_STATE_GRANTED} for any of the
-     * following permissions will return false:
-     *
-     * <ul>
-     * <li>{@code ACCESS_FINE_LOCATION}</li>
-     * <li>{@code ACCESS_BACKGROUND_LOCATION}</li>
-     * <li>{@code ACCESS_COARSE_LOCATION}</li>
-     * </ul>
      *
      * @param admin Which profile or device owner this request is associated with.
      * @param packageName The application to grant or revoke a permission to.

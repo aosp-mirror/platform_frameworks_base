@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"कार्य प्रोफाइल चालू ठेवायची?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"तुमची कार्य अ‍ॅप्स, सूचना, डेटा आणि अन्य कार्य प्रोफाइल वैशिष्ट्ये चालू केली जातील"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"चालू करा"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"ॲप उपलब्ध नाही"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता उपलब्ध नाही."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"हे अ‍ॅप Android च्या जुन्या आवृत्ती साठी तयार करण्यात आले होते आणि योग्यरितीने कार्य करू शकणार नाही. अपडेट आहेत का ते तपासून पाहा, किंवा डेव्हलपरशी संपर्क साधण्याचा प्रयत्न करा."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेट आहे का ते तपासा"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपल्याकडे नवीन मेसेज आहेत"</string>

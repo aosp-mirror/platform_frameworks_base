@@ -43,6 +43,7 @@ import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -2287,12 +2288,14 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean addGnssMeasurementsListener(IGnssMeasurementsListener listener,
-            String packageName, String featureId, String listenerIdentifier) {
+    public boolean addGnssMeasurementsListener(@Nullable GnssRequest request,
+            IGnssMeasurementsListener listener,
+            String packageName, String featureId,
+            String listenerIdentifier) {
         Objects.requireNonNull(listenerIdentifier);
 
         return mGnssManagerService != null && mGnssManagerService.addGnssMeasurementsListener(
-                listener, packageName, featureId, listenerIdentifier);
+                request, listener, packageName, featureId, listenerIdentifier);
     }
 
     @Override
@@ -2416,6 +2419,17 @@ public class LocationManagerService extends ILocationManager.Stub {
             return mExtraLocationControllerPackageEnabled
                     && (mExtraLocationControllerPackage != null);
         }
+    }
+
+    @Override
+    public void setLocationEnabledForUser(boolean enabled, int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
+                    null);
+        }
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS,
+                "Requires WRITE_SECURE_SETTINGS permission");
+        mSettingsHelper.setLocationEnabled(enabled, userId);
     }
 
     @Override

@@ -18,6 +18,9 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
+import android.content.res.Resources;
+import android.text.TextUtils;
+
 import com.android.server.wm.DisplayContent.TaskContainers;
 
 /**
@@ -42,7 +45,18 @@ public abstract class DisplayAreaPolicy {
      */
     protected final TaskContainers mTaskContainers;
 
-    DisplayAreaPolicy(WindowManagerService wmService,
+    /**
+     * Construct a new {@link DisplayAreaPolicy}
+     *
+     * @param wmService the window manager service instance
+     * @param content the display content for which the policy applies
+     * @param root the root display area under which the policy operates
+     * @param imeContainer the ime container that the policy must attach
+     * @param taskContainers the task container that the policy must attach
+     *
+     * @see #attachDisplayAreas()
+     */
+    protected DisplayAreaPolicy(WindowManagerService wmService,
             DisplayContent content, DisplayArea.Root root,
             DisplayArea<? extends WindowContainer> imeContainer, TaskContainers taskContainers) {
         mWmService = wmService;
@@ -117,6 +131,56 @@ public abstract class DisplayAreaPolicy {
                     break;
                 default:
                     throw new IllegalArgumentException("don't know how to sort " + token);
+            }
+        }
+
+        /** Provider for {@link DisplayAreaPolicy.Default platform-default display area policy}. */
+        static class Provider implements DisplayAreaPolicy.Provider {
+            @Override
+            public DisplayAreaPolicy instantiate(WindowManagerService wmService,
+                    DisplayContent content, DisplayArea.Root root,
+                    DisplayArea<? extends WindowContainer> imeContainer,
+                    TaskContainers taskContainers) {
+                return new DisplayAreaPolicy.Default(wmService, content, root, imeContainer,
+                        taskContainers);
+            }
+        }
+    }
+
+    /**
+     * Provider for {@link DisplayAreaPolicy} instances.
+     *
+     * By implementing this interface and overriding the
+     * {@code config_deviceSpecificDisplayAreaPolicyProvider}, a device-specific implementations
+     * of {@link DisplayAreaPolicy} can be supplied.
+     */
+    public interface Provider {
+        /**
+         * Instantiate a new DisplayAreaPolicy.
+         *
+         * @see DisplayAreaPolicy#DisplayAreaPolicy
+         */
+        DisplayAreaPolicy instantiate(WindowManagerService wmService,
+                DisplayContent content, DisplayArea.Root root,
+                DisplayArea<? extends WindowContainer> imeContainer,
+                TaskContainers taskContainers);
+
+        /**
+         * Instantiate the device-specific {@link Provider}.
+         */
+        static Provider fromResources(Resources res) {
+            String name = res.getString(
+                    com.android.internal.R.string.config_deviceSpecificDisplayAreaPolicyProvider);
+            if (TextUtils.isEmpty(name)) {
+                return new DisplayAreaPolicy.Default.Provider();
+            }
+            try {
+                return (Provider) Class.forName(name).newInstance();
+            } catch (ReflectiveOperationException | ClassCastException e) {
+                throw new IllegalStateException("Couldn't instantiate class " + name
+                        + " for config_deviceSpecificDisplayAreaPolicyProvider:"
+                        + " make sure it has a public zero-argument constructor"
+                        + " and implements DisplayAreaPolicy.Provider", e);
             }
         }
     }

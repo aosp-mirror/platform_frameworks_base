@@ -321,8 +321,7 @@ public class MemoryUsageTest extends InstrumentationTestCase {
                 }
 
                 mAtm.startActivityAndWait(null,
-                        getInstrumentation().getContext().getBasePackageName(),
-                        getInstrumentation().getContext().getFeatureId(), mLaunchIntent,
+                        getInstrumentation().getContext().getBasePackageName(), mLaunchIntent,
                         mimeType, null, null, 0, mLaunchIntent.getFlags(), null, null,
                         UserHandle.USER_CURRENT_OR_SELF);
             } catch (RemoteException e) {

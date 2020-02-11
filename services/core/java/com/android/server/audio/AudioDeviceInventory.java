@@ -702,6 +702,10 @@ public class AudioDeviceInventory {
                 delay = 0;
             }
             mDeviceBroker.postSetHearingAidConnectionState(state, device, delay);
+            if (state == BluetoothHearingAid.STATE_CONNECTED) {
+                mDeviceBroker.setForceUse_Async(AudioSystem.FOR_MEDIA, AudioSystem.FORCE_NONE,
+                                "HEARING_AID set to CONNECTED");
+            }
             return delay;
         }
     }

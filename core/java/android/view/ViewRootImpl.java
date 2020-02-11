@@ -315,6 +315,8 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean mForceNextConfigUpdate;
 
+    private final boolean mUseBLASTAdapter;
+
     /**
      * Signals that compatibility booleans have been initialized according to
      * target SDK versions.
@@ -734,6 +736,7 @@ public final class ViewRootImpl implements ViewParent,
 
         loadSystemProperties();
         mImeFocusController = new ImeFocusController(this);
+        mUseBLASTAdapter = WindowManagerGlobal.getInstance().useBLAST();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -861,7 +864,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (mWindowAttributes.packageName == null) {
                     mWindowAttributes.packageName = mBasePackageName;
                 }
-                if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
+                if (mUseBLASTAdapter) {
                     mWindowAttributes.privateFlags |=
                         WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
                 }
@@ -1341,7 +1344,7 @@ public final class ViewRootImpl implements ViewParent,
             }
             mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
-            if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
+            if (mUseBLASTAdapter) {
                 mWindowAttributes.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
             }
@@ -7342,7 +7345,7 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingMergedConfiguration, mSurfaceControl, mTempInsets, mSurfaceSize,
                 mBlastSurfaceControl);
         if (mSurfaceControl.isValid()) {
-            if (!WindowManagerGlobal.USE_BLAST_ADAPTER) {
+            if (!mUseBLASTAdapter) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
                 mSurface.transferFrom(getOrCreateBLASTSurface(mSurfaceSize.x,
@@ -9537,7 +9540,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     SurfaceControl getRenderSurfaceControl() {
-        if (WindowManagerGlobal.USE_BLAST_ADAPTER) {
+        if (mUseBLASTAdapter) {
             return mBlastSurfaceControl;
         } else {
             return mSurfaceControl;

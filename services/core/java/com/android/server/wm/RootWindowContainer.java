@@ -3323,6 +3323,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @return {@code true} if the top activity looks like it belongs to {@param userId}.
      */
     private void taskTopActivityIsUser(Task task, @UserIdInt int userId) {
+        // TODO(b/80414790): having utilities to loop for all leaf tasks from caller vs. checking
+        //  leaf tasks here.
+        if (!task.isLeafTask()) {
+            // No op if not a leaf task since we don't want to report root tasks to
+            // TaskStackListeners.
+            return;
+        }
+
         // To handle the case that work app is in the task but just is not the top one.
         final ActivityRecord activityRecord = task.getTopNonFinishingActivity();
         final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);

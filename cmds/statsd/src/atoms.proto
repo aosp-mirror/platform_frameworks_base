@@ -127,7 +127,7 @@ message Atom {
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported =
-                47 [(allow_from_any_uid) = true, (module) = "framework"];
+                47 [(allow_from_any_uid) = true, (module) = "statsd"];
         AppStartOccurred app_start_occurred = 48 [(module) = "framework"];
         AppStartCanceled app_start_canceled = 49 [(module) = "framework"];
         AppStartFullyDrawn app_start_fully_drawn = 50 [(module) = "framework"];
@@ -188,7 +188,7 @@ message Atom {
         ServiceStateChanged service_state_changed = 99 [(module) = "framework"];
         ServiceLaunchReported service_launch_reported = 100 [(module) = "framework"];
         FlagFlipUpdateOccurred flag_flip_update_occurred = 101 [(module) = "framework"];
-        BinaryPushStateChanged binary_push_state_changed = 102 [(module) = "framework"];
+        BinaryPushStateChanged binary_push_state_changed = 102 [(module) = "statsd"];
         DevicePolicyEvent device_policy_event = 103 [(module) = "framework"];
         DocsUIFileOperationCanceledReported docs_ui_file_op_canceled = 104 [(module) = "docsui"];
         DocsUIFileOperationCopyMoveModeReported docs_ui_file_op_copy_move_mode_reported =
@@ -391,6 +391,7 @@ message Atom {
         WifiHealthStatReported wifi_health_stat_reported = 251 [(module) = "wifi"];
         WifiFailureStatReported wifi_failure_stat_reported = 252 [(module) = "wifi"];
         WifiConnectionResultReported wifi_connection_result_reported = 253 [(module) = "wifi"];
+        AppFreezeChanged app_freeze_changed = 254 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -7518,6 +7519,9 @@ message GrantPermissionsActivityButtonActions {
 
     // Button clicked by user - same as bit flags in buttons_presented with only single bit set
     optional int32 button_clicked = 5;
+
+    // id which identifies single session of user interacting with permission controller
+    optional int64 session_id = 6;
 }
 
 /**
@@ -8365,4 +8369,29 @@ message SdkExtensionStatus {
     // A number identifying which particular symbol's call failed, if any. 0 means no missing symbol.
     // "Failed" here can mean a symbol that wasn't meant to be visible was, or the other way around.
     optional int32 failed_call_symbol = 3;
+}
+
+/**
+ * Logs when an app is frozen or unfrozen.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/CachedAppOptimizer.java
+ */
+message AppFreezeChanged {
+  // The type of event.
+  enum Action {
+    UNKNOWN = 0;
+    FREEZE_APP = 1;
+    UNFREEZE_APP = 2;
+  }
+  optional Action action = 1;
+
+  // Pid of the process being frozen.
+  optional int32 pid = 2;
+
+  // Name of the process being frozen.
+  optional string process_name = 3;
+
+  // Time since last unfrozen.
+  optional int64 time_unfrozen_millis = 4;
 }

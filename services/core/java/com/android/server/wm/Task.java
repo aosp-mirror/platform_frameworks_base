@@ -99,6 +99,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
+import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -183,7 +184,6 @@ class Task extends WindowContainer<WindowContainer> {
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
-    private static final String ATTR_CALLING_FEATURE_ID = "calling_feature_id";
     private static final String ATTR_SUPPORTS_PICTURE_IN_PICTURE = "supports_picture_in_picture";
     private static final String ATTR_RESIZE_MODE = "resize_mode";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
@@ -297,7 +297,6 @@ class Task extends WindowContainer<WindowContainer> {
     // For relaunching the task from recents as though it was launched by the original launcher.
     int mCallingUid;
     String mCallingPackage;
-    String mCallingFeatureId;
 
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
@@ -463,6 +462,11 @@ class Task extends WindowContainer<WindowContainer> {
      */
     ITaskOrganizer mTaskOrganizer;
 
+    /**
+     * Last Picture-in-Picture params applicable to the task. Updated when the app
+     * enters Picture-in-Picture or when setPictureInPictureParams is called.
+     */
+    PictureInPictureParams mPictureInPictureParams = new PictureInPictureParams.Builder().build();
 
     /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
@@ -479,8 +483,8 @@ class Task extends WindowContainer<WindowContainer> {
                 true /*neverRelinquishIdentity*/,
                 _taskDescription != null ? _taskDescription : new TaskDescription(),
                 _taskId, INVALID_TASK_ID, INVALID_TASK_ID, 0 /*taskAffiliationColor*/,
-                info.applicationInfo.uid, info.packageName, null /* default featureId */,
-                info.resizeMode, info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
+                info.applicationInfo.uid, info.packageName, info.resizeMode,
+                info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
                 false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
                 _voiceSession, _voiceInteractor, stack);
     }
@@ -502,17 +506,18 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /** Don't use constructor directly. This is only used by XML parser. */
-    Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent, Intent _affinityIntent,
-            String _affinity, String _rootAffinity, ComponentName _realActivity,
-            ComponentName _origActivity, boolean _rootWasReset, boolean _autoRemoveRecents,
-            boolean _askedCompatMode, int _userId, int _effectiveUid, String _lastDescription,
+    Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
+            Intent _affinityIntent, String _affinity, String _rootAffinity,
+            ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
+            boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
+            int _effectiveUid, String _lastDescription,
             long lastTimeMoved, boolean neverRelinquishIdentity,
             TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            @Nullable String callingFeatureId, int resizeMode, boolean supportsPictureInPicture,
-            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
-            ActivityInfo info, IVoiceInteractionSession _voiceSession,
-            IVoiceInteractor _voiceInteractor, ActivityStack stack) {
+            int resizeMode, boolean supportsPictureInPicture, boolean _realActivitySuspended,
+            boolean userSetupComplete, int minWidth, int minHeight, ActivityInfo info,
+            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
+            ActivityStack stack) {
         super(atmService.mWindowManager);
 
         EventLogTags.writeWmTaskCreated(_taskId, stack != null ? getRootTaskId() : INVALID_TASK_ID);
@@ -551,7 +556,6 @@ class Task extends WindowContainer<WindowContainer> {
         mNextAffiliateTaskId = nextTaskId;
         mCallingUid = callingUid;
         mCallingPackage = callingPackage;
-        mCallingFeatureId = callingFeatureId;
         mResizeMode = resizeMode;
         if (info != null) {
             setIntent(_intent, info);
@@ -898,7 +902,6 @@ class Task extends WindowContainer<WindowContainer> {
     void setIntent(ActivityRecord r) {
         mCallingUid = r.launchedFromUid;
         mCallingPackage = r.launchedFromPackage;
-        mCallingFeatureId = r.launchedFromFeatureId;
         setIntent(r.intent, r.info);
         setLockTaskAuth(r);
 
@@ -1354,7 +1357,6 @@ class Task extends WindowContainer<WindowContainer> {
             isPersistable = r.isPersistable();
             mCallingUid = r.launchedFromUid;
             mCallingPackage = r.launchedFromPackage;
-            mCallingFeatureId = r.launchedFromFeatureId;
             // Clamp to [1, max].
             maxRecents = Math.min(Math.max(r.info.maxRecents, 1),
                     ActivityTaskManager.getMaxAppRecentsLimitStatic());
@@ -1431,18 +1433,27 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
-     * @return whether or not there are ONLY task overlay activities in the stack.
+     * @return whether or not there are ONLY task overlay activities in the task.
      *         If {@param includeFinishing} is set, then don't ignore finishing activities in the
      *         check. If there are no task overlay activities, this call returns false.
      */
     boolean onlyHasTaskOverlayActivities(boolean includeFinishing) {
-        if (getChildCount() == 0) {
-            return false;
+        int count = 0;
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = getChildAt(i).asActivityRecord();
+            if (r == null) {
+                // Has a child that is other than Activity.
+                return false;
+            }
+            if (!includeFinishing && r.finishing) {
+                continue;
+            }
+            if (!r.isTaskOverlay()) {
+                return false;
+            }
+            count++;
         }
-        if (includeFinishing) {
-            return getActivity((r) -> r.isTaskOverlay()) != null;
-        }
-        return getActivity((r) -> !r.finishing && r.isTaskOverlay()) != null;
+        return count > 0;
     }
 
     private boolean autoRemoveFromRecents() {
@@ -2369,6 +2380,15 @@ class Task extends WindowContainer<WindowContainer> {
         return getRootTask() == this;
     }
 
+    boolean isLeafTask() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).asTask() != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     int getDescendantTaskCount() {
         final int[] currentCount = {0};
         final PooledConsumer c = PooledLambda.obtainConsumer((t, count) -> { count[0]++; },
@@ -3203,6 +3223,12 @@ class Task extends WindowContainer<WindowContainer> {
         //                    order changes.
         final Task top = getTopMostTask();
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
+
+        if (mPictureInPictureParams.empty()) {
+            info.pictureInPictureParams = null;
+        } else {
+            info.pictureInPictureParams = mPictureInPictureParams;
+        }
     }
 
     /**
@@ -3235,7 +3261,6 @@ class Task extends WindowContainer<WindowContainer> {
         pw.print(" mCallingUid="); UserHandle.formatUid(pw, mCallingUid);
         pw.print(" mUserSetupComplete="); pw.print(mUserSetupComplete);
         pw.print(" mCallingPackage="); pw.println(mCallingPackage);
-        pw.print(" mCallingFeatureId="); pw.println(mCallingFeatureId);
         if (affinity != null || rootAffinity != null) {
             pw.print(prefix); pw.print("affinity="); pw.print(affinity);
             if (affinity == null || !affinity.equals(rootAffinity)) {
@@ -3445,8 +3470,6 @@ class Task extends WindowContainer<WindowContainer> {
         out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
         out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
-        out.attribute(null, ATTR_CALLING_FEATURE_ID,
-                mCallingFeatureId == null ? "" : mCallingFeatureId);
         out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
         out.attribute(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE,
                 String.valueOf(mSupportsPictureInPicture));
@@ -3560,17 +3583,16 @@ class Task extends WindowContainer<WindowContainer> {
                 long lastTimeMoved, boolean neverRelinquishIdentity,
                 TaskDescription lastTaskDescription, int taskAffiliation, int prevTaskId,
                 int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-                @Nullable String callingFeatureId, int resizeMode,
-                boolean supportsPictureInPicture, boolean realActivitySuspended,
+                int resizeMode, boolean supportsPictureInPicture, boolean realActivitySuspended,
                 boolean userSetupComplete, int minWidth, int minHeight, ActivityStack stack) {
             return new ActivityStack(service, taskId, intent, affinityIntent, affinity,
                     rootAffinity, realActivity, origActivity, rootWasReset, autoRemoveRecents,
                     askedCompatMode, userId, effectiveUid, lastDescription,
                     lastTimeMoved, neverRelinquishIdentity, lastTaskDescription, taskAffiliation,
                     prevTaskId, nextTaskId, taskAffiliationColor, callingUid, callingPackage,
-                    callingFeatureId, resizeMode, supportsPictureInPicture, realActivitySuspended,
-                    userSetupComplete, minWidth, minHeight, null /*ActivityInfo*/,
-                    null /*_voiceSession*/, null /*_voiceInteractor*/, stack);
+                    resizeMode, supportsPictureInPicture, realActivitySuspended, userSetupComplete,
+                    minWidth, minHeight, null /*ActivityInfo*/, null /*_voiceSession*/,
+                    null /*_voiceInteractor*/, stack);
         }
 
         Task restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
@@ -3603,7 +3625,6 @@ class Task extends WindowContainer<WindowContainer> {
             int nextTaskId = INVALID_TASK_ID;
             int callingUid = -1;
             String callingPackage = "";
-            String callingFeatureId = null;
             int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
             boolean supportsPictureInPicture = false;
             Rect lastNonFullscreenBounds = null;
@@ -3683,9 +3704,6 @@ class Task extends WindowContainer<WindowContainer> {
                         break;
                     case ATTR_CALLING_PACKAGE:
                         callingPackage = attrValue;
-                        break;
-                    case ATTR_CALLING_FEATURE_ID:
-                        callingFeatureId = attrValue;
                         break;
                     case ATTR_RESIZE_MODE:
                         resizeMode = Integer.parseInt(attrValue);
@@ -3788,8 +3806,8 @@ class Task extends WindowContainer<WindowContainer> {
                     autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
                     lastTimeOnTop, neverRelinquishIdentity, taskDescription,
                     taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
-                    callingPackage, callingFeatureId, resizeMode, supportsPictureInPicture,
-                    realActivitySuspended, userSetupComplete, minWidth, minHeight, null /*stack*/);
+                    callingPackage, resizeMode, supportsPictureInPicture, realActivitySuspended,
+                    userSetupComplete, minWidth, minHeight, null /*stack*/);
             task.mLastNonFullscreenBounds = lastNonFullscreenBounds;
             task.setBounds(lastNonFullscreenBounds);
 
@@ -3940,5 +3958,11 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void onWindowFocusChanged(boolean hasFocus) {
         updateShadowsRadius(hasFocus, getPendingTransaction());
+    }
+
+    void setPictureInPictureParams(PictureInPictureParams p) {
+        mPictureInPictureParams.copyOnlySet(p);
+        mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(
+                this, true /* force */);
     }
 }

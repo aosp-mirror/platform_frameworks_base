@@ -2056,6 +2056,9 @@
         <attr name="name" />
     </declare-styleable>
     <declare-styleable name="AndroidManifestQueriesIntent" parent="AndroidManifestQueries" />
+    <declare-styleable name="AndroidManifestQueriesProvider" parent="AndroidManifestQueries" >
+        <attr name="authorities" />
+    </declare-styleable>
 
 
     <!-- The <code>static-library</code> tag declares that this apk is providing itself

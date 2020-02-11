@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.app.test.TestAlarmManager;
 import android.content.Context;
+import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApInfo;
 import android.net.wifi.WifiConfiguration;
@@ -65,8 +66,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -121,7 +120,8 @@ public class WifiCondManagerTest {
     private static final String TEST_QUOTED_SSID_2 = "\"testSsid2\"";
     private static final int[] TEST_FREQUENCIES_1 = {};
     private static final int[] TEST_FREQUENCIES_2 = {2500, 5124};
-    private static final byte[] TEST_RAW_MAC_BYTES = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+    private static final MacAddress TEST_RAW_MAC_BYTES = MacAddress.fromBytes(
+            new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05});
 
     private static final List<byte[]> SCAN_HIDDEN_NETWORK_SSID_LIST =
             new ArrayList<byte[]>() {{
@@ -742,40 +742,8 @@ public class WifiCondManagerTest {
         verify(deathHandler).run();
 
         // The handles should be cleared after death.
-        assertEquals(0, mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ).size());
+        assertEquals(0, mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ).length);
         verify(mWificond, never()).getAvailable5gNonDFSChannels();
-    }
-
-    /**
-     * Verify primitive array to list translation of channel API.
-     */
-    @Test
-    public void testGetChannels() throws Exception {
-        int[] resultsEmpty = new int[0];
-        int[] resultsSingle = new int[]{100};
-        int[] resultsMore = new int[]{100, 200};
-
-        List<Integer> emptyList = Collections.emptyList();
-        List<Integer> singleList = Arrays.asList(100);
-        List<Integer> moreList = Arrays.asList(100, 200);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(null);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                emptyList);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_5_GHZ),
-                emptyList);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(resultsEmpty);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                emptyList);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(resultsSingle);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                singleList);
-
-        when(mWificond.getAvailable2gChannels()).thenReturn(resultsMore);
-        assertEquals(mWificondControl.getChannelsMhzForBand(WifiScanner.WIFI_BAND_24_GHZ),
-                moreList);
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -37,20 +38,29 @@ public class LocationManagerServiceUtils {
     /**
      * Listener that can be linked to a binder.
      * @param <TListener> listener type
+     * @param <TRequest> request type
      */
-    public static class LinkedListener<TListener> extends
+    public static class LinkedListener<TRequest, TListener> extends
             LinkedListenerBase {
+        @Nullable protected final TRequest mRequest;
         private final TListener mListener;
         private final Consumer<TListener> mBinderDeathCallback;
 
         public LinkedListener(
+                @Nullable TRequest request,
                 @NonNull TListener listener,
                 String listenerName,
                 @NonNull CallerIdentity callerIdentity,
                 @NonNull Consumer<TListener> binderDeathCallback) {
             super(callerIdentity, listenerName);
             mListener = listener;
+            mRequest = request;
             mBinderDeathCallback = binderDeathCallback;
+        }
+
+        @Nullable
+        public TRequest getRequest() {
+            return mRequest;
         }
 
         @Override

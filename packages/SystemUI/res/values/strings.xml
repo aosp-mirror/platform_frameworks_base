@@ -1829,23 +1829,23 @@
     <!-- Notification: Conversation: control panel, label for button that demotes notification from conversation to normal notification -->
     <string name="demote">Mark this notification as not a conversation</string>
 
-    <!-- [CHAR LIMIT=100] Mark this conversation as a favorite -->
-    <string name="notification_conversation_favorite">Mark as important</string>
+    <!-- [CHAR LIMIT=100] This conversation is marked as important -->
+    <string name="notification_conversation_favorite">Important conversation</string>
 
-    <!-- [CHAR LIMIT=100] Unmark this conversation as a favorite -->
-    <string name="notification_conversation_unfavorite">Mark as unimportant</string>
+    <!-- [CHAR LIMIT=100] This conversation is not marked as important -->
+    <string name="notification_conversation_unfavorite">Not an important conversation</string>
 
-    <!-- [CHAR LIMIT=100] Mute this conversation -->
-    <string name="notification_conversation_mute">Silence</string>
+    <!-- [CHAR LIMIT=100] This conversation is silenced (will not make sound or vibrate)-->
+    <string name="notification_conversation_mute">Silenced</string>
 
-    <!-- [CHAR LIMIT=100] Umute this conversation -->
+    <!-- [CHAR LIMIT=100] This conversation is alerting (may make sound and/or vibrate)-->
     <string name="notification_conversation_unmute">Alerting</string>
 
     <!-- [CHAR LIMIT=100] Show notification as bubble -->
-    <string name="notification_conversation_bubble">Show as bubble</string>
+    <string name="notification_conversation_bubble">Show bubble</string>
 
     <!-- [CHAR LIMIT=100] Turn off bubbles for notification -->
-    <string name="notification_conversation_unbubble">Turn off bubbles</string>
+    <string name="notification_conversation_unbubble">Remove bubbles</string>
 
     <!-- [CHAR LIMIT=100] Add this conversation to home screen -->
     <string name="notification_conversation_home_screen">Add to home screen</string>
@@ -1860,7 +1860,10 @@
     <string name="notification_menu_snooze_description">notification snooze options</string>
 
     <!-- Notification: Menu row: Label for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
-    <string name="notification_menu_snooze_action">Snooze</string>
+    <string name="notification_menu_snooze_action">Remind me</string>
+
+    <!-- Notification: Menu row: Label for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
+    <string name="notification_menu_settings_action">Settings</string>
 
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">UNDO</string>
@@ -2028,6 +2031,9 @@
 
     <!-- Label for feature switch [CHAR LIMIT=30] -->
     <string name="switch_bar_off">Off</string>
+
+    <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
+    <string name="tile_unavailable">Unavailable</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>
@@ -2583,6 +2589,4 @@
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_subtitle">Choose controls for quick access</string>
-
-
 </resources>

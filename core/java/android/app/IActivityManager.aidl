@@ -104,36 +104,23 @@ interface IActivityManager {
     // Special low-level communication with activity manager.
     void handleApplicationCrash(in IBinder app,
             in ApplicationErrorReport.ParcelableCrashInfo crashInfo);
-    /** @deprecated Use {@link #startActivityWithFeature} instead */
-    @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link android.content.Context#startActivity(android.content.Intent)} instead")
+    @UnsupportedAppUsage
     int startActivity(in IApplicationThread caller, in String callingPackage, in Intent intent,
             in String resolvedType, in IBinder resultTo, in String resultWho, int requestCode,
             int flags, in ProfilerInfo profilerInfo, in Bundle options);
-    int startActivityWithFeature(in IApplicationThread caller, in String callingPackage,
-            in String callingFeatureId, in Intent intent, in String resolvedType,
-            in IBinder resultTo, in String resultWho, int requestCode, int flags,
-            in ProfilerInfo profilerInfo, in Bundle options);
     @UnsupportedAppUsage
     void unhandledBack();
     @UnsupportedAppUsage
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
-    @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter)} instead")
+    @UnsupportedAppUsage
     Intent registerReceiver(in IApplicationThread caller, in String callerPackage,
             in IIntentReceiver receiver, in IntentFilter filter,
             in String requiredPermission, int userId, int flags);
-    Intent registerReceiverWithFeature(in IApplicationThread caller, in String callerPackage,
-            in String callingFeatureId, in IIntentReceiver receiver, in IntentFilter filter,
-            in String requiredPermission, int userId, int flags);
     @UnsupportedAppUsage
     void unregisterReceiver(in IIntentReceiver receiver);
-    /** @deprecated Use {@link #broadcastIntentWithFeature} instead */
-    @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link android.content.Context#sendBroadcast(android.content.Intent)} instead")
+    @UnsupportedAppUsage
     int broadcastIntent(in IApplicationThread caller, in Intent intent,
             in String resolvedType, in IIntentReceiver resultTo, int resultCode,
-            in String resultData, in Bundle map, in String[] requiredPermissions,
-            int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
-    int broadcastIntentWithFeature(in IApplicationThread caller, in String callingFeatureId,
-            in Intent intent, in String resolvedType, in IIntentReceiver resultTo, int resultCode,
             in String resultData, in Bundle map, in String[] requiredPermissions,
             int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
     void unbroadcastIntent(in IApplicationThread caller, in Intent intent, int userId);
@@ -158,8 +145,7 @@ interface IActivityManager {
     boolean refContentProvider(in IBinder connection, int stableDelta, int unstableDelta);
     PendingIntent getRunningServiceControlPanel(in ComponentName service);
     ComponentName startService(in IApplicationThread caller, in Intent service,
-            in String resolvedType, boolean requireForeground, in String callingPackage,
-            in String callingFeatureId, int userId);
+            in String resolvedType, boolean requireForeground, in String callingPackage, int userId);
     @UnsupportedAppUsage
     int stopService(in IApplicationThread caller, in Intent service,
             in String resolvedType, int userId);
@@ -240,14 +226,10 @@ interface IActivityManager {
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
     @UnsupportedAppUsage
     oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res);
-    /** @deprecated  Use {@link #getIntentSenderWithFeature} instead */
-    @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@link PendingIntent#getIntentSender()} instead")
+    @UnsupportedAppUsage
     IIntentSender getIntentSender(int type, in String packageName, in IBinder token,
             in String resultWho, int requestCode, in Intent[] intents, in String[] resolvedTypes,
             int flags, in Bundle options, int userId);
-    IIntentSender getIntentSenderWithFeature(int type, in String packageName, in String featureId,
-            in IBinder token, in String resultWho, int requestCode, in Intent[] intents,
-            in String[] resolvedTypes, int flags, in Bundle options, int userId);
     void cancelIntentSender(in IIntentSender sender);
     String getPackageForIntentSender(in IIntentSender sender);
     void registerIntentSenderCancelListener(in IIntentSender sender, in IResultReceiver receiver);
@@ -373,16 +355,11 @@ interface IActivityManager {
     boolean isIntentSenderAnActivity(in IIntentSender sender);
     boolean isIntentSenderAForegroundService(in IIntentSender sender);
     boolean isIntentSenderABroadcast(in IIntentSender sender);
-    /** @deprecated Use {@link startActivityAsUserWithFeature} instead */
-    @UnsupportedAppUsage(maxTargetSdk=29, publicAlternatives="Use {@code android.content.Context#createContextAsUser(android.os.UserHandle, int)} and {@link android.content.Context#startActivity(android.content.Intent)} instead")
+    @UnsupportedAppUsage
     int startActivityAsUser(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo,
             in Bundle options, int userId);
-    int startActivityAsUserWithFeature(in IApplicationThread caller, in String callingPackage,
-            in String callingFeatureId, in Intent intent, in String resolvedType,
-            in IBinder resultTo, in String resultWho, int requestCode, int flags,
-            in ProfilerInfo profilerInfo, in Bundle options, int userId);
     @UnsupportedAppUsage
     int stopUser(int userid, boolean force, in IStopUserCallback callback);
     /**

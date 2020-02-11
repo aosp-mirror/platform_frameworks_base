@@ -86,6 +86,7 @@ public class DataManager {
     private final Context mContext;
     private final Injector mInjector;
     private final ScheduledExecutorService mUsageStatsQueryExecutor;
+    private final ScheduledExecutorService mDiskReadWriterExecutor;
 
     private final SparseArray<UserData> mUserDataArray = new SparseArray<>();
     private final SparseArray<BroadcastReceiver> mBroadcastReceivers = new SparseArray<>();
@@ -113,6 +114,7 @@ public class DataManager {
                 BackgroundThread.getHandler());
         mMmsSmsContentObserver = new MmsSmsContentObserver(
                 BackgroundThread.getHandler());
+        mDiskReadWriterExecutor = mInjector.createScheduledExecutor();
     }
 
     /** Initialization. Called when the system services are up running. */
@@ -122,13 +124,18 @@ public class DataManager {
         mUserManager = mContext.getSystemService(UserManager.class);
 
         mShortcutServiceInternal.addListener(new ShortcutServiceListener());
+
+        IntentFilter shutdownIntentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
+        BroadcastReceiver shutdownBroadcastReceiver = new ShutdownBroadcastReceiver();
+        mContext.registerReceiver(shutdownBroadcastReceiver, shutdownIntentFilter);
     }
 
     /** This method is called when a user is unlocked. */
     public void onUserUnlocked(int userId) {
         UserData userData = mUserDataArray.get(userId);
         if (userData == null) {
-            userData = new UserData(userId);
+            userData = new UserData(userId, mDiskReadWriterExecutor,
+                    mInjector.createContactsQueryHelper(mContext));
             mUserDataArray.put(userId, userData);
         }
         userData.setUserUnlocked();
@@ -659,6 +666,14 @@ public class DataManager {
                     intent.getAction())) {
                 updateDefaultSmsApp(userData);
             }
+        }
+    }
+
+    private class ShutdownBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            forAllPackages(PackageData::saveToDisk);
         }
     }
 

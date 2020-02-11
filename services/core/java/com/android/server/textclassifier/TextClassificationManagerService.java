@@ -36,7 +36,7 @@ import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.TextClassifierService;
 import android.service.textclassifier.TextClassifierService.ConnectionState;
 import android.text.TextUtils;
-import android.util.LruCache;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.textclassifier.ConversationActions;
@@ -65,6 +65,7 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 
@@ -146,11 +147,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private final Object mLock;
     @GuardedBy("mLock")
     final SparseArray<UserState> mUserStates = new SparseArray<>();
-    // SystemTextClassifier.onDestroy() is not guaranteed to be called, use LruCache here
-    // to avoid leak.
-    @GuardedBy("mLock")
-    private final LruCache<TextClassificationSessionId, TextClassificationContext>
-            mSessionContextCache = new LruCache<>(40);
+    private final SessionCache mSessionCache;
     private final TextClassificationConstants mSettings;
     @Nullable
     private final String mDefaultTextClassifierPackage;
@@ -165,6 +162,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         PackageManager packageManager = mContext.getPackageManager();
         mDefaultTextClassifierPackage = packageManager.getDefaultTextClassifierPackageName();
         mSystemTextClassifierPackage = packageManager.getSystemTextClassifierPackageName();
+        mSessionCache = new SessionCache(mLock);
     }
 
     private void startListenSettings() {
@@ -314,7 +312,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 classificationContext.getUseDefaultTextClassifier(),
                 service -> {
                     service.onCreateTextClassificationSession(classificationContext, sessionId);
-                    mSessionContextCache.put(sessionId, classificationContext);
+                    mSessionCache.put(sessionId, classificationContext);
                 },
                 "onCreateTextClassificationSession",
                 NO_OP_CALLBACK);
@@ -326,14 +324,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         Objects.requireNonNull(sessionId);
 
         synchronized (mLock) {
-            TextClassificationContext textClassificationContext =
-                    mSessionContextCache.get(sessionId);
+            final StrippedTextClassificationContext textClassificationContext =
+                    mSessionCache.get(sessionId);
             final int userId = textClassificationContext != null
-                    ? textClassificationContext.getUserId()
+                    ? textClassificationContext.userId
                     : UserHandle.getCallingUserId();
             final boolean useDefaultTextClassifier =
                     textClassificationContext != null
-                            ? textClassificationContext.getUseDefaultTextClassifier()
+                            ? textClassificationContext.useDefaultTextClassifier
                             : true;
             handleRequest(
                     userId,
@@ -342,7 +340,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     useDefaultTextClassifier,
                     service -> {
                         service.onDestroyTextClassificationSession(sessionId);
-                        mSessionContextCache.remove(sessionId);
+                        mSessionCache.remove(sessionId);
                     },
                     "onDestroyTextClassificationSession",
                     NO_OP_CALLBACK);
@@ -409,7 +407,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     pw.decreaseIndent();
                 }
             }
-            pw.println("Number of active sessions: " + mSessionContextCache.size());
+            pw.println("Number of active sessions: " + mSessionCache.size());
         }
     }
 
@@ -565,6 +563,81 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     "Invalid userId. UserId=" + userId + ", CallingUserId=" + callingUserId);
+        }
+    }
+
+    /**
+     * Stores the stripped down version of {@link TextClassificationContext}s, i.e. {@link
+     * StrippedTextClassificationContext},  keyed by {@link TextClassificationSessionId}. Sessions
+     * are cleaned up automatically when the client process is dead.
+     */
+    static final class SessionCache {
+        @NonNull
+        private final Object mLock;
+        @NonNull
+        @GuardedBy("mLock")
+        private final Map<TextClassificationSessionId, StrippedTextClassificationContext> mCache =
+                new ArrayMap<>();
+        @NonNull
+        @GuardedBy("mLock")
+        private final Map<TextClassificationSessionId, DeathRecipient> mDeathRecipients =
+                new ArrayMap<>();
+
+        SessionCache(@NonNull Object lock) {
+            mLock = Objects.requireNonNull(lock);
+        }
+
+        void put(@NonNull TextClassificationSessionId sessionId,
+                @NonNull TextClassificationContext textClassificationContext) {
+            synchronized (mLock) {
+                mCache.put(sessionId,
+                        new StrippedTextClassificationContext(textClassificationContext));
+                try {
+                    DeathRecipient deathRecipient = () -> remove(sessionId);
+                    sessionId.getToken().linkToDeath(deathRecipient, /* flags= */ 0);
+                    mDeathRecipients.put(sessionId, deathRecipient);
+                } catch (RemoteException e) {
+                    Slog.w(LOG_TAG, "SessionCache: Failed to link to death", e);
+                }
+            }
+        }
+
+        @Nullable
+        StrippedTextClassificationContext get(@NonNull TextClassificationSessionId sessionId) {
+            Objects.requireNonNull(sessionId);
+            synchronized (mLock) {
+                return mCache.get(sessionId);
+            }
+        }
+
+        void remove(@NonNull TextClassificationSessionId sessionId) {
+            Objects.requireNonNull(sessionId);
+            synchronized (mLock) {
+                DeathRecipient deathRecipient = mDeathRecipients.get(sessionId);
+                if (deathRecipient != null) {
+                    sessionId.getToken().unlinkToDeath(deathRecipient, /* flags= */ 0);
+                }
+                mDeathRecipients.remove(sessionId);
+                mCache.remove(sessionId);
+            }
+        }
+
+        int size() {
+            synchronized (mLock) {
+                return mCache.size();
+            }
+        }
+    }
+
+    /** A stripped down version of {@link TextClassificationContext}. */
+    static class StrippedTextClassificationContext {
+        @UserIdInt
+        public final int userId;
+        public final boolean useDefaultTextClassifier;
+
+        StrippedTextClassificationContext(TextClassificationContext textClassificationContext) {
+            userId = textClassificationContext.getUserId();
+            useDefaultTextClassifier = textClassificationContext.getUseDefaultTextClassifier();
         }
     }
 

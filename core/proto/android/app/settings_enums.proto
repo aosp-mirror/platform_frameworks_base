@@ -714,6 +714,16 @@ enum Action {
 
     // ACTION: Battery feature runtime event
     ACTION_BATTERY_OPTION_RUNTIME_EVENT = 1733;
+
+    // ACTION: Settings > Developer Options > Toggle on Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_ADB_WIRELESS_ON = 1734;
+
+    // ACTION: Settings > Developer Options > Toggle off Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_ADB_WIRELESS_OFF = 1735;
 }
 
 /**
@@ -2591,4 +2601,20 @@ enum PageId {
     // OPEN: Settings > Notifications > (app or conversations) > conversation
     NOTIFICATION_CONVERSATION_SETTINGS = 1830;
 
+    // OPEN: Settings > Developer Options > Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_ADB_WIRELESS = 1831;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Pair device with pairing code > Pairing code dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_PAIRING_DIALOG = 1832;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Pair device with QR code > Scan QR code > Pairing device dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
 }

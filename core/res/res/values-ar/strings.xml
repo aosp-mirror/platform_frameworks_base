@@ -915,7 +915,7 @@
     <string name="factorytest_no_action" msgid="339252838115675515">"‏لم يتم العثور على أي حزمة توفر إجراء FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"إعادة تشغيل"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"تعرض الصفحة في \"<xliff:g id="TITLE">%s</xliff:g>\":"</string>
-    <string name="js_dialog_title_default" msgid="3769524569903332476">"جافا سكريبت"</string>
+    <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"تأكيد الانتقال"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"مغادرة هذه الصفحة"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"البقاء في هذه الصفحة"</string>
@@ -1395,7 +1395,7 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على الإعدادات الأصلية لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"وحدة التحكّم التسلسلية مفعّلة"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"الأداء متأثر. لإيقاف وحدة التحكّم، تحقّق من برنامج الإقلاع."</string>
-    <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏السوائل والشوائب في منفذ USB"</string>
+    <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏السوائل أو الشوائب في منفذ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏تمّ إيقاف منفذ USB تلقائيًا. انقُر لمعرفة المزيد من المعلومات."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏مسموح باستخدام منفذ USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"لم يَعُد الهاتف يكتشف سوائل أو شوائب."</string>
@@ -1981,6 +1981,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تشغيل"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>

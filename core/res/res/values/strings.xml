@@ -414,6 +414,14 @@
          logging. [CHAR LIMIT=NONE]-->
     <string name="network_logging_notification_text">Your organization manages this device and may monitor network traffic. Tap for details.</string>
 
+    <!-- Content title for a notification. This notification indicates that the device owner has
+         changed the location settings. [CHAR LIMIT=NONE] -->
+    <string name="location_changed_notification_title">Location settings changed by your admin</string>
+    <!-- Content text for a notification. Tapping opens device location settings.
+         [CHAR LIMIT=NONE] -->
+    <string name="location_changed_notification_text">Tap to see your location settings.</string>
+
+
     <!-- Factory reset warning dialog strings--> <skip />
     <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
     <string name="factory_reset_warning">Your device will be erased</string>

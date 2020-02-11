@@ -12,11 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+genrule {
+    name: "statslog-statsd-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module statsd" +
+         " --javaPackage com.android.internal.util --javaClass StatsdStatsLog",
+    out: ["com/android/internal/util/StatsdStatsLog.java"],
+}
+
+java_library_static {
+    name: "statslog-statsd",
+    srcs: [
+        ":statslog-statsd-java-gen",
+    ],
+}
+
 filegroup {
     name: "framework-statsd-sources",
     srcs: [
         "java/**/*.java",
         ":statsd_java_aidl",
+        ":statslog-statsd-java-gen",
     ],
 }
 
@@ -42,8 +58,7 @@ java_library {
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",
-        //TODO(b/146167933) remove this when framework is built with framework-statsd-stubs
-        "//frameworks/base",
+        //TODO(b/146167933) remove this
         "//frameworks/opt/net/wifi/service",
     ],
     apex_available: [
@@ -103,7 +118,6 @@ java_library {
     sdk_version: "core_platform",
 }
 
-// TODO(b/146167933): Use these stubs in frameworks/base/Android.bp
 java_library {
     name: "framework-statsd-stubs-systemapi",
     srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],

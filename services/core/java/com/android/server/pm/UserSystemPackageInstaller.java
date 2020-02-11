@@ -89,7 +89,7 @@ class UserSystemPackageInstaller {
      * <ul>
      * <li> 0  - disable whitelist (install all system packages; no logging)</li>
      * <li> 1  - enforce (only install system packages if they are whitelisted)</li>
-     * <li> 2  - log (log when a non-whitelisted package is run)</li>
+     * <li> 2  - log (log non-whitelisted packages)</li>
      * <li> 4  - for all users: implicitly whitelist any package not mentioned in the whitelist</li>
      * <li> 8  - for SYSTEM: implicitly whitelist any package not mentioned in the whitelist</li>
      * <li> 16 - ignore OTAs (don't install system packages during OTAs)</li>

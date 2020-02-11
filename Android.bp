@@ -458,7 +458,7 @@ java_library {
     libs: [
         "framework-appsearch-stubs",
         "framework-sdkextensions-stubs-systemapi",
-        "framework-statsd", // TODO(b/146167933): Use framework-statsd-stubs
+        "framework-statsd-stubs-module_libs_api",
         "framework-permission-stubs-systemapi",
         "framework-wifi-stubs",
         "ike-stubs",
@@ -511,8 +511,7 @@ java_library {
         "framework-mediaprovider-stubs-systemapi",
         "framework-permission-stubs-systemapi",
         "framework-sdkextensions-stubs-systemapi",
-        // TODO(b/146167933): Use framework-statsd-stubs instead.
-        "framework-statsd",
+        "framework-statsd-stubs-module_libs_api",
         "framework-wifi-stubs",
         "ike-stubs",
         "framework-tethering-stubs",

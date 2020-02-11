@@ -182,11 +182,11 @@
       <item quantity="one">Autoritat de certificació instal·lada</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Per un tercer desconegut"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Per l\'administrador del teu perfil professional"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Per l\'administrador del teu perfil de treball"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"S\'ha suprimit el perfil professional"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Falta l\'aplicació d\'administració del perfil professional o està malmesa. Com a conseqüència, s\'han suprimit el teu perfil professional i les dades relacionades. Contacta amb l\'administrador per obtenir ajuda."</string>
-    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"El teu perfil professional ja no està disponible en aquest dispositiu"</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"S\'ha suprimit el perfil de treball"</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"Falta l\'aplicació d\'administració del perfil de treball o està malmesa. Com a conseqüència, s\'han suprimit el teu perfil de treball i les dades relacionades. Contacta amb l\'administrador per obtenir ajuda."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"El teu perfil de treball ja no està disponible en aquest dispositiu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Has intentat introduir la contrasenya massa vegades"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'administrador ha cedit el dispositiu per a ús personal"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"El dispositiu està gestionat"</string>
@@ -280,7 +280,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Mode segur"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Canvia al perfil personal"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Canvia al perfil professional"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Canvia al perfil de treball"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicació"</string>
@@ -1406,8 +1406,8 @@
     <string name="deny" msgid="6632259981847676572">"Denega"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permís sol·licitat"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"S\'ha sol·licitat permís\nper al compte <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Estàs utilitzant aquesta aplicació fora del perfil professional."</string>
-    <string name="forward_intent_to_work" msgid="3620262405636021151">"Estàs utilitzant l\'aplicació al perfil professional."</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Estàs utilitzant aquesta aplicació fora del perfil de treball."</string>
+    <string name="forward_intent_to_work" msgid="3620262405636021151">"Estàs utilitzant l\'aplicació al perfil de treball."</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Mètode d\'introducció de text"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Sincronització"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Accessibilitat"</string>
@@ -1817,7 +1817,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"La sol·licitud SS s\'ha canviat per una videotrucada"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"La sol·licitud SS s\'ha canviat per una sol·licitud USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"S\'ha canviat a una nova sol·licitud SS"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil professional"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Perfil de treball"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"S\'ha enviat una alerta"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Desplega"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Replega"</string>
@@ -1850,15 +1850,17 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> no està disponible en aquests moments. Aquesta opció es gestiona a <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Més informació"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Reactiva l\'aplicació"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"Activar el perfil professional?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"S\'activaran les teves aplicacions de treball, les notificacions, les dades i altres funcions del perfil professional"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"Activar el perfil de treball?"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"S\'activaran les teves aplicacions de treball, les notificacions, les dades i altres funcions del perfil de treball"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activa"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"L\'aplicació no està disponible"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Ara mateix, <xliff:g id="APP_NAME">%1$s</xliff:g> no està disponible."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Aquesta aplicació es va crear per a una versió antiga d\'Android i pot ser que no funcioni correctament. Prova de cercar actualitzacions o contacta amb el desenvolupador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Obre l\'aplicació d\'SMS per veure\'ls"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algunes funcions poden ser limitades"</string>
-    <string name="profile_encrypted_detail" msgid="5279730442756849055">"Perfil professional bloquejat"</string>
+    <string name="profile_encrypted_detail" msgid="5279730442756849055">"Perfil de treball bloquejat"</string>
     <string name="profile_encrypted_message" msgid="1128512616293157802">"Toca per desbloquejar el perfil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"S\'ha connectat a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Toca per veure els fitxers"</string>

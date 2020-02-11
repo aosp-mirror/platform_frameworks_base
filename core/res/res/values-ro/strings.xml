@@ -1885,6 +1885,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Activați profilul de serviciu?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Se vor activa aplicațiile dvs. de serviciu, notificările, datele și alte funcții ale profilului de serviciu"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Activați"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Această aplicație a fost creată pentru o versiune Android mai veche și este posibil să nu funcționeze corect. Încercați să căutați actualizări sau contactați dezvoltatorul."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Căutați actualizări"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Aveți mesaje noi"</string>

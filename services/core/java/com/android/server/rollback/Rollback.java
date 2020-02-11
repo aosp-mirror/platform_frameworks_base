@@ -44,7 +44,6 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.pm.ApexManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -671,7 +670,7 @@ class Rollback {
                 }
             }
             if (containsApex) {
-                ApexManager.getInstance().destroyDeSnapshots(info.getRollbackId());
+                dataHelper.destroyApexDeSnapshots(info.getRollbackId());
             }
 
             RollbackStore.deleteRollback(this);

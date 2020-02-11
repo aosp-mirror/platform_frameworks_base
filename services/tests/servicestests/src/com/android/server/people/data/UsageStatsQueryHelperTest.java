@@ -29,7 +29,10 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.Context;
 import android.content.LocusId;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 
@@ -41,10 +44,12 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Predicate;
 
 @RunWith(JUnit4.class)
@@ -69,7 +74,13 @@ public final class UsageStatsQueryHelperTest {
 
         addLocalServiceMock(UsageStatsManagerInternal.class, mUsageStatsManagerInternal);
 
-        mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false);
+        Context ctx = InstrumentationRegistry.getContext();
+        File testDir = new File(ctx.getCacheDir(), "testdir");
+        ScheduledExecutorService scheduledExecutorService = new MockScheduledExecutorService();
+        ContactsQueryHelper helper = new ContactsQueryHelper(ctx);
+
+        mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false,
+                scheduledExecutorService, testDir, helper);
         mPackageData.mConversationStore.mConversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
                 .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
@@ -175,7 +186,7 @@ public final class UsageStatsQueryHelperTest {
         assertEquals(createInAppConversationEvent(130_000L, 30), events.get(2));
     }
 
-    private void addUsageEvents(UsageEvents.Event ... events) {
+    private void addUsageEvents(UsageEvents.Event... events) {
         UsageEvents usageEvents = new UsageEvents(Arrays.asList(events), new String[]{});
         when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
                 anyBoolean(), anyBoolean())).thenReturn(usageEvents);
@@ -228,6 +239,12 @@ public final class UsageStatsQueryHelperTest {
 
         private ConversationInfo mConversationInfo;
 
+        TestConversationStore(File packageDir,
+                ScheduledExecutorService scheduledExecutorService,
+                ContactsQueryHelper helper) {
+            super(packageDir, scheduledExecutorService, helper);
+        }
+
         @Override
         @Nullable
         ConversationInfo getConversation(@Nullable String shortcutId) {
@@ -237,13 +254,18 @@ public final class UsageStatsQueryHelperTest {
 
     private static class TestPackageData extends PackageData {
 
-        private final TestConversationStore mConversationStore = new TestConversationStore();
+        private final TestConversationStore mConversationStore;
         private final TestEventStore mEventStore = new TestEventStore();
 
         TestPackageData(@NonNull String packageName, @UserIdInt int userId,
                 @NonNull Predicate<String> isDefaultDialerPredicate,
-                @NonNull Predicate<String> isDefaultSmsAppPredicate) {
-            super(packageName, userId, isDefaultDialerPredicate, isDefaultSmsAppPredicate);
+                @NonNull Predicate<String> isDefaultSmsAppPredicate,
+                @NonNull ScheduledExecutorService scheduledExecutorService, @NonNull File rootDir,
+                @NonNull ContactsQueryHelper helper) {
+            super(packageName, userId, isDefaultDialerPredicate, isDefaultSmsAppPredicate,
+                    scheduledExecutorService, rootDir, helper);
+            mConversationStore = new TestConversationStore(rootDir, scheduledExecutorService,
+                    helper);
         }
 
         @Override

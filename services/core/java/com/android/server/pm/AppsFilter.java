@@ -33,7 +33,6 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
 import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
@@ -87,10 +86,10 @@ public class AppsFilter {
     private final SparseSetArray<Integer> mQueriesViaPackage = new SparseSetArray<>();
 
     /**
-     * A mapping from the set of App IDs that query others via intent to the list
-     * of packages that the intents resolve to.
+     * A mapping from the set of App IDs that query others via component match to the list
+     * of packages that the they resolve to.
      */
-    private final SparseSetArray<Integer> mQueriesViaIntent = new SparseSetArray<>();
+    private final SparseSetArray<Integer> mQueriesViaComponent = new SparseSetArray<>();
 
     /**
      * A set of App IDs that are always queryable by any package, regardless of their manifest
@@ -206,15 +205,18 @@ public class AppsFilter {
     }
 
     /** Returns true if the querying package may query for the potential target package */
-    private static boolean canQueryViaIntent(AndroidPackage querying,
+    private static boolean canQueryViaComponents(AndroidPackage querying,
             AndroidPackage potentialTarget) {
-        if (querying.getQueriesIntents() == null) {
-            return false;
-        }
-        for (Intent intent : querying.getQueriesIntents()) {
-            if (matches(intent, potentialTarget)) {
-                return true;
+        if (querying.getQueriesIntents() != null) {
+            for (Intent intent : querying.getQueriesIntents()) {
+                if (matchesIntentFilters(intent, potentialTarget)) {
+                    return true;
+                }
             }
+        }
+        if (querying.getQueriesProviders() != null
+                && matchesProviders(querying.getQueriesProviders(), potentialTarget)) {
+            return true;
         }
         return false;
     }
@@ -238,24 +240,25 @@ public class AppsFilter {
         return false;
     }
 
-    private static boolean matches(Intent intent, AndroidPackage potentialTarget) {
+    private static boolean matchesProviders(
+            Set<String> queriesAuthorities, AndroidPackage potentialTarget) {
         for (int p = ArrayUtils.size(potentialTarget.getProviders()) - 1; p >= 0; p--) {
             ParsedProvider provider = potentialTarget.getProviders().get(p);
             if (!provider.isExported()) {
                 continue;
             }
-            final Uri data = intent.getData();
-            if (!"content".equalsIgnoreCase(intent.getScheme()) || data == null
-                    || provider.getAuthority() == null) {
-                continue;
-            }
-            StringTokenizer authorities = new StringTokenizer(provider.getAuthority(), ";", false);
+            StringTokenizer authorities = new StringTokenizer(provider.getAuthority(), ";",
+                    false);
             while (authorities.hasMoreElements()) {
-                if (Objects.equals(authorities.nextElement(), data.getAuthority())) {
+                if (queriesAuthorities.contains(authorities.nextToken())) {
                     return true;
                 }
             }
         }
+        return false;
+    }
+
+    private static boolean matchesIntentFilters(Intent intent, AndroidPackage potentialTarget) {
         for (int s = ArrayUtils.size(potentialTarget.getServices()) - 1; s >= 0; s--) {
             ParsedService service = potentialTarget.getServices().get(s);
             if (!service.exported) {
@@ -368,8 +371,8 @@ public class AppsFilter {
                 final AndroidPackage existingPkg = existingSetting.pkg;
                 // let's evaluate the ability of already added packages to see this new package
                 if (!newIsForceQueryable) {
-                    if (canQueryViaIntent(existingPkg, newPkg)) {
-                        mQueriesViaIntent.add(existingSetting.appId, newPkgSetting.appId);
+                    if (canQueryViaComponents(existingPkg, newPkg)) {
+                        mQueriesViaComponent.add(existingSetting.appId, newPkgSetting.appId);
                     }
                     if (canQueryViaPackage(existingPkg, newPkg)
                             || canQueryAsInstaller(existingSetting, newPkg)) {
@@ -378,8 +381,8 @@ public class AppsFilter {
                 }
                 // now we'll evaluate our new package's ability to see existing packages
                 if (!mForceQueryable.contains(existingSetting.appId)) {
-                    if (canQueryViaIntent(newPkg, existingPkg)) {
-                        mQueriesViaIntent.add(newPkgSetting.appId, existingSetting.appId);
+                    if (canQueryViaComponents(newPkg, existingPkg)) {
+                        mQueriesViaComponent.add(newPkgSetting.appId, existingSetting.appId);
                     }
                     if (canQueryViaPackage(newPkg, existingPkg)
                             || canQueryAsInstaller(newPkgSetting, existingPkg)) {
@@ -427,9 +430,9 @@ public class AppsFilter {
             }
         }
 
-        mQueriesViaIntent.remove(setting.appId);
-        for (int i = mQueriesViaIntent.size() - 1; i >= 0; i--) {
-            mQueriesViaIntent.remove(mQueriesViaIntent.keyAt(i), setting.appId);
+        mQueriesViaComponent.remove(setting.appId);
+        for (int i = mQueriesViaComponent.size() - 1; i >= 0; i--) {
+            mQueriesViaComponent.remove(mQueriesViaComponent.keyAt(i), setting.appId);
         }
         mQueriesViaPackage.remove(setting.appId);
         for (int i = mQueriesViaPackage.size() - 1; i >= 0; i--) {
@@ -594,10 +597,10 @@ public class AppsFilter {
                 Trace.endSection();
             }
             try {
-                Trace.beginSection("mQueriesViaIntent");
-                if (mQueriesViaIntent.contains(callingAppId, targetAppId)) {
+                Trace.beginSection("mQueriesViaComponent");
+                if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {
                     if (DEBUG_LOGGING) {
-                        log(callingSetting, targetPkgSetting, "queries intent");
+                        log(callingSetting, targetPkgSetting, "queries component");
                     }
                     return false;
                 }
@@ -732,7 +735,7 @@ public class AppsFilter {
         pw.println("  queries via package name:");
         dumpQueriesMap(pw, filteringAppId, mQueriesViaPackage, "    ", expandPackages);
         pw.println("  queries via intent:");
-        dumpQueriesMap(pw, filteringAppId, mQueriesViaIntent, "    ", expandPackages);
+        dumpQueriesMap(pw, filteringAppId, mQueriesViaComponent, "    ", expandPackages);
         pw.println("  queryable via interaction:");
         for (int user : users) {
             pw.append("    User ").append(Integer.toString(user)).println(":");

@@ -69,6 +69,7 @@ import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -143,7 +144,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private static final float BACKGROUND_ALPHA = 0.5f;
     private static final float SCREENSHOT_DROP_IN_MIN_SCALE = 0.725f;
     private static final float ROUNDED_CORNER_RADIUS = .05f;
-    private static final long SCREENSHOT_CORNER_TIMEOUT_MILLIS = 8000;
+    private static final long SCREENSHOT_CORNER_TIMEOUT_MILLIS = 6000;
     private static final int MESSAGE_CORNER_TIMEOUT = 2;
 
     private final ScreenshotNotificationsController mNotificationsController;
@@ -162,6 +163,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private final HorizontalScrollView mActionsContainer;
     private final LinearLayout mActionsView;
     private final ImageView mBackgroundProtection;
+    private final FrameLayout mDismissButton;
 
     private Bitmap mScreenBitmap;
     private AnimatorSet mScreenshotAnimation;
@@ -170,6 +172,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private float mScreenshotOffsetYPx;
     private float mScreenshotHeightPx;
     private float mCornerScale;
+    private float mDismissButtonSize;
 
     private AsyncTask<Void, Void, Void> mSaveInBgTask;
 
@@ -216,19 +219,14 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mActionsView = mScreenshotLayout.findViewById(R.id.global_screenshot_actions);
         mBackgroundProtection = mScreenshotLayout.findViewById(
                 R.id.global_screenshot_actions_background);
+        mDismissButton = mScreenshotLayout.findViewById(R.id.global_screenshot_dismiss_button);
+        mDismissButton.setOnClickListener(view -> clearScreenshot("dismiss_button"));
 
         mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
         mScreenshotLayout.setFocusable(true);
         mScreenshotSelectorView.setFocusable(true);
         mScreenshotSelectorView.setFocusableInTouchMode(true);
-        mScreenshotLayout.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                clearScreenshot("tap_outside");
-            }
-            // Intercept and ignore all touch events
-            return true;
-        });
 
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
@@ -254,6 +252,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 resources.getDimensionPixelSize(R.dimen.screenshot_action_container_offset_y);
         mCornerScale = resources.getDimensionPixelSize(R.dimen.global_screenshot_x_scale)
                 / (float) mDisplayMetrics.widthPixels;
+        mDismissButtonSize = resources.getDimensionPixelSize(
+                R.dimen.screenshot_dismiss_button_tappable_size);
 
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
@@ -271,6 +271,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         Rect actionsRect = new Rect();
         mActionsContainer.getBoundsOnScreen(actionsRect);
         touchRegion.op(actionsRect, Region.Op.UNION);
+        Rect dismissRect = new Rect();
+        mDismissButton.getBoundsOnScreen(dismissRect);
+        touchRegion.op(dismissRect, Region.Op.UNION);
 
         inoutInfo.touchableRegion.set(touchRegion);
     }
@@ -408,6 +411,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mActionsContainer.setVisibility(View.GONE);
         mBackgroundView.setVisibility(View.GONE);
         mBackgroundProtection.setAlpha(0f);
+        mDismissButton.setVisibility(View.GONE);
         mScreenshotView.setVisibility(View.GONE);
         mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
     }
@@ -615,6 +619,17 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             mScreenshotView.setTranslationX(t * finalPos.x);
             mScreenshotView.setTranslationY(t * finalPos.y);
         });
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                Rect bounds = new Rect();
+                mScreenshotView.getBoundsOnScreen(bounds);
+                mDismissButton.setX(bounds.right - mDismissButtonSize / 2f);
+                mDismissButton.setY(bounds.top - mDismissButtonSize / 2f);
+                mDismissButton.setVisibility(View.VISIBLE);
+            }
+        });
         return anim;
     }
 
@@ -685,14 +700,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             float t = animation.getAnimatedFraction();
             mBackgroundProtection.setAlpha(t);
             mActionsContainer.setY(mDisplayMetrics.heightPixels - actionsViewHeight * t);
-        });
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                mScreenshotView.requestFocus();
-                mScreenshotView.setElevation(50);
-            }
         });
         return animator;
     }

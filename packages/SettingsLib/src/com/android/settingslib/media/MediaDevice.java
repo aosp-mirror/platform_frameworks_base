@@ -16,13 +16,17 @@
 package com.android.settingslib.media;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -113,7 +117,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      *
      * @param volume is the new value.
      */
+
     public void requestSetVolume(int volume) {
+        mRouterManager.requestSetVolume(mRouteInfo, volume);
     }
 
     /**
@@ -122,7 +128,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return max volume.
      */
     public int getMaxVolume() {
-        return 100;
+        return mRouteInfo.getVolumeMax();
     }
 
     /**
@@ -131,7 +137,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return current volume.
      */
     public int getCurrentVolume() {
-        return 0;
+        return mRouteInfo.getVolume();
     }
 
     /**
@@ -140,7 +146,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return package name.
      */
     public String getClientPackageName() {
-        return null;
+        return mRouteInfo.getClientPackageName();
     }
 
     /**
@@ -149,7 +155,22 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return application label.
      */
     public String getClientAppLabel() {
-        return null;
+        final String packageName = mRouteInfo.getClientPackageName();
+        if (TextUtils.isEmpty(packageName)) {
+            Log.d(TAG, "Client package name is empty");
+            return mContext.getResources().getString(R.string.unknown);
+        }
+        try {
+            final PackageManager packageManager = mContext.getPackageManager();
+            final String appLabel = packageManager.getApplicationLabel(
+                    packageManager.getApplicationInfo(packageName, 0)).toString();
+            if (!TextUtils.isEmpty(appLabel)) {
+                return appLabel;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "unable to find " + packageName);
+        }
+        return mContext.getResources().getString(R.string.unknown);
     }
 
     /**

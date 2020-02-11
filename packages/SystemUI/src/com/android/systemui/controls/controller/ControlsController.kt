@@ -26,10 +26,18 @@ interface ControlsController : UserAwareController {
     val available: Boolean
 
     fun getFavoriteControls(): List<ControlInfo>
-    fun loadForComponent(componentName: ComponentName, callback: (List<ControlStatus>) -> Unit)
+    fun loadForComponent(
+        componentName: ComponentName,
+        callback: (List<ControlStatus>, List<String>) -> Unit
+    )
+
     fun subscribeToFavorites()
     fun changeFavoriteStatus(controlInfo: ControlInfo, state: Boolean)
-    fun countFavoritesForComponent(componentName: ComponentName): Int = 0
+    fun replaceFavoritesForComponent(componentName: ComponentName, favorites: List<ControlInfo>)
+
+    fun getFavoritesForComponent(componentName: ComponentName): List<ControlInfo>
+    fun countFavoritesForComponent(componentName: ComponentName): Int
+
     fun unsubscribe()
     fun action(controlInfo: ControlInfo, action: ControlAction)
     fun refreshStatus(componentName: ComponentName, control: Control)

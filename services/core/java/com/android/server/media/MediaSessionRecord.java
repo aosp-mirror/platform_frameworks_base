@@ -127,7 +127,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             new ArrayList<>();
 
     private long mFlags;
-    private PendingIntent mMediaButtonReceiver;
+    private MediaButtonReceiverHolder mMediaButtonReceiverHolder;
     private PendingIntent mLaunchIntent;
 
     // TransportPerformer fields
@@ -220,8 +220,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
      *
      * @return The pending intent set by the app or null.
      */
-    public PendingIntent getMediaButtonReceiver() {
-        return mMediaButtonReceiver;
+    public MediaButtonReceiverHolder getMediaButtonReceiver() {
+        return mMediaButtonReceiverHolder;
     }
 
     /**
@@ -471,7 +471,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 + ", userId=" + mUserId);
         pw.println(indent + "package=" + mPackageName);
         pw.println(indent + "launchIntent=" + mLaunchIntent);
-        pw.println(indent + "mediaButtonReceiver=" + mMediaButtonReceiver);
+        pw.println(indent + "mediaButtonReceiver=" + mMediaButtonReceiverHolder);
         pw.println(indent + "active=" + mIsActive);
         pw.println(indent + "flags=" + mFlags);
         pw.println(indent + "rating type=" + mRatingType);
@@ -833,12 +833,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         @Override
         public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
-            if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER) == 1) {
-                return;
-            }
-            mMediaButtonReceiver = pi;
             final long token = Binder.clearCallingIdentity();
             try {
+                if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
+                        != 0) {
+                    return;
+                }
+                mMediaButtonReceiverHolder =
+                        MediaButtonReceiverHolder.create(mContext, mUserId, pi);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1529,5 +1531,4 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             msg.sendToTarget();
         }
     }
-
 }

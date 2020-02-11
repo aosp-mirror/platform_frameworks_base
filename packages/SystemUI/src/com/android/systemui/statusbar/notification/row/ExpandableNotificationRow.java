@@ -42,7 +42,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -72,11 +71,11 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -199,6 +198,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationGuts mGuts;
     private NotificationEntry mEntry;
     private String mAppName;
+    private FalsingManager mFalsingManager;
 
     /**
      * Whether or not the notification is using the heads up view and should peek from the top.
@@ -1087,20 +1087,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mEntry.setInitializationTime(SystemClock.elapsedRealtime());
-        Dependency.get(PluginManager.class).addPluginListener(this,
-                NotificationMenuRowPlugin.class, false /* Allow multiple */);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        Dependency.get(PluginManager.class).removePluginListener(this);
-    }
-
-    @Override
     public void onPluginConnected(NotificationMenuRowPlugin plugin, Context pluginContext) {
         boolean existed = mMenuRow != null && mMenuRow.getMenuView() != null;
         if (existed) {
@@ -1439,7 +1425,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mIsBlockingHelperShowing && mNotificationTranslationFinished;
     }
 
-    public void setOnDismissRunnable(Runnable onDismissRunnable) {
+    void setOnDismissRunnable(Runnable onDismissRunnable) {
         mOnDismissRunnable = onDismissRunnable;
     }
 
@@ -1597,7 +1583,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMenuRow = new NotificationMenuRow(mContext);
         mImageResolver = new NotificationInlineImageResolver(context,
                 new NotificationInlineImageCache());
-        mMediaManager = Dependency.get(NotificationMediaManager.class);
         initDimens();
     }
 
@@ -1612,7 +1597,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationGroupManager groupManager,
             HeadsUpManager headsUpManager,
             RowContentBindStage rowContentBindStage,
-            OnExpandClickListener onExpandClickListener) {
+            OnExpandClickListener onExpandClickListener,
+            NotificationMediaManager notificationMediaManager,
+            OnAppOpsClickListener onAppOpsClickListener,
+            FalsingManager falsingManager,
+            StatusBarStateController statusBarStateController) {
         mAppName = appName;
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.setAppName(mAppName);
@@ -1625,9 +1614,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mHeadsUpManager = headsUpManager;
         mRowContentBindStage = rowContentBindStage;
         mOnExpandClickListener = onExpandClickListener;
-    }
-
-    public void setStatusBarStateController(StatusBarStateController statusBarStateController) {
+        mMediaManager = notificationMediaManager;
+        setAppOpsOnClickListener(onAppOpsClickListener);
+        mFalsingManager = falsingManager;
         mStatusbarStateController = statusBarStateController;
     }
 
@@ -1719,7 +1708,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mOnAppOpsClickListener;
     }
 
-    public void setAppOpsOnClickListener(ExpandableNotificationRow.OnAppOpsClickListener l) {
+    void setAppOpsOnClickListener(ExpandableNotificationRow.OnAppOpsClickListener l) {
         mOnAppOpsClickListener = v -> {
             createMenu();
             NotificationMenuRowPlugin provider = getProvider();
@@ -2188,7 +2177,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param allowChildExpansion whether a call to this method allows expanding children
      */
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
-        getFalsingManager().setNotificationExpanded();
+        mFalsingManager.setNotificationExpanded();
         if (mIsSummaryWithChildren && !shouldShowPublic() && allowChildExpansion
                 && !mChildrenContainer.showingAsLowPriority()) {
             final boolean wasExpanded = mGroupManager.isGroupExpanded(mEntry.getSbn());

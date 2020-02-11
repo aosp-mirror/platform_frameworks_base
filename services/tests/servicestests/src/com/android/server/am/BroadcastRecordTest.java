@@ -178,7 +178,6 @@ public class BroadcastRecordTest {
                 new Intent(),
                 null /* callerApp */,
                 null  /* callerPackage */,
-                null /* callerFeatureId */,
                 0 /* callingPid */,
                 0 /* callingUid */,
                 false /* callerInstantApp */,

@@ -6298,11 +6298,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
             Intent origIntent, String resolvedType, String callingPackage,
-            @Nullable String callingFeatureId, boolean isRequesterInstantApp,
-            Bundle verificationBundle, int userId) {
+            boolean isRequesterInstantApp, Bundle verificationBundle, int userId) {
         final Message msg = mHandler.obtainMessage(INSTANT_APP_RESOLUTION_PHASE_TWO,
                 new InstantAppRequest(responseObj, origIntent, resolvedType,
-                        callingPackage, callingFeatureId, isRequesterInstantApp, userId, verificationBundle,
+                        callingPackage, isRequesterInstantApp, userId, verificationBundle,
                         false /*resolveForStart*/, responseObj.hostDigestPrefixSecure,
                         responseObj.token));
         mHandler.sendMessage(msg);
@@ -6988,10 +6987,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
                 String token = UUID.randomUUID().toString();
                 InstantAppDigest digest = InstantAppResolver.parseDigest(intent);
-                final InstantAppRequest requestObject = new InstantAppRequest(null /*responseObj*/,
-                        intent /*origIntent*/, resolvedType, null /*callingPackage*/,
-                        null /*callingFeatureId*/, isRequesterInstantApp, userId,
-                        null /*verificationBundle*/, resolveForStart,
+                final InstantAppRequest requestObject = new InstantAppRequest(
+                        null /*responseObj*/, intent /*origIntent*/, resolvedType,
+                        null /*callingPackage*/, isRequesterInstantApp,
+                        userId, null /*verificationBundle*/, resolveForStart,
                         digest.getDigestPrefixSecure(), token);
                 auxiliaryResponse = InstantAppResolver.doInstantAppResolutionPhaseOne(
                         mInstantAppResolverConnection, requestObject);
@@ -12207,7 +12206,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + intent.toShortString(false, true, false, false)
                         + " " + intent.getExtras(), here);
             }
-            am.broadcastIntentWithFeature(null, null, intent, null, finishedReceiver,
+            am.broadcastIntent(null, intent, null, finishedReceiver,
                     0, null, null, requiredPermissions, android.app.AppOpsManager.OP_NONE,
                     null, finishedReceiver != null, false, id);
         }
@@ -12369,9 +12368,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             }
             final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
-            am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
-                    requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
-                    userId);
+            am.broadcastIntent(null, lockedBcIntent, null, null, 0, null, null, requiredPermissions,
+                    android.app.AppOpsManager.OP_NONE, null, false, false, userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
             if (mUserManager.isUserUnlockingOrUnlocked(userId)) {
@@ -12379,9 +12377,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
-                am.broadcastIntentWithFeature(null, null, bcIntent, null, null, 0, null, null,
-                        requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
-                        userId);
+                am.broadcastIntent(null, bcIntent, null, null, 0, null, null, requiredPermissions,
+                        android.app.AppOpsManager.OP_NONE, null, false, false, userId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -18784,7 +18781,7 @@ public class PackageManagerService extends IPackageManager.Stub
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             try {
-                am.broadcastIntentWithFeature(null, null, intent, null, null,
+                am.broadcastIntent(null, intent, null, null,
                         0, null, null, null, android.app.AppOpsManager.OP_NONE,
                         null, false, false, userId);
             } catch (RemoteException e) {
@@ -23428,10 +23425,9 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public void requestInstantAppResolutionPhaseTwo(AuxiliaryResolveInfo responseObj,
                 Intent origIntent, String resolvedType, String callingPackage,
-                @Nullable String callingFeatureId, boolean isRequesterInstantApp,
-                Bundle verificationBundle, int userId) {
-            PackageManagerService.this.requestInstantAppResolutionPhaseTwo(responseObj, origIntent,
-                    resolvedType, callingPackage, callingFeatureId, isRequesterInstantApp,
+                boolean isRequesterInstantApp, Bundle verificationBundle, int userId) {
+            PackageManagerService.this.requestInstantAppResolutionPhaseTwo(
+                    responseObj, origIntent, resolvedType, callingPackage, isRequesterInstantApp,
                     verificationBundle, userId);
         }
 
@@ -24341,9 +24337,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 Manifest.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY,
             };
             try {
-                am.broadcastIntentWithFeature(null, null, intent, null, null, 0, null, null,
-                        requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
-                        UserHandle.USER_ALL);
+                am.broadcastIntent(null, intent, null, null, 0, null, null, requiredPermissions,
+                        android.app.AppOpsManager.OP_NONE, null, false, false, UserHandle.USER_ALL);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -22,6 +22,7 @@ import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
+import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
@@ -69,8 +70,10 @@ interface ILocationManager
         double upperRightLatitude, double upperRightLongitude, int maxResults,
         in GeocoderParams params, out List<Address> addrs);
 
-    boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener,
-             String packageName, String featureId, String listenerIdentifier);
+    boolean addGnssMeasurementsListener(in GnssRequest request,
+            in IGnssMeasurementsListener listener,
+            String packageName, String featureId,
+            String listenerIdentifier);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
             in String packageName);
     long getGnssCapabilities(in String packageName);
@@ -107,6 +110,7 @@ interface ILocationManager
 
     boolean isProviderEnabledForUser(String provider, int userId);
     boolean isLocationEnabledForUser(int userId);
+    void setLocationEnabledForUser(boolean enabled, int userId);
     void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
     void removeTestProvider(String provider, String opPackageName);
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);

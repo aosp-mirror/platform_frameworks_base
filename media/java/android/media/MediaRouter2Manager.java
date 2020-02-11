@@ -247,11 +247,21 @@ public class MediaRouter2Manager {
         Objects.requireNonNull(packageName, "packageName must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
+        boolean transferred = false;
+        //TODO: instead of release all controllers, add an API to specify controllers that
+        // should be released (or is the system controller).
         for (RoutingController controller : getRoutingControllers(packageName)) {
-            if (controller.getSessionInfo().getTransferrableRoutes().contains(route.getId())) {
+            if (!transferred && controller.getSessionInfo().getTransferrableRoutes()
+                    .contains(route.getId())) {
                 controller.transferToRoute(route);
-                return;
+                transferred = true;
+            } else if (!controller.getSessionInfo().isSystemSession()) {
+                controller.release();
             }
+        }
+
+        if (transferred) {
+            return;
         }
 
         Client client;

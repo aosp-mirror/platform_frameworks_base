@@ -80,7 +80,7 @@ public class Utils {
      * @param authenticators composed of one or more values from {@link Authenticators}
      * @return true if device credential is allowed.
      */
-    public static boolean isDeviceCredentialAllowed(@Authenticators.Types int authenticators) {
+    public static boolean isCredentialRequested(@Authenticators.Types int authenticators) {
         return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 
@@ -88,8 +88,8 @@ public class Utils {
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return true if device credential is allowed.
      */
-    public static boolean isDeviceCredentialAllowed(Bundle bundle) {
-        return isDeviceCredentialAllowed(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    public static boolean isCredentialRequested(Bundle bundle) {
+        return isCredentialRequested(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
     }
 
     /**
@@ -120,7 +120,7 @@ public class Utils {
      * @param bundle should be first processed by {@link #combineAuthenticatorBundles(Bundle)}
      * @return true if biometric authentication is allowed.
      */
-    public static boolean isBiometricAllowed(Bundle bundle) {
+    public static boolean isBiometricRequested(Bundle bundle) {
         return getPublicBiometricStrength(bundle) != 0;
     }
 
@@ -169,7 +169,7 @@ public class Utils {
         // should be set.
         final int biometricBits = authenticators & Authenticators.BIOMETRIC_MIN_STRENGTH;
         if (biometricBits == Authenticators.EMPTY_SET
-                && isDeviceCredentialAllowed(authenticators)) {
+                && isCredentialRequested(authenticators)) {
             return true;
         } else if (biometricBits == Authenticators.BIOMETRIC_STRONG) {
             return true;
@@ -208,6 +208,9 @@ public class Utils {
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE;
+                break;
+            case BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
+                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
                 break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);

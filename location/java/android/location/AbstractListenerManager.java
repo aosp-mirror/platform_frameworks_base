@@ -27,6 +27,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -35,26 +36,34 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-abstract class AbstractListenerManager<T> {
+abstract class AbstractListenerManager<TRequest, TListener> {
 
-    private static class Registration<T> {
+    private static class Registration<TRequest, TListener> {
         private final Executor mExecutor;
-        @Nullable private volatile T mListener;
+        @Nullable private TRequest mRequest;
+        @Nullable private volatile TListener mListener;
 
-        private Registration(Executor executor, T listener) {
+        private Registration(@Nullable TRequest request, Executor executor, TListener listener) {
             Preconditions.checkArgument(listener != null, "invalid null listener/callback");
             Preconditions.checkArgument(executor != null, "invalid null executor");
             mExecutor = executor;
             mListener = listener;
+            mRequest = request;
+        }
+
+        @Nullable
+        public TRequest getRequest() {
+            return mRequest;
         }
 
         private void unregister() {
+            mRequest = null;
             mListener = null;
         }
 
-        private void execute(Consumer<T> operation) {
+        private void execute(Consumer<TListener> operation) {
             mExecutor.execute(() -> {
-                T listener = mListener;
+                TListener listener = mListener;
                 if (listener == null) {
                     return;
                 }
@@ -71,71 +80,135 @@ abstract class AbstractListenerManager<T> {
     }
 
     @GuardedBy("mListeners")
-    private final ArrayMap<Object, Registration<T>> mListeners = new ArrayMap<>();
+    private final ArrayMap<Object, Registration<TRequest, TListener>> mListeners =
+            new ArrayMap<>();
 
-    public boolean addListener(@NonNull T listener, @NonNull Handler handler)
+    @GuardedBy("mListeners")
+    @Nullable
+    private TRequest mMergedRequest;
+
+    public boolean addListener(@NonNull TListener listener, @NonNull Handler handler)
             throws RemoteException {
-        return addInternal(listener, handler);
+        return addInternal(/* request= */ null, listener, handler);
     }
 
-    public boolean addListener(@NonNull T listener, @NonNull Executor executor)
+    public boolean addListener(@NonNull TListener listener, @NonNull Executor executor)
             throws RemoteException {
-        return addInternal(listener, executor);
+        return addInternal(/* request= */ null, listener, executor);
     }
 
-    protected final boolean addInternal(@NonNull Object listener, @NonNull Handler handler)
-            throws RemoteException {
-        return addInternal(listener, new HandlerExecutor(handler));
+    public boolean addListener(@Nullable TRequest request, @NonNull TListener listener,
+            @NonNull Handler handler) throws RemoteException {
+        return addInternal(request, listener, handler);
     }
 
-    protected final boolean addInternal(@NonNull Object listener, @NonNull Executor executor)
+    public boolean addListener(@Nullable TRequest request, @NonNull TListener listener,
+            @NonNull Executor executor) throws RemoteException {
+        return addInternal(request, listener, executor);
+    }
+
+    protected final boolean addInternal(@Nullable TRequest request, @NonNull Object listener,
+            @NonNull Handler handler) throws RemoteException {
+        return addInternal(request, listener, new HandlerExecutor(handler));
+    }
+
+    protected final boolean addInternal(@Nullable TRequest request, @NonNull Object listener,
+            @NonNull Executor executor)
             throws RemoteException {
         Preconditions.checkArgument(listener != null, "invalid null listener/callback");
-        return addInternal(listener, new Registration<>(executor, convertKey(listener)));
+        return addInternal(listener, new Registration<>(request, executor, convertKey(listener)));
     }
 
-    private boolean addInternal(Object key, Registration<T> registration) throws RemoteException {
+    private boolean addInternal(Object key, Registration<TRequest, TListener> registration)
+            throws RemoteException {
         Preconditions.checkNotNull(registration);
 
         synchronized (mListeners) {
-            if (mListeners.isEmpty() && !registerService()) {
-                return false;
-            }
-            Registration<T> oldRegistration = mListeners.put(key, registration);
+            boolean initialRequest = mListeners.isEmpty();
+
+            Registration<TRequest, TListener> oldRegistration = mListeners.put(key, registration);
             if (oldRegistration != null) {
                 oldRegistration.unregister();
             }
+            TRequest merged = mergeRequests();
+
+            if (initialRequest || !Objects.equals(merged, mMergedRequest)) {
+                mMergedRequest = merged;
+                if (!initialRequest) {
+                    unregisterService();
+                }
+                registerService(mMergedRequest);
+            }
+
             return true;
         }
     }
 
     public void removeListener(Object listener) throws RemoteException {
         synchronized (mListeners) {
-            Registration<T> oldRegistration = mListeners.remove(listener);
+            Registration<TRequest, TListener> oldRegistration = mListeners.remove(listener);
             if (oldRegistration == null) {
                 return;
             }
             oldRegistration.unregister();
 
-            if (mListeners.isEmpty()) {
+            boolean lastRequest = mListeners.isEmpty();
+            TRequest merged = lastRequest ? null : mergeRequests();
+            boolean newRequest = !lastRequest && !Objects.equals(merged, mMergedRequest);
+
+            if (lastRequest || newRequest) {
                 unregisterService();
+                mMergedRequest = merged;
+                if (newRequest) {
+                    registerService(mMergedRequest);
+                }
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected T convertKey(@NonNull Object listener) {
-        return (T) listener;
+    protected TListener convertKey(@NonNull Object listener) {
+        return (TListener) listener;
     }
 
-    protected abstract boolean registerService() throws RemoteException;
+    protected abstract boolean registerService(TRequest request) throws RemoteException;
     protected abstract void unregisterService() throws RemoteException;
 
-    protected void execute(Consumer<T> operation) {
+    @Nullable
+    protected TRequest merge(@NonNull TRequest[] requests) {
+        for (TRequest request : requests) {
+            Preconditions.checkArgument(request == null,
+                    "merge() has to be overridden for non-null requests.");
+        }
+        return null;
+    }
+
+    protected void execute(Consumer<TListener> operation) {
         synchronized (mListeners) {
-            for (Registration<T> registration : mListeners.values()) {
+            for (Registration<TRequest, TListener> registration : mListeners.values()) {
                 registration.execute(operation);
             }
         }
+    }
+
+    @GuardedBy("mListeners")
+    @SuppressWarnings("unchecked")
+    @Nullable
+    private TRequest mergeRequests() {
+        Preconditions.checkState(Thread.holdsLock(mListeners));
+
+        if (mListeners.isEmpty()) {
+            return null;
+        }
+
+        if (mListeners.size() == 1) {
+            return mListeners.valueAt(0).getRequest();
+        }
+
+        TRequest[] requests = (TRequest[]) new Object[mListeners.size()];
+        for (int index = 0; index < mListeners.size(); index++) {
+            requests[index] = mListeners.valueAt(index).getRequest();
+        }
+        return merge(requests);
     }
 }

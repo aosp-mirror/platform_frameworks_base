@@ -146,7 +146,6 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
             int viewType) {
         BadgedImageView view = (BadgedImageView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.bubble_view, parent, false);
-        view.setPadding(15, 15, 15, 15);
         return new ViewHolder(view);
     }
 

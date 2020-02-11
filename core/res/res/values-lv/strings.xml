@@ -1885,6 +1885,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vai ieslēgt darba profilu?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Tiks ieslēgtas jūsu darba lietotnes, paziņojumi, dati un citas darba profila funkcijas."</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ieslēgt"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Lietotne nav pieejama"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pašlaik nav pieejama."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Šī lietotne tika izstrādāta vecākai Android versijai un var nedarboties pareizi. Meklējiet atjauninājumus vai sazinieties ar izstrādātāju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Meklēt atjauninājumu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jums ir jaunas īsziņas."</string>

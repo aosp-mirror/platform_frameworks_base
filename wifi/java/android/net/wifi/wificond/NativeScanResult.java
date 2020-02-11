@@ -16,14 +16,21 @@
 
 package android.net.wifi.wificond;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,6 +40,8 @@ import java.util.List;
  */
 @SystemApi
 public final class NativeScanResult implements Parcelable {
+    private static final String TAG = "NativeScanResult";
+
     /** @hide */
     @VisibleForTesting
     public byte[] ssid;
@@ -53,7 +62,7 @@ public final class NativeScanResult implements Parcelable {
     public long tsf;
     /** @hide */
     @VisibleForTesting
-    public int capability;
+    @BssCapabilityBits public int capability;
     /** @hide */
     @VisibleForTesting
     public boolean associated;
@@ -71,14 +80,17 @@ public final class NativeScanResult implements Parcelable {
     }
 
     /**
-     * Returns raw bytes representing the MAC address (BSSID) of the AP represented by this scan
-     * result.
+     * Returns the MAC address (BSSID) of the AP represented by this scan result.
      *
-     * @return a byte array, possibly null or containing the incorrect number of bytes for a MAC
-     * address.
+     * @return a MacAddress or null on error.
      */
-    @NonNull public byte[] getBssid() {
-        return bssid;
+    @Nullable public MacAddress getBssid() {
+        try {
+            return MacAddress.fromBytes(bssid);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Illegal argument " + Arrays.toString(bssid), e);
+            return null;
+        }
     }
 
     /**
@@ -127,31 +139,103 @@ public final class NativeScanResult implements Parcelable {
         return associated;
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"BSS_CAPABILITY_"},
+            value = {BSS_CAPABILITY_ESS,
+                    BSS_CAPABILITY_IBSS,
+                    BSS_CAPABILITY_CF_POLLABLE,
+                    BSS_CAPABILITY_CF_POLL_REQUEST,
+                    BSS_CAPABILITY_PRIVACY,
+                    BSS_CAPABILITY_SHORT_PREAMBLE,
+                    BSS_CAPABILITY_PBCC,
+                    BSS_CAPABILITY_CHANNEL_AGILITY,
+                    BSS_CAPABILITY_SPECTRUM_MANAGEMENT,
+                    BSS_CAPABILITY_QOS,
+                    BSS_CAPABILITY_SHORT_SLOT_TIME,
+                    BSS_CAPABILITY_APSD,
+                    BSS_CAPABILITY_RADIO_MANAGEMENT,
+                    BSS_CAPABILITY_DSSS_OFDM,
+                    BSS_CAPABILITY_DELAYED_BLOCK_ACK,
+                    BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK
+            })
+    public @interface BssCapabilityBits { }
+
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): ESS.
+     */
+    public static final int BSS_CAPABILITY_ESS = 0x1 << 0;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): IBSS.
+     */
+    public static final int BSS_CAPABILITY_IBSS = 0x1 << 1;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): CF Pollable.
+     */
+    public static final int BSS_CAPABILITY_CF_POLLABLE = 0x1 << 2;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): CF-Poll Request.
+     */
+    public static final int BSS_CAPABILITY_CF_POLL_REQUEST = 0x1 << 3;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Privacy.
+     */
+    public static final int BSS_CAPABILITY_PRIVACY = 0x1 << 4;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Short Preamble.
+     */
+    public static final int BSS_CAPABILITY_SHORT_PREAMBLE = 0x1 << 5;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): PBCC.
+     */
+    public static final int BSS_CAPABILITY_PBCC = 0x1 << 6;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Channel Agility.
+     */
+    public static final int BSS_CAPABILITY_CHANNEL_AGILITY = 0x1 << 7;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Spectrum Management.
+     */
+    public static final int BSS_CAPABILITY_SPECTRUM_MANAGEMENT = 0x1 << 8;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): QoS.
+     */
+    public static final int BSS_CAPABILITY_QOS = 0x1 << 9;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Short Slot Time.
+     */
+    public static final int BSS_CAPABILITY_SHORT_SLOT_TIME = 0x1 << 10;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): APSD.
+     */
+    public static final int BSS_CAPABILITY_APSD = 0x1 << 11;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Radio Management.
+     */
+    public static final int BSS_CAPABILITY_RADIO_MANAGEMENT = 0x1 << 12;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): DSSS-OFDM.
+     */
+    public static final int BSS_CAPABILITY_DSSS_OFDM = 0x1 << 13;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Delayed Block Ack.
+     */
+    public static final int BSS_CAPABILITY_DELAYED_BLOCK_ACK = 0x1 << 14;
+    /**
+     * BSS capability bit (see IEEE Std 802.11: 9.4.1.4): Immediate Block Ack.
+     */
+    public static final int BSS_CAPABILITY_IMMEDIATE_BLOCK_ACK = 0x1 << 15;
+
     /**
      *  Returns the capabilities of the AP repseresented by this scan result as advertised in the
      *  received probe response or beacon.
      *
-     *  This is a bit mask describing the capabilities of a BSS. See IEEE Std 802.11: 9.4.1.4:
-     *    Bit 0 - ESS
-     *    Bit 1 - IBSS
-     *    Bit 2 - CF Pollable
-     *    Bit 3 - CF-Poll Request
-     *    Bit 4 - Privacy
-     *    Bit 5 - Short Preamble
-     *    Bit 6 - PBCC
-     *    Bit 7 - Channel Agility
-     *    Bit 8 - Spectrum Management
-     *    Bit 9 - QoS
-     *    Bit 10 - Short Slot Time
-     *    Bit 11 - APSD
-     *    Bit 12 - Radio Measurement
-     *    Bit 13 - DSSS-OFDM
-     *    Bit 14 - Delayed Block Ack
-     *    Bit 15 - Immediate Block Ack
+     *  This is a bit mask describing the capabilities of a BSS. See IEEE Std 802.11: 9.4.1.4: one
+     *  of the {@code BSS_CAPABILITY_*} flags.
      *
      * @return a bit mask of capabilities.
      */
-    @NonNull public int getCapabilities() {
+    @BssCapabilityBits public int getCapabilities() {
         return capability;
     }
 

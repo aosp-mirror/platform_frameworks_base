@@ -26,10 +26,10 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IStatsd;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.StatsFrameworkInitializer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.StatsdStatsLog;
 
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
@@ -59,17 +59,17 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging start");
+                        Log.d(TAG, "Failed to find statsd when logging start");
                     }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(label,
-                        FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
+                        StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging start");
+                    Log.d(TAG, "Failed to connect to statsd when logging start");
                 }
                 return false;
             }
@@ -88,17 +88,17 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging stop");
+                        Log.d(TAG, "Failed to find statsd when logging stop");
                     }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
+                        label, StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                    Log.d(TAG, "Failed to connect to statsd when logging stop");
                 }
                 return false;
             }
@@ -117,17 +117,17 @@ public final class StatsLog {
                 IStatsd service = getIStatsdLocked();
                 if (service == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Failed to find statsd when logging event");
+                        Log.d(TAG, "Failed to find statsd when logging event");
                     }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
-                        label, FrameworkStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
+                        label, StatsdStatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
                 if (DEBUG) {
-                    Slog.d(TAG, "Failed to connect to statsd when logging event");
+                    Log.d(TAG, "Failed to connect to statsd when logging event");
                 }
                 return false;
             }
@@ -162,7 +162,7 @@ public final class StatsLog {
                     | EXPERIMENT_IDS_FIELD_ID,
                     id);
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.BINARY_PUSH_STATE_CHANGED,
+        StatsdStatsLog.write(StatsdStatsLog.BINARY_PUSH_STATE_CHANGED,
                 trainName,
                 trainVersionCode,
                 (options & IStatsd.FLAG_REQUIRE_STAGING) > 0,
@@ -180,7 +180,10 @@ public final class StatsLog {
         if (sService != null) {
             return sService;
         }
-        sService = IStatsd.Stub.asInterface(ServiceManager.getService("stats"));
+        sService = IStatsd.Stub.asInterface(StatsFrameworkInitializer
+            .getStatsServiceManager()
+            .getStatsdServiceRegisterer()
+            .get());
         return sService;
     }
 

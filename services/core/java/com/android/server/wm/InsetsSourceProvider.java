@@ -59,6 +59,7 @@ class InsetsSourceProvider {
     private final InsetsSourceControl mFakeControl;
     private @Nullable InsetsSourceControl mControl;
     private @Nullable InsetsControlTarget mControlTarget;
+    private @Nullable InsetsControlTarget mPendingControlTarget;
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
     private @Nullable ControlAdapter mAdapter;
@@ -140,8 +141,9 @@ class InsetsSourceProvider {
             mSource.setVisibleFrame(null);
         } else if (mControllable) {
             mWin.setControllableInsetProvider(this);
-            if (mControlTarget != null) {
-                updateControlForTarget(mControlTarget, true /* force */);
+            if (mPendingControlTarget != null) {
+                updateControlForTarget(mPendingControlTarget, true /* force */);
+                mPendingControlTarget = null;
             }
         }
     }
@@ -245,7 +247,7 @@ class InsetsSourceProvider {
             setWindow(null, null, null);
         }
         if (mWin == null) {
-            mControlTarget = target;
+            mPendingControlTarget = target;
             return;
         }
         if (target == mControlTarget && !force) {

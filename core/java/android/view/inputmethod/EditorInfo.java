@@ -33,11 +33,11 @@ import android.util.Printer;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * An EditorInfo describes several attributes of a text editing object
@@ -558,7 +558,7 @@ public class EditorInfo implements InputType, Parcelable {
      *                      editor wants to trim out the first 10 chars, subTextStart should be 10.
      */
     public void setInitialSurroundingSubText(@NonNull CharSequence subText, int subTextStart) {
-        Preconditions.checkNotNull(subText);
+        Objects.requireNonNull(subText);
 
         // Swap selection start and end if necessary.
         final int subTextSelStart = initialSelStart > initialSelEnd
@@ -585,25 +585,35 @@ public class EditorInfo implements InputType, Parcelable {
             return;
         }
 
-        // The input text is too long. Let's try to trim it reasonably. Fundamental rules are:
-        // 1. Text before the cursor is the most important information to IMEs.
-        // 2. Text after the cursor is the second important information to IMEs.
-        // 3. Selected text is the least important information but it shall NEVER be truncated.
-        //    When it is too long, just drop it.
-        //
-        // Source: <TextBeforeCursor><Selection><TextAfterCursor>
-        // Possible results:
-        // 1. <(maybeTrimmedAtHead)TextBeforeCursor><Selection><TextAfterCursor(maybeTrimmedAtTail)>
-        // 2. <(maybeTrimmedAtHead)TextBeforeCursor><TextAfterCursor(maybeTrimmedAtTail)>
-        //
-        final int sourceSelLength = subTextSelEnd - subTextSelStart;
+        trimLongSurroundingText(subText, subTextSelStart, subTextSelEnd);
+    }
+
+    /**
+     * Trims the initial surrounding text when it is over sized. Fundamental trimming rules are:
+     * - The text before the cursor is the most important information to IMEs.
+     * - The text after the cursor is the second important information to IMEs.
+     * - The selected text is the least important information but it shall NEVER be truncated. When
+     *    it is too long, just drop it.
+     *<p><pre>
+     * For example, the subText can be viewed as
+     *     TextBeforeCursor + Selection + TextAfterCursor
+     * The result could be
+     *     1. (maybeTrimmedAtHead)TextBeforeCursor + Selection + TextAfterCursor(maybeTrimmedAtTail)
+     *     2. (maybeTrimmedAtHead)TextBeforeCursor + TextAfterCursor(maybeTrimmedAtTail)</pre>
+     *
+     * @param subText The long text that needs to be trimmed.
+     * @param selStart The text offset of the start of the selection.
+     * @param selEnd The text offset of the end of the selection
+     */
+    private void trimLongSurroundingText(CharSequence subText, int selStart, int selEnd) {
+        final int sourceSelLength = selEnd - selStart;
         // When the selected text is too long, drop it.
         final int newSelLength = (sourceSelLength > MAX_INITIAL_SELECTION_LENGTH)
                 ? 0 : sourceSelLength;
 
         // Distribute rest of length quota to TextBeforeCursor and TextAfterCursor in 4:1 ratio.
-        final int subTextBeforeCursorLength = subTextSelStart;
-        final int subTextAfterCursorLength = subTextLength - subTextSelEnd;
+        final int subTextBeforeCursorLength = selStart;
+        final int subTextAfterCursorLength = subText.length() - selEnd;
         final int maxLengthMinusSelection = MEMORY_EFFICIENT_TEXT_LENGTH - newSelLength;
         final int possibleMaxBeforeCursorLength =
                 Math.min(subTextBeforeCursorLength, (int) (0.8 * maxLengthMinusSelection));
@@ -617,24 +627,23 @@ public class EditorInfo implements InputType, Parcelable {
 
         // We don't want to cut surrogate pairs in the middle. Exam that at the new head and tail.
         if (isCutOnSurrogate(subText,
-                subTextSelStart - newBeforeCursorLength, TrimPolicy.HEAD)) {
+                selStart - newBeforeCursorLength, TrimPolicy.HEAD)) {
             newBeforeCursorHead = newBeforeCursorHead + 1;
             newBeforeCursorLength = newBeforeCursorLength - 1;
         }
         if (isCutOnSurrogate(subText,
-                subTextSelEnd + newAfterCursorLength - 1, TrimPolicy.TAIL)) {
+                selEnd + newAfterCursorLength - 1, TrimPolicy.TAIL)) {
             newAfterCursorLength = newAfterCursorLength - 1;
         }
 
         // Now we know where to trim, compose the initialSurroundingText.
         final int newTextLength = newBeforeCursorLength + newSelLength + newAfterCursorLength;
-        CharSequence newInitialSurroundingText;
+        final CharSequence newInitialSurroundingText;
         if (newSelLength != sourceSelLength) {
             final CharSequence beforeCursor = subText.subSequence(newBeforeCursorHead,
                     newBeforeCursorHead + newBeforeCursorLength);
-
-            final CharSequence afterCursor = subText.subSequence(subTextSelEnd,
-                    subTextSelEnd + newAfterCursorLength);
+            final CharSequence afterCursor = subText.subSequence(selEnd,
+                    selEnd + newAfterCursorLength);
 
             newInitialSurroundingText = TextUtils.concat(beforeCursor, afterCursor);
         } else {
@@ -651,15 +660,16 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
-     * Get <var>n</var> characters of text before the current cursor position. May be {@code null}
-     * when the protocol is not supported.
+     * Get <var>length</var> characters of text before the current cursor position. May be
+     * {@code null} when the protocol is not supported.
      *
      * @param length The expected length of the text.
      * @param flags Supplies additional options controlling how the text is returned. May be
      * either 0 or {@link InputConnection#GET_TEXT_WITH_STYLES}.
      * @return the text before the cursor position; the length of the returned text might be less
-     * than <var>n</var>. When there is no text before the cursor, an empty string will be returned.
-     * It could also be {@code null} when the editor or system could not support this protocol.
+     * than <var>length</var>. When there is no text before the cursor, an empty string will be
+     * returned. It could also be {@code null} when the editor or system could not support this
+     * protocol.
      */
     @Nullable
     public CharSequence getInitialTextBeforeCursor(int length, int flags) {
@@ -667,8 +677,8 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
-     * Gets the selected text, if any. May be {@code null} when no text is selected or the selected
-     * text is way too long.
+     * Gets the selected text, if any. May be {@code null} when the protocol is not supported or the
+     * selected text is way too long.
      *
      * @param flags Supplies additional options controlling how the text is returned. May be
      * either 0 or {@link InputConnection#GET_TEXT_WITH_STYLES}.
@@ -693,15 +703,16 @@ public class EditorInfo implements InputType, Parcelable {
     }
 
     /**
-     * Get <var>n</var> characters of text after the current cursor position. May be {@code null}
-     * when the protocol is not supported.
+     * Get <var>length</var> characters of text after the current cursor position. May be
+     * {@code null} when the protocol is not supported.
      *
      * @param length The expected length of the text.
      * @param flags Supplies additional options controlling how the text is returned. May be
      * either 0 or {@link InputConnection#GET_TEXT_WITH_STYLES}.
      * @return the text after the cursor position; the length of the returned text might be less
-     * than <var>n</var>. When there is no text after the cursor, an empty string will be returned.
-     * It could also be {@code null} when the editor or system could not support this protocol.
+     * than <var>length</var>. When there is no text after the cursor, an empty string will be
+     * returned. It could also be {@code null} when the editor or system could not support this
+     * protocol.
      */
     @Nullable
     public CharSequence getInitialTextAfterCursor(int length, int flags) {
@@ -863,7 +874,6 @@ public class EditorInfo implements InputType, Parcelable {
         return 0;
     }
 
-    // TODO(b/148035211): Unit tests for this class
     static final class InitialSurroundingText implements Parcelable {
         @Nullable final CharSequence mSurroundingText;
         final int mSelectionHead;

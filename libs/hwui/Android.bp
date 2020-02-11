@@ -171,7 +171,6 @@ cc_defaults {
         "renderthread/RenderTask.cpp",
         "renderthread/TimeLord.cpp",
         "hwui/AnimatedImageDrawable.cpp",
-        "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
         "hwui/Canvas.cpp",
         "hwui/ImageDecoder.cpp",
@@ -213,6 +212,7 @@ cc_defaults {
         android: {
 
             srcs: [
+                "hwui/AnimatedImageThread.cpp",
                 "pipeline/skia/ATraceMemoryDump.cpp",
                 "pipeline/skia/GLFunctorDrawable.cpp",
                 "pipeline/skia/LayerDrawable.cpp",

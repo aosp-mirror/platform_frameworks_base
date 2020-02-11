@@ -25,6 +25,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.UserSwitchObserver;
@@ -82,6 +83,25 @@ public class BiometricService extends SystemService {
 
     static final String TAG = "BiometricService";
     private static final boolean DEBUG = true;
+
+    private static final int BIOMETRIC_NO_HARDWARE = 0;
+    private static final int BIOMETRIC_OK = 1;
+    private static final int BIOMETRIC_DISABLED_BY_DEVICE_POLICY = 2;
+    private static final int BIOMETRIC_INSUFFICIENT_STRENGTH = 3;
+    private static final int BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE = 4;
+    private static final int BIOMETRIC_HARDWARE_NOT_DETECTED = 5;
+    private static final int BIOMETRIC_NOT_ENROLLED = 6;
+    private static final int BIOMETRIC_NOT_ENABLED_FOR_APPS = 7;
+
+    @IntDef({BIOMETRIC_NO_HARDWARE,
+            BIOMETRIC_OK,
+            BIOMETRIC_DISABLED_BY_DEVICE_POLICY,
+            BIOMETRIC_INSUFFICIENT_STRENGTH,
+            BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE,
+            BIOMETRIC_HARDWARE_NOT_DETECTED,
+            BIOMETRIC_NOT_ENROLLED,
+            BIOMETRIC_NOT_ENABLED_FOR_APPS})
+    @interface BiometricStatus {}
 
     private static final int MSG_ON_AUTHENTICATION_SUCCEEDED = 2;
     private static final int MSG_ON_AUTHENTICATION_REJECTED = 3;
@@ -206,7 +226,7 @@ public class BiometricService extends SystemService {
         }
 
         boolean isAllowDeviceCredential() {
-            return Utils.isDeviceCredentialAllowed(mBundle);
+            return Utils.isCredentialRequested(mBundle);
         }
     }
 
@@ -372,8 +392,12 @@ public class BiometricService extends SystemService {
          * strength.
          * @return a bitfield, see {@link Authenticators}
          */
-        public int getActualStrength() {
+        int getActualStrength() {
             return OEMStrength | updatedStrength;
+        }
+
+        boolean isDowngraded() {
+            return OEMStrength != updatedStrength;
         }
 
         /**
@@ -381,7 +405,7 @@ public class BiometricService extends SystemService {
          * is checked.
          * @param newStrength
          */
-        public void updateStrength(int newStrength) {
+        void updateStrength(int newStrength) {
             String log = "updateStrength: Before(" + toString() + ")";
             updatedStrength = newStrength;
             log += " After(" + toString() + ")";
@@ -1007,6 +1031,79 @@ public class BiometricService extends SystemService {
         return isBiometricDisabled;
     }
 
+    private static int biometricStatusToBiometricConstant(@BiometricStatus int status) {
+        switch (status) {
+            case BIOMETRIC_NO_HARDWARE:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+            case BIOMETRIC_OK:
+                return BiometricConstants.BIOMETRIC_SUCCESS;
+            case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            case BIOMETRIC_INSUFFICIENT_STRENGTH:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+            case BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE:
+                return BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+            case BIOMETRIC_HARDWARE_NOT_DETECTED:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            case BIOMETRIC_NOT_ENROLLED:
+                return BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+            default:
+                return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+        }
+    }
+
+    /**
+     * Returns the status of the authenticator, with errors returned in a specific priority order.
+     * For example, {@link #BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE} is only returned
+     * if it has enrollments, and is enabled for apps.
+     *
+     * We should only return the modality if the authenticator should be exposed. e.g.
+     * BIOMETRIC_NOT_ENROLLED_FOR_APPS should not expose the authenticator's type.
+     *
+     * @return A Pair with `first` being modality, and `second` being @BiometricStatus
+     */
+    private Pair<Integer, Integer> getStatusForBiometricAuthenticator(
+            AuthenticatorWrapper authenticator, int userId, String opPackageName,
+            boolean checkDevicePolicyManager, int requestedStrength) {
+        if (checkDevicePolicyManager) {
+            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
+                return new Pair<>(TYPE_NONE, BIOMETRIC_DISABLED_BY_DEVICE_POLICY);
+            }
+        }
+
+        final boolean wasStrongEnough =
+                Utils.isAtLeastStrength(authenticator.OEMStrength, requestedStrength);
+        final boolean isStrongEnough =
+                Utils.isAtLeastStrength(authenticator.getActualStrength(), requestedStrength);
+
+        if (wasStrongEnough && !isStrongEnough) {
+            return new Pair<>(authenticator.modality,
+                    BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE);
+        } else if (!wasStrongEnough) {
+            return new Pair<>(TYPE_NONE, BIOMETRIC_INSUFFICIENT_STRENGTH);
+        }
+
+        try {
+            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
+                return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+            }
+
+            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
+                return new Pair<>(authenticator.modality, BIOMETRIC_NOT_ENROLLED);
+            }
+        } catch (RemoteException e) {
+            return new Pair<>(authenticator.modality, BIOMETRIC_HARDWARE_NOT_DETECTED);
+        }
+
+        if (!isEnabledForApp(authenticator.modality, userId)) {
+            return new Pair<>(TYPE_NONE, BIOMETRIC_NOT_ENABLED_FOR_APPS);
+        }
+
+        return new Pair<>(authenticator.modality, BIOMETRIC_OK);
+    }
+
     /**
      * Depending on the requested authentication (credential/biometric combination), checks their
      * availability.
@@ -1029,10 +1126,9 @@ public class BiometricService extends SystemService {
     private Pair<Integer, Integer> checkAndGetAuthenticators(int userId, Bundle bundle,
             String opPackageName, boolean checkDevicePolicyManager) throws RemoteException {
 
-        final boolean biometricRequested = Utils.isBiometricAllowed(bundle);
-        final boolean credentialRequested = Utils.isDeviceCredentialAllowed(bundle);
+        final boolean biometricRequested = Utils.isBiometricRequested(bundle);
+        final boolean credentialRequested = Utils.isCredentialRequested(bundle);
 
-        final boolean biometricOk;
         final boolean credentialOk = mTrustManager.isDeviceSecure(userId);
 
         // Assuming that biometric authenticators are listed in priority-order, the rest of this
@@ -1041,96 +1137,56 @@ public class BiometricService extends SystemService {
         // the correct error. Error strings that are modality-specific should also respect the
         // priority-order.
 
-        // Find first biometric authenticator that's strong enough, detected, enrolled, and enabled.
-        boolean disabledByDevicePolicy = false;
-        boolean hasSufficientStrength = false;
-        boolean isHardwareDetected = false;
-        boolean hasTemplatesEnrolled = false;
-        boolean enabledForApps = false;
+        int firstBiometricModality = TYPE_NONE;
+        @BiometricStatus int firstBiometricStatus = BIOMETRIC_NO_HARDWARE;
 
-        int modality = TYPE_NONE;
-        int firstHwAvailable = TYPE_NONE;
+        int biometricModality = TYPE_NONE;
+        @BiometricStatus int biometricStatus = BIOMETRIC_NO_HARDWARE;
+
         for (AuthenticatorWrapper authenticator : mAuthenticators) {
-            final int actualStrength = authenticator.getActualStrength();
             final int requestedStrength = Utils.getPublicBiometricStrength(bundle);
+            Pair<Integer, Integer> result = getStatusForBiometricAuthenticator(
+                    authenticator, userId, opPackageName, checkDevicePolicyManager,
+                    requestedStrength);
 
-            if (isBiometricDisabledByDevicePolicy(authenticator.modality, userId)) {
-                disabledByDevicePolicy = true;
-                continue;
-            }
-            disabledByDevicePolicy = false;
+            biometricStatus = result.second;
 
-            if (!Utils.isAtLeastStrength(actualStrength, requestedStrength)) {
-                continue;
-            }
-            hasSufficientStrength = true;
+            Slog.d(TAG, "Authenticator ID: " + authenticator.id
+                    + " Modality: " + authenticator.modality
+                    + " ReportedModality: " + result.first
+                    + " Status: " + biometricStatus);
 
-            if (!authenticator.impl.isHardwareDetected(opPackageName)) {
-                continue;
-            }
-            isHardwareDetected = true;
-
-            if (firstHwAvailable == TYPE_NONE) {
-                // Store the first one since we want to return the error in correct
-                // priority order.
-                firstHwAvailable = authenticator.modality;
+            if (firstBiometricModality == TYPE_NONE) {
+                firstBiometricModality = result.first;
+                firstBiometricStatus = biometricStatus;
             }
 
-            if (!authenticator.impl.hasEnrolledTemplates(userId, opPackageName)) {
-                continue;
+            if (biometricStatus == BIOMETRIC_OK) {
+                biometricModality = result.first;
+                break;
             }
-            hasTemplatesEnrolled = true;
-
-            if (!isEnabledForApp(authenticator.modality, userId)) {
-                continue;
-            }
-            enabledForApps = true;
-            modality = authenticator.modality;
-            break;
         }
 
-        biometricOk = !disabledByDevicePolicy
-                && hasSufficientStrength && isHardwareDetected
-                && hasTemplatesEnrolled && enabledForApps;
-
-        Slog.d(TAG, "checkAndGetAuthenticators: user=" + userId
-                + " checkDevicePolicyManager=" + checkDevicePolicyManager
-                + " isHardwareDetected=" + isHardwareDetected
-                + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
-                + " enabledForApps=" + enabledForApps
-                + " disabledByDevicePolicy=" + disabledByDevicePolicy);
-
         if (biometricRequested && credentialRequested) {
-            if (credentialOk || biometricOk) {
-                if (!biometricOk) {
+            if (credentialOk || biometricStatus == BIOMETRIC_OK) {
+                if (biometricStatus != BIOMETRIC_OK) {
                     // If there's a problem with biometrics but device credential is
                     // allowed, only show credential UI.
                     bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
                             Authenticators.DEVICE_CREDENTIAL);
                 }
-                return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
+                return new Pair<>(biometricModality, BiometricConstants.BIOMETRIC_SUCCESS);
             } else {
-                return new Pair<>(firstHwAvailable,
+                return new Pair<>(firstBiometricModality,
                         BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
             }
         } else if (biometricRequested) {
-            if (biometricOk) {
-                return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
-            } else if (disabledByDevicePolicy) {
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
-            } else if (!hasSufficientStrength) {
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
-            } else if (!isHardwareDetected) {
-                return new Pair<>(firstHwAvailable,
-                        BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
-            } else if (!hasTemplatesEnrolled) {
-                return new Pair<>(firstHwAvailable,
-                        BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
-            } else if (!enabledForApps) {
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            if (biometricStatus == BIOMETRIC_OK) {
+                return new Pair<>(biometricModality,
+                        biometricStatusToBiometricConstant(biometricStatus));
             } else {
-                Slog.e(TAG, "Unexpected case");
-                return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+                return new Pair<>(firstBiometricModality,
+                        biometricStatusToBiometricConstant(firstBiometricStatus));
             }
         } else if (credentialRequested) {
             if (credentialOk) {

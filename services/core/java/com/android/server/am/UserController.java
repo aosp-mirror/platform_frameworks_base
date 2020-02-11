@@ -414,6 +414,7 @@ class UserController implements Handler.Callback {
                 Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
+                        | Intent.FLAG_RECEIVER_OFFLOAD
                         | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
                         new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
@@ -2447,10 +2448,10 @@ class UserController implements Handler.Callback {
                 int realCallingPid, @UserIdInt int userId) {
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
-                return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,
-                        resultTo, resultCode, resultData, resultExtras, requiredPermissions, appOp,
-                        bOptions, ordered, sticky, callingPid, callingUid, realCallingUid,
-                        realCallingPid, userId);
+                return mService.broadcastIntentLocked(null, null, intent, resolvedType, resultTo,
+                        resultCode, resultData, resultExtras, requiredPermissions, appOp, bOptions,
+                        ordered, sticky, callingPid, callingUid, realCallingUid, realCallingPid,
+                        userId);
             }
         }
 

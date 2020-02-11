@@ -21,9 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageStats;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 
@@ -36,14 +33,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
-import org.robolectric.shadows.ShadowPackageManager;
 
 @RunWith(RobolectricTestRunner.class)
 public class InfoMediaDeviceTest {
 
     private static final String TEST_PACKAGE_NAME = "com.test.packagename";
-    private static final String TEST_PACKAGE_NAME2 = "com.test.packagename2";
     private static final String TEST_ID = "test_id";
     private static final String TEST_NAME = "test_name";
 
@@ -52,27 +46,13 @@ public class InfoMediaDeviceTest {
     @Mock
     private MediaRoute2Info mRouteInfo;
 
-
     private Context mContext;
     private InfoMediaDevice mInfoMediaDevice;
-    private ShadowPackageManager mShadowPackageManager;
-    private ApplicationInfo mAppInfo;
-    private PackageInfo mPackageInfo;
-    private PackageStats mPackageStats;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
-        mShadowPackageManager = Shadows.shadowOf(mContext.getPackageManager());
-        mAppInfo = new ApplicationInfo();
-        mAppInfo.flags = ApplicationInfo.FLAG_INSTALLED;
-        mAppInfo.packageName = TEST_PACKAGE_NAME;
-        mAppInfo.name = TEST_NAME;
-        mPackageInfo = new PackageInfo();
-        mPackageInfo.packageName = TEST_PACKAGE_NAME;
-        mPackageInfo.applicationInfo = mAppInfo;
-        mPackageStats = new PackageStats(TEST_PACKAGE_NAME);
 
         mInfoMediaDevice = new InfoMediaDevice(mContext, mRouterManager, mRouteInfo,
                 TEST_PACKAGE_NAME);
@@ -105,33 +85,5 @@ public class InfoMediaDeviceTest {
         when(mRouteInfo.getId()).thenReturn(TEST_ID);
 
         assertThat(mInfoMediaDevice.getId()).isEqualTo(TEST_ID);
-    }
-
-    @Test
-    public void getClientPackageName_returnPackageName() {
-        when(mRouteInfo.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
-
-        assertThat(mInfoMediaDevice.getClientPackageName()).isEqualTo(TEST_PACKAGE_NAME);
-    }
-
-    @Test
-    public void getClientAppLabel_matchedPackageName_returnLabel() {
-        when(mRouteInfo.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
-
-        assertThat(mInfoMediaDevice.getClientAppLabel()).isEqualTo(
-                mContext.getResources().getString(R.string.unknown));
-
-        mShadowPackageManager.addPackage(mPackageInfo, mPackageStats);
-
-        assertThat(mInfoMediaDevice.getClientAppLabel()).isEqualTo(TEST_NAME);
-    }
-
-    @Test
-    public void getClientAppLabel_noMatchedPackageName_returnDefault() {
-        mShadowPackageManager.addPackage(mPackageInfo, mPackageStats);
-        when(mRouteInfo.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME2);
-
-        assertThat(mInfoMediaDevice.getClientAppLabel()).isEqualTo(
-                mContext.getResources().getString(R.string.unknown));
     }
 }

@@ -1853,6 +1853,8 @@
     <string name="work_mode_off_title" msgid="5503291976647976560">"Vill du aktivera jobbprofilen?"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"Jobbappar, aviseringar, data och andra funktioner i jobbprofilen aktiveras"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivera"</string>
+    <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
+    <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Appen har utvecklats för en äldre version av Android och kanske inte fungerar som den ska. Testa att söka efter uppdateringar eller kontakta utvecklaren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sök efter uppdateringar"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nya meddelanden"</string>

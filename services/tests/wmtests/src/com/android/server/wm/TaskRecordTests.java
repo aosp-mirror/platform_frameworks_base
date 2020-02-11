@@ -988,7 +988,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     private Task createTask(int taskId) {
         return new ActivityStack(mService, taskId, new Intent(), null, null, null,
                 ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
-                0, false, null, 0, 0, 0, 0, 0, null, null, 0, false, false, false, 0,
+                0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0,
                 0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/,
                 null /*stack*/);
     }
@@ -1022,7 +1022,7 @@ public class TaskRecordTests extends ActivityTestsBase {
                 boolean neverRelinquishIdentity,
                 ActivityManager.TaskDescription lastTaskDescription,
                 int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
-                int callingUid, String callingPackage, String callingFeatureId, int resizeMode,
+                int callingUid, String callingPackage, int resizeMode,
                 boolean supportsPictureInPicture,
                 boolean realActivitySuspended, boolean userSetupComplete, int minWidth,
                 int minHeight, ActivityStack stack) {

@@ -39,6 +39,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -225,7 +226,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
         val control = builderFromInfo(newControlInfo).build()
 
-        controller.loadForComponent(TEST_COMPONENT) {}
+        controller.loadForComponent(TEST_COMPONENT) { _, _ -> Unit }
 
         reset(persistenceWrapper)
         verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
@@ -293,11 +294,13 @@ class ControlsControllerImplTest : SysuiTestCase() {
         var loaded = false
         val control = builderFromInfo(TEST_CONTROL_INFO).build()
 
-        controller.loadForComponent(TEST_COMPONENT) {
+        controller.loadForComponent(TEST_COMPONENT) { controls, favorites ->
             loaded = true
-            assertEquals(1, it.size)
-            val controlStatus = it[0]
+            assertEquals(1, controls.size)
+            val controlStatus = controls[0]
             assertEquals(ControlStatus(control, false), controlStatus)
+
+            assertTrue(favorites.isEmpty())
         }
 
         verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
@@ -315,14 +318,17 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val control2 = builderFromInfo(TEST_CONTROL_INFO_2).build()
         controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
 
-        controller.loadForComponent(TEST_COMPONENT) {
+        controller.loadForComponent(TEST_COMPONENT) { controls, favorites ->
             loaded = true
-            assertEquals(2, it.size)
-            val controlStatus = it.first { it.control.controlId == TEST_CONTROL_ID }
+            assertEquals(2, controls.size)
+            val controlStatus = controls.first { it.control.controlId == TEST_CONTROL_ID }
             assertEquals(ControlStatus(control, true), controlStatus)
 
-            val controlStatus2 = it.first { it.control.controlId == TEST_CONTROL_ID_2 }
+            val controlStatus2 = controls.first { it.control.controlId == TEST_CONTROL_ID_2 }
             assertEquals(ControlStatus(control2, false), controlStatus2)
+
+            assertEquals(1, favorites.size)
+            assertEquals(TEST_CONTROL_ID, favorites[0])
         }
 
         verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
@@ -338,13 +344,16 @@ class ControlsControllerImplTest : SysuiTestCase() {
         var loaded = false
         controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
 
-        controller.loadForComponent(TEST_COMPONENT) {
+        controller.loadForComponent(TEST_COMPONENT) { controls, favorites ->
             loaded = true
-            assertEquals(1, it.size)
-            val controlStatus = it[0]
+            assertEquals(1, controls.size)
+            val controlStatus = controls[0]
             assertEquals(TEST_CONTROL_ID, controlStatus.control.controlId)
             assertTrue(controlStatus.favorite)
             assertTrue(controlStatus.removed)
+
+            assertEquals(1, favorites.size)
+            assertEquals(TEST_CONTROL_ID, favorites[0])
         }
 
         verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
@@ -361,7 +370,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
         val newControlInfo = TEST_CONTROL_INFO.copy(controlTitle = TEST_CONTROL_TITLE_2)
         val control = builderFromInfo(newControlInfo).build()
 
-        controller.loadForComponent(TEST_COMPONENT) {}
+        controller.loadForComponent(TEST_COMPONENT) { _, _ -> Unit }
 
         verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
@@ -482,5 +491,82 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT_2))
+    }
+
+    @Test
+    fun testGetFavoritesForComponent() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        assertEquals(listOf(TEST_CONTROL_INFO), controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testGetFavoritesForComponent_otherComponent() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO_2, true)
+        assertTrue(controller.getFavoritesForComponent(TEST_COMPONENT).isEmpty())
+    }
+
+    @Test
+    fun testGetFavoritesForComponent_multipleInOrder() {
+        val controlInfo = ControlInfo(TEST_COMPONENT, "id", "title", 0)
+
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        controller.changeFavoriteStatus(controlInfo, true)
+
+        assertEquals(listOf(TEST_CONTROL_INFO, controlInfo),
+            controller.getFavoritesForComponent(TEST_COMPONENT))
+
+        controller.clearFavorites()
+
+        controller.changeFavoriteStatus(controlInfo, true)
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+
+        assertEquals(listOf(controlInfo, TEST_CONTROL_INFO),
+            controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testReplaceFavoritesForComponent_noFavorites() {
+        controller.replaceFavoritesForComponent(TEST_COMPONENT, listOf(TEST_CONTROL_INFO))
+
+        assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(listOf(TEST_CONTROL_INFO), controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testReplaceFavoritesForComponent_differentComponentsAreFilteredOut() {
+        controller.replaceFavoritesForComponent(TEST_COMPONENT,
+            listOf(TEST_CONTROL_INFO, TEST_CONTROL_INFO_2))
+
+        assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(listOf(TEST_CONTROL_INFO), controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testReplaceFavoritesForComponent_oldFavoritesRemoved() {
+        val controlInfo = ControlInfo(TEST_COMPONENT, "id", "title", 0)
+        assertNotEquals(TEST_CONTROL_INFO, controlInfo)
+
+        controller.changeFavoriteStatus(controlInfo, true)
+        controller.replaceFavoritesForComponent(TEST_COMPONENT, listOf(TEST_CONTROL_INFO))
+
+        assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(listOf(TEST_CONTROL_INFO), controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testReplaceFavoritesForComponent_favoritesInOrder() {
+        val controlInfo = ControlInfo(TEST_COMPONENT, "id", "title", 0)
+
+        val listOrder1 = listOf(TEST_CONTROL_INFO, controlInfo)
+        controller.replaceFavoritesForComponent(TEST_COMPONENT, listOrder1)
+
+        assertEquals(2, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(listOrder1, controller.getFavoritesForComponent(TEST_COMPONENT))
+
+        val listOrder2 = listOf(controlInfo, TEST_CONTROL_INFO)
+        controller.replaceFavoritesForComponent(TEST_COMPONENT, listOrder2)
+
+        assertEquals(2, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(listOrder2, controller.getFavoritesForComponent(TEST_COMPONENT))
     }
 }
