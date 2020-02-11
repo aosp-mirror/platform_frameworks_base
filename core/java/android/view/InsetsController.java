@@ -39,7 +39,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
 import android.util.SparseArray;
-import android.view.InputDevice.MotionRange;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
@@ -680,7 +679,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
-        mApplier.scheduleApply(params);
+        if (mViewRoot.mView.isHardwareAccelerated()) {
+            mApplier.scheduleApply(params);
+        } else {
+            // Window doesn't support hardware acceleration, no synchronization for now.
+            // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
+            //  frame instead.
+            mApplier.applyParams(new Transaction(), -1 /* frame */, params);
+        }
     }
 
     void notifyControlRevoked(InsetsSourceConsumer consumer) {
