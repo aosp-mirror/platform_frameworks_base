@@ -174,6 +174,6 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
     }
 
     private static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {
-        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout).first;
+        return displayInfoAndCutoutForRotation(rotation, withDisplayCutout, false).first;
     }
 }
