@@ -665,7 +665,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
                 if (app.lastRestrictAttemptElapsedTime > app.lastUsedByUserElapsedTime
                         && elapsedTimeAdjusted - app.lastUsedByUserElapsedTime
-                        >= mInjector.getRestrictedBucketDelayMs()) {
+                        >= mInjector.getAutoRestrictedBucketDelayMs()) {
                     newBucket = STANDBY_BUCKET_RESTRICTED;
                     reason = app.lastRestrictReason;
                     if (DEBUG) {
@@ -1219,7 +1219,7 @@ public class AppStandbyController implements AppStandbyInternal {
                     }
                 } else {
                     final long timeUntilRestrictPossibleMs = app.lastUsedByUserElapsedTime
-                            + mInjector.getRestrictedBucketDelayMs() - elapsedRealtime;
+                            + mInjector.getAutoRestrictedBucketDelayMs() - elapsedRealtime;
                     if (timeUntilRestrictPossibleMs > 0) {
                         Slog.w(TAG, "Tried to restrict recently used app: " + packageName
                                 + " due to " + reason);
@@ -1566,10 +1566,9 @@ public class AppStandbyController implements AppStandbyInternal {
         int mBootPhase;
         /**
          * The minimum amount of time required since the last user interaction before an app can be
-         * placed in the RESTRICTED bucket.
+         * automatically placed in the RESTRICTED bucket.
          */
-        // TODO: make configurable via DeviceConfig
-        private long mRestrictedBucketDelayMs = ONE_DAY;
+        long mAutoRestrictedBucketDelayMs = ONE_DAY;
 
         Injector(Context context, Looper looper) {
             mContext = context;
@@ -1598,7 +1597,7 @@ public class AppStandbyController implements AppStandbyInternal {
                 final ActivityManager activityManager =
                         (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
                 if (activityManager.isLowRamDevice() || ActivityManager.isSmallBatteryDevice()) {
-                    mRestrictedBucketDelayMs = 12 * ONE_HOUR;
+                    mAutoRestrictedBucketDelayMs = 12 * ONE_HOUR;
                 }
             }
             mBootPhase = phase;
@@ -1639,8 +1638,13 @@ public class AppStandbyController implements AppStandbyInternal {
             return Environment.getDataSystemDirectory();
         }
 
-        long getRestrictedBucketDelayMs() {
-            return mRestrictedBucketDelayMs;
+        /**
+         * Return the minimum amount of time that must have passed since the last user usage before
+         * an app can be automatically put into the
+         * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket.
+         */
+        long getAutoRestrictedBucketDelayMs() {
+            return mAutoRestrictedBucketDelayMs;
         }
 
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
@@ -1816,6 +1820,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 "system_interaction_duration";
         private static final String KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION =
                 "initial_foreground_service_start_duration";
+        private static final String KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS =
+                "auto_restricted_bucket_delay_ms";
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT = 1 * ONE_HOUR;
         public static final long DEFAULT_NOTIFICATION_TIMEOUT = 12 * ONE_HOUR;
         public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT = 2 * ONE_HOUR;
@@ -1826,6 +1832,7 @@ public class AppStandbyController implements AppStandbyInternal {
         public static final long DEFAULT_EXEMPTED_SYNC_START_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT = 30 * ONE_MINUTE;
+        public static final long DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS = ONE_DAY;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -1925,6 +1932,12 @@ public class AppStandbyController implements AppStandbyInternal {
                         KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION,
                         COMPRESS_TIME ? ONE_MINUTE :
                                 DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT);
+
+                mInjector.mAutoRestrictedBucketDelayMs = Math.max(
+                        COMPRESS_TIME ? ONE_MINUTE : 2 * ONE_HOUR,
+                        mParser.getDurationMillis(KEY_AUTO_RESTRICTED_BUCKET_DELAY_MS,
+                                COMPRESS_TIME
+                                        ? ONE_MINUTE : DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS));
             }
 
             // Check if app_idle_enabled has changed. Do this after getting the rest of the settings
