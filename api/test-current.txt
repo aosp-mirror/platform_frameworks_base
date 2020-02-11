@@ -3246,12 +3246,23 @@ package android.service.contentcapture {
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
     method public void onCreateContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureContext, @NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDataRemovalRequest(@NonNull android.view.contentcapture.DataRemovalRequest);
+    method public void onDataShareRequest(@NonNull android.view.contentcapture.DataShareRequest, @NonNull android.service.contentcapture.DataShareCallback);
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public final void setContentCaptureConditions(@NonNull String, @Nullable java.util.Set<android.view.contentcapture.ContentCaptureCondition>);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
     field public static final String SERVICE_META_DATA = "android.content_capture";
+  }
+
+  public interface DataShareCallback {
+    method public void onAccept(@NonNull java.util.concurrent.Executor, @NonNull android.service.contentcapture.DataShareReadAdapter);
+    method public void onReject();
+  }
+
+  public interface DataShareReadAdapter {
+    method public void onError(int);
+    method public void onStart(@NonNull android.os.ParcelFileDescriptor);
   }
 
   public final class SnapshotData implements android.os.Parcelable {

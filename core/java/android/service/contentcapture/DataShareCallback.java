@@ -19,6 +19,7 @@ package android.service.contentcapture;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 import java.util.concurrent.Executor;
 
@@ -32,6 +33,7 @@ import java.util.concurrent.Executor;
  * @hide
  **/
 @SystemApi
+@TestApi
 public interface DataShareCallback {
 
     /** Accept the data share.
