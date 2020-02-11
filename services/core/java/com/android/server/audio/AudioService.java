@@ -83,6 +83,7 @@ import android.media.IAudioService;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.media.IVolumeController;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -1762,6 +1763,26 @@ public class AudioService extends IAudioService.Stub
         } else {
             return devices[0];
         }
+    }
+
+    /** @see AudioManager#addOnPreferredDeviceForStrategyChangedListener(Executor, AudioManager.OnPreferredDeviceForStrategyChangedListener) */
+    public void registerStrategyPreferredDeviceDispatcher(
+            @Nullable IStrategyPreferredDeviceDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.registerStrategyPreferredDeviceDispatcher(dispatcher);
+    }
+
+    /** @see AudioManager#removeOnPreferredDeviceForStrategyChangedListener(AudioManager.OnPreferredDeviceForStrategyChangedListener) */
+    public void unregisterStrategyPreferredDeviceDispatcher(
+            @Nullable IStrategyPreferredDeviceDispatcher dispatcher) {
+        if (dispatcher == null) {
+            return;
+        }
+        enforceModifyAudioRoutingPermission();
+        mDeviceBroker.unregisterStrategyPreferredDeviceDispatcher(dispatcher);
     }
 
     /** @see AudioManager#getDevicesForAttributes(AudioAttributes) */

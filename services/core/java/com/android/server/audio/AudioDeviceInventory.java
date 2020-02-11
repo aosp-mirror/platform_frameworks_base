@@ -16,6 +16,7 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
@@ -31,6 +32,7 @@ import android.media.AudioPort;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -86,6 +88,10 @@ public class AudioDeviceInventory {
     final AudioRoutesInfo mCurAudioRoutes = new AudioRoutesInfo();
     final RemoteCallbackList<IAudioRoutesObserver> mRoutesObservers =
             new RemoteCallbackList<IAudioRoutesObserver>();
+
+    // Monitoring of strategy-preferred device
+    final RemoteCallbackList<IStrategyPreferredDeviceDispatcher> mPrefDevDispatchers =
+            new RemoteCallbackList<IStrategyPreferredDeviceDispatcher>();
 
     /*package*/ AudioDeviceInventory(@NonNull AudioDeviceBroker broker) {
         mDeviceBroker = broker;
@@ -470,10 +476,12 @@ public class AudioDeviceInventory {
 
     /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDevice device) {
         mPreferredDevices.put(strategy, device);
+        dispatchPreferredDevice(strategy, device);
     }
 
     /*package*/ void onSaveRemovePreferredDevice(int strategy) {
         mPreferredDevices.remove(strategy);
+        dispatchPreferredDevice(strategy, null);
     }
 
     //------------------------------------------------------------
@@ -500,6 +508,16 @@ public class AudioDeviceInventory {
             mDeviceBroker.postSaveRemovePreferredDeviceForStrategy(strategy);
         }
         return status;
+    }
+
+    /*package*/ void registerStrategyPreferredDeviceDispatcher(
+            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
+        mPrefDevDispatchers.register(dispatcher);
+    }
+
+    /*package*/ void unregisterStrategyPreferredDeviceDispatcher(
+            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
+        mPrefDevDispatchers.unregister(dispatcher);
     }
 
     /**
@@ -1092,6 +1110,17 @@ public class AudioDeviceInventory {
             }
             intent.putExtra(AudioManager.EXTRA_MAX_CHANNEL_COUNT, maxChannels);
         }
+    }
+
+    private void dispatchPreferredDevice(int strategy, @Nullable AudioDevice device) {
+        final int nbDispatchers = mPrefDevDispatchers.beginBroadcast();
+        for (int i = 0; i < nbDispatchers; i++) {
+            try {
+                mPrefDevDispatchers.getBroadcastItem(i).dispatchPrefDeviceChanged(strategy, device);
+            } catch (RemoteException e) {
+            }
+        }
+        mPrefDevDispatchers.finishBroadcast();
     }
 
     //----------------------------------------------------------
