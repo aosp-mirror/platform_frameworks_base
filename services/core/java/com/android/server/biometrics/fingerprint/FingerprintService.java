@@ -41,7 +41,7 @@ import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
-import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
+import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
@@ -601,6 +601,11 @@ public class FingerprintService extends BiometricServiceBase {
 
         @Override
         public void onAcquired(final long deviceId, final int acquiredInfo, final int vendorCode) {
+            onAcquired_2_2(deviceId, acquiredInfo, vendorCode);
+        }
+
+        @Override
+        public void onAcquired_2_2(long deviceId, int acquiredInfo, int vendorCode) {
             mHandler.post(() -> {
                 FingerprintService.super.handleAcquired(deviceId, acquiredInfo, vendorCode);
             });

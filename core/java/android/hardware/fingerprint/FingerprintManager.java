@@ -918,7 +918,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mEnrollmentCallback != null) {
             mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
         } else if (mAuthenticationCallback != null) {
-            mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
+            if (acquireInfo != BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START) {
+                mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
+            }
         }
     }
 
@@ -1050,6 +1052,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                         return msgArray[vendorCode];
                     }
                 }
+                break;
+            case FINGERPRINT_ACQUIRED_START:
+                return null;
         }
         Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
         return null;
