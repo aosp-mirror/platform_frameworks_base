@@ -909,8 +909,8 @@ public final class PasspointConfiguration implements Parcelable {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s_%x%x", mHomeSp.getFqdn(), mHomeSp.hashCode(),
-                mCredential.hashCode()));
+        sb.append(String.format("%s_%x%x", mHomeSp.getFqdn(), mHomeSp.getUniqueId(),
+                mCredential.getUniqueId()));
         return sb.toString();
     }
 }
