@@ -17,17 +17,16 @@
 package android.view.animation;
 
 import android.content.Context;
+import android.graphics.animation.HasNativeInterpolator;
+import android.graphics.animation.NativeInterpolator;
+import android.graphics.animation.NativeInterpolatorFactory;
 import android.util.AttributeSet;
-
-import com.android.internal.view.animation.HasNativeInterpolator;
-import com.android.internal.view.animation.NativeInterpolatorFactory;
-import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
 
 /**
  * An interpolator where the change bounces at the end.
  */
 @HasNativeInterpolator
-public class BounceInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
+public class BounceInterpolator extends BaseInterpolator implements NativeInterpolator {
     public BounceInterpolator() {
     }
 
@@ -56,6 +55,6 @@ public class BounceInterpolator extends BaseInterpolator implements NativeInterp
     /** @hide */
     @Override
     public long createNativeInterpolator() {
-        return NativeInterpolatorFactoryHelper.createBounceInterpolator();
+        return NativeInterpolatorFactory.createBounceInterpolator();
     }
 }

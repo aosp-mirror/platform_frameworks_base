@@ -60,6 +60,8 @@ extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv*);
 extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_SurfaceTexture(JNIEnv* env);
+extern int register_android_graphics_animation_NativeInterpolatorFactory(JNIEnv* env);
+extern int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
 extern int register_android_graphics_drawable_VectorDrawable(JNIEnv* env);
 extern int register_android_graphics_fonts_Font(JNIEnv* env);
@@ -123,6 +125,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_SurfaceTexture),
     REG_JNI(register_android_graphics_Typeface),
     REG_JNI(register_android_graphics_YuvImage),
+    REG_JNI(register_android_graphics_animation_NativeInterpolatorFactory),
+    REG_JNI(register_android_graphics_animation_RenderNodeAnimator),
     REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable),
     REG_JNI(register_android_graphics_drawable_VectorDrawable),
     REG_JNI(register_android_graphics_fonts_Font),

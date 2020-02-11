@@ -90,7 +90,7 @@ static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut)
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "com/android/internal/view/animation/NativeInterpolatorFactoryHelper";
+const char* const kClassPathName = "android/graphics/animation/NativeInterpolatorFactory";
 
 static const JNINativeMethod gMethods[] = {
     { "createAccelerateDecelerateInterpolator", "()J", (void*) createAccelerateDecelerateInterpolator },
@@ -106,7 +106,7 @@ static const JNINativeMethod gMethods[] = {
     { "createLutInterpolator", "([F)J", (void*) createLutInterpolator },
 };
 
-int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv* env) {
+int register_android_graphics_animation_NativeInterpolatorFactory(JNIEnv* env) {
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
