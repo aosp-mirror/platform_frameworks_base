@@ -231,6 +231,9 @@ public class NotificationHistoryDatabase {
 
     public void disableHistory() {
         synchronized (mLock) {
+            for (AtomicFile file : mHistoryFiles) {
+                file.delete();
+            }
             mHistoryDir.delete();
             mHistoryFiles.clear();
         }
@@ -249,6 +252,10 @@ public class NotificationHistoryDatabase {
                 final AtomicFile currentOldestFile = mHistoryFiles.get(i);
                 final long creationTime =
                         mFileAttrProvider.getCreationTime(currentOldestFile.getBaseFile());
+                if (DEBUG) {
+                    Slog.d(TAG, "Pruning " + currentOldestFile.getBaseFile().getName()
+                            + " created on " + creationTime);
+                }
                 if (creationTime <= retentionBoundary.getTimeInMillis()) {
                     if (DEBUG) {
                         Slog.d(TAG, "Removed " + currentOldestFile.getBaseFile().getName());
