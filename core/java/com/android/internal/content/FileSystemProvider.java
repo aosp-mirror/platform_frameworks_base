@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
@@ -38,6 +39,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Files.FileColumns;
 import android.provider.MetadataReader;
 import android.system.Int64Ref;
 import android.text.TextUtils;
@@ -333,15 +335,17 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         if (isDirectory) {
             FileUtils.deleteContents(file);
         }
-        if (!file.delete()) {
+        // We could be deleting pending media which doesn't have any content yet, so only throw
+        // if the file exists and we fail to delete it.
+        if (file.exists() && !file.delete()) {
             throw new IllegalStateException("Failed to delete " + file);
         }
 
         onDocIdChanged(docId);
-        removeFromMediaStore(visibleFile, isDirectory);
+        removeFromMediaStore(visibleFile);
     }
 
-    private void removeFromMediaStore(@Nullable File visibleFile, boolean isFolder)
+    private void removeFromMediaStore(@Nullable File visibleFile)
             throws FileNotFoundException {
         // visibleFolder is null if we're removing a document from external thumb drive or SD card.
         if (visibleFile != null) {
@@ -350,21 +354,19 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             try {
                 final ContentResolver resolver = getContext().getContentResolver();
                 final Uri externalUri = MediaStore.Files.getContentUri("external");
+                final Bundle queryArgs = new Bundle();
+                queryArgs.putInt(MediaStore.QUERY_ARG_MATCH_PENDING, MediaStore.MATCH_INCLUDE);
 
-                // Remove media store entries for any files inside this directory, using
-                // path prefix match. Logic borrowed from MtpDatabase.
-                if (isFolder) {
-                    final String path = visibleFile.getAbsolutePath() + "/";
-                    resolver.delete(externalUri,
-                            "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
-                            new String[]{path + "%", Integer.toString(path.length()), path});
-                }
-
-                // Remove media store entry for this exact file.
-                final String path = visibleFile.getAbsolutePath();
-                resolver.delete(externalUri,
-                        "_data LIKE ?1 AND lower(_data)=lower(?2)",
-                        new String[]{path, path});
+                // Remove the media store entry corresponding to visibleFile and if it is a
+                // directory, also remove media store entries for any files inside this directory.
+                // Logic borrowed from com.android.providers.media.scan.ModernMediaScanner.
+                final String pathEscapedForLike = DatabaseUtils.escapeForLike(
+                        visibleFile.getAbsolutePath());
+                ContentResolver.includeSqlSelectionArgs(queryArgs,
+                        FileColumns.DATA + " LIKE ? ESCAPE '\\' OR "
+                                + FileColumns.DATA + " LIKE ? ESCAPE '\\'",
+                        new String[] {pathEscapedForLike + "/%", pathEscapedForLike});
+                resolver.delete(externalUri, queryArgs);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
