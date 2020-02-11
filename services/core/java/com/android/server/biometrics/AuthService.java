@@ -153,7 +153,12 @@ public class AuthService extends SystemService {
 
             // Only allow internal clients to enable non-public options.
             if (bundle.getBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS)
-                    || bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
+                    || bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)
+                    || bundle.getCharSequence(BiometricPrompt.KEY_DEVICE_CREDENTIAL_TITLE) != null
+                    || bundle.getCharSequence(
+                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_SUBTITLE) != null
+                    || bundle.getCharSequence(
+                            BiometricPrompt.KEY_DEVICE_CREDENTIAL_DESCRIPTION) != null) {
                 checkInternalPermission();
             }
 
