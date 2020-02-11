@@ -174,6 +174,7 @@ public abstract class Conference extends Conferenceable {
     /**
      * Returns whether this conference is requesting that the system play a ringback tone
      * on its behalf.
+     * @hide
      */
     public final boolean isRingbackRequested() {
         return mRingbackRequested;
@@ -324,6 +325,7 @@ public abstract class Conference extends Conferenceable {
      * the default dialer's {@link InCallService}.
      *
      * @param videoState The video state in which to answer the connection.
+     * @hide
      */
     public void onAnswer(int videoState) {}
 
@@ -343,6 +345,7 @@ public abstract class Conference extends Conferenceable {
      * a request to reject.
      * For managed {@link ConnectionService}s, this will be called when the user rejects a call via
      * the default dialer's {@link InCallService}.
+     * @hide
      */
     public void onReject() {}
 
@@ -362,6 +365,7 @@ public abstract class Conference extends Conferenceable {
 
     /**
      * Sets state to be ringing.
+     * @hide
      */
     public final void setRinging() {
         setState(Connection.STATE_RINGING);
@@ -487,6 +491,7 @@ public abstract class Conference extends Conferenceable {
      * that do not play a ringback tone themselves in the conference's audio stream.
      *
      * @param ringback Whether the ringback tone is to be played.
+     * @hide
      */
     public final void setRingbackRequested(boolean ringback) {
         if (mRingbackRequested != ringback) {
@@ -736,6 +741,7 @@ public abstract class Conference extends Conferenceable {
      *
      * @param disconnectCause The disconnect cause, ({@see android.telecomm.DisconnectCause}).
      * @return A {@code Conference} which indicates failure.
+     * @hide
      */
     public @NonNull static Conference createFailedConference(
             @NonNull DisconnectCause disconnectCause, @NonNull PhoneAccountHandle phoneAccount) {

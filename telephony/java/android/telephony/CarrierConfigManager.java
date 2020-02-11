@@ -1083,6 +1083,7 @@ public class CarrierConfigManager {
     /**
      * Determines whether adhoc conference calls are supported by a carrier.  When {@code true},
      * adhoc conference calling is supported, {@code false otherwise}.
+     * @hide
      */
     public static final String KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL =
             "support_adhoc_conference_calls_bool";
