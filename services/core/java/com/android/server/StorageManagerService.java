@@ -224,6 +224,7 @@ class StorageManagerService extends IStorageManager.Stub
      * disables FuseDaemon. If {@code 0}, uses the default value from the build system.
      */
     private static final String FUSE_ENABLED = "fuse_enabled";
+    private static final boolean DEFAULT_FUSE_ENABLED = false;
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -1623,7 +1624,7 @@ class StorageManagerService extends IStorageManager.Stub
         // If there is no value in the property yet (first boot after data wipe), this value may be
         // incorrect until #updateFusePropFromSettings where we set the correct value and reboot if
         // different
-        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, false);
+        mIsFuseEnabled = SystemProperties.getBoolean(PROP_FUSE, DEFAULT_FUSE_ENABLED);
         mContext = context;
         mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
@@ -1686,23 +1687,17 @@ class StorageManagerService extends IStorageManager.Stub
      *  and updates PROP_FUSE (reboots if changed).
      */
     private void updateFusePropFromSettings() {
-        boolean defaultFuseFlag = false;
-        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE, defaultFuseFlag);
-        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag + ". Default: " + defaultFuseFlag);
-
-        if (TextUtils.isEmpty(SystemProperties.get(PROP_SETTINGS_FUSE))) {
-            // Set default value of PROP_SETTINGS_FUSE and PROP_FUSE if it
-            // is unset (neither true nor false).
-            // This happens only on the first boot after wiping data partition
-            SystemProperties.set(PROP_SETTINGS_FUSE, Boolean.toString(defaultFuseFlag));
-            SystemProperties.set(PROP_FUSE, Boolean.toString(defaultFuseFlag));
-            return;
-        }
+        boolean settingsFuseFlag = SystemProperties.getBoolean(PROP_SETTINGS_FUSE,
+                DEFAULT_FUSE_ENABLED);
+        Slog.d(TAG, "FUSE flags. Settings: " + settingsFuseFlag
+                + ". Default: " + DEFAULT_FUSE_ENABLED);
 
         if (mIsFuseEnabled != settingsFuseFlag) {
             Slog.i(TAG, "Toggling persist.sys.fuse to " + settingsFuseFlag);
+            // Set prop_fuse to match prop_settings_fuse because it is used by native daemons like
+            // init, zygote, installd and vold
             SystemProperties.set(PROP_FUSE, Boolean.toString(settingsFuseFlag));
-            // Perform hard reboot to kick policy into place
+            // Then perform hard reboot to kick policy into place
             mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
         }
     }
