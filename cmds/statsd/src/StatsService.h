@@ -27,27 +27,30 @@
 #include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
 
-#include <android/os/BnStatsd.h>
-#include <android/os/IPendingIntentRef.h>
-#include <android/os/IStatsCompanionService.h>
-#include <android/os/IStatsd.h>
-#include <binder/IResultReceiver.h>
-#include <binder/ParcelFileDescriptor.h>
+#include <aidl/android/os/BnStatsd.h>
+#include <aidl/android/os/IPendingIntentRef.h>
+#include <aidl/android/os/IPullAtomCallback.h>
 #include <utils/Looper.h>
 
 #include <mutex>
 
 using namespace android;
-using namespace android::binder;
 using namespace android::os;
 using namespace std;
+
+using Status = ::ndk::ScopedAStatus;
+using aidl::android::os::BnStatsd;
+using aidl::android::os::IPendingIntentRef;
+using aidl::android::os::IPullAtomCallback;
+using ::ndk::ScopedAIBinder_DeathRecipient;
+using ::ndk::ScopedFileDescriptor;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsService : public BnStatsd,
-                     public IBinder::DeathRecipient {
+class StatsService : public BnStatsd {
 public:
     StatsService(const sp<Looper>& handlerLooper, std::shared_ptr<LogEventQueue> queue);
     virtual ~StatsService();
@@ -55,10 +58,9 @@ public:
     /** The anomaly alarm registered with AlarmManager won't be updated by less than this. */
     const uint32_t MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS = 5;
 
-    virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
-    virtual status_t dump(int fd, const Vector<String16>& args);
-    virtual status_t command(int inFd, int outFd, int err, Vector<String8>& args,
-                             sp<IResultReceiver> resultReceiver);
+    virtual status_t dump(int fd, const char** args, uint32_t numArgs) override;
+    virtual status_t handleShellCommand(int in, int out, int err, const char** argv,
+                                        uint32_t argc) override;
 
     virtual Status systemRunning();
     virtual Status statsCompanionReady();
@@ -66,10 +68,10 @@ public:
     virtual Status informPollAlarmFired();
     virtual Status informAlarmForSubscriberTriggeringFired();
 
-    virtual Status informAllUidData(const ParcelFileDescriptor& fd);
-    virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version,
-                                    const String16& version_string, const String16& installer);
-    virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
+    virtual Status informAllUidData(const ScopedFileDescriptor& fd);
+    virtual Status informOnePackage(const string& app, int32_t uid, int64_t version,
+                                    const string& versionString, const string& installer);
+    virtual Status informOnePackageRemoved(const string& app, int32_t uid);
     virtual Status informDeviceShutdown();
 
     /**
@@ -92,13 +94,13 @@ public:
      */
     virtual Status getData(int64_t key,
                            const int32_t callingUid,
-                           vector<uint8_t>* output) override;
+                           vector<int8_t>* output) override;
 
 
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
-    virtual Status getMetadata(vector<uint8_t>* output) override;
+    virtual Status getMetadata(vector<int8_t>* output) override;
 
 
     /**
@@ -106,14 +108,14 @@ public:
      * should requestData for this configuration.
      */
     virtual Status addConfiguration(int64_t key,
-                                    const vector<uint8_t>& config,
+                                    const vector<int8_t>& config,
                                     const int32_t callingUid) override;
 
     /**
      * Binder call to let clients register the data fetch operation for a configuration.
      */
     virtual Status setDataFetchOperation(int64_t key,
-                                         const sp<IPendingIntentRef>& pir,
+                                         const shared_ptr<IPendingIntentRef>& pir,
                                          const int32_t callingUid) override;
 
     /**
@@ -125,7 +127,7 @@ public:
     /**
      * Binder call to let clients register the active configs changed operation.
      */
-    virtual Status setActiveConfigsChangedOperation(const sp<IPendingIntentRef>& pir,
+    virtual Status setActiveConfigsChangedOperation(const shared_ptr<IPendingIntentRef>& pir,
                                                     const int32_t callingUid,
                                                     vector<int64_t>* output) override;
 
@@ -144,7 +146,7 @@ public:
      */
     virtual Status setBroadcastSubscriber(int64_t configId,
                                           int64_t subscriberId,
-                                          const sp<IPendingIntentRef>& pir,
+                                          const shared_ptr<IPendingIntentRef>& pir,
                                           const int32_t callingUid) override;
 
     /**
@@ -167,14 +169,14 @@ public:
      */
     virtual Status registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownNs,
             int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
-            const sp<android::os::IPullAtomCallback>& pullerCallback) override;
+            const shared_ptr<IPullAtomCallback>& pullerCallback) override;
 
     /**
      * Binder call to register a callback function for a pulled atom.
      */
     virtual Status registerNativePullAtomCallback(int32_t atomTag, int64_t coolDownNs,
             int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
-            const sp<android::os::IPullAtomCallback>& pullerCallback) override;
+            const shared_ptr<IPullAtomCallback>& pullerCallback) override;
 
     /**
      * Binder call to unregister any existing callback for the given uid and atom.
@@ -190,9 +192,6 @@ public:
      * Binder call to get registered experiment IDs.
      */
     virtual Status getRegisteredExperimentIds(std::vector<int64_t>* expIdsOut);
-
-    /** IBinder::DeathRecipient */
-    virtual void binderDied(const wp<IBinder>& who) override;
 
 private:
     /**
@@ -317,12 +316,23 @@ private:
     /**
      * Adds a configuration after checking permissions and obtaining UID from binder call.
      */
-    bool addConfigurationChecked(int uid, int64_t key, const vector<uint8_t>& config);
+    bool addConfigurationChecked(int uid, int64_t key, const vector<int8_t>& config);
 
     /**
      * Update a configuration.
      */
     void set_config(int uid, const string& name, const StatsdConfig& config);
+
+    /**
+     * Death recipient callback that is called when StatsCompanionService dies.
+     * The cookie is a pointer to a StatsService object.
+     */
+    static void statsCompanionServiceDied(void* cookie);
+
+    /**
+     * Implementation of statsCompanionServiceDied.
+     */
+    void statsCompanionServiceDiedImpl();
 
     /**
      * Tracks the uid <--> package name mapping.
@@ -366,6 +376,8 @@ private:
      */
     mutable mutex mShellSubscriberMutex;
     std::shared_ptr<LogEventQueue> mEventQueue;
+
+    ScopedAIBinder_DeathRecipient mStatsCompanionServiceDeathRecipient;
 
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);

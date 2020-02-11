@@ -20,9 +20,9 @@
 #include "StatsService.h"
 #include "socket/StatsSocketListener.h"
 
-#include <binder/IPCThreadState.h>
-#include <binder/IServiceManager.h>
-#include <binder/ProcessState.h>
+#include <android/binder_interface_utils.h>
+#include <android/binder_process.h>
+#include <android/binder_manager.h>
 #include <utils/Looper.h>
 
 #include <stdio.h>
@@ -32,16 +32,11 @@
 
 using namespace android;
 using namespace android::os::statsd;
+using ::ndk::SharedRefBase;
+using std::shared_ptr;
+using std::make_shared;
 
-/**
- * Thread function data.
- */
-struct log_reader_thread_data {
-    sp<StatsService> service;
-};
-
-
-sp<StatsService> gStatsService = nullptr;
+shared_ptr<StatsService> gStatsService = nullptr;
 
 void sigHandler(int sig) {
     if (gStatsService != nullptr) {
@@ -68,20 +63,18 @@ int main(int /*argc*/, char** /*argv*/) {
     sp<Looper> looper(Looper::prepare(0 /* opts */));
 
     // Set up the binder
-    sp<ProcessState> ps(ProcessState::self());
-    ps->setThreadPoolMaxThreadCount(9);
-    ps->startThreadPool();
-    ps->giveThreadPoolName();
-    IPCThreadState::self()->disableBackgroundScheduling(true);
+    ABinderProcess_setThreadPoolMaxThreadCount(9);
+    ABinderProcess_startThreadPool();
 
     std::shared_ptr<LogEventQueue> eventQueue =
             std::make_shared<LogEventQueue>(2000 /*buffer limit. Buffer is NOT pre-allocated*/);
 
     // Create the service
-    gStatsService = new StatsService(looper, eventQueue);
-    if (defaultServiceManager()->addService(String16("stats"), gStatsService, false,
-                IServiceManager::DUMP_FLAG_PRIORITY_NORMAL | IServiceManager::DUMP_FLAG_PROTO)
-            != 0) {
+    gStatsService = SharedRefBase::make<StatsService>(looper, eventQueue);
+    // TODO(b/149582373): Set DUMP_FLAG_PROTO once libbinder_ndk supports
+    // setting dumpsys priorities.
+    binder_status_t status = AServiceManager_addService(gStatsService->asBinder().get(), "stats");
+    if (status != STATUS_OK) {
         ALOGE("Failed to add service as AIDL service");
         return -1;
     }

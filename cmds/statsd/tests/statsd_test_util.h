@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include <android/os/BnPullAtomCallback.h>
-#include <android/os/IPullAtomCallback.h>
-#include <android/os/IPullAtomResultReceiver.h>
+#include <aidl/android/os/BnPullAtomCallback.h>
+#include <aidl/android/os/IPullAtomCallback.h>
+#include <aidl/android/os/IPullAtomResultReceiver.h>
 #include <gtest/gtest.h>
 
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
@@ -31,8 +31,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using ::aidl::android::os::BnPullAtomCallback;
+using ::aidl::android::os::IPullAtomCallback;
+using ::aidl::android::os::IPullAtomResultReceiver;
 using android::util::ProtoReader;
 using google::protobuf::RepeatedPtrField;
+using Status = ::ndk::ScopedAStatus;
 
 const int SCREEN_STATE_ATOM_ID = android::util::SCREEN_STATE_CHANGED;
 const int UID_PROCESS_STATE_ATOM_ID = android::util::UID_PROCESS_STATE_CHANGED;
@@ -230,7 +234,7 @@ AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
 // Create a statsd log event processor upon the start time in seconds, config and key.
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
-                                              const sp<IPullAtomCallback>& puller = nullptr,
+                                              const shared_ptr<IPullAtomCallback>& puller = nullptr,
                                               const int32_t atomTag = 0 /*for puller only*/);
 
 // Util function to sort the log events by timestamp.
@@ -285,8 +289,8 @@ bool backfillDimensionPath(const DimensionsValue& path,
 
 class FakeSubsystemSleepCallback : public BnPullAtomCallback {
 public:
-    binder::Status onPullAtom(int atomTag,
-                              const sp<IPullAtomResultReceiver>& resultReceiver) override;
+    Status onPullAtom(int atomTag,
+                      const shared_ptr<IPullAtomResultReceiver>& resultReceiver) override;
 };
 
 template <typename T>

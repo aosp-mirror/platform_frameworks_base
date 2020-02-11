@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <android/os/BnPullAtomCallback.h>
-#include <android/os/IPullAtomResultReceiver.h>
-#include <binder/IPCThreadState.h>
+#include <android/binder_ibinder.h>
+#include <android/binder_interface_utils.h>
 #include <gtest/gtest.h>
 
 #include <vector>
@@ -23,6 +22,9 @@
 #include "src/StatsService.h"
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
+
+using::ndk::SharedRefBase;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -34,19 +36,17 @@ const string kApp1 = "app1.sharing.1";
 const int kConfigKey = 789130123;  // Randomly chosen to avoid collisions with existing configs.
 const int kCallingUid = 0; // Randomly chosen
 
-void SendConfig(StatsService& service, const StatsdConfig& config) {
+void SendConfig(shared_ptr<StatsService>& service, const StatsdConfig& config) {
     string str;
     config.SerializeToString(&str);
-    std::vector<uint8_t> configAsVec(str.begin(), str.end());
-    bool success;
-    service.addConfiguration(kConfigKey, configAsVec, kCallingUid);
+    std::vector<int8_t> configAsVec(str.begin(), str.end());
+    service->addConfiguration(kConfigKey, configAsVec, kCallingUid);
 }
 
 ConfigMetricsReport GetReports(sp<StatsLogProcessor> processor, int64_t timestamp,
                                bool include_current = false) {
     vector<uint8_t> output;
-    IPCThreadState* ipc = IPCThreadState::self();
-    ConfigKey configKey(ipc->getCallingUid(), kConfigKey);
+    ConfigKey configKey(AIBinder_getCallingUid(), kConfigKey);
     processor->onDumpReport(configKey, timestamp, include_current /* include_current_bucket*/,
                             true /* erase_data */, ADB_DUMP, NO_TIME_CONSTRAINTS, &output);
     ConfigMetricsReportList reports;
@@ -114,56 +114,56 @@ StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
 }  // anonymous namespace
 
 TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 2).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 2).get());
 
-    ConfigMetricsReport report = GetReports(service.mProcessor, start + 3);
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 3);
     // Expect no metrics since the bucket has not finished yet.
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
     // Force the uidmap to update at timestamp 2.
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
     // This is a new installation, so there shouldn't be a split (should be same as the without
     // split case).
-    service.mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
+    service->mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
                                String16(""));
     // Goes into the second bucket.
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
-    ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
-    service.mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
-                               {String16("")});
+    service->mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
+                                {String16("")});
 
     // Force the uidmap to update at timestamp 2.
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-    service.mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
+    service->mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
                                String16(""));
     // Goes into the second bucket.
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
-    ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
     backfillStartEndTimestamp(&report);
 
     ASSERT_EQ(1, report.metrics_size());
@@ -177,20 +177,20 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
 }
 
 TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     SendConfig(service, MakeConfig());
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
-    service.mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
-                               {String16("")});
+    service->mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
+                                {String16("")});
 
     // Force the uidmap to update at timestamp 2.
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-    service.mUidMap->removeApp(start + 2, String16(kApp1.c_str()), 1);
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
+    service->mUidMap->removeApp(start + 2, String16(kApp1.c_str()), 1);
     // Goes into the second bucket.
-    service.mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
 
-    ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
     backfillStartEndTimestamp(&report);
 
     ASSERT_EQ(1, report.metrics_size());
@@ -204,44 +204,44 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
 }
 
 TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
-    StatsService service(nullptr, nullptr);
-    service.mPullerManager->RegisterPullAtomCallback(
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    service->mPullerManager->RegisterPullAtomCallback(
             /*uid=*/0, android::util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
-            new FakeSubsystemSleepCallback());
+            SharedRefBase::make<FakeSubsystemSleepCallback>());
     // Partial buckets don't occur when app is first installed.
-    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
+    service->mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeValueMetricConfig(0));
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
-    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
-    service.mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2,
-                               String16("v2"), String16(""));
+    service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service->mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2,
+                                String16("v2"), String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(0, report.metrics(0).value_metrics().skipped_size());
 }
 
 TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
-    StatsService service(nullptr, nullptr);
-    service.mPullerManager->RegisterPullAtomCallback(
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    service->mPullerManager->RegisterPullAtomCallback(
             /*uid=*/0, android::util::SUBSYSTEM_SLEEP_STATE, NS_PER_SEC, NS_PER_SEC * 10, {},
-            new FakeSubsystemSleepCallback());
+            SharedRefBase::make<FakeSubsystemSleepCallback>());
     // Partial buckets don't occur when app is first installed.
-    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
+    service->mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeValueMetricConfig(60 * NS_PER_SEC /* One minute */));
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
     const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
-    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
-    service.mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2, String16("v2"),
+    service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service->mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2, String16("v2"),
                                String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
     backfillStartEndTimestamp(&report);
 
     ASSERT_EQ(1, report.metrics_size());
@@ -253,38 +253,38 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithoutMinPartialBucket) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
-    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
+    service->mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeGaugeMetricConfig(0));
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
-    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
-    service.mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2,
+    service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service->mUidMap->updateApp(5 * 60 * NS_PER_SEC + start + 2, String16(kApp1.c_str()), 1, 2,
                                String16("v2"), String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100, true);
     EXPECT_EQ(1, report.metrics_size());
     EXPECT_EQ(0, report.metrics(0).gauge_metrics().skipped_size());
 }
 
 TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     // Partial buckets don't occur when app is first installed.
-    service.mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
+    service->mUidMap->updateApp(1, String16(kApp1.c_str()), 1, 1, String16("v1"), String16(""));
     SendConfig(service, MakeGaugeMetricConfig(60 * NS_PER_SEC /* One minute */));
     int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
                                              // initialized with.
 
     const int64_t endSkipped = 5 * 60 * NS_PER_SEC + start + 2;
-    service.mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
-    service.mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2, String16("v2"),
-                               String16(""));
+    service->mProcessor->informPullAlarmFired(5 * 60 * NS_PER_SEC + start);
+    service->mUidMap->updateApp(endSkipped, String16(kApp1.c_str()), 1, 2, String16("v2"),
+                                String16(""));
 
     ConfigMetricsReport report =
-            GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
+            GetReports(service->mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
     backfillStartEndTimestamp(&report);
     ASSERT_EQ(1, report.metrics_size());
     ASSERT_EQ(1, report.metrics(0).gauge_metrics().skipped_size());

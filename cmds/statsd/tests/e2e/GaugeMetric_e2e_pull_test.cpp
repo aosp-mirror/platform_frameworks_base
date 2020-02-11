@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <android/binder_interface_utils.h>
 #include <gtest/gtest.h>
 
 #include <vector>
@@ -19,6 +20,8 @@
 #include "src/StatsLogProcessor.h"
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
+
+using ::ndk::SharedRefBase;
 
 namespace android {
 namespace os {
@@ -71,7 +74,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
+                                             ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -216,7 +220,8 @@ TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
+                                             ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -317,7 +322,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback, ATOM_TAG);
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
+                                             ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -426,7 +432,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
+                                             ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -544,7 +551,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
-                                             new FakeSubsystemSleepCallback(), ATOM_TAG);
+                                             SharedRefBase::make<FakeSubsystemSleepCallback>(),
+                                             ATOM_TAG);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();

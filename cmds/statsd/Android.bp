@@ -123,11 +123,11 @@ cc_defaults {
         "libutils",
     ],
     shared_libs: [
-        "libbinder",
+        "libbinder_ndk",
         "libincident",
         "liblog",
         "libstatssocket",
-        "statsd-aidl-cpp",
+        "statsd-aidl-ndk_platform",
     ],
 }
 

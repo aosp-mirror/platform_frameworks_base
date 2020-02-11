@@ -32,6 +32,8 @@
 
 using namespace android;
 using namespace testing;
+using ::ndk::SharedRefBase;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -49,10 +51,12 @@ public:
     MockMetricsManager()
         : MetricsManager(ConfigKey(1, 12345), StatsdConfig(), 1000, 1000, new UidMap(),
                          new StatsPullerManager(),
-                         new AlarmMonitor(10, [](const sp<IStatsCompanionService>&, int64_t) {},
-                                          [](const sp<IStatsCompanionService>&) {}),
-                         new AlarmMonitor(10, [](const sp<IStatsCompanionService>&, int64_t) {},
-                                          [](const sp<IStatsCompanionService>&) {})) {
+                         new AlarmMonitor(10,
+                                          [](const shared_ptr<IStatsCompanionService>&, int64_t) {},
+                                          [](const shared_ptr<IStatsCompanionService>&) {}),
+                         new AlarmMonitor(10,
+                                          [](const shared_ptr<IStatsCompanionService>&, int64_t) {},
+                                          [](const shared_ptr<IStatsCompanionService>&) {})) {
     }
 
     MOCK_METHOD0(byteSize, size_t());
@@ -1488,9 +1492,9 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     metric2ActivationTrigger2->set_activation_type(ACTIVATE_IMMEDIATELY);
 
     // Send the config.
-    StatsService service(nullptr, nullptr);
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
     string serialized = config1.SerializeAsString();
-    service.addConfigurationChecked(uid, configId, {serialized.begin(), serialized.end()});
+    service->addConfigurationChecked(uid, configId, {serialized.begin(), serialized.end()});
 
     // Make sure the config is stored on disk. Otherwise, we will not reset on system server death.
     StatsdConfig tmpConfig;
@@ -1501,7 +1505,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     // Metric 2 is not active.
     // Metric 3 is active.
     // {{{---------------------------------------------------------------------------
-    sp<StatsLogProcessor> processor = service.mProcessor;
+    sp<StatsLogProcessor> processor = service->mProcessor;
     EXPECT_EQ(1, processor->mMetricsManagers.size());
     auto it = processor->mMetricsManagers.find(cfgKey1);
     EXPECT_TRUE(it != processor->mMetricsManagers.end());
@@ -1592,7 +1596,7 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_TRUE(approximateSystemServerDeath < NS_PER_SEC + configAddedTimeNs);
 
     // System server dies.
-    service.binderDied(nullptr);
+    service->statsCompanionServiceDiedImpl();
 
     // We should have a new metrics manager. Lets get it and ensure activation status is restored.
     // {{{---------------------------------------------------------------------------
