@@ -44,11 +44,12 @@ import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.util.TimingsTraceLog;
 import android.view.WindowManager;
 
-import com.android.server.RescueParty;
 import com.android.server.LocalServices;
+import com.android.server.RescueParty;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -443,6 +444,15 @@ public final class ShutdownThread extends Thread {
         if (mRebootSafeMode) {
             SystemProperties.set(REBOOT_SAFEMODE_PROPERTY, "1");
         }
+
+        shutdownTimingLog.traceBegin("DumpPreRebootInfo");
+        try {
+            Slog.i(TAG, "Logging pre-reboot information...");
+            PreRebootLogger.log(mContext);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to log pre-reboot information", e);
+        }
+        shutdownTimingLog.traceEnd(); // DumpPreRebootInfo
 
         metricStarted(METRIC_SEND_BROADCAST);
         shutdownTimingLog.traceBegin("SendShutdownBroadcast");
