@@ -56,6 +56,8 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.server.LocalServices;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -276,19 +278,14 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private boolean isCrossProfilePackageWhitelisted(String packageName) {
-        final long ident = mInjector.clearCallingIdentity();
-        try {
-            return mInjector.getDevicePolicyManagerInternal()
-                    .getAllCrossProfilePackages().contains(packageName);
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        return mInjector.withCleanCallingIdentity(() ->
+                mInjector.getDevicePolicyManagerInternal()
+                        .getAllCrossProfilePackages().contains(packageName));
     }
 
     private List<UserHandle> getTargetUserProfilesUnchecked(
             String packageName, @UserIdInt int userId) {
-        final long ident = mInjector.clearCallingIdentity();
-        try {
+        return mInjector.withCleanCallingIdentity(() -> {
             final int[] enabledProfileIds =
                     mInjector.getUserManager().getEnabledProfileIds(userId);
 
@@ -303,15 +300,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                 targetProfiles.add(UserHandle.of(profileId));
             }
             return targetProfiles;
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        });
     }
 
     private boolean isPackageEnabled(String packageName, @UserIdInt int userId) {
         final int callingUid = mInjector.getCallingUid();
-        final long ident = mInjector.clearCallingIdentity();
-        try {
+        return mInjector.withCleanCallingIdentity(() -> {
             final PackageInfo info = mInjector.getPackageManagerInternal()
                     .getPackageInfo(
                             packageName,
@@ -319,15 +313,12 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                             callingUid,
                             userId);
             return info != null && info.applicationInfo.enabled;
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        });
     }
 
     private void verifyActivityCanHandleIntent(
             Intent launchIntent, int callingUid, @UserIdInt int userId) {
-        final long ident = mInjector.clearCallingIdentity();
-        try {
+        mInjector.withCleanCallingIdentity(() -> {
             final List<ResolveInfo> activities =
                     mInjector.getPackageManagerInternal().queryIntentActivities(
                             launchIntent,
@@ -340,9 +331,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                 return;
             }
             throw new SecurityException("Activity cannot handle intent");
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        });
     }
 
     /**
@@ -351,8 +340,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
      */
     private void verifyActivityCanHandleIntentAndExported(
             Intent launchIntent, ComponentName component, int callingUid, @UserIdInt int userId) {
-        final long ident = mInjector.clearCallingIdentity();
-        try {
+        mInjector.withCleanCallingIdentity(() -> {
             final List<ResolveInfo> apps =
                     mInjector.getPackageManagerInternal().queryIntentActivities(
                             launchIntent,
@@ -371,9 +359,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             }
             throw new SecurityException("Attempt to launch activity without "
                     + " category Intent.CATEGORY_LAUNCHER or activity is not exported" + component);
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        });
     }
 
     @Override
@@ -385,7 +371,13 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                     "INTERACT_ACROSS_USERS or INTERACT_ACROSS_USERS_FULL is required to set the"
                             + " app-op for interacting across profiles.");
         }
-        final int callingUserId = mInjector.getCallingUserId();
+        if (!isPermissionGranted(Manifest.permission.MANAGE_APP_OPS_MODES, callingUid)
+                && !isPermissionGranted(
+                        Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES, callingUid)) {
+            throw new SecurityException(
+                    "MANAGE_APP_OPS_MODES or CONFIGURE_INTERACT_ACROSS_PROFILES is required to set"
+                            + " the app-op for interacting across profiles.");
+        }
         if (newMode == AppOpsManager.MODE_ALLOWED
                 && !canConfigureInteractAcrossProfiles(packageName)) {
             // The user should not be prompted for apps that cannot request to interact across
@@ -395,7 +387,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return;
         }
         final int[] profileIds =
-                mInjector.getUserManager().getProfileIds(callingUserId, /* enabledOnly= */ false);
+                mInjector.getUserManager()
+                        .getProfileIds(mInjector.getCallingUserId(), /* enabledOnly= */ false);
         for (int profileId : profileIds) {
             if (!isPackageInstalled(packageName, profileId)) {
                 continue;
@@ -406,8 +399,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     private boolean isPackageInstalled(String packageName, @UserIdInt int userId) {
         final int callingUid = mInjector.getCallingUid();
-        final long identity = mInjector.clearCallingIdentity();
-        try {
+        return mInjector.withCleanCallingIdentity(() -> {
             final PackageInfo info =
                     mInjector.getPackageManagerInternal()
                             .getPackageInfo(
@@ -416,9 +408,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                                     callingUid,
                                     userId);
             return info != null;
-        } finally {
-            mInjector.restoreCallingIdentity(identity);
-        }
+        });
     }
 
     private void setInteractAcrossProfilesAppOpForUser(
@@ -440,19 +430,31 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                     + packageName + " on user ID " + userId);
             return;
         }
-        mInjector.getAppOpsManager()
-                .setMode(OP_INTERACT_ACROSS_PROFILES,
-                        uid,
-                        packageName,
-                        newMode);
+        final int callingUid = mInjector.getCallingUid();
+        if (isPermissionGranted(
+                Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES, callingUid)) {
+            // Clear calling identity since the CONFIGURE_INTERACT_ACROSS_PROFILES permission allows
+            // this particular app-op to be modified without the broader app-op permissions.
+            mInjector.withCleanCallingIdentity(() ->
+                    mInjector.getAppOpsManager()
+                            .setMode(OP_INTERACT_ACROSS_PROFILES, uid, packageName, newMode));
+        } else {
+            mInjector.getAppOpsManager()
+                    .setMode(OP_INTERACT_ACROSS_PROFILES, uid, packageName, newMode);
+        }
         sendCanInteractAcrossProfilesChangedBroadcast(packageName, uid, UserHandle.of(userId));
     }
 
+    /**
+     * Returns whether the given app-op mode is equivalent to the currently-set app-op of the given
+     * package name and UID. Clears identity to avoid permission checks, so ensure the caller does
+     * any necessary permission checks.
+     */
     private boolean currentModeEquals(@Mode int otherMode, String packageName, int uid) {
         final String op =
                 AppOpsManager.permissionToOp(Manifest.permission.INTERACT_ACROSS_PROFILES);
-        return otherMode ==
-                mInjector.getAppOpsManager().unsafeCheckOpNoThrow(op, uid, packageName);
+        return mInjector.withCleanCallingIdentity(() -> otherMode
+                == mInjector.getAppOpsManager().unsafeCheckOpNoThrow(op, uid, packageName));
     }
 
     private void sendCanInteractAcrossProfilesChangedBroadcast(
@@ -493,8 +495,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private boolean hasOtherProfileWithPackageInstalled(String packageName, @UserIdInt int userId) {
-        final long ident = mInjector.clearCallingIdentity();
-        try {
+        return mInjector.withCleanCallingIdentity(() -> {
             final int[] profileIds =
                     mInjector.getUserManager().getProfileIds(userId, /* enabledOnly= */ false);
             for (int profileId : profileIds) {
@@ -502,10 +503,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                     return true;
                 }
             }
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
-        return false;
+            return false;
+        });
     }
 
     @Override
@@ -525,12 +524,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
-        final long ident = mInjector.clearCallingIdentity();
-        try {
-            return mInjector.getUserManager().isSameProfileGroup(callerUserId, userId);
-        } finally {
-            mInjector.restoreCallingIdentity(ident);
-        }
+        return mInjector.withCleanCallingIdentity(() ->
+                mInjector.getUserManager().isSameProfileGroup(callerUserId, userId));
     }
 
     /**
@@ -560,42 +555,62 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             mContext = context;
         }
 
+        @Override
         public int getCallingUid() {
             return Binder.getCallingUid();
         }
 
+        @Override
         public int getCallingPid() {
             return Binder.getCallingPid();
         }
 
+        @Override
         public int getCallingUserId() {
             return UserHandle.getCallingUserId();
         }
 
+        @Override
         public UserHandle getCallingUserHandle() {
             return Binder.getCallingUserHandle();
         }
 
+        @Override
         public long clearCallingIdentity() {
             return Binder.clearCallingIdentity();
         }
 
+        @Override
         public void restoreCallingIdentity(long token) {
             Binder.restoreCallingIdentity(token);
         }
 
+        @Override
+        public void withCleanCallingIdentity(ThrowingRunnable action) {
+            Binder.withCleanCallingIdentity(action);
+        }
+
+        @Override
+        public final <T> T withCleanCallingIdentity(ThrowingSupplier<T> action) {
+            return Binder.withCleanCallingIdentity(action);
+        }
+
+        @Override
         public UserManager getUserManager() {
             return mContext.getSystemService(UserManager.class);
         }
 
+        @Override
         public PackageManagerInternal getPackageManagerInternal() {
             return LocalServices.getService(PackageManagerInternal.class);
         }
 
+        @Override
         public PackageManager getPackageManager() {
             return mContext.getPackageManager();
         }
 
+        @Override
         public AppOpsManager getAppOpsManager() {
             return mContext.getSystemService(AppOpsManager.class);
         }
@@ -645,6 +660,10 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         long clearCallingIdentity();
 
         void restoreCallingIdentity(long token);
+
+        void withCleanCallingIdentity(ThrowingRunnable action);
+
+        <T> T withCleanCallingIdentity(ThrowingSupplier<T> action);
 
         UserManager getUserManager();
 
