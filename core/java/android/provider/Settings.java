@@ -1771,6 +1771,15 @@ public final class Settings {
             = "android.settings.NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show notification history screen.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_HISTORY
+            = "android.settings.NOTIFICATION_HISTORY";
+
+    /**
      * Activity Action: Show app listing settings, filtered by those that send notifications.
      *
      * @hide
