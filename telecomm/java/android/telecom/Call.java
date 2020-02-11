@@ -573,6 +573,7 @@ public final class Call {
         /**
          * Indicates that the call is an adhoc conference call. This property can be set for both
          * incoming and outgoing calls.
+         * @hide
          */
         public static final int PROPERTY_IS_ADHOC_CONFERENCE = 0x00002000;
 
