@@ -88,17 +88,9 @@ public abstract class KeymasterUtils {
      * Adds keymaster arguments to express the key's authorization policy supported by user
      * authentication.
      *
-     * @param userAuthenticationRequired whether user authentication is required to authorize the
-     *        use of the key.
-     * @param userAuthenticationValidityDurationSeconds duration of time (seconds) for which user
-     *        authentication is valid as authorization for using the key or {@code -1} if every
-     *        use of the key needs authorization.
-     * @param boundToSpecificSecureUserId if non-zero, specify which SID the key will be bound to,
-     *        overriding the default logic in this method where the key is bound to either the root
-     *        SID of the current user, or the fingerprint SID if explicit fingerprint authorization
-     *        is requested.
-     * @param userConfirmationRequired whether user confirmation is required to authorize the use
-     *        of the key.
+     * @param args The arguments sent to keymaster that need to be populated from the spec
+     * @param spec The user authentication relevant portions of the spec passed in from the caller.
+     *        This spec will be translated into the relevant keymaster tags to be loaded into args.
      * @throws IllegalStateException if user authentication is required but the system is in a wrong
      *         state (e.g., secure lock screen not set up) for generating or importing keys that
      *         require user authentication.
@@ -122,7 +114,7 @@ public abstract class KeymasterUtils {
             return;
         }
 
-        if (spec.getUserAuthenticationValidityDurationSeconds() == -1) {
+        if (spec.getUserAuthenticationValidityDurationSeconds() == 0) {
             PackageManager pm = KeyStore.getApplicationContext().getPackageManager();
             // Every use of this key needs to be authorized by the user. This currently means
             // fingerprint or face auth.
@@ -168,7 +160,8 @@ public abstract class KeymasterUtils {
                 args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
                         KeymasterArguments.toUint64(sids.get(i)));
             }
-            args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, KeymasterDefs.HW_AUTH_BIOMETRIC);
+
+            args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType());
 
             if (spec.isUserAuthenticationValidWhileOnBody()) {
                 throw new ProviderException("Key validity extension while device is on-body is not "
