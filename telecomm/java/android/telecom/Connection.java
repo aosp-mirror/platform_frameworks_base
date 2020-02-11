@@ -501,7 +501,7 @@ public abstract class Connection extends Conferenceable {
      * Set by the framework to indicate that it is an adhoc conference call.
      * <p>
      * This is used for Outgoing and incoming conference calls.
-     *
+     * @hide
      */
     public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
 
