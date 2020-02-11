@@ -3790,6 +3790,12 @@
         <attr name="description" />
         <!-- Brief summary of the target of accessibility shortcut purpose or behavior. -->
         <attr name="summary" />
+        <!-- Animated image of the target of accessibility shortcut purpose or behavior, to help
+             users understand how the target of accessibility shortcut can help them.-->
+        <attr name="animatedImageDrawable" format="reference"/>
+        <!-- Html description of the target of accessibility shortcut purpose or behavior, to help
+             users understand how the target of accessibility shortcut can help them. -->
+        <attr name="htmlDescription" format="string"/>
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that

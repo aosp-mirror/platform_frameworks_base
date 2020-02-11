@@ -4972,11 +4972,14 @@ public class Intent implements Parcelable, Cloneable {
      * <pre>
      * &lt;accessibility-shortcut-target
      *     android:description="@string/shortcut_target_description"
-     *     android:summary="@string/shortcut_target_summary" /&gt;
+     *     android:summary="@string/shortcut_target_summary"
+     *     android:animatedImageDrawable="@drawable/shortcut_target_animated_image"
+     *     android:htmlDescription="@string/shortcut_target_html_description" /&gt;
      * </pre>
      * <p>
      * Both description and summary are necessary. The system will ignore the accessibility
-     * shortcut target if they are missing.
+     * shortcut target if they are missing. The animated image and html description are supported
+     * to help users understand how to use the shortcut target.
      * </p>
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
