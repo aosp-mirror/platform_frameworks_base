@@ -28,6 +28,7 @@ import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
+import android.view.WindowManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.NotificationMessagingUtil;
@@ -98,10 +99,10 @@ public class DependencyProvider {
 
     @Singleton
     @Provides
-    // Single instance of DisplayMetrics, gets updated by StatusBar, but can be used
-    // anywhere it is needed.
-    public DisplayMetrics provideDisplayMetrics() {
-        return new DisplayMetrics();
+    public DisplayMetrics provideDisplayMetrics(Context context, WindowManager windowManager) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        context.getDisplay().getMetrics(displayMetrics);
+        return displayMetrics;
     }
 
     /** */

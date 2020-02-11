@@ -25,9 +25,12 @@ import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -40,6 +43,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.sensors.ProximitySensor;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
@@ -52,7 +56,7 @@ import javax.inject.Singleton;
  * {@link FalsingManagerImpl} is used when a Plugin is not loaded.
  */
 @Singleton
-public class FalsingManagerProxy implements FalsingManager {
+public class FalsingManagerProxy implements FalsingManager, Dumpable {
 
     private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
 
@@ -63,16 +67,20 @@ public class FalsingManagerProxy implements FalsingManager {
     private final DeviceConfigProxy mDeviceConfig;
     private boolean mBrightlineEnabled;
     private final DockManager mDockManager;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private Executor mUiBgExecutor;
 
     @Inject
     FalsingManagerProxy(Context context, PluginManager pluginManager, @Main Executor executor,
             DisplayMetrics displayMetrics, ProximitySensor proximitySensor,
             DeviceConfigProxy deviceConfig, DockManager dockManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DumpController dumpController,
             @UiBackground Executor uiBgExecutor) {
         mDisplayMetrics = displayMetrics;
         mProximitySensor = proximitySensor;
         mDockManager = dockManager;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mUiBgExecutor = uiBgExecutor;
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
         mProximitySensor.setSensorDelay(SensorManager.SENSOR_DELAY_GAME);
@@ -101,6 +109,8 @@ public class FalsingManagerProxy implements FalsingManager {
         };
 
         pluginManager.addPluginListener(mPluginListener, FalsingPlugin.class);
+
+        dumpController.registerDumpable("FalsingManager", this);
     }
 
     private void onDeviceConfigPropertiesChanged(Context context, String namespace) {
@@ -130,7 +140,7 @@ public class FalsingManagerProxy implements FalsingManager {
         } else {
             mInternalFalsingManager = new BrightLineFalsingManager(
                     new FalsingDataProvider(mDisplayMetrics),
-                    Dependency.get(KeyguardUpdateMonitor.class),
+                    mKeyguardUpdateMonitor,
                     mProximitySensor,
                     mDeviceConfig,
                     mDockManager
@@ -319,6 +329,11 @@ public class FalsingManagerProxy implements FalsingManager {
     @Override
     public void onTouchEvent(MotionEvent ev, int width, int height) {
         mInternalFalsingManager.onTouchEvent(ev, width, height);
+    }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        mInternalFalsingManager.dump(pw);
     }
 
     @Override
