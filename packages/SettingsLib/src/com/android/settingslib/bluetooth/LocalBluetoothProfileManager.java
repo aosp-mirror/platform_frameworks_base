@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -232,7 +233,7 @@ public class LocalBluetoothProfileManager {
     }
 
     private final Collection<ServiceListener> mServiceListeners =
-            new ArrayList<ServiceListener>();
+            new CopyOnWriteArrayList<ServiceListener>();
 
     private void addProfile(LocalBluetoothProfile profile,
             String profileName, String stateChangedAction) {
@@ -361,14 +362,18 @@ public class LocalBluetoothProfileManager {
 
     // not synchronized: use only from UI thread! (TODO: verify)
     void callServiceConnectedListeners() {
-        for (ServiceListener l : mServiceListeners) {
+        final Collection<ServiceListener> listeners = new ArrayList<>(mServiceListeners);
+
+        for (ServiceListener l : listeners) {
             l.onServiceConnected();
         }
     }
 
     // not synchronized: use only from UI thread! (TODO: verify)
     void callServiceDisconnectedListeners() {
-        for (ServiceListener listener : mServiceListeners) {
+        final Collection<ServiceListener> listeners = new ArrayList<>(mServiceListeners);
+
+        for (ServiceListener listener : listeners) {
             listener.onServiceDisconnected();
         }
     }
