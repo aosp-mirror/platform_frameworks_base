@@ -147,8 +147,8 @@ public class FalsingManagerProxy implements FalsingManager {
     }
 
     @Override
-    public void onSucccessfulUnlock() {
-        mInternalFalsingManager.onSucccessfulUnlock();
+    public void onSuccessfulUnlock() {
+        mInternalFalsingManager.onSuccessfulUnlock();
     }
 
     @Override

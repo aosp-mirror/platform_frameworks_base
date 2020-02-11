@@ -375,7 +375,7 @@ public class FalsingManagerImpl implements FalsingManager {
         sessionExitpoint(false /* force */);
     }
 
-    public void onSucccessfulUnlock() {
+    public void onSuccessfulUnlock() {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("onSucccessfulUnlock", "");
         }
