@@ -61,10 +61,20 @@ public class BiometricManager {
     public static final int BIOMETRIC_ERROR_NO_HARDWARE =
             BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
 
+    /**
+     * A security vulnerability has been discovered and the sensor is unavailable until a
+     * security update has addressed this issue. This error can be received if for example,
+     * authentication was requested with {@link Authenticators#BIOMETRIC_STRONG}, but the
+     * sensor's strength can currently only meet {@link Authenticators#BIOMETRIC_WEAK}.
+     */
+    public static final int BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED =
+            BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+
     @IntDef({BIOMETRIC_SUCCESS,
             BIOMETRIC_ERROR_HW_UNAVAILABLE,
             BIOMETRIC_ERROR_NONE_ENROLLED,
-            BIOMETRIC_ERROR_NO_HARDWARE})
+            BIOMETRIC_ERROR_NO_HARDWARE,
+            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
     @interface BiometricError {}
 
     /**

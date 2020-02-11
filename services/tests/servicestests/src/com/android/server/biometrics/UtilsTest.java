@@ -91,31 +91,31 @@ public class UtilsTest {
     @Test
     public void testIsDeviceCredentialAllowed_withIntegerFlags() {
         int authenticators = 0;
-        assertFalse(Utils.isDeviceCredentialAllowed(authenticators));
+        assertFalse(Utils.isCredentialRequested(authenticators));
 
         authenticators |= Authenticators.DEVICE_CREDENTIAL;
-        assertTrue(Utils.isDeviceCredentialAllowed(authenticators));
+        assertTrue(Utils.isCredentialRequested(authenticators));
 
         authenticators |= Authenticators.BIOMETRIC_WEAK;
-        assertTrue(Utils.isDeviceCredentialAllowed(authenticators));
+        assertTrue(Utils.isCredentialRequested(authenticators));
     }
 
     @Test
     public void testIsDeviceCredentialAllowed_withBundle() {
         Bundle bundle = new Bundle();
-        assertFalse(Utils.isDeviceCredentialAllowed(bundle));
+        assertFalse(Utils.isCredentialRequested(bundle));
 
         int authenticators = 0;
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        assertFalse(Utils.isDeviceCredentialAllowed(bundle));
+        assertFalse(Utils.isCredentialRequested(bundle));
 
         authenticators |= Authenticators.DEVICE_CREDENTIAL;
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        assertTrue(Utils.isDeviceCredentialAllowed(bundle));
+        assertTrue(Utils.isCredentialRequested(bundle));
 
         authenticators |= Authenticators.BIOMETRIC_WEAK;
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        assertTrue(Utils.isDeviceCredentialAllowed(bundle));
+        assertTrue(Utils.isCredentialRequested(bundle));
     }
 
     @Test
@@ -140,14 +140,14 @@ public class UtilsTest {
         for (int i = 0; i <= 7; i++) {
             int authenticators = 1 << i;
             bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-            assertTrue(Utils.isBiometricAllowed(bundle));
+            assertTrue(Utils.isBiometricRequested(bundle));
         }
 
         // The rest of the bits are not allowed to integrate with the public APIs
         for (int i = 8; i < 32; i++) {
             int authenticators = 1 << i;
             bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-            assertFalse(Utils.isBiometricAllowed(bundle));
+            assertFalse(Utils.isBiometricRequested(bundle));
         }
     }
 
