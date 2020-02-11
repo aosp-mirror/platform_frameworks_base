@@ -29,7 +29,7 @@ import java.util.Map;
  * Class for maintaining and updating the strengths for biometric sensors. Strengths can only
  * be downgraded from the device's default, and never upgraded.
  */
-public class BiometricStrengthController implements DeviceConfig.OnPropertiesChangedListener {
+public class BiometricStrengthController {
     private static final String TAG = "BiometricStrengthController";
 
     private final BiometricService mService;
@@ -41,7 +41,7 @@ public class BiometricStrengthController implements DeviceConfig.OnPropertiesCha
      * "id1:strength1,id2:strength2,id3:strength3"
      *
      * where strength is one of the values defined in
-     * {@link android.hardware.biometrics.Authenticators}
+     * {@link android.hardware.biometrics.BiometricManager.Authenticators}
      *
      * Both id and strength should be int, otherwise Exception will be thrown when parsing and the
      * downgrade will fail.
@@ -53,30 +53,28 @@ public class BiometricStrengthController implements DeviceConfig.OnPropertiesCha
      */
     public static final String DEFAULT_BIOMETRIC_STRENGTHS = null;
 
-    BiometricStrengthController(@NonNull BiometricService service) {
-        mService = service;
-    }
-
-    void startListening() {
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_BIOMETRICS,
-                BackgroundThread.getExecutor(), this);
-        updateStrengths();
-    }
-
-    @Override
-    public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
+    private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener = properties -> {
         for (String name : properties.getKeyset()) {
             if (KEY_BIOMETRIC_STRENGTHS.equals(name)) {
                 updateStrengths();
             }
         }
+    };
+
+    public BiometricStrengthController(@NonNull BiometricService service) {
+        mService = service;
+    }
+
+    public void startListening() {
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_BIOMETRICS,
+                BackgroundThread.getExecutor(), mDeviceConfigListener);
     }
 
     /**
      * Updates the strengths of authenticators in BiometricService if a matching ID's configuration
      * has been changed.
      */
-    private void updateStrengths() {
+    public void updateStrengths() {
         final Map<Integer, Integer> idToStrength = getIdToStrengthMap();
         if (idToStrength == null) {
             return;

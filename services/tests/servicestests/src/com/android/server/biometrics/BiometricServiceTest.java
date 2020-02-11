@@ -1095,6 +1095,24 @@ public class BiometricServiceTest {
     }
 
     @Test
+    public void testRegisterAuthenticator_updatesStrengths() throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        verify(mBiometricService.mBiometricStrengthController).startListening();
+        verify(mBiometricService.mBiometricStrengthController, never()).updateStrengths();
+
+        when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
+                .thenReturn(true);
+        when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
+        mBiometricService.mImpl.registerAuthenticator(0 /* testId */,
+                BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+                mFingerprintAuthenticator);
+
+        verify(mBiometricService.mBiometricStrengthController).updateStrengths();
+    }
+
+    @Test
     public void testWithDowngradedAuthenticator() throws Exception {
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
