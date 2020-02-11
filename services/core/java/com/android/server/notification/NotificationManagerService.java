@@ -185,6 +185,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.VibrationEffect;
@@ -2263,12 +2264,26 @@ public class NotificationManagerService extends SystemService {
 
     @Override
     public void onUnlockUser(@NonNull UserInfo userInfo) {
-        mHandler.post(() -> mHistoryManager.onUserUnlocked(userInfo.id));
+        mHandler.post(() -> {
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryUnlockUser");
+            try {
+                mHistoryManager.onUserUnlocked(userInfo.id);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            }
+        });
     }
 
     @Override
     public void onStopUser(@NonNull UserInfo userInfo) {
-        mHandler.post(() -> mHistoryManager.onUserStopped(userInfo.id));
+        mHandler.post(() -> {
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryStopUser");
+            try {
+                mHistoryManager.onUserStopped(userInfo.id);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            }
+        });
     }
 
     @GuardedBy("mNotificationLock")
@@ -2595,17 +2610,22 @@ public class NotificationManagerService extends SystemService {
             mAppUsageStats.reportInterruptiveNotification(r.getSbn().getPackageName(),
                     r.getChannel().getId(),
                     getRealUserId(r.getSbn().getUserId()));
-            mHistoryManager.addNotification(new HistoricalNotification.Builder()
-                    .setPackage(r.getSbn().getPackageName())
-                    .setUid(r.getSbn().getUid())
-                    .setChannelId(r.getChannel().getId())
-                    .setChannelName(r.getChannel().getName().toString())
-                    .setPostedTimeMs(System.currentTimeMillis())
-                    .setTitle(getHistoryTitle(r.getNotification()))
-                    .setText(getHistoryText(
-                            r.getSbn().getPackageContext(getContext()), r.getNotification()))
-                    .setIcon(r.getNotification().getSmallIcon())
-                    .build());
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryAddItem");
+            try {
+                mHistoryManager.addNotification(new HistoricalNotification.Builder()
+                        .setPackage(r.getSbn().getPackageName())
+                        .setUid(r.getSbn().getUid())
+                        .setChannelId(r.getChannel().getId())
+                        .setChannelName(r.getChannel().getName().toString())
+                        .setPostedTimeMs(System.currentTimeMillis())
+                        .setTitle(getHistoryTitle(r.getNotification()))
+                        .setText(getHistoryText(
+                                r.getSbn().getPackageContext(getContext()), r.getNotification()))
+                        .setIcon(r.getNotification().getSmallIcon())
+                        .build());
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            }
             r.setRecordedInterruption(true);
         }
     }
@@ -3679,7 +3699,12 @@ public class NotificationManagerService extends SystemService {
             if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
                     == AppOpsManager.MODE_ALLOWED) {
                 IntArray currentUserIds = mUserProfiles.getCurrentProfileIds();
-                return mHistoryManager.readNotificationHistory(currentUserIds.toArray());
+                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryReadHistory");
+                try {
+                    return mHistoryManager.readNotificationHistory(currentUserIds.toArray());
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                }
             }
             return new NotificationHistory();
         }
