@@ -22,10 +22,11 @@ import android.graphics.drawable.LayerDrawable
 import android.view.View
 import android.widget.TextView
 import android.service.controls.Control
-import android.service.controls.actions.BooleanAction
 import android.service.controls.templates.ToggleTemplate
 
 import com.android.systemui.R
+import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
+import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
 
 class ToggleBehavior : Behavior {
     lateinit var clipLayer: Drawable
@@ -42,12 +43,14 @@ class ToggleBehavior : Behavior {
 
         status.setText(control.getStatusText())
 
-        cvh.layout.setOnClickListener(View.OnClickListener() { toggle() })
+        template = control.getControlTemplate() as ToggleTemplate
+
+        cvh.layout.setOnClickListener(View.OnClickListener() {
+            ControlActionCoordinator.toggle(cvh, template.getTemplateId(), template.isChecked())
+        })
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
-
-        template = control.getControlTemplate() as ToggleTemplate
 
         val checked = template.isChecked()
         val deviceType = control.getDeviceType()
@@ -55,12 +58,5 @@ class ToggleBehavior : Behavior {
         clipLayer.setLevel(if (checked) MAX_LEVEL else MIN_LEVEL)
         cvh.setEnabled(checked)
         cvh.applyRenderInfo(RenderInfo.lookup(deviceType, checked))
-    }
-
-    fun toggle() {
-        cvh.action(BooleanAction(template.getTemplateId(), !template.isChecked()))
-
-        val nextLevel = if (template.isChecked()) MIN_LEVEL else MAX_LEVEL
-        clipLayer.setLevel(nextLevel)
     }
 }
