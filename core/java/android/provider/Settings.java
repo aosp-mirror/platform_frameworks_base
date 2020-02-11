@@ -10207,7 +10207,9 @@ public final class Settings {
          *
          * Type: int (0 for false, 1 for true)
          * @hide
+         * @deprecated Use {@link WifiManager#isAutoWakeupEnabled()} instead.
          */
+        @Deprecated
         @SystemApi
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
@@ -10243,7 +10245,6 @@ public final class Settings {
          * enabled state.
          * @hide
          */
-        @SystemApi
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
 

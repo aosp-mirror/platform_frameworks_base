@@ -272,4 +272,8 @@ interface IWifiManager
     boolean isScanThrottleEnabled();
 
     Map getAllMatchingPasspointProfilesForScanResults(in List<ScanResult> scanResult);
+
+    void setAutoWakeupEnabled(boolean enable);
+
+    boolean isAutoWakeupEnabled();
 }

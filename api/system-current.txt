@@ -7714,6 +7714,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveBackupData();
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public byte[] retrieveSoftApBackupData();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
+    method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setAutoWakeupEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WIFI_SET_DEVICE_MOBILITY_STATE) public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMacRandomizationSettingPasspointEnabled(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public void setMeteredOverridePasspoint(@NonNull String, int);
@@ -9693,7 +9694,6 @@ package android.provider {
     field public static final String EUICC_UNSUPPORTED_COUNTRIES = "euicc_unsupported_countries";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT = "install_carrier_app_notification_persistent";
     field public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS = "install_carrier_app_notification_sleep_millis";
-    field public static final String NETWORK_RECOMMENDATIONS_ENABLED = "network_recommendations_enabled";
     field public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
     field public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
@@ -9708,7 +9708,7 @@ package android.provider {
     field public static final String WIFI_SCAN_THROTTLE_ENABLED = "wifi_scan_throttle_enabled";
     field public static final String WIFI_SCORE_PARAMS = "wifi_score_params";
     field public static final String WIFI_VERBOSE_LOGGING_ENABLED = "wifi_verbose_logging_enabled";
-    field public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
+    field @Deprecated public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
