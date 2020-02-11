@@ -128,7 +128,7 @@ public class UserDetailItemView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        FontSizeUtils.updateFontSize(mName, R.dimen.qs_detail_item_secondary_text_size);
+        FontSizeUtils.updateFontSize(mName, getFontSizeDimen());
     }
 
     @Override
@@ -145,5 +145,9 @@ public class UserDetailItemView extends LinearLayout {
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    protected int getFontSizeDimen() {
+        return R.dimen.qs_detail_item_secondary_text_size;
     }
 }
