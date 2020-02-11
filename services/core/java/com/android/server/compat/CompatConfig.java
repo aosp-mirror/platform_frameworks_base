@@ -16,8 +16,11 @@
 
 package com.android.server.compat;
 
+import android.compat.Compatibility.ChangeConfig;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.LongSparseArray;
@@ -25,7 +28,11 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.AndroidBuildClassifier;
 import com.android.internal.compat.CompatibilityChangeConfig;
+import com.android.internal.compat.CompatibilityChangeInfo;
+import com.android.internal.compat.IOverrideValidator;
+import com.android.internal.compat.OverrideAllowedState;
 import com.android.server.compat.config.Change;
 import com.android.server.compat.config.XmlParser;
 
@@ -37,34 +44,29 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+
 /**
  * This class maintains state relating to platform compatibility changes.
  *
  * <p>It stores the default configuration for each change, and any per-package overrides that have
  * been configured.
  */
-public final class CompatConfig {
+final class CompatConfig {
 
     private static final String TAG = "CompatConfig";
-
-    private static final CompatConfig sInstance = new CompatConfig().initConfigFromLib(
-            Environment.buildPath(
-                    Environment.getRootDirectory(), "etc", "compatconfig"));
 
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
-    @VisibleForTesting
-    public CompatConfig() {
-    }
+    private IOverrideValidator mOverrideValidator;
 
-    /**
-     * @return The static instance of this class to be used within the system server.
-     */
-    public static CompatConfig get() {
-        return sInstance;
+    @VisibleForTesting
+    CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
+        mOverrideValidator = new OverrideValidatorImpl(androidBuildClassifier, context, this);
     }
 
     /**
@@ -73,7 +75,7 @@ public final class CompatConfig {
      *
      * @param change The change to add. Any change with the same ID will be overwritten.
      */
-    public void addChange(CompatChange change) {
+    void addChange(CompatChange change) {
         synchronized (mChanges) {
             mChanges.put(change.getId(), change);
         }
@@ -85,10 +87,10 @@ public final class CompatConfig {
      *
      * @param app The app in question
      * @return A sorted long array of change IDs. We use a primitive array to minimize memory
-     *      footprint: Every app process will store this array statically so we aim to reduce
-     *      overhead as much as possible.
+     * footprint: Every app process will store this array statically so we aim to reduce
+     * overhead as much as possible.
      */
-    public long[] getDisabledChanges(ApplicationInfo app) {
+    long[] getDisabledChanges(ApplicationInfo app) {
         LongArray disabled = new LongArray();
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
@@ -109,7 +111,7 @@ public final class CompatConfig {
      * @param name Name of the change to look up
      * @return The change ID, or {@code -1} if no change with that name exists.
      */
-    public long lookupChangeId(String name) {
+    long lookupChangeId(String name) {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 if (TextUtils.equals(mChanges.valueAt(i).getName(), name)) {
@@ -124,11 +126,11 @@ public final class CompatConfig {
      * Find if a given change is enabled for a given application.
      *
      * @param changeId The ID of the change in question
-     * @param app App to check for
+     * @param app      App to check for
      * @return {@code true} if the change is enabled for this app. Also returns {@code true} if the
-     *      change ID is not known, as unknown changes are enabled by default.
+     * change ID is not known, as unknown changes are enabled by default.
      */
-    public boolean isChangeEnabled(long changeId, ApplicationInfo app) {
+    boolean isChangeEnabled(long changeId, ApplicationInfo app) {
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
@@ -146,15 +148,20 @@ public final class CompatConfig {
      *
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
-     * @param changeId The ID of the change to be overridden. Note, this call will succeed even if
-     *                 this change is not known; it will only have any effect if any code in the
-     *                 platform is gated on the ID given.
+     * @param changeId    The ID of the change to be overridden. Note, this call will succeed even
+     *                    if
+     *                    this change is not known; it will only have any effect if any code in the
+     *                    platform is gated on the ID given.
      * @param packageName The app package name to override the change for.
-     * @param enabled If the change should be enabled or disabled.
+     * @param enabled     If the change should be enabled or disabled.
      * @return {@code true} if the change existed before adding the override.
      */
-    public boolean addOverride(long changeId, String packageName, boolean enabled) {
+    boolean addOverride(long changeId, String packageName, boolean enabled)
+            throws RemoteException, SecurityException {
         boolean alreadyKnown = true;
+        OverrideAllowedState allowedState =
+                mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+        allowedState.enforce(changeId, packageName);
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
@@ -168,69 +175,138 @@ public final class CompatConfig {
     }
 
     /**
+     * Check whether the change is known to the compat config.
+     *
+     * @return {@code true} if the change is known.
+     */
+    boolean isKnownChangeId(long changeId) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            return c != null;
+        }
+    }
+
+    /**
+     * Returns the minimum sdk version for which this change should be enabled (or 0 if it is not
+     * target sdk gated).
+     */
+    int minTargetSdkForChangeId(long changeId) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            if (c == null) {
+                return 0;
+            }
+            return c.getEnableAfterTargetSdk();
+        }
+    }
+
+    /**
      * Removes an override previously added via {@link #addOverride(long, String, boolean)}. This
      * restores the default behaviour for the given change and app, once any app processes have been
      * restarted.
      *
-     * @param changeId The ID of the change that was overridden.
+     * @param changeId    The ID of the change that was overridden.
      * @param packageName The app package name that was overridden.
      * @return {@code true} if an override existed;
      */
-    public boolean removeOverride(long changeId, String packageName) {
+    boolean removeOverride(long changeId, String packageName)
+            throws RemoteException, SecurityException {
         boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
-            if (c != null) {
-                overrideExists = true;
-                c.removePackageOverride(packageName);
+            try {
+                if (c != null) {
+                    OverrideAllowedState allowedState =
+                            mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+                    allowedState.enforce(changeId, packageName);
+                    overrideExists = true;
+                    c.removePackageOverride(packageName);
+                }
+            } catch (RemoteException e) {
+                // Should never occur, since validator is in the same process.
+                throw new RuntimeException("Unable to call override validator!", e);
             }
         }
         return overrideExists;
     }
+
     /**
-     * Overrides the enabled state for a given change and app. This method is intended to be used
-     * *only* for debugging purposes.
+     * Overrides the enabled state for a given change and app.
      *
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
-     * @param overrides list of overrides to default changes config.
+     * @param overrides   list of overrides to default changes config.
      * @param packageName app for which the overrides will be applied.
      */
-    public void addOverrides(
-            CompatibilityChangeConfig overrides, String packageName) {
+    void addOverrides(CompatibilityChangeConfig overrides, String packageName)
+            throws RemoteException, SecurityException {
         synchronized (mChanges) {
-            for (Long changeId: overrides.enabledChanges()) {
+            for (Long changeId : overrides.enabledChanges()) {
                 addOverride(changeId, packageName, true);
             }
-            for (Long changeId: overrides.disabledChanges()) {
+            for (Long changeId : overrides.disabledChanges()) {
                 addOverride(changeId, packageName, false);
+
             }
         }
     }
 
     /**
      * Removes all overrides previously added via {@link #addOverride(long, String, boolean)} or
-     * {@link #addAppOverrides(CompatibilityChangeConfig, String)} for a certain package.
+     * {@link #addOverrides(CompatibilityChangeConfig, String)} for a certain package.
      *
      * <p>This restores the default behaviour for the given change and app, once any app
      * processes have been restarted.
      *
      * @param packageName The package for which the overrides should be purged.
      */
-    public void removePackageOverrides(String packageName) {
+    void removePackageOverrides(String packageName) throws RemoteException, SecurityException {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
-                mChanges.valueAt(i).removePackageOverride(packageName);
+                try {
+                    CompatChange change = mChanges.valueAt(i);
+                    OverrideAllowedState allowedState =
+                            mOverrideValidator.getOverrideAllowedState(change.getId(),
+                                                                       packageName);
+                    allowedState.enforce(change.getId(), packageName);
+                    if (change != null) {
+                        mChanges.valueAt(i).removePackageOverride(packageName);
+                    }
+                } catch (RemoteException e) {
+                    // Should never occur, since validator is in the same process.
+                    throw new RuntimeException("Unable to call override validator!", e);
+                }
             }
         }
     }
 
+    boolean registerListener(long changeId, CompatChange.ChangeListener listener) {
+        boolean alreadyKnown = true;
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            if (c == null) {
+                alreadyKnown = false;
+                c = new CompatChange(changeId);
+                addChange(c);
+            }
+            c.registerListener(listener);
+        }
+        return alreadyKnown;
+    }
+
+    @VisibleForTesting
+    void clearChanges() {
+        synchronized (mChanges) {
+            mChanges.clear();
+        }
+    }
+
     /**
-    * Dumps the current list of compatibility config information.
-    *
-    * @param pw The {@link PrintWriter} instance to which the information will be dumped.
-    */
-    public void dumpConfig(PrintWriter pw) {
+     * Dumps the current list of compatibility config information.
+     *
+     * @param pw The {@link PrintWriter} instance to which the information will be dumped.
+     */
+    void dumpConfig(PrintWriter pw) {
         synchronized (mChanges) {
             if (mChanges.size() == 0) {
                 pw.println("No compat overrides.");
@@ -243,17 +319,67 @@ public final class CompatConfig {
         }
     }
 
-    CompatConfig initConfigFromLib(File libraryDir) {
+    /**
+     * Get the config for a given app.
+     *
+     * @param applicationInfo the {@link ApplicationInfo} for which the info should be dumped.
+     * @return A {@link CompatibilityChangeConfig} which contains the compat config info for the
+     * given app.
+     */
+
+    CompatibilityChangeConfig getAppConfig(ApplicationInfo applicationInfo) {
+        Set<Long> enabled = new HashSet<>();
+        Set<Long> disabled = new HashSet<>();
+        synchronized (mChanges) {
+            for (int i = 0; i < mChanges.size(); ++i) {
+                CompatChange c = mChanges.valueAt(i);
+                if (c.isEnabled(applicationInfo)) {
+                    enabled.add(c.getId());
+                } else {
+                    disabled.add(c.getId());
+                }
+            }
+        }
+        return new CompatibilityChangeConfig(new ChangeConfig(enabled, disabled));
+    }
+
+    /**
+     * Dumps all the compatibility change information.
+     *
+     * @return An array of {@link CompatibilityChangeInfo} with the current changes.
+     */
+    CompatibilityChangeInfo[] dumpChanges() {
+        synchronized (mChanges) {
+            CompatibilityChangeInfo[] changeInfos = new CompatibilityChangeInfo[mChanges.size()];
+            for (int i = 0; i < mChanges.size(); ++i) {
+                CompatChange change = mChanges.valueAt(i);
+                changeInfos[i] = new CompatibilityChangeInfo(change.getId(),
+                        change.getName(),
+                        change.getEnableAfterTargetSdk(),
+                        change.getDisabled(),
+                        change.getDescription());
+            }
+            return changeInfos;
+        }
+    }
+
+    static CompatConfig create(AndroidBuildClassifier androidBuildClassifier, Context context) {
+        CompatConfig config = new CompatConfig(androidBuildClassifier, context);
+        config.initConfigFromLib(Environment.buildPath(
+                Environment.getRootDirectory(), "etc", "compatconfig"));
+        return config;
+    }
+
+    void initConfigFromLib(File libraryDir) {
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
             Slog.e(TAG, "No directory " + libraryDir + ", skipping");
-            return this;
+            return;
         }
         for (File f : libraryDir.listFiles()) {
             Slog.d(TAG, "Found a config file: " + f.getPath());
             //TODO(b/138222363): Handle duplicate ids across config files.
             readConfig(f);
         }
-        return this;
     }
 
     private void readConfig(File configFile) {
@@ -267,4 +393,7 @@ public final class CompatConfig {
         }
     }
 
+    IOverrideValidator getOverrideValidator() {
+        return mOverrideValidator;
+    }
 }

@@ -18,7 +18,6 @@ package com.android.systemui.bubbles;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -45,7 +44,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
      */
     private static final float INDIVIDUAL_BUBBLE_DISMISS_MIN_VELOCITY = 6000f;
 
-    private static final String TAG = "BubbleTouchHandler";
     /**
      * When the stack is flung towards the bottom of the screen, it'll be dismissed if it's flung
      * towards the center of the screen (where the dismiss target is). This value is the width of
@@ -66,11 +64,10 @@ class BubbleTouchHandler implements View.OnTouchListener {
     private int mTouchSlopSquared;
     private VelocityTracker mVelocityTracker;
 
-    private boolean mInDismissTarget;
-    private Handler mHandler = new Handler();
-
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
+    /** Whether the current touched view is in the dismiss target. */
+    private boolean mInDismissTarget;
 
     BubbleTouchHandler(BubbleStackView stackView,
             BubbleData bubbleData, Context context) {
@@ -94,6 +91,15 @@ class BubbleTouchHandler implements View.OnTouchListener {
         // anything, collapse the stack.
         if (action == MotionEvent.ACTION_OUTSIDE || mTouchedView == null) {
             mBubbleData.setExpanded(false);
+            resetForNextGesture();
+            return false;
+        }
+
+        if (!(mTouchedView instanceof BubbleView)
+                && !(mTouchedView instanceof BubbleStackView)
+                && !(mTouchedView instanceof BubbleFlyoutView)) {
+            // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
+            // of expanded view).
             resetForNextGesture();
             return false;
         }
@@ -193,9 +199,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                                 }
                             });
                 } else if (isFlyout) {
-                    // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
                     if (!mBubbleData.isExpanded() && !mMovedEnough) {
-                        mBubbleData.setExpanded(true);
+                        mStack.onFlyoutTapped();
                     }
                 } else if (mMovedEnough) {
                     if (isStack) {

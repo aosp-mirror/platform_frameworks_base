@@ -50,7 +50,6 @@ import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.service.sms.FinancialSmsService;
-import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -224,9 +223,10 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             //TODO gradually add more role migrations statements here for remaining roles
             // Make sure to implement LegacyRoleResolutionPolicy#getRoleHolders
             // for a given role before adding a migration statement for it here
-            migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_ASSISTANT, userId);
+            migrateRoleIfNecessary(RoleManager.ROLE_BROWSER, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_DIALER, userId);
+            migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_EMERGENCY, userId);
 
             // Some vital packages state has changed since last role grant
@@ -672,40 +672,6 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             }
 
             dumpOutputStream.flush();
-        }
-
-        /**
-         * Get filtered SMS messages for financial app.
-         */
-        @Override
-        public void getSmsMessagesForFinancialApp(
-                String callingPkg, Bundle params, IFinancialSmsCallback callback) {
-            int mode = PermissionChecker.checkCallingOrSelfPermissionForDataDelivery(
-                    getContext(),
-                    AppOpsManager.OPSTR_SMS_FINANCIAL_TRANSACTIONS);
-
-            if (mode == PermissionChecker.PERMISSION_GRANTED) {
-                FinancialSmsManager financialSmsManager = new FinancialSmsManager(getContext());
-                financialSmsManager.getSmsMessages(new RemoteCallback((result) -> {
-                    CursorWindow messages = null;
-                    if (result == null) {
-                        Slog.w(LOG_TAG, "result is null.");
-                    } else {
-                        messages = result.getParcelable(FinancialSmsService.EXTRA_SMS_MSGS);
-                    }
-                    try {
-                        callback.onGetSmsMessagesForFinancialApp(messages);
-                    } catch (RemoteException e) {
-                        // do nothing
-                    }
-                }), params);
-            } else {
-                try {
-                    callback.onGetSmsMessagesForFinancialApp(null);
-                } catch (RemoteException e) {
-                    // do nothing
-                }
-            }
         }
 
         private int getUidForPackage(String packageName) {

@@ -41,6 +41,7 @@ import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.compat.Compatibility;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
@@ -80,15 +81,17 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.server.compat.CompatConfig;
+import com.android.server.compat.PlatformCompat;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -513,12 +516,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
-                result = mInternal.startActivityAndWait(null, null, intent, mimeType,
+                result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
-                res = mInternal.startActivityAsUser(null, null, intent, mimeType,
+                res = mInternal.startActivityAsUser(null, SHELL_PACKAGE_NAME, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
@@ -2868,62 +2871,65 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private void killPackage(String packageName, PrintWriter pw) throws RemoteException {
-        int uid = mPm.getPackageUid(packageName, 0, mUserId);
-        if (uid < 0) {
-            // uid is negative if the package wasn't found.
-            pw.println("Didn't find package " + packageName + " on device.");
-        } else {
-            pw.println("Killing package " + packageName + " (UID " + uid + ").");
-            final long origId = Binder.clearCallingIdentity();
-            mInterface.killUid(UserHandle.getAppId(uid),
-                    UserHandle.USER_ALL, "killPackage");
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     private int runCompat(PrintWriter pw) throws RemoteException {
-        final CompatConfig config = CompatConfig.get();
+        final PlatformCompat platformCompat = (PlatformCompat)
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
+        if (toggleValue.equals("reset-all")) {
+            final String packageName = getNextArgRequired();
+            pw.println("Reset all changes for " + packageName + " to default value.");
+            platformCompat.clearOverrides(packageName);
+            return 0;
+        }
         long changeId;
         String changeIdString = getNextArgRequired();
         try {
             changeId = Long.parseLong(changeIdString);
         } catch (NumberFormatException e) {
-            changeId = config.lookupChangeId(changeIdString);
+            changeId = platformCompat.lookupChangeId(changeIdString);
         }
         if (changeId == -1) {
             pw.println("Unknown or invalid change: '" + changeIdString + "'.");
+            return -1;
         }
         String packageName = getNextArgRequired();
-        switch (toggleValue) {
-            case "enable":
-                if (!config.addOverride(changeId, packageName, true)) {
-                    pw.println("Warning! Change " + changeId + " is not known yet. Enabling it"
-                            + " could have no effect.");
-                }
-                pw.println("Enabled change " + changeId + " for " + packageName + ".");
-                killPackage(packageName, pw);
-                return 0;
-            case "disable":
-                if (!config.addOverride(changeId, packageName, false)) {
-                    pw.println("Warning! Change " + changeId + " is not known yet. Disabling it"
-                            + " could have no effect.");
-                }
-                pw.println("Disabled change " + changeId + " for " + packageName + ".");
-                killPackage(packageName, pw);
-                return 0;
-            case "reset":
-                if (config.removeOverride(changeId, packageName)) {
-                    pw.println("Reset change " + changeId + " for " + packageName
-                            + " to default value.");
-                    killPackage(packageName, pw);
-                } else {
-                    pw.println("No override exists for changeId " + changeId + ".");
-                }
-                return 0;
-            default:
-                pw.println("Invalid toggle value: '" + toggleValue + "'.");
+        if (!platformCompat.isKnownChangeId(changeId)) {
+            pw.println("Warning! Change " + changeId + " is not known yet. Enabling/disabling it"
+                    + " could have no effect.");
+        }
+        ArraySet<Long> enabled = new ArraySet<>();
+        ArraySet<Long> disabled = new ArraySet<>();
+        try {
+            switch (toggleValue) {
+                case "enable":
+                    enabled.add(changeId);
+                    CompatibilityChangeConfig overrides =
+                            new CompatibilityChangeConfig(
+                                    new Compatibility.ChangeConfig(enabled, disabled));
+                    platformCompat.setOverrides(overrides, packageName);
+                    pw.println("Enabled change " + changeId + " for " + packageName + ".");
+                    return 0;
+                case "disable":
+                    disabled.add(changeId);
+                    overrides =
+                            new CompatibilityChangeConfig(
+                                    new Compatibility.ChangeConfig(enabled, disabled));
+                    platformCompat.setOverrides(overrides, packageName);
+                    pw.println("Disabled change " + changeId + " for " + packageName + ".");
+                    return 0;
+                case "reset":
+                    if (platformCompat.clearOverride(changeId, packageName)) {
+                        pw.println("Reset change " + changeId + " for " + packageName
+                                + " to default value.");
+                    } else {
+                        pw.println("No override exists for changeId " + changeId + ".");
+                    }
+                    return 0;
+                default:
+                    pw.println("Invalid toggle value: '" + toggleValue + "'.");
+            }
+        } catch (SecurityException e) {
+            pw.println(e.getMessage());
         }
         return -1;
     }
@@ -3032,7 +3038,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          specified then send to all users.");
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
-            pw.println("          [--user <USER_ID> | current] [--no-hidden-api-checks]");
+            pw.println("          [--user <USER_ID> | current]");
+            pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
             pw.println("          [--no-isolated-storage]");
             pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
             pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
@@ -3052,6 +3059,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
             pw.println("          current user if not specified.");
             pw.println("      --no-hidden-api-checks: disable restrictions on use of hidden API.");
+            pw.println("      --no-test-api-access: do not allow access to test APIs, if hidden");
+            pw.println("          API checks are enabled.");
             pw.println("      --no-isolated-storage: don't use isolated storage sandbox and ");
             pw.println("          mount full external storage");
             pw.println("      --no-window-animation: turn off window animations while running.");
@@ -3234,9 +3243,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      without restarting any processes.");
             pw.println("  write");
             pw.println("      Write all pending state to storage.");
-            pw.println("  compat enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
-            pw.println("      Toggles a change either by id or by name for <PACKAGE_NAME>.");
-            pw.println("      It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("  compat [COMMAND] [...]: sub-commands for toggling app-compat changes.");
+            pw.println("         enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
+            pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("         reset-all <PACKAGE_NAME>");
+            pw.println("            Removes all existing overrides for all changes for ");
+            pw.println("            <PACKAGE_NAME> (back to default behaviour).");
+            pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

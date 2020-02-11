@@ -16,9 +16,10 @@
 
 package android.media;
 
-import android.annotation.UnsupportedAppUsage;
-import java.util.List;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The EncoderCapabilities class is used to retrieve the

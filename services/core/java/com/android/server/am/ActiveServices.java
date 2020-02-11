@@ -192,33 +192,37 @@ public final class ActiveServices {
         @Override
         public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
-                final int N = smap.mServicesByInstanceName.size();
-                final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
-                for (int i = 0; i < N; i++) {
-                    final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
-                    if (uid == r.serviceInfo.applicationInfo.uid
-                            || packageName.equals(r.serviceInfo.packageName)) {
-                        if (r.isForeground) {
-                            toStop.add(r);
-                        }
-                    }
-                }
+                stopAllForegroundServicesLocked(uid, packageName);
+            }
+        }
+    }
 
-                // Now stop them all
-                final int numToStop = toStop.size();
-                if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
-                    Slog.i(TAG, "Package " + packageName + "/" + uid
-                            + " entering FAS with foreground services");
-                }
-                for (int i = 0; i < numToStop; i++) {
-                    final ServiceRecord r = toStop.get(i);
-                    if (DEBUG_FOREGROUND_SERVICE) {
-                        Slog.i(TAG, "  Stopping fg for service " + r);
-                    }
-                    setServiceForegroundInnerLocked(r, 0, null, 0, 0);
+    void stopAllForegroundServicesLocked(final int uid, final String packageName) {
+        final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
+        final int N = smap.mServicesByInstanceName.size();
+        final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) {
+            final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
+            if (uid == r.serviceInfo.applicationInfo.uid
+                    || packageName.equals(r.serviceInfo.packageName)) {
+                if (r.isForeground) {
+                    toStop.add(r);
                 }
             }
+        }
+
+        // Now stop them all
+        final int numToStop = toStop.size();
+        if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
+            Slog.i(TAG, "Package " + packageName + "/" + uid
+                    + " in FAS with foreground services");
+        }
+        for (int i = 0; i < numToStop; i++) {
+            final ServiceRecord r = toStop.get(i);
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.i(TAG, "  Stopping fg for service " + r);
+            }
+            setServiceForegroundInnerLocked(r, 0, null, 0, 0);
         }
     }
 
@@ -268,6 +272,7 @@ public final class ActiveServices {
 
         static final int MSG_BG_START_TIMEOUT = 1;
         static final int MSG_UPDATE_FOREGROUND_APPS = 2;
+        static final int MSG_ENSURE_NOT_START_BG = 3;
 
         ServiceMap(Looper looper, int userId) {
             super(looper);
@@ -285,6 +290,11 @@ public final class ActiveServices {
                 case MSG_UPDATE_FOREGROUND_APPS: {
                     updateForegroundApps(this);
                 } break;
+                case MSG_ENSURE_NOT_START_BG: {
+                    synchronized (mAm) {
+                        rescheduleDelayedStartsLocked();
+                    }
+                } break;
             }
         }
 
@@ -292,7 +302,9 @@ public final class ActiveServices {
             if (mStartingBackground.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "No longer background starting: " + r);
-                rescheduleDelayedStartsLocked();
+                removeMessages(MSG_ENSURE_NOT_START_BG);
+                Message msg = obtainMessage(MSG_ENSURE_NOT_START_BG);
+                sendMessage(msg);
             }
             if (mDelayedStartList.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "No longer delaying start: " + r);
@@ -1010,12 +1022,23 @@ public final class ActiveServices {
                         }
                     }
                     if (!aa.mAppOnTop) {
-                        if (active == null) {
-                            active = new ArrayList<>();
+                        // Transitioning a fg-service host app out of top: if it's bg restricted,
+                        // it loses the fg service state now.
+                        if (!appRestrictedAnyInBackground(aa.mUid, aa.mPackageName)) {
+                            if (active == null) {
+                                active = new ArrayList<>();
+                            }
+                            if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
+                                    + aa.mPackageName + ", uid=" + aa.mUid);
+                            active.add(aa);
+                        } else {
+                            if (DEBUG_FOREGROUND_SERVICE) {
+                                Slog.d(TAG, "bg-restricted app "
+                                        + aa.mPackageName + "/" + aa.mUid
+                                        + " exiting top; demoting fg services ");
+                            }
+                            stopAllForegroundServicesLocked(aa.mUid, aa.mPackageName);
                         }
-                        if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
-                                + aa.mPackageName + ", uid=" + aa.mUid);
-                        active.add(aa);
                     }
                 }
                 smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
@@ -2920,7 +2943,9 @@ public final class ActiveServices {
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when unbinding service "
                                 + r.shortInstanceName, e);
+                        needOomAdj = false;
                         serviceProcessGoneLocked(r);
+                        break;
                     }
                 }
             }

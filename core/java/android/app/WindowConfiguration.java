@@ -26,6 +26,7 @@ import static android.view.Surface.rotationToString;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -199,6 +200,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @hide */
     public static final int PINNED_WINDOWING_MODE_ELEVATION_IN_DIP = 5;
 
+    @UnsupportedAppUsage
     public WindowConfiguration() {
         unset();
     }

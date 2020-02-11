@@ -20,6 +20,12 @@ import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,24 +36,22 @@ import java.util.Set;
 
 @SmallTest
 @Presubmit
+@RunWith(AndroidJUnit4.class)
 public class PasswordSlotManagerTests extends AndroidTestCase {
 
     PasswordSlotManagerTestable mManager;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         mManager = new PasswordSlotManagerTestable();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
+    @After
+    public void tearDown() throws Exception {
         mManager.cleanup();
     }
 
+    @Test
     public void testBasicSlotUse() throws Exception {
         mManager.markSlotInUse(0);
         mManager.markSlotInUse(1);
@@ -64,6 +68,7 @@ public class PasswordSlotManagerTests extends AndroidTestCase {
         assertEquals(expected, mManager.getUsedSlots());
     }
 
+    @Test
     public void testMergeSlots() throws Exception {
         // Add some slots from a different OS image.
         mManager.setGsiImageNumber(1);
@@ -90,6 +95,7 @@ public class PasswordSlotManagerTests extends AndroidTestCase {
         assertEquals(expected, mManager.getUsedSlots());
     }
 
+    @Test
     public void testSerialization() throws Exception {
         mManager.markSlotInUse(0);
         mManager.markSlotInUse(1);
@@ -109,6 +115,7 @@ public class PasswordSlotManagerTests extends AndroidTestCase {
         assertEquals(expected, map);
     }
 
+    @Test
     public void testSaving() throws Exception {
         mManager.markSlotInUse(0);
         mManager.markSlotInUse(1);

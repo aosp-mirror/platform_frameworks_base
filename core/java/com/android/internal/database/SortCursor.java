@@ -16,7 +16,7 @@
 
 package com.android.internal.database;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.DataSetObserver;

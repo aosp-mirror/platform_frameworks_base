@@ -22,21 +22,21 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.View;
-
-import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Information about the current build, extracted from system properties.
@@ -99,7 +99,8 @@ public class Build {
      * {@link #getRadioVersion} instead.
      */
     @Deprecated
-    public static final String RADIO = getString(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
+    public static final String RADIO = joinListOrElse(
+            TelephonyProperties.baseband_version(), UNKNOWN);
 
     /** The name of the hardware (from the kernel command line or /proc). */
     public static final String HARDWARE = getString("ro.hardware");
@@ -108,6 +109,7 @@ public class Build {
      * Whether this build was for an emulator device.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
@@ -159,7 +161,7 @@ public class Build {
         try {
             Application application = ActivityThread.currentApplication();
             String callingPackage = application != null ? application.getPackageName() : null;
-            return service.getSerialForPackage(callingPackage);
+            return service.getSerialForPackage(callingPackage, null);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -991,6 +993,11 @@ public class Build {
          * engaged. It's now time to see if you can dance.</em>
          */
         public static final int Q = 29;
+
+        /**
+         * R.
+         */
+        public static final int R = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1076,16 +1083,17 @@ public class Build {
             return result == 0;
         }
 
-        final String system = SystemProperties.get("ro.build.fingerprint");
+        final String system = SystemProperties.get("ro.system.build.fingerprint");
         final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
         final String bootimage = SystemProperties.get("ro.bootimage.build.fingerprint");
         final String requiredBootloader = SystemProperties.get("ro.build.expect.bootloader");
         final String currentBootloader = SystemProperties.get("ro.bootloader");
         final String requiredRadio = SystemProperties.get("ro.build.expect.baseband");
-        final String currentRadio = SystemProperties.get("gsm.version.baseband");
+        final String currentRadio = joinListOrElse(
+                TelephonyProperties.baseband_version(), "");
 
         if (TextUtils.isEmpty(system)) {
-            Slog.e(TAG, "Required ro.build.fingerprint is empty!");
+            Slog.e(TAG, "Required ro.system.build.fingerprint is empty!");
             return false;
         }
 
@@ -1256,8 +1264,7 @@ public class Build {
      * null (if, for instance, the radio is not currently on).
      */
     public static String getRadioVersion() {
-        String propVal = SystemProperties.get(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
-        return TextUtils.isEmpty(propVal) ? null : propVal;
+        return joinListOrElse(TelephonyProperties.baseband_version(), null);
     }
 
     @UnsupportedAppUsage
@@ -1281,5 +1288,11 @@ public class Build {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+
+    private static <T> String joinListOrElse(List<T> list, String defaultValue) {
+        String ret = list.stream().map(elem -> elem == null ? "" : elem.toString())
+                .collect(Collectors.joining(","));
+        return ret.isEmpty() ? defaultValue : ret;
     }
 }

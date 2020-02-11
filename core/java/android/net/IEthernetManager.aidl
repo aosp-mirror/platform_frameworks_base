@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.IpConfiguration;
 import android.net.IEthernetServiceListener;
+import android.net.ITetheredInterfaceCallback;
 
 /**
  * Interface that answers queries about, and allows changing
@@ -32,4 +33,6 @@ interface IEthernetManager
     boolean isAvailable(String iface);
     void addListener(in IEthernetServiceListener listener);
     void removeListener(in IEthernetServiceListener listener);
+    void requestTetheredInterface(in ITetheredInterfaceCallback callback);
+    void releaseTetheredInterface(in ITetheredInterfaceCallback callback);
 }

@@ -51,7 +51,6 @@ import android.view.textclassifier.TextSelection;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -431,23 +430,18 @@ public abstract class TextClassifierService extends Service {
      * Forwards the callback result to a wrapped binder callback.
      */
     private static final class ProxyCallback<T extends Parcelable> implements Callback<T> {
-        private WeakReference<ITextClassifierCallback> mTextClassifierCallback;
+        private ITextClassifierCallback mTextClassifierCallback;
 
         private ProxyCallback(ITextClassifierCallback textClassifierCallback) {
-            mTextClassifierCallback =
-                    new WeakReference<>(Preconditions.checkNotNull(textClassifierCallback));
+            mTextClassifierCallback = Preconditions.checkNotNull(textClassifierCallback);
         }
 
         @Override
         public void onSuccess(T result) {
-            ITextClassifierCallback callback = mTextClassifierCallback.get();
-            if (callback == null) {
-                return;
-            }
             try {
                 Bundle bundle = new Bundle(1);
                 bundle.putParcelable(KEY_RESULT, result);
-                callback.onSuccess(bundle);
+                mTextClassifierCallback.onSuccess(bundle);
             } catch (RemoteException e) {
                 Slog.d(LOG_TAG, "Error calling callback");
             }
@@ -455,12 +449,8 @@ public abstract class TextClassifierService extends Service {
 
         @Override
         public void onFailure(CharSequence error) {
-            ITextClassifierCallback callback = mTextClassifierCallback.get();
-            if (callback == null) {
-                return;
-            }
             try {
-                callback.onFailure();
+                mTextClassifierCallback.onFailure();
             } catch (RemoteException e) {
                 Slog.d(LOG_TAG, "Error calling callback");
             }

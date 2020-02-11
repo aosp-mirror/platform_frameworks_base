@@ -23,7 +23,7 @@ boundary, so if a previous entry ends unaligned, padding must be inserted.
 | Size (in bytes) | Field          | Description                                                                                               |
 |:----------------|:---------------|:----------------------------------------------------------------------------------------------------------|
 | `4`             | `entry_type`   | The type of the entry. This can be one of two types: `RES_TABLE (0x00000000)` or `RES_FILE (0x00000001)`. |
-| `8`             | `entry_length` | The length of the data that follows.                                                                      |
+| `8`             | `entry_length` | The length of the data that follows.  Do not use if `entry_type` is `RES_FILE`; this value may be wrong.  |
 | `entry_length`  | `data`         | The payload. The contents of this varies based on the `entry_type`.                                       |
 
 If the `entry_type` is equal to `RES_TABLE (0x00000000)`, the `data` field contains a serialized
@@ -32,13 +32,14 @@ If the `entry_type` is equal to `RES_TABLE (0x00000000)`, the `data` field conta
 If the `entry_type` is equal to `RES_FILE (0x00000001)`, the `data` field contains the following:
 
 
-| Size (in bytes) | Field          | Description                                                                                               |
-|:----------------|:---------------|:----------------------------------------------------------------------------------------------------------|
-| `4`             | `header_size`  | The size of the `header` field.                                                                 |
-| `8`             | `data_size`    | The size of the `data` field.                                                                   |
-| `header_size`   | `header`       | The serialized Protobuf message [aapt.pb.internal.CompiledFile](ResourcesInternal.proto).       |
-| `x`             | `padding`      | Up to 4 bytes of zeros, if padding is necessary to align the `data` field on a 32-bit boundary. |
-| `data_size`     | `data`         | The payload, which is determined by the `type` field in the `aapt.pb.internal.CompiledFile`. This can be a PNG file, binary XML, or [aapt.pb.XmlNode](Resources.proto). |
+| Size (in bytes) | Field            | Description                                                                                               |
+|:----------------|:-----------------|:----------------------------------------------------------------------------------------------------------|
+| `4`             | `header_size`    | The size of the `header` field.                                                                           |
+| `8`             | `data_size`      | The size of the `data` field.                                                                             |
+| `header_size`   | `header`         | The serialized Protobuf message [aapt.pb.internal.CompiledFile](ResourcesInternal.proto).                 |
+| `x`             | `header_padding` | Up to 3 bytes of zeros, if padding is necessary to align the `data` field on a 32-bit boundary.           |
+| `data_size`     | `data`           | The payload, which is determined by the `type` field in the `aapt.pb.internal.CompiledFile`. This can be a PNG file, binary XML, or [aapt.pb.XmlNode](Resources.proto). |
+| `y`             | `data_padding`   | Up to 3 bytes of zeros, if `data_size` is not a multiple of 4.                                            |
 
 ## AAPT2 Static Library Format (extension `.sapk`)
 

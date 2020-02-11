@@ -23,12 +23,18 @@ import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.content.pm.ApplicationInfo;
 import android.platform.test.annotations.Presubmit;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 /**
  * Tests for the {@link WindowProcessController} class.
@@ -39,43 +45,89 @@ import org.junit.Test;
 @Presubmit
 public class WindowProcessControllerTests extends ActivityTestsBase {
 
+    WindowProcessController mWpc;
+    WindowProcessListener mMockListener;
+
+    @Before
+    public void setUp() {
+        mMockListener = mock(WindowProcessListener.class);
+        mWpc = new WindowProcessController(
+                mService, mock(ApplicationInfo.class), null, 0, -1, null, mMockListener);
+    }
+
     @Test
     public void testDisplayConfigurationListener() {
-        final WindowProcessController wpc = new WindowProcessController(
-                        mService, mock(ApplicationInfo.class), null, 0, -1, null, null);
+
         //By default, the process should not listen to any display.
-        assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Register to display 1 as a listener.
         TestActivityDisplay testActivityDisplay1 = createTestActivityDisplayInContainer();
-        wpc.registerDisplayConfigurationListenerLocked(testActivityDisplay1);
-        assertTrue(testActivityDisplay1.containsListener(wpc));
-        assertEquals(testActivityDisplay1.mDisplayId, wpc.getDisplayId());
+        mWpc.registerDisplayConfigurationListenerLocked(testActivityDisplay1);
+        assertTrue(testActivityDisplay1.containsListener(mWpc));
+        assertEquals(testActivityDisplay1.mDisplayId, mWpc.getDisplayId());
 
         // Move to display 2.
         TestActivityDisplay testActivityDisplay2 = createTestActivityDisplayInContainer();
-        wpc.registerDisplayConfigurationListenerLocked(testActivityDisplay2);
-        assertFalse(testActivityDisplay1.containsListener(wpc));
-        assertTrue(testActivityDisplay2.containsListener(wpc));
-        assertEquals(testActivityDisplay2.mDisplayId, wpc.getDisplayId());
+        mWpc.registerDisplayConfigurationListenerLocked(testActivityDisplay2);
+        assertFalse(testActivityDisplay1.containsListener(mWpc));
+        assertTrue(testActivityDisplay2.containsListener(mWpc));
+        assertEquals(testActivityDisplay2.mDisplayId, mWpc.getDisplayId());
 
         // Null ActivityDisplay will not change anything.
-        wpc.registerDisplayConfigurationListenerLocked(null);
-        assertTrue(testActivityDisplay2.containsListener(wpc));
-        assertEquals(testActivityDisplay2.mDisplayId, wpc.getDisplayId());
+        mWpc.registerDisplayConfigurationListenerLocked(null);
+        assertTrue(testActivityDisplay2.containsListener(mWpc));
+        assertEquals(testActivityDisplay2.mDisplayId, mWpc.getDisplayId());
 
         // Unregister listener will remove the wpc from registered displays.
-        wpc.unregisterDisplayConfigurationListenerLocked();
-        assertFalse(testActivityDisplay1.containsListener(wpc));
-        assertFalse(testActivityDisplay2.containsListener(wpc));
-        assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+        mWpc.unregisterDisplayConfigurationListenerLocked();
+        assertFalse(testActivityDisplay1.containsListener(mWpc));
+        assertFalse(testActivityDisplay2.containsListener(mWpc));
+        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Unregistration still work even if the display was removed.
-        wpc.registerDisplayConfigurationListenerLocked(testActivityDisplay1);
-        assertEquals(testActivityDisplay1.mDisplayId, wpc.getDisplayId());
+        mWpc.registerDisplayConfigurationListenerLocked(testActivityDisplay1);
+        assertEquals(testActivityDisplay1.mDisplayId, mWpc.getDisplayId());
         mRootActivityContainer.removeChild(testActivityDisplay1);
-        wpc.unregisterDisplayConfigurationListenerLocked();
-        assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+        mWpc.unregisterDisplayConfigurationListenerLocked();
+        assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
+    }
+
+    @Test
+    public void testSetRunningRecentsAnimation() {
+        mWpc.setRunningRecentsAnimation(true);
+        mWpc.setRunningRecentsAnimation(false);
+        mService.mH.runWithScissors(() -> {}, 0);
+
+        InOrder orderVerifier = Mockito.inOrder(mMockListener);
+        orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(true));
+        orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(false));
+    }
+
+    @Test
+    public void testSetRunningRemoteAnimation() {
+        mWpc.setRunningRemoteAnimation(true);
+        mWpc.setRunningRemoteAnimation(false);
+        mService.mH.runWithScissors(() -> {}, 0);
+
+        InOrder orderVerifier = Mockito.inOrder(mMockListener);
+        orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(true));
+        orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(false));
+    }
+
+    @Test
+    public void testSetRunningBothAnimations() {
+        mWpc.setRunningRemoteAnimation(true);
+        mWpc.setRunningRecentsAnimation(true);
+
+        mWpc.setRunningRecentsAnimation(false);
+        mWpc.setRunningRemoteAnimation(false);
+        mService.mH.runWithScissors(() -> {}, 0);
+
+        InOrder orderVerifier = Mockito.inOrder(mMockListener);
+        orderVerifier.verify(mMockListener, times(3)).setRunningRemoteAnimation(eq(true));
+        orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(false));
+        orderVerifier.verifyNoMoreInteractions();
     }
 
     private TestActivityDisplay createTestActivityDisplayInContainer() {

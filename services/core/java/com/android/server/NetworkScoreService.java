@@ -54,18 +54,14 @@ import android.provider.Settings.Global;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.TransferPipe;
-import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -530,7 +526,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
         @Override
         public void accept(INetworkScoreCache networkScoreCache, Object cookie) {
-            int filterType = NetworkScoreManager.CACHE_FILTER_NONE;
+            int filterType = NetworkScoreManager.SCORE_FILTER_NONE;
             if (cookie instanceof Integer) {
                 filterType = (Integer) cookie;
             }
@@ -554,17 +550,17 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         private List<ScoredNetwork> filterScores(List<ScoredNetwork> scoredNetworkList,
                 int filterType) {
             switch (filterType) {
-                case NetworkScoreManager.CACHE_FILTER_NONE:
+                case NetworkScoreManager.SCORE_FILTER_NONE:
                     return scoredNetworkList;
 
-                case NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK:
+                case NetworkScoreManager.SCORE_FILTER_CURRENT_NETWORK:
                     if (mCurrentNetworkFilter == null) {
                         mCurrentNetworkFilter =
                                 new CurrentNetworkScoreCacheFilter(new WifiInfoSupplier(mContext));
                     }
                     return mCurrentNetworkFilter.apply(scoredNetworkList);
 
-                case NetworkScoreManager.CACHE_FILTER_SCAN_RESULTS:
+                case NetworkScoreManager.SCORE_FILTER_SCAN_RESULTS:
                     if (mScanResultsFilter == null) {
                         mScanResultsFilter = new ScanResultsScoreCacheFilter(
                                 new ScanResultsSupplier(mContext));
@@ -907,17 +903,6 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 return;
             }
             writer.println("Current scorer: " + currentScorer);
-
-            sendCacheUpdateCallback(new BiConsumer<INetworkScoreCache, Object>() {
-                @Override
-                public void accept(INetworkScoreCache networkScoreCache, Object cookie) {
-                    try {
-                        TransferPipe.dumpAsync(networkScoreCache.asBinder(), fd, args);
-                    } catch (IOException | RemoteException e) {
-                        writer.println("Failed to dump score cache: " + e);
-                    }
-                }
-            }, getScoreCacheLists());
 
             synchronized (mServiceConnectionLock) {
                 if (mServiceConnection != null) {

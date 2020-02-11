@@ -135,6 +135,13 @@ public class RemoteAppPredictionService extends
     }
 
     /**
+     * Schedules a request to bind to the remote service.
+     */
+    public void reconnect() {
+        super.scheduleBind();
+    }
+
+    /**
      * Failure callback
      */
     public interface RemoteAppPredictionServiceCallbacks

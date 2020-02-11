@@ -15,8 +15,6 @@
  */
 package android.annotation;
 
-import android.content.Intent;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -57,7 +55,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <p>
  * When specified on a parameter, the annotation indicates that the method requires
  * a permission which depends on the value of the parameter. For example, consider
- * {@link android.app.Activity#startActivity(Intent)}:
+ * {@link android.app.Activity#startActivity(android.content.Intent)}:
  * <pre>{@code
  *   public void startActivity(@RequiresPermission Intent intent) { ... }
  * }</pre>

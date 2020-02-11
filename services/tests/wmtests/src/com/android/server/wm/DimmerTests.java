@@ -169,7 +169,7 @@ public class DimmerTests extends WindowTestsBase {
 
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mTransaction).show(getDimLayer());
-        verify(dimLayer, never()).remove();
+        verify(mTransaction, never()).remove(dimLayer);
     }
 
     @Test
@@ -231,7 +231,7 @@ public class DimmerTests extends WindowTestsBase {
 
         mDimmer.updateDims(mTransaction, new Rect());
         verify(mTransaction).show(dimLayer);
-        verify(dimLayer, never()).remove();
+        verify(mTransaction, never()).remove(dimLayer);
     }
 
     @Test

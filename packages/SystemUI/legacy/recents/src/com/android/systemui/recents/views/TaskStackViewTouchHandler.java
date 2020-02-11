@@ -37,6 +37,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.LegacyRecentsImpl;
 import com.android.systemui.recents.events.EventBus;
@@ -107,7 +108,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     boolean mInterceptedBySwipeHelper;
 
     public TaskStackViewTouchHandler(Context context, TaskStackView sv,
-            TaskStackViewScroller scroller) {
+            TaskStackViewScroller scroller, FalsingManager falsingManager) {
         Resources res = context.getResources();
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mContext = context;
@@ -119,7 +120,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
         mFlingAnimUtils = new FlingAnimationUtils(context, 0.2f);
         mOverscrollSize = res.getDimensionPixelSize(R.dimen.recents_fling_overscroll_distance);
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, context) {
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, context, falsingManager) {
             @Override
             protected float getSize(View v) {
                 return getScaledDismissSize();

@@ -2,7 +2,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

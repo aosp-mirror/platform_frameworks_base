@@ -18,8 +18,10 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,6 +33,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,13 +41,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Parcelable object to handle IMS call profile.
- * It is created from GSMA IR.92/IR.94, 3GPP TS 24.229/TS 26.114/TS26.111.
- * It provides the service and call type, the additional information related to the call.
- *
+ * A Parcelable object to handle the IMS call profile, which provides the service, call type, and
+ * additional information related to the call.
+ * <p>
+ * See the following specifications for more information about this class: GSMA IR.92/IR.94,
+ * 3GPP TS 24.229/TS 26.114/TS26.111.
  * @hide
  */
 @SystemApi
+@TestApi
 public final class ImsCallProfile implements Parcelable {
     private static final String TAG = "ImsCallProfile";
 
@@ -148,12 +153,13 @@ public final class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_CONFERENCE_AVAIL = "conference_avail";
 
-    // Extra string for internal use only. OEMs should not use
-    // this for packing extras.
     /**
+     * Extra key used to store a Bundle containing proprietary extras to send to the ImsService.
+     * Use {@link #getProprietaryCallExtras()} instead.
      * @hide
      */
-    public static final String EXTRA_OEM_EXTRAS = "OemCallExtras";
+    @TestApi
+    public static final String EXTRA_OEM_EXTRAS = "android.telephony.ims.extra.OEM_EXTRAS";
 
     /**
      * Rule for originating identity (number) presentation, MO/MT.
@@ -288,15 +294,30 @@ public final class ImsCallProfile implements Parcelable {
      *      updateImsCallRatFromExtras(Bundle)} to determine whether to set the
      * {@link android.telecom.TelecomManager#EXTRA_CALL_NETWORK_TYPE} extra value and
      * {@link android.telecom.Connection#PROPERTY_WIFI} property on a connection.
+     * @deprecated the constants associated with this extra are hidden, instead use
+     * {@link #EXTRA_CALL_NETWORK_TYPE}.
      */
+    @Deprecated
     public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
+
+    /**
+     * Extra key with an {@code int} value which can be set in {@link #setCallExtraInt(String, int)}
+     * to indicate the network type used for a call.
+     * <p>
+     * Valid values are defined by {@code TelephonyManager.NETWORK_TYPE_*} constants. An example may
+     * be {@link android.telephony.TelephonyManager#NETWORK_TYPE_LTE}.
+     */
+    public static final String EXTRA_CALL_NETWORK_TYPE =
+            "android.telephony.ims.extra.CALL_NETWORK_TYPE";
 
     /**
      * Similar to {@link #EXTRA_CALL_RAT_TYPE}, except with a lowercase 'c'.  Used to ensure
      * compatibility with modems that are non-compliant with the {@link #EXTRA_CALL_RAT_TYPE}
      * extra key.  Should be removed when the non-compliant modems are fixed.
      * @hide
+     * @deprecated Use {@link #EXTRA_CALL_NETWORK_TYPE} instead.
      */
+    @Deprecated
     public static final String EXTRA_CALL_RAT_TYPE_ALT = "callRadioTech";
 
     /** @hide */
@@ -307,6 +328,37 @@ public final class ImsCallProfile implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
     public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
+
+    /**
+     * The VERSTAT for an incoming call's phone number.
+     */
+    private @VerificationStatus int mCallerNumberVerificationStatus;
+
+    /**
+     * Indicates that the network could not perform verification.
+     */
+    public static final int VERIFICATION_STATUS_NOT_VERIFIED = 0;
+
+    /**
+     * Indicates that verification by the network passed.  This indicates there is a high likelihood
+     * that the call originated from a valid source.
+     */
+    public static final int VERIFICATION_STATUS_PASSED = 1;
+
+    /**
+     * Indicates that verification by the network failed.  This indicates there is a high likelihood
+     * that the call did not originate from a valid source.
+     */
+    public static final int VERIFICATION_STATUS_FAILED = 2;
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "VERIFICATION_STATUS_", value = {
+            VERIFICATION_STATUS_NOT_VERIFIED,
+            VERIFICATION_STATUS_PASSED,
+            VERIFICATION_STATUS_FAILED
+    })
+    public @interface VerificationStatus {}
 
     /**
      * The emergency service categories, only valid if {@link #getServiceType} returns
@@ -539,6 +591,29 @@ public final class ImsCallProfile implements Parcelable {
         mMediaProfile = profile.mMediaProfile;
     }
 
+    /**
+     * Sets the verification status for the phone number of an incoming call as identified in
+     * ATIS-1000082.
+     * <p>
+     * The ImsService should parse the verstat information from the SIP INVITE headers for the call
+     * to determine this information.  It is typically found in the P-Asserted-Identity OR From
+     * header fields.
+     * @param callerNumberVerificationStatus the new verification status.
+     */
+    public void setCallerNumberVerificationStatus(
+            @VerificationStatus int callerNumberVerificationStatus) {
+        mCallerNumberVerificationStatus = callerNumberVerificationStatus;
+    }
+
+    /**
+     * Gets the verification status for the phone number of an incoming call as identified in
+     * ATIS-1000082.
+     * @return the verification status.
+     */
+    public @VerificationStatus int getCallerNumberVerificationStatus() {
+        return mCallerNumberVerificationStatus;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -551,7 +626,8 @@ public final class ImsCallProfile implements Parcelable {
                 + ", emergencyCallRouting=" + mEmergencyCallRouting
                 + ", emergencyCallTesting=" + mEmergencyCallTesting
                 + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency
-                + ", mRestrictCause=" + mRestrictCause + " }";
+                + ", mRestrictCause=" + mRestrictCause
+                + ", mCallerNumberVerstat= " + mCallerNumberVerificationStatus + " }";
     }
 
     @Override
@@ -572,6 +648,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeBoolean(mEmergencyCallTesting);
         out.writeBoolean(mHasKnownUserIntentEmergency);
         out.writeInt(mRestrictCause);
+        out.writeInt(mCallerNumberVerificationStatus);
     }
 
     private void readFromParcel(Parcel in) {
@@ -585,6 +662,7 @@ public final class ImsCallProfile implements Parcelable {
         mEmergencyCallTesting = in.readBoolean();
         mHasKnownUserIntentEmergency = in.readBoolean();
         mRestrictCause = in.readInt();
+        mCallerNumberVerificationStatus = in.readInt();
     }
 
     public static final @android.annotation.NonNull Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
@@ -617,6 +695,18 @@ public final class ImsCallProfile implements Parcelable {
 
     public Bundle getCallExtras() {
         return mCallExtras;
+    }
+
+    /**
+     * Get the proprietary extras set for this ImsCallProfile.
+     * @return A {@link Bundle} containing proprietary call extras that were not set by the
+     * platform.
+     */
+    public @Nullable Bundle getProprietaryCallExtras() {
+        if (mCallExtras == null) {
+            return null;
+        }
+        return mCallExtras.getBundle(EXTRA_OEM_EXTRAS);
     }
 
     public ImsStreamMediaProfile getMediaProfile() {
@@ -774,7 +864,7 @@ public final class ImsCallProfile implements Parcelable {
         }
 
         int startSize = extras.size();
-        Bundle filtered = extras.filterValues();
+        Bundle filtered = TelephonyUtils.filterValues(extras);
         int endSize = filtered.size();
         if (startSize != endSize) {
             Log.i(TAG, "maybeCleanseExtras: " + (startSize - endSize) + " extra values were "

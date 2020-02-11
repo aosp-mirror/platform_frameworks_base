@@ -122,6 +122,7 @@ interface IActivityManager {
             in String resultData, in Bundle map, in String[] requiredPermissions,
             int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
     void unbroadcastIntent(in IApplicationThread caller, in Intent intent, int userId);
+    @UnsupportedAppUsage
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
     void attachApplication(in IApplicationThread app, long startSeq);
@@ -211,6 +212,7 @@ interface IActivityManager {
 
     @UnsupportedAppUsage
     ParceledListSlice getRecentTasks(int maxNum, int flags, int userId);
+    @UnsupportedAppUsage
     oneway void serviceDoneExecuting(in IBinder token, int type, int startId, int res);
     @UnsupportedAppUsage
     IIntentSender getIntentSender(int type, in String packageName, in IBinder token,

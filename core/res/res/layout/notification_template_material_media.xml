@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<FrameLayout
+<com.android.internal.widget.MediaNotificationView
     android:id="@+id/status_bar_latest_event_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -24,8 +24,8 @@
     android:tag="media"
     >
     <ImageView android:id="@+id/right_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
         android:layout_gravity="top|end"
         android:scaleType="centerCrop"
@@ -91,4 +91,4 @@
             android:layout_alignParentBottom="true"
         />
     </LinearLayout>
-</FrameLayout>
+</com.android.internal.widget.MediaNotificationView>

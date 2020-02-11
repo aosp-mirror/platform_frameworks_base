@@ -22,6 +22,18 @@
 #include <nativehelper/scoped_utf_chars.h>
 #include <android_runtime/AndroidRuntime.h>
 
+// Host targets (layoutlib) do not differentiate between regular and critical native methods,
+// and they need all the JNI methods to have JNIEnv* and jclass/jobject as their first two arguments.
+// The following macro allows to have those arguments when compiling for host while omitting them when
+// compiling for Android.
+#ifdef __ANDROID__
+#define CRITICAL_JNI_PARAMS
+#define CRITICAL_JNI_PARAMS_COMMA
+#else
+#define CRITICAL_JNI_PARAMS JNIEnv*, jclass
+#define CRITICAL_JNI_PARAMS_COMMA JNIEnv*, jclass,
+#endif
+
 namespace android {
 
 // Defines some helpful functions.

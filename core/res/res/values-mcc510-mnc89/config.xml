@@ -23,4 +23,6 @@
          and "333" is used for other purpose -->
     <string-array translatable="false" name="config_callBarringMMI">
     </string-array>
+    <string-array translatable="false" name="config_callBarringMMI_for_ims">
+    </string-array>
 </resources>

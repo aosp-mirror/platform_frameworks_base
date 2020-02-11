@@ -26,26 +26,18 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ByteBufferFactory;
 import android.util.apk.SignatureNotFoundException;
-import android.util.apk.VerityBuilder;
 
 import libcore.util.HexEncoding;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.DigestException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-
-import sun.security.pkcs.PKCS7;
 
 /** Provides fsverity related operations. */
 abstract public class VerityUtils {
@@ -60,8 +52,6 @@ abstract public class VerityUtils {
     /** The maximum size of signature file.  This is just to avoid potential abuse. */
     private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
 
-    private static final int COMMON_LINUX_PAGE_SIZE_IN_BYTES = 4096;
-
     private static final boolean DEBUG = false;
 
     /** Returns true if the given file looks like containing an fs-verity signature. */
@@ -74,42 +64,15 @@ abstract public class VerityUtils {
         return filePath + FSVERITY_SIGNATURE_FILE_EXTENSION;
     }
 
-    /** Generates Merkle tree and fs-verity metadata then enables fs-verity. */
-    public static void setUpFsverity(@NonNull String filePath, String signaturePath)
-            throws IOException, DigestException, NoSuchAlgorithmException {
-        final PKCS7 pkcs7 = new PKCS7(Files.readAllBytes(Paths.get(signaturePath)));
-        final byte[] expectedMeasurement = pkcs7.getContentInfo().getContentBytes();
-        if (DEBUG) {
-            Slog.d(TAG, "Enabling fs-verity with signed fs-verity measurement "
-                    + bytesToString(expectedMeasurement));
-            Slog.d(TAG, "PKCS#7 info: " + pkcs7);
+    /** Enables fs-verity for the file with a PKCS#7 detached signature file. */
+    public static void setUpFsverity(@NonNull String filePath, @NonNull String signaturePath)
+            throws IOException {
+        if (Files.size(Paths.get(signaturePath)) > MAX_SIGNATURE_FILE_SIZE_BYTES) {
+            throw new SecurityException("Signature file is unexpectedly large: " + signaturePath);
         }
-
-        final TrackedBufferFactory bufferFactory = new TrackedBufferFactory();
-        final byte[] actualMeasurement = generateFsverityMetadata(filePath, signaturePath,
-                bufferFactory);
-        try (RandomAccessFile raf = new RandomAccessFile(filePath, "rw")) {
-            FileChannel ch = raf.getChannel();
-            ch.position(roundUpToNextMultiple(ch.size(), COMMON_LINUX_PAGE_SIZE_IN_BYTES));
-            ByteBuffer buffer = bufferFactory.getBuffer();
-
-            long offset = buffer.position();
-            long size = buffer.limit();
-            while (offset < size) {
-                long s = ch.write(buffer);
-                offset += s;
-                size -= s;
-            }
-        }
-
-        if (!Arrays.equals(expectedMeasurement, actualMeasurement)) {
-            throw new SecurityException("fs-verity measurement mismatch: "
-                    + bytesToString(actualMeasurement) + " != "
-                    + bytesToString(expectedMeasurement));
-        }
-
-        // This can fail if the public key is not already in .fs-verity kernel keyring.
-        int errno = enableFsverityNative(filePath);
+        byte[] pkcs7Signature = Files.readAllBytes(Paths.get(signaturePath));
+        // This will fail if the public key is not already in .fs-verity kernel keyring.
+        int errno = enableFsverityNative(filePath, pkcs7Signature);
         if (errno != 0) {
             throw new IOException("Failed to enable fs-verity on " + filePath + ": "
                     + Os.strerror(errno));
@@ -131,12 +94,19 @@ abstract public class VerityUtils {
         return true;
     }
 
+    private static native int enableFsverityNative(@NonNull String filePath,
+            @NonNull byte[] pkcs7Signature);
+    private static native int measureFsverityNative(@NonNull String filePath);
+
     /**
      * Generates legacy Merkle tree and fs-verity metadata with Signing Block skipped.
      *
+     * @deprecated This is only used for previous fs-verity implementation, and should never be used
+     *             on new devices.
      * @return {@code SetupResult} that contains the result code, and when success, the
      *         {@code FileDescriptor} to read all the data from.
      */
+    @Deprecated
     public static SetupResult generateApkVeritySetupData(@NonNull String apkPath) {
         if (DEBUG) {
             Slog.d(TAG, "Trying to install legacy apk verity to " + apkPath);
@@ -173,7 +143,10 @@ abstract public class VerityUtils {
 
     /**
      * {@see ApkSignatureVerifier#generateApkVerityRootHash(String)}.
+     * @deprecated This is only used for previous fs-verity implementation, and should never be used
+     *             on new devices.
      */
+    @Deprecated
     public static byte[] generateApkVerityRootHash(@NonNull String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException {
         return ApkSignatureVerifier.generateApkVerityRootHash(apkPath);
@@ -181,102 +154,14 @@ abstract public class VerityUtils {
 
     /**
      * {@see ApkSignatureVerifier#getVerityRootHash(String)}.
+     * @deprecated This is only used for previous fs-verity implementation, and should never be used
+     *             on new devices.
      */
+    @Deprecated
     public static byte[] getVerityRootHash(@NonNull String apkPath)
             throws IOException, SignatureNotFoundException {
         return ApkSignatureVerifier.getVerityRootHash(apkPath);
     }
-
-    /**
-     * Generates fs-verity metadata for {@code filePath} in the buffer created by {@code
-     * trackedBufferFactory}. The metadata contains the Merkle tree, fs-verity descriptor and
-     * extensions, including a PKCS#7 signature provided in {@code signaturePath}.
-     *
-     * <p>It is worthy to note that {@code trackedBufferFactory} generates a "tracked" {@code
-     * ByteBuffer}. The data will be used outside this method via the factory itself.
-     *
-     * @return fs-verity signed data (struct fsverity_digest_disk) of {@code filePath}, which
-     *         includes SHA-256 of fs-verity descriptor and authenticated extensions.
-     */
-    private static byte[] generateFsverityMetadata(String filePath, String signaturePath,
-            @NonNull ByteBufferFactory trackedBufferFactory)
-            throws IOException, DigestException, NoSuchAlgorithmException {
-        try (RandomAccessFile file = new RandomAccessFile(filePath, "r")) {
-            VerityBuilder.VerityResult result = VerityBuilder.generateFsVerityTree(
-                    file, trackedBufferFactory);
-
-            ByteBuffer buffer = result.verityData;
-            buffer.position(result.merkleTreeSize);
-
-            final byte[] measurement = generateFsverityDescriptorAndMeasurement(file,
-                    result.rootHash, signaturePath, buffer);
-            buffer.flip();
-            return constructFsveritySignedDataNative(measurement);
-        }
-    }
-
-    /**
-     * Generates fs-verity descriptor including the extensions to the {@code output} and returns the
-     * fs-verity measurement.
-     *
-     * @return fs-verity measurement, which is a SHA-256 of fs-verity descriptor and authenticated
-     *         extensions.
-     */
-    private static byte[] generateFsverityDescriptorAndMeasurement(
-            @NonNull RandomAccessFile file, @NonNull byte[] rootHash,
-            @NonNull String pkcs7SignaturePath, @NonNull ByteBuffer output)
-            throws IOException, NoSuchAlgorithmException, DigestException {
-        final short kRootHashExtensionId = 1;
-        final short kPkcs7SignatureExtensionId = 3;
-        final int origPosition = output.position();
-
-        // For generating fs-verity file measurement, which consists of the descriptor and
-        // authenticated extensions (but not unauthenticated extensions and the footer).
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-        // 1. Generate fs-verity descriptor.
-        final byte[] desc = constructFsverityDescriptorNative(file.length());
-        output.put(desc);
-        md.update(desc);
-
-        // 2. Generate authenticated extensions.
-        final byte[] authExt =
-                constructFsverityExtensionNative(kRootHashExtensionId, rootHash.length);
-        output.put(authExt);
-        output.put(rootHash);
-        md.update(authExt);
-        md.update(rootHash);
-
-        // 3. Generate unauthenticated extensions.
-        ByteBuffer header = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
-        output.putShort((short) 1);  // number of unauthenticated extensions below
-        output.position(output.position() + 6);
-
-        // Generate PKCS#7 extension. NB: We do not verify agaist trusted certificate (should be
-        // done by the caller if needed).
-        Path path = Paths.get(pkcs7SignaturePath);
-        if (Files.size(path) > MAX_SIGNATURE_FILE_SIZE_BYTES) {
-            throw new IllegalArgumentException("Signature size is unexpectedly large: "
-                    + pkcs7SignaturePath);
-        }
-        final byte[] pkcs7Signature = Files.readAllBytes(path);
-        output.put(constructFsverityExtensionNative(kPkcs7SignatureExtensionId,
-                    pkcs7Signature.length));
-        output.put(pkcs7Signature);
-
-        // 4. Generate the footer.
-        output.put(constructFsverityFooterNative(output.position() - origPosition));
-
-        return md.digest();
-    }
-
-    private static native int enableFsverityNative(@NonNull String filePath);
-    private static native int measureFsverityNative(@NonNull String filePath);
-    private static native byte[] constructFsveritySignedDataNative(@NonNull byte[] measurement);
-    private static native byte[] constructFsverityDescriptorNative(long fileSize);
-    private static native byte[] constructFsverityExtensionNative(short extensionId,
-            int extensionDataSize);
-    private static native byte[] constructFsverityFooterNative(int offsetToDescriptorHead);
 
     /**
      * Returns a pair of {@code SharedMemory} and {@code Integer}. The {@code SharedMemory} contains
@@ -313,6 +198,11 @@ abstract public class VerityUtils {
         return HexEncoding.encodeToString(bytes);
     }
 
+    /**
+     * @deprecated This is only used for previous fs-verity implementation, and should never be used
+     *             on new devices.
+     */
+    @Deprecated
     public static class SetupResult {
         /** Result code if verity is set up correctly. */
         private static final int RESULT_OK = 1;
@@ -400,31 +290,5 @@ abstract public class VerityUtils {
         public int getBufferLimit() {
             return mBuffer == null ? -1 : mBuffer.limit();
         }
-    }
-
-    /** A {@code ByteBufferFactory} that tracks the {@code ByteBuffer} it creates. */
-    private static class TrackedBufferFactory implements ByteBufferFactory {
-        private ByteBuffer mBuffer;
-
-        @Override
-        public ByteBuffer create(int capacity) {
-            if (mBuffer != null) {
-                throw new IllegalStateException("Multiple instantiation from this factory");
-            }
-            mBuffer = ByteBuffer.allocate(capacity);
-            return mBuffer;
-        }
-
-        public ByteBuffer getBuffer() {
-            return mBuffer;
-        }
-    }
-
-    /** Round up the number to the next multiple of the divisor. */
-    private static long roundUpToNextMultiple(long number, long divisor) {
-        if (number > (Long.MAX_VALUE - divisor)) {
-            throw new IllegalArgumentException("arithmetic overflow");
-        }
-        return ((number + (divisor - 1)) / divisor) * divisor;
     }
 }

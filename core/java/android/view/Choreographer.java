@@ -20,7 +20,7 @@ import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.FrameInfo;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
@@ -330,6 +330,7 @@ public final class Choreographer {
      * @return the requested time between frames, in milliseconds
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static long getFrameDelay() {
         return sFrameDelay;
@@ -412,6 +413,7 @@ public final class Choreographer {
      * @see #removeCallbacks
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public void postCallback(int callbackType, Runnable action, Object token) {
         postCallbackDelayed(callbackType, action, token, 0);
@@ -431,6 +433,7 @@ public final class Choreographer {
      * @see #removeCallback
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public void postCallbackDelayed(int callbackType,
             Runnable action, Object token, long delayMillis) {
@@ -481,6 +484,7 @@ public final class Choreographer {
      * @see #postCallbackDelayed
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public void removeCallbacks(int callbackType, Runnable action, Object token) {
         if (callbackType < 0 || callbackType > CALLBACK_LAST) {
@@ -910,7 +914,7 @@ public final class Choreographer {
         private int mFrame;
 
         public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
-            super(looper, vsyncSource);
+            super(looper, vsyncSource, CONFIG_CHANGED_EVENT_SUPPRESS);
         }
 
         // TODO(b/116025192): physicalDisplayId is ignored because SF only emits VSYNC events for

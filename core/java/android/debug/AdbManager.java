@@ -16,15 +16,17 @@
 
 package android.debug;
 
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.RemoteException;
 
 /**
- * This class allows the control of ADB-related functions. Currently only ADB over USB is
- * supported, and none of the API is public.
- *
+ * This class allows the control of ADB-related functions.
  * @hide
  */
+@SystemApi
 @SystemService(Context.ADB_SERVICE)
 public class AdbManager {
     private static final String TAG = "AdbManager";
@@ -38,5 +40,34 @@ public class AdbManager {
     public AdbManager(Context context, IAdbManager service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * @return true if the device supports secure ADB over Wi-Fi.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING)
+    public boolean isAdbWifiSupported() {
+        try {
+            return mService.isAdbWifiSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return true if the device supports secure ADB over Wi-Fi and device pairing by
+     * QR code.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING)
+    public boolean isAdbWifiQrSupported() {
+        try {
+            return mService.isAdbWifiQrSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

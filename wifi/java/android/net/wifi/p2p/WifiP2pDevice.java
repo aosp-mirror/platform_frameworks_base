@@ -16,7 +16,7 @@
 
 package android.net.wifi.p2p;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;

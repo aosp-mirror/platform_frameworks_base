@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "PowerStatsPuller.h"
+#include "statslog.h"
 #include "stats_log_util.h"
 
 using android::hardware::hidl_vec;
@@ -85,7 +86,6 @@ bool PowerStatsPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
 
     if (!getPowerStatsHalLocked()) {
-        ALOGE("power.stats Hal not loaded");
         return false;
     }
 
@@ -116,6 +116,7 @@ bool PowerStatsPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
         if (gRailInfo.empty()) {
             ALOGE("power.stats has no rail information");
             gPowerStatsExist = false; // No rail info, so never try again.
+            gPowerStatsHal = nullptr;
             return false;
         }
     }

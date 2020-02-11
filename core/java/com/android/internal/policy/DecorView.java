@@ -46,8 +46,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -796,7 +796,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         updateElevation();
         mAllowUpdateElevation = true;
 
-        if (changed && mResizeMode == RESIZE_MODE_DOCKED_DIVIDER) {
+        if (changed
+                && (mResizeMode == RESIZE_MODE_DOCKED_DIVIDER
+                    || mDrawLegacyNavigationBarBackground)) {
             getViewRootImpl().requestInvalidateRootRenderNode();
         }
     }

@@ -16,24 +16,21 @@
 
 package android.telephony;
 
-import com.android.i18n.phonenumbers.NumberParseException;
-import com.android.i18n.phonenumbers.PhoneNumberUtil;
-import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
-import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
-
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.PersistableBundle;
-import android.os.SystemProperties;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
+import android.sysprop.TelephonyProperties;
 import android.telecom.PhoneAccount;
 import android.text.Editable;
 import android.text.Spannable;
@@ -42,7 +39,11 @@ import android.text.TextUtils;
 import android.text.style.TtsSpan;
 import android.util.SparseIntArray;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
+import com.android.i18n.phonenumbers.NumberParseException;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
+import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2029,6 +2030,7 @@ public class PhoneNumberUtils {
     private static boolean isEmergencyNumberInternal(int subId, String number,
                                                      String defaultCountryIso,
                                                      boolean useExactMatch) {
+        // TODO: clean up all the callers that pass in a defaultCountryIso, since it's ignored now.
         try {
             if (useExactMatch) {
                 return TelephonyManager.getDefault().isEmergencyNumber(number);
@@ -2190,18 +2192,7 @@ public class PhoneNumberUtils {
     private static boolean isLocalEmergencyNumberInternal(int subId, String number,
                                                           Context context,
                                                           boolean useExactMatch) {
-        String countryIso;
-        CountryDetector detector = (CountryDetector) context.getSystemService(
-                Context.COUNTRY_DETECTOR);
-        if (detector != null && detector.detectCountry() != null) {
-            countryIso = detector.detectCountry().getCountryIso();
-        } else {
-            Locale locale = context.getResources().getConfiguration().locale;
-            countryIso = locale.getCountry();
-            Rlog.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
-                    + countryIso);
-        }
-        return isEmergencyNumberInternal(subId, number, countryIso, useExactMatch);
+        return isEmergencyNumberInternal(subId, number, null /* unused */, useExactMatch);
     }
 
     /**
@@ -2247,8 +2238,10 @@ public class PhoneNumberUtils {
      * to read the VM number.
      * @hide
      */
-    @UnsupportedAppUsage
-    public static boolean isVoiceMailNumber(Context context, int subId, String number) {
+    @SystemApi
+    @TestApi
+    public static boolean isVoiceMailNumber(@NonNull Context context, int subId,
+            @Nullable String number) {
         String vmNumber, mdn;
         try {
             final TelephonyManager tm;
@@ -2654,7 +2647,7 @@ public class PhoneNumberUtils {
             ps = NANP_IDP_STRING;
         } else {
             // in case, there is no IDD is found, we shouldn't convert it.
-            ps = SystemProperties.get(PROPERTY_OPERATOR_IDP_STRING, PLUS_SIGN_STRING);
+            ps = TelephonyProperties.operator_idp_string().orElse(PLUS_SIGN_STRING);
         }
         return ps;
     }
@@ -2734,8 +2727,9 @@ public class PhoneNumberUtils {
      * @param number
      * @return true if number contains @
      */
-    @UnsupportedAppUsage
-    public static boolean isUriNumber(String number) {
+    @SystemApi
+    @TestApi
+    public static boolean isUriNumber(@Nullable String number) {
         // Note we allow either "@" or "%40" to indicate a URI, in case
         // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
         // will ever be found in a legal PSTN number.)
@@ -2752,8 +2746,9 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public static String getUsernameFromUriNumber(String number) {
+    @SystemApi
+    @TestApi
+    public static @NonNull String getUsernameFromUriNumber(@NonNull String number) {
         // The delimiter between username and domain name can be
         // either "@" or "%40" (the URI-escaped equivalent.)
         int delimiterIndex = number.indexOf('@');

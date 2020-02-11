@@ -16,7 +16,7 @@
 
 package android.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Singleton helper class for lazily initialization.
@@ -26,6 +26,11 @@ import android.annotation.UnsupportedAppUsage;
  * @hide
  */
 public abstract class Singleton<T> {
+
+    @UnsupportedAppUsage
+    public Singleton() {
+    }
+
     @UnsupportedAppUsage
     private T mInstance;
 

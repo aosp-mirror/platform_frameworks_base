@@ -1,5 +1,12 @@
+filegroup {
+    name: "services.usage-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.usage",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.usage-sources"],
     libs: ["services.core"],
 }

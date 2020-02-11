@@ -1522,10 +1522,6 @@
     <string name="submit" msgid="1602335572089911941">"提交"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"驾驶应用正在运行"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"点按即可退出驾驶应用。"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"网络共享或热点已启用"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"点按即可进行设置。"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"网络共享已停用"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"请与您的管理员联系以了解详情"</string>
     <string name="back_button_label" msgid="2300470004503343439">"上一步"</string>
     <string name="next_button_label" msgid="1080555104677992408">"下一步"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"跳过"</string>

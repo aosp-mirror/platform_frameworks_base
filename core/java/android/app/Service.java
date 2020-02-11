@@ -21,7 +21,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
@@ -57,7 +57,7 @@ import java.lang.annotation.RetentionPolicy;
  * networking) operations, it should spawn its own thread in which to do that
  * work.  More information on this can be found in
  * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes and
- * Threads</a>.  The {@link IntentService} class is available
+ * Threads</a>.  The {@link androidx.core.app.JobIntentService} class is available
  * as a standard implementation of Service that has its own thread where it
  * schedules its work to be done.</p>
  * 

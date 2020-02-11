@@ -20,11 +20,11 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -1639,7 +1639,7 @@ public class ZenModeConfig implements Parcelable {
         @UnsupportedAppUsage
         public String name;              // required for automatic
         @UnsupportedAppUsage
-        public int zenMode;
+        public int zenMode;             // ie: Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
         @UnsupportedAppUsage
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional

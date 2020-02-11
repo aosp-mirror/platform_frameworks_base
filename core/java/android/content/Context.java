@@ -30,14 +30,15 @@ import android.annotation.StringDef;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -63,6 +64,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.MediaStore;
+import android.telephony.TelephonyRegistryManager;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -74,6 +76,7 @@ import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.compat.IPlatformCompatNative;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -854,11 +857,16 @@ public abstract class Context {
      * to any callers for the same name, meaning they will see each other's
      * edits as soon as they are made.
      *
-     * This method is thead-safe.
+     * <p>This method is thread-safe.
      *
-     * @param name Desired preferences file. If a preferences file by this name
-     * does not exist, it will be created when you retrieve an
-     * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
+     * <p>If the preferences directory does not already exist, it will be created when this method
+     * is called.
+     *
+     * <p>If a preferences file by this name does not exist, it will be created when you retrieve an
+     * editor ({@link SharedPreferences#edit()}) and then commit changes ({@link
+     * SharedPreferences.Editor#commit()} or {@link SharedPreferences.Editor#apply()}).
+     *
+     * @param name Desired preferences file.
      * @param mode Operating mode.
      *
      * @return The single {@link SharedPreferences} instance that can be used
@@ -2392,6 +2400,86 @@ public abstract class Context {
             @Nullable String initialData, @Nullable  Bundle initialExtras);
 
     /**
+     * Version of
+     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String,
+     * Bundle)} that allows you to specify the App Op to enforce restrictions on which receivers
+     * the broadcast will be sent to.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission String naming a permissions that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param receiverAppOp The app op associated with the broadcast. If null, no appOp is
+     *                      required. If both receiverAppOp and receiverPermission are non-null,
+     *                      a receiver must have both of them to
+     *                      receive the broadcast
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public void sendOrderedBroadcast(@NonNull Intent intent, @Nullable String receiverPermission,
+            @Nullable String receiverAppOp, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Version of
+     * {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String,
+     * Bundle)} that allows you to specify the App Op to enforce restrictions on which receivers
+     * the broadcast will be sent to as well as supply an optional sending options
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission String naming a permissions that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param receiverAppOp The app op associated with the broadcast. If null, no appOp is
+     *                      required. If both receiverAppOp and receiverPermission are non-null,
+     *                      a receiver must have both of them to
+     *                      receive the broadcast
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @see android.app.BroadcastOptions
+     */
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+            @Nullable String receiverPermission, @Nullable String receiverAppOp,
+            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
      * Intent you are sending stays around after the broadcast is complete,
      * so that others can quickly retrieve that data through the return
@@ -2753,6 +2841,37 @@ public abstract class Context {
     public abstract Intent registerReceiver(BroadcastReceiver receiver,
             IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler, @RegisterReceiverFlags int flags);
+
+    /**
+     * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)}
+     * but this receiver will receive broadcasts that are sent to all users. The receiver can
+     * use {@link BroadcastReceiver#getSendingUser} to determine on which user the broadcast
+     * was sent.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you. If {@code null},
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent. If {@code null}, the main thread of the process will be used.
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or {@code null} if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @SystemApi
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * @hide
@@ -3177,6 +3296,7 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
+            VPN_MANAGEMENT_SERVICE,
             TEST_NETWORK_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
@@ -3231,6 +3351,7 @@ public abstract class Context {
             //@hide ROLE_CONTROLLER_SERVICE,
             CAMERA_SERVICE,
             //@hide: PLATFORM_COMPAT_SERVICE,
+            //@hide: PLATFORM_COMPAT_NATIVE_SERVICE,
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
@@ -3257,7 +3378,9 @@ public abstract class Context {
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
+            //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
+            LIGHTS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3707,6 +3830,7 @@ public abstract class Context {
      */
     @SystemApi
     @TestApi
+    @SuppressLint("ServiceName")
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -3731,11 +3855,22 @@ public abstract class Context {
 
     /**
      * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link NetworkStackClient} IBinder for communicating with the network stack
+     * {@link INetworkStackConnector} IBinder for communicating with the network stack
      * @hide
      * @see NetworkStackClient
      */
+    @SystemApi
+    @TestApi
     public static final String NETWORK_STACK_SERVICE = "network_stack";
+
+    /**
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link ITetheringConnector} IBinder for communicating with the tethering service
+     * @hide
+     * @see TetheringClient
+     */
+    @SystemApi
+    public static final String TETHERING_SERVICE = "tethering";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -3745,6 +3880,24 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String IPSEC_SERVICE = "ipsec";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.VpnManager} to
+     * manage profiles for the platform built-in VPN.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.ConnectivityDiagnosticsManager} for performing network connectivity diagnostics
+     * as well as receiving network connectivity information from the system.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.ConnectivityDiagnosticsManager
+     */
+    public static final String CONNECTIVITY_DIAGNOSTICS_SERVICE = "connectivity_diagnostics";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
@@ -3789,6 +3942,8 @@ public abstract class Context {
      */
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
+    @SystemApi
+    @SuppressLint("ServiceName")
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     /** {@hide} */
     public static final String NETWORK_WATCHLIST_SERVICE = "network_watchlist";
@@ -3868,16 +4023,16 @@ public abstract class Context {
     public static final String LOWPAN_SERVICE = "lowpan";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.net.EthernetManager} for handling management of
-     * Ethernet access.
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.EthernetManager}
+     * for handling management of Ethernet access.
      *
      * @see #getSystemService(String)
      * @see android.net.EthernetManager
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
@@ -4098,6 +4253,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to CONTENT_CAPTURE_SERVICE
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
@@ -4111,6 +4267,9 @@ public abstract class Context {
 
     /**
      * Official published name of the app prediction service.
+     *
+     * <p><b>NOTE: </b> this service is optional; callers of
+     * {@code Context.getSystemServiceName(APP_PREDICTION_SERVICE)} should check for {@code null}.
      *
      * @hide
      * @see #getSystemService(String)
@@ -4596,6 +4755,14 @@ public abstract class Context {
     public static final String PLATFORM_COMPAT_SERVICE = "platform_compat";
 
     /**
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link IPlatformCompatNative} IBinder for native code communicating with the platform compat
+     * service.
+     * @hide
+     */
+    public static final String PLATFORM_COMPAT_NATIVE_SERVICE = "platform_compat_native";
+
+    /**
      * Service to capture a bugreport.
      * @see #getSystemService(String)
      * @see android.os.BugreportManager
@@ -4663,7 +4830,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.app.timedetector.ITimeDetectorService}.
+     * {@link android.app.timedetector.TimeDetector}.
      * @hide
      *
      * @see #getSystemService(String)
@@ -4671,10 +4838,25 @@ public abstract class Context {
     public static final String TIME_DETECTOR_SERVICE = "time_detector";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.timezonedetector.TimeZoneDetector}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
+
+    /**
      * Binder service name for {@link AppBindingService}.
      * @hide
      */
     public static final String APP_BINDING_SERVICE = "app_binding";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.telephony.ims.ImsManager}.
+     */
+    public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
@@ -4689,6 +4871,23 @@ public abstract class Context {
      * @hide
      */
     public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link TelephonyRegistryManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.lights.LightsManager} for controlling device lights.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String LIGHTS_SERVICE = "lights";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -5192,11 +5391,29 @@ public abstract class Context {
      */
     @SystemApi
     @TestApi
+    @NonNull
     public Context createPackageContextAsUser(
-            String packageName, @CreatePackageOptions int flags, UserHandle user)
+            @NonNull String packageName, @CreatePackageOptions int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
         if (Build.IS_ENG) {
             throw new IllegalStateException("createPackageContextAsUser not overridden!");
+        }
+        return this;
+    }
+
+    /**
+     * Similar to {@link #createPackageContext(String, int)}, but for the own package with a
+     * different {@link UserHandle}. For example, {@link #getContentResolver()}
+     * will open any {@link Uri} as the given user.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @NonNull
+    public Context createContextAsUser(@NonNull UserHandle user, @CreatePackageOptions int flags) {
+        if (Build.IS_ENG) {
+            throw new IllegalStateException("createContextAsUser not overridden!");
         }
         return this;
     }
@@ -5237,6 +5454,7 @@ public abstract class Context {
      * Get the user associated with this context
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public @UserIdInt int getUserId() {
         return android.os.UserHandle.myUserId();
@@ -5353,6 +5571,7 @@ public abstract class Context {
      * @return Returns the {@link Display} object this context is associated with.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract Display getDisplay();
 

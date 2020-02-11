@@ -20,12 +20,14 @@ import static android.net.shared.IpConfigurationParcelableUtil.fromStableParcela
 
 import android.content.Context;
 import android.net.DhcpResultsParcelable;
+import android.net.Layer2PacketParcelable;
 import android.net.LinkProperties;
 import android.net.NetworkStackClient;
 import android.os.ConditionVariable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 
 /**
@@ -117,6 +119,7 @@ public class IpClientUtil {
         @Override
         public void onNewDhcpResults(DhcpResultsParcelable dhcpResults) {
             mCb.onNewDhcpResults(fromStableParcelable(dhcpResults));
+            mCb.onNewDhcpResults(dhcpResults);
         }
 
         @Override
@@ -176,9 +179,20 @@ public class IpClientUtil {
             mCb.setNeighborDiscoveryOffload(enable);
         }
 
+        // Invoked on starting preconnection process.
+        @Override
+        public void onPreconnectionStart(List<Layer2PacketParcelable> packets) {
+            mCb.onPreconnectionStart(packets);
+        }
+
         @Override
         public int getInterfaceVersion() {
             return this.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() {
+            return this.HASH;
         }
     }
 

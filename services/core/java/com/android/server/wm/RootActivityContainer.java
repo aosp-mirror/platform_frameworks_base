@@ -35,6 +35,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
 import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
@@ -1217,6 +1218,15 @@ class RootActivityContainer extends ConfigurationContainer
                 if (displayShouldSleep) {
                     stack.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
+                    // When the display which can only contain one task turns on, start a special
+                    // transition. {@link AppTransitionController#handleAppTransitionReady} later
+                    // picks up the transition, and schedules
+                    // {@link ITaskStackListener#onSingleTaskDisplayDrawn} callback which is
+                    // triggered after contents are drawn on the display.
+                    if (display.isSingleTaskInstance()) {
+                        display.mDisplayContent.prepareAppTransition(
+                                TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false);
+                    }
                     stack.awakeFromSleepingLocked();
                     if (stack.isFocusedStackOnDisplay()
                             && !mStackSupervisor.getKeyguardController()
@@ -1657,7 +1667,8 @@ class RootActivityContainer extends ConfigurationContainer
 
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
-        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */);
+        return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */,
+                -1 /* no realCallingPid */, -1 /* no realCallingUid */);
     }
 
     /**
@@ -1666,13 +1677,16 @@ class RootActivityContainer extends ConfigurationContainer
      * @param r The activity we are trying to launch. Can be null.
      * @param options The activity options used to the launch. Can be null.
      * @param candidateTask The possible task the activity might be launched in. Can be null.
-     * @params launchParams The resolved launch params to use.
+     * @param launchParams The resolved launch params to use.
+     * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
+     * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
      *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
     <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
-            @Nullable LaunchParamsController.LaunchParams launchParams) {
+            @Nullable LaunchParamsController.LaunchParams launchParams, int realCallingPid,
+            int realCallingUid) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         //Rect bounds = null;
@@ -1703,7 +1717,14 @@ class RootActivityContainer extends ConfigurationContainer
         if (launchParams != null && launchParams.mPreferredDisplayId != INVALID_DISPLAY) {
             displayId = launchParams.mPreferredDisplayId;
         }
-        if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
+        final boolean canLaunchOnDisplayFromStartRequest =
+                realCallingPid != 0 && realCallingUid > 0 && r != null
+                        && mStackSupervisor.canPlaceEntityOnDisplay(displayId, realCallingPid,
+                        realCallingUid, r.info);
+        // Checking if the activity's launch caller, or the realCallerId of the activity from
+        // start request (i.e. PendingIntent caller) is allowed to launch on the display.
+        if (displayId != INVALID_DISPLAY && (canLaunchOnDisplay(r, displayId)
+                || canLaunchOnDisplayFromStartRequest)) {
             if (r != null) {
                 stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options,
                         launchParams);
@@ -2256,9 +2277,9 @@ class RootActivityContainer extends ConfigurationContainer
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
             @WindowConfiguration.ActivityType int ignoreActivityType,
             @WindowConfiguration.WindowingMode int ignoreWindowingMode, int callingUid,
-            boolean allowed) {
+            boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
         mStackSupervisor.mRunningTasks.getTasks(maxNum, list, ignoreActivityType,
-                ignoreWindowingMode, mActivityDisplays, callingUid, allowed);
+                ignoreWindowingMode, mActivityDisplays, callingUid, allowed, crossUser, profileIds);
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {

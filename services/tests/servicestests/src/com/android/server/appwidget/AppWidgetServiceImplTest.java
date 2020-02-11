@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
@@ -80,6 +81,7 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         super.setUp();
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
         LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
+        LocalServices.removeServiceForTest(AppWidgetManagerInternal.class);
 
         mTestContext = new TestContext();
         mPkgName = mTestContext.getOpPackageName();

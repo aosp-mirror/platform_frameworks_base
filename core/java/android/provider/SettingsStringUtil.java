@@ -126,7 +126,7 @@ public class SettingsStringUtil {
 
         @Override
         protected String itemToString(ComponentName item) {
-            return item.flattenToString();
+            return item != null ? item.flattenToString() : "null";
         }
 
         public static String add(String delimitedElements, ComponentName element) {

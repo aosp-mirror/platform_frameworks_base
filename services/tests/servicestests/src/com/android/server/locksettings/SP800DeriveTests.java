@@ -16,16 +16,23 @@
 
 package com.android.server.locksettings;
 
+import static org.junit.Assert.assertEquals;
+
 import android.platform.test.annotations.Presubmit;
-import android.test.AndroidTestCase;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 @SmallTest
 @Presubmit
-public class SP800DeriveTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class SP800DeriveTests {
+    @Test
     public void testFixedInput() throws Exception {
         // CAVP: https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/key-derivation
         byte[] keyBytes = HexDump.hexStringToByteArray(

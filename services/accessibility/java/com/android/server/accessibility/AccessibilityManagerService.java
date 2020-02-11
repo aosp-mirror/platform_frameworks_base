@@ -82,8 +82,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.provider.SettingsStringUtil;
-import android.provider.SettingsStringUtil.ComponentNameSet;
 import android.provider.SettingsStringUtil.SettingStringHelper;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -2436,12 +2434,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Enables accessibility service specified by {@param componentName} for the {@param userId}.
      */
     private void enableAccessibilityServiceLocked(ComponentName componentName, int userId) {
-        final SettingStringHelper setting =
-                new SettingStringHelper(
-                        mContext.getContentResolver(),
-                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                        userId);
-        setting.write(ComponentNameSet.add(setting.read(), componentName));
+        mTempComponentNameSet.clear();
+        readComponentNamesFromSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userId, mTempComponentNameSet);
+        mTempComponentNameSet.add(componentName);
+        persistComponentNamesToSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                mTempComponentNameSet, userId);
 
         UserState userState = getUserStateLocked(userId);
         if (userState.mEnabledServices.add(componentName)) {
@@ -2453,12 +2451,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Disables accessibility service specified by {@param componentName} for the {@param userId}.
      */
     private void disableAccessibilityServiceLocked(ComponentName componentName, int userId) {
-        final SettingsStringUtil.SettingStringHelper setting =
-                new SettingStringHelper(
-                        mContext.getContentResolver(),
-                        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                        userId);
-        setting.write(ComponentNameSet.remove(setting.read(), componentName));
+        mTempComponentNameSet.clear();
+        readComponentNamesFromSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userId, mTempComponentNameSet);
+        mTempComponentNameSet.remove(componentName);
+        persistComponentNamesToSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                mTempComponentNameSet, userId);
 
         UserState userState = getUserStateLocked(userId);
         if (userState.mEnabledServices.remove(componentName)) {

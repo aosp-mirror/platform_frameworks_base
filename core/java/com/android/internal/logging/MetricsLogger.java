@@ -15,7 +15,7 @@
  */
 package com.android.internal.logging;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.Build;
@@ -40,6 +40,10 @@ public class MetricsLogger {
     // mirror changes in native version at system/core/libmetricslogger/metrics_logger.cpp
 
     private static MetricsLogger sMetricsLogger;
+
+    @UnsupportedAppUsage
+    public MetricsLogger() {
+    }
 
     private static MetricsLogger getLogger() {
         if (sMetricsLogger == null) {

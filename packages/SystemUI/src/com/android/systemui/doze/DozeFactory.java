@@ -28,8 +28,9 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AsyncSensorManager;
@@ -42,11 +43,12 @@ public class DozeFactory {
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
-    public DozeMachine assembleMachine(DozeService dozeService) {
+    public DozeMachine assembleMachine(DozeService dozeService, FalsingManager falsingManager) {
         Context context = dozeService;
         SensorManager sensorManager = Dependency.get(AsyncSensorManager.class);
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
         DockManager dockManager = Dependency.get(DockManager.class);
+        WakefulnessLifecycle wakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
 
         DozeHost host = getHost(dozeService);
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
@@ -61,10 +63,11 @@ public class DozeFactory {
         wrappedService = DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(wrappedService,
                 params);
 
-        DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
+        DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock,
+                wakefulnessLifecycle);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager, params.getPolicy()),
-                new DozeFalsingManagerAdapter(FalsingManagerFactory.getInstance(context)),
+                new DozeFalsingManagerAdapter(falsingManager),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine, dockManager),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),
@@ -72,7 +75,8 @@ public class DozeFactory {
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, params,
                         handler),
                 new DozeWallpaperState(context, getBiometricUnlockController(dozeService)),
-                new DozeDockHandler(context, machine, host, config, handler, dockManager)
+                new DozeDockHandler(context, machine, host, config, handler, dockManager),
+                new DozeAuthRemover(dozeService)
         });
 
         return machine;

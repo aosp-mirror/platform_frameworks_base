@@ -16,6 +16,7 @@
 
 package com.android.internal.preference;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
@@ -40,6 +41,7 @@ public class YesNoPreference extends DialogPreference {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @UnsupportedAppUsage
     public YesNoPreference(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.yesNoPreferenceStyle);
     }

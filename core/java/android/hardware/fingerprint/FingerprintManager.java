@@ -26,8 +26,8 @@ import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -44,6 +44,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.security.identity.IdentityCredential;
 import android.util.Slog;
 
 import java.security.Signature;
@@ -125,6 +126,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             super(mac);
         }
 
+        public CryptoObject(@NonNull IdentityCredential credential) {
+            super(credential);
+        }
+
         /**
          * Get {@link Signature} object.
          * @return {@link Signature} object or null if this doesn't contain one.
@@ -147,6 +152,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          */
         public Mac getMac() {
             return super.getMac();
+        }
+
+        /**
+         * Get {@link IdentityCredential} object.
+         * @return {@link IdentityCredential} object or null if this doesn't contain one.
+         */
+        public @Nullable IdentityCredential getIdentityCredential() {
+            return super.getIdentityCredential();
         }
     }
 

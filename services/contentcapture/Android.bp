@@ -1,5 +1,12 @@
+filegroup {
+    name: "services.contentcapture-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.contentcapture",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.contentcapture-sources"],
     libs: ["services.core"],
 }

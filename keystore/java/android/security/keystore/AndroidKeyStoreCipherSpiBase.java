@@ -299,7 +299,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             KeyStore keyStore, IBinder operationToken) {
         return new KeyStoreCryptoOperationChunkedStreamer(
                 new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
-                        keyStore, operationToken));
+                        keyStore, operationToken), 0);
     }
 
     /**

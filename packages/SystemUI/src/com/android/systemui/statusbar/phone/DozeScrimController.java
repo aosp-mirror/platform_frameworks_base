@@ -149,6 +149,14 @@ public class DozeScrimController implements StateListener {
         mHandler.removeCallbacks(mPulseOut);
     }
 
+    /**
+     * When pulsing, cancel any timeouts that would take you out of the pulsing state.
+     */
+    public void cancelPendingPulseTimeout() {
+        mHandler.removeCallbacks(mPulseOut);
+        mHandler.removeCallbacks(mPulseOutExtended);
+    }
+
     private void cancelPulsing() {
         if (mPulseCallback != null) {
             if (DEBUG) Log.d(TAG, "Cancel pulsing");

@@ -25,8 +25,8 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -2226,6 +2226,8 @@ public class AccountManager {
     }
 
     private abstract class AmsTask extends FutureTask<Bundle> implements AccountManagerFuture<Bundle> {
+
+
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         final IAccountManagerResponse mResponse;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

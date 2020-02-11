@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.media.AudioAttributes;
 import android.os.VibrationEffect;
 
 /** {@hide} */
@@ -23,8 +24,10 @@ interface IVibratorService
 {
     boolean hasVibrator();
     boolean hasAmplitudeControl();
-    void vibrate(int uid, String opPkg, in VibrationEffect effect, int usageHint, String reason,
-            IBinder token);
+    boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId, in VibrationEffect effect,
+            in AudioAttributes attributes);
+    void vibrate(int uid, String opPkg, in VibrationEffect effect, in AudioAttributes attributes,
+            String reason, IBinder token);
     void cancelVibrate(IBinder token);
 }
 

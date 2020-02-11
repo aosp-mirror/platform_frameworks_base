@@ -18,7 +18,7 @@ package android.os;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import libcore.util.NativeAllocationRegistry;
 

@@ -77,23 +77,9 @@ interface IRecentsAnimationController {
     void hideCurrentInputMethod();
 
     /**
-     * Set a state for controller whether would like to cancel recents animations with deferred
-     * task screenshot presentation.
-     *
-     * When we cancel the recents animation due to a stack order change, we can't just cancel it
-     * immediately as it would lead to a flicker in Launcher if we just remove the task from the
-     * leash. Instead we screenshot the previous task and replace the child of the leash with the
-     * screenshot, so that Launcher can still control the leash lifecycle & make the next app
-     * transition animate smoothly without flickering.
-     *
-     * @param screenshot When set {@code true}, means recents animation will be canceled when the
-     *                   next app launch. System will take previous task's screenshot when the next
-     *                   app transition starting, and skip previous task's animation.
-     *                   Set {@code false} means will not take screenshot & skip animation
-     *                   for previous task.
-     *
-     * @see #cleanupScreenshot()
-     * @see IRecentsAnimationRunner#onCancelled
+     * This call is deprecated, use #setDeferCancelUntilNextTransition() instead
+     * TODO(138144750): Remove this method once there are no callers
+     * @deprecated
      */
     void setCancelWithDeferredScreenshot(boolean screenshot);
 
@@ -104,4 +90,34 @@ interface IRecentsAnimationController {
      * @see {@link IRecentsAnimationRunner#onAnimationCanceled}
      */
     void cleanupScreenshot();
+
+    /**
+     * Set a state for controller whether would like to cancel recents animations with deferred
+     * task screenshot presentation.
+     *
+     * When we cancel the recents animation due to a stack order change, we can't just cancel it
+     * immediately as it would lead to a flicker in Launcher if we just remove the task from the
+     * leash. Instead we screenshot the previous task and replace the child of the leash with the
+     * screenshot, so that Launcher can still control the leash lifecycle & make the next app
+     * transition animate smoothly without flickering.
+     *
+     * @param defer When set {@code true}, means that the recents animation will defer canceling the
+     *              animation when a stack order change is triggered until the subsequent app
+     *              transition start and skip previous task's animation.
+     *              When set to {@code false}, means that the recents animation will be canceled
+     *              immediately when the stack order changes.
+     * @param screenshot When set {@code true}, means that the system will take previous task's
+     *                   screenshot and replace the contents of the leash with it when the next app
+     *                   transition starting. The runner must call #cleanupScreenshot() to end the
+     *                   recents animation.
+     *                   When set to {@code false}, means that the system will simply wait for the
+     *                   next app transition start to immediately cancel the recents animation. This
+     *                   can be useful when you want an immediate transition into a state where the
+     *                   task is shown in the home/recents activity (without waiting for a
+     *                   screenshot).
+     *
+     * @see #cleanupScreenshot()
+     * @see IRecentsAnimationRunner#onCancelled
+     */
+    void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot);
 }

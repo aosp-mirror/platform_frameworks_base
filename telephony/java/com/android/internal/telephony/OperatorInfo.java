@@ -16,10 +16,11 @@
 
 package com.android.internal.telephony;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 
 /**
  * @hide
@@ -43,6 +44,7 @@ public class OperatorInfo implements Parcelable {
 
     @UnsupportedAppUsage
     private State mState = State.UNKNOWN;
+    private int mRan = AccessNetworkType.UNKNOWN;
 
 
     @UnsupportedAppUsage
@@ -69,6 +71,10 @@ public class OperatorInfo implements Parcelable {
         return mState;
     }
 
+    public int getRan() {
+        return mRan;
+    }
+
     @UnsupportedAppUsage
     OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
@@ -82,6 +88,14 @@ public class OperatorInfo implements Parcelable {
         mState = state;
     }
 
+    OperatorInfo(String operatorAlphaLong,
+                String operatorAlphaShort,
+                String operatorNumeric,
+                State state,
+                int ran) {
+        this (operatorAlphaLong, operatorAlphaShort, operatorNumeric, state);
+        mRan = ran;
+    }
 
     @UnsupportedAppUsage
     public OperatorInfo(String operatorAlphaLong,
@@ -90,6 +104,14 @@ public class OperatorInfo implements Parcelable {
                 String stateString) {
         this (operatorAlphaLong, operatorAlphaShort,
                 operatorNumeric, rilStateToState(stateString));
+    }
+
+    public OperatorInfo(String operatorAlphaLong,
+                String operatorAlphaShort,
+                String operatorNumeric,
+                int ran) {
+        this (operatorAlphaLong, operatorAlphaShort, operatorNumeric);
+        mRan = ran;
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -124,7 +146,8 @@ public class OperatorInfo implements Parcelable {
         return "OperatorInfo " + mOperatorAlphaLong
                 + "/" + mOperatorAlphaShort
                 + "/" + mOperatorNumeric
-                + "/" + mState;
+                + "/" + mState
+                + "/" + mRan;
     }
 
     /**
@@ -150,6 +173,7 @@ public class OperatorInfo implements Parcelable {
         dest.writeString(mOperatorAlphaShort);
         dest.writeString(mOperatorNumeric);
         dest.writeSerializable(mState);
+        dest.writeInt(mRan);
     }
 
     /**
@@ -158,20 +182,21 @@ public class OperatorInfo implements Parcelable {
      */
     @UnsupportedAppUsage
     public static final Creator<OperatorInfo> CREATOR =
-        new Creator<OperatorInfo>() {
-            @Override
-            public OperatorInfo createFromParcel(Parcel in) {
-                OperatorInfo opInfo = new OperatorInfo(
-                        in.readString(), /*operatorAlphaLong*/
-                        in.readString(), /*operatorAlphaShort*/
-                        in.readString(), /*operatorNumeric*/
-                        (State) in.readSerializable()); /*state*/
-                return opInfo;
-            }
+            new Creator<OperatorInfo>() {
+                @Override
+                public OperatorInfo createFromParcel(Parcel in) {
+                    OperatorInfo opInfo = new OperatorInfo(
+                            in.readString(), /*operatorAlphaLong*/
+                            in.readString(), /*operatorAlphaShort*/
+                            in.readString(), /*operatorNumeric*/
+                            (State) in.readSerializable(), /*state*/
+                            in.readInt()); /*ran*/
+                    return opInfo;
+                }
 
-            @Override
-            public OperatorInfo[] newArray(int size) {
-                return new OperatorInfo[size];
-            }
-        };
+                @Override
+                public OperatorInfo[] newArray(int size) {
+                    return new OperatorInfo[size];
+                }
+            };
 }

@@ -87,6 +87,7 @@ cc_library_shared {
         "android_text_Hyphenator.cpp",
         "android_os_Debug.cpp",
         "android_os_GraphicsEnvironment.cpp",
+        "android_os_HidlMemory.cpp",
         "android_os_HidlSupport.cpp",
         "android_os_HwBinder.cpp",
         "android_os_HwBlob.cpp",
@@ -169,7 +170,6 @@ cc_library_shared {
         "android_media_AudioVolumeGroups.cpp",
         "android_media_AudioVolumeGroupCallback.cpp",
         "android_media_DeviceCallback.cpp",
-        "android_media_JetPlayer.cpp",
         "android_media_MediaMetricsJNI.cpp",
         "android_media_MicrophoneInfo.cpp",
         "android_media_midi.cpp",
@@ -233,6 +233,8 @@ cc_library_shared {
 
     static_libs: [
         "libasync_safe",
+        "libbinderthreadstateutils",
+        "libdmabufinfo",
         "libgif",
         "libseccomp_policy",
         "libgrallocusage",
@@ -279,6 +281,7 @@ cc_library_shared {
         "libmediametrics",
         "libmeminfo",
         "libaudioclient",
+        "libaudiofoundation",
         "libaudiopolicy",
         "libjpeg",
         "libusbhost",

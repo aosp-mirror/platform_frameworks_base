@@ -16,6 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_AUDIO;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -42,10 +46,11 @@ public class A2dpProfile implements LocalBluetoothProfile {
     private boolean mIsProfileReady;
 
     private final CachedBluetoothDeviceManager mDeviceManager;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     static final ParcelUuid[] SINK_UUIDS = {
-        BluetoothUuid.AudioSink,
-        BluetoothUuid.AdvAudioDist,
+        BluetoothUuid.A2DP_SINK,
+        BluetoothUuid.ADV_AUDIO_DIST,
     };
 
     static final String NAME = "A2DP";
@@ -96,7 +101,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
         mContext = context;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new A2dpServiceListener(),
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
     }
 
@@ -147,20 +153,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
         return mService.getDevicesMatchingConnectionStates(states);
     }
 
-    public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.connect(device);
-    }
-
-    public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        // Downgrade priority as user is disconnecting the headset.
-        if (mService.getPriority(device) > BluetoothProfile.PRIORITY_ON){
-            mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
-        }
-        return mService.disconnect(device);
-    }
-
     public int getConnectionStatus(BluetoothDevice device) {
         if (mService == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -169,8 +161,10 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.setActiveDevice(device);
+        if (mBluetoothAdapter == null) {
+            return false;
+        }
+        return mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_AUDIO);
     }
 
     public BluetoothDevice getActiveDevice() {
@@ -178,25 +172,37 @@ public class A2dpProfile implements LocalBluetoothProfile {
         return mService.getActiveDevice();
     }
 
-    public boolean isPreferred(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
+    @Override
+    public boolean isEnabled(BluetoothDevice device) {
+        if (mService == null) {
+            return false;
+        }
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
-    public int getPreferred(BluetoothDevice device) {
-        if (mService == null) return BluetoothProfile.PRIORITY_OFF;
-        return mService.getPriority(device);
+    @Override
+    public int getConnectionPolicy(BluetoothDevice device) {
+        if (mService == null) {
+            return CONNECTION_POLICY_FORBIDDEN;
+        }
+        return mService.getConnectionPolicy(device);
     }
 
-    public void setPreferred(BluetoothDevice device, boolean preferred) {
-        if (mService == null) return;
-        if (preferred) {
-            if (mService.getPriority(device) < BluetoothProfile.PRIORITY_ON) {
-                mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
+    @Override
+    public boolean setEnabled(BluetoothDevice device, boolean enabled) {
+        boolean isEnabled = false;
+        if (mService == null) {
+            return false;
+        }
+        if (enabled) {
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            mService.setPriority(device, BluetoothProfile.PRIORITY_OFF);
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
+
+        return isEnabled;
     }
     boolean isA2dpPlaying() {
         if (mService == null) return false;

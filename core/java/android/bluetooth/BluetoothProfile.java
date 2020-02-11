@@ -20,9 +20,9 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +43,7 @@ public interface BluetoothProfile {
      * This extra represents the current connection state of the profile of the
      * Bluetooth device.
      */
+    @SuppressLint("ActionValue")
     String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
 
     /**
@@ -51,6 +52,7 @@ public interface BluetoothProfile {
      * This extra represents the previous connection state of the profile of the
      * Bluetooth device.
      */
+    @SuppressLint("ActionValue")
     String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.profile.extra.PREVIOUS_STATE";
 
@@ -106,7 +108,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @SystemApi
     int PAN = 5;
 
     /**
@@ -144,7 +146,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     int A2DP_SINK = 11;
 
     /**
@@ -152,7 +154,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     int AVRCP_CONTROLLER = 12;
 
     /**
@@ -167,6 +169,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
+    @SystemApi
     int HEADSET_CLIENT = 16;
 
     /**
@@ -174,6 +177,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
+    @SystemApi
     int PBAP_CLIENT = 17;
 
     /**
@@ -223,7 +227,9 @@ public interface BluetoothProfile {
      * and outgoing connections for the profile
      *
      * @hide
+     * @deprecated Replaced with {@link #CONNECTION_POLICY_ALLOWED}
      **/
+    @Deprecated
     @SystemApi
     int PRIORITY_ON = 100;
 
@@ -232,7 +238,9 @@ public interface BluetoothProfile {
      * connections and outgoing connections for the profile.
      *
      * @hide
+     * @deprecated Replaced with {@link #CONNECTION_POLICY_FORBIDDEN}
      **/
+    @Deprecated
     @SystemApi
     int PRIORITY_OFF = 0;
 
@@ -243,6 +251,38 @@ public interface BluetoothProfile {
      */
     @UnsupportedAppUsage
     int PRIORITY_UNDEFINED = -1;
+
+    /** @hide */
+    @IntDef(prefix = "CONNECTION_POLICY_", value = {CONNECTION_POLICY_ALLOWED,
+            CONNECTION_POLICY_FORBIDDEN, CONNECTION_POLICY_UNKNOWN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConnectionPolicy{}
+
+    /**
+     * Default connection policy for devices that allow incoming and outgoing connections
+     * for the profile
+     *
+     * @hide
+     **/
+    @SystemApi
+    int CONNECTION_POLICY_ALLOWED = 100;
+
+    /**
+     * Default connection policy for devices that do not allow incoming or outgoing connections
+     * for the profile.
+     *
+     * @hide
+     **/
+    @SystemApi
+    int CONNECTION_POLICY_FORBIDDEN = 0;
+
+    /**
+     * Default connection policy when not set or when the device is unpaired
+     *
+     * @hide
+     */
+    @SystemApi
+    int CONNECTION_POLICY_UNKNOWN = -1;
 
     /**
      * Get connected devices for this specific profile.
@@ -322,6 +362,56 @@ public interface BluetoothProfile {
                 return "STATE_DISCONNECTING";
             default:
                 return "STATE_UNKNOWN";
+        }
+    }
+
+    /**
+     * Convert an integer value of profile ID into human readable string
+     *
+     * @param profile profile ID
+     * @return profile name as String, UNKOWN_PROFILE if the profile ID is not defined.
+     * @hide
+     */
+    static String getProfileName(int profile) {
+        switch(profile) {
+            case HEADSET:
+                return "HEADSET";
+            case A2DP:
+                return "A2DP";
+            case HID_HOST:
+                return "HID_HOST";
+            case PAN:
+                return "PAN";
+            case PBAP:
+                return "PBAP";
+            case GATT:
+                return "GATT";
+            case GATT_SERVER:
+                return "GATT_SERVER";
+            case MAP:
+                return "MAP";
+            case SAP:
+                return "SAP";
+            case A2DP_SINK:
+                return "A2DP_SINK";
+            case AVRCP_CONTROLLER:
+                return "AVRCP_CONTROLLER";
+            case AVRCP:
+                return "AVRCP";
+            case HEADSET_CLIENT:
+                return "HEADSET_CLIENT";
+            case PBAP_CLIENT:
+                return "PBAP_CLIENT";
+            case MAP_CLIENT:
+                return "MAP_CLIENT";
+            case HID_DEVICE:
+                return "HID_DEVICE";
+            case OPP:
+                return "OPP";
+            case HEARING_AID:
+                return "HEARING_AID";
+            default:
+                return "UNKNOWN_PROFILE";
         }
     }
 }

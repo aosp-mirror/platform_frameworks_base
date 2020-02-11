@@ -16,4 +16,4 @@
 
 package android.net;
 
-parcelable Uri;
+@JavaOnlyStableParcelable parcelable Uri;

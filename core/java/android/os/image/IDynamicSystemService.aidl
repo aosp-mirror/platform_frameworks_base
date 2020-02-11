@@ -21,14 +21,27 @@ import android.gsi.GsiProgress;
 interface IDynamicSystemService
 {
     /**
-     * Start DynamicSystem installation. This call may take 60~90 seconds. The caller
-     * may use another thread to call the getStartProgress() to get the progress.
-     *
-     * @param systemSize system size in bytes
-     * @param userdataSize userdata size in bytes
+     * Start DynamicSystem installation.
+     * @param dsuSlot Name used to identify this installation
      * @return true if the call succeeds
      */
-    boolean startInstallation(long systemSize, long userdataSize);
+    boolean startInstallation(@utf8InCpp String dsuSlot);
+
+    /**
+     * Create a DSU partition. This call may take 60~90 seconds. The caller
+     * may use another thread to call the getStartProgress() to get the progress.
+     * @param name The DSU partition name
+     * @param size Size of the DSU image in bytes
+     * @param readOnly True if this partition is readOnly
+     * @return true if the call succeeds
+     */
+    boolean createPartition(@utf8InCpp String name, long size, boolean readOnly);
+
+    /**
+     * Finish a previously started installation. Installations without
+     * a cooresponding finishInstallation() will be cleaned up during device boot.
+     */
+    boolean finishInstallation();
 
     /**
      * Query the progress of the current installation operation. This can be called while

@@ -69,6 +69,11 @@ public class RcsSipOptionsImplBase extends RcsCapabilityExchange {
      */
     public static final int RESPONSE_DOES_NOT_EXIST_ANYWHERE = 4;
 
+    /**
+     * Indicates that the remote user responded with a 400 BAD REQUEST response.
+     */
+    public static final int RESPONSE_BAD_REQUEST = 5;
+
     /** @hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "RESPONSE_", value = {
@@ -77,7 +82,8 @@ public class RcsSipOptionsImplBase extends RcsCapabilityExchange {
             RESPONSE_TEMPORARILY_UNAVAILABLE,
             RESPONSE_REQUEST_TIMEOUT,
             RESPONSE_NOT_FOUND,
-            RESPONSE_DOES_NOT_EXIST_ANYWHERE
+            RESPONSE_DOES_NOT_EXIST_ANYWHERE,
+            RESPONSE_BAD_REQUEST
     })
     public @interface SipResponseCode {}
 
@@ -188,7 +194,6 @@ public class RcsSipOptionsImplBase extends RcsCapabilityExchange {
      * @param reason A non-null String containing the reason associated with the SIP code.
      * @param operationToken The token provided by the framework when
      *         {@link #onRemoteCapabilityRequest(Uri, RcsContactUceCapability, int)} was called.
-     *
      */
     public void respondToCapabilityRequestWithError(@NonNull Uri contactUri,
             @SipResponseCode int code, @NonNull String reason, int operationToken) {

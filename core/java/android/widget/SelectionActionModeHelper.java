@@ -999,6 +999,7 @@ public final class SelectionActionModeHelper {
         }
 
         private void onTimeOut() {
+            Log.d(LOG_TAG, "Timeout in TextClassificationAsyncTask");
             if (getStatus() == Status.RUNNING) {
                 onPostExecute(mTimeOutResultSupplier.get());
             }

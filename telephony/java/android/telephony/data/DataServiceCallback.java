@@ -22,8 +22,9 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.LinkProperties;
 import android.os.RemoteException;
-import android.telephony.Rlog;
 import android.telephony.data.DataService.DataServiceProvider;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

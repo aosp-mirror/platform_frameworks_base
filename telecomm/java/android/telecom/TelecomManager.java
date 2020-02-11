@@ -14,8 +14,11 @@
 
 package android.telecom;
 
+import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
@@ -23,7 +26,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +36,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.telephony.Annotation.CallState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -481,6 +485,103 @@ public class TelecomManager {
             "android.telecom.extra.START_CALL_WITH_RTT";
 
     /**
+     * Start an activity indicating that the completion of an outgoing call or an incoming call
+     * which was not blocked by the {@link CallScreeningService}, and which was NOT terminated
+     * while the call was in {@link Call#STATE_AUDIO_PROCESSING}.
+     *
+     * The {@link Uri} extra {@link #EXTRA_HANDLE} will contain the uri handle(phone number) for the
+     * call which completed.
+     *
+     * The integer extra {@link #EXTRA_DISCONNECT_CAUSE} will indicate the reason for the call
+     * disconnection. See {@link #EXTRA_DISCONNECT_CAUSE} for more information.
+     *
+     * The integer extra {@link #EXTRA_CALL_DURATION} will indicate the duration of the call. See
+     * {@link #EXTRA_CALL_DURATION} for more information.
+     */
+    public static final String ACTION_POST_CALL = "android.telecom.action.POST_CALL";
+
+    /**
+     * A {@link Uri} extra, which when set on the {@link #ACTION_POST_CALL} intent, indicates the
+     * uri handle(phone number) of the completed call.
+     */
+    public static final String EXTRA_HANDLE = "android.telecom.extra.HANDLE";
+
+    /**
+     * A integer value provided for completed calls to indicate the reason for the call
+     * disconnection.
+     * <p>
+     * Allowed values:
+     * <ul>
+     * <li>{@link DisconnectCause#UNKNOWN}</li>
+     * <li>{@link DisconnectCause#LOCAL}</li>
+     * <li>{@link DisconnectCause#REMOTE}</li>
+     * <li>{@link DisconnectCause#REJECTED}</li>
+     * <li>{@link DisconnectCause#MISSED}</li>
+     * </ul>
+     * </p>
+     */
+    public static final String EXTRA_DISCONNECT_CAUSE = "android.telecom.extra.DISCONNECT_CAUSE";
+
+    /**
+     * A integer value provided for completed calls to indicate the duration of the call.
+     * <p>
+     * Allowed values:
+     * <ul>
+     * <li>{@link #DURATION_VERY_SHORT}</li>
+     * <li>{@link #DURATION_SHORT}</li>
+     * <li>{@link #DURATION_MEDIUM}</li>
+     * <li>{@link #DURATION_LONG}</li>
+     * </ul>
+     * </p>
+     */
+    public static final String EXTRA_CALL_DURATION = "android.telecom.extra.CALL_DURATION";
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was < 3 seconds.
+     */
+    public static final int DURATION_VERY_SHORT = 0;
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was >= 3 seconds and < 60 seconds.
+     */
+    public static final int DURATION_SHORT = 1;
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was >= 60 seconds and < 120 seconds.
+     */
+    public static final int DURATION_MEDIUM = 2;
+
+    /**
+     * A integer value for {@link #EXTRA_CALL_DURATION}, indicates the duration of the completed
+     * call was >= 120 seconds.
+     */
+    public static final int DURATION_LONG = 3;
+
+    /**
+     * The threshold between {@link #DURATION_VERY_SHORT} calls and {@link #DURATION_SHORT} calls in
+     * milliseconds.
+     * @hide
+     */
+    public static final long VERY_SHORT_CALL_TIME_MS = 3000;
+
+    /**
+     * The threshold between {@link #DURATION_SHORT} calls and {@link #DURATION_MEDIUM} calls in
+     * milliseconds.
+     * @hide
+     */
+    public static final long SHORT_CALL_TIME_MS = 60000;
+
+    /**
+     * The threshold between {@link #DURATION_MEDIUM} calls and {@link #DURATION_LONG} calls in
+     * milliseconds.
+     * @hide
+     */
+    public static final long MEDIUM_CALL_TIME_MS = 120000;
+
+    /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an
      * in-call user interface. Dialer implementations (see {@link #getDefaultDialerPackage()}) which
      * would also like to replace the in-call interface should set this meta-data to {@code true} in
@@ -695,7 +796,17 @@ public class TelecomManager {
     /**
      * The boolean indicated by this extra controls whether or not a call is eligible to undergo
      * assisted dialing. This extra is stored under {@link #EXTRA_OUTGOING_CALL_EXTRAS}.
-     * @hide
+     * <p>
+     * The call initiator can use this extra to indicate that a call used assisted dialing to help
+     * place the call.  This is most commonly used by a Dialer app which provides the ability to
+     * automatically add dialing prefixes when placing international calls.
+     * <p>
+     * Setting this extra on the outgoing call extras will cause the
+     * {@link Connection#PROPERTY_ASSISTED_DIALING_USED} property and
+     * {@link Call.Details#PROPERTY_ASSISTED_DIALING_USED} property to be set on the
+     * {@link Connection}/{@link Call} in question.  When the call is logged to the call log, the
+     * {@link android.provider.CallLog.Calls#FEATURES_ASSISTED_DIALING_USED} call feature is set to
+     * indicate that assisted dialing was used for the call.
      */
     public static final String EXTRA_USE_ASSISTED_DIALING =
             "android.telecom.extra.USE_ASSISTED_DIALING";
@@ -736,6 +847,25 @@ public class TelecomManager {
      * Indicates that the address or number of a call belongs to a pay phone.
      */
     public static final int PRESENTATION_PAYPHONE = 4;
+
+
+    /*
+     * Values for the adb property "persist.radio.videocall.audio.output"
+     */
+    /** @hide */
+    public static final int AUDIO_OUTPUT_ENABLE_SPEAKER = 0;
+    /** @hide */
+    public static final int AUDIO_OUTPUT_DISABLE_SPEAKER = 1;
+    /** @hide */
+    public static final int AUDIO_OUTPUT_DEFAULT = AUDIO_OUTPUT_ENABLE_SPEAKER;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = { "PRESENTATION_" },
+            value = {PRESENTATION_ALLOWED, PRESENTATION_RESTRICTED, PRESENTATION_UNKNOWN,
+            PRESENTATION_PAYPHONE})
+    public @interface Presentation {}
 
     private static final String TAG = "TelecomManager";
 
@@ -882,9 +1012,8 @@ public class TelecomManager {
      *                       queried for.
      * @return The phone account handle of the current sim call manager.
      * @see SubscriptionManager#getActiveSubscriptionInfoList()
-     * @hide
      */
-    public PhoneAccountHandle getSimCallManagerForSubscription(int subscriptionId) {
+    public @Nullable PhoneAccountHandle getSimCallManagerForSubscription(int subscriptionId) {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getSimCallManager(subscriptionId);
@@ -946,7 +1075,7 @@ public class TelecomManager {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
@@ -1008,12 +1137,16 @@ public class TelecomManager {
      * by the user.
      *
      * @param includeDisabledAccounts When {@code true}, disabled phone accounts will be included,
-     *                                when {@code false}, only
+     *                                when {@code false}, only enabled phone accounts will be
+     *                                included.
      * @return A list of {@code PhoneAccountHandle} objects.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
-    public List<PhoneAccountHandle> getCallCapablePhoneAccounts(boolean includeDisabledAccounts) {
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccounts(
+            boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCallCapablePhoneAccounts(
@@ -1233,6 +1366,28 @@ public class TelecomManager {
     }
 
     /**
+     * Used to determine the currently selected default dialer package for a specific user.
+     *
+     * @param userId the user id to query the default dialer package for.
+     * @return package name for the default dialer package or null if no package has been
+     *         selected as the default dialer.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getDefaultDialerPackage(int userId) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getDefaultDialerPackageForUser(userId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);
+        }
+        return null;
+    }
+
+    /**
      * Used to set the default dialer package.
      *
      * @param packageName to set the default dialer to, or {@code null} if the system provided
@@ -1412,7 +1567,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    public @TelephonyManager.CallState int getCallState() {
+    public @CallState int getCallState() {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCallState();
@@ -1431,7 +1586,7 @@ public class TelecomManager {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isRinging() {
@@ -1561,7 +1716,7 @@ public class TelecomManager {
      * Returns whether TTY is supported on this device.
      */
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isTtySupported() {
@@ -1587,7 +1742,7 @@ public class TelecomManager {
      */
     @SystemApi
     @TestApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
     public @TtyMode int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {
@@ -1644,6 +1799,45 @@ public class TelecomManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException adding a new incoming call: " + phoneAccount, e);
+        }
+    }
+
+    /**
+     * Registers a new incoming conference. A {@link ConnectionService} should invoke this method
+     * when it has an incoming conference. For managed {@link ConnectionService}s, the specified
+     * {@link PhoneAccountHandle} must have been registered with {@link #registerPhoneAccount} and
+     * the user must have enabled the corresponding {@link PhoneAccount}.  This can be checked using
+     * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
+     * <p>
+     * The incoming conference you are adding is assumed to have a video state of
+     * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
+     * {@link #EXTRA_INCOMING_VIDEO_STATE} is specified.
+     * <p>
+     * Once invoked, this method will cause the system to bind to the {@link ConnectionService}
+     * associated with the {@link PhoneAccountHandle} and request additional information about the
+     * call (See {@link ConnectionService#onCreateIncomingConference}) before starting the incoming
+     * call UI.
+     * <p>
+     * For a managed {@link ConnectionService}, a {@link SecurityException} will be thrown if either
+     * the {@link PhoneAccountHandle} does not correspond to a registered {@link PhoneAccount} or
+     * the associated {@link PhoneAccount} is not currently enabled by the user.
+     *
+     * @param phoneAccount A {@link PhoneAccountHandle} registered with
+     *            {@link #registerPhoneAccount}.
+     * @param extras A bundle that will be passed through to
+     *            {@link ConnectionService#onCreateIncomingConference}.
+     * @hide
+     */
+    public void addNewIncomingConference(@NonNull PhoneAccountHandle phoneAccount,
+            @NonNull Bundle extras) {
+        try {
+            if (isServiceConnected()) {
+                getTelecomService().addNewIncomingConference(
+                        phoneAccount, extras == null ? new Bundle() : extras);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException adding a new incoming conference: " + phoneAccount, e);
         }
     }
 
@@ -1851,6 +2045,43 @@ public class TelecomManager {
         }
     }
 
+
+    /**
+     * Place a new conference call with the provided participants using the system telecom service
+     * This method doesn't support placing of emergency calls.
+     *
+     * An adhoc conference call is established by providing a list of addresses to
+     * {@code TelecomManager#startConference(List<Uri>, int videoState)} where the
+     * {@link ConnectionService} is responsible for connecting all indicated participants
+     * to a conference simultaneously.
+     * This is in contrast to conferences formed by merging calls together (e.g. using
+     * {@link android.telecom.Call#mergeConference()}).
+     *
+     * The following keys are supported in the supplied extras.
+     * <ul>
+     *   <li>{@link #EXTRA_PHONE_ACCOUNT_HANDLE}</li>
+     *   <li>{@link #EXTRA_START_CALL_WITH_SPEAKERPHONE}</li>
+     *   <li>{@link #EXTRA_START_CALL_WITH_VIDEO_STATE}</li>
+     * </ul>
+     *
+     * @param participants List of participants to start conference with
+     * @param extras Bundle of extras to use with the call
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CALL_PHONE)
+    public void startConference(@NonNull List<Uri> participants,
+            @NonNull Bundle extras) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                service.startConference(participants, extras,
+                        mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecomService#placeCall", e);
+            }
+        }
+    }
+
     /**
      * Enables and disables specified phone account.
      *
@@ -1907,6 +2138,29 @@ public class TelecomManager {
                 result = service.createManageBlockedNumbersIntent();
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#createManageBlockedNumbersIntent", e);
+            }
+        }
+        return result;
+    }
+
+
+    /**
+     * Creates the {@link Intent} which can be used with {@link Context#startActivity(Intent)} to
+     * launch the activity for emergency dialer.
+     *
+     * @param number Optional number to call in emergency dialer
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
+        ITelecomService service = getTelecomService();
+        Intent result = null;
+        if (service != null) {
+            try {
+                result = service.createLaunchEmergencyDialerIntent(number);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error createLaunchEmergencyDialerIntent", e);
             }
         }
         return result;

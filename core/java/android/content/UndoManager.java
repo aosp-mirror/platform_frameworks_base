@@ -16,10 +16,8 @@
 
 package android.content;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.ParcelableParcel;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
@@ -86,6 +84,10 @@ public class UndoManager {
      * Always allow merge with the last undo state, if possible.
      */
     public static final int MERGE_MODE_ANY = 2;
+
+    @UnsupportedAppUsage
+    public UndoManager() {
+    }
 
     @UnsupportedAppUsage
     public UndoOwner getOwner(String tag, Object data) {

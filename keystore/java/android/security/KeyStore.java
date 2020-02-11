@@ -16,10 +16,10 @@
 
 package android.security;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
@@ -31,7 +31,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.security.KeyStoreException;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
@@ -346,16 +345,6 @@ public class KeyStore {
 
     public String[] list(String prefix) {
         return list(prefix, UID_SELF);
-    }
-
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public boolean reset() {
-        try {
-            return mBinder.reset() == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
     }
 
     /**
@@ -922,15 +911,26 @@ public class KeyStore {
         }
     }
 
-    public OperationResult finish(IBinder token, KeymasterArguments arguments, byte[] signature,
-            byte[] entropy) {
+    /**
+     * Android KeyStore finish operation.
+     *
+     * @param token Authentication token.
+     * @param arguments Keymaster arguments
+     * @param input Optional additional input data.
+     * @param signature Optional signature to be verified.
+     * @param entropy Optional additional entropy
+     * @return OperationResult that will indicate success or error of the operation.
+     */
+    public OperationResult finish(IBinder token, KeymasterArguments arguments, byte[] input,
+            byte[] signature, byte[] entropy) {
         OperationPromise promise = new OperationPromise();
         try {
             mBinder.asBinder().linkToDeath(promise, 0);
             arguments = arguments != null ? arguments : new KeymasterArguments();
             entropy = entropy != null ? entropy : new byte[0];
+            input = input != null ? input : new byte[0];
             signature = signature != null ? signature : new byte[0];
-            int errorCode = mBinder.finish(promise, token, arguments, signature, entropy);
+            int errorCode = mBinder.finish(promise, token, arguments, input, signature, entropy);
             if (errorCode == NO_ERROR) {
                 return promise.getFuture().get();
             } else {
@@ -948,7 +948,7 @@ public class KeyStore {
     }
 
     public OperationResult finish(IBinder token, KeymasterArguments arguments, byte[] signature) {
-        return finish(token, arguments, signature, null);
+        return finish(token, arguments, null, signature, null);
     }
 
     private class KeystoreResultPromise

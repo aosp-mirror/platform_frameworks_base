@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -116,9 +117,15 @@ public final class SQLiteDebug {
      * @see #nativeGetPagerStats(PagerStats)
      */
     public static class PagerStats {
+
+        @UnsupportedAppUsage
+        public PagerStats() {
+        }
+
         /** the current amount of memory checked out by sqlite using sqlite3_malloc().
          * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
          */
+        @UnsupportedAppUsage
         public int memoryUsed;
 
         /** the number of bytes of page cache allocation which could not be sattisfied by the
@@ -128,16 +135,19 @@ public final class SQLiteDebug {
          * that overflowed because no space was left in the page cache.
          * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
          */
+        @UnsupportedAppUsage
         public int pageCacheOverflow;
 
         /** records the largest memory allocation request handed to sqlite3.
          * documented at http://www.sqlite.org/c3ref/c_status_malloc_size.html
          */
+        @UnsupportedAppUsage
         public int largestMemAlloc;
 
         /** a list of {@link DbStats} - one for each main database opened by the applications
          * running on the android device
          */
+        @UnsupportedAppUsage
         public ArrayList<DbStats> dbStats;
     }
 
@@ -146,16 +156,20 @@ public final class SQLiteDebug {
      */
     public static class DbStats {
         /** name of the database */
+        @UnsupportedAppUsage
         public String dbName;
 
         /** the page size for the database */
+        @UnsupportedAppUsage
         public long pageSize;
 
         /** the database size */
+        @UnsupportedAppUsage
         public long dbSize;
 
         /**
          * Number of lookaside slots: http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html */
+        @UnsupportedAppUsage
         public int lookaside;
 
         /** statement cache stats: hits/misses/cachesize */
@@ -175,6 +189,7 @@ public final class SQLiteDebug {
      * return all pager and database stats for the current process.
      * @return {@link PagerStats}
      */
+    @UnsupportedAppUsage
     public static PagerStats getDatabaseInfo() {
         PagerStats stats = new PagerStats();
         nativeGetPagerStats(stats);

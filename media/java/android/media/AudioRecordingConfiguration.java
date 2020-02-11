@@ -19,7 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.media.audiofx.AudioEffect;
 import android.os.Parcel;
 import android.os.Parcelable;

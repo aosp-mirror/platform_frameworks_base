@@ -1,3 +1,18 @@
 #!/system/bin/sh
+
+if [ "x$1" == "xdata" ]; then
+    if [ "x$2" == "xenable" ]; then
+        exec cmd phone data enable
+    elif [ "x$2" == "xdisable" ]; then
+        exec cmd phone data disable
+    else
+        echo "Enable/Disable Mobile Data Connectivity"
+        echo ""
+        echo "usage: svc data [enable|disable]"
+        echo ""
+    fi
+    exit 1
+fi
+
 export CLASSPATH=/system/framework/svc.jar
 exec app_process /system/bin com.android.commands.svc.Svc "$@"

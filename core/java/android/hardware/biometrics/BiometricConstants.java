@@ -16,8 +16,8 @@
 
 package android.hardware.biometrics;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
+import android.compat.annotation.UnsupportedAppUsage;
 
 
 /**

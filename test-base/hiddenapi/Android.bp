@@ -25,5 +25,8 @@ java_library {
 
     srcs: ["src/**/*.java"],
 
-    libs: ["android.test.base"],
+    libs: [
+        "android.test.base",
+        "unsupportedappusage",
+    ],
 }

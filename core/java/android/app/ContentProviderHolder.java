@@ -16,7 +16,7 @@
 
 package android.app;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.pm.ProviderInfo;

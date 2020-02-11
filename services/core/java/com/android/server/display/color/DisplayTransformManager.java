@@ -26,6 +26,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -76,6 +77,8 @@ public class DisplayTransformManager {
 
     @VisibleForTesting
     static final String PERSISTENT_PROPERTY_SATURATION = "persist.sys.sf.color_saturation";
+    @VisibleForTesting
+    static final String PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE = "persist.sys.sf.color_mode";
     @VisibleForTesting
     static final String PERSISTENT_PROPERTY_DISPLAY_COLOR = "persist.sys.sf.native_mode";
 
@@ -251,23 +254,24 @@ public class DisplayTransformManager {
     /**
      * Sets color mode and updates night display transform values.
      */
-    public boolean setColorMode(int colorMode, float[] nightDisplayMatrix) {
+    public boolean setColorMode(int colorMode, float[] nightDisplayMatrix,
+            int compositionColorMode) {
         if (colorMode == ColorDisplayManager.COLOR_MODE_NATURAL) {
             applySaturation(COLOR_SATURATION_NATURAL);
-            setDisplayColor(DISPLAY_COLOR_MANAGED);
+            setDisplayColor(DISPLAY_COLOR_MANAGED, compositionColorMode);
         } else if (colorMode == ColorDisplayManager.COLOR_MODE_BOOSTED) {
             applySaturation(COLOR_SATURATION_BOOSTED);
-            setDisplayColor(DISPLAY_COLOR_MANAGED);
+            setDisplayColor(DISPLAY_COLOR_MANAGED, compositionColorMode);
         } else if (colorMode == ColorDisplayManager.COLOR_MODE_SATURATED) {
             applySaturation(COLOR_SATURATION_NATURAL);
-            setDisplayColor(DISPLAY_COLOR_UNMANAGED);
+            setDisplayColor(DISPLAY_COLOR_UNMANAGED, compositionColorMode);
         } else if (colorMode == ColorDisplayManager.COLOR_MODE_AUTOMATIC) {
             applySaturation(COLOR_SATURATION_NATURAL);
-            setDisplayColor(DISPLAY_COLOR_ENHANCED);
+            setDisplayColor(DISPLAY_COLOR_ENHANCED, compositionColorMode);
         } else if (colorMode >= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MIN
                 && colorMode <= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MAX) {
             applySaturation(COLOR_SATURATION_NATURAL);
-            setDisplayColor(colorMode);
+            setDisplayColor(colorMode, compositionColorMode);
         }
 
         setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, nightDisplayMatrix);
@@ -323,13 +327,21 @@ public class DisplayTransformManager {
     /**
      * Toggles native mode on/off in SurfaceFlinger.
      */
-    private void setDisplayColor(int color) {
+    private void setDisplayColor(int color, int compositionColorMode) {
         SystemProperties.set(PERSISTENT_PROPERTY_DISPLAY_COLOR, Integer.toString(color));
+        if (compositionColorMode != Display.COLOR_MODE_INVALID) {
+            SystemProperties.set(PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE,
+                Integer.toString(compositionColorMode));
+        }
+
         final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
         if (flinger != null) {
             final Parcel data = Parcel.obtain();
             data.writeInterfaceToken("android.ui.ISurfaceComposer");
             data.writeInt(color);
+            if (compositionColorMode != Display.COLOR_MODE_INVALID) {
+                data.writeInt(compositionColorMode);
+            }
             try {
                 flinger.transact(SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR, data, null, 0);
             } catch (RemoteException ex) {

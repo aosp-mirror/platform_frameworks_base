@@ -32,7 +32,7 @@
     <color name="system_bar_background_opaque">#ff172026</color>
 
     <color name="status_bar_background_color">#33000000</color>
-    <drawable name="system_bar_background">@android:color/transparent</drawable>
+    <drawable name="system_bar_background">@color/status_bar_background_color</drawable>
 
     <!-- The background color of the notification shade -->
     <color name="notification_shade_background_color">#DD000000</color>

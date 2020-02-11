@@ -18,7 +18,7 @@ package android.content;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
@@ -60,9 +60,7 @@ import java.util.Set;
  * multiple possible matching values (via {@link #addAction},
  * {@link #addDataType}, {@link #addDataScheme}, {@link #addDataSchemeSpecificPart},
  * {@link #addDataAuthority}, {@link #addDataPath}, and {@link #addCategory}, respectively).
- * For actions, the field
- * will not be tested if no values have been given (treating it as a wildcard);
- * if no data characteristics are specified, however, then the filter will
+ * For actions, if no data characteristics are specified, then the filter will
  * only match intents that contain no data.
  *
  * <p>The data characteristic is

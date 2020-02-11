@@ -16,12 +16,11 @@
 
 package android.hardware;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-
 import java.nio.ByteBuffer;
 
 /**

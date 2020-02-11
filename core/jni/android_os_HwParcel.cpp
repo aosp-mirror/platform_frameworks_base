@@ -20,6 +20,7 @@
 
 #include "android_os_HwParcel.h"
 
+#include "android_os_HidlMemory.h"
 #include "android_os_HwBinder.h"
 #include "android_os_HwBlob.h"
 #include "android_os_NativeHandle.h"
@@ -27,6 +28,8 @@
 
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <hidl/HidlBinderSupport.h>
+#include <hidl/HidlSupport.h>
 #include <hidl/HidlTransportSupport.h>
 #include <hidl/Status.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -650,6 +653,36 @@ static void JHwParcel_native_writeStrongBinder(
     signalExceptionForError(env, err);
 }
 
+static void JHwParcel_native_writeHidlMemory(
+    JNIEnv *env, jobject thiz, jobject jmem) {
+
+    if (jmem == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", nullptr);
+        return;
+    }
+
+    status_t err = OK;
+
+    // Convert the Java object to its C++ counterpart.
+    const hardware::hidl_memory* cmem = JHidlMemory::fromJava(env, jmem);
+    if (cmem == nullptr) {
+        err = BAD_VALUE;
+    }
+
+    if (err == OK) {
+        // Write it to the parcel.
+        hardware::Parcel* parcel =
+            JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+        size_t parentHandle;
+        err = parcel->writeBuffer(cmem, sizeof(*cmem), &parentHandle);
+        if (err == OK) {
+            err = hardware::writeEmbeddedToParcel(*cmem, parcel, parentHandle, 0);
+        }
+    }
+    signalExceptionForError(env, err);
+}
+
 static jstring MakeStringObjFromHidlString(JNIEnv *env, const hidl_string &s) {
     String16 utf16String(s.c_str(), s.size());
 
@@ -877,6 +910,74 @@ static jobjectArray JHwParcel_native_readNativeHandleVector(
     return objArray;
 }
 
+static status_t readEmbeddedHidlMemory(JNIEnv* env,
+                                       hardware::Parcel* parcel,
+                                       const hardware::hidl_memory& mem,
+                                       size_t parentHandle,
+                                       size_t parentOffset,
+                                       jobject* result) {
+    status_t err = hardware::readEmbeddedFromParcel(mem,
+                                                    *parcel,
+                                                    parentHandle,
+                                                    parentOffset);
+    if (err == OK) {
+        // Convert to Java.
+        *result = JHidlMemory::toJava(env, mem);
+        if (*result == nullptr) {
+            err = BAD_VALUE;
+        }
+    }
+    return err;
+}
+
+static jobject JHwParcel_native_readHidlMemory(
+        JNIEnv* env, jobject thiz) {
+    hardware::Parcel* parcel =
+            JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    jobject result = nullptr;
+
+    const hardware::hidl_memory* mem;
+    size_t parentHandle;
+
+    status_t err = parcel->readBuffer(sizeof(*mem),
+                                      &parentHandle,
+                                      reinterpret_cast<const void**>(&mem));
+    if (err == OK) {
+        err = readEmbeddedHidlMemory(env,
+                                     parcel,
+                                     *mem,
+                                     parentHandle,
+                                     0,
+                                     &result);
+    }
+
+    signalExceptionForError(env, err);
+    return result;
+}
+
+static jobject JHwParcel_native_readEmbeddedHidlMemory(
+        JNIEnv* env,
+        jobject thiz,
+        jlong fieldHandle,
+        jlong parentHandle,
+        jlong offset) {
+    hardware::Parcel* parcel =
+            JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    jobject result = nullptr;
+    const hardware::hidl_memory* mem =
+            reinterpret_cast<const hardware::hidl_memory*>(fieldHandle);
+    status_t err = readEmbeddedHidlMemory(env,
+                                          parcel,
+                                          *mem,
+                                          parentHandle,
+                                          offset,
+                                          &result);
+    signalExceptionForError(env, err);
+    return result;
+}
+
 static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
     hardware::Parcel *parcel =
         JHwParcel::GetNativeContext(env, thiz)->getParcel();
@@ -1075,6 +1176,14 @@ static JNINativeMethod gMethods[] = {
     { "release", "()V",
         (void *)JHwParcel_native_release },
 
+    {"writeHidlMemory", "(L" PACKAGE_PATH "/HidlMemory;)V",
+     (void*) JHwParcel_native_writeHidlMemory},
+
+    {"readHidlMemory", "()L" PACKAGE_PATH "/HidlMemory;",
+     (void*) JHwParcel_native_readHidlMemory},
+
+    {"readEmbeddedHidlMemory", "(JJJ)L" PACKAGE_PATH "/HidlMemory;",
+     (void*) JHwParcel_native_readEmbeddedHidlMemory},
 };
 
 namespace android {

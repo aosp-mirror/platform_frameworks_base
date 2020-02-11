@@ -16,7 +16,7 @@
 package android.hardware.location;
 
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.location.Location;
 import android.os.Build;
 import android.os.RemoteException;

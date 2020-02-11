@@ -20,12 +20,13 @@ import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.service.dreams.Sandman;
 import android.util.ArrayMap;
@@ -605,6 +606,13 @@ public final class PowerManager {
     public static final String REBOOT_SAFE_MODE = "safemode";
 
     /**
+     * The 'reason' value used for rebooting userspace.
+     * @hide
+     */
+    @SystemApi
+    public static final String REBOOT_USERSPACE = "userspace";
+
+    /**
      * The 'reason' value used when rebooting the device without turning on the screen.
      * @hide
      */
@@ -824,6 +832,7 @@ public final class PowerManager {
     final Context mContext;
     @UnsupportedAppUsage
     final IPowerManager mService;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final Handler mHandler;
 
     IThermalService mThermalService;
@@ -1382,6 +1391,14 @@ public final class PowerManager {
     }
 
     /**
+     * Returns {@code true} if this device supports rebooting userspace.
+     */
+    // TODO(b/138605180): add link to documentation once it's ready.
+    public boolean isRebootingUserspaceSupported() {
+        return SystemProperties.getBoolean("ro.init.userspace_reboot.is_supported", false);
+    }
+
+    /**
      * Reboot the device.  Will not return if the reboot is successful.
      * <p>
      * Requires the {@link android.Manifest.permission#REBOOT} permission.
@@ -1389,8 +1406,15 @@ public final class PowerManager {
      *
      * @param reason code to pass to the kernel (e.g., "recovery") to
      *               request special boot modes, or null.
+     * @throws UnsupportedOperationException if userspace reboot was requested on a device that
+     *                                       doesn't support it.
      */
-    public void reboot(String reason) {
+    @RequiresPermission(permission.REBOOT)
+    public void reboot(@Nullable String reason) {
+        if (REBOOT_USERSPACE.equals(reason) && !isRebootingUserspaceSupported()) {
+            throw new UnsupportedOperationException(
+                    "Attempted userspace reboot on a device that doesn't support it");
+        }
         try {
             mService.reboot(false, reason, true);
         } catch (RemoteException e) {
@@ -1405,6 +1429,7 @@ public final class PowerManager {
      * </p>
      * @hide
      */
+    @RequiresPermission(permission.REBOOT)
     public void rebootSafeMode() {
         try {
             mService.rebootSafeMode(false, true);

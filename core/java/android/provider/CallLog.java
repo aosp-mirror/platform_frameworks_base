@@ -17,7 +17,7 @@
 
 package android.provider;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -35,15 +35,13 @@ import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
+import android.telecom.CallerInfo;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
-
-import com.android.internal.telephony.CallerInfo;
-import com.android.internal.telephony.PhoneConstants;
 
 import java.util.List;
 
@@ -227,12 +225,15 @@ public class CallLog {
 
         /**
          * Indicates the call underwent Assisted Dialing.
-         * @hide
+         * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
          */
         public static final int FEATURES_ASSISTED_DIALING_USED = 1 << 4;
 
         /** Call was on RTT at some point */
         public static final int FEATURES_RTT = 1 << 5;
+
+        /** Call was VoLTE */
+        public static final int FEATURES_VOLTE = 1 << 6;
 
         /**
          * The phone number as the user entered it.
@@ -610,7 +611,7 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
-         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
@@ -645,7 +646,7 @@ public class CallLog {
          * @param number the phone number to be added to the calls db
          * @param viaNumber the secondary number that the incoming call received with. If the
          *       call was received with the SIM assigned number, then this field must be ''.
-         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
@@ -686,7 +687,7 @@ public class CallLog {
          *        if it was outgoing. Otherwise it is ''.
          * @param viaNumber the secondary number that the incoming call received with. If the
          *        call was received with the SIM assigned number, then this field must be ''.
-         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
@@ -728,10 +729,11 @@ public class CallLog {
             String accountAddress = getLogAccountAddress(context, accountHandle);
 
             int numberPresentation = getLogNumberPresentation(number, presentation);
+            String name = (ci != null) ? ci.getName() : "";
             if (numberPresentation != PRESENTATION_ALLOWED) {
                 number = "";
                 if (ci != null) {
-                    ci.name = "";
+                    name = "";
                 }
             }
 
@@ -760,9 +762,7 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
-            if ((ci != null) && (ci.name != null)) {
-                values.put(CACHED_NAME, ci.name);
-            }
+            values.put(CACHED_NAME, name);
             values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
             if (callType == MISSED_TYPE) {
@@ -773,7 +773,7 @@ public class CallLog {
             values.put(CALL_SCREENING_APP_NAME, charSequenceToString(callScreeningAppName));
             values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
 
-            if ((ci != null) && (ci.contactIdOrZero > 0)) {
+            if ((ci != null) && (ci.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other
                 // contacts may have the same number.
@@ -787,17 +787,18 @@ public class CallLog {
                     cursor = resolver.query(Phone.CONTENT_URI,
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =? AND " + Phone.NORMALIZED_NUMBER + " =?",
-                            new String[] { String.valueOf(ci.contactIdOrZero),
+                            new String[] { String.valueOf(ci.getContactId()),
                                     normalizedPhoneNumber},
                             null);
                 } else {
-                    final String phoneNumber = ci.phoneNumber != null ? ci.phoneNumber : number;
+                    final String phoneNumber = ci.getPhoneNumber() != null
+                        ? ci.getPhoneNumber() : number;
                     cursor = resolver.query(
                             Uri.withAppendedPath(Callable.CONTENT_FILTER_URI,
                                     Uri.encode(phoneNumber)),
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =?",
-                            new String[] { String.valueOf(ci.contactIdOrZero) },
+                            new String[] { String.valueOf(ci.getContactId()) },
                             null);
                 }
 
@@ -1048,22 +1049,22 @@ public class CallLog {
 
         /**
          * Remap network specified number presentation types
-         * PhoneConstants.PRESENTATION_xxx to calllog number presentation types
+         * TelecomManager.PRESENTATION_xxx to calllog number presentation types
          * Calls.PRESENTATION_xxx, in order to insulate the persistent calllog
          * from any future radio changes.
          * If the number field is empty set the presentation type to Unknown.
          */
         private static int getLogNumberPresentation(String number, int presentation) {
-            if (presentation == PhoneConstants.PRESENTATION_RESTRICTED) {
+            if (presentation == TelecomManager.PRESENTATION_RESTRICTED) {
                 return presentation;
             }
 
-            if (presentation == PhoneConstants.PRESENTATION_PAYPHONE) {
+            if (presentation == TelecomManager.PRESENTATION_PAYPHONE) {
                 return presentation;
             }
 
             if (TextUtils.isEmpty(number)
-                    || presentation == PhoneConstants.PRESENTATION_UNKNOWN) {
+                    || presentation == TelecomManager.PRESENTATION_UNKNOWN) {
                 return PRESENTATION_UNKNOWN;
             }
 

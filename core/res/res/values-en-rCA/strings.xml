@@ -1294,10 +1294,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap to see all networks"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Connect"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"All networks"</string>
-    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Connect to Wi‑Fi networks?"</string>
+    <string name="wifi_suggestion_content" msgid="5883181205841582873">"Suggested by <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Yes"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"No"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi will turn on automatically"</string>
@@ -1522,10 +1520,6 @@
     <string name="submit" msgid="1602335572089911941">"Submit"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Driving app is running"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Tap to exit driving app."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering or hotspot active"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"Tap to set up."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering is disabled"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Contact your admin for details"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Back"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Next"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Skip"</string>

@@ -18,6 +18,7 @@ package com.android.settingslib.net;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +38,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
@@ -70,18 +70,13 @@ public class DataUsageUtilsTest {
         when(mContext.getSystemService(SubscriptionManager.class)).thenReturn(mSubscriptionManager);
         when(mTelephonyManager.getSubscriberId(SUB_ID)).thenReturn(SUBSCRIBER_ID);
         when(mTelephonyManager.getSubscriberId(SUB_ID_2)).thenReturn(SUBSCRIBER_ID_2);
-        when(mInfo1.getSubscriptionId()).thenReturn(SUB_ID);
-        when(mInfo2.getSubscriptionId()).thenReturn(SUB_ID_2);
-
-        mInfos = new ArrayList<>();
-        mInfos.add(mInfo1);
-        mInfos.add(mInfo2);
-        when(mSubscriptionManager.getSubscriptionsInGroup(mParcelUuid)).thenReturn(mInfos);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
+        when(mSubscriptionManager.isActiveSubId(anyInt())).thenReturn(true);
     }
 
     @Test
     public void getMobileTemplate_infoNull_returnMobileAll() {
-        when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(null);
+        when(mSubscriptionManager.isActiveSubId(SUB_ID)).thenReturn(false);
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
         assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
@@ -92,6 +87,8 @@ public class DataUsageUtilsTest {
     public void getMobileTemplate_groupUuidNull_returnMobileAll() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(null);
+        when(mTelephonyManager.getMergedSubscriberIdsFromGroup())
+                .thenReturn(new String[] {SUBSCRIBER_ID});
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
         assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();
@@ -102,6 +99,8 @@ public class DataUsageUtilsTest {
     public void getMobileTemplate_groupUuidExist_returnMobileMerged() {
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(mInfo1);
         when(mInfo1.getGroupUuid()).thenReturn(mParcelUuid);
+        when(mTelephonyManager.getMergedSubscriberIdsFromGroup())
+                .thenReturn(new String[] {SUBSCRIBER_ID, SUBSCRIBER_ID_2});
 
         final NetworkTemplate networkTemplate = DataUsageUtils.getMobileTemplate(mContext, SUB_ID);
         assertThat(networkTemplate.matchesSubscriberId(SUBSCRIBER_ID)).isTrue();

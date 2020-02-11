@@ -16,23 +16,33 @@
 
 package com.android.internal.telephony;
 
+import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
+import android.telephony.SmsMessage;
+import android.text.TextUtils;
+import android.util.Patterns;
+
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-import com.android.internal.telephony.SmsConstants;
-import com.android.internal.telephony.SmsHeader;
+
 import java.text.BreakIterator;
 import java.util.Arrays;
-
-import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
-import android.provider.Telephony;
-import android.telephony.SmsMessage;
-import android.text.Emoji;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Base class declaring the specific methods and members for SmsMessage.
  * {@hide}
  */
 public abstract class SmsMessageBase {
+
+    // Copied from Telephony.Mms.NAME_ADDR_EMAIL_PATTERN
+    public static final Pattern NAME_ADDR_EMAIL_PATTERN =
+            Pattern.compile("\\s*(\"[^\"]*\"|[^<>\"]+)\\s*<([^<>]+)>\\s*");
+
+    @UnsupportedAppUsage
+    public SmsMessageBase() {
+    }
+
     /** {@hide} The address of the SMSC. May be null */
     @UnsupportedAppUsage
     protected String mScAddress;
@@ -353,6 +363,31 @@ public abstract class SmsMessageBase {
         }
     }
 
+    private static String extractAddrSpec(String messageHeader) {
+        Matcher match = NAME_ADDR_EMAIL_PATTERN.matcher(messageHeader);
+
+        if (match.matches()) {
+            return match.group(2);
+        }
+        return messageHeader;
+    }
+
+    /**
+     * Returns true if the message header string indicates that the message is from a email address.
+     *
+     * @param messageHeader message header
+     * @return {@code true} if it's a message from an email address, {@code false} otherwise.
+     */
+    public static boolean isEmailAddress(String messageHeader) {
+        if (TextUtils.isEmpty(messageHeader)) {
+            return false;
+        }
+
+        String s = extractAddrSpec(messageHeader);
+        Matcher match = Patterns.EMAIL_ADDRESS.matcher(s);
+        return match.matches();
+    }
+
     /**
      * Try to parse this message as an email gateway message
      * There are two ways specified in TS 23.040 Section 3.8 :
@@ -373,11 +408,11 @@ public abstract class SmsMessageBase {
          * -or-
          * 2. [x@y][ ]/[body]
          */
-         String[] parts = mMessageBody.split("( /)|( )", 2);
-         if (parts.length < 2) return;
-         mEmailFrom = parts[0];
-         mEmailBody = parts[1];
-         mIsEmail = Telephony.Mms.isEmailAddress(mEmailFrom);
+        String[] parts = mMessageBody.split("( /)|( )", 2);
+        if (parts.length < 2) return;
+        mEmailFrom = parts[0];
+        mEmailBody = parts[1];
+        mIsEmail = isEmailAddress(mEmailFrom);
     }
 
     /**
@@ -400,9 +435,9 @@ public abstract class SmsMessageBase {
             if (!breakIterator.isBoundary(nextPos)) {
                 int breakPos = breakIterator.preceding(nextPos);
                 while (breakPos + 4 <= nextPos
-                        && Emoji.isRegionalIndicatorSymbol(
+                        && isRegionalIndicatorSymbol(
                             Character.codePointAt(msgBody, breakPos))
-                        && Emoji.isRegionalIndicatorSymbol(
+                        && isRegionalIndicatorSymbol(
                             Character.codePointAt(msgBody, breakPos + 2))) {
                     // skip forward over flags (pairs of Regional Indicator Symbol)
                     breakPos += 4;
@@ -416,6 +451,11 @@ public abstract class SmsMessageBase {
             }
         }
         return nextPos;
+    }
+
+    private static boolean isRegionalIndicatorSymbol(int codePoint) {
+        /** Based on http://unicode.org/Public/emoji/3.0/emoji-sequences.txt */
+        return 0x1F1E6 <= codePoint && codePoint <= 0x1F1FF;
     }
 
     /**

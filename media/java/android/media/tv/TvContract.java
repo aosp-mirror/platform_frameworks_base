@@ -1109,6 +1109,24 @@ public final class TvContract {
          * <p>Type: TEXT
          */
         String COLUMN_SERIES_ID = "series_id";
+
+        /**
+         * The split ID of this TV program for multi-part content, as a URI.
+         *
+         * <p>A content may consist of multiple programs within the same channel or over several
+         * channels. For example, a film might be divided into two parts interrupted by a news in
+         * the middle or a longer sport event might be split into several parts over several
+         * channels. The split ID is used to identify all the programs in the same multi-part
+         * content. Suitable URIs include
+         * <ul>
+         * <li>{@code crid://<CRIDauthority>/<data>#<IMI>} from ETSI TS 102 323
+         * </ul>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        String COLUMN_SPLIT_ID = "split_id";
     }
 
     /**
@@ -1677,6 +1695,7 @@ public final class TvContract {
                 TYPE_ATSC_T,
                 TYPE_ATSC_C,
                 TYPE_ATSC_M_H,
+                TYPE_ATSC3_T,
                 TYPE_ISDB_T,
                 TYPE_ISDB_TB,
                 TYPE_ISDB_S,
@@ -1799,6 +1818,13 @@ public final class TvContract {
          * @see #COLUMN_TYPE
          */
         public static final String TYPE_ATSC_M_H = "TYPE_ATSC_M_H";
+
+        /**
+         * The channel type for ATSC3.0 (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
+        public static final String TYPE_ATSC3_T = "TYPE_ATSC3_T";
 
         /**
          * The channel type for ISDB-T (terrestrial).
@@ -2022,6 +2048,7 @@ public final class TvContract {
          * {@link #TYPE_ATSC_C},
          * {@link #TYPE_ATSC_M_H},
          * {@link #TYPE_ATSC_T},
+         * {@link #TYPE_ATSC3_T},
          * {@link #TYPE_CMMB},
          * {@link #TYPE_DTMB},
          * {@link #TYPE_DVB_C},
@@ -2407,6 +2434,22 @@ public final class TvContract {
          */
         public static final String COLUMN_TRANSIENT = "transient";
 
+        /**
+         * The global content ID of this TV channel, as a URI.
+         *
+         * <p>A globally unique URI that identifies this TV channel, if applicable. Suitable URIs
+         * include
+         * <ul>
+         * <li>{@code globalServiceId} from ATSC A/331. ex {@code https://doi.org/10.5239/7E4E-B472}
+         * <li>Other broadcast ID provider. ex {@code http://example.com/tv_channel/1234}
+         * </ul>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_GLOBAL_CONTENT_ID = "global_content_id";
+
         private Channels() {}
 
         /**
@@ -2561,6 +2604,37 @@ public final class TvContract {
          * <p>Type: INTEGER (boolean)
          */
         public static final String COLUMN_RECORDING_PROHIBITED = "recording_prohibited";
+
+        /**
+         * The event ID of this TV program.
+         *
+         * <p>It is used to identify the current TV program in the same channel, if applicable.
+         * Use the same coding for {@code event_id} in the underlying broadcast standard if it
+         * is defined there (e.g. ATSC A/65, ETSI EN 300 468 and ARIB STD-B10).
+         *
+         * <p>This is a required field only if the underlying broadcast standard defines the same
+         * name field. Otherwise, leave empty.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String COLUMN_EVENT_ID = "event_id";
+
+        /**
+         * The global content ID of this TV program, as a URI.
+         *
+         * <p>A globally unique ID that identifies this TV program, if applicable. Suitable URIs
+         * include
+         * <ul>
+         * <li>{@code crid://<CRIDauthority>/<data>} from ETSI TS 102 323
+         * <li>{@code globalContentId} from ATSC A/332
+         * <li>Other broadcast ID provider. ex {@code http://example.com/tv_program/1234}
+         * </ul>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_GLOBAL_CONTENT_ID = "global_content_id";
 
         private Programs() {}
 

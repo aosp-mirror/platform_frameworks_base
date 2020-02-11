@@ -21,13 +21,19 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Car specific notification entry manager that does nothing when adding a notification.
  *
  * <p> This is because system UI notifications are disabled and we have a different implementation.
  * Please see {@link com.android.car.notification}.
  */
+@Singleton
 public class CarNotificationEntryManager extends NotificationEntryManager {
+
+    @Inject
     public CarNotificationEntryManager(Context context) {
         super(context);
     }

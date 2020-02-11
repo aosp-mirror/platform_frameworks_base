@@ -31,7 +31,7 @@
 
 package org.apache.http.conn.ssl;
 
-import java.util.regex.Pattern;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.IOException;
 import java.security.cert.Certificate;
@@ -43,10 +43,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
-import android.annotation.UnsupportedAppUsage;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;

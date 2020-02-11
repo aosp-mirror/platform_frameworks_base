@@ -20,6 +20,8 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.text.format.DateFormat;
 import android.util.FloatProperty;
+import android.util.Log;
+import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.GuardedBy;
@@ -77,6 +79,16 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
 
     /**
+     * Current SystemUiVisibility
+     */
+    private int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+
+    /**
+     * If the device is currently pulsing (AOD2).
+     */
+    private boolean mPulsing;
+
+    /**
      * If the device is currently dozing or not.
      */
     private boolean mIsDozing;
@@ -124,6 +136,11 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
 
         // Record the to-be mState and mLastState
         recordHistoricalState(state, mState);
+
+        // b/139259891
+        if (mState == StatusBarState.SHADE && state == StatusBarState.SHADE_LOCKED) {
+            Log.e(TAG, "Invalid state transition: SHADE -> SHADE_LOCKED", new Throwable());
+        }
 
         synchronized (mListeners) {
             for (RankedListener rl : new ArrayList<>(mListeners)) {
@@ -290,6 +307,30 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     @Override
     public boolean isKeyguardRequested() {
         return mKeyguardRequested;
+    }
+
+    @Override
+    public void setSystemUiVisibility(int visibility) {
+        if (mSystemUiVisibility != visibility) {
+            mSystemUiVisibility = visibility;
+            synchronized (mListeners) {
+                for (RankedListener rl : new ArrayList<>(mListeners)) {
+                    rl.mListener.onSystemUiVisibilityChanged(mSystemUiVisibility);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setPulsing(boolean pulsing) {
+        if (mPulsing != pulsing) {
+            mPulsing = pulsing;
+            synchronized (mListeners) {
+                for (RankedListener rl : new ArrayList<>(mListeners)) {
+                    rl.mListener.onPulsingChanged(pulsing);
+                }
+            }
+        }
     }
 
     /**

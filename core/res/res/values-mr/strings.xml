@@ -1523,10 +1523,6 @@
     <string name="submit" msgid="1602335572089911941">"सबमिट करा"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ड्रायव्हिंग अ‍ॅप चालू आहे"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ड्रायव्हिंग अॅपमधून बाहेर पाडण्यासाठी टॅप करा."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"टेदरिंग किंवा हॉटस्पॉट सक्रिय"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"सेट करण्यासाठी टॅप करा."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"टेदरिंग बंद आहे"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"तपशीलांसाठी तुमच्या प्रशासकाशी संपर्क साधा"</string>
     <string name="back_button_label" msgid="2300470004503343439">"मागे"</string>
     <string name="next_button_label" msgid="1080555104677992408">"पुढील"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"वगळा"</string>

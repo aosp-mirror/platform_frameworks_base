@@ -1,5 +1,12 @@
+filegroup {
+    name: "services.coverage-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.coverage",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.coverage-sources"],
     libs: ["jacocoagent"],
 }

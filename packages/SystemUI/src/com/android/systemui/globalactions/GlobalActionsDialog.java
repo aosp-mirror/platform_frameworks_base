@@ -95,6 +95,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.EmergencyDialerConstants;
@@ -613,7 +614,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mScreenshotHelper.takeScreenshot(1, true, true, mHandler);
+                    mScreenshotHelper.takeScreenshot(1, true, true, mHandler, null);
                     MetricsLogger.action(mContext,
                             MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
                 }
@@ -1144,13 +1145,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             TextView messageView = (TextView) v.findViewById(R.id.message);
             messageView.setSelected(true); // necessary for marquee to work
 
-            TextView statusView = (TextView) v.findViewById(R.id.status);
-            final String status = getStatus();
-            if (!TextUtils.isEmpty(status)) {
-                statusView.setText(status);
-            } else {
-                statusView.setVisibility(View.GONE);
-            }
             if (mIcon != null) {
                 icon.setImageDrawable(mIcon);
                 icon.setScaleType(ScaleType.CENTER_CROP);
@@ -1235,32 +1229,26 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 LayoutInflater inflater) {
             willCreate();
 
-            View v = inflater.inflate(R
-                    .layout.global_actions_item, parent, false);
+            View v = inflater.inflate(com.android.systemui.R
+                    .layout.global_actions_grid_item, parent, false);
 
             ImageView icon = (ImageView) v.findViewById(R.id.icon);
             TextView messageView = (TextView) v.findViewById(R.id.message);
-            TextView statusView = (TextView) v.findViewById(R.id.status);
             final boolean enabled = isEnabled();
+            boolean on = ((mState == State.On) || (mState == State.TurningOn));
 
             if (messageView != null) {
-                messageView.setText(mMessageResId);
+                messageView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
                 messageView.setEnabled(enabled);
                 messageView.setSelected(true); // necessary for marquee to work
             }
 
-            boolean on = ((mState == State.On) || (mState == State.TurningOn));
             if (icon != null) {
                 icon.setImageDrawable(context.getDrawable(
                         (on ? mEnabledIconResId : mDisabledIconResid)));
                 icon.setEnabled(enabled);
             }
 
-            if (statusView != null) {
-                statusView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
-                statusView.setVisibility(View.VISIBLE);
-                statusView.setEnabled(enabled);
-            }
             v.setEnabled(enabled);
 
             return v;
@@ -1515,6 +1503,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private boolean mShowing;
         private float mScrimAlpha;
         private ResetOrientationData mResetOrientationData;
+        private boolean mHadTopUi;
+        private final StatusBarWindowController mStatusBarWindowController;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin) {
@@ -1523,6 +1513,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mAdapter = adapter;
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
             mStatusBarService = Dependency.get(IStatusBarService.class);
+            mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
 
             // Window initialization
             Window window = getWindow();
@@ -1698,6 +1689,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void show() {
             super.show();
             mShowing = true;
+            mHadTopUi = mStatusBarWindowController.getForceHasTopUi();
+            mStatusBarWindowController.setForceHasTopUi(true);
             mBackgroundDrawable.setAlpha(0);
             mGlobalActionsLayout.setTranslationX(mGlobalActionsLayout.getAnimationOffsetX());
             mGlobalActionsLayout.setTranslationY(mGlobalActionsLayout.getAnimationOffsetY());
@@ -1730,7 +1723,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .translationX(mGlobalActionsLayout.getAnimationOffsetX())
                     .translationY(mGlobalActionsLayout.getAnimationOffsetY())
                     .setDuration(300)
-                    .withEndAction(super::dismiss)
+                    .withEndAction(this::completeDismiss)
                     .setInterpolator(new LogAccelerateInterpolator())
                     .setUpdateListener(animation -> {
                         int alpha = (int) ((1f - (Float) animation.getAnimatedValue())
@@ -1743,10 +1736,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         void dismissImmediately() {
-            super.dismiss();
             mShowing = false;
             dismissPanel();
             resetOrientation();
+            completeDismiss();
+        }
+
+        private void completeDismiss() {
+            mStatusBarWindowController.setForceHasTopUi(mHadTopUi);
+            super.dismiss();
         }
 
         private void dismissPanel() {

@@ -24,6 +24,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
+import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
@@ -348,7 +349,6 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.appop.AppOpsService;
-import com.android.server.compat.CompatConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
@@ -2411,7 +2411,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants = hasHandlerThread
                 ? new ActivityManagerConstants(mContext, this, mHandler) : null;
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
-        mProcessList.init(this, activeUids);
+        mPlatformCompat = null;
+        mProcessList.init(this, activeUids, mPlatformCompat);
         mLowMemDetector = null;
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
@@ -2432,7 +2433,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
         mFactoryTest = FACTORY_TEST_OFF;
-        mPlatformCompat = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2461,7 +2461,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mConstants = new ActivityManagerConstants(mContext, this, mHandler);
         final ActiveUids activeUids = new ActiveUids(this, true /* postChangesToAtm */);
-        mProcessList.init(this, activeUids);
+        mPlatformCompat = (PlatformCompat) ServiceManager.getService(
+                Context.PLATFORM_COMPAT_SERVICE);
+        mProcessList.init(this, activeUids, mPlatformCompat);
         mLowMemDetector = new LowMemDetector(this);
         mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids);
 
@@ -2568,9 +2570,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         };
 
         mHiddenApiBlacklist = new HiddenApiSettings(mHandler, mContext);
-
-        mPlatformCompat = (PlatformCompat) ServiceManager.getService(
-                Context.PLATFORM_COMPAT_SERVICE);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -5048,7 +5047,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
-            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
             if (mPlatformCompat != null) {
                 mPlatformCompat.resetReporting(app.info);
             }
@@ -5068,7 +5066,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        disabledCompatChanges);
+                        app.mDisabledCompatChanges);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -5078,7 +5076,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        disabledCompatChanges);
+                        app.mDisabledCompatChanges);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
@@ -5275,6 +5273,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Inform checkpointing systems of success
         try {
+            // This line is needed to CTS test for the correct exception handling
+            // See b/138952436#comment36 for context
+            Slog.i(TAG, "About to commit checkpoint");
             IStorageManager storageManager = PackageHelper.getStorageManager();
             storageManager.commitChanges();
         } catch (Exception e) {
@@ -7786,10 +7787,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 false /* mountExtStorageFull */, abiOverride);
     }
 
-    // TODO: Move to ProcessList?
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, boolean mountExtStorageFull, String abiOverride) {
+        return addAppLocked(info, customProcess, isolated, disableHiddenApiChecks,
+                false /* disableTestApiChecks */, mountExtStorageFull, abiOverride);
+    }
+
+    // TODO: Move to ProcessList?
+    @GuardedBy("this")
+    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
+            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
+            boolean mountExtStorageFull, String abiOverride) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -7824,7 +7833,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
-                    disableHiddenApiChecks, mountExtStorageFull, abiOverride);
+                    disableHiddenApiChecks, disableTestApiChecks, mountExtStorageFull, abiOverride);
         }
 
         return app;
@@ -8487,32 +8496,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
-        if (pid == Process.myPid()) {
-            Slog.wtf(TAG, "system can't run remote animation");
-            return;
-        }
-        synchronized (ActivityManagerService.this) {
-            final ProcessRecord pr;
-            synchronized (mPidsSelfLocked) {
-                pr = mPidsSelfLocked.get(pid);
-                if (pr == null) {
-                    Slog.w(TAG, "setRunningRemoteAnimation called on unknown pid: " + pid);
-                    return;
-                }
-            }
-            if (pr.runningRemoteAnimation == runningRemoteAnimation) {
-                return;
-            }
-            pr.runningRemoteAnimation = runningRemoteAnimation;
-            if (DEBUG_OOM_ADJ) {
-                Slog.i(TAG, "Setting runningRemoteAnimation=" + pr.runningRemoteAnimation
-                        + " for pid=" + pid);
-            }
-            updateOomAdjLocked(pr, true, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
-        }
-    }
-
     public final void enterSafeMode() {
         synchronized(this) {
             // It only makes sense to do this before the system is ready
@@ -9069,7 +9052,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                 Integer.toString(currentUserId), currentUserId);
-        mSystemServiceManager.startUser(currentUserId);
+
+        // On Automotive, at this point the system user has already been started and unlocked,
+        // and some of the tasks we do here have already been done. So skip those in that case.
+        // TODO(b/132262830): this workdound shouldn't be necessary once we move the
+        // headless-user start logic to UserManager-land
+        final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
+
+        if (bootingSystemUser) {
+            mSystemServiceManager.startUser(currentUserId);
+        }
 
         synchronized (this) {
             // Only start up encryption-aware persistent apps; once user is
@@ -9093,43 +9085,53 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw e.rethrowAsRuntimeException();
                 }
             }
-            mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+
+            if (bootingSystemUser) {
+                mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
+            }
 
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
 
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            long ident = Binder.clearCallingIdentity();
-            try {
-                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, null, 0, null, null, null, OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        currentUserId);
-                intent = new Intent(Intent.ACTION_USER_STARTING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
-                broadcastIntentLocked(null, null, intent,
-                        null, new IIntentReceiver.Stub() {
-                            @Override
-                            public void performReceive(Intent intent, int resultCode, String data,
-                                    Bundle extras, boolean ordered, boolean sticky, int sendingUser)
-                                    throws RemoteException {
-                            }
-                        }, 0, null, null,
-                        new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        UserHandle.USER_ALL);
-            } catch (Throwable t) {
-                Slog.wtf(TAG, "Failed sending first user broadcasts", t);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            if (bootingSystemUser) {
+                final int callingUid = Binder.getCallingUid();
+                final int callingPid = Binder.getCallingPid();
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                            | Intent.FLAG_RECEIVER_FOREGROUND);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, null, 0, null, null, null, OP_NONE,
+                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            currentUserId);
+                    intent = new Intent(Intent.ACTION_USER_STARTING);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, currentUserId);
+                    broadcastIntentLocked(null, null, intent,
+                            null, new IIntentReceiver.Stub() {
+                                @Override
+                                public void performReceive(Intent intent, int resultCode, String data,
+                                        Bundle extras, boolean ordered, boolean sticky, int sendingUser)
+                                        throws RemoteException {
+                                }
+                            }, 0, null, null,
+                            new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
+                            null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            UserHandle.USER_ALL);
+                } catch (Throwable t) {
+                    Slog.wtf(TAG, "Failed sending first user broadcasts", t);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            } else {
+                Slog.i(TAG, "Not sending multi-user broadcasts for non-system user "
+                        + currentUserId);
             }
             mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
-            mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+            if (bootingSystemUser) {
+                mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
+            }
 
             BinderInternal.nSetBinderProxyCountWatermarks(BINDER_PROXY_HIGH_WATERMARK,
                     BINDER_PROXY_LOW_WATERMARK);
@@ -12797,14 +12799,31 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println(totalPss - cachedPss);
                 }
             }
-            long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
+            long kernelUsed = memInfo.getKernelUsedSizeKb();
+            final long ionHeap = Debug.getIonHeapsSizeKb();
+            if (ionHeap > 0) {
+                final long ionMapped = Debug.getIonMappedSizeKb();
+                final long ionUnmapped = ionHeap - ionMapped;
+                final long ionPool = Debug.getIonPoolsSizeKb();
+                pw.print("      ION: ");
+                        pw.print(stringifyKBSize(ionHeap + ionPool));
+                        pw.print(" (");
+                        pw.print(stringifyKBSize(ionMapped));
+                        pw.print(" mapped + ");
+                        pw.print(stringifyKBSize(ionUnmapped));
+                        pw.print(" unmapped + ");
+                        pw.print(stringifyKBSize(ionPool));
+                        pw.println(" pools)");
+                kernelUsed += ionUnmapped;
+            }
+            final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                    - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
+                    - kernelUsed - memInfo.getZramTotalSizeKb();
             if (!opts.isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
-                        + memInfo.getKernelUsedSizeKb())); pw.print(" (");
+                        + kernelUsed)); pw.print(" (");
                 pw.print(stringifyKBSize(totalPss - cachedPss)); pw.print(" used pss + ");
-                pw.print(stringifyKBSize(memInfo.getKernelUsedSizeKb())); pw.print(" kernel)\n");
+                pw.print(stringifyKBSize(kernelUsed)); pw.print(" kernel)\n");
                 pw.print(" Lost RAM: "); pw.println(stringifyKBSize(lostRAM));
             } else {
                 pw.print("lostram,"); pw.println(lostRAM);
@@ -13523,14 +13542,25 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append(stringifyKBSize(cachedPss + memInfo.getCachedSizeKb()
                 + memInfo.getFreeSizeKb()));
         memInfoBuilder.append("\n");
+        long kernelUsed = memInfo.getKernelUsedSizeKb();
+        final long ionHeap = Debug.getIonHeapsSizeKb();
+        if (ionHeap > 0) {
+            final long ionMapped = Debug.getIonMappedSizeKb();
+            final long ionUnmapped = ionHeap - ionMapped;
+            final long ionPool = Debug.getIonPoolsSizeKb();
+            memInfoBuilder.append("       ION: ");
+            memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
+            memInfoBuilder.append("\n");
+            kernelUsed += ionUnmapped;
+        }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
-                                  totalPss - cachedPss + memInfo.getKernelUsedSizeKb()));
+                                  totalPss - cachedPss + kernelUsed));
         memInfoBuilder.append("\n");
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb()));
+                - kernelUsed - memInfo.getZramTotalSizeKb()));
         memInfoBuilder.append("\n");
         Slog.i(TAG, "Low on memory:");
         Slog.i(TAG, shortNativeBuilder.toString());
@@ -15021,7 +15051,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final int uid = getUidFromIntent(intent);
                             if (uid >= 0) {
                                 mBatteryStatsService.removeUid(uid);
-                                mAppOpsService.uidRemoved(uid);
+                                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                                    mAppOpsService.resetAllModes(UserHandle.getUserId(uid),
+                                            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME));
+                                } else {
+                                    mAppOpsService.uidRemoved(uid);
+                                }
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
@@ -15787,10 +15822,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
-            if (disableHiddenApiChecks) {
+            boolean disableTestApiChecks = disableHiddenApiChecks
+                    || (flags & INSTR_FLAG_DISABLE_TEST_API_CHECKS) != 0;
+            if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
             }
+
             final boolean mountExtStorageFull = isCallerShell()
                     && (flags & INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL) != 0;
 
@@ -15805,7 +15843,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
-                    mountExtStorageFull, abiOverride);
+                    disableTestApiChecks, mountExtStorageFull, abiOverride);
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
             activeInstr.mRunningProcesses.add(app);
@@ -17988,11 +18026,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return isUidActiveLocked(uid);
             }
-        }
-
-        @Override
-        public void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
-            ActivityManagerService.this.setRunningRemoteAnimation(pid, runningRemoteAnimation);
         }
 
         @Override

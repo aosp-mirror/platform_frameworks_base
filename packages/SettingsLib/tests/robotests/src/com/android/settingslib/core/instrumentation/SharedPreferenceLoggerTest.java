@@ -162,4 +162,33 @@ public class SharedPreferenceLoggerTest {
                 "tag/key:com.android.settings",
                 0);
     }
+
+    @Test
+    public void putString_shouldNotLogInitialPut() {
+        mSharedPrefLogger.logValue(TEST_KEY, "1");
+        mSharedPrefLogger.logValue(TEST_KEY, "2");
+        mSharedPrefLogger.logValue(TEST_KEY, "62");
+        mSharedPrefLogger.logValue(TEST_KEY, "0");
+
+        verify(mMetricsFeature, times(3)).action(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
+                eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_TAGGED_KEY),
+                anyInt());
+    }
+
+    @Test
+    public void putString_shouldNotLogAnyNonIntegers() {
+        mSharedPrefLogger.logValue(TEST_KEY, "string");
+        mSharedPrefLogger.logValue(TEST_KEY, "not an int");
+        mSharedPrefLogger.logValue(TEST_KEY, "1.234f");
+        mSharedPrefLogger.logValue(TEST_KEY, "4.2");
+        mSharedPrefLogger.logValue(TEST_KEY, "3.0");
+
+        verify(mMetricsFeature, times(0)).action(eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
+                eq(SettingsEnums.PAGE_UNKNOWN),
+                eq(TEST_TAGGED_KEY),
+                anyInt());
+    }
 }

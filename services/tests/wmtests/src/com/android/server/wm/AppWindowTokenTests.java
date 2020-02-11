@@ -504,6 +504,21 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(stackBounds, mToken.getAnimationBounds(STACK_CLIP_BEFORE_ANIM));
     }
 
+    @Test
+    public void testHasStartingWindow() {
+        final WindowManager.LayoutParams attrs =
+                new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING);
+        final WindowTestUtils.TestWindowState startingWindow = createWindowState(attrs, mToken);
+        mToken.startingDisplayed = true;
+        mToken.addWindow(startingWindow);
+        assertTrue("Starting window should be present", mToken.hasStartingWindow());
+        mToken.startingDisplayed = false;
+        assertTrue("Starting window should be present", mToken.hasStartingWindow());
+
+        mToken.removeChild(startingWindow);
+        assertFalse("Starting window should not be present", mToken.hasStartingWindow());
+    }
+
     private void assertHasStartingWindow(AppWindowToken atoken) {
         assertNotNull(atoken.startingSurface);
         assertNotNull(atoken.mStartingData);

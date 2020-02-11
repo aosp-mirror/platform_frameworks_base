@@ -16,7 +16,7 @@
 
 package android.location;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.SparseArray;
 

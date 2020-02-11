@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.app.Instrumentation;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -38,6 +42,7 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -47,6 +52,8 @@ import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.graph.SignalDrawable;
@@ -95,6 +102,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected SubscriptionDefaults mMockSubDefaults;
     protected DeviceProvisionedController mMockProvisionController;
     protected DeviceProvisionedListener mUserCallback;
+    protected Instrumentation mInstrumentation;
 
     protected int mSubId;
 
@@ -116,6 +124,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(R.string.cell_data_off_content_description, NO_DATA_STRING);
@@ -164,7 +173,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void setupNetworkController() {
         // For now just pretend to be the data sim, so we can test that too.
         mSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-        when(mMockTm.isDataCapable()).thenReturn(true);
+        when(mMockTm.isDataConnectionEnabled()).thenReturn(true);
         setDefaultSubId(mSubId);
         setSubscriptions(mSubId);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
@@ -181,6 +190,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void setDefaultSubId(int subId) {
         when(mMockSubDefaults.getDefaultDataSubId()).thenReturn(subId);
         when(mMockSubDefaults.getDefaultVoiceSubId()).thenReturn(subId);
+        when(mMockSubDefaults.getActiveDataSubId()).thenReturn(subId);
     }
 
     protected void setSubscriptions(int... subIds) {
@@ -227,6 +237,28 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         NetworkControllerImpl.Config.add5GIconMapping("connected:5g", mConfig);
     }
 
+    public void setupNr5GIconConfigurationForNotRestrictedRrcCon() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_con:5g", mConfig);
+    }
+
+    public void setupNr5GIconConfigurationForNotRestrictedRrcIdle() {
+        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
+        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_idle:5g", mConfig);
+    }
+
+    public void setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds() {
+        final int enableDisplayGraceTimeSec = 30;
+        NetworkControllerImpl.Config.setDisplayGraceTime(enableDisplayGraceTimeSec, mConfig);
+    }
+
+    public void setupDefaultNr5GIconDisplayGracePeriodTime_disabled() {
+        final int disableDisplayGraceTimeSec = 0;
+        NetworkControllerImpl.Config.setDisplayGraceTime(disableDisplayGraceTimeSec, mConfig);
+    }
+
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);
@@ -270,12 +302,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setVoiceRegState(int voiceRegState) {
-        when(mServiceState.getVoiceRegState()).thenReturn(voiceRegState);
+        when(mServiceState.getState()).thenReturn(voiceRegState);
         updateServiceState();
     }
 
     public void setDataRegState(int dataRegState) {
-        when(mServiceState.getDataRegState()).thenReturn(dataRegState);
+        when(mServiceState.getDataRegistrationState()).thenReturn(dataRegState);
         updateServiceState();
     }
 
@@ -319,7 +351,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void updateDataConnectionState(int dataState, int dataNetType) {
-        when(mServiceState.getDataNetworkType()).thenReturn(dataNetType);
+        NetworkRegistrationInfo fakeRegInfo = new NetworkRegistrationInfo.Builder()
+                .setTransportType(TRANSPORT_TYPE_WWAN)
+                .setDomain(DOMAIN_PS)
+                .setAccessNetworkTechnology(dataNetType)
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
+                .thenReturn(fakeRegInfo);
         mPhoneStateListener.onDataConnectionStateChanged(dataState, dataNetType);
     }
 
@@ -349,7 +387,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                     iconArg.capture(),
                     anyInt(),
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
-                    anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
+                    anyString(), anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
         IconState iconState = iconArg.getValue();
         int state = SignalDrawable.getState(icon, SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
                 false);
@@ -381,8 +419,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 iconArg.capture(),
                 any(),
                 typeIconArg.capture(),
-                anyInt(), anyBoolean(), anyBoolean(), anyString(), anyString(), anyBoolean(),
-                anyInt(), eq(roaming));
+                anyInt(), anyBoolean(), anyBoolean(), anyString(), anyString(), anyString(),
+                anyBoolean(), anyInt(), eq(roaming));
         IconState iconState = iconArg.getValue();
 
         int state = icon == -1 ? 0
@@ -424,6 +462,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 qsTypeIconArg.capture(),
                 dataInArg.capture(),
                 dataOutArg.capture(),
+                typeContentDescriptionArg.capture(),
                 typeContentDescriptionArg.capture(),
                 anyString(), anyBoolean(), anyInt(), anyBoolean());
 

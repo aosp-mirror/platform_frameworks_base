@@ -34,10 +34,13 @@
          http://smscoin.net/software/engine/WordPress/Paid+SMS-registration/ -->
 
     <!-- Arab Emirates -->
-    <shortcode country="ae" pattern="\\d{1,5}" free="3214|1017" />
+    <shortcode country="ae" pattern="\\d{1,5}" free="1017|1355|3214" />
 
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
+
+    <!-- Argentia: 5 digits, known short codes listed -->
+    <shortcode country="ar" pattern="\\d{5}" free="11711|28291" />
 
     <!-- Armenia: 3-4 digits, emergency numbers 10[123] -->
     <shortcode country="am" pattern="\\d{3,4}" premium="11[2456]1|3024" free="10[123]" />
@@ -80,7 +83,7 @@
     <shortcode country="cn" premium="1066.*" free="1065.*" />
 
     <!-- Colombia: 1-6 digits (not confirmed) -->
-    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160" />
+    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960" />
 
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
@@ -90,7 +93,7 @@
     <shortcode country="cz" premium="9\\d{6,7}" free="116\\d{3}" />
 
     <!-- Germany: 4-5 digits plus 1232xxx (premium codes from http://www.vodafone.de/infofaxe/537.pdf and http://premiumdienste.eplus.de/pdf/kodex.pdf), plus EU. To keep the premium regex from being too large, it only includes payment processors that have been used by SMS malware, with the regular pattern matching the other premium short codes. -->
-    <shortcode country="de" pattern="\\d{4,5}|1232\\d{3}" premium="11(?:111|833)|1232(?:013|021|060|075|286|358)|118(?:44|80|86)|20[25]00|220(?:21|22|88|99)|221(?:14|21)|223(?:44|53|77)|224[13]0|225(?:20|59|90)|226(?:06|10|20|26|30|40|56|70)|227(?:07|33|39|66|76|78|79|88|99)|228(?:08|11|66|77)|23300|30030|3[12347]000|330(?:33|55|66)|33(?:233|331|366|533)|34(?:34|567)|37000|40(?:040|123|444|[3568]00)|41(?:010|414)|44(?:000|044|344|44[24]|544)|50005|50100|50123|50555|51000|52(?:255|783)|54(?:100|2542)|55(?:077|[24]00|222|333|55|[12369]55)|56(?:789|886)|60800|6[13]000|66(?:[12348]66|566|766|777|88|999)|68888|70(?:07|123|777)|76766|77(?:007|070|222|444|[567]77)|80(?:008|123|888)|82(?:002|[378]00|323|444|472|474|488|727)|83(?:005|[169]00|333|830)|84(?:141|300|32[34]|343|488|499|777|888)|85888|86(?:188|566|640|644|650|677|868|888)|870[24]9|871(?:23|[49]9)|872(?:1[0-8]|49|99)|87499|875(?:49|55|99)|876(?:0[1367]|1[1245678]|54|99)|877(?:00|99)|878(?:15|25|3[567]|8[12])|87999|880(?:08|44|55|77|99)|88688|888(?:03|10|8|89)|8899|90(?:009|999)|99999" free="116\\d{3}|81214|81215|47529|70296|83782|3011|73240" />
+    <shortcode country="de" pattern="\\d{4,5}|1232\\d{3}" premium="11(?:111|833)|1232(?:013|021|060|075|286|358)|118(?:44|80|86)|20[25]00|220(?:21|22|88|99)|221(?:14|21)|223(?:44|53|77)|224[13]0|225(?:20|59|90)|226(?:06|10|20|26|30|40|56|70)|227(?:07|33|39|66|76|78|79|88|99)|228(?:08|11|66|77)|23300|30030|3[12347]000|330(?:33|55|66)|33(?:233|331|366|533)|34(?:34|567)|37000|40(?:040|123|444|[3568]00)|41(?:010|414)|44(?:000|044|344|44[24]|544)|50005|50100|50123|50555|51000|52(?:255|783)|54(?:100|2542)|55(?:077|[24]00|222|333|55|[12369]55)|56(?:789|886)|60800|6[13]000|66(?:[12348]66|566|766|777|88|999)|68888|70(?:07|123|777)|76766|77(?:007|070|222|444|[567]77)|80(?:008|123|888)|82(?:002|[378]00|323|444|472|474|488|727)|83(?:005|[169]00|333|830)|84(?:141|300|32[34]|343|488|499|777|888)|85888|86(?:188|566|640|644|650|677|868|888)|870[24]9|871(?:23|[49]9)|872(?:1[0-8]|49|99)|87499|875(?:49|55|99)|876(?:0[1367]|1[1245678]|54|99)|877(?:00|99)|878(?:15|25|3[567]|8[12])|87999|880(?:08|44|55|77|99)|88688|888(?:03|10|8|89)|8899|90(?:009|999)|99999" free="116\\d{3}|81214|81215|47529|70296|83782|3011|73240|72438" />
 
     <!-- Denmark: see http://iprs.webspacecommerce.com/Denmark-Premium-Rate-Numbers -->
     <shortcode country="dk" pattern="\\d{4,5}" premium="1\\d{3}" free="116\\d{3}|4665" />
@@ -181,7 +184,7 @@
     <shortcode country="mk" pattern="\\d{1,6}" free="129005|122" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="46645|5050|26259|50025|50052|9963|76551" />
+    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288" />
@@ -196,7 +199,7 @@
     <shortcode country="no" pattern="\\d{4,5}" premium="2201|222[67]" free="2171" />
 
     <!-- New Zealand: 3-4 digits, known premium codes listed -->
-    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
+    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|176|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
 
     <!-- Peru: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="pe" pattern="\\d{4,5}" free="9963" />
@@ -263,5 +266,8 @@
 
     <!-- Mayotte (French Territory): 1-5 digits (not confirmed) -->
     <shortcode country="yt" pattern="\\d{1,5}" free="38600,36300,36303,959" />
+
+    <!-- South Africa -->
+    <shortcode country="za" pattern="\d{1,5}" free="44136" />
 
 </shortcodes>

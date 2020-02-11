@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.system.Os;
 import android.system.OsConstants;
 import android.webkit.WebViewZygote;
@@ -97,6 +97,12 @@ public class Process {
      * @hide
      */
     public static final int KEYSTORE_UID = 1017;
+
+    /**
+     * Defines the UID/GID for credstore.
+     * @hide
+     */
+    public static final int CREDSTORE_UID = 1076;
 
     /**
      * Defines the UID/GID for the NFC service process.
@@ -229,6 +235,7 @@ public class Process {
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int FIRST_ISOLATED_UID = 99000;
 
@@ -236,6 +243,7 @@ public class Process {
      * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int LAST_ISOLATED_UID = 99999;
 
@@ -517,11 +525,12 @@ public class Process {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
-     *
+     * @param disabledCompatChanges null-ok list of disabled compat changes for the process being
+     *                             started.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
-     * 
+     *
      * {@hide}
      */
     public static ProcessStartResult start(@NonNull final String processClass,
@@ -536,11 +545,12 @@ public class Process {
                                            @Nullable String appDataDir,
                                            @Nullable String invokeWith,
                                            @Nullable String packageName,
+                                           @Nullable long[] disabledCompatChanges,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ true, zygoteArgs);
+                    /*useUsapPool=*/ true, disabledCompatChanges, zygoteArgs);
     }
 
     /** @hide */
@@ -556,11 +566,12 @@ public class Process {
                                                   @Nullable String appDataDir,
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
+                                                  @Nullable long[] disabledCompatChanges,
                                                   @Nullable String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ false, zygoteArgs);
+                    /*useUsapPool=*/ false, disabledCompatChanges, zygoteArgs);
     }
 
     /**
@@ -735,11 +746,12 @@ public class Process {
 
     /**
      * Set the priority of a thread, based on Linux priorities.
-     * 
-     * @param tid The identifier of the thread/process to change.
+     *
+     * @param tid The identifier of the thread/process to change. It should be
+     * the native thread id but not the managed id of {@link java.lang.Thread}.
      * @param priority A Linux priority level, from -20 for highest scheduling
      * priority to 19 for lowest scheduling priority.
-     * 
+     *
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does
@@ -1003,6 +1015,7 @@ public class Process {
      * your own log, or the Android Illuminati will find you some night and
      * beat you up.
      */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static final native void sendSignalQuiet(int pid, int signal);
     
     /** @hide */

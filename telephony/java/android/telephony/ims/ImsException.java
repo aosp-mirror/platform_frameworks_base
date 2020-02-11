@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.pm.PackageManager;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
@@ -29,9 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * This class defines an IMS-related exception that has been thrown while interacting with a
  * device or carrier provided ImsService implementation.
- * @hide
  */
-@SystemApi
 public final class ImsException extends Exception {
 
     /**
@@ -62,7 +61,6 @@ public final class ImsException extends Exception {
      * This is a configuration error and there should be no retry. The subscription used for this
      * operation is either invalid or has become inactive. The active subscriptions can be queried
      * with {@link SubscriptionManager#getActiveSubscriptionInfoList()}.
-     * @hide
      */
     public static final int CODE_ERROR_INVALID_SUBSCRIPTION = 3;
 
@@ -81,7 +79,10 @@ public final class ImsException extends Exception {
     /**
      * A new {@link ImsException} with an unspecified {@link ImsErrorCode} code.
      * @param message an optional message to detail the error condition more specifically.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     public ImsException(@Nullable String message) {
         super(getMessage(message, CODE_ERROR_UNSPECIFIED));
     }
@@ -89,7 +90,10 @@ public final class ImsException extends Exception {
     /**
      * A new {@link ImsException} that includes an {@link ImsErrorCode} error code.
      * @param message an optional message to detail the error condition more specifically.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     public ImsException(@Nullable String message, @ImsErrorCode int code) {
         super(getMessage(message, code));
         mCode = code;
@@ -100,7 +104,10 @@ public final class ImsException extends Exception {
      * {@link Throwable} that contains the original error that was thrown to lead to this Exception.
      * @param message an optional message to detail the error condition more specifically.
      * @param cause the {@link Throwable} that caused this {@link ImsException} to be created.
+     * @hide
      */
+    @SystemApi
+    @TestApi
     public ImsException(@Nullable String message, @ImsErrorCode  int code,
             @Nullable Throwable cause) {
         super(getMessage(message, code), cause);

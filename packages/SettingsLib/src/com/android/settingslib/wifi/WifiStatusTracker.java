@@ -31,6 +31,7 @@ import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 
 import com.android.settingslib.R;
 
@@ -89,7 +90,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     public void setListening(boolean listening) {
         if (listening) {
             mNetworkScoreManager.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
-                    mWifiNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK);
+                    mWifiNetworkScoreCache, NetworkScoreManager.SCORE_FILTER_CURRENT_NETWORK);
             mWifiNetworkScoreCache.registerListener(mCacheListener);
             mConnectivityManager.registerNetworkCallback(
                     mNetworkRequest, mNetworkCallback, mHandler);
@@ -163,7 +164,13 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
                 statusLabel = mContext.getString(R.string.wifi_limited_connection);
                 return;
             } else if (!networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
-                statusLabel = mContext.getString(R.string.wifi_status_no_internet);
+                final String mode = Settings.Global.getString(mContext.getContentResolver(),
+                        Settings.Global.PRIVATE_DNS_MODE);
+                if (networkCapabilities.isPrivateDnsBroken()) {
+                    statusLabel = mContext.getString(R.string.private_dns_broken);
+                } else {
+                    statusLabel = mContext.getString(R.string.wifi_status_no_internet);
+                }
                 return;
             }
         }

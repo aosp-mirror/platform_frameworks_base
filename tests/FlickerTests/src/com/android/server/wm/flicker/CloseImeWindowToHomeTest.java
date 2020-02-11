@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -62,6 +63,7 @@ public class CloseImeWindowToHomeTest extends NonRotationTestBase {
                 .forAllEntries());
     }
 
+    @Ignore("Flaky")
     @Test
     public void checkVisibility_imeLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
@@ -71,6 +73,7 @@ public class CloseImeWindowToHomeTest extends NonRotationTestBase {
                 .forAllEntries());
     }
 
+    @Ignore("Flaky")
     @Test
     public void checkVisibility_imeAppLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)

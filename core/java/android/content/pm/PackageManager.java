@@ -29,7 +29,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
@@ -38,6 +37,7 @@ import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -545,9 +545,10 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Internal flag used to indicate that a package is a hidden system app.
+     * Internal {@link PackageInfo} flag used to indicate that a package is a hidden system app.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS =  0x20000000;
 
     /**
@@ -3285,6 +3286,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
 
@@ -3297,6 +3299,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
 
@@ -3919,6 +3922,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @NonNull
     @TestApi
     public abstract String getPermissionControllerPackageName();
@@ -4625,6 +4629,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract @NonNull String getServicesSystemSharedLibraryPackageName();
 
@@ -4635,6 +4640,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract @NonNull String getSharedSystemSharedLibraryPackageName();
 
@@ -7360,6 +7366,18 @@ public abstract class PackageManager {
     public String getAppPredictionServicePackageName() {
         throw new UnsupportedOperationException(
             "getAppPredictionServicePackageName not implemented in subclass");
+    }
+
+    /**
+     * @return the system defined telephony package names, or null if there's none.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public String[] getTelephonyPackageNames() {
+        throw new UnsupportedOperationException(
+                "getTelephonyPackageNames not implemented in subclass");
     }
 
     /**

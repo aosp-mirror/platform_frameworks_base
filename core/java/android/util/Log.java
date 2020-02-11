@@ -19,7 +19,7 @@ package android.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.DeadSystemException;
 
 import com.android.internal.os.RuntimeInit;
@@ -385,6 +385,25 @@ public final class Log {
     /** @hide */
     @UnsupportedAppUsage
     public static native int println_native(int bufID, int priority, String tag, String msg);
+
+    /**
+     * Send a log message to the "radio" log buffer, which can be dumped with
+     * {@code adb logcat -b radio}.
+     *
+     * <p>Only the telephony mainline module should use it.
+     *
+     * <p>Note ART will protect {@code MODULE_LIBRARIES} system APIs from regular app code.
+     *
+     * @param priority Log priority.
+     * @param tag Used to identify the source of a log message.  It usually identifies
+     *        the class or activity where the log call occurs.
+     * @param message The message you would like logged.
+     * @hide
+     */
+    public static int logToRadioBuffer(@Level int priority, @Nullable String tag,
+            @Nullable String message) {
+        return println_native(LOG_ID_RADIO, priority, tag, message);
+    }
 
     /**
      * Return the maximum payload the log daemon accepts without truncation.

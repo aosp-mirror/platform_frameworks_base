@@ -949,8 +949,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                                                 (1 << AudioManager.STREAM_NOTIFICATION) |
                                                 (1 << AudioManager.STREAM_SYSTEM) |
                                                 (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
-                if (!mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_voice_capable)) {
+                if (!getTelephonyManager().isVoiceCapable()) {
                     ringerModeAffectedStreams |= (1 << AudioManager.STREAM_MUSIC);
                 }
                 db.execSQL("DELETE FROM system WHERE name='"
@@ -2579,7 +2578,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
             String val = "";
             String mode;
             for (int phoneId = 0;
-                    phoneId < TelephonyManager.getDefault().getPhoneCount(); phoneId++) {
+                    phoneId < getTelephonyManager().getPhoneCount(); phoneId++) {
                 mode = TelephonyManager.getTelephonyProperty(phoneId,
                         "ro.telephony.default_network",
                         Integer.toString(RILConstants.PREFERRED_NETWORK_MODE));
@@ -2693,4 +2692,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
     private String getDefaultDeviceName() {
         return mContext.getResources().getString(R.string.def_device_name_simple, Build.MODEL);
     }
+
+    private TelephonyManager getTelephonyManager() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+    }
+
 }

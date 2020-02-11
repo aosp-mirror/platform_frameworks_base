@@ -261,6 +261,12 @@ public class DozeLog {
                 + state + " blocked=" + blocked);
     }
 
+    public static void tracePulseDropped(Context context, String why) {
+        if (!ENABLED) return;
+        init(context);
+        log("pulseDropped why=" + why);
+    }
+
     public static void tracePulseTouchDisabledByProx(Context context, boolean disabled) {
         if (!ENABLED) return;
         init(context);

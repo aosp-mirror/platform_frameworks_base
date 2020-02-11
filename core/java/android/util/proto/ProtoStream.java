@@ -16,28 +16,104 @@
 
 package android.util.proto;
 
-import android.annotation.TestApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /**
- * Abstract base class for both protobuf streams.
+ * Base utility class for protobuf streams.
  *
- * Contains a set of useful constants and methods used by both
- * ProtoOutputStream and ProtoInputStream
+ * Contains a set of constants and methods used in generated code for
+ * {@link ProtoOutputStream}.
  *
  * @hide
  */
-@TestApi
-public abstract class ProtoStream {
+public class ProtoStream {
 
+    /**
+     * Number of bits to shift the field number to form a tag.
+     *
+     * <pre>
+     * // Reading a field number from a tag.
+     * int fieldNumber = tag &gt;&gt;&gt; FIELD_ID_SHIFT;
+     *
+     * // Building a tag from a field number and a wire type.
+     * int tag = (fieldNumber &lt;&lt; FIELD_ID_SHIFT) | wireType;
+     * </pre>
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int FIELD_ID_SHIFT = 3;
+
+    /**
+     * Mask to select the wire type from a tag.
+     *
+     * <pre>
+     * // Reading a wire type from a tag.
+     * int wireType = tag &amp; WIRE_TYPE_MASK;
+     *
+     * // Building a tag from a field number and a wire type.
+     * int tag = (fieldNumber &lt;&lt; FIELD_ID_SHIFT) | wireType;
+     * </pre>
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_MASK = (1 << FIELD_ID_SHIFT) - 1;
+
+    /**
+     * Mask to select the field id from a tag.
+     * @hide (not used by anything, and not actually useful, because you also want
+     * to shift when you mask the field id).
+     */
     public static final int FIELD_ID_MASK = ~WIRE_TYPE_MASK;
 
+    /**
+     * Varint wire type code.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_VARINT = 0;
+
+    /**
+     * Fixed64 wire type code.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_FIXED64 = 1;
+
+    /**
+     * Length delimited wire type code.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_LENGTH_DELIMITED = 2;
+
+    /**
+     * Start group wire type code.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_START_GROUP = 3;
+
+    /**
+     * End group wire type code.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_END_GROUP = 4;
+
+    /**
+     * Fixed32 wire type code.
+     *
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final int WIRE_TYPE_FIXED32 = 5;
 
     /**
@@ -51,32 +127,147 @@ public abstract class ProtoStream {
      */
     public static final long FIELD_TYPE_MASK = 0x0ffL << FIELD_TYPE_SHIFT;
 
+    /**
+     * Not a real wire type.
+     * @hide
+     */
     public static final long FIELD_TYPE_UNKNOWN = 0;
 
+
+    /*
+     * The FIELD_TYPE_ constants are copied from
+     * external/protobuf/src/google/protobuf/descriptor.h directly, so no
+     * extra mapping needs to be maintained in this case.
+     */
+
     /**
-     * The types are copied from external/protobuf/src/google/protobuf/descriptor.h directly,
-     * so no extra mapping needs to be maintained in this case.
+     * Field type code for double fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, double)
+     * ProtoOutputStream.write(long, double)} method.
      */
     public static final long FIELD_TYPE_DOUBLE = 1L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for float fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, float)
+     * ProtoOutputStream.write(long, float)} method.
+     */
     public static final long FIELD_TYPE_FLOAT = 2L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for int64 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, long)
+     * ProtoOutputStream.write(long, long)} method.
+     */
     public static final long FIELD_TYPE_INT64 = 3L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for uint64 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, long)
+     * ProtoOutputStream.write(long, long)} method.
+     */
     public static final long FIELD_TYPE_UINT64 = 4L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for int32 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
     public static final long FIELD_TYPE_INT32 = 5L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for fixed64 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, long)
+     * ProtoOutputStream.write(long, long)} method.
+     */
     public static final long FIELD_TYPE_FIXED64 = 6L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for fixed32 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
+
+    /**
+     * Field type code for fixed32 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
     public static final long FIELD_TYPE_FIXED32 = 7L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for bool fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, boolean)
+     * ProtoOutputStream.write(long, boolean)} method.
+     */
     public static final long FIELD_TYPE_BOOL = 8L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for string fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, String)
+     * ProtoOutputStream.write(long, String)} method.
+     */
     public static final long FIELD_TYPE_STRING = 9L << FIELD_TYPE_SHIFT;
+
     //  public static final long FIELD_TYPE_GROUP = 10L << FIELD_TYPE_SHIFT; // Deprecated.
+
+    /**
+     * Field type code for message fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#start(long)
+     * ProtoOutputStream.start(long)} method.
+     */
     public static final long FIELD_TYPE_MESSAGE = 11L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for bytes fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, byte[])
+     * ProtoOutputStream.write(long, byte[])} method.
+     */
     public static final long FIELD_TYPE_BYTES = 12L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for uint32 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
     public static final long FIELD_TYPE_UINT32 = 13L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for enum fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
     public static final long FIELD_TYPE_ENUM = 14L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for sfixed32 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
     public static final long FIELD_TYPE_SFIXED32 = 15L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for sfixed64 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, long)
+     * ProtoOutputStream.write(long, long)} method.
+     */
     public static final long FIELD_TYPE_SFIXED64 = 16L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for sint32 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, int)
+     * ProtoOutputStream.write(long, int)} method.
+     */
     public static final long FIELD_TYPE_SINT32 = 17L << FIELD_TYPE_SHIFT;
+
+    /**
+     * Field type code for sint64 fields. Used to build constants in generated
+     * code for use with the {@link ProtoOutputStream#write(long, long)
+     * ProtoOutputStream.write(long, long)} method.
+     */
     public static final long FIELD_TYPE_SINT64 = 18L << FIELD_TYPE_SHIFT;
 
-    protected static final String[] FIELD_TYPE_NAMES = new String[]{
+    private static final @NonNull String[] FIELD_TYPE_NAMES = new String[]{
             "Double",
             "Float",
             "Int64",
@@ -100,19 +291,94 @@ public abstract class ProtoStream {
     //
     // FieldId flags for whether the field is single, repeated or packed.
     //
+    /**
+     * Bit offset for building a field id to be used with a
+     * <code>{@link ProtoOutputStream}.write(...)</code>.
+     *
+     * @see #FIELD_COUNT_MASK
+     * @see #FIELD_COUNT_UNKNOWN
+     * @see #FIELD_COUNT_SINGLE
+     * @see #FIELD_COUNT_REPEATED
+     * @see #FIELD_COUNT_PACKED
+     */
     public static final int FIELD_COUNT_SHIFT = 40;
+
+    /**
+     * Bit mask for selecting the field count when reading a field id that
+     * is used with a <code>{@link ProtoOutputStream}.write(...)</code> method.
+     *
+     * @see #FIELD_COUNT_SHIFT
+     * @see #FIELD_COUNT_MASK
+     * @see #FIELD_COUNT_UNKNOWN
+     * @see #FIELD_COUNT_SINGLE
+     * @see #FIELD_COUNT_REPEATED
+     * @see #FIELD_COUNT_PACKED
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final long FIELD_COUNT_MASK = 0x0fL << FIELD_COUNT_SHIFT;
 
+    /**
+     * Unknown field count, encoded into a field id used with a
+     * <code>{@link ProtoOutputStream}.write(...)</code> method.
+     *
+     * @see #FIELD_COUNT_SHIFT
+     * @see #FIELD_COUNT_MASK
+     * @see #FIELD_COUNT_SINGLE
+     * @see #FIELD_COUNT_REPEATED
+     * @see #FIELD_COUNT_PACKED
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final long FIELD_COUNT_UNKNOWN = 0;
+
+    /**
+     * Single field count, encoded into a field id used with a
+     * <code>{@link ProtoOutputStream}.write(...)</code> method.
+     *
+     * @see #FIELD_COUNT_SHIFT
+     * @see #FIELD_COUNT_MASK
+     * @see #FIELD_COUNT_UNKNOWN
+     * @see #FIELD_COUNT_REPEATED
+     * @see #FIELD_COUNT_PACKED
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final long FIELD_COUNT_SINGLE = 1L << FIELD_COUNT_SHIFT;
+
+    /**
+     * Repeated field count, encoded into a field id used with a
+     * <code>{@link ProtoOutputStream}.write(...)</code> method.
+     *
+     * @see #FIELD_COUNT_SHIFT
+     * @see #FIELD_COUNT_MASK
+     * @see #FIELD_COUNT_UNKNOWN
+     * @see #FIELD_COUNT_SINGLE
+     * @see #FIELD_COUNT_PACKED
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final long FIELD_COUNT_REPEATED = 2L << FIELD_COUNT_SHIFT;
+
+    /**
+     * Repeated packed field count, encoded into a field id used with a
+     * <code>{@link ProtoOutputStream}.write(...)</code> method.
+     *
+     * @see #FIELD_COUNT_SHIFT
+     * @see #FIELD_COUNT_MASK
+     * @see #FIELD_COUNT_UNKNOWN
+     * @see #FIELD_COUNT_SINGLE
+     * @see #FIELD_COUNT_REPEATED
+     * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding">Protobuf
+     * Encoding</a>
+     */
     public static final long FIELD_COUNT_PACKED = 5L << FIELD_COUNT_SHIFT;
 
 
     /**
      * Get the developer-usable name of a field type.
      */
-    public static String getFieldTypeString(long fieldType) {
+    public static @Nullable String getFieldTypeString(long fieldType) {
         int index = ((int) ((fieldType & FIELD_TYPE_MASK) >>> FIELD_TYPE_SHIFT)) - 1;
         if (index >= 0 && index < FIELD_TYPE_NAMES.length) {
             return FIELD_TYPE_NAMES[index];
@@ -124,7 +390,7 @@ public abstract class ProtoStream {
     /**
      * Get the developer-usable name of a field count.
      */
-    public static String getFieldCountString(long fieldCount) {
+    public static @Nullable String getFieldCountString(long fieldCount) {
         if (fieldCount == FIELD_COUNT_SINGLE) {
             return "";
         } else if (fieldCount == FIELD_COUNT_REPEATED) {
@@ -139,7 +405,7 @@ public abstract class ProtoStream {
     /**
      * Get the developer-usable name of a wire type.
      */
-    public static String getWireTypeString(int wireType) {
+    public static @Nullable String getWireTypeString(int wireType) {
         switch (wireType) {
             case WIRE_TYPE_VARINT:
                 return "Varint";
@@ -161,7 +427,7 @@ public abstract class ProtoStream {
     /**
      * Get a debug string for a fieldId.
      */
-    public static String getFieldIdString(long fieldId) {
+    public static @NonNull String getFieldIdString(long fieldId) {
         final long fieldCount = fieldId & FIELD_COUNT_MASK;
         String countString = getFieldCountString(fieldCount);
         if (countString == null) {
@@ -218,29 +484,39 @@ public abstract class ProtoStream {
 
     /**
      * Get the encoded tag size from the token.
+     *
+     * @hide
      */
     public static int getTagSizeFromToken(long token) {
         return (int) (0x7 & (token >> 61));
     }
 
     /**
-     * Get whether this is a call to startObject (false) or startRepeatedObject (true).
+     * Get whether the token has the repeated bit set to true or false
+     *
+     * @hide
      */
     public static boolean getRepeatedFromToken(long token) {
         return (0x1 & (token >> 60)) != 0;
     }
 
     /**
-     * Get the nesting depth of startObject calls from the token.
+     * Get the nesting depth from the token.
+     *
+     * @hide
      */
     public static int getDepthFromToken(long token) {
         return (int) (0x01ff & (token >> 51));
     }
 
     /**
-     * Get the object ID from the token. The object ID is a serial number for the
+     * Get the object ID from the token.
+     *
+     * <p>The object ID is a serial number for the
      * startObject calls that have happened on this object.  The values are truncated
      * to 9 bits, but that is sufficient for error checking.
+     *
+     * @hide
      */
     public static int getObjectIdFromToken(long token) {
         return (int) (0x07ffff & (token >> 32));
@@ -248,6 +524,8 @@ public abstract class ProtoStream {
 
     /**
      * Get the location of the offset recorded in the token.
+     *
+     * @hide
      */
     public static int getOffsetFromToken(long token) {
         return (int) token;
@@ -255,8 +533,11 @@ public abstract class ProtoStream {
 
     /**
      * Convert the object ID to the ordinal value -- the n-th call to startObject.
-     * The object IDs start at -1 and count backwards, so that the value is unlikely
+     *
+     * <p>The object IDs start at -1 and count backwards, so that the value is unlikely
      * to alias with an actual size field that had been written.
+     *
+     * @hide
      */
     public static int convertObjectIdToOrdinal(int objectId) {
         return (-1 & 0x07ffff) - objectId;
@@ -265,7 +546,7 @@ public abstract class ProtoStream {
     /**
      * Return a debugging string of a token.
      */
-    public static String token2String(long token) {
+    public static @NonNull String token2String(long token) {
         if (token == 0L) {
             return "Token(0)";
         } else {
@@ -277,4 +558,9 @@ public abstract class ProtoStream {
                     + ')';
         }
     }
+
+    /**
+     * @hide
+     */
+    protected ProtoStream() {}
 }

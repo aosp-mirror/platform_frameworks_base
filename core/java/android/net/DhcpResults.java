@@ -16,7 +16,7 @@
 
 package android.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
 import android.os.Parcelable;

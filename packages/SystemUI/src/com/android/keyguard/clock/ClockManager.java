@@ -240,14 +240,15 @@ public final class ClockManager {
     }
 
     private void reload() {
-        mPreviewClocks.reload();
+        mPreviewClocks.reloadCurrentClock();
         mListeners.forEach((listener, clocks) -> {
-            clocks.reload();
-            ClockPlugin clock = clocks.getCurrentClock();
-            if (clock instanceof DefaultClockController) {
-                listener.onClockChanged(null);
+            clocks.reloadCurrentClock();
+            final ClockPlugin clock = clocks.getCurrentClock();
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                listener.onClockChanged(clock instanceof DefaultClockController ? null : clock);
             } else {
-                listener.onClockChanged(clock);
+                mMainHandler.post(() -> listener.onClockChanged(
+                        clock instanceof DefaultClockController ? null : clock));
             }
         });
     }
@@ -287,20 +288,13 @@ public final class ClockManager {
         @Override
         public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
             addClockPlugin(plugin);
-            reload();
-            if (plugin == mCurrentClock) {
-                ClockManager.this.reload();
-            }
+            reloadIfNeeded(plugin);
         }
 
         @Override
         public void onPluginDisconnected(ClockPlugin plugin) {
-            boolean isCurrentClock = plugin == mCurrentClock;
             removeClockPlugin(plugin);
-            reload();
-            if (isCurrentClock) {
-                ClockManager.this.reload();
-            }
+            reloadIfNeeded(plugin);
         }
 
         /**
@@ -329,7 +323,7 @@ public final class ClockManager {
             mClocks.put(plugin.getClass().getName(), plugin);
             mClockInfo.add(ClockInfo.builder()
                     .setName(plugin.getName())
-                    .setTitle(plugin.getTitle())
+                    .setTitle(plugin::getTitle)
                     .setId(id)
                     .setThumbnail(plugin::getThumbnail)
                     .setPreview(() -> plugin.getPreview(mWidth, mHeight))
@@ -347,10 +341,19 @@ public final class ClockManager {
             }
         }
 
+        private void reloadIfNeeded(ClockPlugin plugin) {
+            final boolean wasCurrentClock = plugin == mCurrentClock;
+            reloadCurrentClock();
+            final boolean isCurrentClock = plugin == mCurrentClock;
+            if (wasCurrentClock || isCurrentClock) {
+                ClockManager.this.reload();
+            }
+        }
+
         /**
          * Update the current clock.
          */
-        void reload() {
+        void reloadCurrentClock() {
             mCurrentClock = getClockPlugin();
         }
 

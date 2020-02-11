@@ -25,8 +25,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -240,7 +240,8 @@ public class AppOpsManager {
     public @interface UidState {}
 
     /**
-     * Uid state: The UID is a foreground persistent app.
+     * Uid state: The UID is a foreground persistent app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -248,7 +249,8 @@ public class AppOpsManager {
     public static final int UID_STATE_PERSISTENT = 100;
 
     /**
-     * Uid state: The UID is top foreground app.
+     * Uid state: The UID is top foreground app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -257,6 +259,7 @@ public class AppOpsManager {
 
     /**
      * Uid state: The UID is running a foreground service of location type.
+     * The lower the UID state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -264,7 +267,8 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300;
 
     /**
-     * Uid state: The UID is running a foreground service.
+     * Uid state: The UID is running a foreground service. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -279,7 +283,8 @@ public class AppOpsManager {
     public static final int UID_STATE_MAX_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
 
     /**
-     * Uid state: The UID is a foreground app.
+     * Uid state: The UID is a foreground app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -287,7 +292,8 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND = 500;
 
     /**
-     * Uid state: The UID is a background app.
+     * Uid state: The UID is a background app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -295,7 +301,8 @@ public class AppOpsManager {
     public static final int UID_STATE_BACKGROUND = 600;
 
     /**
-     * Uid state: The UID is a cached app.
+     * Uid state: The UID is a cached app. The lower the UID
+     * state the more important the UID is for the user.
      * @hide
      */
     @TestApi
@@ -570,6 +577,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_NONE = -1;
     /** @hide Access to coarse location information. */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_COARSE_LOCATION = 0;
     /** @hide Access to fine location information. */
@@ -642,6 +650,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_WRITE_SETTINGS = 23;
     /** @hide Required to draw on top of other apps. */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     /** @hide */
@@ -651,6 +660,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_CAMERA = 26;
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_RECORD_AUDIO = 27;
     /** @hide */
@@ -710,7 +720,18 @@ public class AppOpsManager {
     /** @hide Capture the device's display contents and/or audio */
     @UnsupportedAppUsage
     public static final int OP_PROJECT_MEDIA = 46;
-    /** @hide Activate a VPN connection without user intervention. */
+
+    /**
+     * Start (without additional user intervention) a VPN connection, as used by {@link
+     * android.net.VpnService} along with as Platform VPN connections, as used by {@link
+     * android.net.VpnManager}
+     *
+     * <p>This appop is granted to apps that have already been given user consent to start
+     * VpnService based VPN connections. As this is a superset of OP_ACTIVATE_PLATFORM_VPN, this
+     * appop also allows the starting of Platform VPNs.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage
     public static final int OP_ACTIVATE_VPN = 47;
     /** @hide Access the WallpaperManagerAPI to write wallpapers. */
@@ -798,6 +819,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_MANAGE_IPSEC_TUNNELS = 75;
     /** @hide Any app start foreground service. */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_START_FOREGROUND = 76;
     /** @hide */
@@ -827,9 +849,23 @@ public class AppOpsManager {
     public static final int OP_ACCESS_ACCESSIBILITY = 88;
     /** @hide Read the device identifiers (IMEI / MEID, IMSI, SIM / Build serial) */
     public static final int OP_READ_DEVICE_IDENTIFIERS = 89;
+    /** @hide Read location metadata from media */
+    public static final int OP_ACCESS_MEDIA_LOCATION = 90;
+    /**
+     * Start (without additional user intervention) a Platform VPN connection, as used by {@link
+     * android.net.VpnManager}
+     *
+     * <p>This appop is granted to apps that have already been given user consent to start Platform
+     * VPN connections. This appop is insufficient to start VpnService based VPNs (but the opposite
+     * is true).
+     *
+     * @hide
+     */
+    public static final int OP_ACTIVATE_PLATFORM_VPN = 91;
+
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 90;
+    public static final int _NUM_OP = 92;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1100,11 +1136,16 @@ public class AppOpsManager {
     @TestApi
     @SystemApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    /** @hide Read location metadata from media */
+    public static final String OPSTR_ACCESS_MEDIA_LOCATION = "android:access_media_location";
+
     /** @hide Interact with accessibility. */
     @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     /** @hide Read device identifiers */
     public static final String OPSTR_READ_DEVICE_IDENTIFIERS = "android:read_device_identifiers";
+    /** @hide Start Platform VPN without user intervention */
+    public static final String OPSTR_ACTIVATE_PLATFORM_VPN = "android:activate_platform_vpn";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -1127,6 +1168,7 @@ public class AppOpsManager {
             // Storage
             OP_READ_EXTERNAL_STORAGE,
             OP_WRITE_EXTERNAL_STORAGE,
+            OP_ACCESS_MEDIA_LOCATION,
             // Location
             OP_COARSE_LOCATION,
             OP_FINE_LOCATION,
@@ -1266,6 +1308,8 @@ public class AppOpsManager {
             OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
             OP_ACCESS_ACCESSIBILITY,            // ACCESS_ACCESSIBILITY
             OP_READ_DEVICE_IDENTIFIERS,         // READ_DEVICE_IDENTIFIERS
+            OP_ACCESS_MEDIA_LOCATION,           // ACCESS_MEDIA_LOCATION
+            OP_ACTIVATE_PLATFORM_VPN,           // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1362,6 +1406,8 @@ public class AppOpsManager {
             OPSTR_LEGACY_STORAGE,
             OPSTR_ACCESS_ACCESSIBILITY,
             OPSTR_READ_DEVICE_IDENTIFIERS,
+            OPSTR_ACCESS_MEDIA_LOCATION,
+            OPSTR_ACTIVATE_PLATFORM_VPN,
     };
 
     /**
@@ -1459,6 +1505,8 @@ public class AppOpsManager {
             "LEGACY_STORAGE",
             "ACCESS_ACCESSIBILITY",
             "READ_DEVICE_IDENTIFIERS",
+            "ACCESS_MEDIA_LOCATION",
+            "ACTIVATE_PLATFORM_VPN"
     };
 
     /**
@@ -1557,6 +1605,8 @@ public class AppOpsManager {
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
             null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
+            null, // no permission for OP_ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1655,6 +1705,8 @@ public class AppOpsManager {
             null, // LEGACY_STORAGE
             null, // ACCESS_ACCESSIBILITY
             null, // READ_DEVICE_IDENTIFIERS
+            null, // ACCESS_MEDIA_LOCATION
+            null, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1752,6 +1804,8 @@ public class AppOpsManager {
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
+            false, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1848,6 +1902,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
             AppOpsManager.MODE_ALLOWED, // ACCESS_ACCESSIBILITY
             AppOpsManager.MODE_ERRORED, // READ_DEVICE_IDENTIFIERS
+            AppOpsManager.MODE_ALLOWED, // ALLOW_MEDIA_LOCATION
+            AppOpsManager.MODE_IGNORED, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -1948,6 +2004,8 @@ public class AppOpsManager {
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
+            false, // ACTIVATE_PLATFORM_VPN
     };
 
     /**
@@ -2058,6 +2116,7 @@ public class AppOpsManager {
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static String opToPermission(int op) {
         return sOpPerms[op];
@@ -2090,6 +2149,7 @@ public class AppOpsManager {
      * to the corresponding app op.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static int permissionToOpCode(String permission) {
         Integer boxedOpCode = sPermToOp.get(permission);
@@ -2580,7 +2640,7 @@ public class AppOpsManager {
          * @return The proxy UID.
          */
         public int getProxyUid() {
-            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+            return (int) findFirstNonNegativeForFlagsInStates(mProxyUids,
                     MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
         }
 
@@ -2602,7 +2662,7 @@ public class AppOpsManager {
          * @return The proxy UID.
          */
         public int getProxyUid(@UidState int uidState, @OpFlags int flags) {
-            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+            return (int) findFirstNonNegativeForFlagsInStates(mProxyUids,
                     uidState, uidState, flags);
         }
 
@@ -4163,8 +4223,8 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
      * @return The sum.
      */
@@ -4193,13 +4253,13 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
      * @return The non-negative value or -1.
      */
     private static long findFirstNonNegativeForFlagsInStates(@Nullable LongSparseLongArray counts,
-            @OpFlags int flags, @UidState int beginUidState, @UidState int endUidState) {
+            @UidState int beginUidState, @UidState int endUidState, @OpFlags int flags) {
         if (counts == null) {
             return -1;
         }
@@ -4225,14 +4285,14 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
      * @return The non-negative value or -1.
      */
     private static @Nullable String findFirstNonNullForFlagsInStates(
-            @Nullable LongSparseArray<String> counts, @OpFlags int flags,
-            @UidState int beginUidState, @UidState int endUidState) {
+            @Nullable LongSparseArray<String> counts, @UidState int beginUidState,
+            @UidState int endUidState, @OpFlags int flags) {
         if (counts == null) {
             return null;
         }
@@ -4578,6 +4638,7 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
@@ -4905,6 +4966,7 @@ public class AppOpsManager {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     @TestApi
     public static int strOpToOp(@NonNull String op) {
         Integer val = sOpStrToOp.get(op);

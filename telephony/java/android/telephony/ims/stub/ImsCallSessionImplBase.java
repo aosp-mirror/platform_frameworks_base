@@ -17,19 +17,19 @@
 package android.telephony.ims.stub;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Message;
 import android.os.RemoteException;
-import android.telephony.ims.ImsCallSessionListener;
-import android.telephony.ims.aidl.IImsCallSessionListener;
-
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
-import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsVideoCallProvider;
+import android.telephony.ims.aidl.IImsCallSessionListener;
+
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
-import android.telephony.ims.ImsVideoCallProvider;
-
 /**
  * Base implementation of IImsCallSession, which implements stub versions of the methods available.
  *
@@ -38,6 +38,7 @@ import android.telephony.ims.ImsVideoCallProvider;
  * @hide
  */
 @SystemApi
+@TestApi
 // DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
 // will break other implementations of ImsCallSession maintained by other ImsServices.
 public class ImsCallSessionImplBase implements AutoCloseable {
@@ -409,6 +410,13 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * Rejects an incoming call or session update.
      *
      * @param reason reason code to reject an incoming call, defined in {@link ImsReasonInfo}.
+     *               The {@link android.telecom.InCallService} (dialer app) can use the
+     *               {@link android.telecom.Call#reject(int)} API to reject a call while specifying
+     *               a user-indicated reason for rejecting the call.
+     *               Normal call declines ({@link android.telecom.Call#REJECT_REASON_DECLINED}) will
+     *               map to {@link ImsReasonInfo#CODE_USER_DECLINE}.
+     *               Unwanted calls ({@link android.telecom.Call#REJECT_REASON_UNWANTED}) will map
+     *               to {@link ImsReasonInfo#CODE_SIP_USER_MARKED_UNWANTED}.
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
     public void reject(int reason) {

@@ -17,43 +17,54 @@
 package android.app.timedetector;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
-import android.util.Log;
+import android.os.SystemClock;
+import android.os.TimestampedValue;
 
 /**
  * The interface through which system components can send signals to the TimeDetectorService.
+ *
  * @hide
  */
 @SystemService(Context.TIME_DETECTOR_SERVICE)
-public final class TimeDetector {
-    private static final String TAG = "timedetector.TimeDetector";
-    private static final boolean DEBUG = false;
+public interface TimeDetector {
 
-    private final ITimeDetectorService mITimeDetectorService;
-
-    public TimeDetector() throws ServiceNotFoundException {
-        mITimeDetectorService = ITimeDetectorService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.TIME_DETECTOR_SERVICE));
+    /**
+     * A shared utility method to create a {@link ManualTimeSuggestion}.
+     *
+     * @hide
+     */
+    static ManualTimeSuggestion createManualTimeSuggestion(long when, String why) {
+        TimestampedValue<Long> utcTime =
+                new TimestampedValue<>(SystemClock.elapsedRealtime(), when);
+        ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(utcTime);
+        manualTimeSuggestion.addDebugInfo(why);
+        return manualTimeSuggestion;
     }
 
     /**
-     * Suggests the current time to the detector. The detector may ignore the signal if better
-     * signals are available such as those that come from more reliable sources or were
+     * Suggests a telephony-signal derived time to the detector. The detector may ignore the signal
+     * if better signals are available such as those that come from more reliable sources or were
      * determined more recently.
      */
-    public void suggestTime(@NonNull TimeSignal timeSignal) {
-        if (DEBUG) {
-            Log.d(TAG, "suggestTime called: " + timeSignal);
-        }
-        try {
-            mITimeDetectorService.suggestTime(timeSignal);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
+    @RequiresPermission(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE)
+    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
+    /**
+     * Suggests the user's manually entered current time to the detector.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE)
+    void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+
+    /**
+     * Suggests the time according to a network time source like NTP.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion);
 }

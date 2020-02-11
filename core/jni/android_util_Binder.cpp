@@ -30,12 +30,14 @@
 #include <unistd.h>
 
 #include <android-base/stringprintf.h>
-#include <binder/IInterface.h>
-#include <binder/IServiceManager.h>
-#include <binder/IPCThreadState.h>
-#include <binder/Parcel.h>
 #include <binder/BpBinder.h>
+#include <binder/IInterface.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
 #include <binder/ProcessState.h>
+#include <binder/Stability.h>
+#include <binderthreadstate/CallerUtils.h>
 #include <cutils/atomic.h>
 #include <log/log.h>
 #include <utils/KeyedVector.h>
@@ -459,6 +461,12 @@ public:
         sp<JavaBBinder> b = mBinder.promote();
         if (b == NULL) {
             b = new JavaBBinder(env, obj);
+            if (mVintf) {
+                ::android::internal::Stability::markVintf(b.get());
+            }
+            if (mExtension != nullptr) {
+                b.get()->setExtension(mExtension);
+            }
             mBinder = b;
             ALOGV("Creating JavaBinder %p (refs %p) for Object %p, weakCount=%" PRId32 "\n",
                  b.get(), b->getWeakRefs(), obj, b->getWeakRefs()->getWeakCount());
@@ -473,9 +481,38 @@ public:
         return mBinder.promote();
     }
 
+    void markVintf() {
+        mVintf = true;
+    }
+
+    sp<IBinder> getExtension() {
+        AutoMutex _l(mLock);
+        sp<JavaBBinder> b = mBinder.promote();
+        if (b != nullptr) {
+            return b.get()->getExtension();
+        }
+        return mExtension;
+    }
+
+    void setExtension(const sp<IBinder>& extension) {
+        AutoMutex _l(mLock);
+        mExtension = extension;
+        sp<JavaBBinder> b = mBinder.promote();
+        if (b != nullptr) {
+            b.get()->setExtension(mExtension);
+        }
+    }
+
 private:
     Mutex           mLock;
     wp<JavaBBinder> mBinder;
+
+    // in the future, we might condense this into int32_t stability, or if there
+    // is too much binder state here, we can think about making JavaBBinder an
+    // sp here (avoid recreating it)
+    bool            mVintf = false;
+
+    sp<IBinder>     mExtension;
 };
 
 // ----------------------------------------------------------------------------
@@ -910,7 +947,7 @@ static jint android_os_Binder_getCallingUid()
 
 static jboolean android_os_Binder_isHandlingTransaction()
 {
-    return IPCThreadState::self()->isServingCall();
+    return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
 static jlong android_os_Binder_clearCallingIdentity()
@@ -960,6 +997,12 @@ static jlong android_os_Binder_clearCallingWorkSource()
 static void android_os_Binder_restoreCallingWorkSource(jlong token)
 {
     IPCThreadState::self()->restoreCallingWorkSource(token);
+}
+
+static void android_os_Binder_markVintfStability(JNIEnv* env, jobject clazz) {
+    JavaBBinderHolder* jbh =
+        (JavaBBinderHolder*) env->GetLongField(clazz, gBinderOffsets.mObject);
+    jbh->markVintf();
 }
 
 static void android_os_Binder_flushPendingCommands(JNIEnv* env, jobject clazz)
@@ -1014,6 +1057,17 @@ static jobject android_os_Binder_waitForService(
     return javaObjectForIBinder(env, service);
 }
 
+static jobject android_os_Binder_getExtension(JNIEnv* env, jobject obj) {
+    JavaBBinderHolder* jbh = (JavaBBinderHolder*) env->GetLongField(obj, gBinderOffsets.mObject);
+    return javaObjectForIBinder(env, jbh->getExtension());
+}
+
+static void android_os_Binder_setExtension(JNIEnv* env, jobject obj, jobject extensionObject) {
+    JavaBBinderHolder* jbh = (JavaBBinderHolder*) env->GetLongField(obj, gBinderOffsets.mObject);
+    sp<IBinder> extension = ibinderForJavaObject(env, extensionObject);
+    jbh->setExtension(extension);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gBinderMethods[] = {
@@ -1038,11 +1092,14 @@ static const JNINativeMethod gBinderMethods[] = {
     // @CriticalNative
     { "clearCallingWorkSource", "()J", (void*)android_os_Binder_clearCallingWorkSource },
     { "restoreCallingWorkSource", "(J)V", (void*)android_os_Binder_restoreCallingWorkSource },
+    { "markVintfStability", "()V", (void*)android_os_Binder_markVintfStability},
     { "flushPendingCommands", "()V", (void*)android_os_Binder_flushPendingCommands },
     { "getNativeBBinderHolder", "()J", (void*)android_os_Binder_getNativeBBinderHolder },
     { "getNativeFinalizer", "()J", (void*)android_os_Binder_getNativeFinalizer },
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable },
-    { "waitForService", "(Ljava/lang/String;)Landroid/os/IBinder;", (void*)android_os_Binder_waitForService }
+    { "waitForService", "(Ljava/lang/String;)Landroid/os/IBinder;", (void*)android_os_Binder_waitForService },
+    { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
+    { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
 };
 
 const char* const kBinderPathName = "android/os/Binder";
@@ -1482,6 +1539,21 @@ JNIEXPORT jlong JNICALL android_os_BinderProxy_getNativeFinalizer(JNIEnv*, jclas
     return (jlong) BinderProxy_destroy;
 }
 
+static jobject android_os_BinderProxy_getExtension(JNIEnv* env, jobject obj) {
+    IBinder* binder = getBPNativeData(env, obj)->mObject.get();
+    if (binder == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", "Native IBinder is null");
+        return nullptr;
+    }
+    sp<IBinder> extension;
+    status_t err = binder->getExtension(&extension);
+    if (err != OK) {
+        signalExceptionForError(env, obj, err, true /* canThrowRemoteException */);
+        return nullptr;
+    }
+    return javaObjectForIBinder(env, extension);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gBinderProxyMethods[] = {
@@ -1493,6 +1565,7 @@ static const JNINativeMethod gBinderProxyMethods[] = {
     {"linkToDeath",         "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
     {"unlinkToDeath",       "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
     {"getNativeFinalizer",  "()J", (void*)android_os_BinderProxy_getNativeFinalizer},
+    {"getExtension",        "()Landroid/os/IBinder;", (void*)android_os_BinderProxy_getExtension},
 };
 
 const char* const kBinderProxyPathName = "android/os/BinderProxy";

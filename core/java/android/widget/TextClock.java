@@ -21,8 +21,8 @@ import static android.widget.RemoteViews.RemoteView;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;

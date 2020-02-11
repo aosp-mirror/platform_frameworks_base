@@ -16,7 +16,7 @@
 
 package android.text.method;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.text.Editable;
 import android.text.NoCopySpan;
 import android.text.Spannable;

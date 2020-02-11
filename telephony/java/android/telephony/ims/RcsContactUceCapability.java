@@ -16,9 +16,11 @@
 
 package android.telephony.ims;
 
-import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +37,8 @@ import java.util.Map;
  * Contains the User Capability Exchange capabilities corresponding to a contact's URI.
  * @hide
  */
+@SystemApi
+@TestApi
 public final class RcsContactUceCapability implements Parcelable {
 
     /** Supports 1-to-1 chat */
@@ -81,12 +85,32 @@ public final class RcsContactUceCapability implements Parcelable {
     public static final int CAPABILITY_RCS_VOICE_CALL = (1 << 19);
     /** Supports RCS video calling */
     public static final int CAPABILITY_RCS_VIDEO_CALL = (1 << 20);
-    /** Supports RCS video calling, where video media can not be dropped */
+    /** Supports RCS video calling, where video media can not be dropped. */
     public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = (1 << 21);
+    /** Supports call composer, where outgoing calls can be enriched with pre-call content.*/
+    public static final int CAPABILITY_CALL_COMPOSER = (1 << 22);
+    /** Supports post call information that is included in the call if the call is missed.*/
+    public static final int CAPABILITY_POST_CALL = (1 << 23);
+    /** Supports sharing a map where the user can draw, share markers, and share their position. */
+    public static final int CAPABILITY_SHARED_MAP = (1 << 24);
+    /** Supports sharing a canvas, where users can draw, add images, and change background colors.*/
+    public static final int CAPABILITY_SHARED_SKETCH = (1 << 25);
+    /** Supports communication with Chatbots. */
+    public static final int CAPABILITY_CHAT_BOT = (1 << 26);
+    /** Supports Chatbot roles. */
+    public static final int CAPABILITY_CHAT_BOT_ROLE = (1 << 27);
+    /** Supports the unidirectional plug-ins framework. */
+    public static final int CAPABILITY_PLUG_IN = (1 << 28);
+    /** Supports standalone Chatbot communication. */
+    public static final int CAPABILITY_STANDALONE_CHAT_BOT = (1 << 29);
+    /** Supports MMTEL based call composer. */
+    public static final int CAPABILITY_MMTEL_CALL_COMPOSER = (1 << 30);
+
+
 
     /** @hide*/
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "CAPABILITY_", flag = true, value = {
+    @LongDef(prefix = "CAPABILITY_", flag = true, value = {
             CAPABILITY_CHAT_STANDALONE,
             CAPABILITY_CHAT_SESSION,
             CAPABILITY_CHAT_SESSION_STORE_FORWARD,
@@ -108,7 +132,16 @@ public final class RcsContactUceCapability implements Parcelable {
             CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER,
             CAPABILITY_RCS_VOICE_CALL,
             CAPABILITY_RCS_VIDEO_CALL,
-            CAPABILITY_RCS_VIDEO_ONLY_CALL
+            CAPABILITY_RCS_VIDEO_ONLY_CALL,
+            CAPABILITY_CALL_COMPOSER,
+            CAPABILITY_POST_CALL,
+            CAPABILITY_SHARED_MAP,
+            CAPABILITY_SHARED_SKETCH,
+            CAPABILITY_CHAT_BOT,
+            CAPABILITY_CHAT_BOT_ROLE,
+            CAPABILITY_PLUG_IN,
+            CAPABILITY_STANDALONE_CHAT_BOT,
+            CAPABILITY_MMTEL_CALL_COMPOSER
     })
     public @interface CapabilityFlag {}
 
@@ -135,11 +168,11 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param type The capability to map to a service URI that is different from the contact's
          *         URI.
          */
-        public Builder add(@CapabilityFlag int type, @NonNull Uri serviceUri) {
+        public @NonNull Builder add(@CapabilityFlag long type, @NonNull Uri serviceUri) {
             mCapabilities.mCapabilities |= type;
             // Put each of these capabilities into the map separately.
-            for (int shift = 0; shift < Integer.SIZE; shift++) {
-                int cap = type & (1 << shift);
+            for (long shift = 0; shift < Integer.SIZE; shift++) {
+                long cap = type & (1 << shift);
                 if (cap != 0) {
                     mCapabilities.mServiceMap.put(cap, serviceUri);
                     // remove that capability from the field.
@@ -157,7 +190,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * Add a UCE capability flag that this contact supports.
          * @param type the capability that the contact supports.
          */
-        public Builder add(@CapabilityFlag int type) {
+        public @NonNull Builder add(@CapabilityFlag long type) {
             mCapabilities.mCapabilities |= type;
             return this;
         }
@@ -167,7 +200,7 @@ public final class RcsContactUceCapability implements Parcelable {
          * @param extension A string containing a carrier specific service tag that is an extension
          *         of the {@link CapabilityFlag}s that are defined here.
          */
-        public Builder add(@NonNull String extension) {
+        public @NonNull Builder add(@NonNull String extension) {
             mCapabilities.mExtensionTags.add(extension);
             return this;
         }
@@ -175,15 +208,15 @@ public final class RcsContactUceCapability implements Parcelable {
         /**
          * @return the constructed instance.
          */
-        public RcsContactUceCapability build() {
+        public @NonNull RcsContactUceCapability build() {
             return mCapabilities;
         }
     }
 
     private final Uri mContactUri;
-    private int mCapabilities;
+    private long mCapabilities;
     private List<String> mExtensionTags = new ArrayList<>();
-    private Map<Integer, Uri> mServiceMap = new HashMap<>();
+    private Map<Long, Uri> mServiceMap = new HashMap<>();
 
     /**
      * Use {@link Builder} to build an instance of this interface.
@@ -196,16 +229,16 @@ public final class RcsContactUceCapability implements Parcelable {
 
     private RcsContactUceCapability(Parcel in) {
         mContactUri = in.readParcelable(Uri.class.getClassLoader());
-        mCapabilities = in.readInt();
+        mCapabilities = in.readLong();
         in.readStringList(mExtensionTags);
         // read mServiceMap as key,value pair
         int mapSize = in.readInt();
         for (int i = 0; i < mapSize; i++) {
-            mServiceMap.put(in.readInt(), in.readParcelable(Uri.class.getClassLoader()));
+            mServiceMap.put(in.readLong(), in.readParcelable(Uri.class.getClassLoader()));
         }
     }
 
-    public static final Creator<RcsContactUceCapability> CREATOR =
+    public static final @NonNull Creator<RcsContactUceCapability> CREATOR =
             new Creator<RcsContactUceCapability>() {
         @Override
         public RcsContactUceCapability createFromParcel(Parcel in) {
@@ -219,15 +252,15 @@ public final class RcsContactUceCapability implements Parcelable {
     };
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(mContactUri, 0);
-        out.writeInt(mCapabilities);
+        out.writeLong(mCapabilities);
         out.writeStringList(mExtensionTags);
         // write mServiceMap as key,value pairs
         int mapSize = mServiceMap.keySet().size();
         out.writeInt(mapSize);
-        for (int key : mServiceMap.keySet()) {
-            out.writeInt(key);
+        for (long key : mServiceMap.keySet()) {
+            out.writeLong(key);
             out.writeParcelable(mServiceMap.get(key), 0);
         }
     }
@@ -242,7 +275,7 @@ public final class RcsContactUceCapability implements Parcelable {
      * @param type The capability flag to query.
      * @return true if the capability flag specified is set, false otherwise.
      */
-    public boolean isCapable(@CapabilityFlag int type) {
+    public boolean isCapable(@CapabilityFlag long type) {
         return (mCapabilities & type) > 0;
     }
 
@@ -266,13 +299,13 @@ public final class RcsContactUceCapability implements Parcelable {
      * <p>
      * This will typically be the contact {@link Uri} available via {@link #getContactUri()} unless
      * a different service {@link Uri} was associated with this capability using
-     * {@link Builder#add(int, Uri)}.
+     * {@link Builder#add(long, Uri)}.
      *
      * @return a String containing the {@link Uri} associated with the service tag or
      * {@code null} if this capability is not set as capable.
-     * @see #isCapable(int)
+     * @see #isCapable(long)
      */
-    public @Nullable Uri getServiceUri(@CapabilityFlag int type) {
+    public @Nullable Uri getServiceUri(@CapabilityFlag long type) {
         Uri result = mServiceMap.getOrDefault(type, null);
         // If the capability is capable, but does not have a service URI associated, use the default
         // contact URI.

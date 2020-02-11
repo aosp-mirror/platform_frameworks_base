@@ -17,7 +17,7 @@
 package android.view.animation;
 
 import android.annotation.FloatRange;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 

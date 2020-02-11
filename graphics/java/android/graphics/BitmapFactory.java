@@ -20,7 +20,7 @@ import static android.graphics.BitmapFactory.Options.validate;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Trace;

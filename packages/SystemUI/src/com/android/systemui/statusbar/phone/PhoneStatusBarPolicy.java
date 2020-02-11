@@ -605,8 +605,7 @@ public class PhoneStatusBarPolicy
                     break;
                 case TelephonyIntents.ACTION_SIM_STATE_CHANGED:
                     // Avoid rebroadcast because SysUI is direct boot aware.
-                    if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK,
-                            false)) {
+                    if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                         break;
                     }
                     updateSimState(intent);

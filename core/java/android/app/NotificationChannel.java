@@ -15,13 +15,11 @@
  */
 package android.app;
 
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager.Importance;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -319,9 +317,14 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Allows users to block notifications sent through this channel, if this channel belongs to
+     * a package that is signed with the system signature. If the channel does not belong to a
+     * package that is signed with the system signature, this method does nothing.
+     * @param blockableSystem if {@code true}, allows users to block notifications on this channel.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public void setBlockableSystem(boolean blockableSystem) {
         mBlockableSystem = blockableSystem;
     }
@@ -641,6 +644,7 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public boolean isBlockableSystem() {
         return mBlockableSystem;
     }

@@ -258,6 +258,16 @@ public class RouteInfoTest extends TestCase {
         assertParcelingIsLossless(r);
 
         r = new RouteInfo(Prefix("192.0.2.0/24"), null, "wlan0");
-        assertParcelSane(r, 6);
+        assertParcelSane(r, 7);
+    }
+
+    public void testMtu() {
+        RouteInfo r;
+        r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0",
+                RouteInfo.RTN_UNICAST, 1500);
+        assertEquals(1500, r.getMtu());
+
+        r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0");
+        assertEquals(0, r.getMtu());
     }
 }

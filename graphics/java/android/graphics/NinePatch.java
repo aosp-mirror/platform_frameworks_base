@@ -16,7 +16,7 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * The NinePatch class permits drawing a bitmap in nine or more sections.

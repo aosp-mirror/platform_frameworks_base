@@ -22,7 +22,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -60,22 +62,34 @@ public final class BluetoothManager {
      * @hide
      */
     public BluetoothManager(Context context) {
-        context = context.getApplicationContext();
-        if (context == null) {
-            throw new IllegalArgumentException(
-                    "context not associated with any application (using a mock context?)");
+        if (null == null) {
+            context = context.getApplicationContext();
+            if (context == null) {
+                throw new IllegalArgumentException(
+                        "context not associated with any application (using a mock context?)");
+            }
+
+            mAdapter = BluetoothAdapter.getDefaultAdapter();
+        } else {
+            IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE);
+            if (b != null) {
+                mAdapter = new BluetoothAdapter(IBluetoothManager.Stub.asInterface(b));
+            } else {
+                Log.e(TAG, "Bluetooth binder is null");
+                mAdapter = null;
+            }
         }
-        // Legacy api - getDefaultAdapter does not take in the context
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        // Context is not initialized in constructor
         if (mAdapter != null) {
             mAdapter.setContext(context);
         }
     }
 
     /**
-     * Get the default BLUETOOTH Adapter for this device.
+     * Get the BLUETOOTH Adapter for this device.
      *
-     * @return the default BLUETOOTH Adapter
+     * @return the BLUETOOTH Adapter
      */
     public BluetoothAdapter getAdapter() {
         return mAdapter;

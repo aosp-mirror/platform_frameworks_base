@@ -38,8 +38,8 @@ using std::vector;
 LogEvent::LogEvent(log_msg& msg) {
     mContext =
             create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
-    mLogdTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
-    mLogUid = msg.entry_v4.uid;
+    mLogdTimestampNs = msg.entry.sec * NS_PER_SEC + msg.entry.nsec;
+    mLogUid = msg.entry.uid;
     init(mContext);
     if (mContext) {
         // android_log_destroy will set mContext to NULL
@@ -204,37 +204,6 @@ LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requi
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(6)), Value(state)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(7)), Value(experimentIds)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(8)), Value(userId)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const VendorAtom& vendorAtom) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = vendorAtom.atomId;
-    mLogUid = AID_STATSD;
-
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(1)), Value(vendorAtom.reverseDomainName)));
-    for (int i = 0; i < (int)vendorAtom.values.size(); i++) {
-        switch (vendorAtom.values[i].getDiscriminator()) {
-            case VendorAtom::Value::hidl_discriminator::intValue:
-                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
-                                             Value(vendorAtom.values[i].intValue())));
-                break;
-            case VendorAtom::Value::hidl_discriminator::longValue:
-                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
-                                             Value(vendorAtom.values[i].longValue())));
-                break;
-            case VendorAtom::Value::hidl_discriminator::floatValue:
-                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
-                                             Value(vendorAtom.values[i].floatValue())));
-                break;
-            case VendorAtom::Value::hidl_discriminator::stringValue:
-                mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 2)),
-                                             Value(vendorAtom.values[i].stringValue())));
-                break;
-        }
-    }
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,

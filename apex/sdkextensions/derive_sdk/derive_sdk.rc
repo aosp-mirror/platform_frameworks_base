@@ -1,0 +1,3 @@
+service derive_sdk /apex/com.android.sdkext/bin/derive_sdk
+    oneshot
+    disabled

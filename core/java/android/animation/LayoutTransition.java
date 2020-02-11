@@ -16,7 +16,7 @@
 
 package android.animation;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;

@@ -42,6 +42,7 @@ import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
+import com.android.systemui.R;
 
 import java.util.List;
 
@@ -248,7 +249,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public boolean disallowInterceptTouch(MotionEvent event) {
-        return mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
+        return !mLockPatternView.isEmpty()
+                || mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
     /** TODO: hook this up */
@@ -273,6 +275,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         @Override
         public void onPatternCellAdded(List<LockPatternView.Cell> pattern) {
             mCallback.userActivity();
+            mCallback.onUserInput();
         }
 
         @Override
@@ -335,6 +338,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
                     });
             if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                 mCallback.userActivity();
+                mCallback.onUserInput();
             }
         }
 
@@ -442,7 +446,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
-        mSecurityMessageDisplay.setNextMessageColor(colorState);
+        if (colorState != null) {
+            mSecurityMessageDisplay.setNextMessageColor(colorState);
+        }
         mSecurityMessageDisplay.setMessage(message);
     }
 

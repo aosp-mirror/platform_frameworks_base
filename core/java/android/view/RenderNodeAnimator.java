@@ -19,7 +19,7 @@ package android.view;
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;

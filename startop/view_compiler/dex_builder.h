@@ -24,7 +24,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "dex/dex_instruction.h"
+#include "android-base/logging.h"
+
+#include "slicer/dex_bytecode.h"
 #include "slicer/dex_ir.h"
 #include "slicer/writer.h"
 
@@ -364,11 +366,11 @@ class MethodBuilder {
   // Encodes a return instruction. For instructions with no return value, the opcode field is
   // ignored. Otherwise, this specifies which return instruction will be used (return,
   // return-object, etc.)
-  void EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode);
+  void EncodeReturn(const Instruction& instruction, ::dex::Opcode opcode);
 
   void EncodeMove(const Instruction& instruction);
-  void EncodeInvoke(const Instruction& instruction, ::art::Instruction::Code opcode);
-  void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
+  void EncodeInvoke(const Instruction& instruction, ::dex::Opcode opcode);
+  void EncodeBranch(::dex::Opcode op, const Instruction& instruction);
   void EncodeNew(const Instruction& instruction);
   void EncodeCast(const Instruction& instruction);
   void EncodeFieldOp(const Instruction& instruction);
@@ -377,17 +379,23 @@ class MethodBuilder {
   // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
   // formats.
 
-  inline void Encode10x(art::Instruction::Code opcode) {
+  inline uint8_t ToBits(::dex::Opcode opcode) {
+    static_assert(sizeof(uint8_t) == sizeof(::dex::Opcode));
+    return static_cast<uint8_t>(opcode);
+  }
+
+  inline void Encode10x(::dex::Opcode opcode) {
     // 00|op
-    buffer_.push_back(opcode);
+    static_assert(sizeof(uint8_t) == sizeof(::dex::Opcode));
+    buffer_.push_back(ToBits(opcode));
   }
 
-  inline void Encode11x(art::Instruction::Code opcode, uint8_t a) {
+  inline void Encode11x(::dex::Opcode opcode, uint8_t a) {
     // aa|op
-    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back((a << 8) | ToBits(opcode));
   }
 
-  inline void Encode11n(art::Instruction::Code opcode, uint8_t a, int8_t b) {
+  inline void Encode11n(::dex::Opcode opcode, uint8_t a, int8_t b) {
     // b|a|op
 
     // Make sure the fields are in bounds (4 bits for a, 4 bits for b).
@@ -395,30 +403,30 @@ class MethodBuilder {
     CHECK_LE(-8, b);
     CHECK_LT(b, 8);
 
-    buffer_.push_back(((b & 0xf) << 12) | (a << 8) | opcode);
+    buffer_.push_back(((b & 0xf) << 12) | (a << 8) | ToBits(opcode));
   }
 
-  inline void Encode21c(art::Instruction::Code opcode, uint8_t a, uint16_t b) {
+  inline void Encode21c(::dex::Opcode opcode, uint8_t a, uint16_t b) {
     // aa|op|bbbb
-    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back((a << 8) | ToBits(opcode));
     buffer_.push_back(b);
   }
 
-  inline void Encode22c(art::Instruction::Code opcode, uint8_t a, uint8_t b, uint16_t c) {
+  inline void Encode22c(::dex::Opcode opcode, uint8_t a, uint8_t b, uint16_t c) {
     // b|a|op|bbbb
     CHECK(IsShortRegister(a));
     CHECK(IsShortRegister(b));
-    buffer_.push_back((b << 12) | (a << 8) | opcode);
+    buffer_.push_back((b << 12) | (a << 8) | ToBits(opcode));
     buffer_.push_back(c);
   }
 
-  inline void Encode32x(art::Instruction::Code opcode, uint16_t a, uint16_t b) {
-    buffer_.push_back(opcode);
+  inline void Encode32x(::dex::Opcode opcode, uint16_t a, uint16_t b) {
+    buffer_.push_back(ToBits(opcode));
     buffer_.push_back(a);
     buffer_.push_back(b);
   }
 
-  inline void Encode35c(art::Instruction::Code opcode, size_t a, uint16_t b, uint8_t c, uint8_t d,
+  inline void Encode35c(::dex::Opcode opcode, size_t a, uint16_t b, uint8_t c, uint8_t d,
                         uint8_t e, uint8_t f, uint8_t g) {
     // a|g|op|bbbb|f|e|d|c
 
@@ -428,14 +436,14 @@ class MethodBuilder {
     CHECK(IsShortRegister(e));
     CHECK(IsShortRegister(f));
     CHECK(IsShortRegister(g));
-    buffer_.push_back((a << 12) | (g << 8) | opcode);
+    buffer_.push_back((a << 12) | (g << 8) | ToBits(opcode));
     buffer_.push_back(b);
     buffer_.push_back((f << 12) | (e << 8) | (d << 4) | c);
   }
 
-  inline void Encode3rc(art::Instruction::Code opcode, size_t a, uint16_t b, uint16_t c) {
+  inline void Encode3rc(::dex::Opcode opcode, size_t a, uint16_t b, uint16_t c) {
     CHECK_LE(a, 255);
-    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back((a << 8) | ToBits(opcode));
     buffer_.push_back(b);
     buffer_.push_back(c);
   }

@@ -101,7 +101,7 @@ public class NotificationLogger implements StateListener {
 
     // Tracks notifications currently visible in mNotificationStackScroller and
     // emits visibility events via NoMan on changes.
-    protected final Runnable mVisibilityReporter = new Runnable() {
+    protected Runnable mVisibilityReporter = new Runnable() {
         private final ArraySet<NotificationVisibility> mTmpNewlyVisibleNotifications =
                 new ArraySet<>();
         private final ArraySet<NotificationVisibility> mTmpCurrentlyVisibleNotifications =
@@ -405,6 +405,11 @@ public class NotificationLogger implements StateListener {
         NotificationVisibility.NotificationLocation location =
                 getNotificationLocation(mEntryManager.getNotificationData().get(key));
         mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded, location);
+    }
+
+    @VisibleForTesting
+    public void setVisibilityReporter(Runnable visibilityReporter) {
+        mVisibilityReporter = visibilityReporter;
     }
 
     /**

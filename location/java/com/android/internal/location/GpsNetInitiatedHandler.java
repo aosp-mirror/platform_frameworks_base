@@ -19,6 +19,7 @@ package com.android.internal.location;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -115,6 +116,7 @@ public class GpsNetInitiatedHandler {
     private final INetInitiatedListener mNetInitiatedListener;
 
     // Set to true if string from HAL is encoded as Hex, e.g., "3F0039"
+    @UnsupportedAppUsage
     static private boolean mIsHexInput = true;
 
     // End time of emergency call, and extension, if set
@@ -123,6 +125,9 @@ public class GpsNetInitiatedHandler {
 
     public static class GpsNiNotification
     {
+        @android.compat.annotation.UnsupportedAppUsage
+        public GpsNiNotification() {
+        }
         public int notificationId;
         public int niType;
         public boolean needNotify;
@@ -130,9 +135,13 @@ public class GpsNetInitiatedHandler {
         public boolean privacyOverride;
         public int timeout;
         public int defaultResponse;
+        @UnsupportedAppUsage
         public String requestorId;
+        @UnsupportedAppUsage
         public String text;
+        @UnsupportedAppUsage
         public int requestorIdEncoding;
+        @UnsupportedAppUsage
         public int textEncoding;
     };
 
@@ -258,6 +267,7 @@ public class GpsNetInitiatedHandler {
     }
 
     // Handles NI events from HAL
+    @UnsupportedAppUsage
     public void handleNiNotification(GpsNiNotification notif) {
         if (DEBUG) Log.d(TAG, "in handleNiNotification () :"
                         + " notificationId: " + notif.notificationId
@@ -539,6 +549,7 @@ public class GpsNetInitiatedHandler {
      *                   set to -1, and <code> isHex </code> can be false.
      * @return the decoded string
      */
+    @UnsupportedAppUsage
     static private String decodeString(String original, boolean isHex, int coding)
     {
         if (coding == GPS_ENC_NONE || coding == GPS_ENC_UNKNOWN) {

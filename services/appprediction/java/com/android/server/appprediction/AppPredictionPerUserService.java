@@ -251,6 +251,40 @@ public class AppPredictionPerUserService extends
         // Do nothing, eventually the system will bind to the remote service again...
     }
 
+    void onPackageUpdatedLocked() {
+        if (isDebug()) {
+            Slog.v(TAG, "onPackageUpdatedLocked()");
+        }
+        destroyAndRebindRemoteService();
+    }
+
+    void onPackageRestartedLocked() {
+        if (isDebug()) {
+            Slog.v(TAG, "onPackageRestartedLocked()");
+        }
+        destroyAndRebindRemoteService();
+    }
+
+    private void destroyAndRebindRemoteService() {
+        if (mRemoteService == null) {
+            return;
+        }
+
+        if (isDebug()) {
+            Slog.d(TAG, "Destroying the old remote service.");
+        }
+        mRemoteService.destroy();
+        mRemoteService = null;
+
+        mRemoteService = getRemoteServiceLocked();
+        if (mRemoteService != null) {
+            if (isDebug()) {
+                Slog.d(TAG, "Rebinding to the new remote service.");
+            }
+            mRemoteService.reconnect();
+        }
+    }
+
     /**
      * Called after the remote service connected, it's used to restore state from a 'zombie'
      * service (i.e., after it died).

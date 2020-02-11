@@ -466,7 +466,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // the user being changed will cause a reload of all user specific settings, which causes
         // provider initialization, and propagates changes until a steady state is reached
         mCurrentUserId = UserHandle.USER_NULL;
-        onUserChangedLocked(UserHandle.USER_SYSTEM);
+        onUserChangedLocked(ActivityManager.getCurrentUser());
 
         // initialize in-memory settings values
         onBackgroundThrottleWhitelistChangedLocked();

@@ -51,6 +51,7 @@ import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
 import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -229,10 +230,23 @@ public class MultipathPolicyTrackerTest {
         verify(mCM).registerNetworkCallback(any(), networkCallback.capture(), any());
 
         // Simulate callback after capability changes
-        final NetworkCapabilities capabilities = new NetworkCapabilities()
+        NetworkCapabilities capabilities = new NetworkCapabilities()
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addTransportType(TRANSPORT_CELLULAR)
                 .setNetworkSpecifier(new StringNetworkSpecifier("234"));
+        if (!roaming) {
+            capabilities.addCapability(NET_CAPABILITY_NOT_ROAMING);
+        }
+        networkCallback.getValue().onCapabilitiesChanged(
+                TEST_NETWORK,
+                capabilities);
+
+        // make sure it also works with the new introduced  TelephonyNetworkSpecifier
+        capabilities = new NetworkCapabilities()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addTransportType(TRANSPORT_CELLULAR)
+                .setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                        .setSubscriptionId(234).build());
         if (!roaming) {
             capabilities.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }

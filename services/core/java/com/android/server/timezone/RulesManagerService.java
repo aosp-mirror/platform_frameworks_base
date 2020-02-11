@@ -32,6 +32,7 @@ import android.app.timezone.IRulesManager;
 import android.app.timezone.RulesManager;
 import android.app.timezone.RulesState;
 import android.content.Context;
+import android.icu.util.TimeZone;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -45,11 +46,10 @@ import com.android.timezone.distro.StagedDistroOperation;
 import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
-import libcore.icu.ICU;
 import libcore.timezone.TimeZoneDataFiles;
 import libcore.timezone.TimeZoneFinder;
 import libcore.timezone.TzDataSetVersion;
-import libcore.timezone.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDb;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -198,7 +198,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     Slog.w(TAG, "Failed to read staged distro.", e);
                 }
             }
-            return new RulesState(baseVersion.rulesVersion, DISTRO_FORMAT_VERSION_SUPPORTED,
+            return new RulesState(baseVersion.getRulesVersion(), DISTRO_FORMAT_VERSION_SUPPORTED,
                     operationInProgress, stagedOperationStatus, stagedDistroRulesVersion,
                     distroStatus, installedDistroRulesVersion);
         }
@@ -518,9 +518,9 @@ public final class RulesManagerService extends IRulesManager.Stub {
                         case 'a': {
                             // Report the active rules version (i.e. the rules in use by the current
                             // process).
-                            pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
-                                    + ICU.getTZDataVersion() + ","
-                                    + ZoneInfoDB.getInstance().getVersion() + ","
+                            pw.println("Active rules version (ICU, ZoneInfoDb, TimeZoneFinder): "
+                                    + TimeZone.getTZDataVersion() + ","
+                                    + ZoneInfoDb.getInstance().getVersion() + ","
                                     + TimeZoneFinder.getInstance().getIanaVersion());
                             break;
                         }
@@ -535,8 +535,8 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
         pw.println("RulesManagerService state: " + toString());
         pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
-                + ICU.getTZDataVersion() + ","
-                + ZoneInfoDB.getInstance().getVersion() + ","
+                + TimeZone.getTZDataVersion() + ","
+                + ZoneInfoDb.getInstance().getVersion() + ","
                 + TimeZoneFinder.getInstance().getIanaVersion());
         pw.println("Distro state: " + rulesState.toString());
         mPackageTracker.dump(pw);

@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.HardwareRenderer;
@@ -35,6 +36,7 @@ import com.android.internal.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Threaded renderer that proxies the rendering to a render thread. Most calls
@@ -300,7 +302,8 @@ public final class ThreadedRenderer extends HardwareRenderer {
     private boolean mEnabled;
     private boolean mRequested = true;
 
-    private FrameDrawingCallback mNextRtFrameCallback;
+    @Nullable
+    private ArrayList<FrameDrawingCallback> mNextRtFrameCallbacks;
 
     ThreadedRenderer(Context context, boolean translucent, String name) {
         super();
@@ -441,8 +444,11 @@ public final class ThreadedRenderer extends HardwareRenderer {
      *
      * @param callback The callback to register.
      */
-    void registerRtFrameCallback(FrameDrawingCallback callback) {
-        mNextRtFrameCallback = callback;
+    void registerRtFrameCallback(@NonNull FrameDrawingCallback callback) {
+        if (mNextRtFrameCallbacks == null) {
+            mNextRtFrameCallbacks = new ArrayList<>();
+        }
+        mNextRtFrameCallbacks.add(callback);
     }
 
     /**
@@ -583,10 +589,14 @@ public final class ThreadedRenderer extends HardwareRenderer {
         // Consume and set the frame callback after we dispatch draw to the view above, but before
         // onPostDraw below which may reset the callback for the next frame.  This ensures that
         // updates to the frame callback during scroll handling will also apply in this frame.
-        final FrameDrawingCallback callback = mNextRtFrameCallback;
-        mNextRtFrameCallback = null;
-        if (callback != null) {
-            setFrameCallback(callback);
+        if (mNextRtFrameCallbacks != null) {
+            final ArrayList<FrameDrawingCallback> frameCallbacks = mNextRtFrameCallbacks;
+            mNextRtFrameCallbacks = null;
+            setFrameCallback(frame -> {
+                for (int i = 0; i < frameCallbacks.size(); ++i) {
+                    frameCallbacks.get(i).onFrameDraw(frame);
+                }
+            });
         }
 
         if (mRootNodeNeedsUpdate || !mRootNode.hasDisplayList()) {

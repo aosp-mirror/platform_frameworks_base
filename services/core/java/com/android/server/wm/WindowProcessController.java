@@ -23,7 +23,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
-import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -56,6 +55,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.IRemoteAnimationRunner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
@@ -175,6 +175,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final Configuration mLastReportedConfiguration;
     // Registered display id as a listener to override config change
     private int mDisplayId;
+
+    /** Whether our process is currently running a {@link RecentsAnimation} */
+    private boolean mRunningRecentsAnimation;
+
+    /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
+    private boolean mRunningRemoteAnimation;
 
     public WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info,
             String name, int uid, int userId, Object owner, WindowProcessListener listener) {
@@ -546,14 +552,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 continue;
             }
             ActivityRecord topActivity = task.getTopActivity();
-            if (topActivity == null) {
-                continue;
-            }
-            // If an activity has just been started it will not yet be visible, but
-            // is expected to be soon. We treat this as if it were already visible.
-            // This ensures a subsequent activity can be started even before this one
-            // becomes visible.
-            if (topActivity.visible || topActivity.isState(INITIALIZING)) {
+            if (topActivity != null && topActivity.visible) {
                 return true;
             }
         }
@@ -565,7 +564,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * activities are allowed to be resumed per process.
      * @return {@code true} if the activity is allowed to be resumed by compatibility
      * restrictions, which the activity was the topmost visible activity in process or the app is
-     * targeting after Q.
+     * targeting after Q. Note that non-focusable activity, in picture-in-picture mode for instance,
+     * does not count as a topmost activity.
      */
     boolean updateTopResumingActivityInProcessIfNeeded(@NonNull ActivityRecord activity) {
         if (mInfo.targetSdkVersion >= Q || mPreQTopResumedActivity == activity) {
@@ -581,9 +581,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         boolean canUpdate = false;
         final ActivityDisplay topDisplay =
                 mPreQTopResumedActivity != null ? mPreQTopResumedActivity.getDisplay() : null;
-        // Update the topmost activity if current top activity was not on any display or no
-        // longer visible.
-        if (topDisplay == null || !mPreQTopResumedActivity.visible) {
+        // Update the topmost activity if current top activity is
+        // - not on any display OR
+        // - no longer visible OR
+        // - not focusable (in PiP mode for instance)
+        if (topDisplay == null
+                || !mPreQTopResumedActivity.visible
+                || !mPreQTopResumedActivity.isFocusable()) {
             canUpdate = true;
         }
 
@@ -1072,6 +1076,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return this == mAtm.mPreviousProcess;
         }
+    }
+
+    void setRunningRecentsAnimation(boolean running) {
+        if (mRunningRecentsAnimation == running) {
+            return;
+        }
+        mRunningRecentsAnimation = running;
+        updateRunningRemoteOrRecentsAnimation();
+    }
+
+    void setRunningRemoteAnimation(boolean running) {
+        if (mRunningRemoteAnimation == running) {
+            return;
+        }
+        mRunningRemoteAnimation = running;
+        updateRunningRemoteOrRecentsAnimation();
+    }
+
+    private void updateRunningRemoteOrRecentsAnimation() {
+
+        // Posting on handler so WM lock isn't held when we call into AM.
+        mAtm.mH.sendMessage(PooledLambda.obtainMessage(
+                WindowProcessListener::setRunningRemoteAnimation, mListener,
+                mRunningRecentsAnimation || mRunningRemoteAnimation));
     }
 
     @Override

@@ -19,16 +19,12 @@ package com.android.keyguard;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 import static android.telephony.PhoneStateListener.LISTEN_NONE;
 
-import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.os.SystemProperties;
-import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -37,18 +33,17 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Controller that generates text including the carrier names and/or the status of all the SIM
@@ -72,8 +67,6 @@ public class CarrierTextController {
     private Context mContext;
     private CharSequence mSeparator;
     private WakefulnessLifecycle mWakefulnessLifecycle;
-    @VisibleForTesting
-    protected boolean mDisplayOpportunisticSubscriptionCarrierText;
     private final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
                 @Override
@@ -162,8 +155,7 @@ public class CarrierTextController {
     public CarrierTextController(Context context, CharSequence separator, boolean showAirplaneMode,
             boolean showMissingSim) {
         mContext = context;
-        mIsEmergencyCallCapable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
+        mIsEmergencyCallCapable = getTelephonyManager().isVoiceCapable();
 
         mShowAirplaneMode = showAirplaneMode;
         mShowMissingSim = showMissingSim;
@@ -171,12 +163,12 @@ public class CarrierTextController {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mSeparator = separator;
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
-        mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE)).getMaxPhoneCount();
+        mSimSlotsNumber = getTelephonyManager().getSupportedModemCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
-        updateDisplayOpportunisticSubscriptionCarrierText(SystemProperties.getBoolean(
-                TelephonyProperties.DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME,
-                false));
+    }
+
+    private TelephonyManager getTelephonyManager() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     /**
@@ -194,7 +186,7 @@ public class CarrierTextController {
         CharSequence carrierTextForSimIOError = getCarrierTextForSimState(
                 IccCardConstants.State.CARD_IO_ERROR, carrier);
         // mSimErrorState has the state of each sim indexed by slotID.
-        for (int index = 0; index < mSimErrorState.length; index++) {
+        for (int index = 0; index < getTelephonyManager().getActiveModemCount(); index++) {
             if (!mSimErrorState[index]) {
                 continue;
             }
@@ -227,8 +219,7 @@ public class CarrierTextController {
      * @param callback Callback to provide text updates
      */
     public void setListening(CarrierTextCallback callback) {
-        TelephonyManager telephonyManager = ((TelephonyManager) mContext
-                .getSystemService(Context.TELEPHONY_SERVICE));
+        TelephonyManager telephonyManager = getTelephonyManager();
         if (callback != null) {
             mCarrierTextCallback = callback;
             if (ConnectivityManager.from(mContext).isNetworkSupported(
@@ -253,58 +244,8 @@ public class CarrierTextController {
         }
     }
 
-    /**
-     * @param subscriptions
-     */
-    private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
-        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
-            SubscriptionInfo info1 = subscriptions.get(0);
-            SubscriptionInfo info2 = subscriptions.get(1);
-            if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
-                // If both subscriptions are primary, show both.
-                if (!info1.isOpportunistic() && !info2.isOpportunistic()) return;
-
-                // If carrier required, always show signal bar of primary subscription.
-                // Otherwise, show whichever subscription is currently active for Internet.
-                boolean alwaysShowPrimary = CarrierConfigManager.getDefaultConfig()
-                        .getBoolean(CarrierConfigManager
-                        .KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN);
-                if (alwaysShowPrimary) {
-                    subscriptions.remove(info1.isOpportunistic() ? info1 : info2);
-                } else {
-                    subscriptions.remove(info1.getSubscriptionId() == mActiveMobileDataSubscription
-                            ? info2 : info1);
-                }
-
-            }
-        }
-    }
-
-    /**
-     * updates if opportunistic sub carrier text should be displayed or not
-     *
-     */
-    @VisibleForTesting
-    public void updateDisplayOpportunisticSubscriptionCarrierText(boolean isEnable) {
-        mDisplayOpportunisticSubscriptionCarrierText = isEnable;
-    }
-
     protected List<SubscriptionInfo> getSubscriptionInfo() {
-        List<SubscriptionInfo> subs;
-        if (mDisplayOpportunisticSubscriptionCarrierText) {
-            SubscriptionManager subscriptionManager = ((SubscriptionManager) mContext
-                    .getSystemService(
-                    Context.TELEPHONY_SUBSCRIPTION_SERVICE));
-            subs = subscriptionManager.getActiveSubscriptionInfoList(false);
-            if (subs == null) {
-                subs = new ArrayList<>();
-            } else {
-                filterMobileSubscriptionInSameGroup(subs);
-            }
-        } else {
-            subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
-        }
-        return subs;
+        return mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(false);
     }
 
     protected void updateCarrierText() {
@@ -341,7 +282,7 @@ public class CarrierTextController {
             }
             if (simState == IccCardConstants.State.READY) {
                 ServiceState ss = mKeyguardUpdateMonitor.mServiceStates.get(subId);
-                if (ss != null && ss.getDataRegState() == ServiceState.STATE_IN_SERVICE) {
+                if (ss != null && ss.getDataRegistrationState() == ServiceState.STATE_IN_SERVICE) {
                     // hack for WFC (IWLAN) not turning off immediately once
                     // Wi-Fi is disassociated or disabled
                     if (ss.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
@@ -356,7 +297,9 @@ public class CarrierTextController {
                 }
             }
         }
-        if (allSimsMissing) {
+        // Only create "No SIM card" if no cards with CarrierName && no wifi when some sim is READY
+        // This condition will also be true always when numSubs == 0
+        if (allSimsMissing && !anySimReadyAndInService) {
             if (numSubs != 0) {
                 // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
                 // This depends on mPlmn containing the text "Emergency calls only" when the radio
@@ -395,8 +338,11 @@ public class CarrierTextController {
             }
         }
 
+        if (TextUtils.isEmpty(displayText)) displayText = joinNotEmpty(mSeparator, carrierNames);
+
         displayText = updateCarrierTextWithSimIoError(displayText, carrierNames, subOrderBySlot,
                 allSimsMissing);
+
         boolean airplaneMode = false;
         // APM (airplane mode) != no carrier state. There are carrier services
         // (e.g. WFC = Wi-Fi calling) which may operate in APM.
@@ -405,9 +351,6 @@ public class CarrierTextController {
             airplaneMode = true;
         }
 
-        if (TextUtils.isEmpty(displayText) && !airplaneMode) {
-            displayText = joinNotEmpty(mSeparator, carrierNames);
-        }
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
                 carrierNames,

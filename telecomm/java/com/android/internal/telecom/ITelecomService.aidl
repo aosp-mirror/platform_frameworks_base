@@ -146,6 +146,11 @@ interface ITelecomService {
     String getDefaultDialerPackage();
 
     /**
+     * @see TelecomServiceImpl#getDefaultDialerPackage
+     */
+    String getDefaultDialerPackageForUser(int userId);
+
+    /**
      * @see TelecomServiceImpl#getSystemDialerPackage
      */
     String getSystemDialerPackage();
@@ -237,9 +242,20 @@ interface ITelecomService {
     void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
 
     /**
+     * @see TelecomServiceImpl#addNewIncomingConference
+     */
+    void addNewIncomingConference(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
      * @see TelecomServiceImpl#addNewUnknownCall
      */
     void addNewUnknownCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
+     * @see TelecomServiceImpl#startConference
+     */
+    void startConference(in List<Uri> participants, in Bundle extras,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#placeCall
@@ -260,6 +276,11 @@ interface ITelecomService {
     * @see TelecomServiceImpl#createManageBlockedNumbersIntent
     **/
     Intent createManageBlockedNumbersIntent();
+
+   /**
+    * @see TelecomServiceImpl#createLaunchEmergencyDialerIntent
+    */
+    Intent createLaunchEmergencyDialerIntent(in String number);
 
     /**
      * @see TelecomServiceImpl#isIncomingCallPermitted
@@ -303,8 +324,6 @@ interface ITelecomService {
     void setTestDefaultCallScreeningApp(String packageName);
 
     void addOrRemoveTestCallCompanionApp(String packageName, boolean isAdded);
-
-    void setTestAutoModeApp(String packageName);
 
     /**
      * @see TelecomServiceImpl#setSystemDialer

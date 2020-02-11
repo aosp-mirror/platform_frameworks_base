@@ -27,11 +27,11 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -58,9 +58,9 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
-import com.google.android.collect.Lists;
-
 import libcore.util.HexEncoding;
+
+import com.google.android.collect.Lists;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

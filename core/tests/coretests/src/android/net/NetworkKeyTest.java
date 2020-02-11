@@ -18,11 +18,12 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiSsid;
+import android.net.wifi.WifiManager;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -65,7 +66,7 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromWifi_noneSsid() throws Exception {
-        when(mWifiInfo.getSSID()).thenReturn(WifiSsid.NONE);
+        when(mWifiInfo.getSSID()).thenReturn(WifiManager.UNKNOWN_SSID);
         when(mWifiInfo.getBSSID()).thenReturn(VALID_BSSID);
         assertNull(NetworkKey.createFromWifiInfo(mWifiInfo));
     }
@@ -106,26 +107,26 @@ public class NetworkKeyTest {
     }
 
     @Test
-    public void createFromScanResult_nullWifiSsid() {
-        ScanResult scanResult = new ScanResult();
+    public void createFromScanResult_nullSsid() {
+        ScanResult scanResult = mock(ScanResult.class);
         scanResult.BSSID = VALID_BSSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
     }
 
     @Test
-    public void createFromScanResult_emptyWifiSsid() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.wifiSsid = WifiSsid.createFromAsciiEncoded("");
+    public void createFromScanResult_emptySsid() {
+        ScanResult scanResult = mock(ScanResult.class);
+        scanResult.SSID = "";
         scanResult.BSSID = VALID_BSSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
     }
 
     @Test
-    public void createFromScanResult_noneWifiSsid() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.wifiSsid = WifiSsid.createFromAsciiEncoded(WifiSsid.NONE);
+    public void createFromScanResult_noneSsid() {
+        ScanResult scanResult = mock(ScanResult.class);
+        scanResult.SSID = WifiManager.UNKNOWN_SSID;
         scanResult.BSSID = VALID_BSSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
@@ -133,16 +134,16 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_nullBssid() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.wifiSsid = WifiSsid.createFromAsciiEncoded(VALID_UNQUOTED_SSID);
+        ScanResult scanResult = mock(ScanResult.class);
+        scanResult.SSID = VALID_UNQUOTED_SSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
     }
 
     @Test
     public void createFromScanResult_emptyBssid() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.wifiSsid = WifiSsid.createFromAsciiEncoded(VALID_UNQUOTED_SSID);
+        ScanResult scanResult = mock(ScanResult.class);
+        scanResult.SSID = VALID_UNQUOTED_SSID;
         scanResult.BSSID = "";
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
@@ -150,17 +151,17 @@ public class NetworkKeyTest {
 
     @Test
     public void createFromScanResult_invalidBssid() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.wifiSsid = WifiSsid.createFromAsciiEncoded(VALID_UNQUOTED_SSID);
+        ScanResult scanResult = mock(ScanResult.class);
+        scanResult.SSID = VALID_UNQUOTED_SSID;
         scanResult.BSSID = INVALID_BSSID;
 
         assertNull(NetworkKey.createFromScanResult(scanResult));
     }
 
     @Test
-    public void createFromScanResult_validWifiSsid() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.wifiSsid = WifiSsid.createFromAsciiEncoded(VALID_UNQUOTED_SSID);
+    public void createFromScanResult_validSsid() {
+        ScanResult scanResult = mock(ScanResult.class);
+        scanResult.SSID = VALID_UNQUOTED_SSID;
         scanResult.BSSID = VALID_BSSID;
 
         NetworkKey expected = new NetworkKey(new WifiKey(VALID_SSID, VALID_BSSID));

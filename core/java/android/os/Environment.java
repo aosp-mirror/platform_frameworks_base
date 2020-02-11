@@ -20,10 +20,10 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -55,6 +55,7 @@ public class Environment {
     private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
     private static final String ENV_PRODUCT_ROOT = "PRODUCT_ROOT";
     private static final String ENV_SYSTEM_EXT_ROOT = "SYSTEM_EXT_ROOT";
+    private static final String ENV_APEX_ROOT = "APEX_ROOT";
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
@@ -78,7 +79,9 @@ public class Environment {
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
     private static final File DIR_PRODUCT_ROOT = getDirectory(ENV_PRODUCT_ROOT, "/product");
     private static final File DIR_SYSTEM_EXT_ROOT = getDirectory(ENV_SYSTEM_EXT_ROOT,
-                                                           "/system_ext");
+            "/system_ext");
+    private static final File DIR_APEX_ROOT = getDirectory(ENV_APEX_ROOT,
+            "/apex");
 
     @UnsupportedAppUsage
     private static UserEnvironment sCurrentUser;
@@ -169,6 +172,7 @@ public class Environment {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     @TestApi
     public static @NonNull File getStorageDirectory() {
         return DIR_ANDROID_STORAGE;
@@ -242,6 +246,16 @@ public class Environment {
     @SystemApi
     public static @NonNull File getSystemExtDirectory() {
         return DIR_SYSTEM_EXT_ROOT;
+    }
+
+    /**
+     * Return root directory of the apex mount point, where all the apex modules are made available
+     * to the rest of the system.
+     *
+     * @hide
+     */
+    public static @NonNull File getApexDirectory() {
+        return DIR_APEX_ROOT;
     }
 
     /**

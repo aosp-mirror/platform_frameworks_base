@@ -24,113 +24,128 @@ import android.telephony.ImsiEncryptionInfo;
  */
 interface IPhoneSubInfo {
 
+    /** @deprecated Use {@link #getDeviceIdWithFeature(String, String) instead */
+    @UnsupportedAppUsage
+    String getDeviceId(String callingPackage);
+
     /**
      * Retrieves the unique device ID, e.g., IMEI for GSM phones.
      */
-    String getDeviceId(String callingPackage);
+    String getDeviceIdWithFeature(String callingPackage, String callingFeatureId);
 
      /**
      * Retrieves the unique Network Access ID
      */
-    String getNaiForSubscriber(int subId, String callingPackage);
+    String getNaiForSubscriber(int subId, String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the unique device ID of a phone for the device, e.g., IMEI
      * for GSM phones.
      */
-    String getDeviceIdForPhone(int phoneId, String callingPackage);
+    String getDeviceIdForPhone(int phoneId, String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the IMEI.
      */
-    String getImeiForSubscriber(int subId, String callingPackage);
+    String getImeiForSubscriber(int subId, String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the software version number for the device, e.g., IMEI/SV
      * for GSM phones.
      */
-    String getDeviceSvn(String callingPackage);
+    String getDeviceSvn(String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the software version number of a subId for the device, e.g., IMEI/SV
      * for GSM phones.
      */
-    String getDeviceSvnUsingSubId(int subId, String callingPackage);
+    String getDeviceSvnUsingSubId(int subId, String callingPackage, String callingFeatureId);
 
-    /**
-     * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
-     */
+    /** @deprecated Use {@link #getSubscriberIdWithFeature(String, String) instead */
     @UnsupportedAppUsage
     String getSubscriberId(String callingPackage);
 
     /**
+     * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
+     */
+    String getSubscriberIdWithFeature(String callingPackage, String callingComponenId);
+
+    /**
      * Retrieves the unique subscriber ID of a given subId, e.g., IMSI for GSM phones.
      */
-    String getSubscriberIdForSubscriber(int subId, String callingPackage);
+    String getSubscriberIdForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Retrieves the Group Identifier Level1 for GSM phones of a subId.
      */
-    String getGroupIdLevel1ForSubscriber(int subId, String callingPackage);
+    String getGroupIdLevel1ForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
-    /**
-     * Retrieves the serial number of the ICC, if applicable.
-     */
+    /** @deprecared Use {@link getIccSerialNumberWithFeature(String, String)} instead */
     @UnsupportedAppUsage
     String getIccSerialNumber(String callingPackage);
 
     /**
+     * Retrieves the serial number of the ICC, if applicable.
+     */
+    String getIccSerialNumberWithFeature(String callingPackage, String callingFeatureId);
+
+    /**
      * Retrieves the serial number of a given subId.
      */
-    String getIccSerialNumberForSubscriber(int subId, String callingPackage);
+    String getIccSerialNumberForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Retrieves the phone number string for line 1.
      */
-    String getLine1Number(String callingPackage);
+    String getLine1Number(String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the phone number string for line 1 of a subcription.
      */
-    String getLine1NumberForSubscriber(int subId, String callingPackage);
+    String getLine1NumberForSubscriber(int subId, String callingPackage, String callingFeatureId);
 
 
     /**
      * Retrieves the alpha identifier for line 1.
      */
-    String getLine1AlphaTag(String callingPackage);
+    String getLine1AlphaTag(String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the alpha identifier for line 1 of a subId.
      */
-    String getLine1AlphaTagForSubscriber(int subId, String callingPackage);
+    String getLine1AlphaTagForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
 
     /**
      * Retrieves MSISDN Number.
      */
-    String getMsisdn(String callingPackage);
+    String getMsisdn(String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the Msisdn of a subId.
      */
-    String getMsisdnForSubscriber(int subId, String callingPackage);
+    String getMsisdnForSubscriber(int subId, String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the voice mail number.
      */
-    String getVoiceMailNumber(String callingPackage);
+    String getVoiceMailNumber(String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the voice mail number of a given subId.
      */
-    String getVoiceMailNumberForSubscriber(int subId, String callingPackage);
+    String getVoiceMailNumberForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Retrieves the Carrier information used to encrypt IMSI and IMPI.
      */
     ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int subId, int keyType,
-    String callingPackage);
+            String callingPackage);
 
     /**
      * Stores the Carrier information used to encrypt IMSI and IMPI.
@@ -148,13 +163,14 @@ interface IPhoneSubInfo {
     /**
      * Retrieves the alpha identifier associated with the voice mail number.
      */
-    String getVoiceMailAlphaTag(String callingPackage);
+    String getVoiceMailAlphaTag(String callingPackage, String callingFeatureId);
 
     /**
      * Retrieves the alpha identifier associated with the voice mail number
      * of a subId.
      */
-    String getVoiceMailAlphaTagForSubscriber(int subId, String callingPackage);
+    String getVoiceMailAlphaTagForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.

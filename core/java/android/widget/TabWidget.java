@@ -18,7 +18,7 @@ package android.widget;
 
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -433,7 +433,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * to the next tabbed view, in this example).
      * <p>
      * To move both the focus AND the selected tab at once, please use
-     * {@link #setCurrentTab}. Normally, the view logic takes care of
+     * {@link #focusCurrentTab}. Normally, the view logic takes care of
      * adjusting the focus, so unless you're circumventing the UI,
      * you'll probably just focus your interest here.
      *

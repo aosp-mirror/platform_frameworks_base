@@ -1,12 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "RollbackTest"
-    },
-    {
-      "name": "StagedRollbackTest"
-    },
-    {
       "name": "FrameworksServicesTests",
       "options": [
         {
@@ -21,6 +15,9 @@
     },
     {
       "path": "cts/hostsidetests/rollback"
+    },
+    {
+      "path": "frameworks/base/tests/RollbackTest"
     }
   ]
 }

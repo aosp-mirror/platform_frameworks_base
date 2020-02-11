@@ -23,7 +23,8 @@ namespace android {
 class DisplayEventDispatcher : public LooperCallback {
 public:
     explicit DisplayEventDispatcher(const sp<Looper>& looper,
-            ISurfaceComposer::VsyncSource vsyncSource = ISurfaceComposer::eVsyncSourceApp);
+            ISurfaceComposer::VsyncSource vsyncSource = ISurfaceComposer::eVsyncSourceApp,
+            ISurfaceComposer::ConfigChanged configChanged = ISurfaceComposer::eConfigChangedSuppress);
 
     status_t initialize();
     void dispose();

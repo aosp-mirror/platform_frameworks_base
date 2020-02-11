@@ -16,6 +16,7 @@
 
 package com.android.internal.telephony.gsm;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.SmsCbEtwsInfo;
 
@@ -31,7 +32,7 @@ import java.util.Locale;
  * All relevant header information is now sent as a Parcelable
  * {@link android.telephony.SmsCbMessage} object in the "message" extra of the
  * {@link android.provider.Telephony.Sms.Intents#SMS_CB_RECEIVED_ACTION} or
- * {@link android.provider.Telephony.Sms.Intents#SMS_EMERGENCY_CB_RECEIVED_ACTION} intent.
+ * {@link android.provider.Telephony.Sms.Intents#ACTION_SMS_EMERGENCY_CB_RECEIVED} intent.
  * The raw PDU is no longer sent to SMS CB applications.
  */
 public class SmsCbHeader {
@@ -72,22 +73,22 @@ public class SmsCbHeader {
     /**
      * Length of SMS-CB header
      */
-    static final int PDU_HEADER_LENGTH = 6;
+    public static final int PDU_HEADER_LENGTH = 6;
 
     /**
      * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1
      */
-    static final int FORMAT_GSM = 1;
+    public static final int FORMAT_GSM = 1;
 
     /**
      * UMTS pdu format, as defined in 3gpp TS 23.041, section 9.4.2
      */
-    static final int FORMAT_UMTS = 2;
+    public static final int FORMAT_UMTS = 2;
 
     /**
-     * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1.3
+     * ETWS pdu format, as defined in 3gpp TS 23.041, section 9.4.1.3
      */
-    static final int FORMAT_ETWS_PRIMARY = 3;
+    public static final int FORMAT_ETWS_PRIMARY = 3;
 
     /**
      * Message type value as defined in 3gpp TS 25.324, section 11.1.
@@ -110,6 +111,7 @@ public class SmsCbHeader {
     private final int mSerialNumber;
 
     /** The Message Identifier in 3GPP is the same as the Service Category in CDMA. */
+    @UnsupportedAppUsage
     private final int mMessageIdentifier;
 
     private final int mDataCodingScheme;
@@ -128,6 +130,7 @@ public class SmsCbHeader {
     /** CMAS warning notification info. */
     private final SmsCbCmasInfo mCmasInfo;
 
+    @UnsupportedAppUsage
     public SmsCbHeader(byte[] pdu) throws IllegalArgumentException {
         if (pdu == null || pdu.length < PDU_HEADER_LENGTH) {
             throw new IllegalArgumentException("Illegal PDU");
@@ -225,39 +228,44 @@ public class SmsCbHeader {
         }
     }
 
+    @UnsupportedAppUsage
     int getGeographicalScope() {
         return mGeographicalScope;
     }
 
+    @UnsupportedAppUsage
     int getSerialNumber() {
         return mSerialNumber;
     }
 
+    @UnsupportedAppUsage
     int getServiceCategory() {
         return mMessageIdentifier;
     }
 
-    int getDataCodingScheme() {
+    public int getDataCodingScheme() {
         return mDataCodingScheme;
     }
 
-    DataCodingScheme getDataCodingSchemeStructedData() {
+    public DataCodingScheme getDataCodingSchemeStructedData() {
         return mDataCodingSchemeStructedData;
     }
 
+    @UnsupportedAppUsage
     int getPageIndex() {
         return mPageIndex;
     }
 
+    @UnsupportedAppUsage
     int getNumberOfPages() {
         return mNrOfPages;
     }
 
-    SmsCbEtwsInfo getEtwsInfo() {
+    public SmsCbEtwsInfo getEtwsInfo() {
         return mEtwsInfo;
     }
 
-    SmsCbCmasInfo getCmasInfo() {
+    public SmsCbCmasInfo getCmasInfo() {
         return mCmasInfo;
     }
 
@@ -265,7 +273,7 @@ public class SmsCbHeader {
      * Return whether this broadcast is an emergency (PWS) message type.
      * @return true if this message is emergency type; false otherwise
      */
-    boolean isEmergencyMessage() {
+    public boolean isEmergencyMessage() {
         return mMessageIdentifier >= SmsCbConstants.MESSAGE_ID_PWS_FIRST_IDENTIFIER
                 && mMessageIdentifier <= SmsCbConstants.MESSAGE_ID_PWS_LAST_IDENTIFIER;
     }
@@ -283,7 +291,7 @@ public class SmsCbHeader {
      * Return whether this broadcast is an ETWS primary notification.
      * @return true if this message is an ETWS primary notification; false otherwise
      */
-    boolean isEtwsPrimaryNotification() {
+    public boolean isEtwsPrimaryNotification() {
         return mFormat == FORMAT_ETWS_PRIMARY;
     }
 
@@ -291,7 +299,7 @@ public class SmsCbHeader {
      * Return whether this broadcast is in UMTS format.
      * @return true if this message is in UMTS format; false otherwise
      */
-    boolean isUmtsFormat() {
+    public boolean isUmtsFormat() {
         return mFormat == FORMAT_UMTS;
     }
 

@@ -18,7 +18,8 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SuppressLint;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.radio.V1_4.CellInfo.Info;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -179,6 +180,18 @@ public abstract class CellInfo implements Parcelable {
      *
      * @return a time stamp in nanos since boot.
      */
+    @SuppressLint("MethodNameUnits")
+    public long getTimestampNanos() {
+        return mTimeStamp;
+    }
+
+    /**
+     * Approximate time this cell information was received from the modem.
+     *
+     * @return a time stamp in nanos since boot.
+     * @deprecated Use {@link #getTimestampNanos} instead.
+     */
+    @Deprecated
     public long getTimeStamp() {
         return mTimeStamp;
     }
@@ -189,11 +202,15 @@ public abstract class CellInfo implements Parcelable {
         mTimeStamp = ts;
     }
 
-    /** @hide */
+    /**
+     * @return a {@link CellIdentity} instance.
+     */
     @NonNull
     public abstract CellIdentity getCellIdentity();
 
-    /** @hide */
+    /**
+     * @return a {@link CellSignalStrength} instance.
+     */
     @NonNull
     public abstract CellSignalStrength getCellSignalStrength();
 
@@ -370,6 +387,7 @@ public abstract class CellInfo implements Parcelable {
             case Info.hidl_discriminator.lte: return new CellInfoLte(ci, timeStamp);
             case Info.hidl_discriminator.wcdma: return new CellInfoWcdma(ci, timeStamp);
             case Info.hidl_discriminator.tdscdma: return new CellInfoTdscdma(ci, timeStamp);
+            case Info.hidl_discriminator.nr: return new CellInfoNr(ci, timeStamp);
             default: return null;
         }
     }

@@ -97,6 +97,7 @@ public class BlackFrame {
     final BlackSurface[] mBlackSurfaces = new BlackSurface[4];
 
     final boolean mForceDefaultOrientation;
+    private final TransactionFactory mTransactionFactory;
 
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Outer: "); mOuterRect.printShortString(pw);
@@ -111,11 +112,12 @@ public class BlackFrame {
         }
     }
 
-    public BlackFrame(SurfaceControl.Transaction t,
-            Rect outer, Rect inner, int layer, DisplayContent dc,
-            boolean forceDefaultOrientation) throws OutOfResourcesException {
+    public BlackFrame(TransactionFactory factory, SurfaceControl.Transaction t, Rect outer,
+            Rect inner, int layer, DisplayContent dc, boolean forceDefaultOrientation)
+            throws OutOfResourcesException {
         boolean success = false;
 
+        mTransactionFactory = factory;
         mForceDefaultOrientation = forceDefaultOrientation;
 
         // TODO: Why do we use 4 surfaces instead of just one big one behind the screenshot?
@@ -149,14 +151,16 @@ public class BlackFrame {
 
     public void kill() {
         if (mBlackSurfaces != null) {
+            SurfaceControl.Transaction t = mTransactionFactory.make();
             for (int i=0; i<mBlackSurfaces.length; i++) {
                 if (mBlackSurfaces[i] != null) {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
                             "  BLACK " + mBlackSurfaces[i].surface + ": DESTROY");
-                    mBlackSurfaces[i].surface.remove();
+                    t.remove(mBlackSurfaces[i].surface);
                     mBlackSurfaces[i] = null;
                 }
             }
+            t.apply();
         }
     }
 

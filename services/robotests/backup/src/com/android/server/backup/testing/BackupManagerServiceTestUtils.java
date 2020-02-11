@@ -113,7 +113,7 @@ public class BackupManagerServiceTestUtils {
             TransportManager transportManager,
             PackageManager packageManager,
             Handler backupHandler,
-            PowerManager.WakeLock wakeLock,
+            UserBackupManagerService.BackupWakeLock wakeLock,
             BackupAgentTimeoutParameters agentTimeoutParameters) {
 
         when(backupManagerService.getContext()).thenReturn(application);
@@ -161,10 +161,12 @@ public class BackupManagerServiceTestUtils {
                 });
     }
 
-    public static PowerManager.WakeLock createBackupWakeLock(Application application) {
+    public static UserBackupManagerService.BackupWakeLock createBackupWakeLock(
+            Application application) {
         PowerManager powerManager =
                 (PowerManager) application.getSystemService(Context.POWER_SERVICE);
-        return powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
+        return new UserBackupManagerService.BackupWakeLock(
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*"));
     }
 
     /**

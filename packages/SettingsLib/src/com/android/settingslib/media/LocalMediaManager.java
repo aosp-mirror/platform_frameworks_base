@@ -116,7 +116,7 @@ public class LocalMediaManager implements BluetoothCallback {
             final CachedBluetoothDevice cachedDevice =
                     ((BluetoothMediaDevice) device).getCachedDevice();
             if (!cachedDevice.isConnected() && !cachedDevice.isBusy()) {
-                cachedDevice.connect(true);
+                cachedDevice.connect();
                 return;
             }
         }

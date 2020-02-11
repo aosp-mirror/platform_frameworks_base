@@ -27,6 +27,7 @@
 #include "core_jni_helpers.h"
 
 #include <audiomanager/AudioManager.h>
+#include <media/AudioDeviceTypeAddr.h>
 #include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
 #include <media/MicrophoneInfo.h>
@@ -2015,9 +2016,10 @@ static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobjec
         if (!env->IsInstanceOf(addrJobj, stringClass)) {
             return (jint) AUDIO_JAVA_BAD_VALUE;
         }
-        String8 address = String8(env->GetStringUTFChars((jstring) addrJobj, NULL));
+        const char* address = env->GetStringUTFChars((jstring) addrJobj, NULL);
         AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
         deviceVector.add(dev);
+        env->ReleaseStringUTFChars((jstring) addrJobj, address);
     }
     env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
 
@@ -2248,6 +2250,20 @@ android_media_AudioSystem_setRttEnabled(JNIEnv *env, jobject thiz, jboolean enab
     return (jint) check_AudioSystem_Command(AudioSystem::setRttEnabled(enabled));
 }
 
+static jint
+android_media_AudioSystem_setAudioHalPids(JNIEnv *env, jobject clazz, jintArray jPids)
+{
+    if (jPids == NULL) {
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    pid_t *nPidsArray = (pid_t *)env->GetIntArrayElements(jPids, NULL);
+    std::vector<pid_t> nPids(nPidsArray, nPidsArray + env->GetArrayLength(jPids));
+    status_t status = AudioSystem::setAudioHalPids(nPids);
+    env->ReleaseIntArrayElements(jPids, nPidsArray, 0);
+    jint jStatus = nativeToJavaStatus(status);
+    return jStatus;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2326,6 +2342,7 @@ static const JNINativeMethod gMethods[] = {
                     (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
     {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
     {"setRttEnabled",       "(Z)I",     (void *)android_media_AudioSystem_setRttEnabled},
+    {"setAudioHalPids",  "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {

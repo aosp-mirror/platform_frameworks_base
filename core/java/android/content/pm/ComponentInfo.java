@@ -16,7 +16,7 @@
 
 package android.content.pm;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;

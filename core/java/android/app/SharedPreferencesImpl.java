@@ -17,7 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.SharedPreferences;
 import android.os.FileUtils;
 import android.os.Looper;

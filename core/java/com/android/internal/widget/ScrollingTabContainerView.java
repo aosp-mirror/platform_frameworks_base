@@ -15,13 +15,11 @@
  */
 package com.android.internal.widget;
 
-import com.android.internal.view.ActionBarPolicy;
-
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActionBar;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -41,6 +39,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.android.internal.view.ActionBarPolicy;
 
 /**
  * This widget implements the dynamic action bar tab behavior that can change

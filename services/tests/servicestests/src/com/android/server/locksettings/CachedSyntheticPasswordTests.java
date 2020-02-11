@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -29,10 +30,14 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
@@ -45,11 +50,11 @@ import java.util.ArrayList;
  */
 @SmallTest
 @Presubmit
+@RunWith(AndroidJUnit4.class)
 public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void enableSpCache() throws Exception {
         enableSpCaching(true);
     }
 
@@ -58,6 +63,7 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
                 .canUserHaveUntrustedCredentialReset(anyInt())).thenReturn(enable);
     }
 
+    @Test
     public void testSyntheticPasswordClearCredentialUntrusted() throws RemoteException {
         final byte[] password = "testSyntheticPasswordClearCredential-password".getBytes();
         final byte[] newPassword = "testSyntheticPasswordClearCredential-newpassword".getBytes();
@@ -78,6 +84,7 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         assertNotEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
+    @Test
     public void testSyntheticPasswordChangeCredentialUntrusted() throws RemoteException {
         final byte[] password = "testSyntheticPasswordClearCredential-password".getBytes();
         final byte[] newPassword = "testSyntheticPasswordClearCredential-newpassword".getBytes();
@@ -95,6 +102,7 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
     }
 
+    @Test
     public void testUntrustedCredentialChangeMaintainsAuthSecret() throws RemoteException {
         final byte[] password =
                 "testUntrustedCredentialChangeMaintainsAuthSecret-password".getBytes();
@@ -117,6 +125,7 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         assertEquals(1, secret.getAllValues().stream().distinct().count());
     }
 
+    @Test
     public void testUntrustedCredentialChangeBlockedIfSpNotCached() throws RemoteException {
         final byte[] password =
                 "testUntrustedCredentialChangeBlockedIfSpNotCached-password".getBytes();

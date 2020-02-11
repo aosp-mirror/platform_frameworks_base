@@ -16,7 +16,7 @@
 
 package com.android.server.net;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.INetworkManagementEventObserver;
 import android.net.LinkAddress;
 import android.net.RouteInfo;
@@ -28,6 +28,11 @@ import android.net.RouteInfo;
  * @hide
  */
 public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
+
+    @UnsupportedAppUsage
+    public BaseNetworkObserver() {
+    }
+
     @Override
     public void interfaceStatusChanged(String iface, boolean up) {
         // default no-op

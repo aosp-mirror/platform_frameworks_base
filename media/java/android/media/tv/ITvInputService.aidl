@@ -38,4 +38,5 @@ oneway interface ITvInputService {
     void notifyHardwareRemoved(in TvInputHardwareInfo hardwareInfo);
     void notifyHdmiDeviceAdded(in HdmiDeviceInfo deviceInfo);
     void notifyHdmiDeviceRemoved(in HdmiDeviceInfo deviceInfo);
+    void notifyHdmiDeviceUpdated(in HdmiDeviceInfo deviceInfo);
 }

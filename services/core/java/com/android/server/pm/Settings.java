@@ -3337,7 +3337,8 @@ public final class Settings {
             int flags, ComponentName cn, String scheme, PatternMatcher ssp,
             IntentFilter.AuthorityEntry auth, PatternMatcher path, int userId) {
         final List<ResolveInfo> ri =
-                pmInternal.queryIntentActivities(intent, flags, Binder.getCallingUid(), 0);
+                pmInternal.queryIntentActivities(
+                        intent, intent.getType(), flags, Binder.getCallingUid(), 0);
         if (PackageManagerService.DEBUG_PREFERRED) {
             Log.d(TAG, "Queried " + intent + " results: " + ri);
         }
@@ -3505,7 +3506,7 @@ public final class Settings {
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
-        if (PackageManagerService.locationIsPrivileged(codePathStr)) {
+        if (codePathStr.contains("/priv-app/")) {
             pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),

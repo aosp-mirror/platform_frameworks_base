@@ -16,11 +16,13 @@
 
 package com.android.internal.telephony.gsm;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.telephony.PhoneNumberUtils;
 
-import java.text.ParseException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsAddress;
+
+import java.text.ParseException;
 
 public class GsmSmsAddress extends SmsAddress {
 
@@ -39,6 +41,7 @@ public class GsmSmsAddress extends SmsAddress {
      * @throws ParseException
      */
 
+    @UnsupportedAppUsage
     public GsmSmsAddress(byte[] data, int offset, int length) throws ParseException {
         origBytes = new byte[length];
         System.arraycopy(data, offset, origBytes, 0, length);
@@ -136,6 +139,7 @@ public class GsmSmsAddress extends SmsAddress {
      * address indicating a "set" of "indicator 1" of type "voice message
      * waiting"
      */
+    @UnsupportedAppUsage
     public boolean isCphsVoiceMessageSet() {
         // 0x11 means "set" "voice message waiting" "indicator 1"
         return isCphsVoiceMessageIndicatorAddress()
@@ -148,6 +152,7 @@ public class GsmSmsAddress extends SmsAddress {
      * address indicating a "clear" of "indicator 1" of type "voice message
      * waiting"
      */
+    @UnsupportedAppUsage
     public boolean isCphsVoiceMessageClear() {
         // 0x10 means "clear" "voice message waiting" "indicator 1"
         return isCphsVoiceMessageIndicatorAddress()

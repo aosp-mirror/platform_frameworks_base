@@ -18,12 +18,13 @@ package android.telephony;
 
 import android.annotation.IntRange;
 import android.annotation.StringDef;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.telephony.Rlog;
 import android.text.TextUtils;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -245,9 +246,12 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     }
 
     /**
-     * Get the Ec/No as dB
+     * Get the Ec/No (Energy per chip over the noise spectral density) as dB.
      *
-     * @hide
+     * Reference: TS 25.133 Section 9.1.2.3
+     *
+     * @return the Ec/No of the measured cell in the range [-24, 1] or
+     * {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable
      */
     public int getEcNo() {
         return mEcNo;

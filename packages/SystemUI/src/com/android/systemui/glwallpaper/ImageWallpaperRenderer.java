@@ -111,7 +111,12 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
             mBitmap = mWallpaperManager.getBitmap();
             mWallpaperManager.forgetLoadedWallpaper();
             if (mBitmap != null) {
-                mSurfaceSize.set(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+                float scale = (float) mScissor.height() / mBitmap.getHeight();
+                int surfaceHeight = Math.max(mScissor.height(), mBitmap.getHeight());
+                int surfaceWidth = scale > 1f
+                        ? Math.round(mBitmap.getWidth() * scale)
+                        : mBitmap.getWidth();
+                mSurfaceSize.set(0, 0, surfaceWidth, surfaceHeight);
             }
         }
         return mBitmap != null;

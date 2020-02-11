@@ -47,6 +47,34 @@ public final class ParcelableConference implements Parcelable {
     private final int mAddressPresentation;
     private final String mCallerDisplayName;
     private final int mCallerDisplayNamePresentation;
+    private DisconnectCause mDisconnectCause;
+    private boolean mRingbackRequested;
+
+    public ParcelableConference(
+            PhoneAccountHandle phoneAccount,
+            int state,
+            int connectionCapabilities,
+            int connectionProperties,
+            List<String> connectionIds,
+            IVideoProvider videoProvider,
+            int videoState,
+            long connectTimeMillis,
+            long connectElapsedTimeMillis,
+            StatusHints statusHints,
+            Bundle extras,
+            Uri address,
+            int addressPresentation,
+            String callerDisplayName,
+            int callerDisplayNamePresentation,
+            DisconnectCause disconnectCause,
+            boolean ringbackRequested) {
+        this(phoneAccount, state, connectionCapabilities, connectionProperties, connectionIds,
+                videoProvider, videoState, connectTimeMillis, connectElapsedTimeMillis,
+                statusHints, extras, address, addressPresentation, callerDisplayName,
+                callerDisplayNamePresentation);
+        mDisconnectCause = disconnectCause;
+        mRingbackRequested = ringbackRequested;
+    }
 
     public ParcelableConference(
             PhoneAccountHandle phoneAccount,
@@ -79,6 +107,8 @@ public final class ParcelableConference implements Parcelable {
         mAddressPresentation = addressPresentation;
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = callerDisplayNamePresentation;
+        mDisconnectCause = null;
+        mRingbackRequested = false;
     }
 
     @Override
@@ -100,6 +130,10 @@ public final class ParcelableConference implements Parcelable {
                 .append(mVideoState)
                 .append(", VideoProvider: ")
                 .append(mVideoProvider)
+                .append(", isRingbackRequested: ")
+                .append(mRingbackRequested)
+                .append(", disconnectCause: ")
+                .append(mDisconnectCause)
                 .toString();
     }
 
@@ -151,6 +185,13 @@ public final class ParcelableConference implements Parcelable {
         return mAddress;
     }
 
+    public final DisconnectCause getDisconnectCause() {
+        return mDisconnectCause;
+    }
+
+    public boolean isRingbackRequested() {
+        return mRingbackRequested;
+    }
     public int getHandlePresentation() {
         return mAddressPresentation;
     }
@@ -177,11 +218,14 @@ public final class ParcelableConference implements Parcelable {
             int addressPresentation = source.readInt();
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
+            DisconnectCause disconnectCause = source.readParcelable(classLoader);
+            boolean isRingbackRequested = source.readInt() == 1;
 
             return new ParcelableConference(phoneAccount, state, capabilities, properties,
                     connectionIds, videoCallProvider, videoState, connectTimeMillis,
                     connectElapsedTimeMillis, statusHints, extras, address, addressPresentation,
-                    callerDisplayName, callerDisplayNamePresentation);
+                    callerDisplayName, callerDisplayNamePresentation, disconnectCause,
+                    isRingbackRequested);
         }
 
         @Override
@@ -215,5 +259,7 @@ public final class ParcelableConference implements Parcelable {
         destination.writeInt(mAddressPresentation);
         destination.writeString(mCallerDisplayName);
         destination.writeInt(mCallerDisplayNamePresentation);
+        destination.writeParcelable(mDisconnectCause, 0);
+        destination.writeInt(mRingbackRequested ? 1 : 0);
     }
 }

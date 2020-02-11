@@ -34,7 +34,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.Pair;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
@@ -187,6 +186,13 @@ public abstract class ActivityTaskManagerInternal {
      * minimized state.
      */
     public abstract void notifyDockedStackMinimizedChanged(boolean minimized);
+
+    /**
+     * Notify listeners that contents are drawn for the first time on a single task display.
+     *
+     * @param displayId An ID of the display on which contents are drawn.
+     */
+    public abstract void notifySingleTaskDisplayDrawn(int displayId);
 
     /**
      * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.

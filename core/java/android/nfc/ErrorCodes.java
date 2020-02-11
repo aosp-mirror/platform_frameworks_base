@@ -16,7 +16,7 @@
 
 package android.nfc;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * This class defines all the error codes that can be returned by the service

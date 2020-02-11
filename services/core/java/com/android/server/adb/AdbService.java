@@ -17,6 +17,7 @@ package com.android.server.adb;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.debug.AdbManagerInternal;
 import android.debug.IAdbManager;
@@ -258,6 +259,30 @@ public class AdbService extends IAdbManager.Stub {
             throw new RuntimeException("Cannot clear ADB debugging keys, "
                     + "AdbDebuggingManager not enabled");
         }
+    }
+
+    /**
+     * @return true if the device supports secure ADB over Wi-Fi.
+     * @hide
+     */
+    @Override
+    public boolean isAdbWifiSupported() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.MANAGE_DEBUGGING, "AdbService");
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
+    }
+
+    /**
+     * @return true if the device supports secure ADB over Wi-Fi and device pairing by
+     * QR code.
+     * @hide
+     */
+    @Override
+    public boolean isAdbWifiQrSupported() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.MANAGE_DEBUGGING, "AdbService");
+        return isAdbWifiSupported() && mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CAMERA_ANY);
     }
 
     private void setAdbEnabled(boolean enable) {

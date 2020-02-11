@@ -16,8 +16,9 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Describes the cause of a disconnected call. Those disconnect causes can be converted into a more
@@ -340,6 +341,25 @@ public final class DisconnectCause {
      */
     public static final int MEDIA_TIMEOUT = 77;
 
+    /**
+     * Indicates that an emergency call cannot be placed over WFC because the service is not
+     * available in the current location.
+     * @hide
+     */
+    public static final int EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 78;
+
+    /**
+     * Indicates that WiFi calling service is not available in the current location.
+     * @hide
+     */
+    public static final int WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 79;
+
+    /**
+     * Indicates that an emergency call was placed, which caused the existing connection to be
+     * hung up.
+     */
+    public static final int OUTGOING_EMERGENCY_CALL_PLACED = 80;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -356,7 +376,7 @@ public final class DisconnectCause {
      * @hide
      */
     @UnsupportedAppUsage
-    public static String toString(int cause) {
+    public static @NonNull String toString(int cause) {
         switch (cause) {
         case NOT_DISCONNECTED:
             return "NOT_DISCONNECTED";
@@ -510,6 +530,12 @@ public final class DisconnectCause {
             return "OTASP_PROVISIONING_IN_PROCESS";
         case MEDIA_TIMEOUT:
             return "MEDIA_TIMEOUT";
+        case EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE:
+            return "EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE";
+        case WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION:
+            return "WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION";
+        case OUTGOING_EMERGENCY_CALL_PLACED:
+            return "OUTGOING_EMERGENCY_CALL_PLACED";
         default:
             return "INVALID: " + cause;
         }

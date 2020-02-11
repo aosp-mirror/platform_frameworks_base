@@ -16,18 +16,18 @@
 
 package android.nfc.cardemulation;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.util.Log;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The AidGroup class represents a group of Application Identifiers (AIDs).

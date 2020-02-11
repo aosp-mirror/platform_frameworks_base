@@ -18,7 +18,7 @@ package android.widget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
@@ -59,6 +59,10 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
 
     private ColorFilter mColorFilter;
     private boolean mHasSetColorFilter;
+
+    @UnsupportedAppUsage
+    public ScrollBarDrawable() {
+    }
 
     /**
      * Indicate whether the horizontal scrollbar track should always be drawn

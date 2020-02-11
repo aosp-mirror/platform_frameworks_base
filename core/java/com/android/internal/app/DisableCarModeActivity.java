@@ -33,7 +33,9 @@ public class DisableCarModeActivity extends Activity {
         try {
             IUiModeManager uiModeManager = IUiModeManager.Stub.asInterface(
                     ServiceManager.getService("uimode"));
-            uiModeManager.disableCarMode(UiModeManager.DISABLE_CAR_MODE_GO_HOME);
+            uiModeManager.disableCarModeByCallingPackage(UiModeManager.DISABLE_CAR_MODE_GO_HOME
+                            | UiModeManager.DISABLE_CAR_MODE_ALL_PRIORITIES,
+                    getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to disable car mode", e);
         }

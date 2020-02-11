@@ -176,14 +176,12 @@ public class BluetoothTestUtils extends Assert {
                         mDevice.setPin(mPin);
                         break;
                     case BluetoothDevice.PAIRING_VARIANT_PASSKEY:
-                        mDevice.setPasskey(mPasskey);
                         break;
                     case BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION:
                     case BluetoothDevice.PAIRING_VARIANT_CONSENT:
                         mDevice.setPairingConfirmation(true);
                         break;
                     case BluetoothDevice.PAIRING_VARIANT_OOB_CONSENT:
-                        mDevice.setRemoteOutOfBandData();
                         break;
                 }
             } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(intent.getAction())) {

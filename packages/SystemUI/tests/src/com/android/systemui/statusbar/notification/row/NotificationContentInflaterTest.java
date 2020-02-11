@@ -17,14 +17,12 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_ALL;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_PUBLIC;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -45,12 +43,12 @@ import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationCallback;
+import com.android.systemui.tests.R;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -135,7 +133,6 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mNotificationInflater);
 
         assertNotNull(mRow.getPrivateLayout().getHeadsUpChild());
-        assertNull(mRow.getShowingLayout().getAmbientChild());
         verify(mRow).onNotificationUpdated();
     }
 
@@ -178,7 +175,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,
                 0,
-                new ArrayMap() /* cachedContentViews */, mRow, false /* redactAmbient */,
+                new ArrayMap() /* cachedContentViews */, mRow,
                 true /* isNewView */, (v, p, r) -> true,
                 new InflationCallback() {
                     @Override
@@ -210,14 +207,12 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
 
     @Test
     public void testUpdateNeedsRedactionReinflatesChangedContentViews() {
-        mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true);
         mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_PUBLIC, true);
         mNotificationInflater.updateNeedsRedaction(true);
 
         NotificationContentInflater.AsyncInflationTask asyncInflationTask =
                 (NotificationContentInflater.AsyncInflationTask) mRow.getEntry().getRunningTask();
-        assertEquals(FLAG_CONTENT_VIEW_AMBIENT | FLAG_CONTENT_VIEW_PUBLIC,
-                asyncInflationTask.getReInflateFlags());
+        assertEquals(FLAG_CONTENT_VIEW_PUBLIC, asyncInflationTask.getReInflateFlags());
         asyncInflationTask.abort();
     }
 

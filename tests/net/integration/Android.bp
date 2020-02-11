@@ -36,6 +36,7 @@ android_test {
         "services.net",
         "testables",
     ],
+    test_suites: ["device-tests"],
     use_embedded_native_libs: true,
     jni_libs: [
         // For mockito extended

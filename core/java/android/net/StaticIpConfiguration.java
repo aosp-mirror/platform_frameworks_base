@@ -20,10 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -152,6 +154,7 @@ public final class StaticIpConfiguration implements Parcelable {
          * @return The {@link Builder} for chaining.
          */
         public @NonNull Builder setDnsServers(@NonNull Iterable<InetAddress> dnsServers) {
+            Preconditions.checkNotNull(dnsServers);
             mDnsServers = dnsServers;
             return this;
         }
@@ -175,8 +178,10 @@ public final class StaticIpConfiguration implements Parcelable {
             final StaticIpConfiguration config = new StaticIpConfiguration();
             config.ipAddress = mIpAddress;
             config.gateway = mGateway;
-            for (InetAddress server : mDnsServers) {
-                config.dnsServers.add(server);
+            if (mDnsServers != null) {
+                for (InetAddress server : mDnsServers) {
+                    config.dnsServers.add(server);
+                }
             }
             config.domains = mDomains;
             return config;

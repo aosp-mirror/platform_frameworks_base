@@ -1159,7 +1159,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             abandonSession = false;
 
-            if (!params.sessionParams.isStaged || !params.waitForStagedSessionReady) {
+            if (!params.sessionParams.isStaged || !params.mWaitForStagedSessionReady) {
                 pw.println("Success");
                 return 0;
             }
@@ -1197,7 +1197,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         + si.getStagedSessionErrorMessage() + "]");
                 return 1;
             }
-            pw.println("Success");
+            pw.println("Success. Reboot device to apply staged session");
             return 0;
         } finally {
             if (abandonSession) {
@@ -2487,7 +2487,7 @@ class PackageManagerShellCommand extends ShellCommand {
         SessionParams sessionParams;
         String installerPackageName;
         int userId = UserHandle.USER_ALL;
-        boolean waitForStagedSessionReady = false;
+        boolean mWaitForStagedSessionReady = true;
         long timeoutMs = DEFAULT_WAIT_MS;
     }
 
@@ -2601,6 +2601,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--staged":
                     sessionParams.setStaged();
                     break;
+                case "--force-queryable":
+                    break;
                 case "--enable-rollback":
                     if (params.installerPackageName == null) {
                         // com.android.shell has the TEST_MANAGE_ROLLBACKS
@@ -2615,12 +2617,15 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
                     break;
                 case "--wait":
-                    params.waitForStagedSessionReady = true;
+                    params.mWaitForStagedSessionReady = true;
                     try {
                         params.timeoutMs = Long.parseLong(peekNextArg());
                         getNextArg();
                     } catch (NumberFormatException ignore) {
                     }
+                    break;
+                case "--no-wait":
+                    params.mWaitForStagedSessionReady = false;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
@@ -3174,7 +3179,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--user USER_ID] INTENT");
         pw.println("    Prints all broadcast receivers that can handle the given INTENT.");
         pw.println("");
-        pw.println("  install [-lrtsfdgw] [-i PACKAGE] [--user USER_ID|all|current]");
+        pw.println("  install [-lrtfdgw] [-i PACKAGE] [--user USER_ID|all|current]");
         pw.println("       [-p INHERIT_PACKAGE] [--install-location 0/1/2]");
         pw.println("       [--install-reason 0/1/2/3/4] [--originating-uri URI]");
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
@@ -3189,7 +3194,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -R: disallow replacement of existing application");
         pw.println("      -t: allow test packages");
         pw.println("      -i: specify package name of installer owning the app");
-        pw.println("      -s: install application on sdcard");
         pw.println("      -f: install application on internal flash");
         pw.println("      -d: allow version code downgrade (debuggable packages only)");
         pw.println("      -p: partial application install (new split on top of existing pkg)");

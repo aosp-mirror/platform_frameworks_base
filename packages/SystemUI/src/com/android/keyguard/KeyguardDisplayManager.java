@@ -35,6 +35,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.util.InjectionInflationController;

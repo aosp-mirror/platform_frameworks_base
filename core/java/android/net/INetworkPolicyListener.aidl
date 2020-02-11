@@ -15,6 +15,7 @@
  */
 
 package android.net;
+import android.telephony.SubscriptionPlan;
 
 /** {@hide} */
 oneway interface INetworkPolicyListener {
@@ -23,4 +24,5 @@ oneway interface INetworkPolicyListener {
     void onRestrictBackgroundChanged(boolean restrictBackground);
     void onUidPoliciesChanged(int uid, int uidPolicies);
     void onSubscriptionOverride(int subId, int overrideMask, int overrideValue);
+    void onSubscriptionPlansChanged(int subId, in SubscriptionPlan[] plans);
 }

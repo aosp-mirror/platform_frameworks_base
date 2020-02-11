@@ -16,8 +16,8 @@
 
 package android.media;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;

@@ -75,6 +75,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_PHONE_ACCOUNT_CHANGED = 34;
     private static final int MSG_CONNECTION_SERVICE_FOCUS_RELEASED = 35;
     private static final int MSG_SET_CONFERENCE_STATE = 36;
+    private static final int MSG_HANDLE_CREATE_CONFERENCE_COMPLETE = 37;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -97,6 +98,19 @@ final class ConnectionServiceAdapterServant {
                                 (String) args.arg1,
                                 (ConnectionRequest) args.arg2,
                                 (ParcelableConnection) args.arg3,
+                                null /*Session.Info*/);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_HANDLE_CREATE_CONFERENCE_COMPLETE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.handleCreateConferenceComplete(
+                                (String) args.arg1,
+                                (ConnectionRequest) args.arg2,
+                                (ParcelableConference) args.arg3,
                                 null /*Session.Info*/);
                     } finally {
                         args.recycle();
@@ -364,6 +378,20 @@ final class ConnectionServiceAdapterServant {
             args.arg3 = connection;
             mHandler.obtainMessage(MSG_HANDLE_CREATE_CONNECTION_COMPLETE, args).sendToTarget();
         }
+
+        @Override
+        public void handleCreateConferenceComplete(
+                String id,
+                ConnectionRequest request,
+                ParcelableConference conference,
+                Session.Info sessionInfo) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = id;
+            args.arg2 = request;
+            args.arg3 = conference;
+            mHandler.obtainMessage(MSG_HANDLE_CREATE_CONFERENCE_COMPLETE, args).sendToTarget();
+        }
+
 
         @Override
         public void setActive(String connectionId, Session.Info sessionInfo) {

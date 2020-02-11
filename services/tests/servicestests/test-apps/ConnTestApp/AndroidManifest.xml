@@ -18,8 +18,7 @@
         package="com.android.servicestests.apps.conntestapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
 
     <application>
         <activity android:name=".ConnTestActivity"

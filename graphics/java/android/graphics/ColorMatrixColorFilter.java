@@ -18,7 +18,7 @@ package android.graphics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A color filter that transforms colors through a 4x5 color matrix. This filter

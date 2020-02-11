@@ -25,12 +25,11 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony.CellBroadcasts;
-
-import com.android.internal.telephony.CbGeoUtils;
-import com.android.internal.telephony.CbGeoUtils.Geometry;
+import android.telephony.CbGeoUtils.Geometry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -140,8 +139,8 @@ public final class SmsCbMessage implements Parcelable {
     public @interface MessagePriority {}
 
     /**
-     * ATIS-0700041 Section 5.2.8 WAC Geo-Fencing Maximum Wait Time Table 12.
-     * @hide
+     * Integer indicating that the maximum wait time is not set.
+     * Based on ATIS-0700041 Section 5.2.8 WAC Geo-Fencing Maximum Wait Time Table 12.
      */
     public static final int MAXIMUM_WAIT_TIME_NOT_SET = 255;
 
@@ -178,6 +177,9 @@ public final class SmsCbMessage implements Parcelable {
     @Nullable
     private final String mLanguage;
 
+    /** The 8-bit data coding scheme defined in 3GPP TS 23.038 section 4. */
+    private final int mDataCodingScheme;
+
     /** Message body, as a String. */
     @Nullable
     private final String mBody;
@@ -207,33 +209,42 @@ public final class SmsCbMessage implements Parcelable {
     /** CMAS warning area coordinates. */
     private final List<Geometry> mGeometries;
 
+    private final int mSlotIndex;
+
+    private final int mSubId;
+
     /**
      * Create a new SmsCbMessage with the specified data.
+     * @hide
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
             @NonNull SmsCbLocation location, int serviceCategory, @Nullable String language,
             @Nullable String body, int priority, @Nullable SmsCbEtwsInfo etwsWarningInfo,
-            @Nullable SmsCbCmasInfo cmasWarningInfo) {
+            @Nullable SmsCbCmasInfo cmasWarningInfo, int slotIndex, int subId) {
 
         this(messageFormat, geographicalScope, serialNumber, location, serviceCategory, language,
-                body, priority, etwsWarningInfo, cmasWarningInfo, 0 /* maximumWaitingTime */,
-                null /* geometries */, System.currentTimeMillis());
+                0, body, priority, etwsWarningInfo, cmasWarningInfo, 0 /* maximumWaitingTime */,
+                null /* geometries */, System.currentTimeMillis(), slotIndex, subId);
     }
 
     /**
-     * Create a new {@link SmsCbMessage} with the warning area coordinates information.
-     * @hide
+     * Create a new {@link SmsCbMessage} with the specified data, including warning area
+     * coordinates information.
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
-            SmsCbLocation location, int serviceCategory, String language, String body,
-            int priority, SmsCbEtwsInfo etwsWarningInfo, SmsCbCmasInfo cmasWarningInfo,
-            int maximumWaitTimeSec, List<Geometry> geometries, long receivedTimeMillis) {
+                        @NonNull SmsCbLocation location, int serviceCategory,
+                        @Nullable String language, int dataCodingScheme, @Nullable String body,
+                        int priority, @Nullable SmsCbEtwsInfo etwsWarningInfo,
+                        @Nullable SmsCbCmasInfo cmasWarningInfo, int maximumWaitTimeSec,
+                        @Nullable List<Geometry> geometries, long receivedTimeMillis, int slotIndex,
+                        int subId) {
         mMessageFormat = messageFormat;
         mGeographicalScope = geographicalScope;
         mSerialNumber = serialNumber;
         mLocation = location;
         mServiceCategory = serviceCategory;
         mLanguage = language;
+        mDataCodingScheme = dataCodingScheme;
         mBody = body;
         mPriority = priority;
         mEtwsWarningInfo = etwsWarningInfo;
@@ -241,6 +252,8 @@ public final class SmsCbMessage implements Parcelable {
         mReceivedTimeMillis = receivedTimeMillis;
         mGeometries = geometries;
         mMaximumWaitTimeSec = maximumWaitTimeSec;
+        mSlotIndex = slotIndex;
+        mSubId = subId;
     }
 
     /**
@@ -254,6 +267,7 @@ public final class SmsCbMessage implements Parcelable {
         mLocation = new SmsCbLocation(in);
         mServiceCategory = in.readInt();
         mLanguage = in.readString();
+        mDataCodingScheme = in.readInt();
         mBody = in.readString();
         mPriority = in.readInt();
         int type = in.readInt();
@@ -278,6 +292,8 @@ public final class SmsCbMessage implements Parcelable {
         String geoStr = in.readString();
         mGeometries = geoStr != null ? CbGeoUtils.parseGeometriesFromString(geoStr) : null;
         mMaximumWaitTimeSec = in.readInt();
+        mSlotIndex = in.readInt();
+        mSubId = in.readInt();
     }
 
     /**
@@ -294,6 +310,7 @@ public final class SmsCbMessage implements Parcelable {
         mLocation.writeToParcel(dest, flags);
         dest.writeInt(mServiceCategory);
         dest.writeString(mLanguage);
+        dest.writeInt(mDataCodingScheme);
         dest.writeString(mBody);
         dest.writeInt(mPriority);
         if (mEtwsWarningInfo != null) {
@@ -312,6 +329,8 @@ public final class SmsCbMessage implements Parcelable {
         dest.writeString(
                 mGeometries != null ? CbGeoUtils.encodeGeometriesToString(mGeometries) : null);
         dest.writeInt(mMaximumWaitTimeSec);
+        dest.writeInt(mSlotIndex);
+        dest.writeInt(mSubId);
     }
 
     @NonNull
@@ -385,6 +404,15 @@ public final class SmsCbMessage implements Parcelable {
     }
 
     /**
+     * Get data coding scheme of the message
+     *
+     * @return The 8-bit data coding scheme defined in 3GPP TS 23.038 section 4.
+     */
+    public int getDataCodingScheme() {
+        return mDataCodingScheme;
+    }
+
+    /**
      * Get the body of this message, or null if no body available
      *
      * @return Body, or null
@@ -395,22 +423,25 @@ public final class SmsCbMessage implements Parcelable {
     }
 
     /**
-     * Get the warning area coordinates information represent by polygons and circles.
-     * @return a list of geometries, {@link Nullable} means there is no coordinate information
-     * associated to this message.
+     * Get the warning area coordinates information represented by polygons and circles.
+     * @return a list of geometries, or an empty list if there is no coordinate information
+     * associated with this message.
      * @hide
      */
-    @Nullable
+    @SystemApi
+    @NonNull
     public List<Geometry> getGeometries() {
+        if (mGeometries == null) {
+            return new ArrayList<>();
+        }
         return mGeometries;
     }
 
     /**
      * Get the Geo-Fencing Maximum Wait Time.
      * @return the time in second.
-     * @hide
      */
-    public int getMaximumWaitingTime() {
+    public int getMaximumWaitingDuration() {
         return mMaximumWaitTimeSec;
     }
 
@@ -420,6 +451,22 @@ public final class SmsCbMessage implements Parcelable {
      */
     public long getReceivedTime() {
         return mReceivedTimeMillis;
+    }
+
+    /**
+     * Get the slot index associated with this message.
+     * @return the slot index associated with this message
+     */
+    public int getSlotIndex() {
+        return mSlotIndex;
+    }
+
+    /**
+     * Get the subscription id associated with this message.
+     * @return the subscription id associated with this message
+     */
+    public int getSubscriptionId() {
+        return mSubId;
     }
 
     /**
@@ -501,7 +548,9 @@ public final class SmsCbMessage implements Parcelable {
                 + ", priority=" + mPriority
                 + (mEtwsWarningInfo != null ? (", " + mEtwsWarningInfo.toString()) : "")
                 + (mCmasWarningInfo != null ? (", " + mCmasWarningInfo.toString()) : "")
-                + ", maximumWaitingTime = " + mMaximumWaitTimeSec
+                + ", maximumWaitingTime=" + mMaximumWaitTimeSec
+                + ", received time=" + mReceivedTimeMillis
+                + ", slotIndex = " + mSlotIndex
                 + ", geo=" + (mGeometries != null
                 ? CbGeoUtils.encodeGeometriesToString(mGeometries) : "null")
                 + '}';
@@ -522,6 +571,8 @@ public final class SmsCbMessage implements Parcelable {
     @NonNull
     public ContentValues getContentValues() {
         ContentValues cv = new ContentValues(16);
+        cv.put(CellBroadcasts.SLOT_INDEX, mSlotIndex);
+        cv.put(CellBroadcasts.SUBSCRIPTION_ID, mSubId);
         cv.put(CellBroadcasts.GEOGRAPHICAL_SCOPE, mGeographicalScope);
         if (mLocation.getPlmn() != null) {
             cv.put(CellBroadcasts.PLMN, mLocation.getPlmn());
@@ -535,6 +586,7 @@ public final class SmsCbMessage implements Parcelable {
         cv.put(CellBroadcasts.SERIAL_NUMBER, getSerialNumber());
         cv.put(CellBroadcasts.SERVICE_CATEGORY, getServiceCategory());
         cv.put(CellBroadcasts.LANGUAGE_CODE, getLanguageCode());
+        cv.put(CellBroadcasts.DATA_CODING_SCHEME, getDataCodingScheme());
         cv.put(CellBroadcasts.MESSAGE_BODY, getMessageBody());
         cv.put(CellBroadcasts.MESSAGE_FORMAT, getMessageFormat());
         cv.put(CellBroadcasts.MESSAGE_PRIORITY, getMessagePriority());
@@ -584,6 +636,8 @@ public final class SmsCbMessage implements Parcelable {
         String body = cursor.getString(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_BODY));
         int format = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_FORMAT));
         int priority = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_PRIORITY));
+        int slotIndex = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SLOT_INDEX));
+        int subId = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SUBSCRIPTION_ID));
 
         String plmn;
         int plmnColumn = cursor.getColumnIndex(CellBroadcasts.PLMN);
@@ -680,14 +734,14 @@ public final class SmsCbMessage implements Parcelable {
                 cursor.getColumnIndexOrThrow(CellBroadcasts.MAXIMUM_WAIT_TIME));
 
         return new SmsCbMessage(format, geoScope, serialNum, location, category,
-                language, body, priority, etwsInfo, cmasInfo, maximumWaitTimeSec, geometries,
-                receivedTimeMillis);
+                language, 0, body, priority, etwsInfo, cmasInfo, maximumWaitTimeSec, geometries,
+                receivedTimeMillis, slotIndex, subId);
     }
 
     /**
      * @return {@code True} if this message needs geo-fencing check.
      */
     public boolean needGeoFencingCheck() {
-        return mMaximumWaitTimeSec > 0 && mGeometries != null;
+        return mMaximumWaitTimeSec > 0 && mGeometries != null && !mGeometries.isEmpty();
     }
 }

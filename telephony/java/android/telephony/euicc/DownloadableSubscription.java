@@ -17,16 +17,17 @@ package android.telephony.euicc;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.UiccAccessRule;
+
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.android.internal.util.Preconditions;
 
 /**
  * Information about a subscription which is downloadable to an eUICC using

@@ -1356,7 +1356,8 @@ public class AppStandbyController {
     private void fetchCarrierPrivilegedAppsLocked() {
         TelephonyManager telephonyManager =
                 mContext.getSystemService(TelephonyManager.class);
-        mCarrierPrivilegedApps = telephonyManager.getPackagesWithCarrierPrivilegesForAllPhones();
+        mCarrierPrivilegedApps =
+                telephonyManager.getCarrierPrivilegedPackagesForAllActiveSubscriptions();
         mHaveCarrierPrivilegedApps = true;
         if (DEBUG) {
             Slog.d(TAG, "apps with carrier privilege " + mCarrierPrivilegedApps);

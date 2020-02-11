@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -58,8 +59,8 @@ public class AppDataRollbackHelperTest {
         // All users are unlocked so we should snapshot data for them.
         doReturn(true).when(helper).isUserCredentialLocked(eq(10));
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
-        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar", new int[]{10, 11});
-        helper.snapshotAppData(5, info);
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
+        helper.snapshotAppData(5, info, new int[]{10, 11});
 
         assertEquals(2, info.getPendingBackups().size());
         assertEquals(10, info.getPendingBackups().get(0));
@@ -79,8 +80,8 @@ public class AppDataRollbackHelperTest {
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
         when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(239L);
 
-        PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar", new int[]{10, 11});
-        helper.snapshotAppData(7, info2);
+        PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar");
+        helper.snapshotAppData(7, info2, new int[]{10, 11});
         assertEquals(1, info2.getPendingBackups().size());
         assertEquals(11, info2.getPendingBackups().get(0));
 
@@ -234,22 +235,22 @@ public class AppDataRollbackHelperTest {
         wasRecentlyRestored.getPendingRestores().add(
                 new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1);
+        Rollback dataWithPendingBackup = new Rollback(101, new File("/does/not/exist"), -1);
         dataWithPendingBackup.info.getPackages().add(pendingBackup);
 
-        RollbackData dataWithRecentRestore = new RollbackData(17239, new File("/does/not/exist"),
+        Rollback dataWithRecentRestore = new Rollback(17239, new File("/does/not/exist"),
                 -1);
         dataWithRecentRestore.info.getPackages().add(wasRecentlyRestored);
 
-        RollbackData dataForDifferentUser = new RollbackData(17239, new File("/does/not/exist"),
+        Rollback dataForDifferentUser = new Rollback(17239, new File("/does/not/exist"),
                 -1);
         dataForDifferentUser.info.getPackages().add(ignoredInfo);
 
-        RollbackData dataForRestore = new RollbackData(17239, new File("/does/not/exist"), -1);
+        Rollback dataForRestore = new Rollback(17239, new File("/does/not/exist"), -1);
         dataForRestore.info.getPackages().add(pendingRestore);
         dataForRestore.info.getPackages().add(wasRecentlyRestored);
 
-        Set<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
+        Set<Rollback> changed = helper.commitPendingBackupAndRestoreForUser(37,
                 Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser,
                     dataForRestore));
         InOrder inOrder = Mockito.inOrder(installer);
@@ -264,7 +265,7 @@ public class AppDataRollbackHelperTest {
         assertEquals(-1, pendingBackup.getPendingBackups().indexOf(37));
         assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
-        // Check that changed returns correct RollbackData.
+        // Check that changed returns correct Rollback.
         assertEquals(3, changed.size());
         assertTrue(changed.contains(dataWithPendingBackup));
         assertTrue(changed.contains(dataWithRecentRestore));
@@ -277,5 +278,16 @@ public class AppDataRollbackHelperTest {
         assertNull(pendingRestore.getRestoreInfo(37));
 
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void snapshotAddDataSavesSnapshottedUsersToInfo() {
+        Installer installer = mock(Installer.class);
+        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
+
+        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
+        helper.snapshotAppData(5, info, new int[]{10, 11});
+
+        assertArrayEquals(info.getSnapshottedUsers().toArray(), new int[]{10, 11});
     }
 }

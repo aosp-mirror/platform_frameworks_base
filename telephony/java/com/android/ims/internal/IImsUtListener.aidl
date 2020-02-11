@@ -44,6 +44,7 @@ oneway interface IImsUtListener {
     @UnsupportedAppUsage
     void utConfigurationQueryFailed(in IImsUt ut, int id, in ImsReasonInfo error);
 
+    void lineIdentificationSupplementaryServiceResponse(int id, in ImsSsInfo config);
     /**
      * Notifies the status of the call barring supplementary service.
      */

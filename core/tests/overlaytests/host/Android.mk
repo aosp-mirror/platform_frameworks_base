@@ -14,23 +14,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := $(call all-java-files-under,src)
-LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE := OverlayHostTests
-LOCAL_JAVA_LIBRARIES := tradefed
-LOCAL_COMPATIBILITY_SUITE := general-tests
-LOCAL_TARGET_REQUIRED_MODULES := \
-    OverlayHostTests_NonPlatformSignatureOverlay \
-    OverlayHostTests_PlatformSignatureStaticOverlay \
-    OverlayHostTests_PlatformSignatureOverlay \
-    OverlayHostTests_UpdateOverlay \
-    OverlayHostTests_FrameworkOverlayV1 \
-    OverlayHostTests_FrameworkOverlayV2 \
-    OverlayHostTests_AppOverlayV1 \
-    OverlayHostTests_AppOverlayV2
-include $(BUILD_HOST_JAVA_LIBRARY)
-
 # Include to build test-apps.
 include $(call all-makefiles-under,$(LOCAL_PATH))
 

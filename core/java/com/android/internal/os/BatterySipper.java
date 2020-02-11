@@ -15,7 +15,7 @@
  */
 package com.android.internal.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.BatteryStats.Uid;
 
 import java.util.List;
@@ -134,6 +134,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     // This list must be kept current with atoms.proto (frameworks/base/cmds/statsd/src/atoms.proto)
     // so the ordinal values (and therefore the order) must never change.
     //                           ****************
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/os/BatterySipper$DrainType;")
     public enum DrainType {
         AMBIENT_DISPLAY,
         @UnsupportedAppUsage

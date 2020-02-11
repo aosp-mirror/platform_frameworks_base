@@ -1,19 +1,29 @@
+filegroup {
+    name: "services.net-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.net",
-    srcs: ["java/**/*.java"],
+    srcs: [
+        ":net-module-utils-srcs",
+        ":services.net-sources",
+    ],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
-        "netd_aidl_interface-java",
+        "netd_aidl_interface-unstable-java",
+        "netlink-client",
         "networkstack-client",
     ],
 }
 
 filegroup {
-    name: "services-networkstack-shared-srcs",
+    name: "services-tethering-shared-srcs",
     srcs: [
-        "java/android/net/ip/InterfaceController.java", // TODO: move to NetworkStack with tethering
-        "java/android/net/util/InterfaceParams.java", // TODO: move to NetworkStack with IpServer
-        "java/android/net/shared/*.java",
-        "java/android/net/netlink/*.java",
+        ":framework-annotations",
+        "java/android/net/util/NetworkConstants.java",
     ],
+    visibility: ["//frameworks/base/packages/Tethering"],
 }

@@ -33,20 +33,24 @@
 
 // Static whitelist of open paths that the zygote is allowed to keep open.
 static const char* kPathWhitelist[] = {
-  "/apex/com.android.conscrypt/javalib/conscrypt.jar",
-  "/apex/com.android.media/javalib/updatable-media.jar",
-  "/dev/null",
-  "/dev/socket/zygote",
-  "/dev/socket/zygote_secondary",
-  "/dev/socket/usap_pool_primary",
-  "/dev/socket/usap_pool_secondary",
-  "/dev/socket/webview_zygote",
-  "/dev/socket/heapprofd",
-  "/sys/kernel/debug/tracing/trace_marker",
-  "/system/framework/framework-res.apk",
-  "/dev/urandom",
-  "/dev/ion",
-  "/dev/dri/renderD129", // Fixes b/31172436
+        "/apex/com.android.conscrypt/javalib/conscrypt.jar",
+        "/apex/com.android.ipsec/javalib/ike.jar",
+        "/apex/com.android.media/javalib/updatable-media.jar",
+        "/apex/com.android.sdkext/javalib/framework-sdkextensions.jar",
+        "/apex/com.android.tethering/javalib/framework-tethering.jar",
+        "/dev/null",
+        "/dev/socket/zygote",
+        "/dev/socket/zygote_secondary",
+        "/dev/socket/usap_pool_primary",
+        "/dev/socket/usap_pool_secondary",
+        "/dev/socket/webview_zygote",
+        "/dev/socket/heapprofd",
+        "/sys/kernel/debug/tracing/trace_marker",
+        "/sys/kernel/tracing/trace_marker",
+        "/system/framework/framework-res.apk",
+        "/dev/urandom",
+        "/dev/ion",
+        "/dev/dri/renderD129", // Fixes b/31172436
 };
 
 static const char kFdPath[] = "/proc/self/fd";
@@ -57,6 +61,10 @@ FileDescriptorWhitelist* FileDescriptorWhitelist::Get() {
     instance_ = new FileDescriptorWhitelist();
   }
   return instance_;
+}
+
+static bool IsArtMemfd(const std::string& path) {
+  return android::base::StartsWith(path, "/memfd:/boot-image-methods.art");
 }
 
 bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
@@ -84,6 +92,11 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   static const char* kArtApexPrefix = "/apex/com.android.art/javalib/";
   if (android::base::StartsWith(path, kArtApexPrefix)
       && android::base::EndsWith(path, kJarSuffix)) {
+    return true;
+  }
+
+  // the in-memory file created by ART through memfd_create is allowed.
+  if (IsArtMemfd(path)) {
     return true;
   }
 
@@ -312,6 +325,11 @@ void FileDescriptorInfo::ReopenOrDetach(fail_fn_t fail_fn) const {
     return DetachSocket(fail_fn);
   }
 
+  // Children can directly use the in-memory file created by ART through memfd_create.
+  if (IsArtMemfd(file_path)) {
+    return;
+  }
+
   // NOTE: This might happen if the file was unlinked after being opened.
   // It's a common pattern in the case of temporary files and the like but
   // we should not allow such usage from the zygote.
@@ -531,6 +549,10 @@ FileDescriptorTable::FileDescriptorTable(
 }
 
 void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn) {
+  // ART creates a file through memfd for optimization purposes. We make sure
+  // there is at most one being created.
+  bool art_memfd_seen = false;
+
   // Iterate through the list of file descriptors we've already recorded
   // and check whether :
   //
@@ -561,6 +583,14 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
       } else {
         // It's the same file. Nothing to do here. Move on to the next open
         // FD.
+      }
+
+      if (IsArtMemfd(it->second->file_path)) {
+        if (art_memfd_seen) {
+          fail_fn("ART fd already seen: " + it->second->file_path);
+        } else {
+          art_memfd_seen = true;
+        }
       }
 
       ++it;

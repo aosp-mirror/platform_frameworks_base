@@ -19,7 +19,7 @@ package android.os.storage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -173,6 +173,7 @@ public final class StorageVolume implements Parcelable {
      * @return the mount path
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public String getPath() {
         return mPath.toString();

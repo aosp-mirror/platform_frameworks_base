@@ -232,6 +232,8 @@ message ConstantsProto {
         // Whether or not TimeController should skip setting wakeup alarms for jobs that aren't
         // ready now.
         optional bool skip_not_ready_jobs = 1;
+        // Whether or not TimeController will use a non-wakeup alarm for delay constraints.
+        optional bool use_non_wakeup_alarm_for_delay = 2;
     }
     optional TimeController time_controller = 25;
 

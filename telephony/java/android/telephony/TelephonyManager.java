@@ -17,6 +17,8 @@
 package android.telephony;
 
 import static android.content.Context.TELECOM_SERVICE;
+import static android.provider.Telephony.Carriers.DPC_URI;
+import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
@@ -34,12 +36,17 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
-import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.Uri;
@@ -58,13 +65,23 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.sysprop.TelephonyProperties;
 import android.telecom.CallScreeningService;
 import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
+import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.CallForwardingReason;
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.CallWaitingStatus;
+import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation.RadioPowerState;
+import android.telephony.Annotation.SimActivationState;
+import android.telephony.Annotation.UiccAppType;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
+import android.telephony.data.ApnSetting.MvnoType;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.ImsMmTelManager;
@@ -80,7 +97,6 @@ import android.util.Pair;
 
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
@@ -92,9 +108,8 @@ import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
-import com.android.internal.telephony.TelephonyProperties;
-
-import dalvik.system.VMRuntime;
+import com.android.internal.telephony.SmsApplication;
+import com.android.telephony.Rlog;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -136,6 +151,14 @@ public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
 
     /**
+     * To expand the error codes for {@link TelephonyManager#updateAvailableNetworks} and
+     * {@link TelephonyManager#setPreferredOpportunisticDataSubscription}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
+
+    /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
      * into the ResultReceiver Bundle.
      * @hide
@@ -173,11 +196,8 @@ public class TelephonyManager {
                     NETWORK_SELECTION_MODE_MANUAL})
     public @interface NetworkSelectionMode {}
 
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_UNKNOWN = 0;
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_AUTO = 1;
-    /** @hide */
     public static final int NETWORK_SELECTION_MODE_MANUAL = 2;
 
     /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
@@ -193,11 +213,28 @@ public class TelephonyManager {
     /** @hide */
     static public final int OTASP_SIM_UNPROVISIONED = 5;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in ePDG links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_EPDG = 1;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in WLAN links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_WLAN = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"KEY_TYPE_"}, value = {KEY_TYPE_EPDG, KEY_TYPE_WLAN})
+    public @interface KeyType {}
 
     /**
      * No Single Radio Voice Call Continuity (SRVCC) handover is active.
@@ -254,17 +291,6 @@ public class TelephonyManager {
      */
     public static final int UNINITIALIZED_CARD_ID = -2;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"SRVCC_STATE_"},
-            value = {
-                    SRVCC_STATE_HANDOVER_NONE,
-                    SRVCC_STATE_HANDOVER_STARTED,
-                    SRVCC_STATE_HANDOVER_COMPLETED,
-                    SRVCC_STATE_HANDOVER_FAILED,
-                    SRVCC_STATE_HANDOVER_CANCELED})
-    public @interface SrvccState {}
-
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
@@ -277,6 +303,8 @@ public class TelephonyManager {
      *  TSTS - Triple SIM Triple Standby
      **/
     /** @hide */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Landroid/telephony/TelephonyManager$MultiSimVariants;")
     public enum MultiSimVariants {
         @UnsupportedAppUsage
         DSDS,
@@ -287,6 +315,21 @@ public class TelephonyManager {
         @UnsupportedAppUsage
         UNKNOWN
     };
+
+    /** @hide */
+    @IntDef(prefix = {"MODEM_COUNT_"},
+            value = {
+                    MODEM_COUNT_NO_MODEM,
+                    MODEM_COUNT_SINGLE_MODEM,
+                    MODEM_COUNT_DUAL_MODEM,
+                    MODEM_COUNT_TRI_MODEM
+            })
+    public @interface ModemCount {}
+
+    public static final int MODEM_COUNT_NO_MODEM     = 0;
+    public static final int MODEM_COUNT_SINGLE_MODEM = 1;
+    public static final int MODEM_COUNT_DUAL_MODEM   = 2;
+    public static final int MODEM_COUNT_TRI_MODEM    = 3;
 
     /** @hide */
     @UnsupportedAppUsage
@@ -331,8 +374,21 @@ public class TelephonyManager {
         // effort and get the context from the current activity thread.
         if (mContext != null) {
             return mContext.getOpPackageName();
+        } else {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return null;
+            try {
+                return telephony.getCurrentPackageName();
+            } catch (RemoteException ex) {
+                return null;
+            } catch (NullPointerException ex) {
+                return null;
+            }
         }
-        return ActivityThread.currentOpPackageName();
+    }
+
+    private String getFeatureId() {
+        return null;
     }
 
     private boolean isSystemProcess() {
@@ -350,7 +406,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public MultiSimVariants getMultiSimConfiguration() {
         String mSimConfig =
-            SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
+                TelephonyProperties.multi_sim_config().orElse("");
         if (mSimConfig.equals("dsds")) {
             return MultiSimVariants.DSDS;
         } else if (mSimConfig.equals("dsda")) {
@@ -365,58 +421,73 @@ public class TelephonyManager {
     /**
      * Returns the number of phones available.
      * Returns 0 if none of voice, sms, data is not supported
-     * Returns 1 for Single standby mode (Single SIM functionality)
-     * Returns 2 for Dual standby mode.(Dual SIM functionality)
-     * Returns 3 for Tri standby mode.(Tri SIM functionality)
+     * Returns 1 for Single standby mode (Single SIM functionality).
+     * Returns 2 for Dual standby mode (Dual SIM functionality).
+     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     * @deprecated Use {@link #getActiveModemCount} instead.
      */
+    @Deprecated
     public int getPhoneCount() {
-        int phoneCount = 1;
+        return getActiveModemCount();
+    }
+
+    /**
+     * Returns the number of logical modems currently configured to be activated.
+     *
+     * Returns 0 if none of voice, sms, data is not supported
+     * Returns 1 for Single standby mode (Single SIM functionality).
+     * Returns 2 for Dual standby mode (Dual SIM functionality).
+     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     */
+    public @ModemCount int getActiveModemCount() {
+        int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                ConnectivityManager cm = mContext == null ? null : (ConnectivityManager) mContext
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                modemCount = MODEM_COUNT_SINGLE_MODEM;
                 // check for voice and data support, 0 if not supported
-                if (!isVoiceCapable() && !isSmsCapable() && cm != null
-                        && !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                    phoneCount = 0;
-                } else {
-                    phoneCount = 1;
+                if (!isVoiceCapable() && !isSmsCapable() && !isDataCapable()) {
+                    modemCount = MODEM_COUNT_NO_MODEM;
                 }
                 break;
             case DSDS:
             case DSDA:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+                modemCount = MODEM_COUNT_DUAL_MODEM;
                 break;
             case TSTS:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_TRI_SIM;
+                modemCount = MODEM_COUNT_TRI_MODEM;
                 break;
         }
-        return phoneCount;
+        return modemCount;
     }
 
     /**
-     *
-     * Return how many phone / logical modem can be active simultaneously, in terms of device
+     * Return how many logical modem can be potentially active simultaneously, in terms of hardware
      * capability.
-     * For example, for a dual-SIM capable device, it always returns 2, even if only one logical
-     * modem / SIM is active (aka in single SIM mode).
-     *
-     * TODO: b/139642279 publicize and rename.
+     * It might return different value from {@link #getActiveModemCount}. For example, for a
+     * dual-SIM capable device operating in single SIM mode (only one logical modem is turned on),
+     * {@link #getActiveModemCount} returns 1 while this API returns 2.
+     */
+    public @ModemCount int getSupportedModemCount() {
+        return TelephonyProperties.max_active_modems().orElse(getActiveModemCount());
+    }
+
+    /**
+     * Gets the maximum number of SIMs that can be active, based on the device's multisim
+     * configuration.
+     * @return 1 for single-SIM, DSDS, and TSTS devices. 2 for DSDA devices.
      * @hide
      */
-    public int getMaxPhoneCount() {
-        // TODO: b/139642279 when turning on this feature, remove dependency of
-        // PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE and always return result based on
-        // PROPERTY_MAX_ACTIVE_MODEMS.
-        String rebootRequired = SystemProperties.get(
-                TelephonyProperties.PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE);
-        if (rebootRequired.equals("false")) {
-            // If no reboot is required, return max possible active modems.
-            return SystemProperties.getInt(
-                    TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS, getPhoneCount());
-        } else {
-            return getPhoneCount();
+    @SystemApi
+    public int getMaxNumberOfSimultaneouslyActiveSims() {
+        switch (getMultiSimConfiguration()) {
+            case UNKNOWN:
+            case DSDS:
+            case TSTS:
+                return 1;
+            case DSDA:
+                return 2;
         }
+        return 1;
     }
 
     /** {@hide} */
@@ -444,7 +515,7 @@ public class TelephonyManager {
      */
     @Nullable
     public TelephonyManager createForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
-        int subId = getSubIdForPhoneAccountHandle(phoneAccountHandle);
+        int subId = getSubscriptionId(phoneAccountHandle);
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             return null;
         }
@@ -543,6 +614,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_EMERGENCY_ASSISTANCE =
             "android.telephony.action.EMERGENCY_ASSISTANCE";
@@ -654,31 +726,6 @@ public class TelephonyManager {
     public static final String EXTRA_INCOMING_NUMBER = "incoming_number";
 
     /**
-     * Broadcast intent action indicating that a precise call state
-     * (cellular) on the device has changed.
-     *
-     * <p>
-     * The {@link #EXTRA_RINGING_CALL_STATE} extra indicates the ringing call state.
-     * The {@link #EXTRA_FOREGROUND_CALL_STATE} extra indicates the foreground call state.
-     * The {@link #EXTRA_BACKGROUND_CALL_STATE} extra indicates the background call state.
-     *
-     * <p class="note">
-     * Requires the READ_PRECISE_PHONE_STATE permission.
-     *
-     * @see #EXTRA_RINGING_CALL_STATE
-     * @see #EXTRA_FOREGROUND_CALL_STATE
-     * @see #EXTRA_BACKGROUND_CALL_STATE
-     *
-     * <p class="note">
-     * Requires the READ_PRECISE_PHONE_STATE permission.
-     * @deprecated use {@link PhoneStateListener#LISTEN_PRECISE_CALL_STATE} instead
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PRECISE_CALL_STATE_CHANGED =
-            "android.intent.action.PRECISE_CALL_STATE";
-
-    /**
      * Broadcast intent action indicating that call disconnect cause has changed.
      *
      * <p>
@@ -700,78 +747,6 @@ public class TelephonyManager {
     /**
      * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and
      * {@link PhoneStateListener#onPreciseCallStateChanged(PreciseCallState)} for an integer
-     * containing the state of the current ringing call.
-     *
-     * @see PreciseCallState#PRECISE_CALL_STATE_NOT_VALID
-     * @see PreciseCallState#PRECISE_CALL_STATE_IDLE
-     * @see PreciseCallState#PRECISE_CALL_STATE_ACTIVE
-     * @see PreciseCallState#PRECISE_CALL_STATE_HOLDING
-     * @see PreciseCallState#PRECISE_CALL_STATE_DIALING
-     * @see PreciseCallState#PRECISE_CALL_STATE_ALERTING
-     * @see PreciseCallState#PRECISE_CALL_STATE_INCOMING
-     * @see PreciseCallState#PRECISE_CALL_STATE_WAITING
-     * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTED
-     * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTING
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_RINGING_CALL_STATE = "ringing_state";
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and
-     * {@link PhoneStateListener#onPreciseCallStateChanged(PreciseCallState)} for an integer
-     * containing the state of the current foreground call.
-     *
-     * @see PreciseCallState#PRECISE_CALL_STATE_NOT_VALID
-     * @see PreciseCallState#PRECISE_CALL_STATE_IDLE
-     * @see PreciseCallState#PRECISE_CALL_STATE_ACTIVE
-     * @see PreciseCallState#PRECISE_CALL_STATE_HOLDING
-     * @see PreciseCallState#PRECISE_CALL_STATE_DIALING
-     * @see PreciseCallState#PRECISE_CALL_STATE_ALERTING
-     * @see PreciseCallState#PRECISE_CALL_STATE_INCOMING
-     * @see PreciseCallState#PRECISE_CALL_STATE_WAITING
-     * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTED
-     * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTING
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_FOREGROUND_CALL_STATE = "foreground_state";
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and
-     * {@link PhoneStateListener#onPreciseCallStateChanged(PreciseCallState)} for an integer
-     * containing the state of the current background call.
-     *
-     * @see PreciseCallState#PRECISE_CALL_STATE_NOT_VALID
-     * @see PreciseCallState#PRECISE_CALL_STATE_IDLE
-     * @see PreciseCallState#PRECISE_CALL_STATE_ACTIVE
-     * @see PreciseCallState#PRECISE_CALL_STATE_HOLDING
-     * @see PreciseCallState#PRECISE_CALL_STATE_DIALING
-     * @see PreciseCallState#PRECISE_CALL_STATE_ALERTING
-     * @see PreciseCallState#PRECISE_CALL_STATE_INCOMING
-     * @see PreciseCallState#PRECISE_CALL_STATE_WAITING
-     * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTED
-     * @see PreciseCallState#PRECISE_CALL_STATE_DISCONNECTING
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_BACKGROUND_CALL_STATE = "background_state";
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and
-     * {@link PhoneStateListener#onPreciseCallStateChanged(PreciseCallState)} for an integer
      * containing the disconnect cause.
      *
      * @see DisconnectCause
@@ -780,8 +755,10 @@ public class TelephonyManager {
      * Retrieve with
      * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
      *
+     * @deprecated Should use the {@link TelecomManager#EXTRA_DISCONNECT_CAUSE} instead.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_DISCONNECT_CAUSE = "disconnect_cause";
 
     /**
@@ -798,136 +775,6 @@ public class TelephonyManager {
      * @hide
      */
     public static final String EXTRA_PRECISE_DISCONNECT_CAUSE = "precise_disconnect_cause";
-
-    /**
-     * Broadcast intent action indicating a data connection has changed,
-     * providing precise information about the connection.
-     *
-     * <p>
-     * The {@link #EXTRA_DATA_STATE} extra indicates the connection state.
-     * The {@link #EXTRA_DATA_NETWORK_TYPE} extra indicates the connection network type.
-     * The {@link #EXTRA_DATA_APN_TYPE} extra indicates the APN type.
-     * The {@link #EXTRA_DATA_APN} extra indicates the APN.
-     * The {@link #EXTRA_DATA_IFACE_PROPERTIES} extra indicates the connection interface.
-     * The {@link #EXTRA_DATA_FAILURE_CAUSE} extra indicates the connection fail cause.
-     *
-     * <p class="note">
-     * Requires the READ_PRECISE_PHONE_STATE permission.
-     *
-     * @see #EXTRA_DATA_STATE
-     * @see #EXTRA_DATA_NETWORK_TYPE
-     * @see #EXTRA_DATA_APN_TYPE
-     * @see #EXTRA_DATA_APN
-     * @see #EXTRA_DATA_IFACE
-     * @see #EXTRA_DATA_FAILURE_CAUSE
-     * @hide
-     *
-     * @deprecated If the app is running in the background, it won't be able to receive this
-     * broadcast. Apps should use ConnectivityManager {@link #registerNetworkCallback(
-     * android.net.NetworkRequest, ConnectivityManager.NetworkCallback)} to listen for network
-     * changes.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    @UnsupportedAppUsage
-    public static final String ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED =
-            "android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED";
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an integer containing the state of the current data connection.
-     *
-     * @see TelephonyManager#DATA_UNKNOWN
-     * @see TelephonyManager#DATA_DISCONNECTED
-     * @see TelephonyManager#DATA_CONNECTING
-     * @see TelephonyManager#DATA_CONNECTED
-     * @see TelephonyManager#DATA_SUSPENDED
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_STATE = PhoneConstants.STATE_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an integer containing the network type.
-     *
-     * @see TelephonyManager#NETWORK_TYPE_UNKNOWN
-     * @see TelephonyManager#NETWORK_TYPE_GPRS
-     * @see TelephonyManager#NETWORK_TYPE_EDGE
-     * @see TelephonyManager#NETWORK_TYPE_UMTS
-     * @see TelephonyManager#NETWORK_TYPE_CDMA
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_0
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_A
-     * @see TelephonyManager#NETWORK_TYPE_1xRTT
-     * @see TelephonyManager#NETWORK_TYPE_HSDPA
-     * @see TelephonyManager#NETWORK_TYPE_HSUPA
-     * @see TelephonyManager#NETWORK_TYPE_HSPA
-     * @see TelephonyManager#NETWORK_TYPE_IDEN
-     * @see TelephonyManager#NETWORK_TYPE_EVDO_B
-     * @see TelephonyManager#NETWORK_TYPE_LTE
-     * @see TelephonyManager#NETWORK_TYPE_EHRPD
-     * @see TelephonyManager#NETWORK_TYPE_HSPAP
-     * @see TelephonyManager#NETWORK_TYPE_NR
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getIntExtra(String name, int defaultValue)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_NETWORK_TYPE = PhoneConstants.DATA_NETWORK_TYPE_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String containing the data APN type.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_APN_TYPE = PhoneConstants.DATA_APN_TYPE_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String containing the data APN.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_APN = PhoneConstants.DATA_APN_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for an String representation of the data interface.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_LINK_PROPERTIES_KEY = PhoneConstants.DATA_LINK_PROPERTIES_KEY;
-
-    /**
-     * The lookup key used with the {@link #ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED} broadcast
-     * for the data connection fail cause.
-     *
-     * <p class="note">
-     * Retrieve with
-     * {@link android.content.Intent#getStringExtra(String name)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_DATA_FAILURE_CAUSE = PhoneConstants.DATA_FAILURE_CAUSE_KEY;
 
     /**
      * Broadcast intent action for letting the default dialer to know to show voicemail
@@ -1177,6 +1024,35 @@ public class TelephonyManager {
             "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
 
     /**
+     * Broadcast intent that indicates multi-SIM configuration is changed. For example, it changed
+     * from single SIM capable to dual-SIM capable (DSDS or DSDA) or triple-SIM mode.
+     *
+     * It doesn't indicate how many subscriptions are actually active, or which states SIMs are,
+     * or that all steps during multi-SIM change are done. To know those information you still need
+     * to listen to SIM_STATE changes or active subscription changes.
+     *
+     * See extra of {@link #EXTRA_NUM_OF_ACTIVE_SIM_SUPPORTED} for updated value.
+     */
+    public static final String ACTION_MULTI_SIM_CONFIG_CHANGED =
+            "android.telephony.action.MULTI_SIM_CONFIG_CHANGED";
+
+
+    /**
+     * The number of active SIM supported by current multi-SIM config. It's not related to how many
+     * SIM/subscriptions are currently active.
+     *
+     * For single SIM mode, it's 1.
+     * For DSDS or DSDA mode, it's 2.
+     * For triple-SIM mode, it's 3.
+     *
+     * Extra of {@link #ACTION_MULTI_SIM_CONFIG_CHANGED}.
+     *
+     * type: integer
+     */
+    public static final String EXTRA_NUM_OF_ACTIVE_SIM_SUPPORTED =
+            "android.telephony.extra.NUM_OF_ACTIVE_SIM_SUPPORTED";
+
+    /**
      * @hide
      */
     public static final String USSD_RESPONSE = "USSD_RESPONSE";
@@ -1349,6 +1225,80 @@ public class TelephonyManager {
      * subscription which has changed; or in general whenever a subscription ID needs specified.
      */
     public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
+
+    /**
+     * Broadcast Action: The Service Provider string(s) have been updated. Activities or
+     * services that use these strings should update their display.
+     *
+     * <p>The intent will have the following extra values:
+     * <dl>
+     *   <dt>{@link #EXTRA_SHOW_PLMN}</dt>
+     *   <dd>Boolean that indicates whether the PLMN should be shown.</dd>
+     *   <dt>{@link #EXTRA_PLMN}</dt>
+     *   <dd>The operator name of the registered network, as a string.</dd>
+     *   <dt>{@link #EXTRA_SHOW_SPN}</dt>
+     *   <dd>Boolean that indicates whether the SPN should be shown.</dd>
+     *   <dt>{@link #EXTRA_SPN}</dt>
+     *   <dd>The service provider name, as a string.</dd>
+     *   <dt>{@link #EXTRA_DATA_SPN}</dt>
+     *   <dd>The service provider name for data service, as a string.</dd>
+     * </dl>
+     *
+     * Note that {@link #EXTRA_SHOW_PLMN} may indicate that {@link #EXTRA_PLMN} should be displayed,
+     * even though the value for {@link #EXTRA_PLMN} is null. This can happen, for example, if the
+     * phone has not registered to a network yet. In this case the receiver may substitute an
+     * appropriate placeholder string (eg, "No service").
+     *
+     * It is recommended to display {@link #EXTRA_PLMN} before / above {@link #EXTRA_SPN} if
+     * both are displayed.
+     *
+     * <p>Note: this is a protected intent that can only be sent by the system.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SERVICE_PROVIDERS_UPDATED =
+            "android.telephony.action.SERVICE_PROVIDERS_UPDATED";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * whether the PLMN should be shown.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SHOW_PLMN = "android.telephony.extra.SHOW_PLMN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * the operator name of the registered network.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PLMN = "android.telephony.extra.PLMN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * whether the PLMN should be shown.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SHOW_SPN = "android.telephony.extra.SHOW_SPN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * the service provider name.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SPN = "android.telephony.extra.SPN";
+
+    /**
+     * String intent extra to be used with {@link ACTION_SERVICE_PROVIDERS_UPDATED} to indicate
+     * the service provider name for data service.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_DATA_SPN = "android.telephony.extra.DATA_SPN";
 
     /**
      * Broadcast intent action indicating that when data stall recovery is attempted by Telephony,
@@ -1561,6 +1511,194 @@ public class TelephonyManager {
      */
     public static final String EXTRA_SIM_COMBINATION_NAMES =
             "android.telephony.extra.SIM_COMBINATION_NAMES";
+
+    /**
+     * <p>Broadcast Action: when data connections get redirected with validation failure.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>{@link #EXTRA_APN_TYPE}</li><dd>A string with the apn type.</dd>
+     *   <li>{@link #EXTRA_APN_TYPE_INT}</li><dd>A integer with the apn type.</dd>
+     *   <li>{@link #EXTRA_REDIRECTION_URL}</li><dd>redirection url string</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data connection failure.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_CARRIER_SIGNAL_REDIRECTED =
+            "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED";
+
+    /**
+     * <p>Broadcast Action: when data connections setup fails.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>{@link #EXTRA_APN_TYPE}</li><dd>A string with the apn type.</dd>
+     *   <li>{@link #EXTRA_APN_TYPE_INT}</li><dd>A integer with the apn type.</dd>
+     *   <li>{@link #EXTRA_ERROR_CODE}</li><dd>A integer with dataFailCause.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data connection failure.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED =
+            "com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
+
+    /**
+     * <p>Broadcast Action: when pco value is available.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>{@link #EXTRA_APN_TYPE}</li><dd>A string with the apn type.</dd>
+     *   <li>{@link #EXTRA_APN_TYPE_INT}</li><dd>A integer with the apn type.</dd>
+     *   <li>{@link #EXTRA_APN_PROTOCOL}</li><dd>A string with the protocol of the apn connection
+     *      (IP,IPV6, IPV4V6)</dd>
+     *   <li>{@link #EXTRA_APN_PROTOCOL_INT}</li><dd>A integer with the protocol of the apn
+     *      connection (IP,IPV6, IPV4V6)</dd>
+     *   <li>{@link #EXTRA_PCO_ID}</li><dd>An integer indicating the pco id for the data.</dd>
+     *   <li>{@link #EXTRA_PCO_VALUE}</li><dd>A byte array of pco data read from modem.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data connection.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE =
+            "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
+
+    /**
+     * <p>Broadcast Action: when system default network available/unavailable with
+     * carrier-disabled mobile data. Intended for carrier apps to set/reset carrier actions when
+     * other network becomes system default network, Wi-Fi for example.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>{@link #EXTRA_DEFAULT_NETWORK_AVAILABLE}</li>
+     *   <dd>A boolean indicates default network available.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the default data.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE =
+            "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
+
+    /**
+     * <p>Broadcast Action: when framework reset all carrier actions on sim load or absent.
+     * intended for carrier apps clean up (clear UI e.g.) and only sent to the specified carrier app
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>subId</li><dd>Sub Id which associated the data connection failure.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String ACTION_CARRIER_SIGNAL_RESET =
+            "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
+
+    // CARRIER_SIGNAL_ACTION extra keys
+    /**
+     *  An string extra of redirected url upon {@link #ACTION_CARRIER_SIGNAL_REDIRECTED}.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
+
+    /**
+     *  An integer extra of error code upon {@link #ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED}.
+     *  Check {@link DataFailCause} for all possible values.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_ERROR_CODE = "errorCode";
+
+    /**
+     *  An string extra of corresponding apn type upon
+     *  {@link #ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED},
+     *  {@link #ACTION_CARRIER_SIGNAL_REDIRECTED} and
+     *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
+     *  @deprecated This is kept for backward compatibility reason. Use {@link #EXTRA_APN_TYPE_INT}
+     *  instead.
+     *
+     *  @hide
+     */
+    @SystemApi
+    @Deprecated
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_APN_TYPE = "apnType";
+
+    /**
+     *  An string integer of corresponding apn type upon
+     *  {@link #ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED},
+     *  {@link #ACTION_CARRIER_SIGNAL_REDIRECTED} and
+     *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
+     *  Check {@link ApnSetting} TYPE_* for its values.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_APN_TYPE_INT = "apnTypeInt";
+
+    /**
+     *  An string extra with the protocol of the apn connection (IP,IPV6, IPV4V6) upon
+     *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
+     *  @deprecated This is kept for backward compatibility reason.
+     *  Use {@link #EXTRA_APN_PROTOCOL_INT} instead.
+     *
+     *  @hide
+     */
+    @SystemApi
+    @Deprecated
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_APN_PROTOCOL = "apnProto";
+
+    /**
+     *  An integer extra with the protocol of the apn connection (IP,IPV6, IPV4V6) upon
+     *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
+     *  Check {@link ApnSetting} PROTOCOL_* for its values.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_APN_PROTOCOL_INT = "apnProtoInt";
+
+    /**
+     *  An integer extra indicating the pco id for the data upon
+     *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_PCO_ID = "pcoId";
+
+    /**
+     *  An extra of byte array of pco data read from modem upon
+     *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_PCO_VALUE = "pcoValue";
+
+    /**
+     *  An boolean extra indicating default network available upon
+     *  {@link #ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE} broadcasts.
+     *  @hide
+     */
+    @SystemApi
+    @SuppressLint("ActionValue")
+    public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE = "defaultNetworkAvailable";
+
     //
     //
     // Device Info
@@ -1568,15 +1706,32 @@ public class TelephonyManager {
     //
 
     /**
+     * Returns the {@link PhoneCapability} for the device or null if it is not available.
+     * <p>
+     * Requires Permission: READ_PHONE_STATE or that the calling app has
+     * carrier privileges (see {@link #hasCarrierPrivileges}).
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @Nullable
+    public PhoneCapability getPhoneCapability() {
+        try {
+            ITelephony telephony = getITelephony();
+            return telephony == null ? null :
+                    telephony.getPhoneCapability(getSubId(), getOpPackageName(), getFeatureId());
+        } catch (RemoteException ex) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
-     *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @Nullable
     public String getDeviceSoftwareVersion() {
         return getDeviceSoftwareVersion(getSlotIndex());
     }
@@ -1585,18 +1740,23 @@ public class TelephonyManager {
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
      *
      * @param slotIndex of which deviceID is returned
+     *
+     * @hide
      */
-    /** {@hide} */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
     public String getDeviceSoftwareVersion(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
 
         try {
-            return telephony.getDeviceSoftwareVersionForSlot(slotIndex, getOpPackageName());
+            return telephony.getDeviceSoftwareVersionForSlot(slotIndex, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1610,8 +1770,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1637,7 +1797,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getDeviceId(mContext.getOpPackageName());
+            return telephony.getDeviceIdWithFeature(mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1651,8 +1812,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1681,7 +1842,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName());
+            return info.getDeviceIdForPhone(slotIndex, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1711,7 +1873,8 @@ public class TelephonyManager {
      *     <li>The caller holds the READ_PRIVILEGED_PHONE_STATE permission.</li>
      *     <li>If the caller is the device or profile owner, the caller holds the
      *     {@link Manifest.permission#READ_PHONE_STATE} permission.</li>
-     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()}.</li>
+     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()} on any
+     *     active subscription.</li>
      *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
@@ -1738,7 +1901,7 @@ public class TelephonyManager {
         if (telephony == null) return null;
 
         try {
-            return telephony.getImeiForSlot(slotIndex, getOpPackageName());
+            return telephony.getImeiForSlot(slotIndex, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1780,8 +1943,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1807,8 +1970,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1832,7 +1995,12 @@ public class TelephonyManager {
         if (telephony == null) return null;
 
         try {
-            return telephony.getMeidForSlot(slotIndex, getOpPackageName());
+            String meid = telephony.getMeidForSlot(slotIndex, getOpPackageName(), getFeatureId());
+            if (TextUtils.isEmpty(meid)) {
+                Log.d(TAG, "getMeid: return null because MEID is not available");
+                return null;
+            }
+            return meid;
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -1872,17 +2040,44 @@ public class TelephonyManager {
     /**
      * Returns the Network Access Identifier (NAI). Return null if NAI is not available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then null is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getNai() {
         return getNaiBySubscriberId(getSubId());
     }
 
     /**
      * Returns the NAI. Return null if NAI is not available.
+     *
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then null is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
      *
      *  @param slotIndex of which Nai is returned
      */
@@ -1901,7 +2096,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName());
+            String nai = info.getNaiForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Rlog.v(TAG, "Nai = " + nai);
             }
@@ -1934,13 +2130,9 @@ public class TelephonyManager {
                 return null;
             }
 
-            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
-            if (bundle == null || bundle.isEmpty()) {
-                Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
-                return null;
-            }
-
-            CellLocation cl = CellLocation.newFromBundle(bundle);
+            CellIdentity cellIdentity = telephony.getCellLocation(mContext.getOpPackageName(),
+                    null);
+            CellLocation cl = cellIdentity.asCellLocation();
             if (cl == null || cl.isEmpty()) {
                 Rlog.d(TAG, "getCellLocation returning null because CellLocation is empty or"
                         + " phone type doesn't match CellLocation type");
@@ -2022,7 +2214,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getNeighboringCellInfo(mContext.getOpPackageName());
+            return telephony.getNeighboringCellInfo(mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -2038,6 +2231,16 @@ public class TelephonyManager {
     public static final int PHONE_TYPE_CDMA = PhoneConstants.PHONE_TYPE_CDMA;
     /** Phone is via SIP. */
     public static final int PHONE_TYPE_SIP = PhoneConstants.PHONE_TYPE_SIP;
+    /** Phone is via IMS. */
+    public static final int PHONE_TYPE_IMS = PhoneConstants.PHONE_TYPE_IMS;
+
+    /**
+     * Phone is via Third Party.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int PHONE_TYPE_THIRD_PARTY = PhoneConstants.PHONE_TYPE_THIRD_PARTY;
 
     /**
      * Returns the current phone type.
@@ -2127,12 +2330,10 @@ public class TelephonyManager {
     /** {@hide} */
     @UnsupportedAppUsage
     private int getPhoneTypeFromProperty(int phoneId) {
-        String type = getTelephonyProperty(phoneId,
-                TelephonyProperties.CURRENT_ACTIVE_PHONE, null);
-        if (type == null || type.isEmpty()) {
-            return getPhoneTypeFromNetworkType(phoneId);
-        }
-        return Integer.parseInt(type);
+        Integer type = getTelephonyProperty(
+                phoneId, TelephonyProperties.current_active_phone(), null);
+        if (type != null) return type;
+        return getPhoneTypeFromNetworkType(phoneId);
     }
 
     private int getPhoneTypeFromNetworkType() {
@@ -2144,9 +2345,9 @@ public class TelephonyManager {
         // When the system property CURRENT_ACTIVE_PHONE, has not been set,
         // use the system property for default network type.
         // This is a fail safe, and can only happen at first boot.
-        String mode = getTelephonyProperty(phoneId, "ro.telephony.default_network", null);
-        if (mode != null && !mode.isEmpty()) {
-            return TelephonyManager.getPhoneType(Integer.parseInt(mode));
+        Integer mode = getTelephonyProperty(phoneId, TelephonyProperties.default_network(), null);
+        if (mode != null) {
+            return TelephonyManager.getPhoneType(mode);
         }
         return TelephonyManager.PHONE_TYPE_NONE;
     }
@@ -2250,7 +2451,7 @@ public class TelephonyManager {
 
     /** The ProductType used for LTE on CDMA devices */
     private static final String sLteOnCdmaProductType =
-        SystemProperties.get(TelephonyProperties.PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE, "");
+            TelephonyProperties.lte_on_cdma_product_type().orElse("");
 
     /**
      * Return if the current radio is LTE on CDMA. This
@@ -2268,8 +2469,8 @@ public class TelephonyManager {
         int curVal;
         String productType = "";
 
-        curVal = SystemProperties.getInt(TelephonyProperties.PROPERTY_LTE_ON_CDMA_DEVICE,
-                    PhoneConstants.LTE_ON_CDMA_UNKNOWN);
+        curVal = TelephonyProperties.lte_on_cdma_device().orElse(
+            PhoneConstants.LTE_ON_CDMA_UNKNOWN);
         retVal = curVal;
         if (retVal == PhoneConstants.LTE_ON_CDMA_UNKNOWN) {
             Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
@@ -2321,7 +2522,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getNetworkOperatorName(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_alpha(), "");
     }
 
     /**
@@ -2365,7 +2566,7 @@ public class TelephonyManager {
      **/
     @UnsupportedAppUsage
     public String getNetworkOperatorForPhone(int phoneId) {
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_numeric(), "");
     }
 
 
@@ -2429,8 +2630,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isNetworkRoaming(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return Boolean.parseBoolean(getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_OPERATOR_ISROAMING, null));
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_is_roaming(), false);
     }
 
     /**
@@ -2449,41 +2649,52 @@ public class TelephonyManager {
      * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
-        return getNetworkCountryIsoForPhone(getPhoneId());
-    }
-
-    /**
-     * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
-     * registered operator or the cell nearby, if available.
-     * <p>
-     * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
-     * if on a CDMA network).
-     *
-     * @param subId for which Network CountryIso is returned
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public String getNetworkCountryIso(int subId) {
-        return getNetworkCountryIsoForPhone(getPhoneId(subId));
-    }
-
-    /**
-     * Returns the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code) of a subscription.
-     * <p>
-     * Availability: Only when user is registered to a network. Result may be
-     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
-     * on a CDMA network).
-     *
-     * @param phoneId for which Network CountryIso is returned
-     */
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public String getNetworkCountryIsoForPhone(int phoneId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(phoneId);
+            return telephony.getNetworkCountryIsoForPhone(getPhoneId(),
+                    null /* no permission check */, null);
+        } catch (RemoteException ex) {
+            return "";
+        }
+    }
+
+    /**
+     * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
+     * registered operator or the cell nearby, if available.
+     * <p>
+     * The ISO-3166 country code is provided in lowercase 2 character format.
+     * <p>
+     * Note: In multi-sim, this returns a shared emergency network country iso from other
+     * subscription if the subscription used to create the TelephonyManager doesn't camp on
+     * a network due to some reason (e.g. pin/puk locked), or sim is absent in the corresponding
+     * slot.
+     * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
+     * if on a CDMA network).
+     * <p>
+     *
+     * @param slotIndex the SIM slot index to get network country ISO.
+     *
+     * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
+     *
+     * @throws IllegalArgumentException when the slotIndex is invalid.
+     *
+     * {@hide}
+     */
+    @SystemApi
+    @TestApi
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public String getNetworkCountryIso(int slotIndex) {
+        try {
+            if (!SubscriptionManager.isValidSlotIndex(slotIndex)) {
+                throw new IllegalArgumentException("invalid slot index " + slotIndex);
+            }
+
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return "";
+            return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return "";
         }
@@ -2491,7 +2702,7 @@ public class TelephonyManager {
 
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
-     * MobileSignalController.mapIconSets().
+     * MobileSignalController.mapIconSets() as well as NETWORK_TYPES
      * Do not add negative types.
      */
     /** Network type is unknown */
@@ -2539,12 +2750,7 @@ public class TelephonyManager {
     /** Current network is NR(New Radio) 5G. */
     public static final int NETWORK_TYPE_NR = TelephonyProtoEnums.NETWORK_TYPE_NR; // 20.
 
-    /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
-    public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_NR;
-
-    /** @hide */
-    @IntDef({
-            NETWORK_TYPE_UNKNOWN,
+    private static final @NetworkType int[] NETWORK_TYPES = {
             NETWORK_TYPE_GPRS,
             NETWORK_TYPE_EDGE,
             NETWORK_TYPE_UMTS,
@@ -2564,10 +2770,16 @@ public class TelephonyManager {
             NETWORK_TYPE_TD_SCDMA,
             NETWORK_TYPE_IWLAN,
             NETWORK_TYPE_LTE_CA,
-            NETWORK_TYPE_NR,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface NetworkType{}
+            NETWORK_TYPE_NR
+    };
+
+    /**
+     * Return a collection of all network types
+     * @return network types
+     */
+    public static @NonNull @NetworkType int[] getAllNetworkTypes() {
+        return NETWORK_TYPES;
+    }
 
     /**
      * Return the current data network type.
@@ -2614,7 +2826,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName());
+                return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -2678,7 +2891,8 @@ public class TelephonyManager {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getDataNetworkTypeForSubscriber(subId, getOpPackageName());
+                return telephony.getDataNetworkTypeForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -2714,7 +2928,8 @@ public class TelephonyManager {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getVoiceNetworkTypeForSubscriber(subId, getOpPackageName());
+                return telephony.getVoiceNetworkTypeForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
@@ -2745,6 +2960,8 @@ public class TelephonyManager {
     /** Class of broadly defined "4G" networks. {@hide} */
     @UnsupportedAppUsage
     public static final int NETWORK_CLASS_4_G = 3;
+    /** Class of broadly defined "5G" networks. {@hide} */
+    public static final int NETWORK_CLASS_5_G = 4;
 
     /**
      * Return general class of network type, such as "3G" or "4G". In cases
@@ -2777,6 +2994,8 @@ public class TelephonyManager {
             case NETWORK_TYPE_IWLAN:
             case NETWORK_TYPE_LTE_CA:
                 return NETWORK_CLASS_4_G;
+            case NETWORK_TYPE_NR:
+                return NETWORK_CLASS_5_G;
             default:
                 return NETWORK_CLASS_UNKNOWN;
         }
@@ -2850,11 +3069,78 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Returns the bitmask for a given technology (network type)
+     * @param networkType for which bitmask is returned
+     * @return the network type bitmask
+     * {@hide}
+     */
+    public static @NetworkTypeBitMask long getBitMaskForNetworkType(@NetworkType int networkType) {
+        switch(networkType) {
+            case NETWORK_TYPE_GSM:
+                return NETWORK_TYPE_BITMASK_GSM;
+            case NETWORK_TYPE_GPRS:
+                return NETWORK_TYPE_BITMASK_GPRS;
+            case NETWORK_TYPE_EDGE:
+                return NETWORK_TYPE_BITMASK_EDGE;
+            case NETWORK_TYPE_CDMA:
+                return NETWORK_TYPE_BITMASK_CDMA;
+            case NETWORK_TYPE_1xRTT:
+                return NETWORK_TYPE_BITMASK_1xRTT;
+            case NETWORK_TYPE_EVDO_0:
+                return NETWORK_TYPE_BITMASK_EVDO_0;
+            case NETWORK_TYPE_EVDO_A:
+                return NETWORK_TYPE_BITMASK_EVDO_A;
+            case NETWORK_TYPE_EVDO_B:
+                return NETWORK_TYPE_BITMASK_EVDO_B;
+            case NETWORK_TYPE_EHRPD:
+                return NETWORK_TYPE_BITMASK_EHRPD;
+            case NETWORK_TYPE_HSUPA:
+                return NETWORK_TYPE_BITMASK_HSUPA;
+            case NETWORK_TYPE_HSDPA:
+                return NETWORK_TYPE_BITMASK_HSDPA;
+            case NETWORK_TYPE_HSPA:
+                return NETWORK_TYPE_BITMASK_HSPA;
+            case NETWORK_TYPE_HSPAP:
+                return NETWORK_TYPE_BITMASK_HSPAP;
+            case NETWORK_TYPE_UMTS:
+                return NETWORK_TYPE_BITMASK_UMTS;
+            case NETWORK_TYPE_TD_SCDMA:
+                return NETWORK_TYPE_BITMASK_TD_SCDMA;
+            case NETWORK_TYPE_LTE:
+                return NETWORK_TYPE_BITMASK_LTE;
+            case NETWORK_TYPE_LTE_CA:
+                return NETWORK_TYPE_BITMASK_LTE_CA;
+            case NETWORK_TYPE_NR:
+                return NETWORK_TYPE_BITMASK_NR;
+            default:
+                return NETWORK_TYPE_BITMASK_UNKNOWN;
+        }
+    }
+
     //
     //
     // SIM Card
     //
     //
+
+    /** @hide */
+    @IntDef(prefix = {"SIM_STATE_"},
+            value = {
+                    SIM_STATE_UNKNOWN,
+                    SIM_STATE_ABSENT,
+                    SIM_STATE_PIN_REQUIRED,
+                    SIM_STATE_PUK_REQUIRED,
+                    SIM_STATE_NETWORK_LOCKED,
+                    SIM_STATE_READY,
+                    SIM_STATE_NOT_READY,
+                    SIM_STATE_PERM_DISABLED,
+                    SIM_STATE_CARD_IO_ERROR,
+                    SIM_STATE_CARD_RESTRICTED,
+                    SIM_STATE_LOADED,
+                    SIM_STATE_PRESENT,
+            })
+    public @interface SimState {}
 
     /**
      * SIM card state: Unknown. Signifies that the SIM is in transition
@@ -3061,7 +3347,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState() {
+    public @SimState int getSimState() {
         int simState = getSimStateIncludingLoaded();
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
@@ -3069,7 +3355,7 @@ public class TelephonyManager {
         return simState;
     }
 
-    private int getSimStateIncludingLoaded() {
+    private @SimState int getSimStateIncludingLoaded() {
         int slotIndex = getSlotIndex();
         // slotIndex may be invalid due to sim being absent. In that case query all slots to get
         // sim state
@@ -3103,7 +3389,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int getSimCardState() {
+    public @SimState int getSimCardState() {
         int simState = getSimState();
         return getSimCardStateFromSimState(simState);
     }
@@ -3123,7 +3409,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getSimCardState(int physicalSlotIndex) {
+    public @SimState int getSimCardState(int physicalSlotIndex) {
         int simState = getSimState(getLogicalSlotIndex(physicalSlotIndex));
         return getSimCardStateFromSimState(simState);
     }
@@ -3133,7 +3419,7 @@ public class TelephonyManager {
      * @param simState
      * @return SIM card state
      */
-    private int getSimCardStateFromSimState(int simState) {
+    private @SimState int getSimCardStateFromSimState(int simState) {
         switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
@@ -3173,7 +3459,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public int getSimApplicationState() {
+    public @SimState int getSimApplicationState() {
         int simState = getSimStateIncludingLoaded();
         return getSimApplicationStateFromSimState(simState);
     }
@@ -3196,7 +3482,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getSimApplicationState(int physicalSlotIndex) {
+    public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int simState =
                 SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex));
         return getSimApplicationStateFromSimState(simState);
@@ -3207,7 +3493,7 @@ public class TelephonyManager {
      * @param simState
      * @return SIM application state
      */
-    private int getSimApplicationStateFromSimState(int simState) {
+    private @SimState int getSimApplicationStateFromSimState(int simState) {
         switch (simState) {
             case SIM_STATE_UNKNOWN:
             case SIM_STATE_ABSENT:
@@ -3264,7 +3550,7 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_IO_ERROR
      * @see #SIM_STATE_CARD_RESTRICTED
      */
-    public int getSimState(int slotIndex) {
+    public @SimState int getSimState(int slotIndex) {
         int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
@@ -3354,8 +3640,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperatorNumericForPhone(int phoneId) {
-        return getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_numeric(), "");
     }
 
     /**
@@ -3392,8 +3677,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage
     public String getSimOperatorNameForPhone(int phoneId) {
-         return getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_alpha(), "");
     }
 
     /**
@@ -3425,8 +3709,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage
     public String getSimCountryIsoForPhone(int phoneId) {
-        return getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_iso_country(), "");
     }
 
     /**
@@ -3489,7 +3772,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getIccSerialNumberForSubscriber(subId, mContext.getOpPackageName());
+            return info.getIccSerialNumberForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3533,7 +3817,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
-            return telephony.getLteOnCdmaModeForSubscriber(subId, getOpPackageName());
+            return telephony.getLteOnCdmaModeForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // Assume no ICC card if remote exception which shouldn't happen
             return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
@@ -3761,7 +4046,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getSubscriberIdForSubscriber(subId, mContext.getOpPackageName());
+            return info.getSubscriberIdForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3771,25 +4057,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns Carrier specific information that will be used to encrypt the IMSI and IMPI.
-     * This includes the public key and the key identifier. For multi-sim devices, if no subId
-     * has been specified, we will return the value for the dafault data sim.
-     * Return null if it is unavailable.
+     * Returns carrier specific information that will be used to encrypt the IMSI and IMPI,
+     * including the public key and the key identifier; or {@code null} if not available.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * @param keyType whether the key is being used for wlan or epdg. Valid key types are
-     *        {@link TelephonyManager#KEY_TYPE_EPDG} or
-     *        {@link TelephonyManager#KEY_TYPE_WLAN}.
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     *
+     * @param keyType whether the key is being used for EPDG or WLAN. Valid values are
+     *        {@link #KEY_TYPE_EPDG} or {@link #KEY_TYPE_WLAN}.
      * @return ImsiEncryptionInfo Carrier specific information that will be used to encrypt the
      *         IMSI and IMPI. This includes the public key and the key identifier. This information
-     *         will be stored in the device keystore. The system will return a null when no key was
-     *         found, and the carrier does not require a key. The system will throw
-     *         IllegalArgumentException when an invalid key is sent or when key is required but
+     *         will be stored in the device keystore. {@code null} will be returned when no key is
+     *         found, and the carrier does not require a key.
+     * @throws IllegalArgumentException when an invalid key is found or when key is required but
      *         not found.
      * @hide
      */
-    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int keyType) {
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(@KeyType int keyType) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
@@ -3817,14 +4105,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets the Carrier Keys in the database. This involves 2 steps:
+     * Resets the carrier keys used to encrypt the IMSI and IMPI.
+     * <p>
+     * This involves 2 steps:
      *  1. Delete the keys from the database.
      *  2. Send an intent to download new Certificates.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: MODIFY_PHONE_STATE.
+     *
+     * @see #getCarrierInfoForImsiEncryption
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public void resetCarrierKeysForImsiEncryption() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -3851,7 +4146,7 @@ public class TelephonyManager {
      * @return true if the digit at position keyType is 1, else false.
      * @hide
      */
-    private static boolean isKeyEnabled(int keyAvailability, int keyType) {
+    private static boolean isKeyEnabled(int keyAvailability, @KeyType int keyType) {
         int returnValue = (keyAvailability >> (keyType - 1)) & 1;
         return (returnValue == 1) ? true : false;
     }
@@ -3860,7 +4155,7 @@ public class TelephonyManager {
      * If Carrier requires Imsi to be encrypted.
      * @hide
      */
-    private boolean isImsiEncryptionRequired(int subId, int keyType) {
+    private boolean isImsiEncryptionRequired(int subId, @KeyType int keyType) {
         CarrierConfigManager configManager =
                 (CarrierConfigManager) mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) {
@@ -3919,7 +4214,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName());
+            return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3942,7 +4238,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName());
+            return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3992,7 +4289,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                number = telephony.getLine1NumberForDisplay(subId, mContext.getOpPackageName());
+                number = telephony.getLine1NumberForDisplay(subId, mContext.getOpPackageName(),
+                         null);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -4003,7 +4301,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getLine1NumberForSubscriber(subId, mContext.getOpPackageName());
+            return info.getLine1NumberForSubscriber(subId, mContext.getOpPackageName(),
+                    null);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4059,6 +4358,7 @@ public class TelephonyManager {
      * @hide
      * nobody seems to call this.
      */
+    @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getLine1AlphaTag() {
@@ -4081,7 +4381,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 alphaTag = telephony.getLine1AlphaTagForDisplay(subId,
-                        getOpPackageName());
+                        getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -4092,7 +4392,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName());
+            return info.getLine1AlphaTagForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4109,14 +4410,42 @@ public class TelephonyManager {
      * The returned set of subscriber IDs will include the subscriber ID corresponding to this
      * TelephonyManager's subId.
      *
+     * This is deprecated and {@link #getMergedSubscriberIdsFromGroup()} should be used for data
+     * usage merging purpose.
+     * TODO: remove this API.
+     *
      * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public @Nullable String[] getMergedSubscriberIds() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName());
+                return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName(),
+                        getFeatureId());
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
+
+    /**
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. Unlike {@link #getMergedSubscriberIds()} this API merge subscriberIds based on
+     * subscription grouping: subscriberId of those in the same group will all be returned.
+     *
+     * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String[] getMergedSubscriberIdsFromGroup() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getMergedSubscriberIdsFromGroup(getSubId(), getOpPackageName());
+            }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -4149,7 +4478,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getMsisdnForSubscriber(subId, getOpPackageName());
+            return info.getMsisdnForSubscriber(subId, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4183,7 +4512,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName());
+            return info.getVoiceMailNumberForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4307,8 +4637,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony
-                        .getVisualVoicemailPackageName(mContext.getOpPackageName(), getSubId());
+                return telephony.getVisualVoicemailPackageName(mContext.getOpPackageName(),
+                        getFeatureId(), getSubId());
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -4528,17 +4858,6 @@ public class TelephonyManager {
     @SystemApi
     public static final int SIM_ACTIVATION_STATE_RESTRICTED = 4;
 
-    /** @hide */
-    @IntDef({
-            SIM_ACTIVATION_STATE_UNKNOWN,
-            SIM_ACTIVATION_STATE_ACTIVATING,
-            SIM_ACTIVATION_STATE_ACTIVATED,
-            SIM_ACTIVATION_STATE_DEACTIVATED,
-            SIM_ACTIVATION_STATE_RESTRICTED
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SimActivationState{}
-
      /**
       * Sets the voice activation state
       *
@@ -4755,7 +5074,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return 0;
-            return telephony.getVoiceMessageCountForSubscriber(subId, getOpPackageName());
+            return telephony.getVoiceMessageCountForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return 0;
         } catch (NullPointerException ex) {
@@ -4791,7 +5111,8 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName());
+            return info.getVoiceMailAlphaTagForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -4881,7 +5202,9 @@ public class TelephonyManager {
      *      not present or not loaded
      * @hide
      */
-    @UnsupportedAppUsage
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String[] getIsimImpu() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -4923,15 +5246,6 @@ public class TelephonyManager {
      */
     public static final int CALL_STATE_OFFHOOK = 2;
 
-    /** @hide */
-    @IntDef(prefix = { "CALL_STATE_" }, value = {
-            CALL_STATE_IDLE,
-            CALL_STATE_RINGING,
-            CALL_STATE_OFFHOOK
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallState{}
-
     /**
      * Returns the state of all calls on the device.
      * <p>
@@ -4945,13 +5259,11 @@ public class TelephonyManager {
      * @return the current call state.
      */
     public @CallState int getCallState() {
-        try {
-            ITelecomService telecom = getTelecomService();
-            if (telecom != null) {
-                return telecom.getCallState();
+        if (mContext != null) {
+            TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+            if (telecomManager != null) {
+                return telecomManager.getCallState();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#getCallState", e);
         }
         return CALL_STATE_IDLE;
     }
@@ -5012,6 +5324,17 @@ public class TelephonyManager {
      */
     public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
 
+    /** @hide */
+    @IntDef(prefix = {"DATA_"}, value = {
+        DATA_ACTIVITY_NONE,
+        DATA_ACTIVITY_IN,
+        DATA_ACTIVITY_OUT,
+        DATA_ACTIVITY_INOUT,
+        DATA_ACTIVITY_DORMANT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataActivityType{}
+
     /**
      * Returns a constant indicating the type of activity on a data connection
      * (cellular).
@@ -5045,6 +5368,7 @@ public class TelephonyManager {
             DATA_CONNECTING,
             DATA_CONNECTED,
             DATA_SUSPENDED,
+            DATA_DISCONNECTING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DataState{}
@@ -5061,6 +5385,19 @@ public class TelephonyManager {
      * traffic is temporarily unavailable. For example, in a 2G network,
      * data activity may be suspended when a voice call arrives. */
     public static final int DATA_SUSPENDED      = 3;
+    /**
+     * Data connection state: Disconnecting.
+     *
+     * IP traffic may be available but will cease working imminently.
+     */
+    public static final int DATA_DISCONNECTING = 4;
+
+    /**
+     * Used for checking if the SDK version for {@link TelephonyManager#getDataState} is above Q.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long GET_DATA_STATE_R_VERSION = 148534348L;
 
     /**
      * Returns a constant indicating the current data connection state
@@ -5070,14 +5407,21 @@ public class TelephonyManager {
      * @see #DATA_CONNECTING
      * @see #DATA_CONNECTED
      * @see #DATA_SUSPENDED
+     * @see #DATA_DISCONNECTING
      */
     public int getDataState() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return DATA_DISCONNECTED;
-            return telephony.getDataStateForSubId(
+            int state = telephony.getDataStateForSubId(
                     getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+            if (state == TelephonyManager.DATA_DISCONNECTING
+                    && !Compatibility.isChangeEnabled(GET_DATA_STATE_R_VERSION)) {
+                return TelephonyManager.DATA_CONNECTED;
+            }
+
+            return state;
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_DISCONNECTED;
@@ -5098,6 +5442,7 @@ public class TelephonyManager {
             case DATA_CONNECTING: return "CONNECTING";
             case DATA_CONNECTED: return "CONNECTED";
             case DATA_SUSPENDED: return "SUSPENDED";
+            case DATA_DISCONNECTING: return "DISCONNECTING";
         }
         return "UNKNOWN(" + state + ")";
     }
@@ -5108,13 +5453,6 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private ITelephony getITelephony() {
         return ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
-    }
-
-    /**
-    * @hide
-    */
-    private ITelecomService getTelecomService() {
-        return ITelecomService.Stub.asInterface(ServiceManager.getService(TELECOM_SERVICE));
     }
 
     private ITelephonyRegistry getTelephonyRegistry() {
@@ -5130,6 +5468,13 @@ public class TelephonyManager {
     // PhoneStateListener
     //
     //
+
+    /**
+     * To check the SDK version for {@link TelephonyManager#listen}.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.P)
+    private static final long LISTEN_CODE_CHANGE = 147600208L;
 
     /**
      * Registers a listener object to receive notification of changes
@@ -5170,7 +5515,7 @@ public class TelephonyManager {
                 // subId from PhoneStateListener is deprecated Q on forward, use the subId from
                 // TelephonyManager instance. keep using subId from PhoneStateListener for pre-Q.
                 int subId = mSubId;
-                if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) {
+                if (Compatibility.isChangeEnabled(LISTEN_CODE_CHANGE)) {
                     // since mSubId in PhoneStateListener is deprecated from Q on forward, this is
                     // the only place to set mSubId and its for "informational" only.
                     //  TODO: remove this once we completely get rid of mSubId in PhoneStateListener
@@ -5179,7 +5524,7 @@ public class TelephonyManager {
                 } else if (listener.mSubId != null) {
                     subId = listener.mSubId;
                 }
-                registry.listenForSubscriber(subId, getOpPackageName(),
+                registry.listenForSubscriber(subId, getOpPackageName(), getFeatureId(),
                         listener.callback, events, notifyNow);
             } else {
                 Rlog.w(TAG, "telephony registry not ready.");
@@ -5209,7 +5554,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return -1;
-            return telephony.getCdmaEriIconIndexForSubscriber(subId, getOpPackageName());
+            return telephony.getCdmaEriIconIndexForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
@@ -5244,7 +5590,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return -1;
-            return telephony.getCdmaEriIconModeForSubscriber(subId, getOpPackageName());
+            return telephony.getCdmaEriIconModeForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
@@ -5275,7 +5622,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getCdmaEriTextForSubscriber(subId, getOpPackageName());
+            return telephony.getCdmaEriTextForSubscriber(subId, getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return null;
@@ -5367,8 +5715,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo(
-                    getOpPackageName());
+            return telephony.getAllCellInfo(getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -5447,19 +5794,28 @@ public class TelephonyManager {
             telephony.requestCellInfoUpdate(
                     getSubId(),
                     new ICellInfoCallback.Stub() {
+                        @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onCellInfo(cellInfo)));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onCellInfo(cellInfo));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
 
-                        public void onError(int errorCode, android.os.ParcelableException detail) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onError(
-                                            errorCode,
-                                            detail == null ? null : detail.getCause())));
+                        @Override
+                        public void onError(int errorCode, String exceptionName, String message) {
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onError(
+                                        errorCode,
+                                        createThrowableByClassName(exceptionName, message)));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
-                    }, getOpPackageName());
-
+                    }, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         }
     }
@@ -5488,20 +5844,43 @@ public class TelephonyManager {
             telephony.requestCellInfoUpdateWithWorkSource(
                     getSubId(),
                     new ICellInfoCallback.Stub() {
+                        @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onCellInfo(cellInfo)));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onCellInfo(cellInfo));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
+
                         }
 
-                        public void onError(int errorCode, android.os.ParcelableException detail) {
-                            Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> callback.onError(
-                                            errorCode,
-                                            detail == null ? null : detail.getCause())));
+                        @Override
+                        public void onError(int errorCode, String exceptionName, String message) {
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> callback.onError(
+                                        errorCode,
+                                        createThrowableByClassName(exceptionName, message)));
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
-                    }, getOpPackageName(), workSource);
+                    }, getOpPackageName(), getFeatureId(), workSource);
         } catch (RemoteException ex) {
         }
+    }
+
+    private static Throwable createThrowableByClassName(String className, String message) {
+        if (className == null) {
+            return null;
+        }
+        try {
+            Class<?> c = Class.forName(className);
+            return (Throwable) c.getConstructor(String.class).newInstance(message);
+        } catch (ReflectiveOperationException | ClassCastException e) {
+        }
+        return new RuntimeException(className + ": " + message);
     }
 
     /**
@@ -5644,7 +6023,10 @@ public class TelephonyManager {
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID, int p2) {
         return iccOpenLogicalChannel(getSubId(), AID, p2);
     }
@@ -5675,7 +6057,10 @@ public class TelephonyManager {
      * @param p2 P2 parameter (described in ISO 7816-4).
      * @return an IccOpenLogicalChannelResponse object.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID, int p2) {
         try {
             ITelephony telephony = getITelephony();
@@ -5703,7 +6088,10 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
@@ -5730,7 +6118,10 @@ public class TelephonyManager {
      * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public boolean iccCloseLogicalChannel(int channel) {
         return iccCloseLogicalChannel(getSubId(), channel);
     }
@@ -5749,7 +6140,10 @@ public class TelephonyManager {
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public boolean iccCloseLogicalChannel(int subId, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -5785,7 +6179,10 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at the end, or null if
      * there is an issue connecting to the Telephony service.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @Nullable
@@ -5823,7 +6220,10 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         return iccTransmitApduLogicalChannel(getSubId(), channel, cla,
@@ -5852,7 +6252,10 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public String iccTransmitApduLogicalChannel(int subId, int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
@@ -5888,7 +6291,10 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @NonNull
@@ -5924,7 +6330,10 @@ public class TelephonyManager {
      * @param data Data to be sent with the APDU.
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public String iccTransmitApduBasicChannel(int cla,
             int instruction, int p1, int p2, int p3, String data) {
         return iccTransmitApduBasicChannel(getSubId(), cla,
@@ -5951,7 +6360,10 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public String iccTransmitApduBasicChannel(int subId, int cla,
             int instruction, int p1, int p2, int p3, String data) {
         try {
@@ -5979,7 +6391,10 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command.
      * @param filePath
      * @return The APDU response.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
             String filePath) {
         return iccExchangeSimIO(getSubId(), fileID, command, p1, p2, p3, filePath);
@@ -6001,7 +6416,10 @@ public class TelephonyManager {
      * @param filePath
      * @return The APDU response.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public byte[] iccExchangeSimIO(int subId, int fileID, int command, int p1, int p2,
             int p3, String filePath) {
         try {
@@ -6027,7 +6445,10 @@ public class TelephonyManager {
      * @return The APDU response from the ICC card in hexadecimal format
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public String sendEnvelopeWithStatus(String content) {
         return sendEnvelopeWithStatus(getSubId(), content);
     }
@@ -6047,7 +6468,10 @@ public class TelephonyManager {
      *         with the last 4 bytes being the status word. If the command fails,
      *         returns an empty string.
      * @hide
+     * @deprecated Use {@link android.se.omapi.SEService} APIs instead.
      */
+    // TODO(b/147153909): Update Javadoc to link to specific SEService API once integrated.
+    @Deprecated
     public String sendEnvelopeWithStatus(int subId, String content) {
         try {
             ITelephony telephony = getITelephony();
@@ -6350,16 +6774,24 @@ public class TelephonyManager {
         INumberVerificationCallback internalCallback = new INumberVerificationCallback.Stub() {
             @Override
             public void onCallReceived(String phoneNumber) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() ->
-                                callback.onCallReceived(phoneNumber)));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() ->
+                            callback.onCallReceived(phoneNumber));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
 
             @Override
             public void onVerificationFailed(int reason) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() ->
-                                callback.onVerificationFailed(reason)));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() ->
+                            callback.onVerificationFailed(reason));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         };
 
@@ -6377,74 +6809,14 @@ public class TelephonyManager {
     }
 
     /**
-     * Sets a per-phone telephony property with the value specified.
-     *
-     * @hide
+     * Inserts or updates a list property. Expands the list if its length is not enough.
      */
-    @UnsupportedAppUsage
-    public static void setTelephonyProperty(int phoneId, String property, String value) {
-        String propVal = "";
-        String p[] = null;
-        String prop = SystemProperties.get(property);
-
-        if (value == null) {
-            value = "";
-        }
-        value.replace(',', ' ');
-        if (prop != null) {
-            p = prop.split(",");
-        }
-
-        if (!SubscriptionManager.isValidPhoneId(phoneId)) {
-            Rlog.d(TAG, "setTelephonyProperty: invalid phoneId=" + phoneId +
-                    " property=" + property + " value: " + value + " prop=" + prop);
-            return;
-        }
-
-        for (int i = 0; i < phoneId; i++) {
-            String str = "";
-            if ((p != null) && (i < p.length)) {
-                str = p[i];
-            }
-            propVal = propVal + str + ",";
-        }
-
-        propVal = propVal + value;
-        if (p != null) {
-            for (int i = phoneId + 1; i < p.length; i++) {
-                propVal = propVal + "," + p[i];
-            }
-        }
-
-        int propValLen = propVal.length();
-        try {
-            propValLen = propVal.getBytes("utf-8").length;
-        } catch (java.io.UnsupportedEncodingException e) {
-            Rlog.d(TAG, "setTelephonyProperty: utf-8 not supported");
-        }
-        if (propValLen > SystemProperties.PROP_VALUE_MAX) {
-            Rlog.d(TAG, "setTelephonyProperty: property too long phoneId=" + phoneId +
-                    " property=" + property + " value: " + value + " propVal=" + propVal);
-            return;
-        }
-
-        SystemProperties.set(property, propVal);
+    private static <T> List<T> updateTelephonyProperty(List<T> prop, int phoneId, T value) {
+        List<T> ret = new ArrayList<>(prop);
+        while (ret.size() <= phoneId) ret.add(null);
+        ret.set(phoneId, value);
+        return ret;
     }
-
-    /**
-     * Sets a global telephony property with the value specified.
-     *
-     * @hide
-     */
-    public static void setTelephonyProperty(String property, String value) {
-        if (value == null) {
-            value = "";
-        }
-        Rlog.d(TAG, "setTelephonyProperty: success" + " property=" +
-                property + " value: " + value);
-        SystemProperties.set(property, value);
-    }
-
     /**
      * Convenience function for retrieving a value from the secure settings
      * value list as an integer.  Note that internally setting values are
@@ -6536,7 +6908,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets a per-phone telephony property.
+     * Gets a per-phone telephony property from a property name.
      *
      * @hide
      */
@@ -6551,6 +6923,15 @@ public class TelephonyManager {
             }
         }
         return propVal == null ? defaultVal : propVal;
+    }
+
+    /**
+     * Gets a typed per-phone telephony property from a schematized list property.
+     */
+    private static <T> T getTelephonyProperty(int phoneId, List<T> prop, T defaultValue) {
+        T ret = null;
+        if (phoneId >= 0 && phoneId < prop.size()) ret = prop.get(phoneId);
+        return ret != null ? ret : defaultValue;
     }
 
     /**
@@ -6623,19 +7004,6 @@ public class TelephonyManager {
         }
     }
 
-    /**
-     * UICC SIM Application Types
-     * @hide
-     */
-    @IntDef(prefix = { "APPTYPE_" }, value = {
-            APPTYPE_SIM,
-            APPTYPE_USIM,
-            APPTYPE_RUIM,
-            APPTYPE_CSIM,
-            APPTYPE_ISIM
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface UiccAppType{}
     /** UICC application type is SIM */
     public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
     /** UICC application type is USIM */
@@ -6746,13 +7114,49 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getForbiddenPlmns(subId, appType, mContext.getOpPackageName());
+            return telephony.getForbiddenPlmns(subId, appType, mContext.getOpPackageName(),
+                    getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
             // This could happen before phone starts
             return null;
         }
+    }
+
+    /**
+     * Replace the contents of the forbidden PLMN SIM file with the provided values.
+     * Passing an empty list will clear the contents of the EFfplmn file.
+     * If the provided list is shorter than the size of EFfplmn, then the list will be padded
+     * up to the file size with 'FFFFFF'. (required by 3GPP TS 31.102 spec 4.2.16)
+     * If the list is longer than the size of EFfplmn, then the file will be written from the
+     * beginning of the list up to the file size.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE
+     * MODIFY_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param fplmns a list of PLMNs to be forbidden.
+     *
+     * @return number of PLMNs that were successfully written to the SIM FPLMN list.
+     * This may be less than the number of PLMNs passed in where the SIM file does not have enough
+     * room for all of the values passed in. Return -1 in the event of an unexpected failure
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public int setForbiddenPlmns(@NonNull List<String> fplmns) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return -1;
+            return telephony.setForbiddenPlmns(
+                    getSubId(), APPTYPE_USIM, fplmns, getOpPackageName(), getFeatureId());
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setForbiddenPlmns RemoteException: " + ex.getMessage());
+        } catch (NullPointerException ex) {
+            // This could happen before phone starts
+            Rlog.e(TAG, "setForbiddenPlmns NullPointerException: " + ex.getMessage());
+        }
+        return -1;
     }
 
     /**
@@ -6766,9 +7170,33 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return new String[0];
-            return telephony.getPcscfAddress(apnType, getOpPackageName());
+            return telephony.getPcscfAddress(apnType, getOpPackageName(), getFeatureId());
         } catch (RemoteException e) {
             return new String[0];
+        }
+    }
+
+
+    /**
+     * Resets the {@link android.telephony.ims.ImsService} associated with the specified sim slot.
+     * Used by diagnostic apps to force the IMS stack to be disabled and re-enabled in an effort to
+     * recover from scenarios where the {@link android.telephony.ims.ImsService} gets in to a bad
+     * state.
+     *
+     * @param slotIndex the sim slot to reset the IMS stack on.
+     * @hide */
+    @SystemApi
+    @WorkerThread
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void resetIms(int slotIndex) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.resetIms(slotIndex);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "toggleImsOnOff, RemoteException: "
+                    + e.getMessage());
         }
     }
 
@@ -7180,7 +7608,9 @@ public class TelephonyManager {
      *
      * @return the preferred network type.
      * @hide
+     * @deprecated Use {@link #getPreferredNetworkTypeBitmask} instead.
      */
+    @Deprecated
     @RequiresPermission((android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE))
     @UnsupportedAppUsage
     public @PrefNetworkMode int getPreferredNetworkType(int subId) {
@@ -7222,6 +7652,30 @@ public class TelephonyManager {
             Rlog.e(TAG, "getPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return 0;
+    }
+
+    /**
+     * Get the allowed network types.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return the allowed network type bitmask
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public @NetworkTypeBitMask long getAllowedNetworkTypes() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getAllowedNetworkTypes(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getAllowedNetworkTypes RemoteException", ex);
+        }
+        return -1;
     }
 
     /**
@@ -7277,7 +7731,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName());
+                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getAvailableNetworks RemoteException", ex);
@@ -7332,7 +7787,7 @@ public class TelephonyManager {
             }
         }
         return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
-                getOpPackageName());
+                getOpPackageName(), getFeatureId());
     }
 
     /**
@@ -7386,6 +7841,36 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
+     * @param operatorNumeric the PLMN ID of the network to select.
+     * @param ran the initial suggested radio access network type.
+     *         If registration fails, the RAN is not available after, the RAN is not within the
+     *         network types specified by {@link #setPreferredNetworkTypeBitmask}, or the value is
+     *         {@link AccessNetworkConstants.AccessNetworkType#UNKNOWN}, modem will select
+     *         the next best RAN for network registration.
+     * @param persistSelection whether the selection will persist until reboot.
+     *         If true, only allows attaching to the selected PLMN until reboot; otherwise,
+     *         attach to the chosen PLMN and resume normal network selection next time.
+     * @return {@code true} on success; {@code false} on any failure.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean setNetworkSelectionModeManual(@NonNull String operatorNumeric,
+            @AccessNetworkConstants.RadioAccessNetworkType int ran, boolean persistSelection) {
+        return setNetworkSelectionModeManual(new OperatorInfo("" /* operatorAlphaLong */,
+                "" /* operatorAlphaShort */, operatorNumeric, ran), persistSelection);
+    }
+
+    /**
+     * Ask the radio to connect to the input network and change selection mode to manual.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @param operatorInfo included the PLMN id, long name, short name of the operator to attach to.
      * @param persistSelection whether the selection will persist until reboot. If true, only allows
      * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
@@ -7414,14 +7899,18 @@ public class TelephonyManager {
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
-
-     * @return the network selection mode.
+     *  <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
+     * READ_PRECISE_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @hide
+     * @return the network selection mode.
      */
-    @NetworkSelectionMode
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getNetworkSelectionMode() {
+    @SuppressAutoDoc // No support for carrier privileges (b/72967236).
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PRECISE_PHONE_STATE
+    })
+    public @NetworkSelectionMode int getNetworkSelectionMode() {
         int mode = NETWORK_SELECTION_MODE_UNKNOWN;
         try {
             ITelephony telephony = getITelephony();
@@ -7445,20 +7934,20 @@ public class TelephonyManager {
      * {@link CarrierConfigManager#KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT}. If
      * the carrier does not support this mode, this function will always return false.
      *
-     * @return true if this device is in emergency SMS mode, false otherwise.
+     * @return {@code true} if this device is in emergency SMS mode, {@code false} otherwise.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isInEmergencySmsMode() {
-
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.isInEmergencySmsMode();
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
+            Rlog.e(TAG, "isInEmergencySmsMode RemoteException", ex);
         }
         return false;
     }
@@ -7474,7 +7963,9 @@ public class TelephonyManager {
      * @param networkType the preferred network type
      * @return true on success; false on any failure.
      * @hide
+     * @deprecated Use {@link #setPreferredNetworkTypeBitmask} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean setPreferredNetworkType(int subId, @PrefNetworkMode int networkType) {
         try {
@@ -7489,7 +7980,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Set the preferred network type bitmask.
+     * Set the preferred network type bitmask but if {@link #setAllowedNetworkTypes} has been set,
+     * only the allowed network type will set to the modem.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -7519,6 +8011,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Set the allowed network types of the device. This is for carrier or privileged apps to
+     * enable/disable certain network types on the device. The user preferred network types should
+     * be set through {@link #setPreferredNetworkTypeBitmask}.
+     *
+     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @return true on success; false on any failure.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean setAllowedNetworkTypes(@NetworkTypeBitMask long allowedNetworkTypes) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setAllowedNetworkTypes(getSubId(), allowedNetworkTypes);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setAllowedNetworkTypes RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
      *
      * <p>Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
@@ -7543,12 +8058,16 @@ public class TelephonyManager {
 
     /**
      * Check whether DUN APN is required for tethering.
+     * <p>
+     * Requires Permission: MODIFY_PHONE_STATE.
      *
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean isTetheringApnRequired() {
+        return isTetheringApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7558,11 +8077,11 @@ public class TelephonyManager {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired(int subId) {
+    public boolean isTetheringApnRequired(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getTetherApnRequiredForSubscriber(subId);
+                return telephony.isTetheringApnRequiredForSubscriber(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -7816,6 +8335,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @TestApi
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         return getCarrierPackageNamesForIntentAndPhone(intent, getPhoneId());
     }
@@ -7850,17 +8370,25 @@ public class TelephonyManager {
         return Collections.EMPTY_LIST;
     }
 
-    /** @hide */
-    public List<String> getPackagesWithCarrierPrivilegesForAllPhones() {
+    /**
+     * Get the names of packages with carrier privileges for all the active subscriptions.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public List<String> getCarrierPrivilegedPackagesForAllActiveSubscriptions() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getPackagesWithCarrierPrivilegesForAllPhones();
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPackagesWithCarrierPrivilegesForAllPhones RemoteException", ex);
+            Rlog.e(TAG, "getCarrierPrivilegedPackagesForAllActiveSubscriptions RemoteException",
+                    ex);
         } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getPackagesWithCarrierPrivilegesForAllPhones NPE", ex);
+            Rlog.e(TAG, "getCarrierPrivilegedPackagesForAllActiveSubscriptions NPE", ex);
         }
         return Collections.EMPTY_LIST;
     }
@@ -7991,7 +8519,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isRadioOn(getOpPackageName());
+                return telephony.isRadioOnWithFeature(getOpPackageName(), getFeatureId());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isRadioOn", e);
         }
@@ -8005,9 +8533,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPin(pin);
+                return telephony.supplyPinForSubscriber(getSubId(), pin);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#supplyPin", e);
+            Log.e(TAG, "Error calling ITelephony#supplyPinForSubscriber", e);
         }
         return false;
     }
@@ -8019,9 +8547,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPuk(puk, pin);
+                return telephony.supplyPukForSubscriber(getSubId(), puk, pin);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#supplyPuk", e);
+            Log.e(TAG, "Error calling ITelephony#supplyPukForSubscriber", e);
         }
         return false;
     }
@@ -8033,9 +8561,9 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPinReportResult(pin);
+                return telephony.supplyPinReportResultForSubscriber(getSubId(), pin);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#supplyPinReportResult", e);
+            Log.e(TAG, "Error calling ITelephony#supplyPinReportResultForSubscriber", e);
         }
         return new int[0];
     }
@@ -8047,7 +8575,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.supplyPukReportResult(puk, pin);
+                return telephony.supplyPukReportResultForSubscriber(getSubId(), puk, pin);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#]", e);
         }
@@ -8229,14 +8757,43 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"RADIO_POWER_"},
-            value = {RADIO_POWER_OFF,
-                    RADIO_POWER_ON,
-                    RADIO_POWER_UNAVAILABLE,
-            })
-    public @interface RadioPowerState {}
+    /**
+     * Shut down all the live radios over all the slot index.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void shutdownAllRadios() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.shutdownMobileRadios();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#shutdownMobileRadios", e);
+        }
+    }
+
+    /**
+     * Check if any radio is on over all the slot indexes.
+     *
+     * @return {@code true} if any radio is on over any slot index.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isAnyRadioPoweredOn() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.needMobileRadioShutdown();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#needMobileRadioShutdown", e);
+        }
+        return false;
+    }
 
     /**
      * Radio explicitly powered off (e.g, airplane mode).
@@ -8275,7 +8832,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getRadioPowerState(getSlotIndex(), mContext.getOpPackageName());
+                return telephony.getRadioPowerState(getSlotIndex(), mContext.getOpPackageName(),
+                        null);
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -8633,7 +9191,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.isVideoCallingEnabled(getOpPackageName());
+                return telephony.isVideoCallingEnabled(getOpPackageName(), getFeatureId());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isVideoCallingEnabled", e);
         }
@@ -8649,7 +9207,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.canChangeDtmfToneLength(mSubId, getOpPackageName());
+                return telephony.canChangeDtmfToneLength(mSubId, getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
@@ -8668,7 +9227,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isWorldPhone(mSubId, getOpPackageName());
+                return telephony.isWorldPhone(mSubId, getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#isWorldPhone", e);
@@ -8688,7 +9247,10 @@ public class TelephonyManager {
     @Deprecated
     public boolean isTtyModeSupported() {
         try {
-            TelecomManager telecomManager = TelecomManager.from(mContext);
+            TelecomManager telecomManager = null;
+            if (mContext != null) {
+                telecomManager = mContext.getSystemService(TelecomManager.class);
+            }
             if (telecomManager != null) {
                 return telecomManager.isTtySupported();
             }
@@ -8850,7 +9412,7 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
+    * Set TelephonyProperties.icc_operator_numeric for the default phone.
     *
     * @hide
     */
@@ -8860,18 +9422,21 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the given phone.
+    * Set TelephonyProperties.icc_operator_numeric for the given phone.
     *
     * @hide
     */
     @UnsupportedAppUsage
     public void setSimOperatorNumericForPhone(int phoneId, String numeric) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, numeric);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.icc_operator_numeric(), phoneId, numeric);
+            TelephonyProperties.icc_operator_numeric(newList);
+        }
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
+     * Set TelephonyProperties.icc_operator_alpha for the default phone.
      *
      * @hide
      */
@@ -8881,18 +9446,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the given phone.
+     * Set TelephonyProperties.icc_operator_alpha for the given phone.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setSimOperatorNameForPhone(int phoneId, String name) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, name);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.icc_operator_alpha(), phoneId, name);
+            TelephonyProperties.icc_operator_alpha(newList);
+        }
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY for the default phone.
+    * Set TelephonyProperties.icc_operator_iso_country for the default phone.
     *
     * @hide
     */
@@ -8902,18 +9470,21 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY for the given phone.
+    * Set TelephonyProperties.icc_operator_iso_country for the given phone.
     *
     * @hide
     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setSimCountryIsoForPhone(int phoneId, String iso) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, iso);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.icc_operator_iso_country(), phoneId, iso);
+            TelephonyProperties.icc_operator_iso_country(newList);
+        }
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_SIM_STATE for the default phone.
+     * Set TelephonyProperties.sim_state for the default phone.
      *
      * @hide
      */
@@ -8923,26 +9494,34 @@ public class TelephonyManager {
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_SIM_STATE for the given phone.
+     * Set TelephonyProperties.sim_state for the given phone.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setSimStateForPhone(int phoneId, String state) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_SIM_STATE, state);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.sim_state(), phoneId, state);
+            TelephonyProperties.sim_state(newList);
+        }
     }
 
     /**
-     * Requested state of SIM
-     *
-     * CARD_POWER_DOWN
      * Powers down the SIM. SIM must be up prior.
-     *
-     * CARD_POWER_UP
+     * @hide
+     */
+    @SystemApi
+    public static final int CARD_POWER_DOWN = 0;
+
+    /**
      * Powers up the SIM normally. SIM must be down prior.
-     *
-     * CARD_POWER_UP_PASS_THROUGH
+     * @hide
+     */
+    @SystemApi
+    public static final int CARD_POWER_UP = 1;
+
+    /**
      * Powers up the SIM in PASS_THROUGH mode. SIM must be down prior.
      * When SIM is powered up in PASS_THOUGH mode, the modem does not send
      * any command to it (for example SELECT of MF, or TERMINAL CAPABILITY),
@@ -8955,12 +9534,9 @@ public class TelephonyManager {
      * is activated, and normal behavior occurs at the next SIM initialization,
      * unless PASS_THROUGH mode is requested again. Hence, the last power-up mode
      * is NOT persistent across boots. On reboot, SIM will power up normally.
+     * @hide
      */
-    /** @hide */
-    public static final int CARD_POWER_DOWN = 0;
-    /** @hide */
-    public static final int CARD_POWER_UP = 1;
-    /** @hide */
+    @SystemApi
     public static final int CARD_POWER_UP_PASS_THROUGH = 2;
 
     /**
@@ -9035,7 +9611,11 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setBasebandVersionForPhone(int phoneId, String version) {
-        setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, version);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.baseband_version(), phoneId, version);
+            TelephonyProperties.baseband_version(newList);
+        }
     }
 
     /**
@@ -9058,8 +9638,8 @@ public class TelephonyManager {
      */
     private String getBasebandVersionLegacy(int phoneId) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            String prop = TelephonyProperties.PROPERTY_BASEBAND_VERSION +
-                    ((phoneId == 0) ? "" : Integer.toString(phoneId));
+            String prop = "gsm.version.baseband"
+                    + ((phoneId == 0) ? "" : Integer.toString(phoneId));
             return SystemProperties.get(prop);
         }
         return null;
@@ -9076,7 +9656,7 @@ public class TelephonyManager {
         if (version != null && !version.isEmpty()) {
             setBasebandVersionForPhone(phoneId, version);
         }
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.baseband_version(), "");
     }
 
     /**
@@ -9102,8 +9682,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setPhoneType(int phoneId, int type) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            TelephonyManager.setTelephonyProperty(phoneId,
-                    TelephonyProperties.CURRENT_ACTIVE_PHONE, String.valueOf(type));
+            List<Integer> newList = updateTelephonyProperty(
+                    TelephonyProperties.current_active_phone(), phoneId, type);
+            TelephonyProperties.current_active_phone(newList);
         }
     }
 
@@ -9132,8 +9713,8 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String getOtaSpNumberSchemaForPhone(int phoneId, String defaultValue) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            return TelephonyManager.getTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA, defaultValue);
+            return getTelephonyProperty(
+                    phoneId, TelephonyProperties.otasp_num_schema(), defaultValue);
         }
 
         return defaultValue;
@@ -9163,8 +9744,7 @@ public class TelephonyManager {
      */
     public boolean getSmsReceiveCapableForPhone(int phoneId, boolean defaultValue) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            return Boolean.parseBoolean(TelephonyManager.getTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_SMS_RECEIVE, String.valueOf(defaultValue)));
+            return getTelephonyProperty(phoneId, TelephonyProperties.sms_receive(), defaultValue);
         }
 
         return defaultValue;
@@ -9194,11 +9774,25 @@ public class TelephonyManager {
      */
     public boolean getSmsSendCapableForPhone(int phoneId, boolean defaultValue) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            return Boolean.parseBoolean(TelephonyManager.getTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_SMS_SEND, String.valueOf(defaultValue)));
+            return getTelephonyProperty(phoneId, TelephonyProperties.sms_send(), defaultValue);
         }
 
         return defaultValue;
+    }
+
+    /**
+     * Gets the default Respond Via Message application
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static @Nullable ComponentName getDefaultRespondViaMessageApplication(
+            @NonNull Context context, boolean updateIfNeeded) {
+        return SmsApplication.getDefaultRespondViaMessageApplication(context, updateIfNeeded);
     }
 
     /**
@@ -9220,7 +9814,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public void setNetworkOperatorNameForPhone(int phoneId, String name) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, name);
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.operator_alpha(), phoneId, name);
+            TelephonyProperties.operator_alpha(newList);
         }
     }
 
@@ -9242,7 +9838,11 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage
     public void setNetworkOperatorNumericForPhone(int phoneId, String numeric) {
-        setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, numeric);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.operator_numeric(), phoneId, numeric);
+            TelephonyProperties.operator_numeric(newList);
+        }
     }
 
     /**
@@ -9264,8 +9864,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public void setNetworkRoamingForPhone(int phoneId, boolean isRoaming) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ISROAMING,
-                    isRoaming ? "true" : "false");
+            List<Boolean> newList = updateTelephonyProperty(
+                    TelephonyProperties.operator_is_roaming(), phoneId, isRoaming);
+            TelephonyProperties.operator_is_roaming(newList);
         }
     }
 
@@ -9292,9 +9893,10 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public void setDataNetworkTypeForPhone(int phoneId, int type) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.data_network_type(), phoneId,
                     ServiceState.rilRadioTechnologyToString(type));
+            TelephonyProperties.data_network_type(newList);
         }
     }
 
@@ -9303,7 +9905,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public int getSubIdForPhoneAccount(PhoneAccount phoneAccount) {
+    public int getSubIdForPhoneAccount(@Nullable PhoneAccount phoneAccount) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             ITelephony service = getITelephony();
@@ -9337,16 +9939,28 @@ public class TelephonyManager {
         return returnValue;
     }
 
-    private int getSubIdForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+    /**
+     * Returns the subscription ID for the given phone account handle.
+     *
+     * @param phoneAccountHandle the phone account handle for outgoing calls
+     * @return subscription ID for the given phone account handle; or
+     *         {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     *         if not available; or throw a SecurityException if the caller doesn't have the
+     *         permission.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
-            ITelecomService service = getTelecomService();
+            ITelephony service = getITelephony();
             if (service != null) {
-                retval = getSubIdForPhoneAccount(service.getPhoneAccount(phoneAccountHandle));
+                retval = service.getSubIdForPhoneAccountHandle(
+                        phoneAccountHandle, mContext.getOpPackageName(), null);
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getSubscriptionId RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
-
         return retval;
     }
 
@@ -9359,8 +9973,29 @@ public class TelephonyManager {
         try {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
-            if (telephony != null)
+            if (telephony != null) {
                 telephony.factoryReset(subId);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
+
+    /**
+     * Resets Telephony and IMS settings back to factory defaults only for the subscription
+     * associated with this instance.
+     * @see #createForSubscriptionId(int)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONNECTIVITY_INTERNAL)
+    public void resetSettings() {
+        try {
+            Log.d(TAG, "resetSettings: subId=" + getSubId());
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.factoryReset(getSubId());
+            }
         } catch (RemoteException e) {
         }
     }
@@ -9416,7 +10051,8 @@ public class TelephonyManager {
      * {@link android.telephony.ModemActivityInfo} object.
      * @hide
      */
-    public void requestModemActivityInfo(ResultReceiver result) {
+    @SystemApi
+    public void requestModemActivityInfo(@NonNull ResultReceiver result) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -9458,7 +10094,8 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName());
+                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
@@ -10053,6 +10690,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *
      * @param enabled control enable or disable carrier data.
+     * @see #resetAllCarrierActions()
      * @hide
      */
     @SystemApi
@@ -10070,17 +10708,26 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to enable/disable radio
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     * @param subId the subscription ID that this action applies to.
+     * Carrier action to enable or disable the radio.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
      * @param enabled control enable or disable radio.
+     * @see #resetAllCarrierActions()
      * @hide
      */
-    public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setRadioEnabled(boolean enabled) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionSetRadioEnabled(subId, enabled);
+                service.carrierActionSetRadioEnabled(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionSetRadioEnabled", e);
@@ -10088,18 +10735,26 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to start/stop reporting default
-     * network available events
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     * @param subId the subscription ID that this action applies to.
+     * Carrier action to start or stop reporting default network available events.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
      * @param report control start/stop reporting network status.
+     * @see #resetAllCarrierActions()
      * @hide
      */
-    public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void reportDefaultNetworkStatus(boolean report) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionReportDefaultNetworkStatus(subId, report);
+                service.carrierActionReportDefaultNetworkStatus(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), report);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionReportDefaultNetworkStatus", e);
@@ -10107,16 +10762,24 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to reset all carrier actions
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     * @param subId the subscription ID that this action applies to.
+     * Reset all carrier actions previously set by {@link #setRadioEnabled},
+     * {@link #reportDefaultNetworkStatus} and {@link #setCarrierDataEnabled}.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      * @hide
      */
-    public void carrierActionResetAll(int subId) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void resetAllCarrierActions() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionResetAll(subId);
+                service.carrierActionResetAll(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
@@ -10175,7 +10838,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getClientRequestStats(getOpPackageName(), subId);
+                return service.getClientRequestStats(getOpPackageName(), getFeatureId(), subId);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getClientRequestStats", e);
@@ -10228,7 +10891,8 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isManualNetworkSelectionAllowed() {
         try {
             ITelephony telephony = getITelephony();
@@ -10239,6 +10903,27 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#isManualNetworkSelectionAllowed", e);
         }
         return true;
+    }
+
+    /**
+     * Enable or disable signal strength changes from radio will always be reported in any
+     * condition (e.g. screen is off). This is only allowed for System caller.
+     *
+     * @param isEnabled {@code true} for enabling; {@code false} for disabling.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setAlwaysReportSignalStrength(boolean isEnabled) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setAlwaysReportSignalStrength(getSubId(), isEnabled);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "setAlwaysReportSignalStrength RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
     }
 
     /**
@@ -10262,12 +10947,21 @@ public class TelephonyManager {
     }
 
     /**
+     * Checks whether cellular data connection is enabled in the device.
+     *
+     * Whether cellular data connection is enabled, meaning upon request whether will try to setup
+     * metered data connection considering all factors below:
+     * 1) User turned on data setting {@link #isDataEnabled}.
+     * 2) Carrier allows data to be on.
+     * 3) Network policy.
+     * And possibly others.
+     *
+     * @return {@code true} if the overall data connection is capable; {@code false} if not.
      * @hide
-     * It's similar to isDataEnabled, but unlike isDataEnabled, this API also evaluates
-     * carrierDataEnabled, policyDataEnabled etc to give a final decision of whether mobile data is
-     * capable of using.
      */
-    public boolean isDataCapable() {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isDataConnectionEnabled() {
         boolean retVal = false;
         try {
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
@@ -10275,10 +10969,21 @@ public class TelephonyManager {
             if (telephony != null)
                 retVal = telephony.isDataEnabled(subId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isDataEnabled", e);
+            Log.e(TAG, "Error isDataConnectionEnabled", e);
         } catch (NullPointerException e) {
         }
         return retVal;
+    }
+
+    /**
+     * Checks if FEATURE_TELEPHONY_DATA is enabled.
+     *
+     * @hide
+     */
+    public boolean isDataCapable() {
+        if (mContext == null) return true;
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_mobile_data_capable);
     }
 
     /**
@@ -10439,6 +11144,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int getCarrierIdListVersion() {
         try {
@@ -10462,7 +11168,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getNumberOfModemsWithSimultaneousDataConnections(
-                        getSubId(), getOpPackageName());
+                        getSubId(), getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -10485,6 +11191,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public boolean setOpportunisticNetworkState(boolean enable) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean ret = false;
@@ -10512,6 +11219,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
     public boolean isOpportunisticNetworkEnabled() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean isEnabled = false;
@@ -10707,6 +11415,68 @@ public class TelephonyManager {
     }
 
     /**
+     * Indicates Emergency number database version is invalid.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1;
+
+    /**
+     * Notify Telephony for OTA emergency number database installation complete.
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public void notifyOtaEmergencyNumberDbInstalled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.notifyOtaEmergencyNumberDbInstalled();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "notifyOtaEmergencyNumberDatabaseInstalled RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Override the file path for testing OTA emergency number database in a file partition.
+     *
+     * @param otaFilePath The test OTA emergency number database file path;
+     *                    if "RESET", recover the original database file partition.
+     *                    Format: <root file folder>@<file path>
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+    @SystemApi
+    @TestApi
+    public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String otaFilePath) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.updateTestOtaEmergencyNumberDbFilePath(otaFilePath);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "notifyOtaEmergencyNumberDatabaseInstalled RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Returns whether {@link TelephonyManager#ACTION_EMERGENCY_ASSISTANCE emergency assistance} is
      * available on the device.
      * <p>
@@ -10754,7 +11524,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getEmergencyNumberList(mContext.getOpPackageName());
+                return telephony.getEmergencyNumberList(mContext.getOpPackageName(),
+                        null);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -10809,7 +11580,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 emergencyNumberList = telephony.getEmergencyNumberList(
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), null);
                 if (emergencyNumberList != null) {
                     for (Integer subscriptionId : emergencyNumberList.keySet()) {
                         List<EmergencyNumber> numberList = emergencyNumberList.get(subscriptionId);
@@ -10901,12 +11672,37 @@ public class TelephonyManager {
         return false;
     }
 
+    /**
+     * A test API to return the emergency number db version.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public int getEmergencyNumberDbVersion() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getEmergencyNumberDbVersion(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getEmergencyNumberDbVersion RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return INVALID_EMERGENCY_NUMBER_DB_VERSION;
+    }
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"SET_OPPORTUNISTIC_SUB"}, value = {
             SET_OPPORTUNISTIC_SUB_SUCCESS,
             SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED,
-            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION})
+            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION,
+            SET_OPPORTUNISTIC_SUB_NO_OPPORTUNISTIC_SUB_AVAILABLE,
+            SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION})
     public @interface SetOpportunisticSubscriptionResult {}
 
     /**
@@ -10924,6 +11720,16 @@ public class TelephonyManager {
      */
     public static final int SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION = 2;
 
+    /**
+     * The subscription is not valid. It must be an opportunistic subscription.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_NO_OPPORTUNISTIC_SUB_AVAILABLE = 3;
+
+    /**
+     * Subscription service happened remote exception.
+     */
+    public static final int SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION = 4;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"UPDATE_AVAILABLE_NETWORKS"}, value = {
@@ -10931,7 +11737,13 @@ public class TelephonyManager {
             UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE,
             UPDATE_AVAILABLE_NETWORKS_ABORTED,
             UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS,
-            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE})
+            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE,
+            UPDATE_AVAILABLE_NETWORKS_DISABLE_MODEM_FAIL,
+            UPDATE_AVAILABLE_NETWORKS_ENABLE_MODEM_FAIL,
+            UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED,
+            UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE,
+            UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION,
+            UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED})
     public @interface UpdateAvailableNetworksResult {}
 
     /**
@@ -10960,6 +11772,36 @@ public class TelephonyManager {
     public static final int UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE = 4;
 
     /**
+     * Disable modem fail.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_DISABLE_MODEM_FAIL = 5;
+
+    /**
+     * Enable modem fail.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_ENABLE_MODEM_FAIL = 6;
+
+    /**
+     * Carrier app does not support multiple available networks.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_MULTIPLE_NETWORKS_NOT_SUPPORTED = 7;
+
+    /**
+     * The subscription is not valid. It must be an opportunistic subscription.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_NO_OPPORTUNISTIC_SUB_AVAILABLE = 8;
+
+    /**
+     * There is no OpportunisticNetworkService.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION = 9;
+
+    /**
+     * OpportunisticNetworkService is disabled.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_SERVICE_IS_DISABLED = 10;
+
+    /**
      * Set preferred opportunistic data subscription id.
      *
      * Switch internet data to preferred opportunistic data subscription id. This api
@@ -10978,7 +11820,6 @@ public class TelephonyManager {
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
      *                 for more details. Pass null if don't care about the result.
-     *
      */
     public void setPreferredOpportunisticDataSubscription(int subId, boolean needValidation,
             @Nullable @CallbackExecutor Executor executor, @Nullable Consumer<Integer> callback) {
@@ -10986,6 +11827,21 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService == null) {
+                if (executor == null || callback == null) {
+                    return;
+                }
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_REMOTE_SERVICE_EXCEPTION);
+                        } else {
+                            callback.accept(SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION);
+                        }
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
                 return;
             }
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
@@ -10994,9 +11850,14 @@ public class TelephonyManager {
                     if (executor == null || callback == null) {
                         return;
                     }
-                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        callback.accept(result);
-                    }));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            callback.accept(result);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             };
 
@@ -11025,12 +11886,14 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public int getPreferredOpportunisticDataSubscription() {
-        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String packageName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String featureId = null;
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService != null) {
-                subId = iOpportunisticNetworkService.getPreferredDataSubscriptionId(pkgForDebug);
+                subId = iOpportunisticNetworkService.getPreferredDataSubscriptionId(
+                        packageName, featureId);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredDataSubscriptionId RemoteException", ex);
@@ -11064,9 +11927,32 @@ public class TelephonyManager {
         try {
             IOns iOpportunisticNetworkService = getIOns();
             if (iOpportunisticNetworkService == null || availableNetworks == null) {
-                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                    callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
-                }));
+                if (executor == null || callback == null) {
+                    return;
+                }
+                if (iOpportunisticNetworkService == null) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            if (Compatibility.isChangeEnabled(CALLBACK_ON_MORE_ERROR_CODE_CHANGE)) {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_REMOTE_SERVICE_EXCEPTION);
+                            } else {
+                                callback.accept(UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE);
+                            }
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                } else {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
                 return;
             }
             IUpdateAvailableNetworksCallback callbackStub =
@@ -11076,9 +11962,14 @@ public class TelephonyManager {
                             if (executor == null || callback == null) {
                                 return;
                             }
-                            Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                                callback.accept(result);
-                            }));
+                            final long identity = Binder.clearCallingIdentity();
+                            try {
+                                executor.execute(() -> {
+                                    callback.accept(result);
+                                });
+                            } finally {
+                                Binder.restoreCallingIdentity(identity);
+                            }
                         }
                     };
             iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks, callbackStub,
@@ -11124,11 +12015,13 @@ public class TelephonyManager {
      * @param slotIndex which slot it's checking.
      * @hide
      */
+    @SystemApi
     public boolean isModemEnabledForSlot(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName());
+                return telephony.isModemEnabledForSlot(slotIndex, mContext.getOpPackageName(),
+                        null);
             }
         } catch (RemoteException ex) {
             Log.e(TAG, "enableModem RemoteException", ex);
@@ -11233,7 +12126,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMultiSimSupported(getOpPackageName());
+                return service.isMultiSimSupported(getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "isMultiSimSupported RemoteException", e);
@@ -11285,7 +12178,7 @@ public class TelephonyManager {
             ITelephony service = getITelephony();
             if (service != null) {
                 return service.doesSwitchMultiSimConfigTriggerReboot(getSubId(),
-                        getOpPackageName());
+                        getOpPackageName(), getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "doesSwitchMultiSimConfigTriggerReboot RemoteException", e);
@@ -11302,6 +12195,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public Pair<Integer, Integer> getRadioHalVersion() {
         try {
@@ -11318,6 +12212,114 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the calling application status about carrier privileges for the subscription created
+     * in TelephonyManager. Used by Telephony Module for permission checking.
+     *
+     * @param uid Uid to check.
+     * @return any value of {@link #CARRIER_PRIVILEGE_STATUS_HAS_ACCESS},
+     *         {@link #CARRIER_PRIVILEGE_STATUS_NO_ACCESS},
+     *         {@link #CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED}, or
+     *         {@link #CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES}
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getCarrierPrivilegeStatus(int uid) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCarrierPrivilegeStatusForUid(getSubId(), uid);
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getCarrierPrivilegeStatus RemoteException", ex);
+        }
+        return TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
+    }
+
+    /**
+     * Returns a list of APNs set as overrides by the device policy manager via
+     * {@link #addDevicePolicyOverrideApn}.
+     * This method must only be called from the system or phone processes.
+     *
+     * @param context Context to use.
+     * @return {@link List} of APNs that have been set as overrides.
+     * @throws {@link SecurityException} if the caller is not the system or phone process.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    // TODO: add new permission tag indicating that this is system-only.
+    public @NonNull List<ApnSetting> getDevicePolicyOverrideApns(@NonNull Context context) {
+        try (Cursor cursor = context.getContentResolver().query(DPC_URI, null, null, null, null)) {
+            if (cursor == null) {
+                return Collections.emptyList();
+            }
+            List<ApnSetting> apnList = new ArrayList<ApnSetting>();
+            cursor.moveToPosition(-1);
+            while (cursor.moveToNext()) {
+                ApnSetting apn = ApnSetting.makeApnSetting(cursor);
+                apnList.add(apn);
+            }
+            return apnList;
+        }
+    }
+
+    /**
+     * Used by the device policy manager to add a new override APN.
+     * This method must only be called from the system or phone processes.
+     *
+     * @param context Context to use.
+     * @param apnSetting The {@link ApnSetting} describing the new APN.
+     * @return An integer, corresponding to a primary key in a database, that allows the caller to
+     *         modify the APN in the future via {@link #modifyDevicePolicyOverrideApn}, or
+     *         {@link android.provider.Telephony.Carriers.INVALID_APN_ID} if the override operation
+     *         failed.
+     * @throws {@link SecurityException} if the caller is not the system or phone process.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    // TODO: add new permission tag indicating that this is system-only.
+    public int addDevicePolicyOverrideApn(@NonNull Context context,
+            @NonNull ApnSetting apnSetting) {
+        Uri resultUri = context.getContentResolver().insert(DPC_URI, apnSetting.toContentValues());
+
+        int resultId = INVALID_APN_ID;
+        if (resultUri != null) {
+            try {
+                resultId = Integer.parseInt(resultUri.getLastPathSegment());
+            } catch (NumberFormatException e) {
+                Rlog.e(TAG, "Failed to parse inserted override APN id: "
+                        + resultUri.getLastPathSegment());
+            }
+        }
+        return resultId;
+    }
+
+    /**
+     * Used by the device policy manager to modify an override APN.
+     * This method must only be called from the system or phone processes.
+     *
+     * @param context Context to use.
+     * @param apnId The integer key of the APN to modify, as returned by
+     *              {@link #addDevicePolicyOverrideApn}
+     * @param apnSetting The {@link ApnSetting} describing the updated APN.
+     * @return {@code true} if successful, {@code false} otherwise.
+     * @throws {@link SecurityException} if the caller is not the system or phone process.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    // TODO: add new permission tag indicating that this is system-only.
+    public boolean modifyDevicePolicyOverrideApn(@NonNull Context context, int apnId,
+            @NonNull ApnSetting apnSetting) {
+        return context.getContentResolver().update(
+                Uri.withAppendedPath(DPC_URI, Integer.toString(apnId)),
+                apnSetting.toContentValues(), null, null) > 0;
+    }
+
+    /**
      * Return whether data is enabled for certain APN type. This will tell if framework will accept
      * corresponding network requests on a subId.
      *
@@ -11330,13 +12332,16 @@ public class TelephonyManager {
      *  1) User data is turned on, or
      *  2) APN is un-metered for this subscription, or
      *  3) APN type is whitelisted. E.g. MMS is whitelisted if
-     *  {@link SubscriptionManager#setAlwaysAllowMmsData} is turned on.
+     *  {@link #setAlwaysAllowMmsData(boolean)} is turned on.
      *
+     * @param apnType Value indicating the apn type. Apn types are defined in {@link ApnSetting}.
      * @return whether data is enabled for a apn type.
      *
      * @hide
      */
-    public boolean isDataEnabledForApn(@ApnSetting.ApnType int apnType) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isDataEnabledForApn(@ApnType int apnType) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
             ITelephony service = getITelephony();
@@ -11357,7 +12362,7 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public boolean isApnMetered(@ApnSetting.ApnType int apnType) {
+    public boolean isApnMetered(@ApnType int apnType) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -11372,21 +12377,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Set allowing mobile data during voice call.
+     * Verifies whether the input MCC/MNC and MVNO correspond to the current carrier.
      *
-     * @param allow {@code true} if allowing using data during voice call, {@code false} if
-     * disallowed
+     * @param mccmnc the carrier's mccmnc that you want to match
+     * @param mvnoType the mvnoType that defined in {@link ApnSetting}
+     * @param mvnoMatchData the MVNO match data
+     * @return {@code true} if input mccmnc and mvno matches with data from sim operator.
+     * {@code false} otherwise.
      *
-     * @return {@code false} if the setting is changed.
-     *
-     * @hide
+     * {@hide}
      */
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setDataAllowedDuringVoiceCall(boolean allow) {
+    @SystemApi
+    public boolean isCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
+            @Nullable String mvnoMatchData) {
         try {
+            if (!mccmnc.equals(getSimOperator())) {
+                Log.d(TAG, "The mccmnc does not match");
+                return false;
+            }
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.setDataAllowedDuringVoiceCall(getSubId(), allow);
+                return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
             if (!isSystemProcess()) {
@@ -11397,13 +12408,236 @@ public class TelephonyManager {
     }
 
     /**
-     * Check whether data is allowed during voice call. Note this is for dual sim device that
-     * data might be disabled on non-default data subscription but explicitly turned on by settings.
+<<<<<<< HEAD
+     * Gets the voice call forwarding info {@link CallForwardingInfo}, given the call forward
+     * reason.
      *
-     * @return {@code true} if data is allowed during voice call.
+     * @param callForwardingReason the call forwarding reasons
+     *
+     * @throws IllegalArgumentException if callForwardingReason is not any of
+     * {@link CallForwardingInfo.REASON_UNCONDITIONAL}, {@link CallForwardingInfo.REASON_BUSY},
+     * {@link CallForwardingInfo.REASON_NO_REPLY}, {@link CallForwardingInfo.REASON_NOT_REACHABLE},
+     * {@link CallForwardingInfo.REASON_ALL}, {@link CallForwardingInfo.REASON_ALL_CONDITIONAL}
+     *
+     * @return {@link CallForwardingInfo} with the status {@link CallForwardingInfo#STATUS_ACTIVE}
+     * or {@link CallForwardingInfo#STATUS_INACTIVE} and the target phone number to forward calls
+     * to, if it's available. Otherwise, it will return a {@link CallForwardingInfo} with status
+     * {@link CallForwardingInfo#STATUS_UNKNOWN_ERROR},
+     * {@link CallForwardingInfo#STATUS_NOT_SUPPORTED},
+     * or {@link CallForwardingInfo#STATUS_FDN_CHECK_FAILURE} depending on the situation.
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
+    public CallForwardingInfo getCallForwarding(@CallForwardingReason int callForwardingReason) {
+        if (callForwardingReason < CallForwardingInfo.REASON_UNCONDITIONAL
+                || callForwardingReason > CallForwardingInfo.REASON_ALL_CONDITIONAL) {
+            throw new IllegalArgumentException("callForwardingReason is out of range");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCallForwarding(getSubId(), callForwardingReason);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCallForwarding RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCallForwarding NPE", ex);
+        }
+        return new CallForwardingInfo(
+                CallForwardingInfo.STATUS_UNKNOWN_ERROR, 0 /* reason */, null /* number */,
+                        0 /* timeout */);
+    }
+
+    /**
+     * Sets the voice call forwarding info including status (enable/disable), call forwarding
+     * reason, the number to forward, and the timeout before the forwarding is attempted.
+     *
+     * @param callForwardingInfo {@link CallForwardingInfo} to setup the call forwarding.
+     * Enabling if {@link CallForwardingInfo#getStatus()} returns
+     * {@link CallForwardingInfo#STATUS_ACTIVE}; Disabling if
+     * {@link CallForwardingInfo#getStatus()} returns {@link CallForwardingInfo#STATUS_INACTIVE}.
+     *
+     * @throws IllegalArgumentException if any of the following for parameter callForwardingInfo:
+     * 0) it is {@code null}.
+     * 1) {@link CallForwardingInfo#getStatus()} returns neither
+     * {@link CallForwardingInfo#STATUS_ACTIVE} nor {@link CallForwardingInfo#STATUS_INACTIVE}.
+     * 2) {@link CallForwardingInfo#getReason()} is not any of
+     * {@link CallForwardingInfo.REASON_UNCONDITIONAL}, {@link CallForwardingInfo.REASON_BUSY},
+     * {@link CallForwardingInfo.REASON_NO_REPLY}, {@link CallForwardingInfo.REASON_NOT_REACHABLE},
+     * {@link CallForwardingInfo.REASON_ALL}, {@link CallForwardingInfo.REASON_ALL_CONDITIONAL}
+     * 3) {@link CallForwardingInfo#getNumber()} returns {@code null}.
+     * 4) {@link CallForwardingInfo#getTimeoutSeconds()} doesn't return a positive value.
+     *
+     * @return {@code true} to indicate it was set successfully; {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setCallForwarding(@NonNull CallForwardingInfo callForwardingInfo) {
+        if (callForwardingInfo == null) {
+            throw new IllegalArgumentException("callForwardingInfo is null");
+        }
+        int callForwardingStatus = callForwardingInfo.getStatus();
+        if (callForwardingStatus != CallForwardingInfo.STATUS_ACTIVE
+                && callForwardingStatus != CallForwardingInfo.STATUS_INACTIVE) {
+            throw new IllegalArgumentException(
+                    "callForwardingStatus is neither active nor inactive");
+        }
+        int callForwardingReason = callForwardingInfo.getReason();
+        if (callForwardingReason < CallForwardingInfo.REASON_UNCONDITIONAL
+                || callForwardingReason > CallForwardingInfo.REASON_ALL_CONDITIONAL) {
+            throw new IllegalArgumentException("callForwardingReason is out of range");
+        }
+        if (callForwardingInfo.getNumber() == null) {
+            throw new IllegalArgumentException("callForwarding number is null");
+        }
+        if (callForwardingInfo.getTimeoutSeconds() <= 0) {
+            throw new IllegalArgumentException("callForwarding timeout isn't positive");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setCallForwarding(getSubId(), callForwardingInfo);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setCallForwarding RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setCallForwarding NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Indicates the call waiting status is active.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_ACTIVE = 1;
+
+    /**
+     * Indicates the call waiting status is inactive.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_INACTIVE = 2;
+
+    /**
+     * Indicates the call waiting status is with an unknown error.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3;
+
+    /**
+     * Indicates the call waiting is not supported (e.g. called via CDMA).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4;
+
+    /**
+     * Gets the status of voice call waiting function. Call waiting function enables the waiting
+     * for the incoming call when it reaches the user who is busy to make another call and allows
+     * users to decide whether to switch to the incoming call.
+     *
+     * @return the status of call waiting function.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @CallWaitingStatus int getCallWaitingStatus() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCallWaitingStatus(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getCallWaitingStatus RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getCallWaitingStatus NPE", ex);
+        }
+        return CALL_WAITING_STATUS_UNKNOWN_ERROR;
+    }
+
+    /**
+     * Sets the status for voice call waiting function. Call waiting function enables the waiting
+     * for the incoming call when it reaches the user who is busy to make another call and allows
+     * users to decide whether to switch to the incoming call.
+     *
+     * @param isEnable {@code true} to enable; {@code false} to disable.
+     * @return {@code true} to indicate it was set successfully; {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setCallWaitingStatus(boolean isEnable) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setCallWaitingStatus(getSubId(), isEnable);
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setCallWaitingStatus RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setCallWaitingStatus NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Set allowing mobile data during voice call. This is used for allowing data on the non-default
+     * data SIM. When a voice call is placed on the non-default data SIM on DSDS devices, users will
+     * not be able to use mobile data. By calling this API, data will be temporarily enabled on the
+     * non-default data SIM during the life cycle of the voice call.
+     *
+     * @param allow {@code true} if allowing using data during voice call, {@code false} if
+     * disallowed.
+     *
+     * @return {@code true} if operation is successful. otherwise {@code false}.
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setDataAllowedDuringVoiceCall(boolean allow) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.setDataAllowedDuringVoiceCall(getSubId(), allow);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check whether data is allowed during voice call. This is used for allowing data on the
+     * non-default data SIM. When a voice call is placed on the non-default data SIM on DSDS
+     * devices, users will not be able to use mobile data. By calling this API, data will be
+     * temporarily enabled on the non-default data SIM during the life cycle of the voice call.
+     *
+     * @return {@code true} if data is allowed during voice call.
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isDataAllowedInVoiceCall() {
         try {
@@ -11412,10 +12646,141 @@ public class TelephonyManager {
                 return service.isDataAllowedInVoiceCall(getSubId());
             }
         } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
             if (!isSystemProcess()) {
                 ex.rethrowAsRuntimeException();
             }
         }
         return false;
+    }
+
+    /**
+     * Set whether the specific sim card always allows MMS connection. If true, MMS network
+     * request will be accepted by telephony even if user turns "mobile data" off
+     * on this specific sim card.
+     *
+     * @param alwaysAllow whether Mms data is always allowed.
+     * @return whether operation is successful.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setAlwaysAllowMmsData(boolean alwaysAllow) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.setAlwaysAllowMmsData(getSubId(), alwaysAllow);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The IccLock state or password was changed successfully.
+     * @hide
+     */
+    @SystemApi
+    public static final int CHANGE_ICC_LOCK_SUCCESS = Integer.MAX_VALUE;
+
+    /**
+     * Check whether ICC pin lock is enabled.
+     * This is a sync call which returns the cached pin enabled state.
+     *
+     * @return {@code true} if ICC lock enabled, {@code false} if ICC lock disabled.
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @WorkerThread
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isIccLockEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isIccLockEnabled(getSubId());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "isIccLockEnabled RemoteException", e);
+        }
+        return false;
+    }
+
+    /**
+     * Set the ICC pin lock enabled or disabled.
+     *
+     * If enable/disable ICC pin lock successfully, a value of {@link Integer#MAX_VALUE} is
+     * returned.
+     * If an incorrect old password is specified, the return value will indicate how many more
+     * attempts the user can make to change the password before the SIM is locked.
+     * Using PUK code to unlock SIM if enter the incorrect old password 3 times.
+     *
+     * @param enabled    "true" for locked, "false" for unlocked.
+     * @param password   needed to change the ICC pin state, aka. Pin1
+     * @return an integer representing the status of IccLock enabled or disabled in the following
+     * three cases:
+     *   - {@link TelephonyManager#CHANGE_ICC_LOCK_SUCCESS} if enabled or disabled IccLock
+     *   successfully.
+     *   - Positive number and zero for remaining password attempts.
+     *   - Negative number for other failure cases (such like enabling/disabling PIN failed).
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public int setIccLockEnabled(boolean enabled, @NonNull String password) {
+        checkNotNull(password, "setIccLockEnabled password can't be null.");
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setIccLockEnabled(getSubId(), enabled, password);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "setIccLockEnabled RemoteException", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Change the ICC password used in ICC pin lock.
+     *
+     * If the password was changed successfully, a value of {@link Integer#MAX_VALUE} is returned.
+     * If an incorrect old password is specified, the return value will indicate how many more
+     * attempts the user can make to change the password before the SIM is locked.
+     * Using PUK code to unlock SIM if enter the incorrect old password 3 times.
+     *
+     * @param oldPassword is the old password
+     * @param newPassword is the new password
+     * @return an integer representing the status of IccLock changed in the following three cases:
+     *   - {@link TelephonyManager#CHANGE_ICC_LOCK_SUCCESS} if changed IccLock successfully.
+     *   - Positive number and zero for remaining password attempts.
+     *   - Negative number for other failure cases (such like enabling/disabling PIN failed).
+     *
+     * @throws SecurityException if the caller doesn't have the permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public int changeIccLockPassword(@NonNull String oldPassword, @NonNull String newPassword) {
+        checkNotNull(oldPassword, "changeIccLockPassword oldPassword can't be null.");
+        checkNotNull(newPassword, "changeIccLockPassword newPassword can't be null.");
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.changeIccLockPassword(getSubId(), oldPassword, newPassword);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "changeIccLockPassword RemoteException", e);
+        }
+        return 0;
     }
 }

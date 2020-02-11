@@ -18,7 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.Printer;
 import android.util.Slog;
@@ -112,10 +112,12 @@ public final class Looper {
 
     /**
      * Initialize the current thread as a looper, marking it as an
-     * application's main looper. The main looper for your application
-     * is created by the Android environment, so you should never need
-     * to call this function yourself.  See also: {@link #prepare()}
+     * application's main looper. See also: {@link #prepare()}
+     *
+     * @deprecated The main looper for your application is created by the Android environment,
+     *   so you should never need to call this function yourself.
      */
+    @Deprecated
     public static void prepareMainLooper() {
         prepare(false);
         synchronized (Looper.class) {
