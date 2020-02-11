@@ -17,6 +17,7 @@
 package com.android.server.location.gnss;
 
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
+import static android.location.LocationManager.GPS_PROVIDER;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -39,6 +40,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.stats.location.LocationStatsEnums;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -588,18 +590,26 @@ public class GnssManagerService {
      */
     public void onReportLocation(List<Location> locations) {
         IBatchedLocationCallback gnssBatchingCallback;
+        LinkedListener<IBatchedLocationCallback> gnssBatchingDeathCallback;
         synchronized (mGnssBatchingLock) {
             gnssBatchingCallback = mGnssBatchingCallback;
+            gnssBatchingDeathCallback = mGnssBatchingDeathCallback;
         }
 
-        if (gnssBatchingCallback == null) {
+        if (gnssBatchingCallback == null || gnssBatchingDeathCallback == null) {
+            return;
+        }
+
+        int userId = UserHandle.getUserId(gnssBatchingDeathCallback.getCallerIdentity().mUid);
+        if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER, userId)) {
+            Log.w(TAG, "reportLocationBatch() called without user permission");
             return;
         }
 
         try {
             gnssBatchingCallback.onLocationBatch(locations);
         } catch (RemoteException e) {
-            Log.e(TAG, "mGnssBatchingCallback.onLocationBatch failed", e);
+            Log.e(TAG, "reportLocationBatch() failed", e);
         }
     }
 

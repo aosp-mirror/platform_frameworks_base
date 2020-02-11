@@ -6257,16 +6257,19 @@ public final class Settings {
          * @hide
          */
         public static final String LOCATION_CHANGER = "location_changer";
+
         /**
          * The location changer is unknown or unable to detect.
          * @hide
          */
         public static final int LOCATION_CHANGER_UNKNOWN = 0;
+
         /**
          * Location settings in system settings.
          * @hide
          */
         public static final int LOCATION_CHANGER_SYSTEM_SETTINGS = 1;
+
         /**
          * The location icon in drop down notification drawer.
          * @hide
@@ -6312,6 +6315,14 @@ public final class Settings {
          */
         @SystemApi
         public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
+
+        /**
+         * The accuracy in meters used for coarsening location for clients with only the coarse
+         * location permission.
+         *
+         * @hide
+         */
+        public static final String LOCATION_COARSE_ACCURACY_M = "locationCoarseAccuracy";
 
         /**
          * A flag containing settings used for biometric weak

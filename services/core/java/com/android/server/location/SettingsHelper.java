@@ -23,6 +23,7 @@ import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACK
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS;
 import static android.provider.Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST;
 import static android.provider.Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS;
+import static android.provider.Settings.Secure.LOCATION_COARSE_ACCURACY_M;
 import static android.provider.Settings.Secure.LOCATION_MODE;
 import static android.provider.Settings.Secure.LOCATION_MODE_OFF;
 
@@ -88,6 +89,7 @@ public class SettingsHelper {
     private static final long DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS =
             30 * 60 * 1000;
     private static final long DEFAULT_MAX_LAST_LOCATION_AGE_MS = 20 * 60 * 1000;
+    private static final float DEFAULT_COARSE_LOCATION_ACCURACY_M = 2000.0f;
 
     private final Context mContext;
 
@@ -268,19 +270,45 @@ public class SettingsHelper {
      * Retrieve the background throttling proximity alert interval.
      */
     public long getBackgroundThrottleProximityAlertIntervalMs() {
-        return Settings.Global.getLong(mContext.getContentResolver(),
-                LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
-                DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Global.getLong(mContext.getContentResolver(),
+                    LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
+                    DEFAULT_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
      * Retrieve maximum age of the last location.
      */
     public long getMaxLastLocationAgeMs() {
-        return Settings.Global.getLong(
-                mContext.getContentResolver(),
-                LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
-                DEFAULT_MAX_LAST_LOCATION_AGE_MS);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Global.getLong(
+                    mContext.getContentResolver(),
+                    LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
+                    DEFAULT_MAX_LAST_LOCATION_AGE_MS);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Retrieve the accuracy for coarsening location, ie, the grid size used for snap-to-grid
+     * coarsening.
+     */
+    public float getCoarseLocationAccuracyM() {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Secure.getFloat(
+                    mContext.getContentResolver(),
+                    LOCATION_COARSE_ACCURACY_M,
+                    DEFAULT_COARSE_LOCATION_ACCURACY_M);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**

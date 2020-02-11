@@ -1215,7 +1215,7 @@ public class LocationManager {
      * the first fix.
      *
      * @param location newly available {@link Location} object
-     * @return true if the location was successfully injected, false otherwise
+     * @return true if the location was injected, false otherwise
      *
      * @throws IllegalArgumentException if location is null
      * @throws SecurityException if permissions are not present
@@ -1229,7 +1229,8 @@ public class LocationManager {
                 "incomplete location object, missing timestamp or accuracy?");
 
         try {
-            return mService.injectLocation(location);
+            mService.injectLocation(location);
+            return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
