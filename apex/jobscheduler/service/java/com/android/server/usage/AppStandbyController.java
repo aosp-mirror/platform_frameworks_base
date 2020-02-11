@@ -136,25 +136,59 @@ public class AppStandbyController implements AppStandbyInternal {
     private static final long ONE_HOUR = ONE_MINUTE * 60;
     private static final long ONE_DAY = ONE_HOUR * 24;
 
-    static final long[] SCREEN_TIME_THRESHOLDS = {
+    /**
+     * The minimum amount of time the screen must have been on before an app can time out from its
+     * current bucket to the next bucket.
+     */
+    private static final long[] SCREEN_TIME_THRESHOLDS = {
             0,
             0,
-            COMPRESS_TIME ? 120 * 1000 : 1 * ONE_HOUR,
-            COMPRESS_TIME ? 240 * 1000 : 2 * ONE_HOUR
+            COMPRESS_TIME ? 2 * ONE_MINUTE : 1 * ONE_HOUR,
+            COMPRESS_TIME ? 4 * ONE_MINUTE : 2 * ONE_HOUR,
+            COMPRESS_TIME ? 8 * ONE_MINUTE : 6 * ONE_HOUR
     };
 
-    static final long[] ELAPSED_TIME_THRESHOLDS = {
+    /** The minimum allowed values for each index in {@link #SCREEN_TIME_THRESHOLDS}. */
+    private static final long[] MINIMUM_SCREEN_TIME_THRESHOLDS = COMPRESS_TIME
+            ? new long[SCREEN_TIME_THRESHOLDS.length]
+            : new long[]{
+                    0,
+                    0,
+                    0,
+                    30 * ONE_MINUTE,
+                    ONE_HOUR
+            };
+
+    /**
+     * The minimum amount of elapsed time that must have passed before an app can time out from its
+     * current bucket to the next bucket.
+     */
+    private static final long[] ELAPSED_TIME_THRESHOLDS = {
             0,
             COMPRESS_TIME ?  1 * ONE_MINUTE : 12 * ONE_HOUR,
             COMPRESS_TIME ?  4 * ONE_MINUTE : 24 * ONE_HOUR,
-            COMPRESS_TIME ? 16 * ONE_MINUTE : 48 * ONE_HOUR
+            COMPRESS_TIME ? 16 * ONE_MINUTE : 48 * ONE_HOUR,
+            // TODO(149050681): increase timeout to 30+ days
+            COMPRESS_TIME ? 32 * ONE_MINUTE : 4 * ONE_DAY
     };
 
-    static final int[] THRESHOLD_BUCKETS = {
+    /** The minimum allowed values for each index in {@link #ELAPSED_TIME_THRESHOLDS}. */
+    private static final long[] MINIMUM_ELAPSED_TIME_THRESHOLDS = COMPRESS_TIME
+            ? new long[ELAPSED_TIME_THRESHOLDS.length]
+            : new long[]{
+                    0,
+                    ONE_HOUR,
+                    ONE_HOUR,
+                    2 * ONE_HOUR,
+                    4 * ONE_DAY
+            };
+
+    private static final int[] THRESHOLD_BUCKETS = {
             STANDBY_BUCKET_ACTIVE,
             STANDBY_BUCKET_WORKING_SET,
             STANDBY_BUCKET_FREQUENT,
-            STANDBY_BUCKET_RARE
+            STANDBY_BUCKET_RARE,
+            STANDBY_BUCKET_RESTRICTED
     };
 
     /** Default expiration time for bucket prediction. After this, use thresholds to downgrade. */
@@ -204,7 +238,15 @@ public class AppStandbyController implements AppStandbyInternal {
     static final int MSG_REPORT_EXEMPTED_SYNC_START = 13;
 
     long mCheckIdleIntervalMillis;
+    /**
+     * The minimum amount of time the screen must have been on before an app can time out from its
+     * current bucket to the next bucket.
+     */
     long[] mAppStandbyScreenThresholds = SCREEN_TIME_THRESHOLDS;
+    /**
+     * The minimum amount of elapsed time that must have passed before an app can time out from its
+     * current bucket to the next bucket.
+     */
     long[] mAppStandbyElapsedThresholds = ELAPSED_TIME_THRESHOLDS;
     /** Minimum time a strong usage event should keep the bucket elevated. */
     long mStrongUsageTimeoutMillis;
@@ -1147,9 +1189,11 @@ public class AppStandbyController implements AppStandbyInternal {
             final boolean isForcedByUser =
                     (reason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_USER;
 
-            // If the current bucket is RESTRICTED, only user force or usage should bring it out.
+            // If the current bucket is RESTRICTED, only user force or usage should bring it out,
+            // unless the app was put into the bucket due to timing out.
             if (app.currentBucket == STANDBY_BUCKET_RESTRICTED && !isUserUsage(reason)
-                    && !isForcedByUser) {
+                    && !isForcedByUser
+                    && (app.bucketingReason & REASON_MAIN_MASK) != REASON_MAIN_TIMEOUT) {
                 return;
             }
 
@@ -1829,12 +1873,12 @@ public class AppStandbyController implements AppStandbyInternal {
 
                 String screenThresholdsValue = mParser.getString(KEY_SCREEN_TIME_THRESHOLDS, null);
                 mAppStandbyScreenThresholds = parseLongArray(screenThresholdsValue,
-                        SCREEN_TIME_THRESHOLDS);
+                        SCREEN_TIME_THRESHOLDS, MINIMUM_SCREEN_TIME_THRESHOLDS);
 
                 String elapsedThresholdsValue = mParser.getString(KEY_ELAPSED_TIME_THRESHOLDS,
                         null);
                 mAppStandbyElapsedThresholds = parseLongArray(elapsedThresholdsValue,
-                        ELAPSED_TIME_THRESHOLDS);
+                        ELAPSED_TIME_THRESHOLDS, MINIMUM_ELAPSED_TIME_THRESHOLDS);
                 mCheckIdleIntervalMillis = Math.min(mAppStandbyElapsedThresholds[1] / 4,
                         COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
                 mStrongUsageTimeoutMillis = mParser.getDurationMillis(
@@ -1870,8 +1914,8 @@ public class AppStandbyController implements AppStandbyInternal {
 
                 mUnexemptedSyncScheduledTimeoutMillis = mParser.getDurationMillis(
                         KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE
-                                        : DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT); // TODO
+                                COMPRESS_TIME
+                                        ? ONE_MINUTE : DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT);
 
                 mSystemInteractionTimeoutMillis = mParser.getDurationMillis(
                         KEY_SYSTEM_INTERACTION_HOLD_DURATION,
@@ -1888,7 +1932,7 @@ public class AppStandbyController implements AppStandbyInternal {
             setAppIdleEnabled(mInjector.isAppIdleEnabled());
         }
 
-        long[] parseLongArray(String values, long[] defaults) {
+        long[] parseLongArray(String values, long[] defaults, long[] minValues) {
             if (values == null) return defaults;
             if (values.isEmpty()) {
                 // Reset to defaults
@@ -1896,13 +1940,19 @@ public class AppStandbyController implements AppStandbyInternal {
             } else {
                 String[] thresholds = values.split("/");
                 if (thresholds.length == THRESHOLD_BUCKETS.length) {
+                    if (minValues.length != THRESHOLD_BUCKETS.length) {
+                        Slog.wtf(TAG, "minValues array is the wrong size");
+                        // Use zeroes as the minimums.
+                        minValues = new long[THRESHOLD_BUCKETS.length];
+                    }
                     long[] array = new long[THRESHOLD_BUCKETS.length];
                     for (int i = 0; i < THRESHOLD_BUCKETS.length; i++) {
                         try {
                             if (thresholds[i].startsWith("P") || thresholds[i].startsWith("p")) {
-                                array[i] = Duration.parse(thresholds[i]).toMillis();
+                                array[i] = Math.max(minValues[i],
+                                        Duration.parse(thresholds[i]).toMillis());
                             } else {
-                                array[i] = Long.parseLong(thresholds[i]);
+                                array[i] = Math.max(minValues[i], Long.parseLong(thresholds[i]));
                             }
                         } catch (NumberFormatException|DateTimeParseException e) {
                             return defaults;
