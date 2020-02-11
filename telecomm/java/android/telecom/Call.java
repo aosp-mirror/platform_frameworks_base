@@ -459,7 +459,11 @@ public final class Call {
         /** Call supports the deflect feature. */
         public static final int CAPABILITY_SUPPORT_DEFLECT = 0x01000000;
 
-        /** call supports adding participants to existing call */
+        /**
+         * Call supports adding participants to the call via
+         * {@link #addConferenceParticipants(List)}.
+         * @hide
+         */
         public static final int CAPABILITY_ADD_PARTICIPANT = 0x02000000;
         //******************************************************************************************
         // Next CAPABILITY value: 0x04000000
@@ -1713,6 +1717,7 @@ public final class Call {
      * See {@link Details#CAPABILITY_ADD_PARTICIPANT}.
      *
      * @param participants participants to be pulled to existing call.
+     * @hide
      */
     public void addConferenceParticipants(@NonNull List<Uri> participants) {
         mInCallAdapter.addConferenceParticipants(mTelecomCallId, participants);

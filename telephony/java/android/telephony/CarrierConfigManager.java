@@ -1091,6 +1091,7 @@ public class CarrierConfigManager {
     /**
      * Determines whether conference participants can be added to existing call.  When {@code true},
      * adding conference participants to existing call is supported, {@code false otherwise}.
+     * @hide
      */
     public static final String KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL =
             "support_add_conference_participants_bool";

@@ -319,8 +319,9 @@ public abstract class Conference extends Conferenceable {
     public void onConnectionAdded(Connection connection) {}
 
     /**
-     * Notifies the {@link Conference} of a request to add a new participant to the conference call
-     * @param participants that will be added to existing conference call
+     * Notifies the {@link Conference} of a request to add a new participants to the conference call
+     * @param participants that will be added to this conference call
+     * @hide
      */
     public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
 

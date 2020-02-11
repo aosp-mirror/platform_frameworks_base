@@ -378,7 +378,8 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * When set, indicates that this {@link Connection} supports initiation of a conference call
-     * by directly adding a participant using {@link #onAddConferenceParticipants()}.
+     * by directly adding participants using {@link #onAddConferenceParticipants(List)}.
+     * @hide
      */
     public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
     //**********************************************************************************************
@@ -2960,9 +2961,10 @@ public abstract class Connection extends Conferenceable {
     public void onSeparate() {}
 
     /**
-     * Supports initiation of a conference call by directly adding participants.
+     * Supports initiation of a conference call by directly adding participants to an ongoing call.
      *
      * @param participants with which conference call will be formed.
+     * @hide
      */
     public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
 
