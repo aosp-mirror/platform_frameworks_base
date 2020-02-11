@@ -1132,7 +1132,11 @@ public class UsageStatsService extends SystemService implements
                             // dump everything for all users
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
-                                ipw.println("user=" + mUserState.keyAt(user));
+                                final int userId = mUserState.keyAt(user);
+                                if (!mUserUnlockedStates.get(userId)) {
+                                    continue;
+                                }
+                                ipw.println("user=" + userId);
                                 ipw.increaseIndent();
                                 mUserState.valueAt(user).dumpFile(ipw, null);
                                 ipw.decreaseIndent();
@@ -1153,7 +1157,11 @@ public class UsageStatsService extends SystemService implements
                             // dump info for all users
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
-                                ipw.println("user=" + mUserState.keyAt(user));
+                                final int userId = mUserState.keyAt(user);
+                                if (!mUserUnlockedStates.get(userId)) {
+                                    continue;
+                                }
+                                ipw.println("user=" + userId);
                                 ipw.increaseIndent();
                                 mUserState.valueAt(user).dumpDatabaseInfo(ipw);
                                 ipw.decreaseIndent();
@@ -1198,11 +1206,13 @@ public class UsageStatsService extends SystemService implements
                 idpw.printPair("user", userId);
                 idpw.println();
                 idpw.increaseIndent();
-                if (checkin) {
-                    mUserState.valueAt(i).checkin(idpw);
-                } else {
-                    mUserState.valueAt(i).dump(idpw, pkg, compact);
-                    idpw.println();
+                if (mUserUnlockedStates.get(userId)) {
+                    if (checkin) {
+                        mUserState.valueAt(i).checkin(idpw);
+                    } else {
+                        mUserState.valueAt(i).dump(idpw, pkg, compact);
+                        idpw.println();
+                    }
                 }
                 mAppStandby.dumpUser(idpw, userId, pkg);
                 idpw.decreaseIndent();
@@ -1224,13 +1234,17 @@ public class UsageStatsService extends SystemService implements
     private int parseUserIdFromArgs(String[] args, int index, IndentingPrintWriter ipw) {
         final int userId;
         try {
-            userId = Integer.valueOf(args[index + 1]);
+            userId = Integer.parseInt(args[index + 1]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             ipw.println("invalid user specified.");
             return UserHandle.USER_NULL;
         }
         if (mUserState.indexOfKey(userId) < 0) {
             ipw.println("the specified user does not exist.");
+            return UserHandle.USER_NULL;
+        }
+        if (!mUserUnlockedStates.get(userId)) {
+            ipw.println("the specified user is currently in a locked state.");
             return UserHandle.USER_NULL;
         }
         return userId;
