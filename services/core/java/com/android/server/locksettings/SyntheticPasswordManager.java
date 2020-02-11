@@ -590,8 +590,8 @@ public class SyntheticPasswordManager {
             throw new IllegalStateException("Failed to create new SID for user", e);
         }
         if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
-            Slog.e(TAG, "Fail to create new SID for user " + userId);
-            return;
+            throw new IllegalStateException("Fail to create new SID for user " + userId
+                    + " response: " + response.getResponseCode());
         }
         saveSyntheticPasswordHandle(response.getPayload(), userId);
     }
