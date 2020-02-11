@@ -216,12 +216,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean supportsHighQualityAudio(BluetoothDevice device) {
-        int support = mService.supportsOptionalCodecs(device);
+        int support = mService.isOptionalCodecsSupported(device);
         return support == BluetoothA2dp.OPTIONAL_CODECS_SUPPORTED;
     }
 
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
-        int enabled = mService.getOptionalCodecsEnabled(device);
+        int enabled = mService.isOptionalCodecsEnabled(device);
         if (enabled != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN) {
             return enabled == BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED;
         } else if (getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED &&
