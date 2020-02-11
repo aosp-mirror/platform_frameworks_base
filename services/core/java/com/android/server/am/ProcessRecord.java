@@ -1910,8 +1910,7 @@ class ProcessRecord implements WindowProcessListener {
             mWaitDialog = null;
         }
 
-        void forAllDialogs(List<? extends BaseErrorDialog> dialogs,
-                Consumer<BaseErrorDialog> c) {
+        void forAllDialogs(List<? extends BaseErrorDialog> dialogs, Consumer<BaseErrorDialog> c) {
             for (int i = dialogs.size() - 1; i >= 0; i--) {
                 c.accept(dialogs.get(i));
             }
@@ -1920,42 +1919,72 @@ class ProcessRecord implements WindowProcessListener {
         void showCrashDialogs(AppErrorDialog.Data data) {
             List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
             mCrashDialogs = new ArrayList<>();
-
             for (int i = contexts.size() - 1; i >= 0; i--) {
                 final Context c = contexts.get(i);
                 mCrashDialogs.add(new AppErrorDialog(c, mService, data));
             }
-            mService.mUiHandler.post(() -> mCrashDialogs.forEach(Dialog::show));
+            mService.mUiHandler.post(() -> {
+                List<AppErrorDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mCrashDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
         }
 
         void showAnrDialogs(AppNotRespondingDialog.Data data) {
             List<Context> contexts = getDisplayContexts(isSilentAnr() /* lastUsedOnly */);
             mAnrDialogs = new ArrayList<>();
-
             for (int i = contexts.size() - 1; i >= 0; i--) {
                 final Context c = contexts.get(i);
                 mAnrDialogs.add(new AppNotRespondingDialog(mService, c, data));
             }
-            mService.mUiHandler.post(() -> mAnrDialogs.forEach(Dialog::show));
+            mService.mUiHandler.post(() -> {
+                List<AppNotRespondingDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mAnrDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
         }
 
         void showViolationDialogs(AppErrorResult res) {
             List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
             mViolationDialogs = new ArrayList<>();
-
             for (int i = contexts.size() - 1; i >= 0; i--) {
                 final Context c = contexts.get(i);
                 mViolationDialogs.add(
                         new StrictModeViolationDialog(c, mService, res, ProcessRecord.this));
             }
-            mService.mUiHandler.post(() -> mViolationDialogs.forEach(Dialog::show));
+            mService.mUiHandler.post(() -> {
+                List<StrictModeViolationDialog> dialogs;
+                synchronized (mService) {
+                    dialogs = mViolationDialogs;
+                }
+                if (dialogs != null) {
+                    forAllDialogs(dialogs, Dialog::show);
+                }
+            });
         }
 
         void showDebugWaitingDialogs() {
             List<Context> contexts = getDisplayContexts(true /* lastUsedOnly */);
             final Context c = contexts.get(0);
             mWaitDialog = new AppWaitingForDebuggerDialog(mService, c, ProcessRecord.this);
-            mService.mUiHandler.post(() -> mWaitDialog.show());
+
+            mService.mUiHandler.post(() -> {
+                Dialog dialog;
+                synchronized (mService) {
+                    dialog = mWaitDialog;
+                }
+                if (dialog != null) {
+                    dialog.show();
+                }
+            });
         }
 
         /**
