@@ -44,10 +44,6 @@ static inline ::std::ostream& operator<<(::std::ostream& out, const String8& str
   return out << str.string();
 }
 
-static inline ::std::ostream& operator<<(::std::ostream& out, const String16& str) {
-  return out << String8(str).string();
-}
-
 static inline ::std::ostream& operator<<(::std::ostream& out, const ResTable_config& c) {
   return out << c.toString();
 }
