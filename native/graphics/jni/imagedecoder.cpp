@@ -28,6 +28,7 @@
 #include <utils/Color.h>
 
 #include <fcntl.h>
+#include <limits>
 #include <optional>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -68,6 +69,14 @@ static int createFromStream(std::unique_ptr<SkStreamRewindable> stream, AImageDe
             SkAndroidCodec::ExifOrientationBehavior::kRespect);
     if (!androidCodec) {
         return ResultToErrorCode(result);
+    }
+
+    // AImageDecoderHeaderInfo_getWidth/Height return an int32_t. Ensure that
+    // the conversion is safe.
+    const auto& info = androidCodec->getInfo();
+    if (info.width() > std::numeric_limits<int32_t>::max()
+        || info.height() > std::numeric_limits<int32_t>::max()) {
+        return ANDROID_IMAGE_DECODER_INVALID_INPUT;
     }
 
     *outDecoder = reinterpret_cast<AImageDecoder*>(new ImageDecoder(std::move(androidCodec)));
