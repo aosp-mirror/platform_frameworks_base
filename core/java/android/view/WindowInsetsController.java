@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
+import android.os.CancellationSignal;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.animation.Interpolator;
@@ -156,13 +157,15 @@ public interface WindowInsetsController {
      *                     {@link InsetsAnimation#getInterpolatedFraction()}.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
-     *
+     * @return A cancellation signal that the caller can use to cancel the request to obtain
+     *         control, or once they have control, to cancel the control.
      * @see InsetsAnimation#getFraction()
      * @see InsetsAnimation#getInterpolatedFraction()
      * @see InsetsAnimation#getInterpolator()
      * @see InsetsAnimation#getDurationMillis()
      */
-    void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
+    @NonNull
+    CancellationSignal controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
             @Nullable Interpolator interpolator,
             @NonNull WindowInsetsAnimationControlListener listener);
 
