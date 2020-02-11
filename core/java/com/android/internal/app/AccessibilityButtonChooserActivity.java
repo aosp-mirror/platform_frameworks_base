@@ -30,10 +30,12 @@ import static com.android.internal.app.AccessibilityButtonChooserActivity.WhiteL
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -265,6 +267,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
             @ShortcutType int shortcutType) {
         final List<AccessibilityButtonTarget> targets = new ArrayList<>();
         targets.addAll(getAccessibilityServiceTargets(context));
+        targets.addAll(getAccessibilityActivityTargets(context));
         targets.addAll(getWhiteListingServiceTargets(context));
 
         final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
@@ -285,6 +288,24 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
         final List<AccessibilityButtonTarget> targets = new ArrayList<>(installedServices.size());
         for (AccessibilityServiceInfo info : installedServices) {
+            targets.add(new AccessibilityButtonTarget(context, info));
+        }
+
+        return targets;
+    }
+
+    private static List<AccessibilityButtonTarget> getAccessibilityActivityTargets(
+            @NonNull Context context) {
+        final AccessibilityManager ams = context.getSystemService(AccessibilityManager.class);
+        final List<AccessibilityShortcutInfo> installedServices =
+                ams.getInstalledAccessibilityShortcutListAsUser(context,
+                        ActivityManager.getCurrentUser());
+        if (installedServices == null) {
+            return Collections.emptyList();
+        }
+
+        final List<AccessibilityButtonTarget> targets = new ArrayList<>(installedServices.size());
+        for (AccessibilityShortcutInfo info : installedServices) {
             targets.add(new AccessibilityButtonTarget(context, info));
         }
 
@@ -540,6 +561,14 @@ public class AccessibilityButtonChooserActivity extends Activity {
             this.mFragmentType = getAccessibilityServiceFragmentType(serviceInfo);
         }
 
+        AccessibilityButtonTarget(@NonNull Context context,
+                @NonNull AccessibilityShortcutInfo shortcutInfo) {
+            this.mId = shortcutInfo.getComponentName().flattenToString();
+            this.mLabel = shortcutInfo.getActivityInfo().loadLabel(context.getPackageManager());
+            this.mDrawable = shortcutInfo.getActivityInfo().loadIcon(context.getPackageManager());
+            this.mFragmentType = AccessibilityServiceFragmentType.BOUNCE;
+        }
+
         AccessibilityButtonTarget(Context context, @NonNull String id, int labelResId,
                 int iconRes, @AccessibilityServiceFragmentType int fragmentType) {
             this.mId = id;
@@ -594,7 +623,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 onIntuitiveTargetSelected(target);
                 break;
             case AccessibilityServiceFragmentType.BOUNCE:
-                // Do nothing
+                onBounceTargetSelected(target);
                 break;
             default:
                 throw new IllegalStateException("Unexpected fragment type");
@@ -623,6 +652,15 @@ public class AccessibilityButtonChooserActivity extends Activity {
 
     private void onIntuitiveTargetSelected(AccessibilityButtonTarget target) {
         switchServiceState(target);
+    }
+
+    private void onBounceTargetSelected(AccessibilityButtonTarget target) {
+        final AccessibilityManager ams = getSystemService(AccessibilityManager.class);
+        if (mShortcutType == ACCESSIBILITY_BUTTON) {
+            ams.notifyAccessibilityButtonClicked(getDisplayId(), target.getId());
+        } else if (mShortcutType == ACCESSIBILITY_SHORTCUT_KEY) {
+            ams.performAccessibilityShortcut(target.getId());
+        }
     }
 
     private void switchServiceState(AccessibilityButtonTarget target) {
@@ -656,7 +694,7 @@ public class AccessibilityButtonChooserActivity extends Activity {
                 onIntuitiveTargetDeleted(position, componentId);
                 break;
             case AccessibilityServiceFragmentType.BOUNCE:
-                // Do nothing
+                onBounceTargetDeleted(position, componentId);
                 break;
             default:
                 throw new IllegalStateException("Unexpected fragment type");
@@ -689,6 +727,12 @@ public class AccessibilityButtonChooserActivity extends Activity {
     }
 
     private void onIntuitiveTargetDeleted(int position, String componentId) {
+        optOutValueFromSettings(this, mShortcutUserType, componentId);
+        mTargets.remove(position);
+        mTargetAdapter.notifyDataSetChanged();
+    }
+
+    private void onBounceTargetDeleted(int position, String componentId) {
         optOutValueFromSettings(this, mShortcutUserType, componentId);
         mTargets.remove(position);
         mTargetAdapter.notifyDataSetChanged();
