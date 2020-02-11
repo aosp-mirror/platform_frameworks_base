@@ -2450,17 +2450,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // TODO(b/136132412): update with new APIs
-        if (isIncrementalInstallation()) {
-            try {
-                mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext,
-                        stageDir, params.dataLoaderParams, addedFiles);
-                return true;
-            } catch (IOException e) {
-                throw new PackageManagerException(e);
-            }
-        }
-
         final DataLoaderManager dataLoaderManager = mContext.getSystemService(
                 DataLoaderManager.class);
         if (dataLoaderManager == null) {
@@ -2468,6 +2457,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Failed to find data loader manager service");
         }
 
+        final boolean manualStartAndDestroy = !isIncrementalInstallation();
         IDataLoaderStatusListener listener = new IDataLoaderStatusListener.Stub() {
             @Override
             public void onStatusChanged(int dataLoaderId, int status) {
@@ -2487,7 +2477,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                     switch (status) {
                         case IDataLoaderStatusListener.DATA_LOADER_CREATED: {
-                            dataLoader.start();
+                            if (manualStartAndDestroy) {
+                                // IncrementalFileStorages will call start after all files are
+                                // created in IncFS.
+                                dataLoader.start();
+                            }
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_STARTED: {
@@ -2502,7 +2496,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             } else {
                                 dispatchStreamValidateAndCommit();
                             }
-                            dataLoader.destroy();
+                            if (manualStartAndDestroy) {
+                                dataLoader.destroy();
+                            }
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_IMAGE_NOT_READY: {
@@ -2510,7 +2506,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             onSessionVerificationFailure(
                                     new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                             "Failed to prepare image."));
-                            dataLoader.destroy();
+                            if (manualStartAndDestroy) {
+                                dataLoader.destroy();
+                            }
                             break;
                         }
                     }
@@ -2523,6 +2521,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
         };
+
+        if (!manualStartAndDestroy) {
+            try {
+                mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext,
+                        stageDir, params.dataLoaderParams, listener, addedFiles);
+                return false;
+            } catch (IOException e) {
+                throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
+                        e.getCause());
+            }
+        }
 
         final FileSystemConnector connector = new FileSystemConnector(addedFiles);
         final FileSystemControlParcel control = new FileSystemControlParcel();

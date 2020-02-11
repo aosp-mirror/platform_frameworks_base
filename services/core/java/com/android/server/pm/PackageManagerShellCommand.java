@@ -181,6 +181,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstall();
                 case "install-streaming":
                     return runStreamingInstall();
+                case "install-incremental":
+                    return runIncrementalInstall();
                 case "install-abandon":
                 case "install-destroy":
                     return runInstallAbandon();
@@ -1164,6 +1166,15 @@ class PackageManagerShellCommand extends ShellCommand {
         if (params.sessionParams.dataLoaderParams == null) {
             params.sessionParams.setDataLoaderParams(
                     PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(this));
+        }
+        return doRunInstall(params);
+    }
+
+    private int runIncrementalInstall() throws RemoteException {
+        final InstallParams params = makeInstallParams();
+        if (params.sessionParams.dataLoaderParams == null) {
+            params.sessionParams.setDataLoaderParams(
+                    PackageManagerShellCommandDataLoader.getIncrementalDataLoaderParams(this));
         }
         return doRunInstall(params);
     }
@@ -3001,17 +3012,21 @@ class PackageManagerShellCommand extends ShellCommand {
                         return 1;
                     }
 
-                    session.addFile(LOCATION_DATA_APP, name, sizeBytes, STDIN_PATH_BYTES, null);
+                    // Incremental requires unique metadatas, let's add a name to the dash.
+                    session.addFile(LOCATION_DATA_APP, name, sizeBytes,
+                            ("-" + name).getBytes(StandardCharsets.UTF_8), null);
                     continue;
                 }
 
                 // 3. Local file.
                 final String inPath = arg;
 
-                String name = new File(inPath).getName();
+                final File file = new File(inPath);
+                final String name = file.getName();
+                final long size = file.length();
                 byte[] metadata = inPath.getBytes(StandardCharsets.UTF_8);
 
-                session.addFile(LOCATION_DATA_APP, name, -1, metadata, null);
+                session.addFile(LOCATION_DATA_APP, name, size, metadata, null);
             }
             return 0;
         } finally {

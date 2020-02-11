@@ -59,6 +59,8 @@ using Clock = std::chrono::steady_clock;
 using TimePoint = std::chrono::time_point<Clock>;
 using Seconds = std::chrono::seconds;
 
+using DataLoaderStatusListener = ::android::sp<::android::content::pm::IDataLoaderStatusListener>;
+
 class IncrementalService final {
 public:
     explicit IncrementalService(ServiceManagerWrapper&& sm, std::string_view rootDir);
@@ -94,7 +96,9 @@ public:
 
     std::optional<std::future<void>> onSystemReady();
 
-    StorageId createStorage(std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
+    StorageId createStorage(std::string_view mountPoint,
+                            DataLoaderParamsParcel&& dataLoaderParams,
+                            const DataLoaderStatusListener& dataLoaderStatusListener,
                             CreateOptions options = CreateOptions::Default);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
@@ -129,13 +133,14 @@ public:
                                  std::string_view libDirRelativePath, std::string_view abi);
     class IncrementalDataLoaderListener : public android::content::pm::BnDataLoaderStatusListener {
     public:
-        IncrementalDataLoaderListener(IncrementalService& incrementalService)
-              : incrementalService(incrementalService) {}
+        IncrementalDataLoaderListener(IncrementalService& incrementalService, DataLoaderStatusListener externalListener)
+              : incrementalService(incrementalService), externalListener(externalListener) {}
         // Callbacks interface
         binder::Status onStatusChanged(MountId mount, int newStatus) override;
 
     private:
         IncrementalService& incrementalService;
+        DataLoaderStatusListener externalListener;
     };
 
 private:
@@ -201,7 +206,7 @@ private:
                            std::string&& source, std::string&& target, BindKind kind,
                            std::unique_lock<std::mutex>& mainLock);
 
-    bool prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel* params);
+    bool prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel* params = nullptr, const DataLoaderStatusListener* externalListener = nullptr);
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
     StorageId findStorageId(std::string_view path) const;
 

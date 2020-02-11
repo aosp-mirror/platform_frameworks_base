@@ -30,7 +30,6 @@
 #include <binder/BinderService.h>
 #include <binder/ParcelFileDescriptor.h>
 #include <binder/Status.h>
-#include <openssl/sha.h>
 #include <sys/stat.h>
 #include <uuid/uuid.h>
 #include <zlib.h>
@@ -242,20 +241,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
 }
 
 FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
-    incfs::FileId id = {};
-    if (size_t(metadata.size()) <= sizeof(id)) {
-        memcpy(&id, metadata.data(), metadata.size());
-    } else {
-        uint8_t buffer[SHA_DIGEST_LENGTH];
-        static_assert(sizeof(buffer) >= sizeof(id));
-
-        SHA_CTX ctx;
-        SHA1_Init(&ctx);
-        SHA1_Update(&ctx, metadata.data(), metadata.size());
-        SHA1_Final(buffer, &ctx);
-        memcpy(&id, buffer, sizeof(id));
-    }
-    return id;
+    return IncFs_FileIdFromMetadata({(const char*)metadata.data(), metadata.size()});
 }
 
 IncrementalService::~IncrementalService() = default;
@@ -344,7 +330,7 @@ std::optional<std::future<void>> IncrementalService::onSystemReady() {
     std::thread([this, mounts = std::move(mounts)]() {
         std::vector<IfsMountPtr> failedLoaderMounts;
         for (auto&& ifs : mounts) {
-            if (prepareDataLoader(*ifs, nullptr)) {
+            if (prepareDataLoader(*ifs)) {
                 LOG(INFO) << "Successfully started data loader for mount " << ifs->mountId;
             } else {
                 LOG(WARNING) << "Failed to start data loader for mount " << ifs->mountId;
@@ -377,6 +363,7 @@ auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
 
 StorageId IncrementalService::createStorage(std::string_view mountPoint,
                                             DataLoaderParamsParcel&& dataLoaderParams,
+                                            const DataLoaderStatusListener& dataLoaderStatusListener,
                                             CreateOptions options) {
     LOG(INFO) << "createStorage: " << mountPoint << " | " << int(options);
     if (!path::isAbsolute(mountPoint)) {
@@ -509,7 +496,7 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
     // Done here as well, all data structures are in good state.
     secondCleanupOnFailure.release();
 
-    if (!prepareDataLoader(*ifs, &dataLoaderParams)) {
+    if (!prepareDataLoader(*ifs, &dataLoaderParams, &dataLoaderStatusListener)) {
         LOG(ERROR) << "prepareDataLoader() failed";
         deleteStorageLocked(*ifs, std::move(l));
         return kInvalidStorageId;
@@ -767,7 +754,6 @@ int IncrementalService::makeFile(StorageId storage, std::string_view path, int m
         if (params.metadata.data && params.metadata.size > 0) {
             metadataBytes.assign(params.metadata.data, params.metadata.data + params.metadata.size);
         }
-        mIncrementalManager->newFileForDataLoader(ifs->mountId, id, metadataBytes);
         return 0;
     }
     return -EINVAL;
@@ -1074,7 +1060,8 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
 }
 
 bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
-                                           DataLoaderParamsParcel* params) {
+                                           DataLoaderParamsParcel* params,
+                                           const DataLoaderStatusListener* externalListener) {
     if (!mSystemReady.load(std::memory_order_relaxed)) {
         std::unique_lock l(ifs.lock);
         if (params) {
@@ -1117,7 +1104,7 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     fsControlParcel.incremental->pendingReads.reset(
             base::unique_fd(::dup(ifs.control.pendingReads)));
     fsControlParcel.incremental->log.reset(base::unique_fd(::dup(ifs.control.logs)));
-    sp<IncrementalDataLoaderListener> listener = new IncrementalDataLoaderListener(*this);
+    sp<IncrementalDataLoaderListener> listener = new IncrementalDataLoaderListener(*this, *externalListener);
     bool created = false;
     auto status = mIncrementalManager->prepareDataLoader(ifs.mountId, fsControlParcel, *dlp,
                                                          listener, &created);
@@ -1247,6 +1234,11 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
 
 binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChanged(MountId mountId,
                                                                                   int newStatus) {
+    if (externalListener) {
+        // Give an external listener a chance to act before we destroy something.
+        externalListener->onStatusChanged(mountId, newStatus);
+    }
+
     std::unique_lock l(incrementalService.mLock);
     const auto& ifs = incrementalService.getIfsLocked(mountId);
     if (!ifs) {
@@ -1286,6 +1278,12 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_STOPPED: {
+            break;
+        }
+        case IDataLoaderStatusListener::DATA_LOADER_IMAGE_READY: {
+            break;
+        }
+        case IDataLoaderStatusListener::DATA_LOADER_IMAGE_NOT_READY: {
             break;
         }
         default: {
