@@ -1086,6 +1086,50 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Associate the connection between the host View and the embedded SurfaceControlViewHost.
+     *
+     * @hide
+     */
+    public void associateEmbeddedHierarchy(@NonNull IBinder host, @NonNull IBinder embedded) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.associateEmbeddedHierarchy(host, embedded);
+        } catch (RemoteException e) {
+            return;
+        }
+    }
+
+    /**
+     * Disassociate the connection between the host View and the embedded SurfaceControlViewHost.
+     * The given token could be either from host side or embedded side.
+     *
+     * @hide
+     */
+    public void disassociateEmbeddedHierarchy(@NonNull IBinder token) {
+        if (token == null) {
+            return;
+        }
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.disassociateEmbeddedHierarchy(token);
+        } catch (RemoteException e) {
+            return;
+        }
+    }
+
+    /**
      * Sets the current state and notifies listeners, if necessary.
      *
      * @param stateFlags The state flags.
@@ -1147,11 +1191,12 @@ public final class AccessibilityManager {
     /**
      * Adds an accessibility interaction connection interface for a given window.
      * @param windowToken The window token to which a connection is added.
+     * @param leashToken The leash token to which a connection is added.
      * @param connection The connection.
      *
      * @hide
      */
-    public int addAccessibilityInteractionConnection(IWindow windowToken,
+    public int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,
             String packageName, IAccessibilityInteractionConnection connection) {
         final IAccessibilityManager service;
         final int userId;
@@ -1163,8 +1208,8 @@ public final class AccessibilityManager {
             userId = mUserId;
         }
         try {
-            return service.addAccessibilityInteractionConnection(windowToken, connection,
-                    packageName, userId);
+            return service.addAccessibilityInteractionConnection(windowToken, leashToken,
+                    connection, packageName, userId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while adding an accessibility interaction connection. ", re);
         }
