@@ -18,8 +18,11 @@ package com.android.systemui.controls
 
 import android.os.UserHandle
 
+/**
+ * An interface for controllers that keep track of the current user and can be notified of user
+ * changes.
+ */
 interface UserAwareController {
-
     fun changeUser(newUser: UserHandle) {}
     val currentUserId: Int
 }
