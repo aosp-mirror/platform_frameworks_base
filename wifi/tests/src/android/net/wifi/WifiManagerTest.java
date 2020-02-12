@@ -2401,4 +2401,15 @@ public class WifiManagerTest {
         assertFalse(mWifiManager.isAutoWakeupEnabled());
         verify(mWifiService).isAutoWakeupEnabled();
     }
+
+
+    @Test
+    public void testScanAvailable() throws Exception {
+        mWifiManager.setScanAlwaysAvailable(true);
+        verify(mWifiService).setScanAlwaysAvailable(true);
+
+        when(mWifiService.isScanAlwaysAvailable()).thenReturn(false);
+        assertFalse(mWifiManager.isScanAlwaysAvailable());
+        verify(mWifiService).isScanAlwaysAvailable();
+    }
 }
