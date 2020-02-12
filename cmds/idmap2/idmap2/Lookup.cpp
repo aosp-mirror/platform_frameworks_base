@@ -85,11 +85,42 @@ Result<ResourceId> WARN_UNUSED ParseResReference(const AssetManager2& am, const 
   return Error("failed to obtain resource id for %s", res.c_str());
 }
 
-Result<std::string> WARN_UNUSED GetValue(const AssetManager2& am, ResourceId resid) {
+void PrintValue(AssetManager2* const am, const Res_value& value, const ApkAssetsCookie& cookie,
+                std::string* const out) {
+  switch (value.dataType) {
+    case Res_value::TYPE_INT_DEC:
+      out->append(StringPrintf("%d", value.data));
+      break;
+    case Res_value::TYPE_INT_HEX:
+      out->append(StringPrintf("0x%08x", value.data));
+      break;
+    case Res_value::TYPE_INT_BOOLEAN:
+      out->append(value.data != 0 ? "true" : "false");
+      break;
+    case Res_value::TYPE_STRING: {
+      const ResStringPool* pool = am->GetStringPoolForCookie(cookie);
+      out->append("\"");
+      size_t len;
+      if (pool->isUTF8()) {
+        const char* str = pool->string8At(value.data, &len);
+        out->append(str, len);
+      } else {
+        const char16_t* str16 = pool->stringAt(value.data, &len);
+        out->append(Utf16ToUtf8(StringPiece16(str16, len)));
+      }
+      out->append("\"");
+    } break;
+    default:
+      out->append(StringPrintf("dataType=0x%02x data=0x%08x", value.dataType, value.data));
+      break;
+  }
+}
+
+Result<std::string> WARN_UNUSED GetValue(AssetManager2* const am, ResourceId resid) {
   Res_value value;
   ResTable_config config;
   uint32_t flags;
-  ApkAssetsCookie cookie = am.GetResource(resid, false, 0, &value, &config, &flags);
+  ApkAssetsCookie cookie = am->GetResource(resid, true, 0, &value, &config, &flags);
   if (cookie == kInvalidCookie) {
     return Error("no resource 0x%08x in asset manager", resid);
   }
@@ -104,31 +135,37 @@ Result<std::string> WARN_UNUSED GetValue(const AssetManager2& am, ResourceId res
   out.append(config.toString().c_str());
   out.append("' value=");
 
-  switch (value.dataType) {
-    case Res_value::TYPE_INT_DEC:
-      out.append(StringPrintf("%d", value.data));
-      break;
-    case Res_value::TYPE_INT_HEX:
-      out.append(StringPrintf("0x%08x", value.data));
-      break;
-    case Res_value::TYPE_INT_BOOLEAN:
-      out.append(value.data != 0 ? "true" : "false");
-      break;
-    case Res_value::TYPE_STRING: {
-      const ResStringPool* pool = am.GetStringPoolForCookie(cookie);
-      size_t len;
-      if (pool->isUTF8()) {
-        const char* str = pool->string8At(value.data, &len);
-        out.append(str, len);
-      } else {
-        const char16_t* str16 = pool->stringAt(value.data, &len);
-        out += Utf16ToUtf8(StringPiece16(str16, len));
-      }
-    } break;
-    default:
+  if (value.dataType == Res_value::TYPE_REFERENCE) {
+    const android::ResolvedBag* bag = am->GetBag(static_cast<uint32_t>(value.data));
+    if (bag == nullptr) {
       out.append(StringPrintf("dataType=0x%02x data=0x%08x", value.dataType, value.data));
-      break;
+      return out;
+    }
+    out.append("[");
+    Res_value bag_val;
+    ResTable_config selected_config;
+    uint32_t flags;
+    uint32_t ref;
+    ApkAssetsCookie bag_cookie;
+    for (size_t i = 0; i < bag->entry_count; ++i) {
+      const android::ResolvedBag::Entry& entry = bag->entries[i];
+      bag_val = entry.value;
+      bag_cookie = am->ResolveReference(entry.cookie, &bag_val, &selected_config, &flags, &ref);
+      if (bag_cookie == kInvalidCookie) {
+        out.append(
+            StringPrintf("Error: dataType=0x%02x data=0x%08x", bag_val.dataType, bag_val.data));
+        continue;
+      }
+      PrintValue(am, bag_val, bag_cookie, &out);
+      if (i != bag->entry_count - 1) {
+        out.append(", ");
+      }
+    }
+    out.append("]");
+  } else {
+    PrintValue(am, value, cookie, &out);
   }
+
   return out;
 }
 
@@ -212,7 +249,7 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
     return Error(resid.GetError(), "failed to parse resource ID");
   }
 
-  const Result<std::string> value = GetValue(am, *resid);
+  const Result<std::string> value = GetValue(&am, *resid);
   if (!value) {
     return Error(value.GetError(), "resource 0x%08x not found", *resid);
   }
