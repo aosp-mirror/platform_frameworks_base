@@ -18,6 +18,7 @@ package com.android.systemui.controls.ui
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.provider.Settings
 import android.service.controls.actions.BooleanAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
@@ -25,6 +26,8 @@ import android.view.HapticFeedbackConstants
 object ControlActionCoordinator {
     public const val MIN_LEVEL = 0
     public const val MAX_LEVEL = 10000
+
+    private var useDetailDialog: Boolean? = null
 
     fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
         cvh.action(BooleanAction(templateId, !isChecked))
@@ -36,11 +39,20 @@ object ControlActionCoordinator {
     fun longPress(cvh: ControlViewHolder) {
         // Long press snould only be called when there is valid control state, otherwise ignore
         cvh.cws.control?.let {
+            if (useDetailDialog == null) {
+                useDetailDialog = Settings.Secure.getInt(cvh.context.getContentResolver(),
+                    "systemui.controls_use_detail_panel", 0) != 0
+            }
+
             try {
                 cvh.layout.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-                it.getAppIntent().send()
-                val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                cvh.context.sendBroadcast(closeDialog)
+                if (useDetailDialog!!) {
+                    DetailDialog(cvh.context, it.getAppIntent()).show()
+                } else {
+                    it.getAppIntent().send()
+                    val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                    cvh.context.sendBroadcast(closeDialog)
+                }
             } catch (e: PendingIntent.CanceledException) {
                 Log.e(ControlsUiController.TAG, "Error sending pending intent", e)
                 cvh.setTransientStatus("Error opening application")
