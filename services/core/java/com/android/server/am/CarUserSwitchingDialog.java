@@ -30,7 +30,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -57,8 +56,6 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
             String switchingToSystemUserMessage) {
         super(service, context, oldUser, newUser, aboveSystem, switchingFromSystemUserMessage,
                 switchingToSystemUserMessage);
-
-        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
     @Override
