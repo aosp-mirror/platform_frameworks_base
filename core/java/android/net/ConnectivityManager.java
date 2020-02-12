@@ -3746,7 +3746,6 @@ public class ConnectivityManager {
         checkCallbackNotNull(callback);
         Preconditions.checkArgument(action == REQUEST || need != null, "null NetworkCapabilities");
         final NetworkRequest request;
-        final String callingPackageName = mContext.getOpPackageName();
         try {
             synchronized(sCallbacks) {
                 if (callback.networkRequest != null
@@ -3758,11 +3757,10 @@ public class ConnectivityManager {
                 Messenger messenger = new Messenger(handler);
                 Binder binder = new Binder();
                 if (action == LISTEN) {
-                    request = mService.listenForNetwork(
-                            need, messenger, binder, callingPackageName);
+                    request = mService.listenForNetwork(need, messenger, binder);
                 } else {
                     request = mService.requestNetwork(
-                            need, messenger, timeoutMs, binder, legacyType, callingPackageName);
+                            need, messenger, timeoutMs, binder, legacyType);
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -4035,10 +4033,8 @@ public class ConnectivityManager {
             @NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
-        final String callingPackageName = mContext.getOpPackageName();
         try {
-            mService.pendingRequestForNetwork(
-                    request.networkCapabilities, operation, callingPackageName);
+            mService.pendingRequestForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -4150,10 +4146,8 @@ public class ConnectivityManager {
             @NonNull PendingIntent operation) {
         printStackTrace();
         checkPendingIntentNotNull(operation);
-        final String callingPackageName = mContext.getOpPackageName();
         try {
-            mService.pendingListenForNetwork(
-                    request.networkCapabilities, operation, callingPackageName);
+            mService.pendingListenForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

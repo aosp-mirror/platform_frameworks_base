@@ -166,19 +166,18 @@ interface IConnectivityManager
             in int factorySerialNumber);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
-            String callingPackageName);
+            in Messenger messenger, int timeoutSec, in IBinder binder, int legacy);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
-            in PendingIntent operation, String callingPackageName);
+            in PendingIntent operation);
 
     void releasePendingNetworkRequest(in PendingIntent operation);
 
     NetworkRequest listenForNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, in IBinder binder, String callingPackageName);
+            in Messenger messenger, in IBinder binder);
 
     void pendingListenForNetwork(in NetworkCapabilities networkCapabilities,
-            in PendingIntent operation, String callingPackageName);
+            in PendingIntent operation);
 
     void releaseNetworkRequest(in NetworkRequest networkRequest);
 
