@@ -607,6 +607,10 @@ public class ResolverListAdapter extends BaseAdapter {
                 mIntents, userHandle);
     }
 
+    protected List<Intent> getIntents() {
+        return mIntents;
+    }
+
     /**
      * Necessary methods to communicate between {@link ResolverListAdapter}
      * and {@link ResolverActivity}.

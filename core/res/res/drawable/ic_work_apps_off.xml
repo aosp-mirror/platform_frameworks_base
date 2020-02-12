@@ -1,0 +1,4 @@
+<vector android:height="32dp" android:viewportHeight="24"
+    android:viewportWidth="24" android:width="32dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="@color/resolver_empty_state_icon" android:pathData="M22,7.95c0.05,-1.11 -0.84,-2 -1.95,-1.95L16,6L16,3.95c0,-1.11 -0.84,-2 -1.95,-1.95h-4C8.94,1.95 8,2.84 8,3.95v0.32l14,14L22,7.95zM14,6h-4L10,4h4v2zM21.54,20.28l-7.56,-7.56v0.01l-1.7,-1.7h0.01L7.21,5.95 3.25,1.99 1.99,3.27 4.69,6h-0.64c-1.11,0 -1.99,0.86 -1.99,1.97l-0.01,11.02c0,1.11 0.89,2.01 2,2.01h15.64l2.05,2.02L23,21.75l-1.46,-1.47z"/>
+</vector>

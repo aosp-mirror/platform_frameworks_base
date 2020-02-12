@@ -75,7 +75,8 @@
             <TabWidget
                 android:id="@android:id/tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone">
             </TabWidget>
             <FrameLayout
                 android:id="@android:id/tabcontent"
@@ -88,16 +89,5 @@
             </FrameLayout>
         </LinearLayout>
     </TabHost>
-
-    <TextView android:id="@+id/empty"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_alwaysShow="true"
-              android:background="?attr/colorBackgroundFloating"
-              android:text="@string/noApplications"
-              android:padding="@dimen/chooser_edge_margin_normal"
-              android:gravity="center"
-              android:elevation="1dp"
-              android:visibility="gone"/>
 
 </com.android.internal.widget.ResolverDrawerLayout>

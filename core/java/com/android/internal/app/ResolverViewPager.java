@@ -57,10 +57,15 @@ public class ResolverViewPager extends ViewPager {
         widthMeasureSpec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY);
         int height = getMeasuredHeight();
         if (getChildCount() > 0) {
-            View firstChild = getChildAt(0);
-            firstChild.measure(widthMeasureSpec,
+            View child = getChildAt(0);
+            child.measure(widthMeasureSpec,
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
-            height = firstChild.getMeasuredHeight();
+            if (height > child.getMeasuredHeight()) {
+                height = child.getMeasuredHeight();
+            }
+        }
+        if (height < getMinimumHeight()) {
+            height = getMinimumHeight();
         }
         heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
