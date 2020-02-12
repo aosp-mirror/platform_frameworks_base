@@ -144,12 +144,6 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
     }
 
     @Override
-    public void assertValidFromUid(int requestorUid) {
-        throw new SecurityException(
-                "WifiAwareAgentNetworkSpecifier should not be used in network requests");
-    }
-
-    @Override
     public NetworkSpecifier redact() {
         return null;
     }
