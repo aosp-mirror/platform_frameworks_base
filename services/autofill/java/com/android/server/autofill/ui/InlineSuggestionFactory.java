@@ -17,6 +17,7 @@
 package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,10 +25,12 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.service.autofill.Dataset;
 import android.service.autofill.InlinePresentation;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 import android.view.inline.InlinePresentationSpec;
 import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionInfo;
@@ -42,6 +45,7 @@ import com.android.server.UiThread;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.regex.Pattern;
 
 public final class InlineSuggestionFactory {
     private static final String TAG = "InlineSuggestionFactory";
@@ -69,17 +73,19 @@ public final class InlineSuggestionFactory {
             @NonNull Runnable onErrorCallback) {
         if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
         return createInlineSuggestionsResponseInternal(/* isAugmented= */ true, request,
-                datasets, /* inlineActions= */ null, autofillId, context, onErrorCallback,
+                datasets, /* filterText= */ null, /* inlineActions= */ null, autofillId, context,
+                onErrorCallback,
                 (dataset, filedIndex) -> (v -> inlineSuggestionUiCallback.autofill(dataset)));
     }
 
     /**
      * Creates an {@link InlineSuggestionsResponse} with the {@code datasets} provided by the
-     * autofill service.
+     * autofill service, potentially filtering the datasets.
      */
     public static InlineSuggestionsResponse createInlineSuggestionsResponse(
             @NonNull InlineSuggestionsRequest request, int requestId,
             @NonNull Dataset[] datasets,
+            @Nullable String filterText,
             @Nullable List<InlinePresentation> inlineActions,
             @NonNull AutofillId autofillId,
             @NonNull Context context,
@@ -87,15 +93,15 @@ public final class InlineSuggestionFactory {
             @NonNull Runnable onErrorCallback) {
         if (sDebug) Slog.d(TAG, "createInlineSuggestionsResponse called");
         return createInlineSuggestionsResponseInternal(/* isAugmented= */ false, request, datasets,
-                inlineActions, autofillId, context, onErrorCallback,
+                filterText, inlineActions, autofillId, context, onErrorCallback,
                 (dataset, filedIndex) -> (v -> client.fill(requestId, filedIndex, dataset)));
     }
 
     private static InlineSuggestionsResponse createInlineSuggestionsResponseInternal(
             boolean isAugmented, @NonNull InlineSuggestionsRequest request,
-            @NonNull Dataset[] datasets, @Nullable List<InlinePresentation> inlineActions,
-            @NonNull AutofillId autofillId, @NonNull Context context,
-            @NonNull Runnable onErrorCallback,
+            @NonNull Dataset[] datasets, @Nullable String filterText,
+            @Nullable List<InlinePresentation> inlineActions, @NonNull AutofillId autofillId,
+            @NonNull Context context, @NonNull Runnable onErrorCallback,
             @NonNull BiFunction<Dataset, Integer, View.OnClickListener> onClickListenerFactory) {
         final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
         final InlineSuggestionUi inlineSuggestionUi = new InlineSuggestionUi(context,
@@ -113,6 +119,9 @@ public final class InlineSuggestionFactory {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
                 return null;
             }
+            if (!includeDataset(dataset, fieldIndex, filterText)) {
+                continue;
+            }
             InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
                     fieldIndex, mergedInlinePresentation(request, i, inlinePresentation),
                     inlineSuggestionUi, onClickListenerFactory);
@@ -128,6 +137,38 @@ public final class InlineSuggestionFactory {
         }
         return new InlineSuggestionsResponse(inlineSuggestions);
     }
+
+    // TODO: Extract the shared filtering logic here and in FillUi to a common method.
+    private static boolean includeDataset(Dataset dataset, int fieldIndex,
+            @Nullable String filterText) {
+        // Show everything when the user input is empty.
+        if (TextUtils.isEmpty(filterText)) {
+            return true;
+        }
+
+        final String constraintLowerCase = filterText.toString().toLowerCase();
+
+        // Use the filter provided by the service, if available.
+        final Dataset.DatasetFieldFilter filter = dataset.getFilter(fieldIndex);
+        if (filter != null) {
+            Pattern filterPattern = filter.pattern;
+            if (filterPattern == null) {
+                if (sVerbose) {
+                    Slog.v(TAG, "Explicitly disabling filter for dataset id" + dataset.getId());
+                }
+                return true;
+            }
+            return filterPattern.matcher(constraintLowerCase).matches();
+        }
+
+        final AutofillValue value = dataset.getFieldValues().get(fieldIndex);
+        if (value == null || !value.isText()) {
+            return dataset.getAuthentication() == null;
+        }
+        final String valueText = value.getTextValue().toString().toLowerCase();
+        return valueText.toLowerCase().startsWith(constraintLowerCase);
+    }
+
 
     private static InlineSuggestion createInlineAction(boolean isAugmented,
             @NonNull Context context,
