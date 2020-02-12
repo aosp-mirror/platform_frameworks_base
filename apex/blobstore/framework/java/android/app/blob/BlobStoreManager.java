@@ -307,7 +307,7 @@ public class BlobStoreManager {
      * Acquire a lease to the blob represented by {@code blobHandle}. This lease indicates to the
      * system that the caller wants the blob to be kept around.
      *
-     * <p> This is variant of {@link #acquireLease(BlobHandle, int, long)} taking a
+     * <p> This is a variant of {@link #acquireLease(BlobHandle, int, long)} taking a
      * {@link CharSequence} for {@code description}. It is highly recommended that callers only
      * use this when a valid resource ID for {@code description} could not be provided. Otherwise,
      * apps should prefer using {@link #acquireLease(BlobHandle, int)} which will allow
@@ -395,7 +395,7 @@ public class BlobStoreManager {
      * Acquire a lease to the blob represented by {@code blobHandle}. This lease indicates to the
      * system that the caller wants the blob to be kept around.
      *
-     * <p> This is variant of {@link #acquireLease(BlobHandle, int)} taking a {@link CharSequence}
+     * <p> This is a variant of {@link #acquireLease(BlobHandle, int)} taking a {@link CharSequence}
      * for {@code description}. It is highly recommended that callers only use this when a valid
      * resource ID for {@code description} could not be provided. Otherwise, apps should prefer
      * using {@link #acquireLease(BlobHandle, int)} which will allow {@code description} to be
