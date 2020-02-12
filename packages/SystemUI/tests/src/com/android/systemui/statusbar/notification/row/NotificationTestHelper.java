@@ -50,10 +50,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -90,7 +90,7 @@ public class NotificationTestHelper {
     private ExpandableNotificationRow mRow;
     private HeadsUpManagerPhone mHeadsUpManager;
     private final NotifBindPipeline mBindPipeline;
-    private final NotificationEntryListener mBindPipelineEntryListener;
+    private final NotifCollectionListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
     private StatusBarStateController mStatusBarStateController;
 
@@ -114,15 +114,15 @@ public class NotificationTestHelper {
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder, mock(IStatusBarService.class));
 
-        NotificationEntryManager entryManager = mock(NotificationEntryManager.class);
+        CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(entryManager);
+        mBindPipeline = new NotifBindPipeline(collection);
         mBindPipeline.setStage(mBindStage);
 
-        ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
-                ArgumentCaptor.forClass(NotificationEntryListener.class);
-        verify(entryManager).addNotificationEntryListener(entryListenerCaptor.capture());
-        mBindPipelineEntryListener = entryListenerCaptor.getValue();
+        ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
+                ArgumentCaptor.forClass(NotifCollectionListener.class);
+        verify(collection).addCollectionListener(collectionListenerCaptor.capture());
+        mBindPipelineEntryListener = collectionListenerCaptor.getValue();
     }
 
     /**
@@ -377,7 +377,7 @@ public class NotificationTestHelper {
         entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
 
-        mBindPipelineEntryListener.onPendingEntryAdded(entry);
+        mBindPipelineEntryListener.onEntryInit(entry);
         mBindPipeline.manageRow(entry, row);
 
         row.initialize(

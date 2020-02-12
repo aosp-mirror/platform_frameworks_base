@@ -1459,16 +1459,14 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-            if (message == null) {
-                Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
-                return;
-            }
-            try {
-                mStatusBarService.onBiometricHelp(message);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
+        if (message == null) {
+            Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
+            return;
+        }
+        try {
+            mStatusBarService.onBiometricHelp(message);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 

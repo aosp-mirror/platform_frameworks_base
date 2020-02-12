@@ -977,6 +977,9 @@
          Equal to pip_action_size - pip_action_padding. -->
     <dimen name="pip_expand_container_edge_margin">30dp</dimen>
 
+    <!-- The touchable/draggable edge size for PIP resize. -->
+    <dimen name="pip_resize_edge_size">30dp</dimen>
+
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
@@ -1225,4 +1228,6 @@
     <!-- Screen Record -->
     <dimen name="screenrecord_dialog_padding">18dp</dimen>
     <dimen name="screenrecord_logo_size">24dp</dimen>
+
+    <dimen name="kg_user_switcher_text_size">16sp</dimen>
 </resources>

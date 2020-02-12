@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -69,8 +70,12 @@ public abstract class LoggableMonitor {
 
     protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
             int targetUserId) {
-        if (statsModality() == BiometricsProtoEnums.MODALITY_FACE) {
-            if (acquiredInfo == FaceManager.FACE_ACQUIRED_START) {
+
+        final boolean isFace = statsModality() == BiometricsProtoEnums.MODALITY_FACE;
+        final boolean isFingerprint = statsModality() == BiometricsProtoEnums.MODALITY_FINGERPRINT;
+        if (isFace || isFingerprint) {
+            if ((isFingerprint && acquiredInfo == FingerprintManager.FINGERPRINT_ACQUIRED_START)
+                    || (isFace && acquiredInfo == FaceManager.FACE_ACQUIRED_START)) {
                 mFirstAcquireTimeMs = System.currentTimeMillis();
             }
         } else if (acquiredInfo == BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {

@@ -462,8 +462,42 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private boolean mForceEphemeralUsers;
 
+    /**
+     * The member mUserStates affects the return value of isUserUnlocked.
+     * If any value in mUserStates changes, then the binder cache for
+     * isUserUnlocked must be invalidated.  When adding mutating methods to
+     * WatchedUserStates, be sure to invalidate the cache in the new
+     * methods.
+     */
+    private class WatchedUserStates {
+        final SparseIntArray states;
+        public WatchedUserStates() {
+            states = new SparseIntArray();
+        }
+        public int get(int userId) {
+            return states.get(userId);
+        }
+        public int get(int userId, int fallback) {
+            return states.indexOfKey(userId) >= 0 ? states.get(userId) : fallback;
+        }
+        public void put(int userId, int state) {
+            states.put(userId, state);
+            invalidateIsUserUnlockedCache();
+        }
+        public void delete(int userId) {
+            states.delete(userId);
+            invalidateIsUserUnlockedCache();
+        }
+        @Override
+        public String toString() {
+            return states.toString();
+        }
+        private void invalidateIsUserUnlockedCache() {
+            UserManager.invalidateIsUserUnlockedCache();
+        }
+    }
     @GuardedBy("mUserStates")
-    private final SparseIntArray mUserStates = new SparseIntArray();
+    private final WatchedUserStates mUserStates = new WatchedUserStates();
 
     private static UserManagerService sInstance;
 
@@ -4801,6 +4835,11 @@ public class UserManagerService extends IUserManager.Stub {
                     || (state == UserState.STATE_RUNNING_UNLOCKED);
         }
 
+        /**
+         * The return values of this method are cached in clients.  If the
+         * logic in this function changes then the cache invalidation code
+         * may need to be revisited.
+         */
         @Override
         public boolean isUserUnlocked(@UserIdInt int userId) {
             int state;

@@ -224,6 +224,19 @@ public abstract class LocationProviderBase {
     public void reportLocation(Location location) {
         ILocationProviderManager manager = mManager;
         if (manager != null) {
+            // remove deprecated extras to save on serialization
+            Bundle extras = location.getExtras();
+            if (extras != null && (extras.containsKey("noGPSLocation")
+                    || extras.containsKey("coarseLocation"))) {
+                location = new Location(location);
+                extras = location.getExtras();
+                extras.remove("noGPSLocation");
+                extras.remove("coarseLocation");
+                if (extras.isEmpty()) {
+                    location.setExtras(null);
+                }
+            }
+
             try {
                 manager.onReportLocation(location);
             } catch (RemoteException | RuntimeException e) {

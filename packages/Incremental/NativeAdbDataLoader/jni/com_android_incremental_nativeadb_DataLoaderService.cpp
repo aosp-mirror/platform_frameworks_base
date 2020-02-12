@@ -261,6 +261,11 @@ private:
         mReadLogFd.reset();
     }
 
+    // Installation callback
+    bool onPrepareImage(const android::dataloader::DataLoaderInstallationFiles& addedFiles) final {
+        return true;
+    }
+
     // IFS callbacks.
     void onPendingReads(const android::dataloader::PendingReads& pendingReads) final {
         std::lock_guard lock{mMapsMutex};
@@ -520,6 +525,6 @@ private:
 
 int JNI_OnLoad(JavaVM* jvm, void* /* reserved */) {
   android::dataloader::DataLoader::initialize(
-            [](auto) { return std::make_unique<AdbDataLoader>(); });
+            [](auto, auto) { return std::make_unique<AdbDataLoader>(); });
     return JNI_VERSION_1_6;
 }

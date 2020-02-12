@@ -251,7 +251,7 @@ public class LocationManager {
      * @hide
      */
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
-        "android.location.HIGH_POWER_REQUEST_CHANGE";
+            "android.location.HIGH_POWER_REQUEST_CHANGE";
 
     /**
      * Broadcast intent action for Settings app to inject a footer at the bottom of location
@@ -310,6 +310,8 @@ public class LocationManager {
             new GnssMeasurementsListenerManager();
     private final GnssNavigationMessageListenerManager mGnssNavigationMessageListenerTransport =
             new GnssNavigationMessageListenerManager();
+    private final GnssAntennaInfoListenerManager mGnssAntennaInfoListenerManager =
+            new GnssAntennaInfoListenerManager();
 
     /**
      * @hide
@@ -1215,7 +1217,7 @@ public class LocationManager {
      * the first fix.
      *
      * @param location newly available {@link Location} object
-     * @return true if the location was successfully injected, false otherwise
+     * @return true if the location was injected, false otherwise
      *
      * @throws IllegalArgumentException if location is null
      * @throws SecurityException if permissions are not present
@@ -1229,7 +1231,8 @@ public class LocationManager {
                 "incomplete location object, missing timestamp or accuracy?");
 
         try {
-            return mService.injectLocation(location);
+            mService.injectLocation(location);
+            return true;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2260,6 +2263,41 @@ public class LocationManager {
     }
 
     /**
+     * Registers a Gnss Antenna Info callback.
+     *
+     * @param executor the executor that the callback runs on.
+     * @param callback a {@link GnssAntennaInfo.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerAntennaInfoCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GnssAntennaInfo.Callback callback) {
+        try {
+            return mGnssAntennaInfoListenerManager.addListener(callback, executor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a GNSS Antenna Info callback.
+     *
+     * @param callback a {@link GnssAntennaInfo.Callback} object to remove.
+     */
+    public void unregisterAntennaInfoCallback(@NonNull GnssAntennaInfo.Callback callback) {
+        try {
+            mGnssAntennaInfoListenerManager.removeListener(callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * No-op method to keep backward-compatibility.
      *
      * @hide
@@ -2988,6 +3026,48 @@ public class LocationManager {
         }
     }
 
+    private class GnssAntennaInfoListenerManager extends
+            AbstractListenerManager<Void, GnssAntennaInfo.Callback> {
+
+        @Nullable
+        private IGnssAntennaInfoListener mListenerTransport;
+
+        @Override
+        protected boolean registerService(Void ignored) throws RemoteException {
+            Preconditions.checkState(mListenerTransport == null);
+
+            GnssAntennaInfoListener transport = new GnssAntennaInfoListener();
+            if (mService.addGnssAntennaInfoListener(transport, mContext.getPackageName(),
+                    mContext.getFeatureId(), "gnss antenna info callback")) {
+                mListenerTransport = transport;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        protected void unregisterService() throws RemoteException {
+            Preconditions.checkState(mListenerTransport != null);
+
+            mService.removeGnssAntennaInfoListener(mListenerTransport);
+            mListenerTransport = null;
+        }
+
+        private class GnssAntennaInfoListener extends IGnssAntennaInfoListener.Stub {
+            @Override
+            public void onGnssAntennaInfoReceived(final List<GnssAntennaInfo> gnssAntennaInfos) {
+                execute((callback) -> callback.onGnssAntennaInfoReceived(gnssAntennaInfos));
+            }
+
+            @Override
+            public void onStatusChanged(int status) {
+                execute((listener) -> listener.onStatusChanged(status));
+            }
+        }
+
+    }
+
     private class BatchedLocationCallbackManager extends
             AbstractListenerManager<Void, BatchedLocationCallback> {
 
@@ -3000,7 +3080,7 @@ public class LocationManager {
 
             BatchedLocationCallback transport = new BatchedLocationCallback();
             if (mService.addGnssBatchingCallback(transport, mContext.getPackageName(),
-                     mContext.getFeatureId(), "batched location callback")) {
+                    mContext.getFeatureId(), "batched location callback")) {
                 mListenerTransport = transport;
                 return true;
             } else {

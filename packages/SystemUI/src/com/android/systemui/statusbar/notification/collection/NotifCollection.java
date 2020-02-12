@@ -44,6 +44,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -239,8 +240,7 @@ public class NotifCollection implements Dumpable {
             // Also mark any children as dismissed as system server will auto-dismiss them as well
             if (entry.getSbn().getNotification().isGroupSummary()) {
                 for (NotificationEntry otherEntry : mNotificationSet.values()) {
-                    if (otherEntry.getSbn().getGroupKey().equals(entry.getSbn().getGroupKey())
-                            && otherEntry.getDismissState() != DISMISSED) {
+                    if (shouldAutoDismiss(otherEntry, entry.getSbn().getGroupKey())) {
                         otherEntry.setDismissState(PARENT_DISMISSED);
                         if (isCanceled(otherEntry)) {
                             canceledEntries.add(otherEntry);
@@ -542,6 +542,28 @@ public class NotifCollection implements Dumpable {
 
     private static boolean isDismissedByUser(NotificationEntry entry) {
         return entry.getDismissState() != NOT_DISMISSED;
+    }
+
+    /**
+     * When a group summary is dismissed, NotificationManager will also try to dismiss its children.
+     * Returns true if we think dismissing the group summary with group key
+     * <code>dismissedGroupKey</code> will cause NotificationManager to also dismiss
+     * <code>entry</code>.
+     *
+     * See NotificationManager.cancelGroupChildrenByListLocked() for corresponding code.
+     */
+    private static boolean shouldAutoDismiss(
+            NotificationEntry entry,
+            String dismissedGroupKey) {
+        return entry.getSbn().getGroupKey().equals(dismissedGroupKey)
+                && !entry.getSbn().getNotification().isGroupSummary()
+                && !hasFlag(entry, Notification.FLAG_FOREGROUND_SERVICE)
+                && !hasFlag(entry, Notification.FLAG_BUBBLE)
+                && entry.getDismissState() != DISMISSED;
+    }
+
+    private static boolean hasFlag(NotificationEntry entry, int flag) {
+        return (entry.getSbn().getNotification().flags & flag) != 0;
     }
 
     private void dispatchOnEntryInit(NotificationEntry entry) {

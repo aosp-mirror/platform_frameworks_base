@@ -375,6 +375,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
                 mDownPoint.set(ev.getX(), ev.getY());
                 mThresholdCrossed = false;
             }
+
         } else if (mAllowGesture) {
             if (!mThresholdCrossed) {
                 if (action == MotionEvent.ACTION_POINTER_DOWN) {

@@ -55,6 +55,8 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.server.LocalServices;
 import com.android.server.testing.shadows.ShadowApplicationPackageManager;
 import com.android.server.testing.shadows.ShadowUserManager;
@@ -190,6 +192,8 @@ public class CrossProfileAppsServiceImplRoboTest {
     public void grantPermissions() {
         grantPermissions(
                 Manifest.permission.MANAGE_APP_OPS_MODES,
+                Manifest.permission.UPDATE_APP_OPS_STATS,
+                Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
                 Manifest.permission.INTERACT_ACROSS_USERS,
                 Manifest.permission.INTERACT_ACROSS_USERS_FULL);
     }
@@ -213,9 +217,26 @@ public class CrossProfileAppsServiceImplRoboTest {
     }
 
     @Test
+    public void setInteractAcrossProfilesAppOp_noPermissions_throwsSecurityException() {
+        denyPermissions(
+                Manifest.permission.MANAGE_APP_OPS_MODES,
+                Manifest.permission.UPDATE_APP_OPS_STATS,
+                Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
+                Manifest.permission.INTERACT_ACROSS_USERS,
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        try {
+            mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
+                    CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
+            fail();
+        } catch (SecurityException expected) {}
+    }
+
+    @Test
     public void setInteractAcrossProfilesAppOp_missingInteractAcrossUsersAndFull_throwsSecurityException() {
-        denyPermissions(Manifest.permission.INTERACT_ACROSS_USERS);
-        denyPermissions(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        denyPermissions(
+                Manifest.permission.INTERACT_ACROSS_USERS,
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        grantPermissions(Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES);
         try {
             mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
                     CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
@@ -231,8 +252,38 @@ public class CrossProfileAppsServiceImplRoboTest {
     }
 
     @Test
+    public void setInteractAcrossProfilesAppOp_configureInteractAcrossProfilesPermissionWithoutAppOpsPermissions_setsAppOp() {
+        denyPermissions(
+                Manifest.permission.MANAGE_APP_OPS_MODES,
+                Manifest.permission.UPDATE_APP_OPS_STATS);
+        grantPermissions(
+                Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
+                Manifest.permission.INTERACT_ACROSS_USERS);
+
+        mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
+                CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
+
+        assertThat(getCrossProfileAppOp()).isEqualTo(MODE_ALLOWED);
+    }
+
+    @Test
+    public void setInteractAcrossProfilesAppOp_appOpsPermissionsWithoutConfigureInteractAcrossProfilesPermission_setsAppOp() {
+        denyPermissions(Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES);
+        grantPermissions(
+                Manifest.permission.MANAGE_APP_OPS_MODES,
+                Manifest.permission.UPDATE_APP_OPS_STATS,
+                Manifest.permission.INTERACT_ACROSS_USERS);
+
+        mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
+                CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
+
+        assertThat(getCrossProfileAppOp()).isEqualTo(MODE_ALLOWED);
+    }
+
+    @Test
     public void setInteractAcrossProfilesAppOp_setsAppOpWithUsersAndWithoutFull() {
         denyPermissions(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        grantPermissions(Manifest.permission.INTERACT_ACROSS_USERS);
         mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
                 CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
         assertThat(getCrossProfileAppOp()).isEqualTo(MODE_ALLOWED);
@@ -241,6 +292,7 @@ public class CrossProfileAppsServiceImplRoboTest {
     @Test
     public void setInteractAcrossProfilesAppOp_setsAppOpWithFullAndWithoutUsers() {
         denyPermissions(Manifest.permission.INTERACT_ACROSS_USERS);
+        grantPermissions(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         mCrossProfileAppsServiceImpl.setInteractAcrossProfilesAppOp(
                 CROSS_PROFILE_APP_PACKAGE_NAME, MODE_ALLOWED);
         assertThat(getCrossProfileAppOp()).isEqualTo(MODE_ALLOWED);
@@ -477,6 +529,16 @@ public class CrossProfileAppsServiceImplRoboTest {
 
         @Override
         public void restoreCallingIdentity(long token) {}
+
+        @Override
+        public void withCleanCallingIdentity(ThrowingRunnable action) {
+            action.run();
+        }
+
+        @Override
+        public <T> T withCleanCallingIdentity(ThrowingSupplier<T> action) {
+            return action.get();
+        }
 
         @Override
         public UserManager getUserManager() {

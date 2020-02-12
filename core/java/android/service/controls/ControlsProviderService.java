@@ -35,6 +35,7 @@ import android.util.Log;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
@@ -73,6 +74,18 @@ public abstract class ControlsProviderService extends Service {
     public abstract void loadAvailableControls(@NonNull Consumer<List<Control>> consumer);
 
     /**
+     * (Optional) The service may be asked to provide a small number of recommended controls, in
+     * order to suggest some controls to the user for favoriting. The controls shall be built using
+     * the stateless builder {@link Control.StatelessBuilder}, followed by an invocation to the
+     * provided consumer to callback to the call originator. If the number of controls
+     * is greater than maxNumber, the list will be truncated.
+     */
+    public void loadSuggestedControls(int maxNumber, @NonNull Consumer<List<Control>> consumer) {
+        // Override to change the default behavior
+        consumer.accept(Collections.emptyList());
+    }
+
+    /**
      * Return a valid Publisher for the given controlIds. This publisher will be asked
      * to provide updates for the given list of controlIds as long as the Subscription
      * is valid.
@@ -104,6 +117,11 @@ public abstract class ControlsProviderService extends Service {
                 mHandler.obtainMessage(RequestHandler.MSG_LOAD, cb).sendToTarget();
             }
 
+            public void loadSuggested(int maxNumber, IControlsLoadCallback cb) {
+                LoadMessage msg = new LoadMessage(maxNumber, cb);
+                mHandler.obtainMessage(RequestHandler.MSG_LOAD_SUGGESTED, msg).sendToTarget();
+            }
+
             public void subscribe(List<String> controlIds,
                     IControlsSubscriber subscriber) {
                 SubscribeMessage msg = new SubscribeMessage(controlIds, subscriber);
@@ -128,6 +146,14 @@ public abstract class ControlsProviderService extends Service {
         private static final int MSG_LOAD = 1;
         private static final int MSG_SUBSCRIBE = 2;
         private static final int MSG_ACTION = 3;
+        private static final int MSG_LOAD_SUGGESTED = 4;
+
+        /**
+         * This the maximum number of controls that can be loaded via
+         * {@link ControlsProviderService#loadAvailablecontrols}. Anything over this number
+         * will be truncated.
+         */
+        private static final int MAX_NUMBER_OF_CONTROLS_ALLOWED = 1000;
 
         RequestHandler(Looper looper) {
             super(looper);
@@ -137,7 +163,14 @@ public abstract class ControlsProviderService extends Service {
             switch(msg.what) {
                 case MSG_LOAD:
                     final IControlsLoadCallback cb = (IControlsLoadCallback) msg.obj;
-                    ControlsProviderService.this.loadAvailableControls(consumerFor(cb));
+                    ControlsProviderService.this.loadAvailableControls(consumerFor(
+                            MAX_NUMBER_OF_CONTROLS_ALLOWED, cb));
+                    break;
+
+                case MSG_LOAD_SUGGESTED:
+                    final LoadMessage lMsg = (LoadMessage) msg.obj;
+                    ControlsProviderService.this.loadSuggestedControls(lMsg.mMaxNumber,
+                            consumerFor(lMsg.mMaxNumber, lMsg.mCb));
                     break;
 
                 case MSG_SUBSCRIBE:
@@ -201,9 +234,15 @@ public abstract class ControlsProviderService extends Service {
             };
         }
 
-        private Consumer<List<Control>> consumerFor(IControlsLoadCallback cb) {
+        private Consumer<List<Control>> consumerFor(int maxNumber, IControlsLoadCallback cb) {
             return (@NonNull List<Control> controls) -> {
                 Preconditions.checkNotNull(controls);
+                if (controls.size() > maxNumber) {
+                    Log.w(TAG, "Too many controls. Provided: " + controls.size() + ", Max allowed: "
+                            + maxNumber + ". Truncating the list.");
+                    controls = controls.subList(0, maxNumber);
+                }
+
                 List<Control> list = new ArrayList<>();
                 for (Control control: controls) {
                     if (control == null) {
@@ -266,6 +305,16 @@ public abstract class ControlsProviderService extends Service {
         SubscribeMessage(List<String> controlIds, IControlsSubscriber subscriber) {
             this.mControlIds = controlIds;
             this.mSubscriber = subscriber;
+        }
+    }
+
+    private static class LoadMessage {
+        final int mMaxNumber;
+        final IControlsLoadCallback mCb;
+
+        LoadMessage(int maxNumber, IControlsLoadCallback cb) {
+            this.mMaxNumber = maxNumber;
+            this.mCb = cb;
         }
     }
 }

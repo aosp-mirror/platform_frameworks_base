@@ -23,6 +23,7 @@ import static com.android.server.integrity.model.ComponentBitSize.CONNECTOR_BITS
 import static com.android.server.integrity.model.ComponentBitSize.DEFAULT_FORMAT_VERSION;
 import static com.android.server.integrity.model.ComponentBitSize.EFFECT_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.FORMAT_VERSION_BITS;
+import static com.android.server.integrity.model.ComponentBitSize.INSTALLER_ALLOWED_BY_MANIFEST_START;
 import static com.android.server.integrity.model.ComponentBitSize.KEY_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.OPERATOR_BITS;
 import static com.android.server.integrity.model.ComponentBitSize.SEPARATOR_BITS;
@@ -36,6 +37,7 @@ import static com.android.server.integrity.serializer.RuleIndexingDetails.PACKAG
 
 import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
+import android.content.integrity.InstallerAllowedByManifestFormula;
 import android.content.integrity.IntegrityFormula;
 import android.content.integrity.IntegrityUtils;
 import android.content.integrity.Rule;
@@ -202,6 +204,8 @@ public class RuleBinarySerializer implements RuleSerializer {
             serializeAtomicFormula((AtomicFormula) formula, bitOutputStream);
         } else if (formula instanceof CompoundFormula) {
             serializeCompoundFormula((CompoundFormula) formula, bitOutputStream);
+        } else if (formula instanceof InstallerAllowedByManifestFormula) {
+            bitOutputStream.setNext(SEPARATOR_BITS, INSTALLER_ALLOWED_BY_MANIFEST_START);
         } else {
             throw new IllegalArgumentException(
                     String.format("Invalid formula type: %s", formula.getClass()));

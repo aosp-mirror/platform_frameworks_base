@@ -25,8 +25,11 @@ import android.os.Parcelable;
  * A class containing a GPS clock timestamp.
  * It represents a measurement of the GPS receiver's clock.
  *
+ * @deprecated use {@link GnssClock} instead.
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public class GpsClock implements Parcelable {
 

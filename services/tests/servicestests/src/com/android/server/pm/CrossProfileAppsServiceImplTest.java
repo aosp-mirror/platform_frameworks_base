@@ -35,6 +35,8 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.Before;
@@ -571,6 +573,16 @@ public class CrossProfileAppsServiceImplTest {
 
         @Override
         public void restoreCallingIdentity(long token) {
+        }
+
+        @Override
+        public void withCleanCallingIdentity(ThrowingRunnable action) {
+            action.run();
+        }
+
+        @Override
+        public <T> T withCleanCallingIdentity(ThrowingSupplier<T> action) {
+            return action.get();
         }
 
         @Override

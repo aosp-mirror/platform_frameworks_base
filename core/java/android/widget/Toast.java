@@ -460,8 +460,19 @@ public class Toast {
      * @hide
      */
     @UnsupportedAppUsage
-    public WindowManager.LayoutParams getWindowParams() {
-        return mTN.mParams;
+    @Nullable public WindowManager.LayoutParams getWindowParams() {
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            if (mNextView != null) {
+                // Custom toasts
+                return mTN.mParams;
+            } else {
+                // Text toasts
+                return null;
+            }
+        } else {
+            // Text and custom toasts are app-rendered
+            return mTN.mParams;
+        }
     }
 
     /**

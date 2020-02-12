@@ -193,6 +193,7 @@ public class RcsFeature extends ImsFeature {
      * of the capability and notify the capability status as true using
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)}. This will signal to the
      * framework that the capability is available for usage.
+     * @hide
      */
     public static class RcsImsCapabilities extends Capabilities {
         /** @hide*/
@@ -286,6 +287,7 @@ public class RcsFeature extends ImsFeature {
      * set, the {@link RcsFeature} has brought up the capability and is ready for framework
      * requests. To change the status of the capabilities
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)} should be called.
+     * @hide
      */
     @Override
     public @NonNull final RcsImsCapabilities queryCapabilityStatus() {
@@ -296,6 +298,7 @@ public class RcsFeature extends ImsFeature {
      * Notify the framework that the capabilities status has changed. If a capability is enabled,
      * this signals to the framework that the capability has been initialized and is ready.
      * Call {@link #queryCapabilityStatus()} to return the current capability status.
+     * @hide
      */
     public final void notifyCapabilitiesStatusChanged(@NonNull RcsImsCapabilities c) {
         if (c == null) {
@@ -310,6 +313,7 @@ public class RcsFeature extends ImsFeature {
      * {@link #changeEnabledCapabilities(CapabilityChangeRequest, CapabilityCallbackProxy)} to
      * enable or disable capability A, this method should return the correct configuration for
      * capability A afterwards (until it has changed).
+     * @hide
      */
     public boolean queryCapabilityConfiguration(
             @RcsImsCapabilities.RcsImsCapabilityFlag int capability,
@@ -331,6 +335,7 @@ public class RcsFeature extends ImsFeature {
      * If for some reason one or more of these capabilities can not be enabled/disabled,
      * {@link CapabilityCallbackProxy#onChangeCapabilityConfigurationError(int, int, int)} should
      * be called for each capability change that resulted in an error.
+     * @hide
      */
     @Override
     public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
@@ -349,6 +354,7 @@ public class RcsFeature extends ImsFeature {
      *
      * @return An instance of {@link RcsSipOptionsImplBase} that implements SIP options exchange if
      * it is supported by the device.
+     * @hide
      */
     public @NonNull RcsSipOptionsImplBase getOptionsExchangeImpl() {
         // Base Implementation, override to implement functionality
@@ -364,6 +370,7 @@ public class RcsFeature extends ImsFeature {
      *
      * @return An instance of {@link RcsPresenceExchangeImplBase} that implements presence
      * exchange if it is supported by the device.
+     * @hide
      */
     public @NonNull RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
         // Base Implementation, override to implement functionality.

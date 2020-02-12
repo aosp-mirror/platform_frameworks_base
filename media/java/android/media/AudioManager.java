@@ -17,6 +17,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -1647,6 +1648,179 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @hide
+     * Interface to be notified of changes in the preferred audio device set for a given audio
+     * strategy.
+     * @see #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDevice)
+     * @see #removePreferredDeviceForStrategy(AudioProductStrategy)
+     * @see #getPreferredDeviceForStrategy(AudioProductStrategy)
+     */
+    @SystemApi
+    public interface OnPreferredDeviceForStrategyChangedListener {
+        /**
+         * Called on the listener to indicate that the preferred audio device for the given
+         * strategy has changed.
+         * @param strategy the {@link AudioProductStrategy} whose preferred device changed
+         * @param device <code>null</code> if the preferred device was removed, or the newly set
+         *              preferred audio device
+         */
+        void onPreferredDeviceForStrategyChanged(@NonNull AudioProductStrategy strategy,
+                @Nullable AudioDevice device);
+    }
+
+    /**
+     * @hide
+     * Adds a listener for being notified of changes to the strategy-preferred audio device.
+     * @param executor
+     * @param listener
+     * @throws SecurityException if the caller doesn't hold the required permission
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void addOnPreferredDeviceForStrategyChangedListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnPreferredDeviceForStrategyChangedListener listener)
+            throws SecurityException {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mPrefDevListenerLock) {
+            if (hasPrefDevListener(listener)) {
+                throw new IllegalArgumentException(
+                        "attempt to call addOnPreferredDeviceForStrategyChangedListener() "
+                                + "on a previously registered listener");
+            }
+            // lazy initialization of the list of strategy-preferred device listener
+            if (mPrefDevListeners == null) {
+                mPrefDevListeners = new ArrayList<>();
+            }
+            final int oldCbCount = mPrefDevListeners.size();
+            mPrefDevListeners.add(new PrefDevListenerInfo(listener, executor));
+            if (oldCbCount == 0 && mPrefDevListeners.size() > 0) {
+                // register binder for callbacks
+                if (mPrefDevDispatcherStub == null) {
+                    mPrefDevDispatcherStub = new StrategyPreferredDeviceDispatcherStub();
+                }
+                try {
+                    getService().registerStrategyPreferredDeviceDispatcher(mPrefDevDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Removes a previously added listener of changes to the strategy-preferred audio device.
+     * @param listener
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void removeOnPreferredDeviceForStrategyChangedListener(
+            @NonNull OnPreferredDeviceForStrategyChangedListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mPrefDevListenerLock) {
+            if (!removePrefDevListener(listener)) {
+                throw new IllegalArgumentException(
+                        "attempt to call removeOnPreferredDeviceForStrategyChangedListener() "
+                                + "on an unregistered listener");
+            }
+            if (mPrefDevListeners.size() == 0) {
+                // unregister binder for callbacks
+                try {
+                    getService().unregisterStrategyPreferredDeviceDispatcher(
+                            mPrefDevDispatcherStub);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                } finally {
+                    mPrefDevDispatcherStub = null;
+                    mPrefDevListeners = null;
+                }
+            }
+        }
+    }
+
+
+    private final Object mPrefDevListenerLock = new Object();
+    /**
+     * List of listeners for preferred device for strategy and their associated Executor.
+     * List is lazy-initialized on first registration
+     */
+    @GuardedBy("mPrefDevListenerLock")
+    private @Nullable ArrayList<PrefDevListenerInfo> mPrefDevListeners;
+
+    private static class PrefDevListenerInfo {
+        final @NonNull OnPreferredDeviceForStrategyChangedListener mListener;
+        final @NonNull Executor mExecutor;
+        PrefDevListenerInfo(OnPreferredDeviceForStrategyChangedListener listener, Executor exe) {
+            mListener = listener;
+            mExecutor = exe;
+        }
+    }
+
+    @GuardedBy("mPrefDevListenerLock")
+    private StrategyPreferredDeviceDispatcherStub mPrefDevDispatcherStub;
+
+    private final class StrategyPreferredDeviceDispatcherStub
+            extends IStrategyPreferredDeviceDispatcher.Stub {
+
+        @Override
+        public void dispatchPrefDeviceChanged(int strategyId, @Nullable AudioDevice device) {
+            // make a shallow copy of listeners so callback is not executed under lock
+            final ArrayList<PrefDevListenerInfo> prefDevListeners;
+            synchronized (mPrefDevListenerLock) {
+                if (mPrefDevListeners == null || mPrefDevListeners.size() == 0) {
+                    return;
+                }
+                prefDevListeners = (ArrayList<PrefDevListenerInfo>) mPrefDevListeners.clone();
+            }
+            final AudioProductStrategy strategy =
+                    AudioProductStrategy.getAudioProductStrategyWithId(strategyId);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                for (PrefDevListenerInfo info : prefDevListeners) {
+                    info.mExecutor.execute(() ->
+                            info.mListener.onPreferredDeviceForStrategyChanged(strategy, device));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @GuardedBy("mPrefDevListenerLock")
+    private @Nullable PrefDevListenerInfo getPrefDevListenerInfo(
+            OnPreferredDeviceForStrategyChangedListener listener) {
+        if (mPrefDevListeners == null) {
+            return null;
+        }
+        for (PrefDevListenerInfo info : mPrefDevListeners) {
+            if (info.mListener == listener) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    @GuardedBy("mPrefDevListenerLock")
+    private boolean hasPrefDevListener(OnPreferredDeviceForStrategyChangedListener listener) {
+        return getPrefDevListenerInfo(listener) != null;
+    }
+
+    @GuardedBy("mPrefDevListenerLock")
+    /**
+     * @return true if the listener was removed from the list
+     */
+    private boolean removePrefDevListener(OnPreferredDeviceForStrategyChangedListener listener) {
+        final PrefDevListenerInfo infoToRemove = getPrefDevListenerInfo(listener);
+        if (infoToRemove != null) {
+            mPrefDevListeners.remove(infoToRemove);
+            return true;
+        }
+        return false;
     }
 
     //====================================================================

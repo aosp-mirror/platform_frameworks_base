@@ -27,8 +27,6 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/android_util_AssetManager.h>
-#include <androidfw/AssetManager2.h>
 #include "Utils.h"
 #include "FontUtils.h"
 
@@ -212,63 +210,6 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
 }
 
-static void releaseAsset(const void* ptr, void* context) {
-    delete static_cast<Asset*>(context);
-}
-
-static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong builderPtr,
-        jobject jassetMgr, jstring jpath, jint cookie, jboolean isAsset, jint ttcIndex,
-        jint weight, jint isItalic) {
-#ifdef __ANDROID__ // Layoutlib does not support native AssetManager
-    NPE_CHECK_RETURN_ZERO(env, jassetMgr);
-    NPE_CHECK_RETURN_ZERO(env, jpath);
-
-    NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
-    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(env, jassetMgr);
-    if (NULL == mgr) {
-        builder->axes.clear();
-        return false;
-    }
-
-    ScopedUtfChars str(env, jpath);
-    if (str.c_str() == nullptr) {
-        builder->axes.clear();
-        return false;
-    }
-
-    std::unique_ptr<Asset> asset;
-    {
-      ScopedLock<AssetManager2> locked_mgr(*mgr);
-      if (isAsset) {
-          asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
-      } else if (cookie > 0) {
-          // Valid java cookies are 1-based, but AssetManager cookies are 0-based.
-          asset = locked_mgr->OpenNonAsset(str.c_str(), static_cast<ApkAssetsCookie>(cookie - 1),
-                  Asset::ACCESS_BUFFER);
-      } else {
-          asset = locked_mgr->OpenNonAsset(str.c_str(), Asset::ACCESS_BUFFER);
-      }
-    }
-
-    if (nullptr == asset) {
-        builder->axes.clear();
-        return false;
-    }
-
-    const void* buf = asset->getBuffer(false);
-    if (NULL == buf) {
-        builder->axes.clear();
-        return false;
-    }
-
-    sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset,
-            asset.release()));
-    return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
-#else
-    return false;
-#endif
-}
-
 static void FontFamily_addAxisValue(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jint tag, jfloat value) {
     NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
     builder->axes.push_back({static_cast<minikin::AxisTag>(tag), value});
@@ -284,8 +225,6 @@ static const JNINativeMethod gFontFamilyMethods[] = {
     { "nAddFont",               "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },
     { "nAddFontWeightStyle",    "(JLjava/nio/ByteBuffer;III)Z",
             (void*)FontFamily_addFontWeightStyle },
-    { "nAddFontFromAssetManager",    "(JLandroid/content/res/AssetManager;Ljava/lang/String;IZIII)Z",
-            (void*)FontFamily_addFontFromAssetManager },
     { "nAddAxisValue",         "(JIF)V", (void*)FontFamily_addAxisValue },
 };
 

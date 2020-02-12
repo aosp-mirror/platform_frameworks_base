@@ -18,11 +18,15 @@ package android.os;
 
 import android.os.VibrationEffect;
 import android.os.VibrationAttributes;
+import android.os.IVibratorStateListener;
 
 /** {@hide} */
 interface IVibratorService
 {
     boolean hasVibrator();
+    boolean isVibrating();
+    boolean registerVibratorStateListener(in IVibratorStateListener listener);
+    boolean unregisterVibratorStateListener(in IVibratorStateListener listener);
     boolean hasAmplitudeControl();
     boolean[] areEffectsSupported(in int[] effectIds);
     boolean[] arePrimitivesSupported(in int[] primitiveIds);

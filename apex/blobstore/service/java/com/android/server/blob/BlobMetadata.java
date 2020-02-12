@@ -15,6 +15,7 @@
  */
 package com.android.server.blob;
 
+import static android.app.blob.XmlTags.ATTR_DESCRIPTION;
 import static android.app.blob.XmlTags.ATTR_DESCRIPTION_RES_ID;
 import static android.app.blob.XmlTags.ATTR_EXPIRY_TIME;
 import static android.app.blob.XmlTags.ATTR_ID;
@@ -28,12 +29,14 @@ import static android.app.blob.XmlTags.TAG_LEASEE;
 import static android.system.OsConstants.O_RDONLY;
 
 import static com.android.server.blob.BlobStoreConfig.TAG;
+import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_STRING_DESC;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.blob.BlobHandle;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.os.ParcelFileDescriptor;
 import android.os.RevocableFileDescriptor;
@@ -141,11 +144,11 @@ class BlobMetadata {
         }
     }
 
-    void addLeasee(String callingPackage, int callingUid,
-            int descriptionResId, long leaseExpiryTimeMillis) {
+    void addLeasee(String callingPackage, int callingUid, int descriptionResId,
+            CharSequence description, long leaseExpiryTimeMillis) {
         synchronized (mMetadataLock) {
             mLeasees.add(new Leasee(callingPackage, callingUid,
-                    descriptionResId, leaseExpiryTimeMillis));
+                    descriptionResId, description, leaseExpiryTimeMillis));
         }
     }
 
@@ -308,7 +311,7 @@ class BlobMetadata {
     }
 
     @Nullable
-    static BlobMetadata createFromXml(Context context, XmlPullParser in)
+    static BlobMetadata createFromXml(XmlPullParser in, int version, Context context)
             throws XmlPullParserException, IOException {
         final long blobId = XmlUtils.readLongAttribute(in, ATTR_ID);
         final int userId = XmlUtils.readIntAttribute(in, ATTR_USER_ID);
@@ -321,12 +324,12 @@ class BlobMetadata {
             if (TAG_BLOB_HANDLE.equals(in.getName())) {
                 blobHandle = BlobHandle.createFromXml(in);
             } else if (TAG_COMMITTER.equals(in.getName())) {
-                final Committer committer = Committer.createFromXml(in);
+                final Committer committer = Committer.createFromXml(in, version);
                 if (committer != null) {
                     committers.add(committer);
                 }
             } else if (TAG_LEASEE.equals(in.getName())) {
-                leasees.add(Leasee.createFromXml(in));
+                leasees.add(Leasee.createFromXml(in, version));
             }
         }
 
@@ -366,7 +369,7 @@ class BlobMetadata {
         }
 
         @Nullable
-        static Committer createFromXml(@NonNull XmlPullParser in)
+        static Committer createFromXml(@NonNull XmlPullParser in, int version)
                 throws XmlPullParserException, IOException {
             final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
             final int uid = XmlUtils.readIntAttribute(in, ATTR_UID);
@@ -388,12 +391,15 @@ class BlobMetadata {
 
     static final class Leasee extends Accessor {
         public final int descriptionResId;
+        public final CharSequence description;
         public final long expiryTimeMillis;
 
-        Leasee(String packageName, int uid, int descriptionResId, long expiryTimeMillis) {
+        Leasee(String packageName, int uid, int descriptionResId, CharSequence description,
+                long expiryTimeMillis) {
             super(packageName, uid);
             this.descriptionResId = descriptionResId;
             this.expiryTimeMillis = expiryTimeMillis;
+            this.description = description;
         }
 
         boolean isStillValid() {
@@ -401,18 +407,27 @@ class BlobMetadata {
         }
 
         void dump(Context context, IndentingPrintWriter fout) {
-            String desc = null;
-            try {
-                final Resources leaseeRes = context.getPackageManager()
-                        .getResourcesForApplicationAsUser(packageName, UserHandle.getUserId(uid));
-                desc = leaseeRes.getString(descriptionResId);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.d(TAG, "Unknown package in user " + UserHandle.getUserId(uid) + ": "
-                        + packageName, e);
-                desc = "<none>";
-            }
-            fout.println("desc: " + desc);
+            fout.println("desc: " + getDescriptionToDump(context));
             fout.println("expiryMs: " + expiryTimeMillis);
+        }
+
+        private String getDescriptionToDump(Context context) {
+            String desc = null;
+            if (ResourceId.isValid(descriptionResId)) {
+                try {
+                    final Resources leaseeRes = context.getPackageManager()
+                            .getResourcesForApplicationAsUser(
+                                    packageName, UserHandle.getUserId(uid));
+                    desc = leaseeRes.getString(descriptionResId);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Slog.d(TAG, "Unknown package in user " + UserHandle.getUserId(uid) + ": "
+                            + packageName, e);
+                    desc = "<none>";
+                }
+            } else {
+                desc = description.toString();
+            }
+            return desc;
         }
 
         void writeToXml(@NonNull XmlSerializer out) throws IOException {
@@ -420,16 +435,23 @@ class BlobMetadata {
             XmlUtils.writeIntAttribute(out, ATTR_UID, uid);
             XmlUtils.writeIntAttribute(out, ATTR_DESCRIPTION_RES_ID, descriptionResId);
             XmlUtils.writeLongAttribute(out, ATTR_EXPIRY_TIME, expiryTimeMillis);
+            XmlUtils.writeStringAttribute(out, ATTR_DESCRIPTION, description);
         }
 
         @NonNull
-        static Leasee createFromXml(@NonNull XmlPullParser in) throws IOException {
+        static Leasee createFromXml(@NonNull XmlPullParser in, int version) throws IOException {
             final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
             final int uid = XmlUtils.readIntAttribute(in, ATTR_UID);
             final int descriptionResId = XmlUtils.readIntAttribute(in, ATTR_DESCRIPTION_RES_ID);
             final long expiryTimeMillis = XmlUtils.readLongAttribute(in, ATTR_EXPIRY_TIME);
+            final CharSequence description;
+            if (version >= XML_VERSION_ADD_STRING_DESC) {
+                description = XmlUtils.readStringAttribute(in, ATTR_DESCRIPTION);
+            } else {
+                description = null;
+            }
 
-            return new Leasee(packageName, uid, descriptionResId, expiryTimeMillis);
+            return new Leasee(packageName, uid, descriptionResId, description, expiryTimeMillis);
         }
     }
 

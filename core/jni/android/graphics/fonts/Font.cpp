@@ -26,8 +26,6 @@
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedUtfChars.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/android_util_AssetManager.h>
-#include <androidfw/AssetManager2.h>
 #include "Utils.h"
 #include "FontUtils.h"
 
@@ -46,14 +44,6 @@ struct NativeFontBuilder {
 
 static inline NativeFontBuilder* toBuilder(jlong ptr) {
     return reinterpret_cast<NativeFontBuilder*>(ptr);
-}
-
-static inline Asset* toAsset(jlong ptr) {
-    return reinterpret_cast<Asset*>(ptr);
-}
-
-static void releaseAsset(jlong asset) {
-    delete toAsset(asset);
 }
 
 static void releaseFont(jlong font) {
@@ -76,54 +66,6 @@ static void release_global_ref(const void* /*data*/, void* context) {
 
     jobject obj = reinterpret_cast<jobject>(context);
     env->DeleteGlobalRef(obj);
-}
-
-// Regular JNI
-static jlong Font_Builder_getNativeAsset(
-    JNIEnv* env, jobject clazz, jobject assetMgr, jstring path, jboolean isAsset, jint cookie) {
-#ifdef __ANDROID__ // Layoutlib does not support native AssetManager
-    NPE_CHECK_RETURN_ZERO(env, assetMgr);
-    NPE_CHECK_RETURN_ZERO(env, path);
-
-    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(env, assetMgr);
-    if (mgr == nullptr) {
-        return 0;
-    }
-
-    ScopedUtfChars str(env, path);
-    if (str.c_str() == nullptr) {
-        return 0;
-    }
-
-    std::unique_ptr<Asset> asset;
-    {
-      ScopedLock<AssetManager2> locked_mgr(*mgr);
-      if (isAsset) {
-          asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
-      } else if (cookie > 0) {
-          // Valid java cookies are 1-based, but AssetManager cookies are 0-based.
-          asset = locked_mgr->OpenNonAsset(str.c_str(), static_cast<ApkAssetsCookie>(cookie - 1),
-                  Asset::ACCESS_BUFFER);
-      } else {
-          asset = locked_mgr->OpenNonAsset(str.c_str(), Asset::ACCESS_BUFFER);
-      }
-    }
-
-    return reinterpret_cast<jlong>(asset.release());
-#else
-    return 0;
-#endif
-}
-
-// Regular JNI
-static jobject Font_Builder_getAssetBuffer(JNIEnv* env, jobject clazz, jlong nativeAsset) {
-    Asset* asset = toAsset(nativeAsset);
-    return env->NewDirectByteBuffer(const_cast<void*>(asset->getBuffer(false)), asset->getLength());
-}
-
-// CriticalNative
-static jlong Font_Builder_getReleaseNativeAssetFunc(CRITICAL_JNI_PARAMS) {
-    return reinterpret_cast<jlong>(&releaseAsset);
 }
 
 // Regular JNI
@@ -196,11 +138,6 @@ static const JNINativeMethod gFontBuilderMethods[] = {
     { "nAddAxis", "(JIF)V", (void*) Font_Builder_addAxis },
     { "nBuild", "(JLjava/nio/ByteBuffer;Ljava/lang/String;IZI)J", (void*) Font_Builder_build },
     { "nGetReleaseNativeFont", "()J", (void*) Font_Builder_getReleaseNativeFont },
-
-    { "nGetNativeAsset", "(Landroid/content/res/AssetManager;Ljava/lang/String;ZI)J",
-      (void*) Font_Builder_getNativeAsset },
-    { "nGetAssetBuffer", "(J)Ljava/nio/ByteBuffer;", (void*) Font_Builder_getAssetBuffer },
-    { "nGetReleaseNativeAssetFunc", "()J", (void*) Font_Builder_getReleaseNativeAssetFunc },
 };
 
 int register_android_graphics_fonts_Font(JNIEnv* env) {

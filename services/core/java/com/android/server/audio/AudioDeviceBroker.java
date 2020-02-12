@@ -29,6 +29,7 @@ import android.media.AudioManager;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -408,6 +409,16 @@ import java.io.PrintWriter;
 
     /*package*/ int removePreferredDeviceForStrategySync(int strategy) {
         return mDeviceInventory.removePreferredDeviceForStrategySync(strategy);
+    }
+
+    /*package*/ void registerStrategyPreferredDeviceDispatcher(
+            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
+        mDeviceInventory.registerStrategyPreferredDeviceDispatcher(dispatcher);
+    }
+
+    /*package*/ void unregisterStrategyPreferredDeviceDispatcher(
+            @NonNull IStrategyPreferredDeviceDispatcher dispatcher) {
+        mDeviceInventory.unregisterStrategyPreferredDeviceDispatcher(dispatcher);
     }
 
     //---------------------------------------------------------------------

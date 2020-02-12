@@ -24,6 +24,7 @@ import android.location.Geofence;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssRequest;
 import android.location.IBatchedLocationCallback;
+import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssNavigationMessageListener;
@@ -79,6 +80,10 @@ interface ILocationManager
     long getGnssCapabilities(in String packageName);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
+    boolean addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener,
+             String packageName, String featureId, String listenerIdentifier);
+    void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
+
     boolean addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener,
              String packageName, String featureId, String listenerIdentifier);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
@@ -93,7 +98,7 @@ interface ILocationManager
     boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName);
     void flushGnssBatch(String packageName);
     boolean stopGnssBatch();
-    boolean injectLocation(in Location location);
+    void injectLocation(in Location location);
 
     @UnsupportedAppUsage
     List<String> getAllProviders();

@@ -28989,6 +28989,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         OnContentApplyWindowInsetsListener mContentOnApplyWindowInsetsListener;
 
         /**
+         * The leash token of this view's parent when it's in an embedded hierarchy that is
+         * re-parented to another window.
+         */
+        IBinder mLeashedParentToken;
+
+        /**
+         * The accessibility view id of this view's parent when it's in an embedded
+         * hierarchy that is re-parented to another window.
+         */
+        int mLeashedParentAccessibilityViewId;
+
+        /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
          *

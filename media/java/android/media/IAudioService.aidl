@@ -29,6 +29,7 @@ import android.media.IAudioServerStateDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
+import android.media.IStrategyPreferredDeviceDispatcher;
 import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
@@ -285,6 +286,11 @@ interface IAudioService {
     int setAllowedCapturePolicy(in int capturePolicy);
 
     int getAllowedCapturePolicy();
+
+    void registerStrategyPreferredDeviceDispatcher(IStrategyPreferredDeviceDispatcher dispatcher);
+
+    oneway void unregisterStrategyPreferredDeviceDispatcher(
+            IStrategyPreferredDeviceDispatcher dispatcher);
 
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.

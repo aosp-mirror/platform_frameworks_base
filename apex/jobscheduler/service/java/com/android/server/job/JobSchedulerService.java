@@ -473,13 +473,17 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     public static class Constants {
         // Key names stored in the settings value.
-        private static final String KEY_MIN_IDLE_COUNT = "min_idle_count";
-        private static final String KEY_MIN_CHARGING_COUNT = "min_charging_count";
-        private static final String KEY_MIN_BATTERY_NOT_LOW_COUNT = "min_battery_not_low_count";
-        private static final String KEY_MIN_STORAGE_NOT_LOW_COUNT = "min_storage_not_low_count";
-        private static final String KEY_MIN_CONNECTIVITY_COUNT = "min_connectivity_count";
-        private static final String KEY_MIN_CONTENT_COUNT = "min_content_count";
-        private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
+        // TODO(124466289): remove deprecated flags when we migrate to DeviceConfig
+        private static final String DEPRECATED_KEY_MIN_IDLE_COUNT = "min_idle_count";
+        private static final String DEPRECATED_KEY_MIN_CHARGING_COUNT = "min_charging_count";
+        private static final String DEPRECATED_KEY_MIN_BATTERY_NOT_LOW_COUNT =
+                "min_battery_not_low_count";
+        private static final String DEPRECATED_KEY_MIN_STORAGE_NOT_LOW_COUNT =
+                "min_storage_not_low_count";
+        private static final String DEPRECATED_KEY_MIN_CONNECTIVITY_COUNT =
+                "min_connectivity_count";
+        private static final String DEPRECATED_KEY_MIN_CONTENT_COUNT = "min_content_count";
+        private static final String DEPRECATED_KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
         private static final String KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT =
                 "min_ready_non_active_jobs_count";
         private static final String KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS =
@@ -515,13 +519,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION =
                 "aq_schedule_throw_exception";
 
-        private static final int DEFAULT_MIN_IDLE_COUNT = 1;
-        private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
-        private static final int DEFAULT_MIN_BATTERY_NOT_LOW_COUNT = 1;
-        private static final int DEFAULT_MIN_STORAGE_NOT_LOW_COUNT = 1;
-        private static final int DEFAULT_MIN_CONNECTIVITY_COUNT = 1;
-        private static final int DEFAULT_MIN_CONTENT_COUNT = 1;
-        private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
@@ -534,44 +531,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
-
-        /**
-         * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
-         * early.
-         */
-        int MIN_IDLE_COUNT = DEFAULT_MIN_IDLE_COUNT;
-        /**
-         * Minimum # of charging jobs that must be ready in order to force the JMS to schedule
-         * things early.
-         */
-        int MIN_CHARGING_COUNT = DEFAULT_MIN_CHARGING_COUNT;
-        /**
-         * Minimum # of "battery not low" jobs that must be ready in order to force the JMS to
-         * schedule things early.
-         */
-        int MIN_BATTERY_NOT_LOW_COUNT = DEFAULT_MIN_BATTERY_NOT_LOW_COUNT;
-        /**
-         * Minimum # of "storage not low" jobs that must be ready in order to force the JMS to
-         * schedule things early.
-         */
-        int MIN_STORAGE_NOT_LOW_COUNT = DEFAULT_MIN_STORAGE_NOT_LOW_COUNT;
-        /**
-         * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
-         * things early.  1 == Run connectivity jobs as soon as ready.
-         */
-        int MIN_CONNECTIVITY_COUNT = DEFAULT_MIN_CONNECTIVITY_COUNT;
-        /**
-         * Minimum # of content trigger jobs that must be ready in order to force the JMS to
-         * schedule things early.
-         */
-        int MIN_CONTENT_COUNT = DEFAULT_MIN_CONTENT_COUNT;
-        /**
-         * Minimum # of jobs (with no particular constraints) for which the JMS will be happy
-         * running some work early.  This (and thus the other min counts) is now set to 1, to
-         * prevent any batching at this level.  Since we now do batching through doze, that is
-         * a much better mechanism.
-         */
-        int MIN_READY_JOBS_COUNT = DEFAULT_MIN_READY_JOBS_COUNT;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -687,20 +646,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Slog.e(TAG, "Bad jobscheduler settings", e);
             }
 
-            MIN_IDLE_COUNT = mParser.getInt(KEY_MIN_IDLE_COUNT,
-                    DEFAULT_MIN_IDLE_COUNT);
-            MIN_CHARGING_COUNT = mParser.getInt(KEY_MIN_CHARGING_COUNT,
-                    DEFAULT_MIN_CHARGING_COUNT);
-            MIN_BATTERY_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_BATTERY_NOT_LOW_COUNT,
-                    DEFAULT_MIN_BATTERY_NOT_LOW_COUNT);
-            MIN_STORAGE_NOT_LOW_COUNT = mParser.getInt(KEY_MIN_STORAGE_NOT_LOW_COUNT,
-                    DEFAULT_MIN_STORAGE_NOT_LOW_COUNT);
-            MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
-                    DEFAULT_MIN_CONNECTIVITY_COUNT);
-            MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
-                    DEFAULT_MIN_CONTENT_COUNT);
-            MIN_READY_JOBS_COUNT = mParser.getInt(KEY_MIN_READY_JOBS_COUNT,
-                    DEFAULT_MIN_READY_JOBS_COUNT);
             MIN_READY_NON_ACTIVE_JOBS_COUNT = mParser.getInt(
                     KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT);
@@ -749,13 +694,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
-            pw.printPair(KEY_MIN_IDLE_COUNT, MIN_IDLE_COUNT).println();
-            pw.printPair(KEY_MIN_CHARGING_COUNT, MIN_CHARGING_COUNT).println();
-            pw.printPair(KEY_MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT).println();
-            pw.printPair(KEY_MIN_STORAGE_NOT_LOW_COUNT, MIN_STORAGE_NOT_LOW_COUNT).println();
-            pw.printPair(KEY_MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT).println();
-            pw.printPair(KEY_MIN_CONTENT_COUNT, MIN_CONTENT_COUNT).println();
-            pw.printPair(KEY_MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT).println();
             pw.printPair(KEY_MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     MIN_READY_NON_ACTIVE_JOBS_COUNT).println();
             pw.printPair(KEY_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
@@ -790,13 +728,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         void dump(ProtoOutputStream proto) {
-            proto.write(ConstantsProto.MIN_IDLE_COUNT, MIN_IDLE_COUNT);
-            proto.write(ConstantsProto.MIN_CHARGING_COUNT, MIN_CHARGING_COUNT);
-            proto.write(ConstantsProto.MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT);
-            proto.write(ConstantsProto.MIN_STORAGE_NOT_LOW_COUNT, MIN_STORAGE_NOT_LOW_COUNT);
-            proto.write(ConstantsProto.MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT);
-            proto.write(ConstantsProto.MIN_CONTENT_COUNT, MIN_CONTENT_COUNT);
-            proto.write(ConstantsProto.MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT);
             proto.write(ConstantsProto.MIN_READY_NON_ACTIVE_JOBS_COUNT,
                     MIN_READY_NON_ACTIVE_JOBS_COUNT);
             proto.write(ConstantsProto.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS,
@@ -2106,13 +2037,6 @@ public class JobSchedulerService extends com.android.server.SystemService
      * policies on when we want to execute jobs.
      */
     final class MaybeReadyJobQueueFunctor implements Consumer<JobStatus> {
-        int chargingCount;
-        int batteryNotLowCount;
-        int storageNotLowCount;
-        int idleCount;
-        int backoffCount;
-        int connectivityCount;
-        int contentCount;
         int forceBatchedCount;
         int unbatchedCount;
         final List<JobStatus> runnableJobs = new ArrayList<>();
@@ -2135,13 +2059,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } catch (RemoteException e) {
                 }
+
+                final boolean shouldForceBatchJob;
                 // Restricted jobs must always be batched
-                if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX
-                        || (mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
-                        && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
-                        && (job.getFirstForceBatchedTimeElapsed() == 0
-                        || sElapsedRealtimeClock.millis() - job.getFirstForceBatchedTimeElapsed()
-                                < mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS))) {
+                if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
+                    shouldForceBatchJob = true;
+                } else if (job.getNumFailures() > 0) {
+                    shouldForceBatchJob = false;
+                } else {
+                    final long nowElapsed = sElapsedRealtimeClock.millis();
+                    final boolean batchDelayExpired = job.getFirstForceBatchedTimeElapsed() > 0
+                            && nowElapsed - job.getFirstForceBatchedTimeElapsed()
+                            >= mConstants.MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS;
+                    shouldForceBatchJob =
+                            mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
+                                    && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
+                                    && !batchDelayExpired;
+                }
+
+                if (shouldForceBatchJob) {
                     // Force batching non-ACTIVE jobs. Don't include them in the other counts.
                     forceBatchedCount++;
                     if (job.getFirstForceBatchedTimeElapsed() == 0) {
@@ -2149,27 +2085,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 } else {
                     unbatchedCount++;
-                    if (job.getNumFailures() > 0) {
-                        backoffCount++;
-                    }
-                    if (job.hasIdleConstraint()) {
-                        idleCount++;
-                    }
-                    if (job.hasConnectivityConstraint()) {
-                        connectivityCount++;
-                    }
-                    if (job.hasChargingConstraint()) {
-                        chargingCount++;
-                    }
-                    if (job.hasBatteryNotLowConstraint()) {
-                        batteryNotLowCount++;
-                    }
-                    if (job.hasStorageNotLowConstraint()) {
-                        storageNotLowCount++;
-                    }
-                    if (job.hasContentTriggerConstraint()) {
-                        contentCount++;
-                    }
                 }
                 runnableJobs.add(job);
             } else {
@@ -2178,16 +2093,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         public void postProcess() {
-            if (backoffCount > 0 ||
-                    idleCount >= mConstants.MIN_IDLE_COUNT ||
-                    connectivityCount >= mConstants.MIN_CONNECTIVITY_COUNT ||
-                    chargingCount >= mConstants.MIN_CHARGING_COUNT ||
-                    batteryNotLowCount >= mConstants.MIN_BATTERY_NOT_LOW_COUNT ||
-                    storageNotLowCount >= mConstants.MIN_STORAGE_NOT_LOW_COUNT ||
-                    contentCount >= mConstants.MIN_CONTENT_COUNT ||
-                    forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT ||
-                    (unbatchedCount > 0 && (unbatchedCount + forceBatchedCount)
-                            >= mConstants.MIN_READY_JOBS_COUNT)) {
+            if (unbatchedCount > 0
+                    || forceBatchedCount >= mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT) {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: Running jobs.");
                 }
@@ -2208,13 +2115,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @VisibleForTesting
         void reset() {
-            chargingCount = 0;
-            idleCount =  0;
-            backoffCount = 0;
-            connectivityCount = 0;
-            batteryNotLowCount = 0;
-            storageNotLowCount = 0;
-            contentCount = 0;
             forceBatchedCount = 0;
             unbatchedCount = 0;
             runnableJobs.clear();

@@ -56,7 +56,7 @@ import java.util.ArrayList;
 public final class WindowManagerGlobal {
     private static final String TAG = "WindowManager";
 
-    private final boolean mUseBLASTAdapter;
+    private static boolean sUseBLASTAdapter = false;
 
     /**
      * The user is navigating with keys (not the touch screen), so
@@ -159,11 +159,6 @@ public final class WindowManagerGlobal {
     private Runnable mSystemPropertyUpdater;
 
     private WindowManagerGlobal() {
-        try {
-            mUseBLASTAdapter = getWindowManagerService().useBLAST();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     @UnsupportedAppUsage
@@ -191,6 +186,7 @@ public final class WindowManagerGlobal {
                     if (sWindowManagerService != null) {
                         ValueAnimator.setDurationScale(
                                 sWindowManagerService.getCurrentAnimatorScale());
+                        sUseBLASTAdapter = sWindowManagerService.useBLAST();
                     }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -235,8 +231,8 @@ public final class WindowManagerGlobal {
     /**
      * Whether or not to use BLAST for ViewRootImpl
      */
-    public boolean useBLAST() {
-        return mUseBLASTAdapter;
+    public static boolean useBLAST() {
+        return sUseBLASTAdapter;
     }
 
     @UnsupportedAppUsage

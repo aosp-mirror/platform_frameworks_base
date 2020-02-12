@@ -442,27 +442,35 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         ValueAnimator screenshotDropInAnim = screenRect != null ? createRectAnimation(screenRect)
                 : createScreenshotDropInAnimation();
-        ValueAnimator screenshotFadeOutAnim = createScreenshotToCornerAnimation(w, h);
+        ValueAnimator screenshotToCornerAnimation = createScreenshotToCornerAnimation(w, h);
         mScreenshotAnimation = new AnimatorSet();
-        mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
-        mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
+        mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotToCornerAnimation);
+
+        saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
             @Override
-            public void onAnimationEnd(Animator animation) {
-                // Save the screenshot once we have a bit of time now
-                saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
-                    @Override
-                    void onActionsReady(Uri uri, List<Notification.Action> smartActions,
-                            List<Notification.Action> actions) {
-                        if (uri == null) {
-                            mNotificationsController.notifyScreenshotError(
-                                    R.string.screenshot_failed_to_capture_text);
+            void onActionsReady(Uri uri, List<Notification.Action> smartActions,
+                    List<Notification.Action> actions) {
+                if (uri == null) {
+                    mNotificationsController.notifyScreenshotError(
+                            R.string.screenshot_failed_to_capture_text);
+                } else {
+                    mScreenshotHandler.post(() -> {
+                        if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
+                            mScreenshotAnimation.addListener(
+                                    new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            super.onAnimationEnd(animation);
+                                            createScreenshotActionsShadeAnimation(
+                                                    smartActions, actions).start();
+                                        }
+                                    });
                         } else {
-                            mScreenshotHandler.post(() ->
-                                    createScreenshotActionsShadeAnimation(smartActions,
-                                            actions).start());
+                            createScreenshotActionsShadeAnimation(smartActions,
+                                    actions).start();
                         }
-                    }
-                });
+                    });
+                }
                 mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
                 mScreenshotHandler.sendMessageDelayed(
                         mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),

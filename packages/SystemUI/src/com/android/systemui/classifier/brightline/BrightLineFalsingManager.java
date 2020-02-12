@@ -21,6 +21,7 @@ import static com.android.systemui.classifier.FalsingManagerImpl.FALSING_SUCCESS
 
 import android.hardware.biometrics.BiometricSourceType;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -40,15 +41,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * FalsingManager designed to make clear why a touch was rejected.
  */
 public class BrightLineFalsingManager implements FalsingManager {
 
-    static final boolean DEBUG = false;
     private static final String TAG = "FalsingManager";
-    private static final int RECENT_INFO_LOG_SIZE = 20;
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final int RECENT_INFO_LOG_SIZE = 40;
+    private static final int RECENT_SWIPE_LOG_SIZE = 20;
 
     private final FalsingDataProvider mDataProvider;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -62,6 +67,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     private boolean mJustUnlockedWithFace;
     private static final Queue<String> RECENT_INFO_LOG =
             new ArrayDeque<>(RECENT_INFO_LOG_SIZE + 1);
+    private static final Queue<DebugSwipeRecord> RECENT_SWIPES =
+            new ArrayDeque<>(RECENT_SWIPE_LOG_SIZE + 1);
 
     private final List<FalsingClassifier> mClassifiers;
 
@@ -78,6 +85,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                     }
                 }
             };
+    private boolean mPreviousResult = false;
 
     public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
             KeyguardUpdateMonitor keyguardUpdateMonitor, ProximitySensor proximitySensor,
@@ -148,7 +156,11 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseTouch() {
-        boolean r = !mJustUnlockedWithFace && !mDockManager.isDocked()
+        if (!mDataProvider.isDirty()) {
+            return mPreviousResult;
+        }
+
+        mPreviousResult = !mJustUnlockedWithFace && !mDockManager.isDocked()
                 && mClassifiers.stream().anyMatch(falsingClassifier -> {
                     boolean result = falsingClassifier.isFalseTouch();
                     if (result) {
@@ -167,9 +179,26 @@ public class BrightLineFalsingManager implements FalsingManager {
                     return result;
                 });
 
-        logDebug("Is false touch? " + r);
+        logDebug("Is false touch? " + mPreviousResult);
 
-        return r;
+        if (Build.IS_ENG || Build.IS_USERDEBUG) {
+            // Copy motion events, as the passed in list gets emptied out elsewhere in the code.
+            RECENT_SWIPES.add(new DebugSwipeRecord(
+                    mPreviousResult,
+                    mDataProvider.getInteractionType(),
+                    mDataProvider.getRecentMotionEvents().stream().map(
+                            motionEvent -> new XYDt(
+                                    (int) motionEvent.getX(),
+                                    (int) motionEvent.getY(),
+                                    (int) (motionEvent.getEventTime() - motionEvent.getDownTime())))
+                            .collect(Collectors.toList())));
+            while (RECENT_SWIPES.size() > RECENT_INFO_LOG_SIZE) {
+                DebugSwipeRecord record = RECENT_SWIPES.remove();
+            }
+
+        }
+
+        return mPreviousResult;
     }
 
     @Override
@@ -212,7 +241,6 @@ public class BrightLineFalsingManager implements FalsingManager {
     @Override
     public void onNotificatonStartDraggingDown() {
         updateInteractionType(Classifier.NOTIFICATION_DRAG_DOWN);
-
     }
 
     @Override
@@ -348,15 +376,35 @@ public class BrightLineFalsingManager implements FalsingManager {
     public void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("BRIGHTLINE FALSING MANAGER");
-        ipw.print("classifierEnabled="); pw.println(isClassifierEnabled() ? 1 : 0);
-        ipw.print("mJustUnlockedWithFace="); pw.println(mJustUnlockedWithFace ? 1 : 0);
-        ipw.print("isDocked="); pw.println(mDockManager.isDocked() ? 1 : 0);
+        ipw.print("classifierEnabled=");
+        ipw.println(isClassifierEnabled() ? 1 : 0);
+        ipw.print("mJustUnlockedWithFace=");
+        ipw.println(mJustUnlockedWithFace ? 1 : 0);
+        ipw.print("isDocked=");
+        ipw.println(mDockManager.isDocked() ? 1 : 0);
+        ipw.print("width=");
+        ipw.println(mDataProvider.getWidthPixels());
+        ipw.print("height=");
+        ipw.println(mDataProvider.getHeightPixels());
+        ipw.println();
+        if (RECENT_SWIPES.size() != 0) {
+            ipw.println("Recent swipes:");
+            ipw.increaseIndent();
+            for (DebugSwipeRecord record : RECENT_SWIPES) {
+                ipw.println(record.getString());
+                ipw.println();
+            }
+            ipw.decreaseIndent();
+        } else {
+            ipw.println("No recent swipes");
+        }
         ipw.println();
         ipw.println("Recent falsing info:");
         ipw.increaseIndent();
         for (String msg : RECENT_INFO_LOG) {
             ipw.println(msg);
         }
+        ipw.println();
     }
 
     @Override
@@ -385,5 +433,47 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     static void logError(String msg) {
         Log.e(TAG, msg);
+    }
+
+    private static class DebugSwipeRecord {
+        private static final byte VERSION = 1;  // opaque version number indicating format of data.
+        private final boolean mIsFalse;
+        private final int mInteractionType;
+        private final List<XYDt> mRecentMotionEvents;
+
+        DebugSwipeRecord(boolean isFalse, int interactionType,
+                List<XYDt> recentMotionEvents) {
+            mIsFalse = isFalse;
+            mInteractionType = interactionType;
+            mRecentMotionEvents = recentMotionEvents;
+        }
+
+        String getString() {
+            StringJoiner sj = new StringJoiner(",");
+            sj.add(Integer.toString(VERSION))
+                    .add(mIsFalse ? "1" : "0")
+                    .add(Integer.toString(mInteractionType));
+            for (XYDt event : mRecentMotionEvents) {
+                sj.add(event.toString());
+            }
+            return sj.toString();
+        }
+    }
+
+    private static class XYDt {
+        private final int mX;
+        private final int mY;
+        private final int mDT;
+
+        XYDt(int x, int y, int dT) {
+            mX = x;
+            mY = y;
+            mDT = dT;
+        }
+
+        @Override
+        public String toString() {
+            return mX + "," + mY + "," + mDT;
+        }
     }
 }

@@ -35,6 +35,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
+import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.InstallationFile;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -74,6 +75,7 @@ public final class IncrementalFileStorages {
     public static IncrementalFileStorages initialize(Context context,
             @NonNull File stageDir,
             @NonNull DataLoaderParams dataLoaderParams,
+            @Nullable IDataLoaderStatusListener dataLoaderStatusListener,
             List<InstallationFile> addedFiles) throws IOException {
         // TODO(b/136132412): sanity check if session should not be incremental
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
@@ -85,7 +87,13 @@ public final class IncrementalFileStorages {
 
         IncrementalFileStorages result = null;
         try {
-            result = new IncrementalFileStorages(stageDir, incrementalManager, dataLoaderParams);
+            result = new IncrementalFileStorages(stageDir, incrementalManager, dataLoaderParams,
+                    dataLoaderStatusListener);
+
+            if (!addedFiles.isEmpty()) {
+                result.mDefaultStorage.bind(stageDir.getAbsolutePath());
+            }
+
             for (InstallationFile file : addedFiles) {
                 if (file.getLocation() == LOCATION_DATA_APP) {
                     try {
@@ -93,14 +101,15 @@ public final class IncrementalFileStorages {
                     } catch (IOException e) {
                         // TODO(b/146080380): add incremental-specific error code
                         throw new IOException(
-                                "Failed to add and configure Incremental File: " + file.getName(),
-                                e);
+                                "Failed to add file to IncFS: " + file.getName() + ", reason: "
+                                        + e.getMessage(), e.getCause());
                     }
                 } else {
                     throw new IOException("Unknown file location: " + file.getLocation());
                 }
             }
 
+            // TODO(b/146080380): remove 5 secs wait in startLoading
             if (!result.mDefaultStorage.startLoading()) {
                 // TODO(b/146080380): add incremental-specific error code
                 throw new IOException("Failed to start loading data for Incremental installation.");
@@ -117,7 +126,8 @@ public final class IncrementalFileStorages {
 
     private IncrementalFileStorages(@NonNull File stageDir,
             @NonNull IncrementalManager incrementalManager,
-            @NonNull DataLoaderParams dataLoaderParams) throws IOException {
+            @NonNull DataLoaderParams dataLoaderParams,
+            @Nullable IDataLoaderStatusListener dataLoaderStatusListener) throws IOException {
         mStageDir = stageDir;
         mIncrementalManager = incrementalManager;
         if (dataLoaderParams.getComponentName().getPackageName().equals("local")) {
@@ -134,6 +144,7 @@ public final class IncrementalFileStorages {
             }
             mDefaultStorage = mIncrementalManager.createStorage(mDefaultDir,
                     dataLoaderParams,
+                    dataLoaderStatusListener,
                     IncrementalManager.CREATE_MODE_CREATE
                             | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false);
         }
@@ -144,10 +155,8 @@ public final class IncrementalFileStorages {
     }
 
     private void addApkFile(@NonNull InstallationFile apk) throws IOException {
-        final String stageDirPath = mStageDir.getAbsolutePath();
-        mDefaultStorage.bind(stageDirPath);
-        String apkName = apk.getName();
-        File targetFile = Paths.get(stageDirPath, apkName).toFile();
+        final String apkName = apk.getName();
+        final File targetFile = new File(mStageDir, apkName);
         if (!targetFile.exists()) {
             mDefaultStorage.makeFile(apkName, apk.getLengthBytes(), null, apk.getMetadata(),
                     apk.getSignature());

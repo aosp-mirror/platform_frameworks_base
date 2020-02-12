@@ -167,6 +167,10 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 // again, it will only show after the brightness sensor has stabilized,
                 // avoiding a potential flicker.
                 scrimOpacity = 255;
+            } else if (!mScreenOff && mLightSensor == null) {
+                // No light sensor but previous state turned the screen black. Make the scrim
+                // transparent and below views visible.
+                scrimOpacity = 0;
             } else if (brightnessReady) {
                 // Only unblank scrim once brightness is ready.
                 scrimOpacity = computeScrimOpacity(sensorValue);
@@ -199,7 +203,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mDozeService.setDozeScreenBrightness(clampToUserSetting(mDefaultDozeBrightness));
         mDozeHost.setAodDimmingScrim(0f);
     }
-
+    //TODO: brightnessfloat change usages to float.
     private int clampToUserSetting(int brightness) {
         int userSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,

@@ -31,6 +31,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -98,6 +99,19 @@ public class AccessibilityWindowManager {
     /** List of Display Windows Observer, mapping from displayId -> DisplayWindowsObserver. */
     private final SparseArray<DisplayWindowsObserver> mDisplayWindowsObservers =
             new SparseArray<>();
+
+    /**
+     * Map of host view and embedded hierarchy, mapping from leash token of its ViewRootImpl.
+     * The key is the token from embedded hierarchy, and the value is the token from its host.
+     */
+    private final ArrayMap<IBinder, IBinder> mHostEmbeddedMap = new ArrayMap<>();
+
+    /**
+     * Map of window id and view hierarchy.
+     * The key is the window id when the ViewRootImpl register to accessibility, and the value is
+     * its leash token.
+     */
+    private final SparseArray<IBinder> mWindowIdMap = new SparseArray<>();
 
     /**
      * This class implements {@link WindowManagerInternal.WindowsForAccessibilityCallback} to
@@ -913,19 +927,21 @@ public class AccessibilityWindowManager {
      * Adds accessibility interaction connection according to given window token, package name and
      * window token.
      *
-     * @param windowToken The window token of accessibility interaction connection
+     * @param window The window token of accessibility interaction connection
+     * @param leashToken The leash token of accessibility interaction connection
      * @param connection The accessibility interaction connection
      * @param packageName The package name
      * @param userId The userId
      * @return The windowId of added connection
      * @throws RemoteException
      */
-    public int addAccessibilityInteractionConnection(@NonNull IWindow windowToken,
-            @NonNull IAccessibilityInteractionConnection connection, @NonNull String packageName,
-            int userId) throws RemoteException {
+    public int addAccessibilityInteractionConnection(@NonNull IWindow window,
+            @NonNull IBinder leashToken, @NonNull IAccessibilityInteractionConnection connection,
+            @NonNull String packageName, int userId) throws RemoteException {
         final int windowId;
         boolean shouldComputeWindows = false;
-        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken.asBinder());
+        final IBinder token = window.asBinder();
+        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(token);
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -947,35 +963,33 @@ public class AccessibilityWindowManager {
                         windowId, connection, packageName, resolvedUid, UserHandle.USER_ALL);
                 wrapper.linkToDeath();
                 mGlobalInteractionConnections.put(windowId, wrapper);
-                mGlobalWindowTokens.put(windowId, windowToken.asBinder());
+                mGlobalWindowTokens.put(windowId, token);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added global connection for pid:" + Binder.getCallingPid()
-                            + " with windowId: " + windowId + " and  token: "
-                            + windowToken.asBinder());
+                            + " with windowId: " + windowId + " and token: " + token);
                 }
             } else {
                 RemoteAccessibilityConnection wrapper = new RemoteAccessibilityConnection(
                         windowId, connection, packageName, resolvedUid, resolvedUserId);
                 wrapper.linkToDeath();
                 getInteractionConnectionsForUserLocked(resolvedUserId).put(windowId, wrapper);
-                getWindowTokensForUserLocked(resolvedUserId).put(windowId, windowToken.asBinder());
+                getWindowTokensForUserLocked(resolvedUserId).put(windowId, token);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added user connection for pid:" + Binder.getCallingPid()
-                            + " with windowId: " + windowId
-                            + " and  token: " + windowToken.asBinder());
+                            + " with windowId: " + windowId + " and  token: " + token);
                 }
             }
 
             if (isTrackingWindowsLocked(displayId)) {
                 shouldComputeWindows = true;
             }
+            registerIdLocked(leashToken, windowId);
         }
         if (shouldComputeWindows) {
             mWindowManagerInternal.computeWindowsForAccessibility(displayId);
         }
 
-        mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(
-                windowToken.asBinder(), windowId);
+        mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(token, windowId);
         return windowId;
     }
 
@@ -1098,6 +1112,7 @@ public class AccessibilityWindowManager {
      * Invoked when accessibility interaction connection of window is removed.
      *
      * @param windowId Removed windowId
+     * @param binder Removed window token
      */
     private void onAccessibilityInteractionConnectionRemovedLocked(
             int windowId, @Nullable IBinder binder) {
@@ -1110,6 +1125,7 @@ public class AccessibilityWindowManager {
             mWindowManagerInternal.setAccessibilityIdToSurfaceMetadata(
                     binder, AccessibilityWindowInfo.UNDEFINED_WINDOW_ID);
         }
+        unregisterIdLocked(windowId);
     }
 
     /**
@@ -1132,7 +1148,7 @@ public class AccessibilityWindowManager {
      * Returns the userId that owns the given window token, {@link UserHandle#USER_NULL}
      * if not found.
      *
-     * @param windowToken The winodw token
+     * @param windowToken The window token
      * @return The userId
      */
     public int getWindowOwnerUserId(@NonNull IBinder windowToken) {
@@ -1158,6 +1174,50 @@ public class AccessibilityWindowManager {
             }
         }
         return -1;
+    }
+
+    /**
+     * Establish the relationship between the host and the embedded view hierarchy.
+     *
+     * @param host The token of host hierarchy
+     * @param embedded The token of the embedded hierarchy
+     */
+    public void associateEmbeddedHierarchyLocked(@NonNull IBinder host, @NonNull IBinder embedded) {
+        // Use embedded window as key, since one host window may have multiple embedded windows.
+        associateLocked(embedded, host);
+    }
+
+    /**
+     * Clear the relationship by given token.
+     *
+     * @param token The token
+     */
+    public void disassociateEmbeddedHierarchyLocked(@NonNull IBinder token) {
+        disassociateLocked(token);
+    }
+
+    /**
+     * Gets the parent windowId of the window according to the specified windowId.
+     *
+     * @param windowId The windowId to check
+     * @return The windowId of the parent window, or self if no parent exists
+     */
+    public int resolveParentWindowIdLocked(int windowId) {
+        final IBinder token = getTokenLocked(windowId);
+        if (token == null) {
+            return windowId;
+        }
+        final IBinder resolvedToken = resolveTopParentTokenLocked(token);
+        final int resolvedWindowId = getWindowIdLocked(resolvedToken);
+        return resolvedWindowId != -1 ? resolvedWindowId : windowId;
+    }
+
+    private IBinder resolveTopParentTokenLocked(IBinder token) {
+        final IBinder hostToken = getHostTokenLocked(token);
+        if (hostToken == null) {
+            return token;
+        }
+        return resolveTopParentTokenLocked(hostToken);
     }
 
     /**
@@ -1357,6 +1417,7 @@ public class AccessibilityWindowManager {
      */
     @Nullable
     public AccessibilityWindowInfo findA11yWindowInfoByIdLocked(int windowId) {
+        windowId = resolveParentWindowIdLocked(windowId);
         final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(windowId);
         if (observer != null) {
             return observer.findA11yWindowInfoByIdLocked(windowId);
@@ -1581,6 +1642,88 @@ public class AccessibilityWindowManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Associate the token of the embedded view hierarchy to the host view hierarchy.
+     *
+     * @param embedded The leash token from the view root of embedded hierarchy
+     * @param host The leash token from the view root of host hierarchy
+     */
+    void associateLocked(IBinder embedded, IBinder host) {
+        mHostEmbeddedMap.put(embedded, host);
+    }
+
+    /**
+     * Clear the relationship of given token.
+     *
+     * @param token The leash token
+     */
+    void disassociateLocked(IBinder token) {
+        mHostEmbeddedMap.remove(token);
+        for (int i = mHostEmbeddedMap.size() - 1; i >= 0; i--) {
+            if (mHostEmbeddedMap.valueAt(i).equals(token)) {
+                mHostEmbeddedMap.removeAt(i);
+            }
+        }
+    }
+
+    /**
+     * Register the leash token with its windowId.
+     *
+     * @param token The token.
+     * @param windowId The windowID.
+     */
+    void registerIdLocked(IBinder token, int windowId) {
+        mWindowIdMap.put(windowId, token);
+    }
+
+    /**
+     * Unregister the windowId and also disassociate its token.
+     *
+     * @param windowId The windowID
+     */
+    void unregisterIdLocked(int windowId) {
+        final IBinder token = mWindowIdMap.get(windowId);
+        if (token == null) {
+            return;
+        }
+        disassociateLocked(token);
+        mWindowIdMap.remove(windowId);
+    }
+
+    /**
+     * Get the leash token by given windowID.
+     *
+     * @param windowId The windowID.
+     * @return The token, or {@code NULL} if this windowID doesn't exist
+     */
+    IBinder getTokenLocked(int windowId) {
+        return mWindowIdMap.get(windowId);
+    }
+
+    /**
+     * Get the windowId by given leash token.
+     *
+     * @param token The token
+     * @return The windowID, or -1 if the token doesn't exist
+     */
+    int getWindowIdLocked(IBinder token) {
+        final int index = mWindowIdMap.indexOfValue(token);
+        if (index == -1) {
+            return index;
+        }
+        return mWindowIdMap.keyAt(index);
+    }
+
+    /**
+     * Get the leash token of the host hierarchy by given token.
+     *
+     * @param token The token
+     * @return The token of host hierarchy, or {@code NULL} if no host exists
+     */
+    IBinder getHostTokenLocked(IBinder token) {
+        return mHostEmbeddedMap.get(token);
     }
 
     /**

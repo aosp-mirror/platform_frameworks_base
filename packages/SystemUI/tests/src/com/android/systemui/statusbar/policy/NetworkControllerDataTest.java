@@ -132,7 +132,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, true, NO_DATA_STRING);
+                false, true, NO_DATA_STRING, NO_DATA_STRING);
     }
 
     @Test
@@ -146,7 +146,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, true, NO_DATA_STRING);
+                false, true, NO_DATA_STRING, NO_DATA_STRING);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, false, NOT_DEFAULT_DATA_STRING);
+                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         // Verify that a SignalDrawable with a cut out is used to display data disabled.
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0,
                 true, DEFAULT_QS_SIGNAL_STRENGTH, 0, false,
-                false, false, NOT_DEFAULT_DATA_STRING);
+                false, false, NOT_DEFAULT_DATA_STRING, NOT_DEFAULT_DATA_STRING);
     }
 
     @Test

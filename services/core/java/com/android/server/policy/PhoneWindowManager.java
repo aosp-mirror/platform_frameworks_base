@@ -2729,21 +2729,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
                             UserHandle.USER_CURRENT_OR_SELF);
                 }
-
-                int min = mPowerManager.getMinimumScreenBrightnessSetting();
-                int max = mPowerManager.getMaximumScreenBrightnessSetting();
-                int step = (max - min + BRIGHTNESS_STEPS - 1) / BRIGHTNESS_STEPS * direction;
-                int brightness = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS,
-                        mPowerManager.getDefaultScreenBrightnessSetting(),
+                float minFloat = mPowerManager.getBrightnessConstraint(
+                        PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+                float maxFloat = mPowerManager.getBrightnessConstraint(
+                        PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+                float stepFloat = (maxFloat - minFloat) / BRIGHTNESS_STEPS * direction;
+                float brightnessFloat = Settings.System.getFloatForUser(
+                        mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                        mPowerManager.getBrightnessConstraint(
+                                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT),
                         UserHandle.USER_CURRENT_OR_SELF);
-                brightness += step;
+                brightnessFloat += stepFloat;
                 // Make sure we don't go beyond the limits.
-                brightness = Math.min(max, brightness);
-                brightness = Math.max(min, brightness);
+                brightnessFloat = Math.min(maxFloat, brightnessFloat);
+                brightnessFloat = Math.max(minFloat, brightnessFloat);
 
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS, brightness,
+                Settings.System.putFloatForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessFloat,
                         UserHandle.USER_CURRENT_OR_SELF);
                 startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
                         UserHandle.CURRENT_OR_SELF);

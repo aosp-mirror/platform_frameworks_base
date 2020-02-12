@@ -65,6 +65,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
 import android.view.Display;
 
@@ -111,6 +112,7 @@ public class PowerManagerServiceTest {
     @Mock private BatteryManagerInternal mBatteryManagerInternalMock;
     @Mock private ActivityManagerInternal mActivityManagerInternalMock;
     @Mock private AttentionManagerInternal mAttentionManagerInternalMock;
+    @Mock private DreamManagerInternal mDreamManagerInternalMock;
     @Mock private PowerManagerService.NativeWrapper mNativeWrapperMock;
     @Mock private Notifier mNotifierMock;
     @Mock private WirelessChargerDetector mWirelessChargerDetectorMock;
@@ -171,6 +173,7 @@ public class PowerManagerServiceTest {
         addLocalServiceMock(BatteryManagerInternal.class, mBatteryManagerInternalMock);
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
         addLocalServiceMock(AttentionManagerInternal.class, mAttentionManagerInternalMock);
+        addLocalServiceMock(DreamManagerInternal.class, mDreamManagerInternalMock);
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
@@ -651,6 +654,7 @@ public class PowerManagerServiceTest {
         int flags = PowerManager.DOZE_WAKE_LOCK;
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */);
+        when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
         mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
         assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_DOZING);
@@ -732,7 +736,7 @@ public class PowerManagerServiceTest {
         setAttentiveTimeout(5);
         createService();
         startSystem();
-        SystemClock.sleep(8);
+        SystemClock.sleep(20);
         assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 

@@ -306,6 +306,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWaitForBroadcastIdle(pw);
                 case "compat":
                     return runCompat(pw);
+                case "refresh-settings-cache":
+                    return runRefreshSettingsCache();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -2937,6 +2939,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
         mInternal.waitForBroadcastIdle(pw);
+        return 0;
+    }
+
+    int runRefreshSettingsCache() throws RemoteException {
+        mInternal.refreshSettingsCache();
         return 0;
     }
 

@@ -1875,8 +1875,8 @@ public class TelecomManager {
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
      *            {@link ConnectionService#onCreateIncomingConference}.
+     * @hide
      */
-
     public void addNewIncomingConference(@NonNull PhoneAccountHandle phoneAccount,
             @NonNull Bundle extras) {
         try {
@@ -2115,6 +2115,7 @@ public class TelecomManager {
      *
      * @param participants List of participants to start conference with
      * @param extras Bundle of extras to use with the call
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.CALL_PHONE)
     public void startConference(@NonNull List<Uri> participants,

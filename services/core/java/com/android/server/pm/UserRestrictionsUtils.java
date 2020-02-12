@@ -783,6 +783,7 @@ public class UserRestrictionsUtils {
                 break;
 
             case android.provider.Settings.System.SCREEN_BRIGHTNESS:
+            case android.provider.Settings.System.SCREEN_BRIGHTNESS_FLOAT:
             case android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE:
                 if (callingUid == Process.SYSTEM_UID) {
                     return false;

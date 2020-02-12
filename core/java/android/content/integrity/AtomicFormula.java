@@ -55,14 +55,12 @@ public abstract class AtomicFormula extends IntegrityFormula {
                     PRE_INSTALLED,
             })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Key {
-    }
+    public @interface Key {}
 
     /** @hide */
     @IntDef(value = {EQ, GT, GTE})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Operator {
-    }
+    public @interface Operator {}
 
     /**
      * Package name of the app.
@@ -354,7 +352,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
                             "Key %s cannot be used with StringAtomicFormula", keyToString(key)));
             mValue = hashValue(key, value);
             mIsHashedValue =
-                    key == APP_CERTIFICATE || key == INSTALLER_CERTIFICATE
+                    key == APP_CERTIFICATE
+                            || key == INSTALLER_CERTIFICATE
                             ? true
                             : !mValue.equals(value);
         }

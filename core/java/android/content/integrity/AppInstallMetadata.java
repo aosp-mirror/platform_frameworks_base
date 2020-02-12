@@ -18,7 +18,9 @@ package android.content.integrity;
 
 import android.annotation.NonNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -40,6 +42,7 @@ public final class AppInstallMetadata {
     private final List<String> mInstallerCertificates;
     private final long mVersionCode;
     private final boolean mIsPreInstalled;
+    private final Map<String, String> mAllowedInstallersAndCertificates;
 
     private AppInstallMetadata(Builder builder) {
         this.mPackageName = builder.mPackageName;
@@ -48,6 +51,7 @@ public final class AppInstallMetadata {
         this.mInstallerCertificates = builder.mInstallerCertificates;
         this.mVersionCode = builder.mVersionCode;
         this.mIsPreInstalled = builder.mIsPreInstalled;
+        this.mAllowedInstallersAndCertificates = builder.mAllowedInstallersAndCertificates;
     }
 
     @NonNull
@@ -80,6 +84,13 @@ public final class AppInstallMetadata {
         return mIsPreInstalled;
     }
 
+    /**
+     * Get the allowed installers and their corresponding cert.
+     */
+    public Map<String, String> getAllowedInstallersAndCertificates() {
+        return mAllowedInstallersAndCertificates;
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -101,6 +112,23 @@ public final class AppInstallMetadata {
         private List<String> mInstallerCertificates;
         private long mVersionCode;
         private boolean mIsPreInstalled;
+        private Map<String, String> mAllowedInstallersAndCertificates;
+
+        public Builder() {
+            mAllowedInstallersAndCertificates = new HashMap<>();
+        }
+
+        /**
+         * Add allowed installers and cert.
+         *
+         * @see AppInstallMetadata#getAllowedInstallersAndCertificates()
+         */
+        @NonNull
+        public Builder setAllowedInstallersAndCert(
+                @NonNull Map<String, String> allowedInstallersAndCertificates) {
+            this.mAllowedInstallersAndCertificates = allowedInstallersAndCertificates;
+            return this;
+        }
 
         /**
          * Set package name of the app to be installed.

@@ -1128,8 +1128,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public int getWindowIdForLeashToken(@NonNull IBinder token) {
         synchronized (mLock) {
-            // TODO: Add a method to lookup window ID by given leash token.
-            return -1;
+            return mA11yWindowManager.getWindowIdLocked(token);
         }
     }
 

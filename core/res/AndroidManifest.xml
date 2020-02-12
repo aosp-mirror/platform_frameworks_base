@@ -1912,6 +1912,15 @@
     <permission android:name="android.permission.VIBRATE_ALWAYS_ON"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows access to the vibrator state.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_VIBRATOR_STATE"
+        android:label="@string/permdesc_vibrator_state"
+        android:description="@string/permdesc_vibrator_state"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows using PowerManager WakeLocks to keep processor from sleeping or screen
          from dimming.
          <p>Protection level: normal
@@ -2382,6 +2391,12 @@
     <!-- Allows interaction across profiles in the same profile group. -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
         android:protectionLevel="signature|appop|documenter|wellbeing" />
+
+    <!-- Allows configuring apps to have the INTERACT_ACROSS_PROFILES permission so that they can
+         interact across profiles in the same profile group.
+         @hide -->
+    <permission android:name="android.permission.CONFIGURE_INTERACT_ACROSS_PROFILES"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query and manage
          users on the device. This permission is not available to

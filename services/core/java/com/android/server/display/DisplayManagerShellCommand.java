@@ -108,8 +108,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 "Permission required to set the display's brightness");
         final long token = Binder.clearCallingIdentity();
         try {
-            Settings.System.putIntForUser(context.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, (int) (brightness * 255),
+            Settings.System.putFloatForUser(context.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightness,
                     UserHandle.USER_CURRENT);
         } finally {
             Binder.restoreCallingIdentity(token);

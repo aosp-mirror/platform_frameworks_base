@@ -112,6 +112,7 @@ public class RuleIndexingDetailsIdentifierTest {
                                     ATOMIC_FORMULA_WITH_VERSION_CODE,
                                     ATOMIC_FORMULA_WITH_ISPREINSTALLED)),
                     Rule.DENY);
+    public static final int INVALID_FORMULA_TAG = -1;
 
     @Test
     public void getIndexType_nullRule() {
@@ -290,7 +291,7 @@ public class RuleIndexingDetailsIdentifierTest {
         return new AtomicFormula(0) {
             @Override
             public int getTag() {
-                return 4;
+                return INVALID_FORMULA_TAG;
             }
 
             @Override

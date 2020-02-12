@@ -232,7 +232,7 @@ public final class DisplayManagerService extends SystemService {
 
     // The overall display brightness.
     // For now, this only applies to the built-in display but we may split it up eventually.
-    private int mGlobalDisplayBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+    private float mGlobalDisplayBrightness;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -340,7 +340,8 @@ public final class DisplayManagerService extends SystemService {
         mMinimumBrightnessSpline = Spline.createSpline(lux, nits);
 
         PowerManager pm = mContext.getSystemService(PowerManager.class);
-        mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
+        mGlobalDisplayBrightness = pm.getBrightnessConstraint(
+                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT);
         mCurrentUserId = UserHandle.USER_SYSTEM;
         ColorSpace[] colorSpaces = SurfaceControl.getCompositionColorSpaces();
         mWideColorSpace = colorSpaces[1];
@@ -539,16 +540,16 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void requestGlobalDisplayStateInternal(int state, int brightness) {
+    private void requestGlobalDisplayStateInternal(int state, float brightnessState) {
         if (state == Display.STATE_UNKNOWN) {
             state = Display.STATE_ON;
         }
         if (state == Display.STATE_OFF) {
-            brightness = PowerManager.BRIGHTNESS_OFF;
-        } else if (brightness < 0) {
-            brightness = PowerManager.BRIGHTNESS_DEFAULT;
-        } else if (brightness > PowerManager.BRIGHTNESS_ON) {
-            brightness = PowerManager.BRIGHTNESS_ON;
+            brightnessState = PowerManager.BRIGHTNESS_OFF_FLOAT;
+        } else if (brightnessState < PowerManager.BRIGHTNESS_MIN || Float.isNaN(brightnessState)) {
+            brightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        } else if (brightnessState > PowerManager.BRIGHTNESS_MAX) {
+            brightnessState = PowerManager.BRIGHTNESS_MAX;
         }
 
         synchronized (mTempDisplayStateWorkQueue) {
@@ -558,15 +559,15 @@ public final class DisplayManagerService extends SystemService {
                 // may happen as a side-effect of displays changing state.
                 synchronized (mSyncRoot) {
                     if (mGlobalDisplayState == state
-                            && mGlobalDisplayBrightness == brightness) {
+                            && mGlobalDisplayBrightness == brightnessState) {
                         return; // no change
                     }
 
                     Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestGlobalDisplayState("
                             + Display.stateToString(state)
-                            + ", brightness=" + brightness + ")");
+                            + ", brightness=" + brightnessState + ")");
                     mGlobalDisplayState = state;
-                    mGlobalDisplayBrightness = brightness;
+                    mGlobalDisplayBrightness = brightnessState;
                     applyGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
                 }
 
@@ -1023,7 +1024,8 @@ public final class DisplayManagerService extends SystemService {
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-            return device.requestDisplayStateLocked(mGlobalDisplayState, mGlobalDisplayBrightness);
+            return device.requestDisplayStateLocked(
+                    mGlobalDisplayState, mGlobalDisplayBrightness);
         }
         return null;
     }
@@ -2300,7 +2302,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void setTemporaryBrightness(int brightness) {
+        public void setTemporaryBrightness(float brightness) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
                     "Permission required to set the display's brightness");
@@ -2419,7 +2421,7 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 DisplayBlanker blanker = new DisplayBlanker() {
                     @Override
-                    public void requestDisplayState(int state, int brightness) {
+                    public void requestDisplayState(int state, float brightness) {
                         // The order of operations is important for legacy reasons.
                         if (state == Display.STATE_OFF) {
                             requestGlobalDisplayStateInternal(state, brightness);

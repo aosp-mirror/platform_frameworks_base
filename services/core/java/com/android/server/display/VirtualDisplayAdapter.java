@@ -265,7 +265,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(int state, int brightness) {
+        public Runnable requestDisplayStateLocked(int state, float brightnessState) {
             if (state != mDisplayState) {
                 mDisplayState = state;
                 if (state == Display.STATE_OFF) {

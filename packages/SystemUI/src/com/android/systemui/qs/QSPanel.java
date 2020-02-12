@@ -38,7 +38,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -60,7 +59,6 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -117,9 +115,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private BrightnessMirrorController mBrightnessMirrorController;
     private View mDivider;
 
-    private FrameLayout mPluginFrame;
-    private final PluginManager mPluginManager;
-
     private final LocalMediaManager.DeviceCallback mDeviceCallback =
             new LocalMediaManager.DeviceCallback() {
         @Override
@@ -154,13 +149,12 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public QSPanel(Context context, AttributeSet attrs, DumpController dumpController) {
-        this(context, attrs, dumpController, null, Dependency.get(BroadcastDispatcher.class));
+        this(context, attrs, dumpController, Dependency.get(BroadcastDispatcher.class));
     }
 
     @Inject
     public QSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DumpController dumpController, PluginManager pluginManager,
-            BroadcastDispatcher broadcastDispatcher) {
+            DumpController dumpController, BroadcastDispatcher broadcastDispatcher) {
         super(context, attrs);
         mContext = context;
 
@@ -198,7 +192,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mBrightnessController = new BrightnessController(getContext(),
                 findViewById(R.id.brightness_slider), broadcastDispatcher);
         mDumpController = dumpController;
-        mPluginManager = pluginManager;
     }
 
     @Override

@@ -60,8 +60,6 @@ public:
                                              bool* _aidl_return) const = 0;
     virtual binder::Status startDataLoader(MountId mountId, bool* _aidl_return) const = 0;
     virtual binder::Status destroyDataLoader(MountId mountId) const = 0;
-    virtual binder::Status newFileForDataLoader(MountId mountId, FileId fileid,
-                                                const std::vector<uint8_t>& metadata) const = 0;
     virtual binder::Status showHealthBlockedUI(MountId mountId) const = 0;
 };
 
@@ -127,13 +125,6 @@ public:
     }
     binder::Status destroyDataLoader(MountId mountId) const override {
         return mInterface->destroyDataLoader(mountId);
-    }
-    binder::Status newFileForDataLoader(MountId mountId, FileId fileid,
-                                        const std::vector<uint8_t>& metadata) const override {
-        return mInterface->newFileForDataLoader(mountId,
-                                                {(const uint8_t*)fileid.data,
-                                                 (const uint8_t*)fileid.data + sizeof(fileid.data)},
-                                                metadata);
     }
     binder::Status showHealthBlockedUI(MountId mountId) const override {
         return mInterface->showHealthBlockedUI(mountId);
