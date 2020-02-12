@@ -3426,7 +3426,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 187;
+            private static final int SETTINGS_VERSION = 188;
 
             private final int mUserId;
 
@@ -4730,6 +4730,23 @@ public class SettingsProvider extends ContentProvider {
                     getGlobalSettingsLocked().deleteSettingLocked(
                             "wifi_saved_state");
                     currentVersion = 187;
+                }
+
+                if (currentVersion == 187) {
+                    // Migrate adaptive sleep setting from System to Secure.
+                    if (userId == UserHandle.USER_OWNER) {
+                        // Remove from the system settings.
+                        SettingsState systemSettings = getSystemSettingsLocked(userId);
+                        String name = Settings.System.ADAPTIVE_SLEEP;
+                        Setting setting = systemSettings.getSettingLocked(name);
+                        systemSettings.deleteSettingLocked(name);
+
+                        // Add to the secure settings.
+                        SettingsState secureSettings = getSecureSettingsLocked(userId);
+                        secureSettings.insertSettingLocked(name, setting.getValue(), null /* tag */,
+                                false /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 188;
                 }
 
                 // vXXX: Add new settings above this point.
