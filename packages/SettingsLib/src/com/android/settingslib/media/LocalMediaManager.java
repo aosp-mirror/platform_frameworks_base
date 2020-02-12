@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * LocalMediaManager provide interface to get MediaDevice list and transfer media to MediaDevice.
@@ -53,7 +54,7 @@ public class LocalMediaManager implements BluetoothCallback {
         int STATE_DISCONNECTED = 3;
     }
 
-    private final Collection<DeviceCallback> mCallbacks = new ArrayList<>();
+    private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
     @VisibleForTesting
     final MediaDeviceCallback mMediaDeviceCallback = new MediaDeviceCallback();
 
@@ -73,18 +74,14 @@ public class LocalMediaManager implements BluetoothCallback {
      * Register to start receiving callbacks for MediaDevice events.
      */
     public void registerCallback(DeviceCallback callback) {
-        synchronized (mCallbacks) {
-            mCallbacks.add(callback);
-        }
+        mCallbacks.add(callback);
     }
 
     /**
      * Unregister to stop receiving callbacks for MediaDevice events
      */
     public void unregisterCallback(DeviceCallback callback) {
-        synchronized (mCallbacks) {
-            mCallbacks.remove(callback);
-        }
+        mCallbacks.remove(callback);
     }
 
     public LocalMediaManager(Context context, String packageName, Notification notification) {
@@ -152,10 +149,8 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     void dispatchSelectedDeviceStateChanged(MediaDevice device, @MediaDeviceState int state) {
-        synchronized (mCallbacks) {
-            for (DeviceCallback callback : mCallbacks) {
-                callback.onSelectedDeviceStateChanged(device, state);
-            }
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onSelectedDeviceStateChanged(device, state);
         }
     }
 
@@ -169,19 +164,15 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     void dispatchDeviceListUpdate() {
-        synchronized (mCallbacks) {
-            Collections.sort(mMediaDevices, COMPARATOR);
-            for (DeviceCallback callback : mCallbacks) {
-                callback.onDeviceListUpdate(new ArrayList<>(mMediaDevices));
-            }
+        Collections.sort(mMediaDevices, COMPARATOR);
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onDeviceListUpdate(new ArrayList<>(mMediaDevices));
         }
     }
 
     void dispatchDeviceAttributesChanged() {
-        synchronized (mCallbacks) {
-            for (DeviceCallback callback : mCallbacks) {
-                callback.onDeviceAttributesChanged();
-            }
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onDeviceAttributesChanged();
         }
     }
 
@@ -268,6 +259,10 @@ public class LocalMediaManager implements BluetoothCallback {
     private boolean isConnected(CachedBluetoothDevice device) {
         return device.isActiveDevice(BluetoothProfile.A2DP)
                 || device.isActiveDevice(BluetoothProfile.HEARING_AID);
+    }
+
+    private Collection<DeviceCallback> getCallbacks() {
+        return new CopyOnWriteArrayList<>(mCallbacks);
     }
 
     class MediaDeviceCallback implements MediaManager.MediaDeviceCallback {
