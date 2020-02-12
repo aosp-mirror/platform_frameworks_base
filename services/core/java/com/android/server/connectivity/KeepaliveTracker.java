@@ -325,7 +325,7 @@ public class KeepaliveTracker {
             mSlot = slot;
             int error = isValid();
             if (error == SUCCESS) {
-                Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.name());
+                Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.toShortString());
                 switch (mType) {
                     case TYPE_NATT:
                         mNai.asyncChannel.sendMessage(
@@ -365,7 +365,8 @@ public class KeepaliveTracker {
                     Log.e(TAG, "Cannot stop unowned keepalive " + mSlot + " on " + mNai.network);
                 }
             }
-            Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.name() + ": " + reason);
+            Log.d(TAG, "Stopping keepalive " + mSlot + " on " + mNai.toShortString()
+                    + ": " + reason);
             switch (mStartedState) {
                 case NOT_STARTED:
                     // Remove the reference of the keepalive that meet error before starting,
@@ -476,7 +477,7 @@ public class KeepaliveTracker {
     }
 
     public void handleStopKeepalive(NetworkAgentInfo nai, int slot, int reason) {
-        String networkName = (nai == null) ? "(null)" : nai.name();
+        final String networkName = NetworkAgentInfo.toShortString(nai);
         HashMap <Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(nai);
         if (networkKeepalives == null) {
             Log.e(TAG, "Attempt to stop keepalive on nonexistent network " + networkName);
@@ -493,7 +494,7 @@ public class KeepaliveTracker {
     }
 
     private void cleanupStoppedKeepalive(NetworkAgentInfo nai, int slot) {
-        String networkName = (nai == null) ? "(null)" : nai.name();
+        final String networkName = NetworkAgentInfo.toShortString(nai);
         HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(nai);
         if (networkKeepalives == null) {
             Log.e(TAG, "Attempt to remove keepalive on nonexistent network " + networkName);
@@ -540,7 +541,7 @@ public class KeepaliveTracker {
         } catch(NullPointerException e) {}
         if (ki == null) {
             Log.e(TAG, "Event " + message.what + "," + slot + "," + reason
-                    + " for unknown keepalive " + slot + " on " + nai.name());
+                    + " for unknown keepalive " + slot + " on " + nai.toShortString());
             return;
         }
 
@@ -562,7 +563,7 @@ public class KeepaliveTracker {
         if (KeepaliveInfo.STARTING == ki.mStartedState) {
             if (SUCCESS == reason) {
                 // Keepalive successfully started.
-                Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
+                Log.d(TAG, "Started keepalive " + slot + " on " + nai.toShortString());
                 ki.mStartedState = KeepaliveInfo.STARTED;
                 try {
                     ki.mCallback.onStarted(slot);
@@ -570,14 +571,14 @@ public class KeepaliveTracker {
                     Log.w(TAG, "Discarded onStarted(" + slot + ") callback");
                 }
             } else {
-                Log.d(TAG, "Failed to start keepalive " + slot + " on " + nai.name()
+                Log.d(TAG, "Failed to start keepalive " + slot + " on " + nai.toShortString()
                         + ": " + reason);
                 // The message indicated some error trying to start: do call handleStopKeepalive.
                 handleStopKeepalive(nai, slot, reason);
             }
         } else if (KeepaliveInfo.STOPPING == ki.mStartedState) {
             // The message indicated result of stopping : clean up keepalive slots.
-            Log.d(TAG, "Stopped keepalive " + slot + " on " + nai.name()
+            Log.d(TAG, "Stopped keepalive " + slot + " on " + nai.toShortString()
                     + " stopped: " + reason);
             ki.mStartedState = KeepaliveInfo.NOT_STARTED;
             cleanupStoppedKeepalive(nai, slot);
@@ -733,7 +734,7 @@ public class KeepaliveTracker {
         pw.println("Socket keepalives:");
         pw.increaseIndent();
         for (NetworkAgentInfo nai : mKeepalives.keySet()) {
-            pw.println(nai.name());
+            pw.println(nai.toShortString());
             pw.increaseIndent();
             for (int slot : mKeepalives.get(nai).keySet()) {
                 KeepaliveInfo ki = mKeepalives.get(nai).get(slot);
