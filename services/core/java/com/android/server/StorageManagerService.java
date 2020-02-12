@@ -3242,7 +3242,7 @@ class StorageManagerService extends IStorageManager.Stub
                         + " does not match calling user id " + userId);
             }
             try {
-                mVold.setupAppDir(appPath, matcher.group(1), callingUid);
+                mVold.setupAppDir(appPath, callingUid);
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
