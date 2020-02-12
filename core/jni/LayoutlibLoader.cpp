@@ -80,6 +80,7 @@ extern int register_android_text_AndroidCharacter(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
+extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
 extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
@@ -149,6 +150,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
         {"android.util.Log", REG_JNI(register_android_util_Log)},
         {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
+        {"android.util.jar.StrictJarFile", REG_JNI(register_android_util_jar_StrictJarFile)},
         {"android.view.RenderNodeAnimator", REG_JNI(register_android_view_RenderNodeAnimator)},
         {"com.android.internal.util.VirtualRefBasePtr",
          REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
