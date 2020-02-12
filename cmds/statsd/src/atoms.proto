@@ -381,7 +381,7 @@ message Atom {
         UserspaceRebootReported userspace_reboot_reported = 243;
         NotificationReported notification_reported = 244 [(module) = "framework"];
         NotificationPanelReported notification_panel_reported = 245;
-        NotificationChannelModified notification_panel_modified = 246;
+        NotificationChannelModified notification_channel_modified = 246;
         IntegrityCheckResultReported integrity_check_result_reported = 247 [(module) = "framework"];
         IntegrityRulesPushed integrity_rules_pushed = 248 [(module) = "framework"];
         CellBroadcastMessageReported cb_message_reported =
