@@ -5860,21 +5860,27 @@ public class DevicePolicyManager {
      * a secure video output. See {@link android.view.Display#FLAG_SECURE} for more details about
      * secure surfaces and secure displays.
      * <p>
-     * The calling device admin must be a device or profile owner. If it is not, a security
+     * This method can be called on the {@link DevicePolicyManager} instance, returned by
+     * {@link #getParentProfileInstance(ComponentName)}, where the calling device admin must be
+     * the profile owner of an organization-owned managed profile. If it is not, a security
      * exception will be thrown.
+     * <p>
+     * If the caller is device owner or called on the parent instance by a profile owner of an
+     * organization-owned managed profile, then the restriction will be applied to all users.
      * <p>
      * From version {@link android.os.Build.VERSION_CODES#M} disabling screen capture also blocks
      * assist requests for all activities of the relevant user.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled Whether screen capture is disabled or not.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or if
+     *                           called on the parent profile and the {@code admin} is not a
+     *                           profile owner of an organization-owned managed profile.
      */
     public void setScreenCaptureDisabled(@NonNull ComponentName admin, boolean disabled) {
-        throwIfParentInstance("setScreenCaptureDisabled");
         if (mService != null) {
             try {
-                mService.setScreenCaptureDisabled(admin, disabled);
+                mService.setScreenCaptureDisabled(admin, disabled, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5884,11 +5890,16 @@ public class DevicePolicyManager {
     /**
      * Determine whether or not screen capture has been disabled by the calling
      * admin, if specified, or all admins.
-     * @param admin The name of the admin component to check, or {@code null} to check whether any admins
-     * have disabled screen capture.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance,
+     * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
+     * the profile owner of an organization-owned managed profile (the calling admin must be
+     * specified).
+     *
+     * @param admin The name of the admin component to check, or {@code null} to check whether any
+     *              admins have disabled screen capture.
      */
     public boolean getScreenCaptureDisabled(@Nullable ComponentName admin) {
-        throwIfParentInstance("getScreenCaptureDisabled");
         return getScreenCaptureDisabled(admin, myUserId());
     }
 
@@ -5896,7 +5907,7 @@ public class DevicePolicyManager {
     public boolean getScreenCaptureDisabled(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getScreenCaptureDisabled(admin, userHandle);
+                return mService.getScreenCaptureDisabled(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
