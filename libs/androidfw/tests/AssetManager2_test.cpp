@@ -216,25 +216,6 @@ TEST_F(AssetManager2Test, FindsResourceFromAppLoadedAsSharedLibrary) {
   EXPECT_EQ(fix_package_id(appaslib::R::array::integerArray1, 0x02), value.data);
 }
 
-TEST_F(AssetManager2Test, AssignsUnchangingPackageIdToSharedLibrary) {
-  DynamicLibManager lib_manager;
-  AssetManager2 assetmanager(&lib_manager);
-  assetmanager.SetApkAssets(
-      {lib_one_assets_.get(), lib_two_assets_.get(), libclient_assets_.get()});
-
-  AssetManager2 assetmanager2(&lib_manager);
-  assetmanager2.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
-
-  uint32_t res_id = assetmanager.GetResourceId("com.android.lib_one:string/foo");
-  ASSERT_NE(0U, res_id);
-
-  uint32_t res_id_2 = assetmanager2.GetResourceId("com.android.lib_one:string/foo");
-  ASSERT_NE(0U, res_id_2);
-
-  ASSERT_EQ(res_id, res_id_2);
-}
-
 TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({lib_one_assets_.get()});
