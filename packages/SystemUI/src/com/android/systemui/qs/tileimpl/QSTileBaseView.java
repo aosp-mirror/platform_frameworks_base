@@ -13,6 +13,8 @@
  */
 package com.android.systemui.qs.tileimpl;
 
+import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_STATE_DESCRIPTION;
+
 import static com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH;
 
 import android.animation.ValueAnimator;
@@ -73,6 +75,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private int mCircleColor;
     private int mBgSize;
 
+    private static final int INVALID = -1;
+    private CharSequence mStateDescriptionDeltas = null;
+    private CharSequence mLastStateDescription;
+    private int mLastState = INVALID;
 
     public QSTileBaseView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -250,8 +256,14 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         if (!TextUtils.isEmpty(state.stateDescription)) {
             stateDescription.append(", ");
             stateDescription.append(state.stateDescription);
+            if (mLastState != INVALID && state.state == mLastState
+                    && !state.stateDescription.equals(mLastStateDescription)) {
+                mStateDescriptionDeltas = state.stateDescription;
+            }
         }
         setStateDescription(stateDescription.toString());
+        mLastState = state.state;
+        mLastStateDescription = state.stateDescription;
 
         mAccessibilityClass =
                 state.state == Tile.STATE_UNAVAILABLE ? null : state.expandedAccessibilityClassName;
@@ -313,6 +325,11 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         super.onInitializeAccessibilityEvent(event);
         if (!TextUtils.isEmpty(mAccessibilityClass)) {
             event.setClassName(mAccessibilityClass);
+        }
+        if (event.getContentChangeTypes() == CONTENT_CHANGE_TYPE_STATE_DESCRIPTION
+                && mStateDescriptionDeltas != null) {
+            event.getText().add(mStateDescriptionDeltas);
+            mStateDescriptionDeltas = null;
         }
     }
 
