@@ -1156,7 +1156,7 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_RAM_NORMAL, 0);
         }
 
-        if (IncrementalManager.isEnabled()) {
+        if (IncrementalManager.isFeatureEnabled()) {
             addFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY, 0);
         }
 
