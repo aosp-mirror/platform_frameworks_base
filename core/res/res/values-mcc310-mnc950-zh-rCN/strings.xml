@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="94675382531896663">"未配置的 SIM 卡 MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="2418195136279399212">"不被允许的 SIM 卡 MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="8920048244573695129">"不受允许的手机 MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="615419724607901560">"未配置的 SIM 卡 MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="7801541624846497489">"不被允许的 SIM 卡 MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="7066936962628406316">"不受允许的手机 MM#6"</string>
 </resources>
