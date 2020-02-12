@@ -122,9 +122,6 @@ public final class NotificationEntry extends ListEntry {
      */
     @CancellationReason int mCancellationReason = REASON_NOT_CANCELED;
 
-    /** @see #hasInflationError() */
-    private boolean mHasInflationError;
-
     /** @see #getDismissState() */
     @NonNull private DismissState mDismissState = DismissState.NOT_DISMISSED;
 
@@ -272,23 +269,6 @@ public final class NotificationEntry extends ListEntry {
     /*
      * Bookkeeping getters and setters
      */
-
-    /**
-     * Whether this notification had an error when attempting to inflate. This is only used in
-     * the NewNotifPipeline
-     */
-    public boolean hasInflationError() {
-        return mHasInflationError;
-    }
-
-    /**
-     * Set whether the notification has an error while inflating.
-     *
-     * TODO: Move this into an inflation error manager class.
-     */
-    public void setHasInflationError(boolean hasError) {
-        mHasInflationError = hasError;
-    }
 
     /**
      * Set if the user has dismissed this notif but we haven't yet heard back from system server to
