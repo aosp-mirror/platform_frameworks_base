@@ -811,11 +811,14 @@ public final class MediaParser {
 
     private static MediaFormat toMediaFormat(Format format) {
 
-        // TODO: Add if (value != Format.NO_VALUE);
-
         MediaFormat result = new MediaFormat();
-        result.setInteger(MediaFormat.KEY_BIT_RATE, format.bitrate);
-        result.setInteger(MediaFormat.KEY_CHANNEL_COUNT, format.channelCount);
+        if (format.bitrate != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_BIT_RATE, format.bitrate);
+        }
+        if (format.channelCount != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_CHANNEL_COUNT, format.channelCount);
+        }
+
         if (format.colorInfo != null) {
             result.setInteger(MediaFormat.KEY_COLOR_TRANSFER, format.colorInfo.colorTransfer);
             result.setInteger(MediaFormat.KEY_COLOR_RANGE, format.colorInfo.colorRange);
@@ -826,25 +829,44 @@ public final class MediaParser {
                         ByteBuffer.wrap(format.colorInfo.hdrStaticInfo));
             }
         }
-        result.setString(MediaFormat.KEY_MIME, format.sampleMimeType);
-        result.setFloat(MediaFormat.KEY_FRAME_RATE, format.frameRate);
-        result.setInteger(MediaFormat.KEY_WIDTH, format.width);
-        result.setInteger(MediaFormat.KEY_HEIGHT, format.height);
+
+        if (format.sampleMimeType != null) {
+            result.setString(MediaFormat.KEY_MIME, format.sampleMimeType);
+        }
+        if (format.codecs != null) {
+            result.setString(MediaFormat.KEY_CODECS_STRING, format.codecs);
+        }
+        if (format.frameRate != Format.NO_VALUE) {
+            result.setFloat(MediaFormat.KEY_FRAME_RATE, format.frameRate);
+        }
+        if (format.width != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_WIDTH, format.width);
+        }
+        if (format.height != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_HEIGHT, format.height);
+        }
         List<byte[]> initData = format.initializationData;
         if (initData != null) {
             for (int i = 0; i < initData.size(); i++) {
                 result.setByteBuffer("csd-" + i, ByteBuffer.wrap(initData.get(i)));
             }
         }
-        result.setString(MediaFormat.KEY_LANGUAGE, format.language);
-        result.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
-        result.setInteger(MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
-        result.setInteger(MediaFormat.KEY_ROTATION, format.rotationDegrees);
-        result.setInteger(MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
-
+        if (format.language != null) {
+            result.setString(MediaFormat.KEY_LANGUAGE, format.language);
+        }
+        if (format.maxInputSize != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
+        }
+        if (format.pcmEncoding != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
+        }
+        if (format.rotationDegrees != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_ROTATION, format.rotationDegrees);
+        }
+        if (format.sampleRate != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
+        }
         int selectionFlags = format.selectionFlags;
-        // We avoid setting selection flags in the MediaFormat, unless explicitly signaled by the
-        // extractor.
         if ((selectionFlags & C.SELECTION_FLAG_AUTOSELECT) != 0) {
             result.setInteger(MediaFormat.KEY_IS_AUTOSELECT, 1);
         }
@@ -854,26 +876,27 @@ public final class MediaParser {
         if ((selectionFlags & C.SELECTION_FLAG_FORCED) != 0) {
             result.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, 1);
         }
+        if (format.encoderDelay != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_ENCODER_DELAY, format.encoderDelay);
+        }
+        if (format.encoderPadding != Format.NO_VALUE) {
+            result.setInteger(MediaFormat.KEY_ENCODER_PADDING, format.encoderPadding);
+        }
+        // TODO: Implement float to fraction conversion.
+        // if (format.pixelWidthHeightRatio != Format.NO_VALUE) {
+        //     result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_WIDTH, );
+        //     result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_HEIGHT, );
+        // }
 
         // LACK OF SUPPORT FOR:
         //    format.accessibilityChannel;
-        //    format.codecs;
         //    format.containerMimeType;
-        //    format.drmInitData;
-        //    format.encoderDelay;
-        //    format.encoderPadding;
         //    format.id;
         //    format.metadata;
-        //    format.pixelWidthHeightRatio;
         //    format.roleFlags;
         //    format.stereoMode;
         //    format.subsampleOffsetUs;
         return result;
-    }
-
-    private static int toFrameworkFlags(int flags) {
-        // TODO: Implement.
-        return 0;
     }
 
     private static DrmInitData toFrameworkDrmInitData(
