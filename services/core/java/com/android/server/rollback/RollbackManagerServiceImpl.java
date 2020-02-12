@@ -982,8 +982,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (!session.isMultiPackage()) {
                 if (!enableRollbackForPackageSession(newRollback, session)) {
                     Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
-                    result.offer(-1);
-                    return;
                 }
             } else {
                 for (int childSessionId : session.getChildSessionIds()) {
@@ -991,13 +989,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             installer.getSessionInfo(childSessionId);
                     if (childSession == null) {
                         Slog.e(TAG, "No matching child install session for: " + childSessionId);
-                        result.offer(-1);
-                        return;
+                        break;
                     }
                     if (!enableRollbackForPackageSession(newRollback, childSession)) {
                         Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
-                        result.offer(-1);
-                        return;
+                        break;
                     }
                 }
             }
@@ -1188,8 +1184,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     /**
-     * Add a rollback to the list of rollbacks. This should be called after rollback has been
-     * enabled for all packages in the rollback. It does not make the rollback available yet.
+     * Add a rollback to the list of rollbacks. It does not make the rollback available yet.
      *
      * @return the Rollback instance for a successfully enable-completed rollback,
      * or null on error.
