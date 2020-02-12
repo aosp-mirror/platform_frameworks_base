@@ -1,0 +1,49 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server;
+
+import "frameworks/base/core/proto/android/bluetooth/enums.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+message BluetoothManagerServiceDumpProto {
+   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+   message ActiveLog {
+      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+      optional int64 timestamp_ms = 1;
+      optional bool enable = 2;
+      optional string package_name = 3;
+      optional .android.bluetooth.EnableDisableReasonEnum reason = 4;
+   }
+
+   optional bool enabled = 1;
+   optional int32 state = 2;
+   optional string state_name = 3;
+   optional string address = 4 [(.android.privacy).dest = DEST_EXPLICIT];
+   optional string name = 5 [(.android.privacy).dest = DEST_EXPLICIT];
+   optional int64 last_enabled_time_ms = 6;
+   optional int64 curr_timestamp_ms = 7;
+   repeated ActiveLog active_logs = 8;
+   optional int32 num_crashes = 9;
+   optional bool crash_log_maxed = 10;
+   repeated int64 crash_timestamps_ms = 11;
+   optional int32 num_ble_apps = 12;
+   repeated string ble_app_package_names = 13;
+}
