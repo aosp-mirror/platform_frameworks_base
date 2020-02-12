@@ -48,6 +48,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
+import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
 import android.annotation.NonNull;
@@ -71,9 +72,8 @@ import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkRequest;
 import android.net.NetworkScoreManager;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Environment;
@@ -285,6 +285,7 @@ public class AppStandbyController implements AppStandbyInternal {
     long mInitialForegroundServiceStartTimeoutMillis;
 
     private volatile boolean mAppIdleEnabled;
+    private boolean mIsCharging;
     private boolean mSystemServicesReady = false;
     // There was a system update, defaults need to be initialized after services are ready
     private boolean mPendingInitializeDefaults;
@@ -360,6 +361,11 @@ public class AppStandbyController implements AppStandbyInternal {
         mHandler = new AppStandbyHandler(mInjector.getLooper());
         mPackageManager = mContext.getPackageManager();
 
+        DeviceStateReceiver deviceStateReceiver = new DeviceStateReceiver();
+        IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
+        deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
+        mContext.registerReceiver(deviceStateReceiver, deviceStates);
+
         synchronized (mAppIdleLock) {
             mAppIdleHistory = new AppIdleHistory(mInjector.getDataSystemDirectory(),
                     mInjector.elapsedRealtime());
@@ -417,6 +423,8 @@ public class AppStandbyController implements AppStandbyInternal {
             if (mPendingOneTimeCheckIdleStates) {
                 postOneTimeCheckIdleStates();
             }
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            setChargingState(mInjector.isCharging());
         }
     }
 
@@ -513,6 +521,16 @@ public class AppStandbyController implements AppStandbyInternal {
                 nextCheckDelay);
         maybeInformListeners(packageName, userId, elapsedRealtime, appUsage.currentBucket,
                 appUsage.bucketingReason, false);
+    }
+
+    @VisibleForTesting
+    void setChargingState(boolean isCharging) {
+        synchronized (mAppIdleLock) {
+            if (mIsCharging != isCharging) {
+                if (DEBUG) Slog.d(TAG, "Setting mIsCharging to " + isCharging);
+                mIsCharging = isCharging;
+            }
+        }
     }
 
     @Override
@@ -977,6 +995,11 @@ public class AppStandbyController implements AppStandbyInternal {
         if (isAppSpecial(packageName, appId, userId)) {
             return false;
         } else {
+            synchronized (mAppIdleLock) {
+                if (!mAppIdleEnabled || mIsCharging) {
+                    return false;
+                }
+            }
             return isAppIdleUnfiltered(packageName, userId, elapsedRealtime);
         }
     }
@@ -1543,6 +1566,8 @@ public class AppStandbyController implements AppStandbyInternal {
 
         pw.println();
         pw.print("mAppIdleEnabled="); pw.print(mAppIdleEnabled);
+        pw.print(" mIsCharging=");
+        pw.print(mIsCharging);
         pw.println();
         pw.print("mScreenThresholds="); pw.println(Arrays.toString(mAppStandbyScreenThresholds));
         pw.print("mElapsedThresholds="); pw.println(Arrays.toString(mAppStandbyElapsedThresholds));
@@ -1560,6 +1585,7 @@ public class AppStandbyController implements AppStandbyInternal {
         private final Looper mLooper;
         private IDeviceIdleController mDeviceIdleController;
         private IBatteryStats mBatteryStats;
+        private BatteryManager mBatteryManager;
         private PackageManagerInternal mPackageManagerInternal;
         private DisplayManager mDisplayManager;
         private PowerManager mPowerManager;
@@ -1593,6 +1619,7 @@ public class AppStandbyController implements AppStandbyInternal {
                 mDisplayManager = (DisplayManager) mContext.getSystemService(
                         Context.DISPLAY_SERVICE);
                 mPowerManager = mContext.getSystemService(PowerManager.class);
+                mBatteryManager = mContext.getSystemService(BatteryManager.class);
 
                 final ActivityManager activityManager =
                         (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -1628,6 +1655,10 @@ public class AppStandbyController implements AppStandbyInternal {
                     && Global.getInt(mContext.getContentResolver(),
                     Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED, 1) == 1;
             return buildFlag && runtimeFlag;
+        }
+
+        boolean isCharging() {
+            return mBatteryManager.isCharging();
         }
 
         boolean isPowerSaveWhitelistExceptIdleApp(String packageName) throws RemoteException {
@@ -1766,15 +1797,19 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     };
 
-    private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder().build();
-
-    private final ConnectivityManager.NetworkCallback mNetworkCallback
-            = new ConnectivityManager.NetworkCallback() {
+    private class DeviceStateReceiver extends BroadcastReceiver {
         @Override
-        public void onAvailable(Network network) {
-            mConnectivityManager.unregisterNetworkCallback(this);
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case BatteryManager.ACTION_CHARGING:
+                    setChargingState(true);
+                    break;
+                case BatteryManager.ACTION_DISCHARGING:
+                    setChargingState(false);
+                    break;
+            }
         }
-    };
+    }
 
     private final DisplayManager.DisplayListener mDisplayListener
             = new DisplayManager.DisplayListener() {
