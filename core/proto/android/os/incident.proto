@@ -428,7 +428,7 @@ message IncidentProto {
         (section).args = "dropbox --proto system_app_wtf"
     ];
 
-    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_crashes = 3037 [
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_crash = 3037 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "dropbox --proto system_server_crash"
     ];
