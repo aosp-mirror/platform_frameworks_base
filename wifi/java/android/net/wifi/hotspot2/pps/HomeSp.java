@@ -305,6 +305,20 @@ public final class HomeSp implements Parcelable {
                 Arrays.hashCode(mRoamingConsortiumOis));
     }
 
+    /**
+     * Get a unique identifier for HomeSp. This identifier depends only on items that remain
+     * constant throughout the lifetime of a subscription.
+     *
+     * @hide
+     * @return a Unique identifier for a HomeSp object
+     */
+    public int getUniqueId() {
+        return Objects.hash(mFqdn, mFriendlyName, mHomeNetworkIds, Arrays.hashCode(mMatchAllOis),
+                Arrays.hashCode(mMatchAnyOis), Arrays.hashCode(mOtherHomePartners),
+                Arrays.hashCode(mRoamingConsortiumOis));
+    }
+
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

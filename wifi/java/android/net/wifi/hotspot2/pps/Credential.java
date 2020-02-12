@@ -1020,6 +1020,28 @@ public final class Credential implements Parcelable {
                 Arrays.hashCode(mClientCertificateChain));
     }
 
+    /**
+     * Get a unique identifier for Credential. This identifier depends only on items that remain
+     * constant throughout the lifetime of a subscription's credentials.
+     *
+     * @hide
+     * @return a Unique identifier for a Credential object
+     */
+    public int getUniqueId() {
+        int usedCredential;
+
+        // Initialize usedCredential based on the credential type of the profile
+        if (mUserCredential != null) {
+            usedCredential = 0;
+        } else if (mCertCredential != null) {
+            usedCredential = 1;
+        } else {
+            usedCredential = 2;
+        }
+
+        return Objects.hash(usedCredential, mRealm);
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
