@@ -22,8 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.graphics.Insets;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationCallback.AnimationBounds;
-import android.view.animation.Interpolator;
+import android.view.WindowInsetsAnimation.Bounds;
 
 /**
  * Controller for app-driven animation of system windows.
@@ -35,7 +34,7 @@ import android.view.animation.Interpolator;
  *  <p>
  *  Control is obtained through {@link WindowInsetsController#controlWindowInsetsAnimation}.
  */
-@SuppressLint("NotClosable")
+@SuppressLint("NotCloseable")
 public interface WindowInsetsAnimationController {
 
     /**
@@ -45,12 +44,12 @@ public interface WindowInsetsAnimationController {
      * to {@link View#getRootView}
      * <p>
      * If there are any animation listeners registered, this value is the same as
-     * {@link AnimationBounds#getLowerBound()} that is being be passed into the root view of the
+     * {@link Bounds#getLowerBound()} that is being be passed into the root view of the
      * hierarchy.
      *
      * @return Insets when the windows this animation is controlling are fully hidden.
      *
-     * @see AnimationBounds#getLowerBound()
+     * @see Bounds#getLowerBound()
      */
     @NonNull Insets getHiddenStateInsets();
 
@@ -61,11 +60,11 @@ public interface WindowInsetsAnimationController {
      * to {@link View#getRootView}
      * <p>
      * If there are any animation listeners registered, this value is the same as
-     * {@link AnimationBounds#getUpperBound()} that is being passed into the root view of hierarchy.
+     * {@link Bounds#getUpperBound()} that is being passed into the root view of hierarchy.
      *
      * @return Insets when the windows this animation is controlling are fully shown.
      *
-     * @see AnimationBounds#getUpperBound()
+     * @see Bounds#getUpperBound()
      */
     @NonNull Insets getShownStateInsets();
 
@@ -114,9 +113,9 @@ public interface WindowInsetsAnimationController {
      * Also note that this will <b>not</b> inform the view system of a full inset change via
      * {@link View#dispatchApplyWindowInsets} in order to avoid a full layout pass during the
      * animation. If you'd like to animate views during a window inset animation, register a
-     * {@link WindowInsetsAnimationCallback} by calling
-     * {@link View#setWindowInsetsAnimationCallback(WindowInsetsAnimationCallback)} that will be
-     * notified about any insets change via {@link WindowInsetsAnimationCallback#onProgress} during
+     * {@link WindowInsetsAnimation.Callback} by calling
+     * {@link View#setWindowInsetsAnimationCallback(WindowInsetsAnimation.Callback)} that will be
+     * notified about any insets change via {@link WindowInsetsAnimation.Callback#onProgress} during
      * the animation.
      * <p>
      * {@link View#dispatchApplyWindowInsets} will instead be called once the animation has
@@ -131,10 +130,10 @@ public interface WindowInsetsAnimationController {
      *               If you intend on changing alpha only, pass null or {@link #getCurrentInsets()}.
      * @param alpha  The new alpha to apply to the inset side.
      * @param fraction instantaneous animation progress. This value is dispatched to
-     *                 {@link WindowInsetsAnimationCallback}.
+     *                 {@link WindowInsetsAnimation.Callback}.
      *
-     * @see WindowInsetsAnimationCallback
-     * @see View#setWindowInsetsAnimationCallback(WindowInsetsAnimationCallback)
+     * @see WindowInsetsAnimation.Callback
+     * @see View#setWindowInsetsAnimationCallback(WindowInsetsAnimation.Callback)
      */
     void setInsetsAndAlpha(@Nullable Insets insets, @FloatRange(from = 0f, to = 1f) float alpha,
             @FloatRange(from = 0f, to = 1f) float fraction);

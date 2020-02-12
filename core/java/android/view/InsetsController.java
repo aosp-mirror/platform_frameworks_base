@@ -46,8 +46,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationCallback.AnimationBounds;
-import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
+import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
@@ -58,6 +57,8 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -275,6 +276,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
     private final ArrayList<RunningAnimation> mRunningAnimations = new ArrayList<>();
+    private final ArrayList<WindowInsetsAnimation> mRunningInsetsAnimations = new ArrayList<>();
+    private final List<WindowInsetsAnimation> mUnmodifiableRunningInsetsAnimations =
+            Collections.unmodifiableList(mRunningInsetsAnimations);
     private final ArrayList<InsetsAnimationControlImpl> mTmpFinishedControls = new ArrayList<>();
     private WindowInsets mLastInsets;
 
@@ -337,10 +341,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     mLastInsets.shouldAlwaysConsumeSystemBars(), mLastInsets.getDisplayCutout(),
                     mLastLegacyContentInsets, mLastLegacyStableInsets, mLastLegacySoftInputMode,
                     mLastLegacySystemUiFlags, null /* typeSideMap */);
-            mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets);
+            mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets,
+                    mUnmodifiableRunningInsetsAnimations);
 
             for (int i = mTmpFinishedControls.size() - 1; i >= 0; i--) {
-                dispatchAnimationFinished(mTmpFinishedControls.get(i).getAnimation());
+                dispatchAnimationEnd(mTmpFinishedControls.get(i).getAnimation());
             }
         };
     }
@@ -579,6 +584,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 frame, mState, listener, typesReady, this, durationMs, interpolator, fade,
                 layoutInsetsDuringAnimation);
         mRunningAnimations.add(new RunningAnimation(controller, animationType));
+        mRunningInsetsAnimations.add(controller.getAnimation());
         cancellationSignal.setOnCancelListener(controller::onCancelled);
         return cancellationSignal;
     }
@@ -729,6 +735,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             if (mRunningAnimations.get(i).control == control) {
                 mRunningAnimations.remove(i);
+                mRunningInsetsAnimations.remove(i);
                 break;
             }
         }
@@ -875,8 +882,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting
     @Override
     public void startAnimation(InsetsAnimationControlImpl controller,
-            WindowInsetsAnimationControlListener listener, int types, InsetsAnimation animation,
-            AnimationBounds bounds, int layoutDuringAnimation) {
+            WindowInsetsAnimationControlListener listener, int types,
+            WindowInsetsAnimation animation, Bounds bounds, int layoutDuringAnimation) {
         if (layoutDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN) {
             showDirectly(types);
         } else {
@@ -904,8 +911,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @VisibleForTesting
-    public void dispatchAnimationFinished(InsetsAnimation animation) {
-        mViewRoot.mView.dispatchWindowInsetsAnimationFinish(animation);
+    public void dispatchAnimationEnd(WindowInsetsAnimation animation) {
+        mViewRoot.mView.dispatchWindowInsetsAnimationEnd(animation);
     }
 
     @VisibleForTesting
