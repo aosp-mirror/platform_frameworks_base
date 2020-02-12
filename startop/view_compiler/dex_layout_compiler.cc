@@ -118,7 +118,7 @@ namespace {
 std::string ResolveName(const std::string& name) {
   if (name == "View") return "android.view.View";
   if (name == "ViewGroup") return "android.view.ViewGroup";
-  if (name.find(".") == std::string::npos) {
+  if (name.find('.') == std::string::npos) {
     return StringPrintf("android.widget.%s", name.c_str());
   }
   return name;
