@@ -642,7 +642,7 @@ public class GnssManagerService {
      */
     public void onReportLocation(List<Location> locations) {
         IBatchedLocationCallback gnssBatchingCallback;
-        LinkedListener<IBatchedLocationCallback> gnssBatchingDeathCallback;
+        LinkedListener<Void, IBatchedLocationCallback> gnssBatchingDeathCallback;
         synchronized (mGnssBatchingLock) {
             gnssBatchingCallback = mGnssBatchingCallback;
             gnssBatchingDeathCallback = mGnssBatchingDeathCallback;
