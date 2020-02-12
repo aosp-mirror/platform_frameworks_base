@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
+
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 
@@ -48,7 +48,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.RemoteInputController.Callback;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -96,15 +95,13 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
             mCallbacks = Lists.newArrayList();
 
     private final SysuiColorExtractor mColorExtractor;
-    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
 
     @Inject
     public NotificationShadeWindowController(Context context, WindowManager windowManager,
             IActivityManager activityManager, DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
-            KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor,
-            SuperStatusBarViewFactory superStatusBarViewFactory) {
+            KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -114,8 +111,6 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         mLpChanged = new LayoutParams();
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
-        mSuperStatusBarViewFactory = superStatusBarViewFactory;
-        mNotificationShadeView = mSuperStatusBarViewFactory.getNotificationShadeWindowView();
 
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
@@ -192,6 +187,10 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         mWindowManager.addView(mNotificationShadeView, mLp);
         mLpChanged.copyFrom(mLp);
         onThemeChanged();
+    }
+
+    public void setNotificationShadeView(ViewGroup view) {
+        mNotificationShadeView = view;
     }
 
     public ViewGroup getNotificationShadeView() {
