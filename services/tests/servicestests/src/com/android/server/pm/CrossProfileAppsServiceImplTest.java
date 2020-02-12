@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -37,6 +38,7 @@ import android.util.SparseArray;
 
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
+import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.Before;
@@ -97,6 +99,7 @@ public class CrossProfileAppsServiceImplTest {
     @Before
     public void initCrossProfileAppsServiceImpl() {
         mTestInjector = new TestInjector();
+        LocalServices.removeServiceForTest(CrossProfileAppsInternal.class);
         mCrossProfileAppsServiceImpl = new CrossProfileAppsServiceImpl(mContext, mTestInjector);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
     }
