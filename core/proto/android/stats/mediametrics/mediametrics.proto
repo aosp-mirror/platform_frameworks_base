@@ -154,6 +154,8 @@ message CodecData {
     optional int64 latency_avg = 18;
     optional int64 latency_count = 19;
     optional int64 latency_unknown = 20;
+    optional int32 queue_input_buffer_error = 21;
+    optional int32 queue_secure_input_buffer_error = 22;
 }
 
 /**
