@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 
@@ -265,6 +266,40 @@ public interface NotificationRecordLogger {
 
         int getInstanceId() {
             return (r.getSbn().getInstanceId() == null ? 0 : r.getSbn().getInstanceId().getId());
+        }
+
+        /**
+         * @return Small hash of the notification ID, and tag (if present).
+         */
+        int getNotificationIdHash() {
+            return smallHash(Objects.hashCode(r.getSbn().getTag()) ^ r.getSbn().getId());
+        }
+
+        /**
+         * @return Small hash of the channel ID, if present, or 0 otherwise.
+         */
+        int getChannelIdHash() {
+            return smallHash(Objects.hashCode(r.getSbn().getNotification().getChannelId()));
+        }
+
+        /**
+         * @return Small hash of the group ID, respecting group override if present. 0 otherwise.
+         */
+        int getGroupIdHash() {
+            return smallHash(Objects.hashCode(r.getSbn().getGroup()));
+        }
+
+        // "Small" hashes will be in the range [0, MAX_HASH).
+        static final int MAX_HASH = (1 << 13);
+
+        /**
+         * Maps in to the range [0, MAX_HASH), keeping similar values distinct.
+         * @param in An arbitrary integer.
+         * @return in mod MAX_HASH, signs chosen to stay in the range [0, MAX_HASH).
+         */
+        @VisibleForTesting
+        static int smallHash(int in) {
+            return Math.floorMod(in, MAX_HASH);
         }
     }
 }

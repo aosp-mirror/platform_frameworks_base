@@ -3475,27 +3475,25 @@ message NotificationReported {
     // A small system-assigned identifier for the notification.
     // Locally probably-unique, but expect collisions across users and/or days.
     optional int32 instance_id = 4;
-    // The app-assigned notification ID and tag
-    optional int32 notification_id = 5;
-    optional string notification_tag = 6;
-    optional string channel_id = 7;  // App-assigned channel ID
+    optional int32 notification_id_hash = 5;  // Small hash of the app-assigned notif ID + tag
+    optional int32 channel_id_hash = 6;  // Small hash of app-assigned channel ID
 
     // Grouping information
-    optional string group_id = 8;  // Group the notification currently belongs to
-    optional int32 group_instance_id = 9;  // Instance_id of the group-summary notification
-    optional bool is_group_summary = 10;  // Tags the group-summary notification
+    optional int32 group_id_hash = 7;  // Small hash of the group ID of the notification
+    optional int32 group_instance_id = 8;  // Instance_id of the group-summary notification
+    optional bool is_group_summary = 9;  // Tags the group-summary notification
 
     // Attributes
-    optional string category = 11;   // App-assigned notification category (API-defined strings)
-    optional int32 style = 12;       // App-assigned notification style
-    optional int32 num_people = 13;  // Number of Person records attached to the notification
+    optional string category = 10;   // App-assigned notification category (API-defined strings)
+    optional int32 style = 11;       // App-assigned notification style
+    optional int32 num_people = 12;  // Number of Person records attached to the notification
 
     // Ordering, importance and interruptiveness
 
-    optional int32 position = 14;    // Position in NotificationManager's list
+    optional int32 position = 13;    // Position in NotificationManager's list
 
-    optional android.stats.sysui.NotificationImportance importance = 15;
-    optional int32 alerting = 16;    // Bitfield, 1=buzz 2=beep 4=blink
+    optional android.stats.sysui.NotificationImportance importance = 14;
+    optional int32 alerting = 15;    // Bitfield, 1=buzz 2=beep 4=blink
 
     enum NotificationImportanceExplanation {
         IMPORTANCE_EXPLANATION_UNKNOWN = 0;
@@ -3507,12 +3505,12 @@ message NotificationReported {
         IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS = 5;
     }
 
-    optional NotificationImportanceExplanation importance_source = 17;
-    optional android.stats.sysui.NotificationImportance importance_initial = 18;
-    optional NotificationImportanceExplanation importance_initial_source = 19;
-    optional android.stats.sysui.NotificationImportance importance_asst = 20;
-    optional int32 assistant_hash = 21;
-    optional float assistant_ranking_score = 22;
+    optional NotificationImportanceExplanation importance_source = 16;
+    optional android.stats.sysui.NotificationImportance importance_initial = 17;
+    optional NotificationImportanceExplanation importance_initial_source = 18;
+    optional android.stats.sysui.NotificationImportance importance_asst = 19;
+    optional int32 assistant_hash = 20;
+    optional float assistant_ranking_score = 21;
 }
 
 message Notification {

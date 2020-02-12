@@ -40,28 +40,27 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* int32 uid = 2 */ r.getUid(),
                 /* string package_name = 3 */ r.getSbn().getPackageName(),
                 /* int32 instance_id = 4 */ p.getInstanceId(),
-                /* int32 notification_id = 5 */ r.getSbn().getId(),
-                /* string notification_tag = 6 */ r.getSbn().getTag(),
-                /* string channel_id = 7 */ r.getSbn().getChannelIdLogTag(),
-                /* string group_id = 8 */ r.getSbn().getGroupLogTag(),
-                /* int32 group_instance_id = 9 */ 0, // TODO generate and fill instance ids
-                /* bool is_group_summary = 10 */ r.getSbn().getNotification().isGroupSummary(),
-                /* string category = 11 */ r.getSbn().getNotification().category,
-                /* int32 style = 12 */ p.getStyle(),
-                /* int32 num_people = 13 */ p.getNumPeople(),
-                /* int32 position = 14 */ position,
-                /* android.stats.sysui.NotificationImportance importance = 15 */ r.getImportance(),
-                /* int32 alerting = 16 */ buzzBeepBlink,
-                /* NotificationImportanceExplanation importance_source = 17 */
+                /* int32 notification_id_hash = 5 */ p.getNotificationIdHash(),
+                /* int32 channel_id_hash = 6 */ p.getChannelIdHash(),
+                /* string group_id_hash = 7 */ p.getGroupIdHash(),
+                /* int32 group_instance_id = 8 */ 0, // TODO generate and fill instance ids
+                /* bool is_group_summary = 9 */ r.getSbn().getNotification().isGroupSummary(),
+                /* string category = 10 */ r.getSbn().getNotification().category,
+                /* int32 style = 11 */ p.getStyle(),
+                /* int32 num_people = 12 */ p.getNumPeople(),
+                /* int32 position = 13 */ position,
+                /* android.stats.sysui.NotificationImportance importance = 14 */ r.getImportance(),
+                /* int32 alerting = 15 */ buzzBeepBlink,
+                /* NotificationImportanceExplanation importance_source = 16 */
                 r.getImportanceExplanationCode(),
-                /* android.stats.sysui.NotificationImportance importance_initial = 18 */
+                /* android.stats.sysui.NotificationImportance importance_initial = 17 */
                 r.getInitialImportance(),
-                /* NotificationImportanceExplanation importance_initial_source = 19 */
+                /* NotificationImportanceExplanation importance_initial_source = 18 */
                 r.getInitialImportanceExplanationCode(),
-                /* android.stats.sysui.NotificationImportance importance_asst = 20 */
+                /* android.stats.sysui.NotificationImportance importance_asst = 19 */
                 r.getAssistantImportance(),
-                /* int32 assistant_hash = 21 */ p.getAssistantHash(),
-                /* float assistant_ranking_score = 22 */ 0  // TODO connect up ranking score
+                /* int32 assistant_hash = 20 */ p.getAssistantHash(),
+                /* float assistant_ranking_score = 21 */ 0 // TODO connect up ranking score
         );
     }
 
