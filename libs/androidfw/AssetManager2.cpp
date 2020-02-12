@@ -88,13 +88,24 @@ void AssetManager2::BuildDynamicRefTable() {
   // A mapping from apk assets path to the runtime package id of its first loaded package.
   std::unordered_map<std::string, uint8_t> apk_assets_package_ids;
 
+  // Overlay resources are not directly referenced by an application so their resource ids
+  // can change throughout the application's lifetime. Assign overlay package ids last.
+  std::vector<const ApkAssets*> sorted_apk_assets(apk_assets_);
+  std::stable_partition(sorted_apk_assets.begin(), sorted_apk_assets.end(), [](const ApkAssets* a) {
+    return !a->IsOverlay();
+  });
+
+  // The assets cookie must map to the position of the apk assets in the unsorted apk assets list.
+  std::unordered_map<const ApkAssets*, ApkAssetsCookie> apk_assets_cookies;
+  apk_assets_cookies.reserve(apk_assets_.size());
+  for (size_t i = 0, n = apk_assets_.size(); i < n; i++) {
+    apk_assets_cookies[apk_assets_[i]] = static_cast<ApkAssetsCookie>(i);
+  }
+
   // 0x01 is reserved for the android package.
   int next_package_id = 0x02;
-  const size_t apk_assets_count = apk_assets_.size();
-  for (size_t i = 0; i < apk_assets_count; i++) {
-    const ApkAssets* apk_assets = apk_assets_[i];
+  for (const ApkAssets* apk_assets : sorted_apk_assets) {
     const LoadedArsc* loaded_arsc = apk_assets->GetLoadedArsc();
-
     for (const std::unique_ptr<const LoadedPackage>& package : loaded_arsc->GetPackages()) {
       // Get the package ID or assign one if a shared library.
       int package_id;
@@ -126,7 +137,7 @@ void AssetManager2::BuildDynamicRefTable() {
 
             PackageGroup& target_package_group = package_groups_[target_idx];
 
-            // Create a special dynamic reference table for the overlay to rewite references to
+            // Create a special dynamic reference table for the overlay to rewrite references to
             // overlay resources as references to the target resources they overlay.
             auto overlay_table = std::make_shared<OverlayDynamicRefTable>(
                 loaded_idmap->GetOverlayDynamicRefTable(target_package_id));
@@ -136,7 +147,7 @@ void AssetManager2::BuildDynamicRefTable() {
             target_package_group.overlays_.push_back(
                 ConfiguredOverlay{loaded_idmap->GetTargetResourcesMap(target_package_id,
                                                                       overlay_table.get()),
-                                  static_cast<ApkAssetsCookie>(i)});
+                                  apk_assets_cookies[apk_assets]});
           }
         }
 
@@ -148,7 +159,7 @@ void AssetManager2::BuildDynamicRefTable() {
 
       // Add the package and to the set of packages with the same ID.
       package_group->packages_.push_back(ConfiguredPackage{package.get(), {}});
-      package_group->cookies_.push_back(static_cast<ApkAssetsCookie>(i));
+      package_group->cookies_.push_back(apk_assets_cookies[apk_assets]);
 
       // Add the package name -> build time ID mappings.
       for (const DynamicPackageEntry& entry : package->GetDynamicPackageMap()) {
