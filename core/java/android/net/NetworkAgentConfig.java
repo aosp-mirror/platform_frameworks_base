@@ -24,8 +24,7 @@ import android.os.Parcelable;
 
 /**
  * Allows a network transport to provide the system with policy and configuration information about
- * a particular network when registering a {@link NetworkAgent}.
- * @note This information cannot change once the agent is registered.
+ * a particular network when registering a {@link NetworkAgent}. This information cannot change once the agent is registered.
  *
  * @hide
  */
