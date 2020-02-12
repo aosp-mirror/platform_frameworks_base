@@ -76,6 +76,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.SystemService;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,6 +88,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -127,6 +129,15 @@ public class AppStandbyControllerTests {
     private MyInjector mInjector;
     private AppStandbyController mController;
 
+    private CountDownLatch mStateChangedLatch = new CountDownLatch(1);
+    private AppIdleStateChangeListener mListener = new AppIdleStateChangeListener() {
+        @Override
+        public void onAppIdleStateChanged(String packageName, int userId,
+                boolean idle, int bucket, int reason) {
+            mStateChangedLatch.countDown();
+        }
+    };
+
     static class MyContextWrapper extends ContextWrapper {
         PackageManager mockPm = mock(PackageManager.class);
 
@@ -156,6 +167,7 @@ public class AppStandbyControllerTests {
         String mBoundWidgetPackage = PACKAGE_EXEMPTED_1;
         int[] mRunningUsers = new int[] {USER_ID};
         List<UserHandle> mCrossProfileTargets = Collections.emptyList();
+        boolean mDeviceIdleMode = false;
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -251,7 +263,7 @@ public class AppStandbyControllerTests {
 
         @Override
         public boolean isDeviceIdleMode() {
-            return false;
+            return mDeviceIdleMode;
         }
 
         @Override
@@ -327,6 +339,7 @@ public class AppStandbyControllerTests {
                 controller.getAppStandbyBucket(PACKAGE_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
 
+        controller.addListener(mListener);
         return controller;
     }
 
@@ -1055,6 +1068,46 @@ public class AppStandbyControllerTests {
                 STANDBY_BUCKET_WORKING_SET, getStandbyBucket(USER_ID2, mController, PACKAGE_1));
     }
 
+    @Test
+    public void testUnexemptedSyncScheduled() throws Exception {
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.addListener(mListener);
+        assertEquals("Test package did not start in the Never bucket", STANDBY_BUCKET_NEVER,
+                getStandbyBucket(mController, PACKAGE_1));
+
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, false);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Unexempted sync scheduled should bring the package out of the Never bucket",
+                STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, false);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Unexempted sync scheduled should not elevate a non Never bucket",
+                STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+    }
+
+    @Test
+    public void testExemptedSyncScheduled() throws Exception {
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+        mInjector.mDeviceIdleMode = true;
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, true);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Exempted sync scheduled in doze should set bucket to working set",
+                STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+        mInjector.mDeviceIdleMode = false;
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.postReportSyncScheduled(PACKAGE_1, USER_ID, true);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Exempted sync scheduled while not in doze should set bucket to active",
+                STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
+    }
+
     private String getAdminAppsStr(int userId) {
         return getAdminAppsStr(userId, mController.getActiveAdminAppsForTest(userId));
     }
@@ -1094,5 +1147,13 @@ public class AppStandbyControllerTests {
 
     private void setActiveAdmins(int userId, String... admins) {
         mController.setActiveAdminApps(new ArraySet<>(Arrays.asList(admins)), userId);
+    }
+
+    private void setAndAssertBucket(String pkg, int user, int bucket, int reason) throws Exception {
+        mStateChangedLatch = new CountDownLatch(1);
+        mController.setAppStandbyBucket(pkg, user, bucket, reason);
+        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        assertEquals("Failed to set package bucket", bucket,
+                getStandbyBucket(mController, PACKAGE_1));
     }
 }
