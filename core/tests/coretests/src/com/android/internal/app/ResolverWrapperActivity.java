@@ -47,6 +47,15 @@ public class ResolverWrapperActivity extends ResolverActivity {
                 filterLastUsed, createListController(userHandle), useLayoutForBrowsables, this);
     }
 
+    @Override
+    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
+            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed) {
+        AbstractMultiProfilePagerAdapter multiProfilePagerAdapter =
+                super.createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
+        multiProfilePagerAdapter.setInjector(sOverrides.multiPagerAdapterInjector);
+        return multiProfilePagerAdapter;
+    }
+
     ResolverWrapperAdapter getAdapter() {
         return (ResolverWrapperAdapter) mMultiProfilePagerAdapter.getActiveListAdapter();
     }
@@ -124,6 +133,9 @@ public class ResolverWrapperActivity extends ResolverActivity {
         public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
         public UserHandle workProfileUserHandle;
+        public boolean hasCrossProfileIntents;
+        public boolean isQuietModeEnabled;
+        public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -132,6 +144,26 @@ public class ResolverWrapperActivity extends ResolverActivity {
             resolverListController = mock(ResolverListController.class);
             workResolverListController = mock(ResolverListController.class);
             workProfileUserHandle = null;
+            hasCrossProfileIntents = true;
+            isQuietModeEnabled = false;
+            multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
+                @Override
+                public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
+                        int targetUserId) {
+                    return hasCrossProfileIntents;
+                }
+
+                @Override
+                public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
+                    return isQuietModeEnabled;
+                }
+
+                @Override
+                public void requestQuietModeEnabled(boolean enabled,
+                        UserHandle workProfileUserHandle) {
+                    isQuietModeEnabled = enabled;
+                }
+            };
         }
     }
 }
