@@ -2140,7 +2140,8 @@ public class WifiConfiguration implements Parcelable {
     public boolean isEnterprise() {
         return (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
                 || allowedKeyManagement.get(KeyMgmt.IEEE8021X)
-                || allowedKeyManagement.get(KeyMgmt.SUITE_B_192))
+                || allowedKeyManagement.get(KeyMgmt.SUITE_B_192)
+                || allowedKeyManagement.get(KeyMgmt.WAPI_CERT))
                 && enterpriseConfig != null
                 && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
@@ -2415,6 +2416,9 @@ public class WifiConfiguration implements Parcelable {
             }
             if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
                 keyMgmt += KeyMgmt.strings[KeyMgmt.SUITE_B_192];
+            }
+            if (allowedKeyManagement.get(KeyMgmt.WAPI_CERT)) {
+                keyMgmt += KeyMgmt.strings[KeyMgmt.WAPI_CERT];
             }
 
             if (TextUtils.isEmpty(keyMgmt)) {
