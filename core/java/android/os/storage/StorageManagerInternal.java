@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IVold;
 
@@ -124,4 +125,14 @@ public abstract class StorageManagerInternal {
      * legacy storage, {@code false} otherwise.
      */
     public abstract boolean hasLegacyExternalStorage(int uid);
+
+    /**
+     * Makes sure app-private data directories on external storage are setup correctly
+     * after an application is installed or upgraded. The main use for this is OBB dirs,
+     * which can be created/modified by the installer.
+     *
+     * @param packageName the package name of the package
+     * @param uid the uid of the package
+     */
+    public abstract void prepareAppDataAfterInstall(@NonNull String packageName, int uid);
 }

@@ -4409,6 +4409,25 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
+        @Override
+        public void prepareAppDataAfterInstall(String packageName, int uid) {
+            int userId = UserHandle.getUserId(uid);
+            final Environment.UserEnvironment userEnv = new Environment.UserEnvironment(userId);
+
+            // The installer may have downloaded OBBs for this newly installed application;
+            // make sure the OBB dir for the application is setup correctly, if it exists.
+            File[] packageObbDirs = userEnv.buildExternalStorageAppObbDirs(packageName);
+            for (File packageObbDir : packageObbDirs) {
+                try {
+                    mVold.fixupAppDir(packageObbDir.getCanonicalPath() + "/", uid);
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to get canonical path for " + packageName);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to fixup app dir for " + packageName);
+                }
+            }
+        }
+
         public boolean hasExternalStorage(int uid, String packageName) {
             // No need to check for system uid. This avoids a deadlock between
             // PackageManagerService and AppOpsService.

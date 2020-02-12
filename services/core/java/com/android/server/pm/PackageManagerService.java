@@ -21785,6 +21785,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+        StorageManagerInternal smInternal = mInjector.getStorageManagerInternal();
         for (UserInfo user : mUserManager.getUsers(false /*excludeDying*/)) {
             final int flags;
             if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
@@ -21798,6 +21799,13 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ps.getInstalled(user.id)) {
                 // TODO: when user data is locked, mark that we're still dirty
                 prepareAppDataLIF(pkg, user.id, flags);
+
+                if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+                    // Prepare app data on external storage; currently this is used to
+                    // setup any OBB dirs that were created by the installer correctly.
+                    int uid = UserHandle.getUid(user.id, UserHandle.getAppId(pkg.getUid()));
+                    smInternal.prepareAppDataAfterInstall(pkg.getPackageName(), uid);
+                }
             }
         }
     }
