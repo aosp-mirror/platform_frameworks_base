@@ -63,8 +63,8 @@ using NumBlocks = int32_t;
 using CompressionType = int16_t;
 using RequestType = int16_t;
 
-static constexpr int COMMAND_SIZE = 2 + 2 + 4;     // bytes
-static constexpr int HEADER_SIZE = 2 + 2 + 4 + 2;  // bytes
+static constexpr int COMMAND_SIZE = 2 + 2 + 4;    // bytes
+static constexpr int HEADER_SIZE = 2 + 2 + 4 + 2; // bytes
 static constexpr std::string_view OKAY = "OKAY"sv;
 
 static constexpr auto PollTimeoutMs = 5000;
@@ -95,10 +95,9 @@ static_assert(COMMAND_SIZE == sizeof(RequestCommand));
 
 static bool sendRequest(int fd, RequestType requestType, FileId fileId = -1,
                         BlockIdx blockIdx = -1) {
-    const RequestCommand command{
-            .requestType = static_cast<int16_t>(be16toh(requestType)),
-            .fileId = static_cast<int16_t>(be16toh(fileId)),
-            .blockIdx = static_cast<int32_t>(be32toh(blockIdx))};
+    const RequestCommand command{.requestType = static_cast<int16_t>(be16toh(requestType)),
+                                 .fileId = static_cast<int16_t>(be16toh(fileId)),
+                                 .blockIdx = static_cast<int32_t>(be32toh(blockIdx))};
     return android::base::WriteFully(fd, &command, sizeof(command));
 }
 
@@ -139,14 +138,11 @@ static BlockHeader readHeader(std::span<uint8_t>& data) {
         return header;
     }
 
-    header.fileId = static_cast<FileId>(
-            be16toh(*reinterpret_cast<uint16_t*>(&data[0])));
-    header.compressionType = static_cast<CompressionType>(
-            be16toh(*reinterpret_cast<uint16_t*>(&data[2])));
-    header.blockIdx = static_cast<BlockIdx>(
-            be32toh(*reinterpret_cast<uint32_t*>(&data[4])));
-    header.blockSize = static_cast<BlockSize>(
-            be16toh(*reinterpret_cast<uint16_t*>(&data[8])));
+    header.fileId = static_cast<FileId>(be16toh(*reinterpret_cast<uint16_t*>(&data[0])));
+    header.compressionType =
+            static_cast<CompressionType>(be16toh(*reinterpret_cast<uint16_t*>(&data[2])));
+    header.blockIdx = static_cast<BlockIdx>(be32toh(*reinterpret_cast<uint32_t*>(&data[4])));
+    header.blockSize = static_cast<BlockSize>(be16toh(*reinterpret_cast<uint16_t*>(&data[8])));
     data = data.subspan(sizeof(header));
 
     return header;
@@ -162,8 +158,8 @@ static std::string extractPackageName(const std::string& staticArgs) {
     }
     const auto endPos = staticArgs.find(kSuffix, startPos + kPrefix.size());
     return staticArgs.substr(startPos + kPrefix.size(),
-                            endPos == staticArgs.npos ? staticArgs.npos
-                                                     : (endPos - (startPos + kPrefix.size())));
+                             endPos == staticArgs.npos ? staticArgs.npos
+                                                       : (endPos - (startPos + kPrefix.size())));
 }
 
 class AdbDataLoader : public android::dataloader::DataLoader {
@@ -176,7 +172,9 @@ private:
                   android::dataloader::ServiceParamsPtr) final {
         CHECK(ifs) << "ifs can't be null";
         CHECK(statusListener) << "statusListener can't be null";
-        ALOGE("[AdbDataLoader] onCreate: %d/%s/%s/%s/%d", params.type(), params.packageName().c_str(), params.className().c_str(), params.arguments().c_str(), (int)params.dynamicArgs().size());
+        ALOGE("[AdbDataLoader] onCreate: %d/%s/%s/%s/%d", params.type(),
+              params.packageName().c_str(), params.className().c_str(), params.arguments().c_str(),
+              (int)params.dynamicArgs().size());
 
         if (params.dynamicArgs().empty()) {
             ALOGE("[AdbDataLoader] Invalid DataLoaderParams. Need in/out FDs.");
@@ -210,8 +208,7 @@ private:
         }
         if (!logFile.empty()) {
             int flags = O_WRONLY | O_CREAT | O_CLOEXEC;
-            mReadLogFd.reset(
-                    TEMP_FAILURE_RETRY(open(logFile.c_str(), flags, 0666)));
+            mReadLogFd.reset(TEMP_FAILURE_RETRY(open(logFile.c_str(), flags, 0666)));
         }
 
         mIfs = ifs;
@@ -227,8 +224,8 @@ private:
             return false;
         }
         if (std::string_view(okay_buf, OKAY.size()) != OKAY) {
-            ALOGE("[AdbDataLoader] Received '%.*s', expecting '%.*s'",
-                  (int)OKAY.size(), okay_buf, (int)OKAY.size(), OKAY.data());
+            ALOGE("[AdbDataLoader] Received '%.*s', expecting '%.*s'", (int)OKAY.size(), okay_buf,
+                  (int)OKAY.size(), OKAY.data());
             return false;
         }
 
@@ -353,8 +350,8 @@ private:
             auto remainingData = std::span(data);
             while (!remainingData.empty()) {
                 auto header = readHeader(remainingData);
-                if (header.fileId == -1 && header.compressionType == 0 &&
-                    header.blockIdx == 0 && header.blockSize == 0) {
+                if (header.fileId == -1 && header.compressionType == 0 && header.blockIdx == 0 &&
+                    header.blockSize == 0) {
                     ALOGI("[AdbDataLoader] stop signal received. Sending "
                           "exit command (remaining bytes: %d).",
                           int(remainingData.size()));
@@ -363,8 +360,8 @@ private:
                     mStopReceiving = true;
                     break;
                 }
-                if (header.fileId < 0 || header.blockSize <= 0 ||
-                    header.compressionType < 0 || header.blockIdx < 0) {
+                if (header.fileId < 0 || header.blockSize <= 0 || header.compressionType < 0 ||
+                    header.blockIdx < 0) {
                     ALOGE("[AdbDataLoader] invalid header received. Abort.");
                     mStopReceiving = true;
                     break;
@@ -379,7 +376,7 @@ private:
 
                 auto& writeFd = writeFds[id];
                 if (writeFd < 0) {
-                    writeFd.reset(this->mIfs->openWrite(id));
+                    writeFd = this->mIfs->openWrite(id);
                     if (writeFd < 0) {
                         ALOGE("Failed to open file %d for writing (%d). Aboring.", header.fileId,
                               -writeFd);
@@ -422,8 +419,7 @@ private:
     MetaPair* updateMapsForFile(android::dataloader::FileId id) {
         android::dataloader::RawMetadata meta = mIfs->getRawMetadata(id);
         FileId fileId;
-        auto res =
-                std::from_chars(meta.data(), meta.data() + meta.size(), fileId);
+        auto res = std::from_chars(meta.data(), meta.data() + meta.size(), fileId);
         if (res.ec != std::errc{} || fileId < 0) {
             ALOGE("[AdbDataLoader] Invalid metadata for fileid=%s (%s)",
                   android::incfs::toString(id).c_str(), meta.data());
@@ -470,11 +466,11 @@ private:
         }
         if (trace) {
             auto* meta = getMeta(read.fileId);
-            auto str = android::base::StringPrintf(
-                    "page_read: index=%lld count=%lld meta=%.*s",
-                    static_cast<long long>(read.firstBlockIdx),
-                    static_cast<long long>(read.count),
-                    meta ? int(meta->size()) : 0, meta ? meta->data() : "");
+            auto str = android::base::StringPrintf("page_read: index=%lld count=%lld meta=%.*s",
+                                                   static_cast<long long>(read.firstBlockIdx),
+                                                   static_cast<long long>(read.count),
+                                                   meta ? int(meta->size()) : 0,
+                                                   meta ? meta->data() : "");
             ATRACE_BEGIN(str.c_str());
             ATRACE_END();
         }
@@ -482,12 +478,11 @@ private:
             mReadLog.reserve(ReadLogBufferSize);
 
             auto fileId = getFileId(read.fileId);
-            android::base::StringAppendF(
-                    &mReadLog, "%lld:%lld:%lld:%lld\n",
-                    static_cast<long long>(read.timestampUs),
-                    static_cast<long long>(fileId ? *fileId : -1),
-                    static_cast<long long>(read.firstBlockIdx),
-                    static_cast<long long>(read.count));
+            android::base::StringAppendF(&mReadLog, "%lld:%lld:%lld:%lld\n",
+                                         static_cast<long long>(read.timestampUs),
+                                         static_cast<long long>(fileId ? *fileId : -1),
+                                         static_cast<long long>(read.firstBlockIdx),
+                                         static_cast<long long>(read.count));
 
             if (mReadLog.size() >= mReadLog.capacity() - ReadLogMaxEntrySize) {
                 flushReadLog();
@@ -521,10 +516,10 @@ private:
     std::atomic<bool> mStopReceiving = false;
 };
 
-}  // namespace
+} // namespace
 
 int JNI_OnLoad(JavaVM* jvm, void* /* reserved */) {
-  android::dataloader::DataLoader::initialize(
+    android::dataloader::DataLoader::initialize(
             [](auto, auto) { return std::make_unique<AdbDataLoader>(); });
     return JNI_VERSION_1_6;
 }
