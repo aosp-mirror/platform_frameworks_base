@@ -417,22 +417,23 @@ public final class ActiveServices {
     }
 
     private boolean appRestrictedAnyInBackground(final int uid, final String packageName) {
-        final int mode = mAm.mAppOpsService.checkOperation(
+        final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                 AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
         return (mode != AppOpsManager.MODE_ALLOWED);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
-            int callingPid, int callingUid, boolean fgRequired, String callingPackage, final int userId)
+            int callingPid, int callingUid, boolean fgRequired, String callingPackage,
+            @Nullable String callingFeatureId, final int userId)
             throws TransactionTooLargeException {
         return startServiceLocked(caller, service, resolvedType, callingPid, callingUid, fgRequired,
-                callingPackage, userId, false);
+                callingPackage, callingFeatureId, userId, false);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
             int callingPid, int callingUid, boolean fgRequired, String callingPackage,
-            final int userId, boolean allowBackgroundActivityStarts)
-            throws TransactionTooLargeException {
+            @Nullable String callingFeatureId, final int userId,
+            boolean allowBackgroundActivityStarts) throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
 
@@ -488,7 +489,7 @@ public final class ActiveServices {
         // If this is a direct-to-foreground start, make sure it is allowed as per the app op.
         boolean forceSilentAbort = false;
         if (fgRequired) {
-            final int mode = mAm.mAppOpsService.checkOperation(
+            final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                     AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
             switch (mode) {
                 case AppOpsManager.MODE_ALLOWED:
@@ -566,7 +567,7 @@ public final class ActiveServices {
         // review is completed.
 
         // XXX This is not dealing with fgRequired!
-        if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage,
+        if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage, callingFeatureId,
                 callingUid, service, callerFg, userId)) {
             return null;
         }
@@ -673,8 +674,8 @@ public final class ActiveServices {
     }
 
     private boolean requestStartTargetPermissionsReviewIfNeededLocked(ServiceRecord r,
-            String callingPackage, int callingUid, Intent service, boolean callerFg,
-            final int userId) {
+            String callingPackage, @Nullable String callingFeatureId, int callingUid,
+            Intent service, boolean callerFg, final int userId) {
         if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                 r.packageName, r.userId)) {
 
@@ -686,7 +687,7 @@ public final class ActiveServices {
             }
 
             IIntentSender target = mAm.mPendingIntentController.getIntentSender(
-                    ActivityManager.INTENT_SENDER_SERVICE, callingPackage,
+                    ActivityManager.INTENT_SENDER_SERVICE, callingPackage, callingFeatureId,
                     callingUid, userId, null, null, 0, new Intent[]{service},
                     new String[]{service.resolveType(mAm.mContext.getContentResolver())},
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
@@ -1287,7 +1288,7 @@ public final class ActiveServices {
             }
             // Instant apps need permission to create foreground services.
             if (r.appInfo.isInstantApp()) {
-                final int mode = mAm.mAppOpsService.checkOperation(
+                final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                         AppOpsManager.OP_INSTANT_APP_START_FOREGROUND,
                         r.appInfo.uid,
                         r.appInfo.packageName);
@@ -1354,7 +1355,7 @@ public final class ActiveServices {
 
             try {
                 boolean ignoreForeground = false;
-                final int mode = mAm.mAppOpsService.checkOperation(
+                final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
                 switch (mode) {
                     case AppOpsManager.MODE_ALLOWED:
@@ -2289,7 +2290,7 @@ public final class ActiveServices {
                 return new ServiceLookupResult(null, r.permission);
             } else if (r.permission != null && callingPackage != null) {
                 final int opCode = AppOpsManager.permissionToOpCode(r.permission);
-                if (opCode != AppOpsManager.OP_NONE && mAm.mAppOpsService.checkOperation(
+                if (opCode != AppOpsManager.OP_NONE && mAm.getAppOpsManager().checkOpNoThrow(
                         opCode, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: Accessing service " + r.shortInstanceName
                             + " from pid=" + callingPid

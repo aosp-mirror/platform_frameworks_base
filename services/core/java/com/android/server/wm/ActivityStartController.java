@@ -26,6 +26,7 @@ import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -278,10 +279,11 @@ public class ActivityStartController {
     }
 
     final int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
-            int userId, Task inTask, String reason, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+            String callingPackage, @Nullable String callingFeatureId, Intent intent,
+            String resolvedType, IBinder resultTo, String resultWho, int requestCode,
+            int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
+            boolean allowBackgroundActivityStart) {
 
         userId = checkTargetUser(userId, validateIncomingUser, realCallingPid, realCallingUid,
                 reason);
@@ -292,6 +294,7 @@ public class ActivityStartController {
                 .setRealCallingPid(realCallingPid)
                 .setRealCallingUid(realCallingUid)
                 .setCallingPackage(callingPackage)
+                .setCallingFeatureId(callingFeatureId)
                 .setResolvedType(resolvedType)
                 .setResultTo(resultTo)
                 .setResultWho(resultWho)
@@ -310,19 +313,20 @@ public class ActivityStartController {
      *
      * @param uid Make a call as if this UID did.
      * @param callingPackage Make a call as if this package did.
+     * @param callingFeatureId Make a call as if this feature in the package did.
      * @param intents Intents to start.
      * @param userId Start the intents on this user.
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
      */
-    final int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
-            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
-            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+    final int startActivitiesInPackage(int uid, String callingPackage,
+            @Nullable String callingFeatureId, Intent[] intents, String[] resolvedTypes,
+            IBinder resultTo, SafeActivityOptions options, int userId, boolean validateIncomingUser,
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
         return startActivitiesInPackage(uid, 0 /* realCallingPid */, -1 /* realCallingUid */,
-            callingPackage, intents, resolvedTypes, resultTo, options, userId, validateIncomingUser,
-            originatingPendingIntent, allowBackgroundActivityStart);
+                callingPackage, callingFeatureId, intents, resolvedTypes, resultTo, options, userId,
+                validateIncomingUser, originatingPendingIntent, allowBackgroundActivityStart);
     }
 
     /**
@@ -339,9 +343,9 @@ public class ActivityStartController {
      *        null if not originated by PendingIntent
      */
     final int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            SafeActivityOptions options, int userId, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent,
+            String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart) {
 
         final String reason = "startActivityInPackage";
@@ -350,14 +354,14 @@ public class ActivityStartController {
                 Binder.getCallingUid(), reason);
 
         // TODO: Switch to user app stacks here.
-        return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage, intents,
-                resolvedTypes, resultTo, options, userId, reason, originatingPendingIntent,
-                allowBackgroundActivityStart);
+        return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage,
+                callingFeatureId, intents, resolvedTypes, resultTo, options, userId, reason,
+                originatingPendingIntent, allowBackgroundActivityStart);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, int incomingRealCallingPid,
-            int incomingRealCallingUid, String callingPackage, Intent[] intents,
-            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
+            int incomingRealCallingUid, String callingPackage, @Nullable String callingFeatureId,
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
             int userId, String reason, PendingIntentRecord originatingPendingIntent,
             boolean allowBackgroundActivityStart) {
         if (intents == null) {
@@ -435,6 +439,7 @@ public class ActivityStartController {
                         .setCallingPid(callingPid)
                         .setCallingUid(callingUid)
                         .setCallingPackage(callingPackage)
+                        .setCallingFeatureId(callingFeatureId)
                         .setRealCallingPid(realCallingPid)
                         .setRealCallingUid(realCallingUid)
                         .setActivityOptions(checkedOptions)

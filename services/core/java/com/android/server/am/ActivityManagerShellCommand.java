@@ -536,13 +536,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
-                result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, intent, mimeType,
-                        null, null, 0, mStartFlags, profilerInfo,
+                result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
+                        mimeType, null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
-                res = mInternal.startActivityAsUser(null, SHELL_PACKAGE_NAME, intent, mimeType,
-                        null, null, 0, mStartFlags, profilerInfo,
+                res = mInternal.startActivityAsUserWithFeature(null, SHELL_PACKAGE_NAME, null,
+                        intent, mimeType, null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
             final long endTime = SystemClock.uptimeMillis();
@@ -654,7 +654,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Starting service: " + intent);
         pw.flush();
         ComponentName cn = mInterface.startService(null, intent, intent.getType(),
-                asForeground, SHELL_PACKAGE_NAME, mUserId);
+                asForeground, SHELL_PACKAGE_NAME, null, mUserId);
         if (cn == null) {
             err.println("Error: Not found; no service started.");
             return -1;
@@ -744,8 +744,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.println("Broadcasting: " + intent);
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
-        mInterface.broadcastIntent(null, intent, null, receiver, 0, null, null, requiredPermissions,
-                android.app.AppOpsManager.OP_NONE, bundle, true, false, mUserId);
+        mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
+                requiredPermissions, android.app.AppOpsManager.OP_NONE, bundle, true, false,
+                mUserId);
         receiver.waitForFinish();
         return 0;
     }
