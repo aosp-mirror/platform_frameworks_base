@@ -339,6 +339,7 @@ public abstract class ContentCaptureService extends Service {
      * @hide
      */
     @SystemApi
+    @TestApi
     public void onDataShareRequest(@NonNull DataShareRequest request,
             @NonNull DataShareCallback callback) {
         if (sVerbose) Log.v(TAG, "onDataShareRequest()");

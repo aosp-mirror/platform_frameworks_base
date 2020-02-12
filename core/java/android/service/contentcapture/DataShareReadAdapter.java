@@ -18,6 +18,7 @@ package android.service.contentcapture;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -27,6 +28,7 @@ import android.os.ParcelFileDescriptor;
  * @hide
  **/
 @SystemApi
+@TestApi
 public interface DataShareReadAdapter {
 
     /**
