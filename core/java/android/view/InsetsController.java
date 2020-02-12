@@ -700,7 +700,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
-        mApplier.scheduleApply(params);
+        if (mViewRoot.mView.isHardwareAccelerated()) {
+            mApplier.scheduleApply(params);
+        } else {
+            // Window doesn't support hardware acceleration, no synchronization for now.
+            // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
+            //  frame instead.
+            mApplier.applyParams(new Transaction(), -1 /* frame */, params);
+        }
     }
 
     void notifyControlRevoked(InsetsSourceConsumer consumer) {
