@@ -320,14 +320,29 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void requestSetVolume2(IMediaRouter2Client client, MediaRoute2Info route, int volume) {
+    public void setRouteVolume2(IMediaRouter2Client client,
+            MediaRoute2Info route, int volume) {
         Objects.requireNonNull(client, "client must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestSetVolumeLocked(client, route, volume);
+                setRouteVolumeLocked(client, route, volume);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void setSessionVolume2(IMediaRouter2Client client, String sessionId, int volume) {
+        Objects.requireNonNull(client, "client must not be null");
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                setSessionVolumeLocked(client, sessionId, volume);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -346,7 +361,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void requestSetVolume2Manager(IMediaRouter2Manager manager,
+    public void setRouteVolume2Manager(IMediaRouter2Manager manager,
             MediaRoute2Info route, int volume) {
         Objects.requireNonNull(manager, "manager must not be null");
         Objects.requireNonNull(route, "route must not be null");
@@ -354,7 +369,22 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestSetVolumeLocked(manager, route, volume);
+                setRouteVolumeLocked(manager, route, volume);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void setSessionVolume2Manager(IMediaRouter2Manager manager,
+            String sessionId, int volume) {
+        Objects.requireNonNull(manager, "manager must not be null");
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                setSessionVolumeLocked(manager, sessionId, volume);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -587,15 +617,27 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void requestSetVolumeLocked(IMediaRouter2Client client, MediaRoute2Info route,
+    private void setRouteVolumeLocked(IMediaRouter2Client client, MediaRoute2Info route,
             int volume) {
         final IBinder binder = client.asBinder();
         Client2Record clientRecord = mAllClientRecords.get(binder);
 
         if (clientRecord != null) {
             clientRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::requestSetVolume,
+                    obtainMessage(UserHandler::setRouteVolume,
                             clientRecord.mUserRecord.mHandler, route, volume));
+        }
+    }
+
+    private void setSessionVolumeLocked(IMediaRouter2Client client, String sessionId,
+            int volume) {
+        final IBinder binder = client.asBinder();
+        Client2Record clientRecord = mAllClientRecords.get(binder);
+
+        if (clientRecord != null) {
+            clientRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::setSessionVolume,
+                            clientRecord.mUserRecord.mHandler, sessionId, volume));
         }
     }
 
@@ -660,15 +702,27 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void requestSetVolumeLocked(IMediaRouter2Manager manager, MediaRoute2Info route,
+    private void setRouteVolumeLocked(IMediaRouter2Manager manager, MediaRoute2Info route,
             int volume) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord != null) {
             managerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::requestSetVolume,
+                    obtainMessage(UserHandler::setRouteVolume,
                             managerRecord.mUserRecord.mHandler, route, volume));
+        }
+    }
+
+    private void setSessionVolumeLocked(IMediaRouter2Manager manager, String sessionId,
+            int volume) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+
+        if (managerRecord != null) {
+            managerRecord.mUserRecord.mHandler.sendMessage(
+                    obtainMessage(UserHandler::setSessionVolume,
+                            managerRecord.mUserRecord.mHandler, sessionId, volume));
         }
     }
 
@@ -1399,11 +1453,21 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void requestSetVolume(MediaRoute2Info route, int volume) {
+        private void setRouteVolume(MediaRoute2Info route, int volume) {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider != null) {
-                provider.requestSetVolume(route.getOriginalId(), volume);
+                provider.setRouteVolume(route.getOriginalId(), volume);
             }
+        }
+
+        private void setSessionVolume(String sessionId, int volume) {
+            final MediaRoute2Provider provider = findProvider(getProviderId(sessionId));
+            if (provider == null) {
+                Slog.w(TAG, "setSessionVolume: couldn't find provider for session "
+                        + "id=" + sessionId);
+                return;
+            }
+            provider.setSessionVolume(getOriginalId(sessionId), volume);
         }
 
         private List<IMediaRouter2Client> getClients() {

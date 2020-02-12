@@ -44,6 +44,7 @@ import android.media.MediaRouter2;
 import android.media.MediaRouter2.RouteCallback;
 import android.media.MediaRouter2.RoutingControllerCallback;
 import android.media.MediaRouter2Manager;
+import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.support.test.InstrumentationRegistry;
@@ -57,6 +58,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,22 +227,22 @@ public class MediaRouterManagerTest {
             }
         });
 
-        assertEquals(1, mManager.getRoutingControllers(mPackageName).size());
+        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
         latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
-        List<MediaRouter2Manager.RoutingController> controllers =
-                mManager.getRoutingControllers(mPackageName);
+        List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
 
-        assertEquals(2, controllers.size());
+        assertEquals(2, sessions.size());
 
-        MediaRouter2Manager.RoutingController routingController = controllers.get(1);
+        MediaRouter2Manager.RoutingController routingController =
+                mManager.getControllerForSession(sessions.get(1));
         awaitOnRouteChangedManager(
                 () -> routingController.release(),
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
-        assertEquals(1, mManager.getRoutingControllers(mPackageName).size());
+        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
     }
 
     /**
@@ -266,11 +268,11 @@ public class MediaRouterManagerTest {
                 route -> TextUtils.equals(route.getClientPackageName(), mPackageName));
         assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
-        List<MediaRouter2Manager.RoutingController> controllers =
-                mManager.getRoutingControllers(mPackageName);
+        List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
 
-        assertEquals(2, controllers.size());
-        MediaRouter2Manager.RoutingController routingController = controllers.get(1);
+        assertEquals(2, sessions.size());
+        MediaRouter2Manager.RoutingController routingController =
+                mManager.getControllerForSession(sessions.get(1));
 
         awaitOnRouteChangedManager(
                 () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID5_TO_TRANSFER_TO)),
@@ -284,7 +286,33 @@ public class MediaRouterManagerTest {
     }
 
     @Test
-    public void testControlVolumeWithManager() throws Exception {
+    public void testSetSystemRouteVolume() throws Exception {
+        // ensure client
+        addManagerCallback(new MediaRouter2Manager.Callback());
+        String selectedSystemRouteId =
+                MediaRouter2Utils.getOriginalId(
+                mManager.getActiveSessions().get(0).getSelectedRoutes().get(0));
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(Collections.emptyList());
+        MediaRoute2Info volRoute = routes.get(selectedSystemRouteId);
+        assertNotNull(volRoute);
+
+        int originalVolume = volRoute.getVolume();
+        int targetVolume = originalVolume == volRoute.getVolumeMax()
+                ? originalVolume - 1 : originalVolume + 1;
+
+        awaitOnRouteChangedManager(
+                () -> mManager.setRouteVolume(volRoute, targetVolume),
+                selectedSystemRouteId,
+                (route -> route.getVolume() == targetVolume));
+
+        awaitOnRouteChangedManager(
+                () -> mManager.setRouteVolume(volRoute, originalVolume),
+                selectedSystemRouteId,
+                (route -> route.getVolume() == originalVolume));
+    }
+
+    @Test
+    public void testSetRouteVolume() throws Exception {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
 
@@ -293,14 +321,78 @@ public class MediaRouterManagerTest {
                 ? originalVolume - 1 : originalVolume + 1;
 
         awaitOnRouteChangedManager(
-                () -> mManager.requestSetVolume(volRoute, targetVolume),
+                () -> mManager.setRouteVolume(volRoute, targetVolume),
                 ROUTE_ID_VARIABLE_VOLUME,
                 (route -> route.getVolume() == targetVolume));
 
         awaitOnRouteChangedManager(
-                () -> mManager.requestSetVolume(volRoute, originalVolume),
+                () -> mManager.setRouteVolume(volRoute, originalVolume),
                 ROUTE_ID_VARIABLE_VOLUME,
                 (route -> route.getVolume() == originalVolume));
+    }
+
+    @Test
+    public void testSetSessionVolume() throws Exception {
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        addRouterCallback(new RouteCallback());
+
+        CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
+        CountDownLatch volumeChangedLatch = new CountDownLatch(2);
+
+        // create a controller
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onSessionCreated(MediaRouter2Manager.RoutingController controller) {
+                assertNotNull(controller);
+                onSessionCreatedLatch.countDown();
+            }
+        });
+
+        mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
+        assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
+        assertEquals(2, sessions.size());
+
+        // test setSessionVolume
+        RoutingSessionInfo sessionInfo = sessions.get(1);
+        int currentVolume = sessionInfo.getVolume();
+        int targetVolume = (currentVolume == 0) ? 1 : (currentVolume - 1);
+
+        RoutingControllerCallback routingControllerCallback = new RoutingControllerCallback() {
+            @Override
+            public void onControllerUpdated(MediaRouter2.RoutingController controller) {
+                if (!TextUtils.equals(sessionInfo.getId(), controller.getId())) {
+                    return;
+                }
+                if (controller.getVolume() == targetVolume) {
+                    volumeChangedLatch.countDown();
+                }
+            }
+        };
+        mRouter2.registerControllerCallback(mExecutor, routingControllerCallback);
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onSessionsUpdated() {
+                List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
+                if (sessions.size() != 2) {
+                    return;
+                }
+
+                if (sessions.get(1).getVolume() == targetVolume) {
+                    volumeChangedLatch.countDown();
+                }
+            }
+        });
+
+        mManager.setSessionVolume(sessionInfo, targetVolume);
+
+        try {
+            assertTrue(volumeChangedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        } finally {
+            mRouter2.unregisterControllerCallback(routingControllerCallback);
+        }
     }
 
     @Test

@@ -131,9 +131,17 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
-    public void requestSetVolume(String routeId, int volume) {
+    public void setRouteVolume(String routeId, int volume) {
         if (mConnectionReady) {
-            mActiveConnection.requestSetVolume(routeId, volume);
+            mActiveConnection.setRouteVolume(routeId, volume);
+            updateBinding();
+        }
+    }
+
+    @Override
+    public void setSessionVolume(String sessionId, int volume) {
+        if (mConnectionReady) {
+            mActiveConnection.setSessionVolume(sessionId, volume);
             updateBinding();
         }
     }
@@ -456,7 +464,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.requestCreateSession(packageName, routeId, requestId, sessionHints);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to create a session.", ex);
+                Slog.e(TAG, "requestCreateSession: Failed to deliver request.");
             }
         }
 
@@ -464,7 +472,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.releaseSession(sessionId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to release a session.", ex);
+                Slog.e(TAG, "releaseSession: Failed to deliver request.");
             }
         }
 
@@ -472,7 +480,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.updateDiscoveryPreference(discoveryPreference);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "updateDiscoveryPreference(): Failed to deliver request.");
+                Slog.e(TAG, "updateDiscoveryPreference: Failed to deliver request.");
             }
         }
 
@@ -480,7 +488,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.selectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to select a route for a session.", ex);
+                Slog.e(TAG, "selectRoute: Failed to deliver request.", ex);
             }
         }
 
@@ -488,7 +496,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.deselectRoute(sessionId, routeId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to deselect a route from a session.", ex);
+                Slog.e(TAG, "deselectRoute: Failed to deliver request.", ex);
             }
         }
 
@@ -496,7 +504,7 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.transferToRoute(sessionId, routeId);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to transfer a session to a route.", ex);
+                Slog.e(TAG, "transferToRoute: Failed to deliver request.", ex);
             }
         }
 
@@ -504,15 +512,23 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             try {
                 mProvider.notifyControlRequestSent(routeId, request);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to send control request.", ex);
+                Slog.e(TAG, "sendControlRequest: Failed to deliver request.", ex);
             }
         }
 
-        public void requestSetVolume(String routeId, int volume) {
+        public void setRouteVolume(String routeId, int volume) {
             try {
-                mProvider.requestSetVolume(routeId, volume);
+                mProvider.setRouteVolume(routeId, volume);
             } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to request set volume.", ex);
+                Slog.e(TAG, "setRouteVolume: Failed to deliver request.", ex);
+            }
+        }
+
+        public void setSessionVolume(String sessionId, int volume) {
+            try {
+                mProvider.setSessionVolume(sessionId, volume);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "setSessionVolume: Failed to deliver request.", ex);
             }
         }
 
