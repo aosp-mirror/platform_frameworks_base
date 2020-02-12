@@ -31,4 +31,12 @@ cc_test {
         "-Wall",
         "-Werror",
     ],
+    data: [
+        ":default-permissions",
+    ],
+    test_suites: [
+        "general-tests",
+        "vts-core"
+    ],
+    test_config: "vts_defaultPermissions_validate_test.xml",
 }
