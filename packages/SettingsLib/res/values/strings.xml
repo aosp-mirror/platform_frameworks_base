@@ -886,6 +886,11 @@
     <!-- UI debug setting: enable gpu debug layers summary [CHAR LIMIT=50] -->
     <string name="enable_gpu_debug_layers_summary">Allow loading GPU debug layers for debug apps</string>
 
+    <!-- UI debug setting: enable verbose vendor logging [CHAR LIMIT=30] -->
+    <string name="enable_verbose_vendor_logging">Enable verbose vendor logging</string>
+    <!-- UI debug setting: enable verbose vendor logging summary [CHAR LIMIT=100] -->
+    <string name="enable_verbose_vendor_logging_summary">Allow additional vendor logs to be included in bug reports, may contain private information</string>
+
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
 
