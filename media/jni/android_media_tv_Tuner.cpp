@@ -88,6 +88,7 @@ using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtGuardInterval;
 using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtMode;
 using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtModulation;
 using ::android::hardware::tv::tuner::V1_0::FrontendIsdbtSettings;
+using ::android::hardware::tv::tuner::V1_0::FrontendScanAtsc3PlpInfo;
 using ::android::hardware::tv::tuner::V1_0::FrontendType;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::PlaybackSettings;
@@ -226,14 +227,152 @@ Return<void> FrontendCallback::onEvent(FrontendEventType frontendEventType) {
             (jint)frontendEventType);
     return Void();
 }
-Return<void> FrontendCallback::onDiseqcMessage(const hidl_vec<uint8_t>& /*diseqcMessage*/) {
-    ALOGD("FrontendCallback::onDiseqcMessage");
-    return Void();
-}
 
-Return<void> FrontendCallback::onScanMessage(
-        FrontendScanMessageType type, const FrontendScanMessage& /*message*/) {
+Return<void> FrontendCallback::onScanMessage(FrontendScanMessageType type, const FrontendScanMessage& message) {
     ALOGD("FrontendCallback::onScanMessage, type=%d", type);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
+    switch(type) {
+        case FrontendScanMessageType::LOCKED: {
+            if (message.isLocked()) {
+                env->CallVoidMethod(
+                        mObject,
+                        env->GetMethodID(clazz, "onLocked", "()V"));
+            }
+            break;
+        }
+        case FrontendScanMessageType::END: {
+            if (message.isEnd()) {
+                env->CallVoidMethod(
+                        mObject,
+                        env->GetMethodID(clazz, "onScanStopped", "()V"));
+            }
+            break;
+        }
+        case FrontendScanMessageType::PROGRESS_PERCENT: {
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onProgress", "(I)V"),
+                    (jint) message.progressPercent());
+            break;
+        }
+        case FrontendScanMessageType::FREQUENCY: {
+            std::vector<uint32_t> v = message.frequencies();
+            jintArray freqs = env->NewIntArray(v.size());
+            env->SetIntArrayRegion(freqs, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onFrequenciesReport", "([I)V"),
+                    freqs);
+            break;
+        }
+        case FrontendScanMessageType::SYMBOL_RATE: {
+            std::vector<uint32_t> v = message.symbolRates();
+            jintArray symbolRates = env->NewIntArray(v.size());
+            env->SetIntArrayRegion(symbolRates, 0, v.size(), reinterpret_cast<jint*>(&v[0]));
+
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onSymbolRates", "([I)V"),
+                    symbolRates);
+            break;
+        }
+        case FrontendScanMessageType::HIERARCHY: {
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onHierarchy", "(I)V"),
+                    (jint) message.hierarchy());
+            break;
+        }
+        case FrontendScanMessageType::ANALOG_TYPE: {
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onSignalType", "(I)V"),
+                    (jint) message.analogType());
+            break;
+        }
+        case FrontendScanMessageType::PLP_IDS: {
+            std::vector<uint8_t> v = message.plpIds();
+            std::vector<jint> jintV(v.begin(), v.end());
+            jintArray plpIds = env->NewIntArray(v.size());
+            env->SetIntArrayRegion(plpIds, 0, jintV.size(), &jintV[0]);
+
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onPlpIds", "([I)V"),
+                    plpIds);
+            break;
+        }
+        case FrontendScanMessageType::GROUP_IDS: {
+            std::vector<uint8_t> v = message.groupIds();
+            std::vector<jint> jintV(v.begin(), v.end());
+            jintArray groupIds = env->NewIntArray(v.size());
+            env->SetIntArrayRegion(groupIds, 0, jintV.size(), &jintV[0]);
+
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onGroupIds", "([I)V"),
+                    groupIds);
+            break;
+        }
+        case FrontendScanMessageType::INPUT_STREAM_IDS: {
+            std::vector<uint16_t> v = message.inputStreamIds();
+            std::vector<jint> jintV(v.begin(), v.end());
+            jintArray streamIds = env->NewIntArray(v.size());
+            env->SetIntArrayRegion(streamIds, 0, jintV.size(), &jintV[0]);
+
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onInputStreamIds", "([I)V"),
+                    streamIds);
+            break;
+        }
+        case FrontendScanMessageType::STANDARD: {
+            FrontendScanMessage::Standard std = message.std();
+            jint standard;
+            if (std.getDiscriminator() == FrontendScanMessage::Standard::hidl_discriminator::sStd) {
+                standard = (jint) std.sStd();
+                env->CallVoidMethod(
+                        mObject,
+                        env->GetMethodID(clazz, "onDvbsStandard", "(I)V"),
+                        standard);
+            } else if (std.getDiscriminator() == FrontendScanMessage::Standard::hidl_discriminator::tStd) {
+                standard = (jint) std.tStd();
+                env->CallVoidMethod(
+                        mObject,
+                        env->GetMethodID(clazz, "onDvbtStandard", "(I)V"),
+                        standard);
+            } else if (std.getDiscriminator() == FrontendScanMessage::Standard::hidl_discriminator::sifStd) {
+                standard = (jint) std.sifStd();
+                env->CallVoidMethod(
+                        mObject,
+                        env->GetMethodID(clazz, "onAnalogSifStandard", "(I)V"),
+                        standard);
+            }
+            break;
+        }
+        case FrontendScanMessageType::ATSC3_PLP_INFO: {
+            jclass plpClazz = env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo");
+            jmethodID init = env->GetMethodID(plpClazz, "<init>", "(IZ)V");
+            std::vector<FrontendScanAtsc3PlpInfo> plpInfos = message.atsc3PlpInfos();
+            jobjectArray array = env->NewObjectArray(plpInfos.size(), plpClazz, NULL);
+
+            for (int i = 0; i < plpInfos.size(); i++) {
+                auto info = plpInfos[i];
+                jint plpId = (jint) info.plpId;
+                jboolean lls = (jboolean) info.bLlsFlag;
+
+                jobject obj = env->NewObject(plpClazz, init, plpId, lls);
+                env->SetObjectArrayElement(array, i, obj);
+            }
+            env->CallVoidMethod(
+                    mObject,
+                    env->GetMethodID(clazz, "onAtsc3PlpInfos", "([Landroid/media/tv/tuner/frontend/Atsc3PlpInfo;)V"),
+                    array);
+            break;
+        }
+    }
     return Void();
 }
 

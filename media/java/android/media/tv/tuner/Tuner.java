@@ -34,6 +34,7 @@ import android.media.tv.tuner.filter.Filter.Subtype;
 import android.media.tv.tuner.filter.Filter.Type;
 import android.media.tv.tuner.filter.FilterCallback;
 import android.media.tv.tuner.filter.TimeFilter;
+import android.media.tv.tuner.frontend.Atsc3PlpInfo;
 import android.media.tv.tuner.frontend.FrontendInfo;
 import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tuner.frontend.FrontendStatus;
@@ -508,6 +509,90 @@ public class Tuner implements AutoCloseable  {
     private void onFrontendEvent(int eventType) {
         if (mOnTunerEventExecutor != null && mOnTuneEventListener != null) {
             mOnTunerEventExecutor.execute(() -> mOnTuneEventListener.onTuneEvent(eventType));
+        }
+    }
+
+    private void onLocked() {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onLocked());
+        }
+    }
+
+    private void onScanStopped() {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onScanStopped());
+        }
+    }
+
+    private void onProgress(int percent) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onProgress(percent));
+        }
+    }
+
+    private void onFrequenciesReport(int[] frequency) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReport(frequency));
+        }
+    }
+
+    private void onSymbolRates(int[] rate) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRates(rate));
+        }
+    }
+
+    private void onHierarchy(int hierarchy) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchy(hierarchy));
+        }
+    }
+
+    private void onSignalType(int signalType) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalType(signalType));
+        }
+    }
+
+    private void onPlpIds(int[] plpIds) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIds(plpIds));
+        }
+    }
+
+    private void onGroupIds(int[] groupIds) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIds(groupIds));
+        }
+    }
+
+    private void onInputStreamIds(int[] inputStreamIds) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onInputStreamIds(inputStreamIds));
+        }
+    }
+
+    private void onDvbsStandard(int dvbsStandandard) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbsStandard(dvbsStandandard));
+        }
+    }
+
+    private void onDvbtStandard(int dvbtStandard) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandard(dvbtStandard));
+        }
+    }
+
+    private void onAnalogSifStandard(int sif) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandard(sif));
+        }
+    }
+
+    private void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos) {
+        if (mScanCallbackExecutor != null && mScanCallback != null) {
+            mScanCallbackExecutor.execute(() -> mScanCallback.onAtsc3PlpInfos(atsc3PlpInfos));
         }
     }
 
