@@ -57,7 +57,6 @@ public class WifiSoftApConfigChangedNotifier {
         Resources resources = context.getResources();
         CharSequence title = resources.getText(R.string.wifi_softap_config_change);
         CharSequence contentSummary = resources.getText(R.string.wifi_softap_config_change_summary);
-        CharSequence content = resources.getText(R.string.wifi_softap_config_change_detailed);
         int color = resources.getColor(
                 android.R.color.system_notification_accent_color, context.getTheme());
 
@@ -73,7 +72,6 @@ public class WifiSoftApConfigChangedNotifier {
                 .setLocalOnly(true)
                 .setColor(color)
                 .setStyle(new Notification.BigTextStyle()
-                        .bigText(content)
                         .setBigContentTitle(title)
                         .setSummaryText(contentSummary))
                 .setAutoCancel(true)
