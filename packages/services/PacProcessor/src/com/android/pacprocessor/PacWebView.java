@@ -19,8 +19,6 @@ package com.android.pacprocessor;
 import android.util.Log;
 import android.webkit.PacProcessor;
 
-import com.android.internal.annotations.GuardedBy;
-
 /**
  * @hide
  */
@@ -28,10 +26,6 @@ public class PacWebView implements LibpacInterface {
     private static final String TAG = "PacWebView";
 
     private static final PacWebView sInstance = new PacWebView();
-
-    private Object mLock = new Object();
-
-    @GuardedBy("mLock")
     private PacProcessor mProcessor = PacProcessor.getInstance();
 
     public static PacWebView getInstance() {
@@ -39,20 +33,16 @@ public class PacWebView implements LibpacInterface {
     }
 
     @Override
-    public boolean setCurrentProxyScript(String script) {
-        synchronized (mLock) {
-            if (!mProcessor.setProxyScript(script)) {
-                Log.e(TAG, "Unable to parse proxy script.");
-                return false;
-            }
-            return true;
+    public synchronized boolean setCurrentProxyScript(String script) {
+        if (!mProcessor.setProxyScript(script)) {
+            Log.e(TAG, "Unable to parse proxy script.");
+            return false;
         }
+        return true;
     }
 
     @Override
-    public String makeProxyRequest(String url, String host) {
-        synchronized (mLock) {
-            return mProcessor.findProxyForUrl(url);
-        }
+    public synchronized String makeProxyRequest(String url, String host) {
+        return mProcessor.findProxyForUrl(url);
     }
 }
