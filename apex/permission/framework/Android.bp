@@ -26,13 +26,7 @@ java_library {
     srcs: [
         ":framework-permission-sources",
     ],
-    // TODO(b/146758669): Use "system_current" after nullability annotations are system APIs.
-    sdk_version: "core_current",
-    libs: [
-        "framework-annotations-lib",
-        // TODO(b/146758669): Remove this line after nullability annotations are system APIs.
-        "android_system_stubs_current",
-    ],
+    sdk_version: "module_current",
     apex_available: [
         "com.android.permission",
         "test_com.android.permission",
