@@ -18,7 +18,6 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 
-/** @hide */
 interface IWapPushManager {
     /**
      * Processes WAP push message and triggers the receiver application registered
@@ -27,10 +26,11 @@ interface IWapPushManager {
     int processMessage(String app_id, String content_type, in Intent intent);
 
     /**
-     * Adds receiver application into the application ID table.
-     * Returns true if inserting the information is successful. Inserting duplicated
+     * Add receiver application into the application ID table.
+     * Returns true if inserting the information is successfull. Inserting the duplicated
      * record in the application ID table is not allowed. Use update/delete method.
      */
+    @UnsupportedAppUsage
     boolean addPackage(String x_app_id, String content_type,
             String package_name, String class_name,
             int app_type, boolean need_signature, boolean further_processing);
@@ -39,14 +39,17 @@ interface IWapPushManager {
      * Updates receiver application that is last added.
      * Returns true if updating the information is successfull.
      */
+    @UnsupportedAppUsage
     boolean updatePackage(String x_app_id, String content_type,
             String package_name, String class_name,
             int app_type, boolean need_signature, boolean further_processing);
 
     /**
-     * Deletes receiver application information.
+     * Delites receiver application information.
      * Returns true if deleting is successfull.
      */
+    @UnsupportedAppUsage
     boolean deletePackage(String x_app_id, String content_type,
-            String package_name, String class_name);
+                            String package_name, String class_name);
 }
+
