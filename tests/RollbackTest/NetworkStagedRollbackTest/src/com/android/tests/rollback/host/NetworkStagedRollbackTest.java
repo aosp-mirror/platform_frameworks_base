@@ -16,6 +16,7 @@
 
 package com.android.tests.rollback.host;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
@@ -115,6 +116,31 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testNetworkPassedDoesNotRollback() throws Exception {
+        runPhase("testNetworkPassedDoesNotRollback_Phase1");
+        // Reboot device to activate staged package
+        getDevice().reboot();
+
+        // Verify rollback was enabled
+        runPhase("testNetworkPassedDoesNotRollback_Phase2");
+
+        // Connect to internet so network health check passes
+        getDevice().executeShellCommand("svc wifi enable");
+        getDevice().executeShellCommand("svc data enable");
+
+        // Wait for device available because emulator device may restart after turning
+        // on mobile data
+        getDevice().waitForDeviceAvailable();
+
+        // Verify rollback was not executed after health check deadline
+        runPhase("testNetworkPassedDoesNotRollback_Phase3");
+        InputStreamSource logcatStream = mReceiver.getLogcatData();
+        try {
+            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
+            assertEquals(watchdogEventOccurred(watchdogEvents, null, null,
+                    REASON_EXPLICIT_HEALTH_CHECK, null), false);
+        } finally {
+            logcatStream.close();
+        }
     }
 
     /**
