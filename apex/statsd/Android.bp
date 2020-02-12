@@ -20,6 +20,7 @@ apex {
 
 apex_defaults {
     native_shared_libs: [
+        "libstatspull",
         "libstats_jni",
     ],
     // binaries: ["vold"],
@@ -28,6 +29,7 @@ apex_defaults {
         "service-statsd",
     ],
     // prebuilts: ["my_prebuilt"],
+    compile_multilib: "both",
     name: "com.android.os.statsd-defaults",
     key: "com.android.os.statsd.key",
     certificate: ":com.android.os.statsd.certificate",
