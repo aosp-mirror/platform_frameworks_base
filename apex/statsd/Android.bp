@@ -20,6 +20,7 @@ apex {
 
 apex_defaults {
     native_shared_libs: [
+        "libstatssocket",
         "libstatspull",
         "libstats_jni",
     ],
