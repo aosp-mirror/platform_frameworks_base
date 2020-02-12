@@ -312,8 +312,14 @@ public class PackageInfoUtils {
 
     /**
      * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
+     *
+     * @deprecated use {@link #generateProviderInfo(
+     * AndroidPackage, ParsedProvider, int, PackageUserState, ApplicationInfo, int, PackageSetting)}
+     * instead and pass {@link ApplicationInfo} explicitly to avoid generating duplicate instances
+     * of it.
      */
     @Nullable
+    @Deprecated
     public static ProviderInfo generateProviderInfo(AndroidPackage pkg, ParsedProvider p,
             @PackageManager.ComponentInfoFlags int flags, PackageUserState state, int userId,
             @Nullable PackageSetting pkgSetting) {
@@ -324,7 +330,7 @@ public class PackageInfoUtils {
      * @param pkgSetting See {@link PackageInfoUtils} for description of pkgSetting usage.
      */
     @Nullable
-    private static ProviderInfo generateProviderInfo(AndroidPackage pkg, ParsedProvider p,
+    public static ProviderInfo generateProviderInfo(AndroidPackage pkg, ParsedProvider p,
             @PackageManager.ComponentInfoFlags int flags, PackageUserState state,
             @Nullable ApplicationInfo applicationInfo, int userId,
             @Nullable PackageSetting pkgSetting) {

@@ -218,6 +218,7 @@ import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
@@ -5149,12 +5150,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mPlatformCompat != null) {
                 mPlatformCompat.resetReporting(app.info);
             }
+            final ProviderInfoList providerList = ProviderInfoList.fromList(providers);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
                 // being bound to an application.
                 thread.runIsolatedEntryPoint(app.isolatedEntryPoint, app.isolatedEntryPointArgs);
             } else if (instr2 != null) {
-                thread.bindApplication(processName, appInfo, providers,
+                thread.bindApplication(processName, appInfo, providerList,
                         instr2.mClass,
                         profilerInfo, instr2.mArguments,
                         instr2.mWatcher,
@@ -5167,7 +5169,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         buildSerial, autofillOptions, contentCaptureOptions,
                         app.mDisabledCompatChanges);
             } else {
-                thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
+                thread.bindApplication(processName, appInfo, providerList, null, profilerInfo,
                         null, null, null, testMode,
                         mBinderTransactionTrackingEnabled, enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode, app.isPersistent(),

@@ -1630,6 +1630,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     @SuppressWarnings("unchecked")
     public void writeToParcel(Parcel dest, int parcelableFlags) {
+        if (dest.maybeWriteSquashed(this)) {
+            return;
+        }
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(taskAffinity);
         dest.writeString(permission);
@@ -1700,9 +1703,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
             = new Parcelable.Creator<ApplicationInfo>() {
+        @Override
         public ApplicationInfo createFromParcel(Parcel source) {
-            return new ApplicationInfo(source);
+            return source.readSquashed(ApplicationInfo::new);
         }
+
+        @Override
         public ApplicationInfo[] newArray(int size) {
             return new ApplicationInfo[size];
         }
