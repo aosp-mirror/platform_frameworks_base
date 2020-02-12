@@ -869,14 +869,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return false;
         }
 
-        ApplicationInfo appInfo = pkgInfo.applicationInfo;
-        boolean success = rollback.enableForPackage(packageName, newPackage.versionCode,
-                pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
-                appInfo.splitSourceDirs, session.rollbackDataPolicy);
-        if (!success) {
-            return success;
-        }
-
         if (isApex) {
             // Check if this apex contains apks inside it. If true, then they should be added as
             // a RollbackPackageInfo into this rollback
@@ -894,12 +886,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     Slog.e(TAG, apkInApex + " is not installed");
                     return false;
                 }
-                success = rollback.enableForPackageInApex(
-                        apkInApex, apkPkgInfo.getLongVersionCode(), session.rollbackDataPolicy);
-                if (!success) return success;
+                if (!rollback.enableForPackageInApex(
+                        apkInApex, apkPkgInfo.getLongVersionCode(), session.rollbackDataPolicy)) {
+                    return false;
+                }
             }
         }
-        return true;
+
+        /**
+         * The order is important here! Always enable the embedded apk-in-apex (if any) before
+         * enabling the embedding apex. Otherwise the rollback object might be in an inconsistent
+         * state where an embedding apex is successfully enabled while one of its embedded
+         * apk-in-apex failed. Note {@link Rollback#allPackagesEnabled()} won't behave correctly if
+         * a rollback object is inconsistent because it doesn't count apk-in-apex.
+         */
+        ApplicationInfo appInfo = pkgInfo.applicationInfo;
+        return rollback.enableForPackage(packageName, newPackage.versionCode,
+                pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
+                appInfo.splitSourceDirs, session.rollbackDataPolicy);
     }
 
     @Override
