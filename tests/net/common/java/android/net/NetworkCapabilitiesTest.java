@@ -272,22 +272,8 @@ public class NetworkCapabilitiesTest {
         netCap.setOwnerUid(123);
         assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
-        assertParcelSane(netCap, 15);
+        assertParcelSane(netCap, 13);
     }
-
-    @Test
-    public void testParcelNetworkCapabilitiesWithRequestorUidAndPackageName() {
-        final NetworkCapabilities netCap = new NetworkCapabilities()
-                .addCapability(NET_CAPABILITY_INTERNET)
-                .setRequestorUid(9304)
-                .setRequestorPackageName("com.android.test")
-                .addCapability(NET_CAPABILITY_EIMS)
-                .addCapability(NET_CAPABILITY_NOT_METERED);
-        assertParcelingIsLossless(netCap);
-        netCap.setSSID(TEST_SSID);
-        assertParcelSane(netCap, 15);
-    }
-
 
     @Test
     public void testOemPaid() {

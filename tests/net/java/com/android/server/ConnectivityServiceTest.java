@@ -107,7 +107,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -306,7 +305,6 @@ public class ConnectivityServiceTest {
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
     private static final String WIFI_IFNAME = "test_wlan0";
     private static final String WIFI_WOL_IFNAME = "test_wlan_wol";
-    private static final String TEST_PACKAGE_NAME = "com.android.test.package";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private MockContext mServiceContext;
@@ -656,7 +654,7 @@ public class ConnectivityServiceTest {
 
             if (mNmValidationRedirectUrl != null) {
                 mNmCallbacks.showProvisioningNotification(
-                        "test_provisioning_notif_action", TEST_PACKAGE_NAME);
+                        "test_provisioning_notif_action", "com.android.test.package");
                 mNmProvNotificationRequested = true;
             }
         }
@@ -2974,7 +2972,7 @@ public class ConnectivityServiceTest {
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, null, 0, null,
-                    ConnectivityManager.TYPE_WIFI, TEST_PACKAGE_NAME);
+                    ConnectivityManager.TYPE_WIFI);
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
@@ -3013,12 +3011,31 @@ public class ConnectivityServiceTest {
     }
 
     @Test
-    public void testNetworkRequestUidSpoofSecurityException() throws Exception {
+    public void testNetworkSpecifierUidSpoofSecurityException() throws Exception {
+        class UidAwareNetworkSpecifier extends NetworkSpecifier implements Parcelable {
+            @Override
+            public boolean satisfiedBy(NetworkSpecifier other) {
+                return true;
+            }
+
+            @Override
+            public void assertValidFromUid(int requestorUid) {
+                throw new SecurityException("failure");
+            }
+
+            @Override
+            public int describeContents() { return 0; }
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {}
+        }
+
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-        NetworkRequest networkRequest = newWifiRequestBuilder().build();
+
+        UidAwareNetworkSpecifier networkSpecifier = new UidAwareNetworkSpecifier();
+        NetworkRequest networkRequest = newWifiRequestBuilder().setNetworkSpecifier(
+                networkSpecifier).build();
         TestNetworkCallback networkCallback = new TestNetworkCallback();
-        doThrow(new SecurityException()).when(mAppOpsManager).checkPackage(anyInt(), anyString());
         assertThrows(SecurityException.class, () -> {
             mCm.requestNetwork(networkRequest, networkCallback);
         });
