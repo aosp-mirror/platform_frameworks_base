@@ -1511,15 +1511,16 @@ public class DisplayPolicy {
         // nav bar and ensure the application doesn't see the event.
         if (navVisible || navAllowedHidden) {
             if (mInputConsumer != null) {
+                mInputConsumer.dismiss();
                 mHandler.sendMessage(
                         mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
                 mInputConsumer = null;
             }
         } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
-            mInputConsumer = mService.createInputConsumer(mHandler.getLooper(),
+            mInputConsumer = mDisplayContent.getInputMonitor().createInputConsumer(
+                    mHandler.getLooper(),
                     INPUT_CONSUMER_NAVIGATION,
-                    HideNavInputEventReceiver::new,
-                    displayFrames.mDisplayId);
+                    HideNavInputEventReceiver::new);
             // As long as mInputConsumer is active, hover events are not dispatched to the app
             // and the pointer icon is likely to become stale. Hide it to avoid confusion.
             InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);
@@ -3173,7 +3174,7 @@ public class DisplayPolicy {
 
     private void disposeInputConsumer(InputConsumer inputConsumer) {
         if (inputConsumer != null) {
-            inputConsumer.dismiss();
+            inputConsumer.dispose();
         }
     }
 

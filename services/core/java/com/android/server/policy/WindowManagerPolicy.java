@@ -75,7 +75,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -83,7 +82,6 @@ import android.view.Display;
 import android.view.IApplicationToken;
 import android.view.IDisplayFoldListener;
 import android.view.IWindowManager;
-import android.view.InputEventReceiver;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -471,6 +469,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Remove the input consumer from the window manager.
          */
         void dismiss();
+        /**
+         * Dispose the input consumer and input receiver from UI thread.
+         */
+        void dispose();
     }
 
     /**
@@ -503,12 +505,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public static final int CAMERA_LENS_COVER_ABSENT = -1;
         public static final int CAMERA_LENS_UNCOVERED = 0;
         public static final int CAMERA_LENS_COVERED = 1;
-
-        /**
-         * Add a input consumer which will consume all input events going to any window below it.
-         */
-        public InputConsumer createInputConsumer(Looper looper, String name,
-                InputEventReceiver.Factory inputEventReceiverFactory, int displayId);
 
         /**
          * Returns a code that describes the current state of the lid switch.
