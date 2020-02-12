@@ -1175,7 +1175,7 @@ class Activity : public ManifestExtractor::Element {
     }
 
     // Fully qualify the activity name
-    ssize_t idx = name.find(".");
+    ssize_t idx = name.find('.');
     if (idx == 0) {
       name = package + name;
     } else if (idx < 0) {
@@ -2125,7 +2125,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
     size_t pos = file_path.find("lib/");
     if (pos != std::string::npos) {
       file_path = file_path.substr(pos + 4);
-      pos = file_path.find("/");
+      pos = file_path.find('/');
       if (pos != std::string::npos) {
         file_path = file_path.substr(0, pos);
       }
