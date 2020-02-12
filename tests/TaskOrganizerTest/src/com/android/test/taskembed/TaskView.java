@@ -31,6 +31,10 @@ import android.view.SurfaceView;
 class TaskView extends SurfaceView implements SurfaceHolder.Callback {
     final ITaskOrganizer mTaskOrganizer;
     final int mWindowingMode;
+    IWindowContainer mWc;
+
+    boolean mSurfaceCreated = false;
+    boolean mNeedsReparent;
 
     TaskView(Context c, ITaskOrganizer o, int windowingMode) {
         super(c);
@@ -43,10 +47,10 @@ class TaskView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        try {
-            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(mTaskOrganizer,
-                    mWindowingMode);
-        } catch (Exception e) {
+        mSurfaceCreated = true;
+        if (mNeedsReparent) {
+            mNeedsReparent = false;
+            reparentLeash();
         }
     }
 
@@ -59,10 +63,19 @@ class TaskView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     void reparentTask(IWindowContainer wc) {
+        mWc = wc;
+        if (mSurfaceCreated == false) {
+            mNeedsReparent = true;
+        } else {
+            reparentLeash();
+        }
+    }
+
+    void reparentLeash() {
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         SurfaceControl leash = null;
         try {
-            leash = wc.getLeash();
+            leash = mWc.getLeash();
         } catch (Exception e) {
             // System server died.. oh well
         }
