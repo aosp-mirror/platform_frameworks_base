@@ -22,14 +22,31 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/error_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/controls_management_list_margin"
+        android:text="@string/controls_favorite_load_error"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:visibility="gone"
+        android:gravity="center_horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/text_favorites"
+    />
+
+    <TextView
         android:id="@+id/text_favorites"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="FAVORITES"
+        android:layout_marginTop="@dimen/controls_management_list_margin"
+        android:text="@string/controls_favorite_header_favorites"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAllCaps="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/divider1"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/error_message"
         />
 
     <View
@@ -60,8 +77,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/controls_management_list_margin"
-        android:text="ALL"
+        android:text="@string/controls_favorite_header_all"
         android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAllCaps="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/divider2"
         app:layout_constraintTop_toBottomOf="@id/listFavorites"

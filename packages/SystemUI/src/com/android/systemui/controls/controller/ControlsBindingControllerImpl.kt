@@ -125,7 +125,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
-    override fun bindAndLoad(component: ComponentName, callback: (List<Control>) -> Unit) {
+    override fun bindAndLoad(
+        component: ComponentName,
+        callback: ControlsBindingController.LoadCallback
+    ) {
         val provider = retrieveLifecycleManager(component)
         provider.maybeBindAndLoad(callback)
     }
@@ -230,7 +233,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
                     return
                 }
             }
-            provider.lastLoadCallback?.invoke(list) ?: run {
+            provider.lastLoadCallback?.accept(list) ?: run {
                 Log.w(TAG, "Null callback")
             }
             provider.unbindService()

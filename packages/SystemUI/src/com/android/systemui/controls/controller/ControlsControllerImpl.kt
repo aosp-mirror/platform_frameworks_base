@@ -38,7 +38,6 @@ import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
-import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
@@ -47,6 +46,7 @@ import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.TimeUnit
+import java.util.function.Consumer
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -188,47 +188,74 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun loadForComponent(
         componentName: ComponentName,
-        callback: (List<ControlStatus>, List<String>) -> Unit
+        dataCallback: Consumer<ControlsController.LoadData>
     ) {
         if (!confirmAvailability()) {
             if (userChanging) {
                 // Try again later, userChanging should not last forever. If so, we have bigger
                 // problems
                 executor.executeDelayed(
-                        { loadForComponent(componentName, callback) },
+                        { loadForComponent(componentName, dataCallback) },
                         USER_CHANGE_RETRY_DELAY,
                         TimeUnit.MILLISECONDS
                 )
             } else {
-                callback(emptyList(), emptyList())
+                dataCallback.accept(createLoadDataObject(emptyList(), emptyList(), true))
             }
             return
         }
-        bindingController.bindAndLoad(componentName) {
-            synchronized(currentFavorites) {
-                val favoritesForComponentKeys: List<String> =
-                        currentFavorites.getValue(componentName).map { it.controlId }
-                val changed = updateFavoritesLocked(componentName, it, favoritesForComponentKeys)
-                if (changed) {
-                    persistenceWrapper.storeFavorites(favoritesAsListLocked())
+        bindingController.bindAndLoad(
+                componentName,
+                object : ControlsBindingController.LoadCallback {
+                    override fun accept(controls: List<Control>) {
+                        val loadData = synchronized(currentFavorites) {
+                            val favoritesForComponentKeys: List<String> =
+                                    currentFavorites.getValue(componentName).map { it.controlId }
+                            val changed = updateFavoritesLocked(componentName, controls,
+                                    favoritesForComponentKeys)
+                            if (changed) {
+                                persistenceWrapper.storeFavorites(favoritesAsListLocked())
+                            }
+                            val removed = findRemovedLocked(favoritesForComponentKeys.toSet(),
+                                    controls)
+                            val controlsWithFavorite = controls.map {
+                                ControlStatus(it, it.controlId in favoritesForComponentKeys)
+                            }
+                            createLoadDataObject(
+                                    currentFavorites.getValue(componentName)
+                                            .filter { it.controlId in removed }
+                                            .map { createRemovedStatus(it) } +
+                                            controlsWithFavorite,
+                                    favoritesForComponentKeys
+                            )
+                        }
+                        dataCallback.accept(loadData)
+                    }
+
+                    override fun error(message: String) {
+                        val loadData = synchronized(currentFavorites) {
+                            val favoritesForComponent = currentFavorites.getValue(componentName)
+                            val favoritesForComponentKeys = favoritesForComponent
+                                    .map { it.controlId }
+                            createLoadDataObject(
+                                    favoritesForComponent.map { createRemovedStatus(it, false) },
+                                    favoritesForComponentKeys,
+                                    true
+                            )
+                        }
+                        dataCallback.accept(loadData)
+                    }
                 }
-                val removed = findRemovedLocked(favoritesForComponentKeys.toSet(), it)
-                val controlsWithFavorite =
-                        it.map { ControlStatus(it, it.controlId in favoritesForComponentKeys) }
-                callback(
-                        currentFavorites.getValue(componentName)
-                                .filter { it.controlId in removed }
-                                .map(::createRemovedStatus) + controlsWithFavorite,
-                        favoritesForComponentKeys
-                )
-            }
-        }
+        )
     }
 
-    private fun createRemovedStatus(controlInfo: ControlInfo): ControlStatus {
-        val intent = Intent(context, ControlsFavoritingActivity::class.java).apply {
-            putExtra(Intent.EXTRA_COMPONENT_NAME, controlInfo.component)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+    private fun createRemovedStatus(
+        controlInfo: ControlInfo,
+        setRemoved: Boolean = true
+    ): ControlStatus {
+        val intent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            this.`package` = controlInfo.component.packageName
         }
         val pendingIntent = PendingIntent.getActivity(context,
                 controlInfo.component.hashCode(),
@@ -238,7 +265,7 @@ class ControlsControllerImpl @Inject constructor (
                 .setTitle(controlInfo.controlTitle)
                 .setDeviceType(controlInfo.deviceType)
                 .build()
-        return ControlStatus(control, true, true)
+        return ControlStatus(control, true, setRemoved)
     }
 
     @GuardedBy("currentFavorites")

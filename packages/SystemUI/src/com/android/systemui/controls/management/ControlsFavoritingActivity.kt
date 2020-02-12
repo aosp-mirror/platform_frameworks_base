@@ -21,6 +21,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
@@ -34,6 +35,7 @@ import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.CurrentUserTracker
 import java.util.concurrent.Executor
+import java.util.function.Consumer
 import javax.inject.Inject
 
 class ControlsFavoritingActivity @Inject constructor(
@@ -51,6 +53,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var adapterAll: ControlAdapter
     private lateinit var recyclerViewFavorites: RecyclerView
     private lateinit var adapterFavorites: ControlAdapter
+    private lateinit var errorText: TextView
     private var component: ComponentName? = null
 
     private var currentModel: FavoriteModel? = null
@@ -96,6 +99,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
         val app = intent.getCharSequenceExtra(EXTRA_APP)
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
+        errorText = requireViewById(R.id.error_message)
 
         setUpRecyclerViews()
 
@@ -118,7 +122,10 @@ class ControlsFavoritingActivity @Inject constructor(
         }
 
         component?.let {
-            controller.loadForComponent(it) { allControls, favoriteKeys ->
+            controller.loadForComponent(it, Consumer { data ->
+                val allControls = data.allControls
+                val favoriteKeys = data.favoritesIds
+                val error = data.errorOnLoad
                 executor.execute {
                     val favoriteModel = FavoriteModel(
                         allControls,
@@ -128,8 +135,9 @@ class ControlsFavoritingActivity @Inject constructor(
                     adapterAll.changeFavoritesModel(favoriteModel)
                     adapterFavorites.changeFavoritesModel(favoriteModel)
                     currentModel = favoriteModel
+                    errorText.visibility = if (error) View.VISIBLE else View.GONE
                 }
-            }
+            })
         }
 
         currentUserTracker.startTracking()
