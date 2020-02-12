@@ -86,6 +86,7 @@ import java.util.function.Consumer;
 public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String TAG = "StorageStatsService";
 
+    private static final String PROP_STORAGE_CRATES = "fw.storage_crates";
     private static final String PROP_DISABLE_QUOTA = "fw.disable_quota";
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
 
@@ -595,6 +596,13 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 Uri.parse("content://com.android.externalstorage.documents/"), null, false);
     }
 
+    private static void checkCratesEnable() {
+        final boolean enable = SystemProperties.getBoolean(PROP_STORAGE_CRATES, false);
+        if (!enable) {
+            throw new IllegalStateException("Storage Crate feature is disabled.");
+        }
+    }
+
     /**
      * To enforce the calling or self to have the {@link android.Manifest.permission#MANAGE_CRATES}
      * permission.
@@ -650,6 +658,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     @Override
     public ParceledListSlice<CrateInfo> queryCratesForPackage(String volumeUuid,
             @NonNull String packageName, @UserIdInt int userId, @NonNull String callingPackage) {
+        checkCratesEnable();
         if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
@@ -677,6 +686,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     @Override
     public ParceledListSlice<CrateInfo> queryCratesForUid(String volumeUuid, int uid,
             @NonNull String callingPackage) {
+        checkCratesEnable();
         final int userId = UserHandle.getUserId(uid);
         if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
@@ -718,6 +728,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     @Override
     public ParceledListSlice<CrateInfo> queryCratesForUser(String volumeUuid, int userId,
             @NonNull String callingPackage) {
+        checkCratesEnable();
         if (userId != UserHandle.getCallingUserId()) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS, TAG);
