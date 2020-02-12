@@ -50,13 +50,15 @@
 
 #include <inputflinger/InputManager.h>
 
+#include <android/graphics/GraphicsJNI.h>
 #include <android_os_MessageQueue.h>
+#include <android_view_InputChannel.h>
 #include <android_view_InputDevice.h>
 #include <android_view_KeyEvent.h>
 #include <android_view_MotionEvent.h>
-#include <android_view_InputChannel.h>
 #include <android_view_PointerIcon.h>
-#include <android/graphics/GraphicsJNI.h>
+#include <android_view_VerifiedKeyEvent.h>
+#include <android_view_VerifiedMotionEvent.h>
 
 #include <nativehelper/ScopedLocalFrame.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -1513,6 +1515,49 @@ static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
     }
 }
 
+static jobject nativeVerifyInputEvent(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                      jobject inputEventObj) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
+        KeyEvent keyEvent;
+        status_t status = android_view_KeyEvent_toNative(env, inputEventObj, &keyEvent);
+        if (status) {
+            jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
+            return nullptr;
+        }
+
+        std::unique_ptr<VerifiedInputEvent> verifiedEvent =
+                im->getInputManager()->getDispatcher()->verifyInputEvent(keyEvent);
+        if (verifiedEvent == nullptr) {
+            return nullptr;
+        }
+
+        return android_view_VerifiedKeyEvent(env,
+                                             static_cast<const VerifiedKeyEvent&>(*verifiedEvent));
+    } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
+        const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
+        if (!motionEvent) {
+            jniThrowRuntimeException(env, "Could not read contents of MotionEvent object.");
+            return nullptr;
+        }
+
+        std::unique_ptr<VerifiedInputEvent> verifiedEvent =
+                im->getInputManager()->getDispatcher()->verifyInputEvent(*motionEvent);
+
+        if (verifiedEvent == nullptr) {
+            return nullptr;
+        }
+
+        return android_view_VerifiedMotionEvent(env,
+                                                static_cast<const VerifiedMotionEvent&>(
+                                                        *verifiedEvent));
+    } else {
+        jniThrowRuntimeException(env, "Invalid input event type.");
+        return nullptr;
+    }
+}
+
 static void nativeToggleCapsLock(JNIEnv* env, jclass /* clazz */,
          jlong ptr, jint deviceId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1735,90 +1780,61 @@ static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */,
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeInit",
-            "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/MessageQueue;)J",
-            (void*) nativeInit },
-    { "nativeStart", "(J)V",
-            (void*) nativeStart },
-    { "nativeSetDisplayViewports", "(J[Landroid/hardware/display/DisplayViewport;)V",
-            (void*) nativeSetDisplayViewports },
-    { "nativeGetScanCodeState", "(JIII)I",
-            (void*) nativeGetScanCodeState },
-    { "nativeGetKeyCodeState", "(JIII)I",
-            (void*) nativeGetKeyCodeState },
-    { "nativeGetSwitchState", "(JIII)I",
-            (void*) nativeGetSwitchState },
-    { "nativeHasKeys", "(JII[I[Z)Z",
-            (void*) nativeHasKeys },
-    { "nativeRegisterInputChannel",
-            "(JLandroid/view/InputChannel;)V",
-            (void*) nativeRegisterInputChannel },
-    { "nativeRegisterInputMonitor",
-            "(JLandroid/view/InputChannel;IZ)V",
-            (void*) nativeRegisterInputMonitor},
-    { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
-            (void*) nativeUnregisterInputChannel },
-    { "nativePilferPointers", "(JLandroid/os/IBinder;)V",
-            (void*) nativePilferPointers },
-    { "nativeSetInputFilterEnabled", "(JZ)V",
-            (void*) nativeSetInputFilterEnabled },
-    { "nativeSetInTouchMode", "(JZ)V",
-            (void*) nativeSetInTouchMode },
-    { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
-            (void*) nativeInjectInputEvent },
-    { "nativeToggleCapsLock", "(JI)V",
-            (void*) nativeToggleCapsLock },
-    { "nativeSetInputWindows", "(J[Landroid/view/InputWindowHandle;I)V",
-            (void*) nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
-            (void*) nativeSetFocusedApplication },
-    { "nativeSetFocusedDisplay", "(JI)V",
-            (void*) nativeSetFocusedDisplay },
-    { "nativeSetPointerCapture", "(JZ)V",
-            (void*) nativeSetPointerCapture },
-    { "nativeSetInputDispatchMode", "(JZZ)V",
-            (void*) nativeSetInputDispatchMode },
-    { "nativeSetSystemUiVisibility", "(JI)V",
-            (void*) nativeSetSystemUiVisibility },
-    { "nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
-            (void*) nativeTransferTouchFocus },
-    { "nativeSetPointerSpeed", "(JI)V",
-            (void*) nativeSetPointerSpeed },
-    { "nativeSetShowTouches", "(JZ)V",
-            (void*) nativeSetShowTouches },
-    { "nativeSetInteractive", "(JZ)V",
-            (void*) nativeSetInteractive },
-    { "nativeReloadCalibration", "(J)V",
-            (void*) nativeReloadCalibration },
-    { "nativeVibrate", "(JI[JII)V",
-            (void*) nativeVibrate },
-    { "nativeCancelVibrate", "(JII)V",
-            (void*) nativeCancelVibrate },
-    { "nativeReloadKeyboardLayouts", "(J)V",
-            (void*) nativeReloadKeyboardLayouts },
-    { "nativeReloadDeviceAliases", "(J)V",
-            (void*) nativeReloadDeviceAliases },
-    { "nativeDump", "(J)Ljava/lang/String;",
-            (void*) nativeDump },
-    { "nativeMonitor", "(J)V",
-            (void*) nativeMonitor },
-    { "nativeIsInputDeviceEnabled", "(JI)Z",
-            (void*) nativeIsInputDeviceEnabled },
-    { "nativeEnableInputDevice", "(JI)V",
-            (void*) nativeEnableInputDevice },
-    { "nativeDisableInputDevice", "(JI)V",
-            (void*) nativeDisableInputDevice },
-    { "nativeSetPointerIconType", "(JI)V",
-            (void*) nativeSetPointerIconType },
-    { "nativeReloadPointerIcons", "(J)V",
-            (void*) nativeReloadPointerIcons },
-    { "nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",
-            (void*) nativeSetCustomPointerIcon },
-    { "nativeCanDispatchToDisplay", "(JII)Z",
-            (void*) nativeCanDispatchToDisplay },
-    { "nativeNotifyPortAssociationsChanged", "(J)V",
-            (void*) nativeNotifyPortAssociationsChanged },
+        /* name, signature, funcPtr */
+        {"nativeInit",
+         "(Lcom/android/server/input/InputManagerService;Landroid/content/Context;Landroid/os/"
+         "MessageQueue;)J",
+         (void*)nativeInit},
+        {"nativeStart", "(J)V", (void*)nativeStart},
+        {"nativeSetDisplayViewports", "(J[Landroid/hardware/display/DisplayViewport;)V",
+         (void*)nativeSetDisplayViewports},
+        {"nativeGetScanCodeState", "(JIII)I", (void*)nativeGetScanCodeState},
+        {"nativeGetKeyCodeState", "(JIII)I", (void*)nativeGetKeyCodeState},
+        {"nativeGetSwitchState", "(JIII)I", (void*)nativeGetSwitchState},
+        {"nativeHasKeys", "(JII[I[Z)Z", (void*)nativeHasKeys},
+        {"nativeRegisterInputChannel", "(JLandroid/view/InputChannel;)V",
+         (void*)nativeRegisterInputChannel},
+        {"nativeRegisterInputMonitor", "(JLandroid/view/InputChannel;IZ)V",
+         (void*)nativeRegisterInputMonitor},
+        {"nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
+         (void*)nativeUnregisterInputChannel},
+        {"nativePilferPointers", "(JLandroid/os/IBinder;)V", (void*)nativePilferPointers},
+        {"nativeSetInputFilterEnabled", "(JZ)V", (void*)nativeSetInputFilterEnabled},
+        {"nativeSetInTouchMode", "(JZ)V", (void*)nativeSetInTouchMode},
+        {"nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
+         (void*)nativeInjectInputEvent},
+        {"nativeVerifyInputEvent", "(JLandroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
+         (void*)nativeVerifyInputEvent},
+        {"nativeToggleCapsLock", "(JI)V", (void*)nativeToggleCapsLock},
+        {"nativeSetInputWindows", "(J[Landroid/view/InputWindowHandle;I)V",
+         (void*)nativeSetInputWindows},
+        {"nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
+         (void*)nativeSetFocusedApplication},
+        {"nativeSetFocusedDisplay", "(JI)V", (void*)nativeSetFocusedDisplay},
+        {"nativeSetPointerCapture", "(JZ)V", (void*)nativeSetPointerCapture},
+        {"nativeSetInputDispatchMode", "(JZZ)V", (void*)nativeSetInputDispatchMode},
+        {"nativeSetSystemUiVisibility", "(JI)V", (void*)nativeSetSystemUiVisibility},
+        {"nativeTransferTouchFocus", "(JLandroid/os/IBinder;Landroid/os/IBinder;)Z",
+         (void*)nativeTransferTouchFocus},
+        {"nativeSetPointerSpeed", "(JI)V", (void*)nativeSetPointerSpeed},
+        {"nativeSetShowTouches", "(JZ)V", (void*)nativeSetShowTouches},
+        {"nativeSetInteractive", "(JZ)V", (void*)nativeSetInteractive},
+        {"nativeReloadCalibration", "(J)V", (void*)nativeReloadCalibration},
+        {"nativeVibrate", "(JI[JII)V", (void*)nativeVibrate},
+        {"nativeCancelVibrate", "(JII)V", (void*)nativeCancelVibrate},
+        {"nativeReloadKeyboardLayouts", "(J)V", (void*)nativeReloadKeyboardLayouts},
+        {"nativeReloadDeviceAliases", "(J)V", (void*)nativeReloadDeviceAliases},
+        {"nativeDump", "(J)Ljava/lang/String;", (void*)nativeDump},
+        {"nativeMonitor", "(J)V", (void*)nativeMonitor},
+        {"nativeIsInputDeviceEnabled", "(JI)Z", (void*)nativeIsInputDeviceEnabled},
+        {"nativeEnableInputDevice", "(JI)V", (void*)nativeEnableInputDevice},
+        {"nativeDisableInputDevice", "(JI)V", (void*)nativeDisableInputDevice},
+        {"nativeSetPointerIconType", "(JI)V", (void*)nativeSetPointerIconType},
+        {"nativeReloadPointerIcons", "(J)V", (void*)nativeReloadPointerIcons},
+        {"nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",
+         (void*)nativeSetCustomPointerIcon},
+        {"nativeCanDispatchToDisplay", "(JII)Z", (void*)nativeCanDispatchToDisplay},
+        {"nativeNotifyPortAssociationsChanged", "(J)V", (void*)nativeNotifyPortAssociationsChanged},
 };
 
 #define FIND_CLASS(var, className) \
