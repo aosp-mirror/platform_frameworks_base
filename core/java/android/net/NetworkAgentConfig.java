@@ -21,12 +21,11 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 /**
  * Allows a network transport to provide the system with policy and configuration information about
- * a particular network when registering a {@link NetworkAgent}. This information cannot change once
- * the agent is registered.
+ * a particular network when registering a {@link NetworkAgent}.
+ * @note This information cannot change once the agent is registered.
  *
  * @hide
  */
@@ -120,12 +119,40 @@ public final class NetworkAgentConfig implements Parcelable {
     }
 
     /**
+     * The legacy type of this network agent, or TYPE_NONE if unset.
+     * @hide
+     */
+    public int legacyType = ConnectivityManager.TYPE_NONE;
+
+    /**
+     * @return the legacy type
+     */
+    public int getLegacyType() {
+        return legacyType;
+    }
+
+    /**
      * Set to true if the PRIVATE_DNS_BROKEN notification has shown for this network.
      * Reset this bit when private DNS mode is changed from strict mode to opportunistic/off mode.
      *
      * @hide
      */
     public boolean hasShownBroken;
+
+    /**
+     * The name of the legacy network type. It's a free-form string used in logging.
+     * @hide
+     */
+    @NonNull
+    public String legacyTypeName = "";
+
+    /**
+     * @return the name of the legacy network type. It's a free-form string used in logging.
+     */
+    @NonNull
+    public String getLegacyTypeName() {
+        return legacyTypeName;
+    }
 
     /** @hide */
     public NetworkAgentConfig() {
@@ -140,6 +167,8 @@ public final class NetworkAgentConfig implements Parcelable {
             subscriberId = nac.subscriberId;
             provisioningNotificationDisabled = nac.provisioningNotificationDisabled;
             skip464xlat = nac.skip464xlat;
+            legacyType = nac.legacyType;
+            legacyTypeName = nac.legacyTypeName;
         }
     }
 
@@ -181,6 +210,29 @@ public final class NetworkAgentConfig implements Parcelable {
         @NonNull
         public Builder disableProvisioningNotification() {
             mConfig.provisioningNotificationDisabled = true;
+            return this;
+        }
+
+        /**
+         * Sets the legacy type for this network.
+         *
+         * @param legacyType the type
+         * @return this builder, to facilitate chaining.
+         */
+        @NonNull
+        public Builder setLegacyType(int legacyType) {
+            mConfig.legacyType = legacyType;
+            return this;
+        }
+
+        /**
+         * Sets the name of the legacy type of the agent. It's a free-form string used in logging.
+         * @param legacyTypeName the name
+         * @return this builder, to facilitate chaining.
+         */
+        @NonNull
+        public Builder setLegacyTypeName(@NonNull String legacyTypeName) {
+            mConfig.legacyTypeName = legacyTypeName;
             return this;
         }
 
