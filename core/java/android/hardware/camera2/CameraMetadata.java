@@ -95,7 +95,7 @@ public abstract class CameraMetadata<TKey> {
     }
 
     /**
-     * Retrieves the native CameraMetadata* as a Java long.
+     * Retrieves the native std::shared_ptr<CameraMetadata*>* as a Java long.
      * Returns 0 if mNativeInstance is null.
      *
      * @hide
