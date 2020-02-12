@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.PixelCopy;
@@ -76,8 +77,8 @@ public final class Magnifier {
     // the Handler of this Thread when the copy is finished.
     private static final HandlerThread sPixelCopyHandlerThread =
             new HandlerThread("magnifier pixel copy result handler");
-    // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
-    private static final int FISHEYE_RAMP_WIDTH = 30;
+    // The width of the ramp region in DP on the left & right sides of the fish-eye effect.
+    private static final float FISHEYE_RAMP_WIDTH = 12f;
 
     // The view to which this magnifier is attached.
     private final View mView;
@@ -153,6 +154,8 @@ public final class Magnifier {
     // The horizontal bounds of the content source in pixels, relative to the view.
     private int mLeftBound = Integer.MIN_VALUE;
     private int mRightBound = Integer.MAX_VALUE;
+    // The width of the ramp region in pixels on the left & right sides of the fish-eye effect.
+    private final int mRamp;
 
     /**
      * Initializes a magnifier.
@@ -234,6 +237,8 @@ public final class Magnifier {
         mBottomContentBound = params.mBottomContentBound;
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
+        mRamp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, FISHEYE_RAMP_WIDTH,
+                mView.getContext().getResources().getDisplayMetrics());
     }
 
     static {
@@ -310,13 +315,13 @@ public final class Magnifier {
             // content. However the PixelCopy requires the pre-magnified bounds.
             // The below logic calculates the leftBound & rightBound for the pre-magnified bounds.
             final float rampPre =
-                    (mSourceWidth - (mSourceWidth - 2 * FISHEYE_RAMP_WIDTH) / mZoom) / 2;
+                    (mSourceWidth - (mSourceWidth - 2 * mRamp) / mZoom) / 2;
 
             // Calculates the pre-zoomed left edge.
             // The leftEdge moves from the left of view towards to sourceCenterX, considering the
             // fisheye-like zooming.
             final float x0 = sourceCenterX - mSourceWidth / 2;
-            final float rampX0 = x0 + FISHEYE_RAMP_WIDTH;
+            final float rampX0 = x0 + mRamp;
             float leftEdge = 0;
             if (leftEdge > rampX0) {
                 // leftEdge is in the zoom range, the distance from leftEdge to sourceCenterX
@@ -325,7 +330,7 @@ public final class Magnifier {
             } else if (leftEdge > x0) {
                 // leftEdge is in the ramp range, the distance from leftEdge to rampX0 should
                 // increase per ramp zoom (ramp / rampPre).
-                leftEdge = x0 + rampPre - (rampX0 - leftEdge) * rampPre / FISHEYE_RAMP_WIDTH;
+                leftEdge = x0 + rampPre - (rampX0 - leftEdge) * rampPre / mRamp;
             }
             int leftBound = Math.min(Math.max((int) leftEdge, mLeftBound), mRightBound);
 
@@ -333,7 +338,7 @@ public final class Magnifier {
             // The rightEdge moves from the right of view towards to sourceCenterX, considering the
             // fisheye-like zooming.
             final float x1 = sourceCenterX + mSourceWidth / 2;
-            final float rampX1 = x1 - FISHEYE_RAMP_WIDTH;
+            final float rampX1 = x1 - mRamp;
             float rightEdge = mView.getWidth();
             if (rightEdge < rampX1) {
                 // rightEdge is in the zoom range, the distance from rightEdge to sourceCenterX
@@ -342,7 +347,7 @@ public final class Magnifier {
             } else if (rightEdge < x1) {
                 // rightEdge is in the ramp range, the distance from rightEdge to rampX1 should
                 // increase per ramp zoom (ramp / rampPre).
-                rightEdge = x1 - rampPre + (rightEdge - rampX1) * rampPre / FISHEYE_RAMP_WIDTH;
+                rightEdge = x1 - rampPre + (rightEdge - rampX1) * rampPre / mRamp;
             }
             int rightBound = Math.max(leftBound, Math.min((int) rightEdge, mRightBound));
 
@@ -362,7 +367,7 @@ public final class Magnifier {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
                             mParentSurface.mSurfaceControl, mWindowWidth, mWindowHeight, mZoom,
-                            FISHEYE_RAMP_WIDTH, mWindowElevation, mWindowCornerRadius,
+                            mRamp, mWindowElevation, mWindowCornerRadius,
                             mOverlay != null ? mOverlay : new ColorDrawable(Color.TRANSPARENT),
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
                             mCallback, mIsFishEyeStyle);
