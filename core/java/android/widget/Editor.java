@@ -5248,9 +5248,6 @@ public class Editor {
         private boolean mIsInActionMode;
         // The timestamp for the last up event, which is used for double tap detection.
         private long mLastUpTime;
-        // The text height of the font of the text view, which is used to calculate the Y coordinate
-        // of the touch through events.
-        private float mTextHeight;
 
         // The delta height applied to the insertion handle view.
         private final int mDeltaHeight;
@@ -5403,8 +5400,6 @@ public class Editor {
                     if (ev.getEventTime() - mLastUpTime < ViewConfiguration.getDoubleTapTimeout()) {
                         stopTextActionMode();  // Avoid crash when double tap and drag backwards.
                     }
-                    final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
-                    mTextHeight = fontMetrics.descent - fontMetrics.ascent;
                     mTouchState.setIsOnHandle(true);
                     break;
                 case MotionEvent.ACTION_UP:
@@ -5443,6 +5438,10 @@ public class Editor {
         }
 
         private MotionEvent transformEventForTouchThrough(MotionEvent ev) {
+            final Layout layout = mTextView.getLayout();
+            final int line = layout.getLineForOffset(getCurrentCursorOffset());
+            final int textHeight =
+                    layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
             // Transforms the touch events to screen coordinates.
             // And also shift up to make the hit point is on the text.
             // Note:
@@ -5450,7 +5449,7 @@ public class Editor {
             //  - The revised Y should be at the top of the text.
             Matrix m = new Matrix();
             m.setTranslate(ev.getRawX() - ev.getX() + (getMeasuredWidth() >> 1) - mTouchDownX,
-                    ev.getRawY() - ev.getY() - mTouchDownY - mTextHeight);
+                    ev.getRawY() - ev.getY() - (textHeight >> 1) - mTouchDownY);
             ev.transform(m);
             // Transforms the touch events to text view coordinates.
             mTextView.toLocalMotionEvent(ev);
