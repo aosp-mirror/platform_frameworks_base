@@ -28,6 +28,7 @@ import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.testutils.shadow.ShadowRouter2Manager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,15 +37,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowRouter2Manager.class})
 public class InfoMediaManagerTest {
 
     private static final String TEST_PACKAGE_NAME = "com.test.packagename";
     private static final String TEST_ID = "test_id";
+    private static final String TEST_NAME = "test_name";
 
     @Mock
     private MediaRouter2Manager mRouterManager;
@@ -53,6 +57,7 @@ public class InfoMediaManagerTest {
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
+    private ShadowRouter2Manager mShadowRouter2Manager;
 
     @Before
     public void setUp() {
@@ -61,22 +66,8 @@ public class InfoMediaManagerTest {
 
         mInfoMediaManager =
                 new InfoMediaManager(mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
-        mInfoMediaManager.mRouterManager = mRouterManager;
-    }
-
-    @Test
-    public void stopScan_shouldRemoveCallback() {
-        mInfoMediaManager.stopScan();
-
-        verify(mRouterManager).unregisterCallback(mInfoMediaManager.mMediaRouterCallback);
-    }
-
-    @Test
-    public void startScan_shouldAddCallback() {
-        mInfoMediaManager.startScan();
-
-        verify(mRouterManager).registerCallback(mInfoMediaManager.mExecutor,
-                mInfoMediaManager.mMediaRouterCallback);
+        mShadowRouter2Manager = ShadowRouter2Manager.getShadow();
+        mInfoMediaManager.mRouterManager = MediaRouter2Manager.getInstance(mContext);
     }
 
     @Test
@@ -87,7 +78,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
+        mShadowRouter2Manager.setAvailableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -108,7 +99,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        when(mRouterManager.getAllRoutes()).thenReturn(routes);
+        mShadowRouter2Manager.setAllRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -129,7 +120,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
+        mShadowRouter2Manager.setAvailableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -157,7 +148,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
+        mShadowRouter2Manager.setAvailableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -178,7 +169,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        when(mRouterManager.getAllRoutes()).thenReturn(routes);
+        mShadowRouter2Manager.setAllRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -194,12 +185,12 @@ public class InfoMediaManagerTest {
     @Test
     public void connectDeviceWithoutPackageName_noSession_returnFalse() {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, mRouterManager, info,
-                TEST_PACKAGE_NAME);
+        final MediaDevice device = new InfoMediaDevice(mContext, mInfoMediaManager.mRouterManager,
+                info, TEST_PACKAGE_NAME);
 
         final List<RoutingSessionInfo> infos = new ArrayList<>();
 
-        when(mRouterManager.getActiveSessions()).thenReturn(infos);
+        mShadowRouter2Manager.setActiveSessions(infos);
 
         assertThat(mInfoMediaManager.connectDeviceWithoutPackageName(device)).isFalse();
     }
@@ -239,10 +230,212 @@ public class InfoMediaManagerTest {
         assertThat(mediaDevice).isNull();
 
         mInfoMediaManager.mPackageName = "";
-        mInfoMediaManager.mMediaRouterCallback.onRoutesChanged(routes);
+        mInfoMediaManager.mMediaRouterCallback.onRoutesRemoved(routes);
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
         assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+    }
+
+    @Test
+    public void addDeviceToPlayMedia_packageNameIsNull_returnFalse() {
+        mInfoMediaManager.mPackageName = null;
+        final MediaDevice device = mock(MediaDevice.class);
+
+        assertThat(mInfoMediaManager.addDeviceToPlayMedia(device)).isFalse();
+    }
+
+    @Test
+    public void addDeviceToPlayMedia_containSelectableRoutes_returnTrue() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final MediaDevice device =
+                new InfoMediaDevice(mContext, mInfoMediaManager.mRouterManager, route2Info,
+                        TEST_PACKAGE_NAME);
+
+        final List<String> list = new ArrayList<>();
+        list.add(TEST_ID);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.getSelectableRoutes()).thenReturn(list);
+        when(route2Info.getId()).thenReturn(TEST_ID);
+        when(route2Info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        assertThat(mInfoMediaManager.addDeviceToPlayMedia(device)).isTrue();
+    }
+
+    @Test
+    public void addDeviceToPlayMedia_notContainSelectableRoutes_returnFalse() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final MediaDevice device =
+                new InfoMediaDevice(mContext, mInfoMediaManager.mRouterManager, route2Info,
+                        TEST_PACKAGE_NAME);
+
+        final List<String> list = new ArrayList<>();
+        list.add("fake_id");
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.getSelectableRoutes()).thenReturn(list);
+        when(route2Info.getId()).thenReturn(TEST_ID);
+        when(route2Info.getName()).thenReturn(TEST_NAME);
+        when(route2Info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        assertThat(mInfoMediaManager.addDeviceToPlayMedia(device)).isFalse();
+    }
+
+    @Test
+    public void removeDeviceFromMedia_packageNameIsNull_returnFalse() {
+        mInfoMediaManager.mPackageName = null;
+        final MediaDevice device = mock(MediaDevice.class);
+
+        assertThat(mInfoMediaManager.removeDeviceFromPlayMedia(device)).isFalse();
+    }
+
+    @Test
+    public void removeDeviceFromMedia_containSelectedRoutes_returnTrue() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final MediaDevice device =
+                new InfoMediaDevice(mContext, mInfoMediaManager.mRouterManager, route2Info,
+                        TEST_PACKAGE_NAME);
+
+        final List<String> list = new ArrayList<>();
+        list.add(TEST_ID);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.getSelectedRoutes()).thenReturn(list);
+        when(route2Info.getId()).thenReturn(TEST_ID);
+        when(route2Info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        assertThat(mInfoMediaManager.removeDeviceFromPlayMedia(device)).isTrue();
+    }
+
+    @Test
+    public void removeDeviceFromMedia_notContainSelectedRoutes_returnFalse() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final MediaDevice device =
+                new InfoMediaDevice(mContext, mInfoMediaManager.mRouterManager, route2Info,
+                        TEST_PACKAGE_NAME);
+
+        final List<String> list = new ArrayList<>();
+        list.add("fake_id");
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(info.getSelectedRoutes()).thenReturn(list);
+        when(route2Info.getId()).thenReturn(TEST_ID);
+        when(route2Info.getName()).thenReturn(TEST_NAME);
+        when(route2Info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        assertThat(mInfoMediaManager.removeDeviceFromPlayMedia(device)).isFalse();
+    }
+
+    @Test
+    public void getSelectableMediaDevice_packageNameIsNull_returnFalse() {
+        mInfoMediaManager.mPackageName = null;
+
+        assertThat(mInfoMediaManager.getSelectableMediaDevice()).isEmpty();
+    }
+
+    @Test
+    public void getSelectableMediaDevice_notContainPackageName_returnEmpty() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
+
+        assertThat(mInfoMediaManager.getSelectableMediaDevice()).isEmpty();
+    }
+
+    @Test
+    public void adjustSessionVolume_packageNameIsNull_noCrash() {
+        mInfoMediaManager.mPackageName = null;
+
+        mInfoMediaManager.adjustSessionVolume(10);
+    }
+
+    @Test
+    public void getSessionVolumeMax_packageNameIsNull_returnNotFound() {
+        mInfoMediaManager.mPackageName = null;
+
+        assertThat(mInfoMediaManager.getSessionVolumeMax()).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionVolumeMax_containPackageName_returnMaxVolume() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        mInfoMediaManager.getSessionVolumeMax();
+
+        verify(info).getVolumeMax();
+    }
+
+    @Test
+    public void getSessionVolumeMax_notContainPackageName_returnNotFound() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
+
+        assertThat(mInfoMediaManager.getSessionVolumeMax()).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionVolume_packageNameIsNull_returnNotFound() {
+        mInfoMediaManager.mPackageName = null;
+
+        assertThat(mInfoMediaManager.getSessionVolume()).isEqualTo(-1);
+    }
+
+    @Test
+    public void getSessionVolume_containPackageName_returnMaxVolume() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        mInfoMediaManager.getSessionVolume();
+
+        verify(info).getVolume();
+    }
+
+    @Test
+    public void getSessionVolume_notContainPackageName_returnNotFound() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        when(info.getClientPackageName()).thenReturn("com.fake.packagename");
+
+        assertThat(mInfoMediaManager.getSessionVolume()).isEqualTo(-1);
     }
 }
