@@ -34,6 +34,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
@@ -91,6 +92,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private WindowState mWindow;
     private int mRotation = ROTATION_0;
     private boolean mHasDisplayCutout;
+    private boolean mIsLongEdgeDisplayCutout;
     private static final int DECOR_WINDOW_INSET = 50;
 
     @Before
@@ -124,6 +126,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         updateDisplayFrames();
     }
 
+    public void addLongEdgeDisplayCutout() {
+        mHasDisplayCutout = true;
+        mIsLongEdgeDisplayCutout = true;
+        updateDisplayFrames();
+    }
+
     private void updateDisplayFrames() {
         mFrames = createDisplayFrames();
         mDisplayContent.mDisplayFrames = mFrames;
@@ -131,7 +139,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     private DisplayFrames createDisplayFrames() {
         final Pair<DisplayInfo, WmDisplayCutout> info = displayInfoAndCutoutForRotation(mRotation,
-                mHasDisplayCutout);
+                mHasDisplayCutout, mIsLongEdgeDisplayCutout);
         return new DisplayFrames(mDisplayContent.getDisplayId(), info.first, info.second);
     }
 
@@ -376,6 +384,46 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     @Test
+    public void layoutWindowLw_withDisplayCutout_shortEdges() {
+        addDisplayCutout();
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
+        mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getStableFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getContentFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_always() {
+        addDisplayCutout();
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
+        mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getStableFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getContentFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
+    }
+
+    @Test
     public void layoutWindowLw_withDisplayCutout_layoutFullscreen() {
         addDisplayCutout();
 
@@ -548,6 +596,88 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetBy(mWindow.getContentFrameLw(),
                 DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
         assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withLongEdgeDisplayCutout() {
+        addLongEdgeDisplayCutout();
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mWindow.getStableFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getContentFrameLw(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
+                NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getDisplayFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withLongEdgeDisplayCutout_never() {
+        addLongEdgeDisplayCutout();
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mWindow.getStableFrameLw(), 0, STATUS_BAR_HEIGHT, 0,
+                NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getContentFrameLw(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
+                NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getDisplayFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withLongEdgeDisplayCutout_shortEdges() {
+        addLongEdgeDisplayCutout();
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
+        mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mWindow.getStableFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getContentFrameLw(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
+                NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getDisplayFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withLongEdgeDisplayCutout_always() {
+        addLongEdgeDisplayCutout();
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
+        mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getStableFrameLw(), 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getContentFrameLw(), DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, 0,
+                NAV_BAR_HEIGHT);
+        assertInsetBy(mWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
     }
 
     @Test
