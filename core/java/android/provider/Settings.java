@@ -6449,6 +6449,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
 
@@ -7867,6 +7868,7 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
         /**
@@ -8069,6 +8071,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
                 "lock_screen_show_notifications";
 
