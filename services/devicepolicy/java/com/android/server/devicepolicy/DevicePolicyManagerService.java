@@ -2542,7 +2542,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * corporate owned device.
      */
     @GuardedBy("getLockObject()")
-    private void maybeMigrateToProfileOnOrganizationOwnedDeviceLocked() {
+    private void migrateToProfileOnOrganizationOwnedDeviceIfCompLocked() {
         logIfVerbose("Checking whether we need to migrate COMP ");
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
@@ -2605,6 +2605,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // Note: KeyChain keys are not removed and will remain accessible for the apps that have
         // been given grants to use them.
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.COMP_TO_ORG_OWNED_PO_MIGRATED)
+                .setAdmin(poAdminComponent)
+                .write();
     }
 
     private void moveDoPoliciesToProfileParentAdmin(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
@@ -3865,7 +3870,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 synchronized (getLockObject()) {
-                    maybeMigrateToProfileOnOrganizationOwnedDeviceLocked();
+                    migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
                 }
                 final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
                 if (userId >= 0) {
@@ -15545,6 +15550,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mInjector.binderWithCleanCallingIdentity(
                 () -> applyPersonalAppsSuspension(callingUserId, suspended));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)
+                .setAdmin(who)
+                .setBoolean(suspended)
+                .write();
     }
 
     /**
@@ -15716,9 +15727,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mInjector.binderWithCleanCallingIdentity(
                 () -> updatePersonalAppSuspension(userId, mUserManager.isUserUnlocked()));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_MANAGED_PROFILE_MAXIMUM_TIME_OFF)
+                .setAdmin(who)
+                .setTimePeriod(timeoutMs)
+                .write();
     }
 
-    void enforceHandlesCheckPolicyComplianceIntent(@UserIdInt int userId, String packageName) {
+    private void enforceHandlesCheckPolicyComplianceIntent(
+            @UserIdInt int userId, String packageName) {
         mInjector.binderWithCleanCallingIdentity(() -> {
             final Intent intent = new Intent(DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
             intent.setPackage(packageName);
