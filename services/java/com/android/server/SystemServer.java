@@ -1334,7 +1334,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartIpSecService");
             try {
-                ipSecService = IpSecService.create(context);
+                ipSecService = IpSecService.create(context, networkManagement);
                 ServiceManager.addService(Context.IPSEC_SERVICE, ipSecService);
             } catch (Throwable e) {
                 reportWtf("starting IpSec Service", e);

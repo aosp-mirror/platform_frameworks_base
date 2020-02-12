@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.RemoteException;
 
 import androidx.test.filters.SmallTest;
@@ -61,7 +62,8 @@ public class IpSecServiceRefcountedResourceTest {
     public void setUp() throws Exception {
         mMockContext = mock(Context.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
-        mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
+        mIpSecService = new IpSecService(
+                mMockContext, mock(INetworkManagementService.class), mMockIpSecSrvConfig);
     }
 
     private void assertResourceState(
