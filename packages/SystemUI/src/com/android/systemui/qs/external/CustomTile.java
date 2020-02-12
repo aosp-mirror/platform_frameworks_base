@@ -210,8 +210,10 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         if (mListening == listening) return;
         mListening = listening;
+
         try {
             if (listening) {
                 updateDefaultTileAndIcon();

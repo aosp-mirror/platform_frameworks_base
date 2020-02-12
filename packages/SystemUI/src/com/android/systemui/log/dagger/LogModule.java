@@ -61,6 +61,18 @@ public class LogModule {
         return buffer;
     }
 
+    /** Provides a logging buffer for all logs related to Quick Settings. */
+    @Provides
+    @Singleton
+    @QSLog
+    public static LogBuffer provideQuickSettingsLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpController dumpController) {
+        LogBuffer buffer = new LogBuffer("QSLog", 500, 10, bufferFilter);
+        buffer.attach(dumpController);
+        return buffer;
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @Singleton

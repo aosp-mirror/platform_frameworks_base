@@ -35,9 +35,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import org.junit.Before;
@@ -65,6 +68,12 @@ public class QSPanelTest extends SysuiTestCase {
     private QSCustomizer mCustomizer;
     @Mock
     private QSTileImpl dndTile;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private DumpController mDumpController;
+    @Mock
+    private QSLogger mQSLogger;
     private ViewGroup mParentView;
     @Mock
     private QSDetail.Callback mCallback;
@@ -78,7 +87,8 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mQsPanel = new QSPanel(mContext, null);
+            mQsPanel = new QSPanel(mContext, null, mDumpController, mBroadcastDispatcher,
+                    mQSLogger);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
             mParentView.addView(mQsPanel);
@@ -97,8 +107,10 @@ public class QSPanelTest extends SysuiTestCase {
     public void testSetExpanded_Metrics() {
         mQsPanel.setExpanded(true);
         verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(true));
+        verify(mQSLogger).logPanelExpanded(true, mQsPanel.getDumpableTag());
         mQsPanel.setExpanded(false);
         verify(mMetricsLogger).visibility(eq(MetricsEvent.QS_PANEL), eq(false));
+        verify(mQSLogger).logPanelExpanded(false, mQsPanel.getDumpableTag());
     }
 
     @Test
@@ -108,6 +120,14 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mCallback).onShowingDetail(any(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void setListening() {
+        when(dndTile.getTileSpec()).thenReturn("dnd");
+
+        mQsPanel.setListening(true);
+        verify(mQSLogger).logAllTilesChangeListening(true, mQsPanel.getDumpableTag(), "dnd");
     }
 
 /*    @Test

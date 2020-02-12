@@ -97,6 +97,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         if (DEBUG) Log.d(TAG, "handleSetListening " + listening);
         if (!listening) {
             mController.setDiscovering(false);

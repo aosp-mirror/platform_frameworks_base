@@ -27,6 +27,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
+import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +43,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -63,6 +64,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QuickStatusBarHeader;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tiles.QSSettingsControllerKt;
 import com.android.systemui.qs.tiles.QSSettingsPanel;
 
@@ -95,6 +97,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final StatusBarStateController
             mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final QSLogger mQSLogger;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -156,6 +159,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mState = newTileState();
         mTmpState = newTileState();
         mQSSettingsPanelOption = QSSettingsControllerKt.getQSSettingsPanelOption();
+        mQSLogger = host.getQSLogger();
     }
 
     protected final void resetStates() {
@@ -243,6 +247,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.CLICK);
     }
 
@@ -250,6 +255,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_SECONDARY_CLICK).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
+                mState.state);
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
@@ -257,6 +264,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mMetricsLogger.write(populate(new LogMaker(ACTION_QS_LONG_PRESS).setType(TYPE_ACTION)
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
+        mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
         mHandler.sendEmptyMessage(H.LONG_CLICK);
 
         Prefs.putInt(
@@ -359,6 +367,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         handleUpdateState(mTmpState, arg);
         final boolean changed = mTmpState.copyTo(mState);
         if (changed) {
+            mQSLogger.logTileUpdated(mTileSpec, mState);
             handleStateChanged();
         }
         mHandler.removeMessages(H.STALE);
@@ -445,9 +454,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mIsFullQs = 0;
     }
 
-    protected abstract void handleSetListening(boolean listening);
+    @CallSuper
+    protected void handleSetListening(boolean listening) {
+        if (mTileSpec != null) {
+            mQSLogger.logTileChangeListening(mTileSpec, listening);
+        }
+    }
 
     protected void handleDestroy() {
+        mQSLogger.logTileDestroyed(mTileSpec, "Handle destroy");
         if (mListeners.size() != 0) {
             handleSetListening(false);
         }
@@ -592,6 +607,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         public Drawable getInvisibleDrawable(Context context) {
             return mInvisibleDrawable;
         }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return "DrawableIcon";
+        }
     }
 
     public static class DrawableIconWithRes extends DrawableIcon {
@@ -605,6 +626,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         @Override
         public boolean equals(Object o) {
             return o instanceof DrawableIconWithRes && ((DrawableIconWithRes) o).mId == mId;
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return String.format("DrawableIconWithRes[resId=0x%08x]", mId);
         }
     }
 
@@ -642,6 +669,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         }
 
         @Override
+        @NonNull
         public String toString() {
             return String.format("ResourceIcon[resId=0x%08x]", mResId);
         }
@@ -659,6 +687,12 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
             return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return String.format("AnimationIcon[resId=0x%08x]", mResId);
         }
     }
 

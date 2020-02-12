@@ -50,10 +50,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_MANAGED_PROFILE_SETTINGS);
     }

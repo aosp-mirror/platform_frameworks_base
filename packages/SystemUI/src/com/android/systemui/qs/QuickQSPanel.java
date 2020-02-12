@@ -29,10 +29,12 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.DumpController;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
@@ -65,9 +67,14 @@ public class QuickQSPanel extends QSPanel {
     private QSTileLayout mRegularTileLayout;
 
     @Inject
-    public QuickQSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DumpController dumpController) {
-        super(context, attrs, dumpController);
+    public QuickQSPanel(
+            @Named(VIEW_CONTEXT) Context context,
+            AttributeSet attrs,
+            DumpController dumpController,
+            BroadcastDispatcher broadcastDispatcher,
+            QSLogger qsLogger
+    ) {
+        super(context, attrs, dumpController, broadcastDispatcher, qsLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
