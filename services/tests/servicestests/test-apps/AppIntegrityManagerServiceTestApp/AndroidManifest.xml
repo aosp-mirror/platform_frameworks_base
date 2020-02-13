@@ -22,7 +22,7 @@
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="28" />
 
     <application android:hasCode="false">
-        <meta-data android:name="allowed-installers" android:value="com.android.vending|play_store_cert,adb|"/>
+        <meta-data android:name="allowed-installers" android:value="com.android.vending|play_store_cert,adb"/>
     </application>
 </manifest>
 
