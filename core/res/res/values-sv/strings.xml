@@ -209,7 +209,7 @@
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Förbereder uppdatering …"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Uppdateringspaketet behandlas ..."</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Startar om …"</string>
-    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Återställ standardinställning"</string>
+    <string name="reboot_to_reset_title" msgid="2226229680017882787">"Återställer standardinställning"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Startar om …"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Avslutar…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Din surfplatta stängs av."</string>
@@ -298,7 +298,7 @@
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"spela in ljud"</string>
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysiska aktivitet"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysisk aktivitet"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"åtkomst till data om fysisk aktivitet"</string>
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till data om fysisk aktivitet?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
