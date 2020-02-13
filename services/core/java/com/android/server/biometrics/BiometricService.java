@@ -782,6 +782,8 @@ public class BiometricService extends SystemService {
             }
 
             mAuthenticators.add(new AuthenticatorWrapper(id, modality, strength, authenticator));
+
+            mBiometricStrengthController.updateStrengths();
         }
 
         @Override // Binder call
