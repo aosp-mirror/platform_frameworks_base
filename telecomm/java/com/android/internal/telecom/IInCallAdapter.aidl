@@ -67,6 +67,8 @@ oneway interface IInCallAdapter {
 
     void swapConference(String callId);
 
+    void addConferenceParticipants(String callId, in List<Uri> participants);
+
     void turnOnProximitySensor();
 
     void turnOffProximitySensor(boolean screenOnImmediately);
