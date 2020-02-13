@@ -258,7 +258,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mCellIdentity = cellIdentity;
         mEmergencyOnly = emergencyOnly;
         mNrState = NR_STATE_NONE;
-        mRplmn = (rplmn == null) ? "" : rplmn;
+        mRplmn = rplmn;
     }
 
     /**
@@ -408,13 +408,13 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * <p>If the device is registered, this will return the registered PLMN-ID. If registration
      * has failed, then this will return the PLMN ID of the last attempted registration. If the
      * device is not registered, or if is registered to a non-3GPP radio technology, then this
-     * will return an empty string.
+     * will return null.
      *
      * <p>See 3GPP TS 23.122 for further information about the Registered PLMN.
      *
-     * @return the registered PLMN-ID or an empty string.
+     * @return the registered PLMN-ID or null.
      */
-    @NonNull public String getRegisteredPlmn() {
+    @Nullable public String getRegisteredPlmn() {
         return mRplmn;
     }
 
@@ -892,7 +892,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setRegisteredPlmn(@Nullable String rplmn) {
-            mRplmn = (rplmn == null) ? "" : rplmn;
+            mRplmn = rplmn;
             return this;
         }
 
