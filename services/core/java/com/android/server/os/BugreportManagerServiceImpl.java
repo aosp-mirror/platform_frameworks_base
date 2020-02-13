@@ -276,6 +276,11 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
 
         @Override
+        public void onScreenshotTaken(boolean success) throws RemoteException {
+            mListener.onScreenshotTaken(success);
+        }
+
+        @Override
         public void binderDied() {
             synchronized (mLock) {
                 if (!mDone) {
