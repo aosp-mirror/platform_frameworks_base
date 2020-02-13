@@ -39,7 +39,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Property;
 import android.util.SparseArray;
-import android.view.InputDevice.MotionRange;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
@@ -854,6 +853,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             showDirectly(types);
         } else {
             hideDirectly(types);
+        }
+        if (mViewRoot.mView == null) {
+            return;
         }
         mViewRoot.mView.dispatchWindowInsetsAnimationPrepare(animation);
         mViewRoot.mView.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
