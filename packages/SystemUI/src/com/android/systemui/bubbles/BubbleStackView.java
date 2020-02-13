@@ -795,6 +795,7 @@ public class BubbleStackView extends FrameLayout {
         if (removedIndex >= 0) {
             mBubbleContainer.removeViewAt(removedIndex);
             bubble.cleanupExpandedState();
+            bubble.setInflated(false);
             logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);

@@ -226,6 +226,10 @@ class Bubble {
         mIconView.update(this);
     }
 
+    void setInflated(boolean inflated) {
+        mInflated = inflated;
+    }
+
     /**
      * Set visibility of bubble in the expanded state.
      *
