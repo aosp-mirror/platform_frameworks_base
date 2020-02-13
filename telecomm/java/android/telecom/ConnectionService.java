@@ -18,7 +18,6 @@ package android.telecom;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -1808,7 +1807,7 @@ public abstract class ConnectionService extends Service {
                         null : conference.getVideoProvider().getInterface(),
                 conference.getVideoState(),
                 conference.getConnectTimeMillis(),
-                conference.getConnectionStartElapsedRealTime(),
+                conference.getConnectionStartElapsedRealtimeMillis(),
                 conference.getStatusHints(),
                 conference.getExtras(),
                 conference.getAddress(),
@@ -1914,7 +1913,7 @@ public abstract class ConnectionService extends Service {
                         connection.isRingbackRequested(),
                         connection.getAudioModeIsVoip(),
                         connection.getConnectTimeMillis(),
-                        connection.getConnectElapsedTimeMillis(),
+                        connection.getConnectionStartElapsedRealtimeMillis(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
                         createIdList(connection.getConferenceables()),
@@ -2415,7 +2414,7 @@ public abstract class ConnectionService extends Service {
                             null : conference.getVideoProvider().getInterface(),
                     conference.getVideoState(),
                     conference.getConnectTimeMillis(),
-                    conference.getConnectionStartElapsedRealTime(),
+                    conference.getConnectionStartElapsedRealtimeMillis(),
                     conference.getStatusHints(),
                     conference.getExtras(),
                     conference.getAddress(),
@@ -2506,7 +2505,7 @@ public abstract class ConnectionService extends Service {
                     connection.isRingbackRequested(),
                     connection.getAudioModeIsVoip(),
                     connection.getConnectTimeMillis(),
-                    connection.getConnectElapsedTimeMillis(),
+                    connection.getConnectionStartElapsedRealtimeMillis(),
                     connection.getStatusHints(),
                     connection.getDisconnectCause(),
                     emptyList,
