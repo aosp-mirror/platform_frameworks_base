@@ -430,10 +430,9 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     private void verifyInstalledFiles(String... filenames) throws DeviceNotAvailableException {
         String apkPath = getApkPath(TARGET_PACKAGE);
         String appDir = apkPath.substring(0, apkPath.lastIndexOf("/"));
+        // Exclude directories since we only care about files.
         HashSet<String> actualFiles = new HashSet<>(Arrays.asList(
-                expectRemoteCommandToSucceed("ls " + appDir).split("\n")));
-        assertTrue(actualFiles.remove("lib"));
-        assertTrue(actualFiles.remove("oat"));
+                expectRemoteCommandToSucceed("ls -p " + appDir + " | grep -v '/'").split("\n")));
 
         HashSet<String> expectedFiles = new HashSet<>(Arrays.asList(filenames));
         assertEquals(expectedFiles, actualFiles);
