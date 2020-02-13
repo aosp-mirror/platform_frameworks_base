@@ -396,7 +396,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10071
+    // Next: 10074
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -471,6 +471,12 @@ message Atom {
         GraphicsStats graphics_stats = 10068;
         RuntimeAppOpAccess runtime_app_op_access = 10069 [(module) = "framework"];
         IonHeapSize ion_heap_size = 10070 [(module) = "framework"];
+        PackageNotificationPreferences package_notification_preferences =
+                10071 [(module) = "framework"];
+        PackageNotificationChannelPreferences package_notification_channel_preferences =
+                10072 [(module) = "framework"];
+        PackageNotificationChannelGroupPreferences package_notification_channel_group_preferences =
+                10073 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3475,27 +3481,25 @@ message NotificationReported {
     // A small system-assigned identifier for the notification.
     // Locally probably-unique, but expect collisions across users and/or days.
     optional int32 instance_id = 4;
-    // The app-assigned notification ID and tag
-    optional int32 notification_id = 5;
-    optional string notification_tag = 6;
-    optional string channel_id = 7;  // App-assigned channel ID
+    optional int32 notification_id_hash = 5;  // Small hash of the app-assigned notif ID + tag
+    optional int32 channel_id_hash = 6;  // Small hash of app-assigned channel ID
 
     // Grouping information
-    optional string group_id = 8;  // Group the notification currently belongs to
-    optional int32 group_instance_id = 9;  // Instance_id of the group-summary notification
-    optional bool is_group_summary = 10;  // Tags the group-summary notification
+    optional int32 group_id_hash = 7;  // Small hash of the group ID of the notification
+    optional int32 group_instance_id = 8;  // Instance_id of the group-summary notification
+    optional bool is_group_summary = 9;  // Tags the group-summary notification
 
     // Attributes
-    optional string category = 11;   // App-assigned notification category (API-defined strings)
-    optional int32 style = 12;       // App-assigned notification style
-    optional int32 num_people = 13;  // Number of Person records attached to the notification
+    optional string category = 10;   // App-assigned notification category (API-defined strings)
+    optional int32 style = 11;       // App-assigned notification style
+    optional int32 num_people = 12;  // Number of Person records attached to the notification
 
     // Ordering, importance and interruptiveness
 
-    optional int32 position = 14;    // Position in NotificationManager's list
+    optional int32 position = 13;    // Position in NotificationManager's list
 
-    optional android.stats.sysui.NotificationImportance importance = 15;
-    optional int32 alerting = 16;    // Bitfield, 1=buzz 2=beep 4=blink
+    optional android.stats.sysui.NotificationImportance importance = 14;
+    optional int32 alerting = 15;    // Bitfield, 1=buzz 2=beep 4=blink
 
     enum NotificationImportanceExplanation {
         IMPORTANCE_EXPLANATION_UNKNOWN = 0;
@@ -3507,12 +3511,12 @@ message NotificationReported {
         IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS = 5;
     }
 
-    optional NotificationImportanceExplanation importance_source = 17;
-    optional android.stats.sysui.NotificationImportance importance_initial = 18;
-    optional NotificationImportanceExplanation importance_initial_source = 19;
-    optional android.stats.sysui.NotificationImportance importance_asst = 20;
-    optional int32 assistant_hash = 21;
-    optional float assistant_ranking_score = 22;
+    optional NotificationImportanceExplanation importance_source = 16;
+    optional android.stats.sysui.NotificationImportance importance_initial = 17;
+    optional NotificationImportanceExplanation importance_initial_source = 18;
+    optional android.stats.sysui.NotificationImportance importance_asst = 19;
+    optional int32 assistant_hash = 20;
+    optional float assistant_ranking_score = 21;
 }
 
 message Notification {
@@ -5469,6 +5473,65 @@ message NotificationRemoteViews {
     optional NotificationRemoteViewsProto notification_remote_views = 1;
 }
 
+/**
+ * Atom that contains a list of a package's preferences, pulled from NotificationManagerService.java
+ */
+message PackageNotificationPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Notification importance, which specifies when and how a notification is displayed.
+    // Specified under core/java/android/app/NotificationManager.java.
+    optional int32 importance = 2;
+    // Lockscreen visibility as set by the user.
+    optional int32 visibility = 3;
+    // Bitfield mask indicating what fields were locked by the user (see LockableAppfields in
+    // PreferencesHelper.java)
+    optional int32 user_locked_fields = 4;
+}
+
+/**
+ * Atom that contains a list of a package's channel preferences, pulled from
+ * NotificationManagerService.java.
+ */
+message PackageNotificationChannelPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Channel's ID. Should always be available.
+    optional string channel_id = 2;
+    // Channel's name. Should always be available.
+    optional string channel_name = 3;
+    // Channel's description. Optionally set by the channel creator.
+    optional string description = 4;
+    // Notification importance, which specifies when and how a notification is displayed. Specified
+    // under core/java/android/app/NotificationManager.java.
+    optional int32 importance = 5;
+    // Bitmask representing which fields have been set by the user. See field bitmask descriptions
+    // at core/java/android/app/NotificationChannel.java
+    optional int32 user_locked_fields = 6;
+    // Indicates if the channel was deleted by the app.
+    optional bool is_deleted = 7;
+}
+
+/**
+ * Atom that contains a list of a package's channel group preferences, pulled from
+ * NotificationManagerService.java.
+ */
+message PackageNotificationChannelGroupPreferences {
+    // Uid under which the package is installed.
+    optional int32 uid = 1;
+    // Channel Group's ID. Should always be available.
+    optional string group_id = 2;
+    // Channel Group's name. Should always be available.
+    optional string group_name = 3;
+    // Channel Group's description. Optionally set by group creator.
+    optional string description = 4;
+    // Indicates if notifications from this channel group are blocked.
+    optional bool is_blocked = 5;
+    // Bitmask representing which fields have been set by the user. See field bitmask descriptions
+    // at core/java/android/app/NotificationChannelGroup.java
+    optional int32 user_locked_fields = 6;
+}
+
 message PowerProfileProto {
     optional double cpu_suspend = 1;
 
@@ -6986,6 +7049,20 @@ message MediametricsDrmManagerReported {
     optional string description = 6;
     optional Method method = 7;
     optional string mime_types = 8;
+
+    optional int64 get_constraints_count =  9;
+    optional int64 get_metadata_count = 10;
+    optional int64 can_handle_count = 11;
+    optional int64 process_drm_info_count = 12;
+    optional int64 acquire_drm_info_count = 13;
+    optional int64 save_rights_count = 14;
+    optional int64 get_original_mime_type_count = 15;
+    optional int64 get_drm_object_type_count = 16;
+    optional int64 check_rights_status_count = 17;
+    optional int64 remove_rights_count = 18;
+    optional int64 remove_all_rights_count = 19;
+    optional int64 open_convert_session_count = 20;
+    optional int64 open_decrypt_session_count = 21;
 }
 
 /**
@@ -7919,6 +7996,10 @@ message SurfaceflingerStatsGlobalInfo {
     // Total time that was spent performing animations.
     // This is derived from the present-to-present layer histogram
     optional int64 animation_millis = 5;
+    // Total number of event connections tracked by SurfaceFlinger at the time
+    // of this pull. If this number grows prohibitively large, then this can
+    // cause jank due to resource contention.
+    optional int32 event_connection_count = 6;
 }
 
 /**

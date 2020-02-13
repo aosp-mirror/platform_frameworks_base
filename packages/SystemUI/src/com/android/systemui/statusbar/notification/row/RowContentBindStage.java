@@ -18,12 +18,8 @@ package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
-import android.os.RemoteException;
-import android.service.notification.StatusBarNotification;
-
 import androidx.annotation.NonNull;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
@@ -41,14 +37,14 @@ import javax.inject.Singleton;
 @Singleton
 public class RowContentBindStage extends BindStage<RowContentBindParams> {
     private final NotificationRowContentBinder mBinder;
-    private final IStatusBarService mStatusBarService;
+    private final NotifInflationErrorManager mNotifInflationErrorManager;
 
     @Inject
     RowContentBindStage(
             NotificationRowContentBinder binder,
-            IStatusBarService statusBarService) {
+            NotifInflationErrorManager errorManager) {
         mBinder = binder;
-        mStatusBarService = statusBarService;
+        mNotifInflationErrorManager = errorManager;
     }
 
     @Override
@@ -78,24 +74,12 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
         InflationCallback inflationCallback = new InflationCallback() {
             @Override
             public void handleInflationException(NotificationEntry entry, Exception e) {
-                entry.setHasInflationError(true);
-                try {
-                    final StatusBarNotification sbn = entry.getSbn();
-                    mStatusBarService.onNotificationError(
-                            sbn.getPackageName(),
-                            sbn.getTag(),
-                            sbn.getId(),
-                            sbn.getUid(),
-                            sbn.getInitialPid(),
-                            e.getMessage(),
-                            sbn.getUserId());
-                } catch (RemoteException ex) {
-                }
+                mNotifInflationErrorManager.setInflationError(entry, e);
             }
 
             @Override
             public void onAsyncInflationFinished(NotificationEntry entry) {
-                entry.setHasInflationError(false);
+                mNotifInflationErrorManager.clearInflationError(entry);
                 getStageParams(entry).clearDirtyContentViews();
                 callback.onStageFinished(entry);
             }

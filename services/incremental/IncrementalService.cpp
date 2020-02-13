@@ -35,6 +35,7 @@
 #include <zlib.h>
 
 #include <ctime>
+#include <filesystem>
 #include <iterator>
 #include <span>
 #include <stack>
@@ -45,6 +46,7 @@
 
 using namespace std::literals;
 using namespace android::content::pm;
+namespace fs = std::filesystem;
 
 namespace android::incremental {
 
@@ -56,6 +58,7 @@ using IncrementalFileSystemControlParcel =
 struct Constants {
     static constexpr auto backing = "backing_store"sv;
     static constexpr auto mount = "mount"sv;
+    static constexpr auto mountKeyPrefix = "MT_"sv;
     static constexpr auto storagePrefix = "st"sv;
     static constexpr auto mountpointMdPrefix = ".mountpoint."sv;
     static constexpr auto infoMdName = ".info"sv;
@@ -104,7 +107,7 @@ static std::string toMountKey(std::string_view path) {
     std::string res(path);
     std::replace(res.begin(), res.end(), '/', '_');
     std::replace(res.begin(), res.end(), '@', '_');
-    return res;
+    return std::string(constants().mountKeyPrefix) + res;
 }
 
 static std::pair<std::string, std::string> makeMountDir(std::string_view incrementalDir,
@@ -235,9 +238,7 @@ IncrementalService::IncrementalService(ServiceManagerWrapper&& sm, std::string_v
     if (!mIncrementalManager) {
         LOG(FATAL) << "IncrementalManager service is unavailable";
     }
-    // TODO(b/136132412): check that root dir should already exist
-    // TODO(b/136132412): enable mount existing dirs after SELinux rules are merged
-    // mountExistingImages();
+    mountExistingImages();
 }
 
 FileId IncrementalService::idFromMetadata(std::span<const uint8_t> metadata) {
@@ -328,20 +329,13 @@ std::optional<std::future<void>> IncrementalService::onSystemReady() {
     }
 
     std::thread([this, mounts = std::move(mounts)]() {
-        std::vector<IfsMountPtr> failedLoaderMounts;
         for (auto&& ifs : mounts) {
             if (prepareDataLoader(*ifs)) {
                 LOG(INFO) << "Successfully started data loader for mount " << ifs->mountId;
             } else {
+                // TODO(b/133435829): handle data loader start failures
                 LOG(WARNING) << "Failed to start data loader for mount " << ifs->mountId;
-                failedLoaderMounts.push_back(std::move(ifs));
             }
-        }
-
-        while (!failedLoaderMounts.empty()) {
-            LOG(WARNING) << "Deleting failed mount " << failedLoaderMounts.back()->mountId;
-            deleteStorage(*failedLoaderMounts.back());
-            failedLoaderMounts.pop_back();
         }
         mPrepareDataLoaders.set_value_at_thread_exit();
     }).detach();
@@ -361,10 +355,9 @@ auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
     }
 }
 
-StorageId IncrementalService::createStorage(std::string_view mountPoint,
-                                            DataLoaderParamsParcel&& dataLoaderParams,
-                                            const DataLoaderStatusListener& dataLoaderStatusListener,
-                                            CreateOptions options) {
+StorageId IncrementalService::createStorage(
+        std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
+        const DataLoaderStatusListener& dataLoaderStatusListener, CreateOptions options) {
     LOG(INFO) << "createStorage: " << mountPoint << " | " << int(options);
     if (!path::isAbsolute(mountPoint)) {
         LOG(ERROR) << "path is not absolute: " << mountPoint;
@@ -826,9 +819,10 @@ int IncrementalService::addBindMount(IncFsMount& ifs, StorageId storage,
         metadata::BindPoint bp;
         bp.set_storage_id(storage);
         bp.set_allocated_dest_path(&target);
-        bp.set_source_subdir(std::string(path::relativize(storageRoot, source)));
+        bp.set_allocated_source_subdir(&source);
         const auto metadata = bp.SerializeAsString();
         bp.release_dest_path();
+        bp.release_source_subdir();
         mdFileName = makeBindMdName();
         auto node =
                 mIncFs->makeFile(ifs.control, path::join(ifs.root, constants().mount, mdFileName),
@@ -943,25 +937,20 @@ bool IncrementalService::startLoading(StorageId storage) const {
 }
 
 void IncrementalService::mountExistingImages() {
-    auto d = std::unique_ptr<DIR, decltype(&::closedir)>(::opendir(mIncrementalDir.c_str()),
-                                                         ::closedir);
-    while (auto e = ::readdir(d.get())) {
-        if (e->d_type != DT_DIR) {
+    for (const auto& entry : fs::directory_iterator(mIncrementalDir)) {
+        const auto path = entry.path().u8string();
+        const auto name = entry.path().filename().u8string();
+        if (!base::StartsWith(name, constants().mountKeyPrefix)) {
             continue;
         }
-        if (e->d_name == "."sv || e->d_name == ".."sv) {
-            continue;
-        }
-        auto root = path::join(mIncrementalDir, e->d_name);
-        if (!mountExistingImage(root, e->d_name)) {
-            IncFsMount::cleanupFilesystem(root);
+        const auto root = path::join(mIncrementalDir, name);
+        if (!mountExistingImage(root, name)) {
+            IncFsMount::cleanupFilesystem(path);
         }
     }
 }
 
 bool IncrementalService::mountExistingImage(std::string_view root, std::string_view key) {
-    LOG(INFO) << "Trying to mount: " << key;
-
     auto mountTarget = path::join(root, constants().mount);
     const auto backing = path::join(root, constants().backing);
 
@@ -1045,16 +1034,6 @@ bool IncrementalService::mountExistingImage(std::string_view root, std::string_v
         return false;
     }
 
-    DataLoaderParamsParcel dlParams;
-    dlParams.type = (DataLoaderType)m.loader().type();
-    dlParams.packageName = std::move(*m.mutable_loader()->mutable_package_name());
-    dlParams.className = std::move(*m.mutable_loader()->mutable_class_name());
-    dlParams.arguments = std::move(*m.mutable_loader()->mutable_arguments());
-    if (!prepareDataLoader(*ifs, &dlParams)) {
-        deleteStorage(*ifs);
-        return false;
-    }
-
     mMounts[ifs->mountId] = std::move(ifs);
     return true;
 }
@@ -1104,7 +1083,8 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
     fsControlParcel.incremental->pendingReads.reset(
             base::unique_fd(::dup(ifs.control.pendingReads)));
     fsControlParcel.incremental->log.reset(base::unique_fd(::dup(ifs.control.logs)));
-    sp<IncrementalDataLoaderListener> listener = new IncrementalDataLoaderListener(*this, *externalListener);
+    sp<IncrementalDataLoaderListener> listener =
+            new IncrementalDataLoaderListener(*this, *externalListener);
     bool created = false;
     auto status = mIncrementalManager->prepareDataLoader(ifs.mountId, fsControlParcel, *dlp,
                                                          listener, &created);

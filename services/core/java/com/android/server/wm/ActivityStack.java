@@ -60,18 +60,6 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.wm.TaskProto.ACTIVITIES;
-import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
-import static com.android.server.wm.TaskProto.BOUNDS;
-import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
-import static com.android.server.wm.TaskProto.DISPLAY_ID;
-import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
-import static com.android.server.wm.TaskProto.MIN_HEIGHT;
-import static com.android.server.wm.TaskProto.MIN_WIDTH;
-import static com.android.server.wm.TaskProto.ORIG_ACTIVITY;
-import static com.android.server.wm.TaskProto.REAL_ACTIVITY;
-import static com.android.server.wm.TaskProto.RESIZE_MODE;
-import static com.android.server.wm.TaskProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -115,14 +103,26 @@ import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGE
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.TaskProto.ACTIVITIES;
+import static com.android.server.wm.TaskProto.ACTIVITY_TYPE;
 import static com.android.server.wm.TaskProto.ADJUSTED_BOUNDS;
 import static com.android.server.wm.TaskProto.ADJUSTED_FOR_IME;
 import static com.android.server.wm.TaskProto.ADJUST_DIVIDER_AMOUNT;
 import static com.android.server.wm.TaskProto.ADJUST_IME_AMOUNT;
 import static com.android.server.wm.TaskProto.ANIMATING_BOUNDS;
+import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
+import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
+import static com.android.server.wm.TaskProto.DISPLAY_ID;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
+import static com.android.server.wm.TaskProto.LAST_NON_FULLSCREEN_BOUNDS;
 import static com.android.server.wm.TaskProto.MINIMIZE_AMOUNT;
+import static com.android.server.wm.TaskProto.MIN_HEIGHT;
+import static com.android.server.wm.TaskProto.MIN_WIDTH;
+import static com.android.server.wm.TaskProto.ORIG_ACTIVITY;
+import static com.android.server.wm.TaskProto.REAL_ACTIVITY;
+import static com.android.server.wm.TaskProto.RESIZE_MODE;
+import static com.android.server.wm.TaskProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.TaskProto.ROOT_TASK_ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
@@ -135,6 +135,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -622,7 +623,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                 true /*neverRelinquishIdentity*/,
                 _taskDescription != null ? _taskDescription : new ActivityManager.TaskDescription(),
                 id, INVALID_TASK_ID, INVALID_TASK_ID, 0 /*taskAffiliationColor*/,
-                info.applicationInfo.uid, info.packageName, info.resizeMode,
+                info.applicationInfo.uid, info.packageName, null, info.resizeMode,
                 info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
                 false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
                 _voiceSession, _voiceInteractor, stack);
@@ -635,15 +636,16 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
             String _lastDescription, long lastTimeMoved, boolean neverRelinquishIdentity,
             ActivityManager.TaskDescription _lastTaskDescription, int taskAffiliation,
             int prevTaskId, int nextTaskId, int taskAffiliationColor, int callingUid,
-            String callingPackage, int resizeMode, boolean supportsPictureInPicture,
-            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
+            String callingPackage, @Nullable String callingFeatureId, int resizeMode,
+            boolean supportsPictureInPicture, boolean _realActivitySuspended,
+            boolean userSetupComplete, int minWidth, int minHeight,
             ActivityInfo info, IVoiceInteractionSession _voiceSession,
             IVoiceInteractor _voiceInteractor, ActivityStack stack) {
         super(atmService, id, _intent, _affinityIntent, _affinity, _rootAffinity,
                 _realActivity, _origActivity, _rootWasReset, _autoRemoveRecents, _askedCompatMode,
                 _userId, _effectiveUid, _lastDescription, lastTimeMoved, neverRelinquishIdentity,
                 _lastTaskDescription, taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor,
-                callingUid, callingPackage, resizeMode, supportsPictureInPicture,
+                callingUid, callingPackage, callingFeatureId, resizeMode, supportsPictureInPicture,
                 _realActivitySuspended, userSetupComplete, minWidth, minHeight, info, _voiceSession,
                 _voiceInteractor, stack);
 
@@ -826,6 +828,17 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
         setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
                 false /* creating */);
+        if (windowingMode == WINDOWING_MODE_PINNED) {
+            // This stack will be visible before SystemUI requests PiP animation to start, and if
+            // the selected animation type is fade in, this stack will be close first. If the
+            // animation does not start early, user may see this full screen window appear again
+            // after the closing transition finish, which could cause screen to flicker.
+            // Check if animation should start here in advance.
+            final BoundsAnimationController controller = getDisplay().mBoundsAnimationController;
+            if (controller.isAnimationTypeFadeIn()) {
+                setPinnedStackAlpha(0f);
+            }
+        }
     }
 
     /**
@@ -2924,6 +2937,7 @@ class ActivityStack extends Task implements BoundsAnimationTarget {
                             .setCallingPid(-1)
                             .setCallingUid(parent.launchedFromUid)
                             .setCallingPackage(parent.launchedFromPackage)
+                            .setCallingFeatureId(parent.launchedFromFeatureId)
                             .setRealCallingPid(-1)
                             .setRealCallingUid(parent.launchedFromUid)
                             .setComponentSpecified(true)

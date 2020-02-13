@@ -4047,6 +4047,15 @@
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- Allows a data loader to read a package's access logs. The access logs contain the
+         set of pages referenced over time.
+         <p>Declaring the permission implies intention to use the API and the user of the
+         device can grant permission through the Settings application.
+         <p>Protection level: signature|privileged|appop -->
+    <permission android:name="android.permission.LOADER_USAGE_STATS"
+        android:protectionLevel="signature|privileged|appop" />
+    <uses-permission android:name="android.permission.LOADER_USAGE_STATS" />
+
     <!-- @hide @SystemApi Allows an application to observe usage time of apps. The app can register
          for callbacks when apps reach a certain usage time limit, etc. -->
     <permission android:name="android.permission.OBSERVE_APP_USAGE"
@@ -4933,6 +4942,10 @@
          @hide -->
     <permission android:name="android.permission.ACCESS_TV_TUNER"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
+    <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
+                android:protectionLevel="signature|appPredictor" />
 
     <application android:process="system"
                  android:persistent="true"

@@ -685,7 +685,30 @@ public class AppStandbyControllerTests {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
-        mInjector.mElapsedRealtime += mInjector.getRestrictedBucketDelayMs() - 5000;
+        mInjector.mElapsedRealtime += mInjector.getAutoRestrictedBucketDelayMs() - 5000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        // Bucket shouldn't change
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // bucketing works after timeout
+        mInjector.mElapsedRealtime += 6000;
+
+        Thread.sleep(6000);
+        // Enough time has passed. The app should automatically be put into the RESTRICTED bucket.
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
+    /**
+     * Test that an app is put into the RESTRICTED bucket after enough time has passed.
+     */
+    @Test
+    public void testRestrictedDelay_DelayChange() throws Exception {
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mAutoRestrictedBucketDelayMs = 2 * HOUR_MS;
+        mInjector.mElapsedRealtime += 2 * HOUR_MS - 5000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
                 REASON_MAIN_FORCED_BY_SYSTEM);
         // Bucket shouldn't change

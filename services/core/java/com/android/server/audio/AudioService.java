@@ -21,7 +21,6 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
-import static android.media.audiopolicy.AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
@@ -91,7 +90,6 @@ import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
-import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -6826,8 +6824,9 @@ public class AudioService extends IAudioService.Stub
 
         boolean requireValidProjection = false;
         boolean requireCaptureAudioOrMediaOutputPerm = false;
-        boolean requireVoiceComunicationOutputPerm = false;
         boolean requireModifyRouting = false;
+        ArrayList<AudioMix> voiceCommunicationCaptureMixes = null;
+
 
         if (hasFocusAccess || isVolumeController) {
             requireModifyRouting |= true;
@@ -6836,22 +6835,28 @@ public class AudioService extends IAudioService.Stub
             requireModifyRouting |= true;
         }
         for (AudioMix mix : policyConfig.getMixes()) {
-            // If mix is trying to capture USAGE_VOICE_COMMUNICATION using playback capture
-            if (isVoiceCommunicationPlaybackCaptureMix(mix)) {
-                // then it must have CAPTURE_USAGE_VOICE_COMMUNICATION_OUTPUT permission
-                requireVoiceComunicationOutputPerm |= true;
-            }
-            // If mix is requesting privileged capture and is capturing at
-            // least one usage which is not USAGE_VOICE_COMMUNICATION.
-            if (mix.getRule().allowPrivilegedPlaybackCapture()
-                    && isNonVoiceCommunicationCaptureMix(mix)) {
+            // If mix is requesting privileged capture
+            if (mix.getRule().allowPrivilegedPlaybackCapture()) {
                 // then it must have CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT permission
                 requireCaptureAudioOrMediaOutputPerm |= true;
+
                 // and its format must be low quality enough
                 String error = mix.canBeUsedForPrivilegedCapture(mix.getFormat());
                 if (error != null) {
                     Log.e(TAG, error);
                     return false;
+                }
+
+                // If mix is trying to excplicitly capture USAGE_VOICE_COMMUNICATION
+                if (mix.containsMatchAttributeRuleForUsage(
+                        AudioAttributes.USAGE_VOICE_COMMUNICATION)) {
+                    // then it must have CAPTURE_USAGE_VOICE_COMMUNICATION_OUTPUT permission
+                    // Note that for UID, USERID or EXCLDUE rules, the capture will be silenced
+                    // in AudioPolicyMix
+                    if (voiceCommunicationCaptureMixes == null) {
+                        voiceCommunicationCaptureMixes = new ArrayList<AudioMix>();
+                    }
+                    voiceCommunicationCaptureMixes.add(mix);
                 }
             }
 
@@ -6872,12 +6877,18 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
 
-        if (requireVoiceComunicationOutputPerm
-                && !callerHasPermission(
-                        android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT)) {
-            Log.e(TAG, "Privileged audio capture for voice communication requires "
-                      + "CAPTURE_VOICE_COMMUNICATION_OUTPUT system permission");
-            return false;
+        if (voiceCommunicationCaptureMixes != null && voiceCommunicationCaptureMixes.size() > 0) {
+            if (!callerHasPermission(
+                    android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT)) {
+                Log.e(TAG, "Privileged audio capture for voice communication requires "
+                        + "CAPTURE_VOICE_COMMUNICATION_OUTPUT system permission");
+                return false;
+            }
+
+            // If permission check succeeded, we set the flag in each of the mixing rules
+            for (AudioMix mix : voiceCommunicationCaptureMixes) {
+                mix.getRule().setVoiceCommunicationCaptureAllowed(true);
+            }
         }
 
         if (requireValidProjection && !canProjectAudio(projection)) {
@@ -6891,41 +6902,6 @@ public class AudioService extends IAudioService.Stub
         }
 
         return true;
-    }
-
-    /**
-    * Checks whether a given AudioMix is used for playback capture
-    * (has the ROUTE_FLAG_LOOP_BACK_RENDER flag) and has a matching
-    * criterion for USAGE_VOICE_COMMUNICATION.
-    */
-    private boolean isVoiceCommunicationPlaybackCaptureMix(AudioMix mix) {
-        if (mix.getRouteFlags() != mix.ROUTE_FLAG_LOOP_BACK_RENDER) {
-            return false;
-        }
-
-        for (AudioMixMatchCriterion criterion : mix.getRule().getCriteria()) {
-            if (criterion.getRule() == RULE_MATCH_ATTRIBUTE_USAGE
-                    && criterion.getAudioAttributes().getUsage()
-                    == AudioAttributes.USAGE_VOICE_COMMUNICATION) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-    * Checks whether a given AudioMix has a matching
-    * criterion for a usage which is not USAGE_VOICE_COMMUNICATION.
-    */
-    private boolean isNonVoiceCommunicationCaptureMix(AudioMix mix) {
-        for (AudioMixMatchCriterion criterion : mix.getRule().getCriteria()) {
-            if (criterion.getRule() == RULE_MATCH_ATTRIBUTE_USAGE
-                    && criterion.getAudioAttributes().getUsage()
-                    != AudioAttributes.USAGE_VOICE_COMMUNICATION) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean callerHasPermission(String permission) {

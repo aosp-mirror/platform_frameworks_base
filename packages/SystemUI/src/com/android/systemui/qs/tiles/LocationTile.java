@@ -61,10 +61,6 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     }

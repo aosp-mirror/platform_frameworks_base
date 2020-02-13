@@ -16,8 +16,11 @@
 
 package android.os.incremental;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -26,20 +29,36 @@ import java.io.IOException;
  * @hide
  */
 public class V4Signature {
+    public static final String EXT = ".idsig";
+
     public final byte[] verityRootHash;
     public final byte[] v3Digest;
     public final byte[] pkcs7SignatureBlock;
 
-    V4Signature(byte[] verityRootHash, byte[] v3Digest, byte[] pkcs7SignatureBlock) {
-        this.verityRootHash = verityRootHash;
-        this.v3Digest = v3Digest;
-        this.pkcs7SignatureBlock = pkcs7SignatureBlock;
+    /**
+     * Construct a V4Signature from .idsig file.
+     */
+    public static V4Signature readFrom(File file) {
+        try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
+            return readFrom(stream);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
-    static byte[] readBytes(DataInputStream stream) throws IOException {
-        byte[] result = new byte[stream.readInt()];
-        stream.read(result);
-        return result;
+    /**
+     * Store the V4Signature to a byte-array.
+     */
+    public byte[] toByteArray() {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            try (DataOutputStream steam = new DataOutputStream(byteArrayOutputStream)) {
+                this.writeTo(steam);
+                steam.flush();
+            }
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     static V4Signature readFrom(DataInputStream stream) throws IOException {
@@ -49,14 +68,26 @@ public class V4Signature {
         return new V4Signature(verityRootHash, v3Digest, pkcs7SignatureBlock);
     }
 
-    static void writeBytes(DataOutputStream stream, byte[] bytes) throws IOException {
-        stream.writeInt(bytes.length);
-        stream.write(bytes);
+    V4Signature(byte[] verityRootHash, byte[] v3Digest, byte[] pkcs7SignatureBlock) {
+        this.verityRootHash = verityRootHash;
+        this.v3Digest = v3Digest;
+        this.pkcs7SignatureBlock = pkcs7SignatureBlock;
     }
 
     void writeTo(DataOutputStream stream) throws IOException {
         writeBytes(stream, this.verityRootHash);
         writeBytes(stream, this.v3Digest);
         writeBytes(stream, this.pkcs7SignatureBlock);
+    }
+
+    private static byte[] readBytes(DataInputStream stream) throws IOException {
+        byte[] result = new byte[stream.readInt()];
+        stream.read(result);
+        return result;
+    }
+
+    private static void writeBytes(DataOutputStream stream, byte[] bytes) throws IOException {
+        stream.writeInt(bytes.length);
+        stream.write(bytes);
     }
 }

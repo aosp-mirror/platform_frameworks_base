@@ -151,10 +151,6 @@ public class ListDumper {
                         .append(" ");
             }
 
-            if (notifEntry.hasInflationError()) {
-                rksb.append("(!)hasInflationError ");
-            }
-
             if (notifEntry.getDismissState() != NOT_DISMISSED) {
                 rksb.append("dismissState=")
                         .append(notifEntry.getDismissState())

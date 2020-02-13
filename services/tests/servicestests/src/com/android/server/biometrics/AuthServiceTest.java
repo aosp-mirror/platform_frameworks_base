@@ -38,6 +38,7 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -136,7 +137,10 @@ public class AuthServiceTest {
                 eq(userId),
                 eq(mReceiver),
                 eq(TEST_OP_PACKAGE_NAME),
-                eq(bundle));
+                eq(bundle),
+                eq(Binder.getCallingUid()),
+                eq(Binder.getCallingPid()),
+                eq(UserHandle.getCallingUserId()));
     }
 
     @Test
@@ -147,7 +151,7 @@ public class AuthServiceTest {
         final int userId = 0;
         final int expectedResult = BIOMETRIC_SUCCESS;
         final int authenticators = 0;
-        when(mBiometricService.canAuthenticate(anyString(), anyInt(), anyInt()))
+        when(mBiometricService.canAuthenticate(anyString(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(expectedResult);
 
         final int result = mAuthService.mImpl
@@ -158,6 +162,7 @@ public class AuthServiceTest {
         verify(mBiometricService).canAuthenticate(
                 eq(TEST_OP_PACKAGE_NAME),
                 eq(userId),
+                eq(UserHandle.getCallingUserId()),
                 eq(authenticators));
     }
 
@@ -196,7 +201,8 @@ public class AuthServiceTest {
         mAuthService.mImpl.registerEnabledOnKeyguardCallback(callback);
 
         waitForIdle();
-        verify(mBiometricService).registerEnabledOnKeyguardCallback(eq(callback));
+        verify(mBiometricService).registerEnabledOnKeyguardCallback(
+                eq(callback), eq(UserHandle.getCallingUserId()));
     }
 
     @Test

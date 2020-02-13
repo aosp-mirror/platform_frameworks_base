@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             SystemMediaRoute2Provider.class.getPackageName$(),
             SystemMediaRoute2Provider.class.getName());
 
+    @GuardedBy("mLock")
+    private String mSelectedRouteId;
     MediaRoute2Info mDefaultRoute;
     @NonNull List<MediaRoute2Info> mBluetoothRoutes = Collections.EMPTY_LIST;
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
@@ -153,9 +156,17 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     public void sendControlRequest(@NonNull String routeId, @NonNull Intent request) {
     }
 
-    //TODO: implement method
     @Override
-    public void requestSetVolume(String routeId, int volume) {
+    public void setRouteVolume(String routeId, int volume) {
+        if (!TextUtils.equals(routeId, mSelectedRouteId)) {
+            return;
+        }
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+    }
+
+    @Override
+    public void setSessionVolume(String sessionId, int volume) {
+        // Do nothing since we don't support grouping volume yet.
     }
 
     private void initializeDefaultRoute() {
@@ -241,18 +252,16 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 SYSTEM_SESSION_ID, "" /* clientPackageName */)
                 .setSystemSession(true);
         String activeBtDeviceAddress = mBtRouteProvider.getActiveDeviceAddress();
+        mSelectedRouteId = TextUtils.isEmpty(activeBtDeviceAddress) ? mDefaultRoute.getId()
+                : activeBtDeviceAddress;
+        builder.addSelectedRoute(mSelectedRouteId);
 
         if (!TextUtils.isEmpty(activeBtDeviceAddress)) {
-            // Bluetooth route. Set the route ID with the device's address.
-            builder.addSelectedRoute(activeBtDeviceAddress);
             builder.addTransferrableRoute(mDefaultRoute.getId());
-        } else {
-            // Default device
-            builder.addSelectedRoute(mDefaultRoute.getId());
         }
 
         for (MediaRoute2Info route : mBluetoothRoutes) {
-            if (!TextUtils.equals(activeBtDeviceAddress, route.getId())) {
+            if (!TextUtils.equals(mSelectedRouteId, route.getId())) {
                 builder.addTransferrableRoute(route.getId());
             }
         }

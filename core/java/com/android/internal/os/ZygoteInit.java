@@ -914,10 +914,6 @@ public class ZygoteInit {
             bootTimingsTraceLog.traceEnd(); // PostZygoteInitGC
 
             bootTimingsTraceLog.traceEnd(); // ZygoteInit
-            // Disable tracing so that forked processes do not inherit stale tracing tags from
-            // Zygote.
-            Trace.setTracingEnabled(false, 0);
-
 
             Zygote.initNativeState(isPrimaryZygote);
 

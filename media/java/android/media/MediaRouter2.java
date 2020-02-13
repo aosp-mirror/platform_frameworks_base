@@ -446,7 +446,7 @@ public class MediaRouter2 {
      * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
      * @hide
      */
-    public void requestSetVolume(@NonNull MediaRoute2Info route, int volume) {
+    public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
 
         Client2 client;
@@ -455,7 +455,7 @@ public class MediaRouter2 {
         }
         if (client != null) {
             try {
-                mMediaRouterService.requestSetVolume2(client, route, volume);
+                mMediaRouterService.setRouteVolume2(client, route, volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -885,6 +885,43 @@ public class MediaRouter2 {
         }
 
         /**
+         * Gets information about how volume is handled on the session.
+         *
+         * @return {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
+         * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}
+         */
+        @MediaRoute2Info.PlaybackVolume
+        public int getVolumeHandling() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getVolumeHandling();
+            }
+        }
+
+        /**
+         * Gets the maximum volume of the session.
+         */
+        public int getVolumeMax() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getVolumeMax();
+            }
+        }
+
+        /**
+         * Gets the current volume of the session.
+         * <p>
+         * When it's available, it represents the volume of routing session, which is a group
+         * of selected routes. To get the volume of a route,
+         * use {@link MediaRoute2Info#getVolume()}.
+         * </p>
+         * @see MediaRoute2Info#getVolume()
+         */
+        public int getVolume() {
+            synchronized (mControllerLock) {
+                return mSessionInfo.getVolume();
+            }
+        }
+
+        /**
          * Returns true if this controller is released, false otherwise.
          * If it is released, then all other getters from this instance may return invalid values.
          * Also, any operations to this instance will be ignored once released.
@@ -1035,6 +1072,42 @@ public class MediaRouter2 {
                     mMediaRouterService.transferToRoute(client, getId(), route);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
+                }
+            }
+        }
+
+        /**
+         * Requests a volume change for the remote session asynchronously.
+         *
+         * @param volume The new volume value between 0 and {@link RoutingController#getVolumeMax}
+         *               (inclusive).
+         * @see #getVolume()
+         */
+        public void setVolume(int volume) {
+            if (getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+                Log.w(TAG, "setVolume: the routing session has fixed volume. Ignoring.");
+                return;
+            }
+            if (volume < 0 || volume > getVolumeMax()) {
+                Log.w(TAG, "setVolume: the target volume is out of range. Ignoring");
+                return;
+            }
+
+            synchronized (mControllerLock) {
+                if (mIsReleased) {
+                    Log.w(TAG, "setVolume is called on released controller. Ignoring.");
+                    return;
+                }
+            }
+            Client2 client;
+            synchronized (sRouterLock) {
+                client = mClient;
+            }
+            if (client != null) {
+                try {
+                    mMediaRouterService.setSessionVolume2(client, getId(), volume);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "setVolume: Failed to deliver request.", ex);
                 }
             }
         }

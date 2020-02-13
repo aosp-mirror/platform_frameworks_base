@@ -129,7 +129,8 @@ public final class BlobHandle implements Parcelable {
      * @param label a label indicating what the blob is, that can be surfaced to the user.
      * @param expiryTimeMillis the time in secs after which the blob should be invalidated and not
      *                         allowed to be accessed by any other app,
-     *                         in {@link System#currentTimeMillis()} timebase.
+     *                         in {@link System#currentTimeMillis()} timebase or {@code 0} to
+     *                         indicate that there is no expiry time associated with this blob.
      * @param tag an opaque {@link String} associated with the blob. The length of the tag
      *            cannot be more than 128 characters.
      *

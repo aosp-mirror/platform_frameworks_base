@@ -85,10 +85,6 @@ abstract class FalsingClassifier {
         return mDataProvider.getInteractionType();
     }
 
-    final void setInteractionType(@Classifier.InteractionType int interactionType) {
-        mDataProvider.setInteractionType(interactionType);
-    }
-
     /**
      * Called whenever a MotionEvent occurs.
      *

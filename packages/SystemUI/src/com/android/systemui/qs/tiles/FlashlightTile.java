@@ -58,10 +58,6 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     protected void handleUserSwitch(int newUserId) {
     }
 

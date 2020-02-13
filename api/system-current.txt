@@ -9,6 +9,7 @@ package android {
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field @Deprecated public static final String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
     field public static final String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
+    field public static final String ACCESS_LOCUS_ID_USAGE_STATS = "android.permission.ACCESS_LOCUS_ID_USAGE_STATS";
     field public static final String ACCESS_MESSAGES_ON_ICC = "android.permission.ACCESS_MESSAGES_ON_ICC";
     field public static final String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
     field public static final String ACCESS_MTP = "android.permission.ACCESS_MTP";
@@ -392,6 +393,7 @@ package android.app {
     field public static final String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
     field public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
     field public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    field public static final String OPSTR_LOADER_USAGE_STATS = "android:loader_usage_stats";
     field public static final String OPSTR_MANAGE_EXTERNAL_STORAGE = "android:manage_external_storage";
     field public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
@@ -8899,26 +8901,6 @@ package android.os {
     field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
   }
 
-  public class StatsFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setStatsServiceManager(@NonNull android.os.StatsServiceManager);
-  }
-
-  public class StatsServiceManager {
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsCompanionServiceRegisterer();
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsManagerServiceRegisterer();
-    method @NonNull public android.os.StatsServiceManager.ServiceRegisterer getStatsdServiceRegisterer();
-  }
-
-  public static class StatsServiceManager.ServiceNotFoundException extends java.lang.Exception {
-    ctor public StatsServiceManager.ServiceNotFoundException(@NonNull String);
-  }
-
-  public static final class StatsServiceManager.ServiceRegisterer {
-    method @Nullable public android.os.IBinder get();
-    method @Nullable public android.os.IBinder getOrThrow() throws android.os.StatsServiceManager.ServiceNotFoundException;
-  }
-
   public class SystemConfigManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Set<java.lang.String> getDisabledUntilUsedPreinstalledCarrierApps();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_CARRIER_APP_INFO) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
@@ -12643,20 +12625,6 @@ package android.telephony {
   public abstract class VisualVoicemailService extends android.app.Service {
     method public static final void sendVisualVoicemailSms(android.content.Context, android.telecom.PhoneAccountHandle, String, short, String, android.app.PendingIntent);
     method public static final void setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings);
-  }
-
-  public final class WapPushManagerConnector {
-    ctor public WapPushManagerConnector(@NonNull android.content.Context);
-    method public boolean bindToWapPushManagerService();
-    method @Nullable public String getConnectedWapPushManagerServicePackage();
-    method public int processMessage(@NonNull String, @NonNull String, @NonNull android.content.Intent);
-    method public void unbindWapPushManagerService();
-    field public static final int RESULT_APP_QUERY_FAILED = 2; // 0x2
-    field public static final int RESULT_EXCEPTION_CAUGHT = 16; // 0x10
-    field public static final int RESULT_FURTHER_PROCESSING = 32768; // 0x8000
-    field public static final int RESULT_INVALID_RECEIVER_NAME = 8; // 0x8
-    field public static final int RESULT_MESSAGE_HANDLED = 1; // 0x1
-    field public static final int RESULT_SIGNATURE_NO_MATCH = 4; // 0x4
   }
 
 }

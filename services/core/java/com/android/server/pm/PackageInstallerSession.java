@@ -101,6 +101,7 @@ import android.os.RevocableFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalFileStorages;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings.Secure;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -538,16 +539,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException(
                         "DataLoader installation of APEX modules is not allowed.");
             }
-        }
-
-        if (isStreamingInstallation()) {
-            if (!isIncrementalInstallationAllowed(mPackageName)) {
-                throw new IllegalArgumentException(
-                        "Incremental installation of this package is not allowed.");
-            }
             if (this.params.dataLoaderParams.getComponentName().getPackageName()
                     == SYSTEM_DATA_LOADER_PACKAGE) {
                 assertShellOrSystemCalling("System data loaders");
+            }
+        }
+
+        if (isIncrementalInstallation()) {
+            if (!IncrementalManager.isAllowed()) {
+                throw new IllegalArgumentException("Incremental installation not allowed.");
+            }
+            if (!isIncrementalInstallationAllowed(mPackageName)) {
+                throw new IllegalArgumentException(
+                        "Incremental installation of this package is not allowed.");
             }
         }
     }
@@ -2385,11 +2389,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
         }
-        if (!isIncrementalInstallation()) {
+        if (isStreamingInstallation()) {
             if (location != LOCATION_DATA_APP) {
                 throw new IllegalArgumentException(
                         "Non-incremental installation only supports /data/app placement: " + name);
             }
+        }
+        if (metadata == null) {
+            throw new IllegalArgumentException(
+                    "DataLoader installation requires valid metadata: " + name);
         }
         // Use installer provided name for now; we always rename later
         if (!FileUtils.isValidExtFilename(name)) {

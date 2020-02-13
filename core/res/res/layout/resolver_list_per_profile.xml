@@ -14,18 +14,26 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<ListView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/resolver_list"
-    android:clipToPadding="false"
-    android:background="?attr/colorBackgroundFloating"
-    android:elevation="@dimen/resolver_elevation"
-    android:nestedScrollingEnabled="true"
-    android:scrollbarStyle="outsideOverlay"
-    android:scrollIndicators="top|bottom"
-    android:divider="@null"
-    android:footerDividersEnabled="false"
-    android:headerDividersEnabled="false"
-    android:dividerHeight="0dp" />
+    android:layout_height="match_parent"
+    android:layout_marginTop="8dp">
+    <ListView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/resolver_list"
+        android:clipToPadding="false"
+        android:background="?attr/colorBackgroundFloating"
+        android:elevation="@dimen/resolver_elevation"
+        android:nestedScrollingEnabled="true"
+        android:scrollbarStyle="outsideOverlay"
+        android:scrollIndicators="top|bottom"
+        android:divider="@null"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false"
+        android:dividerHeight="0dp" />
+
+    <include layout="@layout/resolver_empty_states" />
+</RelativeLayout>

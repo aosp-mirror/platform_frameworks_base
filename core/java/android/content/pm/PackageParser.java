@@ -61,7 +61,6 @@ import android.content.pm.PackageParserCacheHelper.WriteHelper;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ApkParseUtils;
 import android.content.pm.parsing.PackageImpl;
-import android.content.pm.parsing.PackageInfoUtils;
 import android.content.pm.parsing.ParsedPackage;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
@@ -5967,12 +5966,14 @@ public class PackageParser {
         @IntDef({SigningDetails.SignatureSchemeVersion.UNKNOWN,
                 SigningDetails.SignatureSchemeVersion.JAR,
                 SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2,
-                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3})
+                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4})
         public @interface SignatureSchemeVersion {
             int UNKNOWN = 0;
             int JAR = 1;
             int SIGNING_BLOCK_V2 = 2;
             int SIGNING_BLOCK_V3 = 3;
+            int SIGNING_BLOCK_V4 = 4;
         }
 
         @Nullable

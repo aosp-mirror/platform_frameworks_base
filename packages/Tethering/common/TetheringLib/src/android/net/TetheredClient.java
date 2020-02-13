@@ -27,7 +27,7 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -86,7 +86,7 @@ public final class TetheredClient implements Parcelable {
      * @hide
      */
     public TetheredClient addAddresses(@NonNull TetheredClient other) {
-        final HashSet<AddressInfo> newAddresses = new HashSet<>(
+        final LinkedHashSet<AddressInfo> newAddresses = new LinkedHashSet<>(
                 mAddresses.size() + other.mAddresses.size());
         newAddresses.addAll(mAddresses);
         newAddresses.addAll(other.mAddresses);

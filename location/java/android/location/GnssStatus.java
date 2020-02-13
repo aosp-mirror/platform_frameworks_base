@@ -24,6 +24,8 @@ import android.annotation.NonNull;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * This class represents the current state of the GNSS engine and is used in conjunction with
@@ -339,6 +341,33 @@ public final class GnssStatus {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GnssStatus)) {
+            return false;
+        }
+
+        GnssStatus that = (GnssStatus) o;
+        return mSvCount == that.mSvCount
+                && Arrays.equals(mSvidWithFlags, that.mSvidWithFlags)
+                && Arrays.equals(mCn0DbHzs, that.mCn0DbHzs)
+                && Arrays.equals(mElevations, that.mElevations)
+                && Arrays.equals(mAzimuths, that.mAzimuths)
+                && Arrays.equals(mCarrierFrequencies, that.mCarrierFrequencies)
+                && Arrays.equals(mBasebandCn0DbHzs, that.mBasebandCn0DbHzs);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(mSvCount);
+        result = 31 * result + Arrays.hashCode(mSvidWithFlags);
+        result = 31 * result + Arrays.hashCode(mCn0DbHzs);
+        return result;
+    }
+
     /**
      * Builder class to help create new GnssStatus instances.
      */
@@ -451,8 +480,8 @@ public final class GnssStatus {
             mCn0DbHz = cn0DbHz;
             mElevation = elevation;
             mAzimuth = azimuth;
-            mCarrierFrequency = carrierFrequency;
-            mBasebandCn0DbHz = basebandCn0DbHz;
+            mCarrierFrequency = hasCarrierFrequency ? carrierFrequency : 0;
+            mBasebandCn0DbHz = hasBasebandCn0DbHz ? basebandCn0DbHz : 0;
         }
     }
 }

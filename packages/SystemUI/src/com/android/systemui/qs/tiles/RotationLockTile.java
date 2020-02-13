@@ -51,9 +51,6 @@ public class RotationLockTile extends QSTileImpl<BooleanState> {
         return new BooleanState();
     }
 
-    public void handleSetListening(boolean listening) {
-    }
-
     @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_DISPLAY_SETTINGS);

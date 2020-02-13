@@ -434,6 +434,7 @@ public class GarbageMonitor implements Dumpable {
 
         @Override
         public void handleSetListening(boolean listening) {
+            super.handleSetListening(listening);
             if (gm != null) gm.setTile(listening ? this : null);
 
             final ActivityManager am = mContext.getSystemService(ActivityManager.class);

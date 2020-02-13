@@ -20,6 +20,9 @@
 
 #include <android-base/unique_fd.h>
 #include <nativehelper/JNIHelp.h>
+#include "android-base/file.h"
+
+#include <endian.h>
 
 #include <core_jni_helpers.h>
 
@@ -32,6 +35,8 @@ namespace android {
 
 namespace {
 
+using android::base::borrowed_fd;
+using android::base::ReadFully;
 using android::base::unique_fd;
 
 static constexpr int BUFFER_SIZE = 256 * 1024;
@@ -80,6 +85,27 @@ const JniIds& jniIds(JNIEnv* env) {
     return ids;
 }
 
+static inline int32_t readBEInt32(borrowed_fd fd) {
+    int32_t result;
+    ReadFully(fd, &result, sizeof(result));
+    result = int32_t(be32toh(result));
+    return result;
+}
+
+static inline std::vector<char> readBytes(borrowed_fd fd) {
+    int32_t size = readBEInt32(fd);
+    std::vector<char> result(size);
+    ReadFully(fd, result.data(), size);
+    return result;
+}
+
+static inline int32_t skipIdSigHeaders(borrowed_fd fd) {
+    readBytes(fd);          // verityRootHash
+    readBytes(fd);          // v3Digest
+    readBytes(fd);          // pkcs7SignatureBlock
+    return readBEInt32(fd); // size of the verity tree
+}
+
 static inline unique_fd convertPfdToFdAndDup(JNIEnv* env, const JniIds& jni, jobject pfd) {
     if (!pfd) {
         ALOGE("Missing In ParcelFileDescriptor.");
@@ -90,33 +116,78 @@ static inline unique_fd convertPfdToFdAndDup(JNIEnv* env, const JniIds& jni, job
         ALOGE("Missing In FileDescriptor.");
         return {};
     }
-    return unique_fd{dup(jniGetFDFromFileDescriptor(env, managedFd))};
+    unique_fd result{dup(jniGetFDFromFileDescriptor(env, managedFd))};
+    // Can be closed after dup.
+    env->CallStaticVoidMethod(jni.ioUtils, jni.ioUtilsCloseQuietly, pfd);
+    return result;
 }
 
-static inline std::pair<unique_fd, bool> openIncomingFile(JNIEnv* env, const JniIds& jni,
-                                                          jobject shellCommand,
-                                                          IncFsSpan metadata) {
-    jobject pfd = nullptr;
-    const bool stdin = (metadata.size == 0 || *metadata.data == '-');
-    if (stdin) {
+struct InputDesc {
+    unique_fd fd;
+    IncFsSize size;
+    IncFsBlockKind kind;
+    bool waitOnEof;
+};
+using InputDescs = std::vector<InputDesc>;
+
+static inline InputDescs openInputs(JNIEnv* env, const JniIds& jni, jobject shellCommand,
+                                    IncFsSize size, IncFsSpan metadata) {
+    InputDescs result;
+    result.reserve(2);
+
+    const bool fromStdin = (metadata.size == 0 || *metadata.data == '-');
+    if (fromStdin) {
         // stdin
-        pfd = env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                          jni.pmscdGetStdInPFD, shellCommand);
-    } else {
-        // file
-        const std::string filePath(metadata.data, metadata.size);
-        pfd = env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
-                                          jni.pmscdGetLocalFile, shellCommand,
-                                          env->NewStringUTF(filePath.c_str()));
+        auto fd = convertPfdToFdAndDup(
+                env, jni,
+                env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
+                                            jni.pmscdGetStdInPFD, shellCommand));
+        if (fd.ok()) {
+            result.push_back(InputDesc{
+                    .fd = std::move(fd),
+                    .size = size,
+                    .kind = INCFS_BLOCK_KIND_DATA,
+                    .waitOnEof = true,
+            });
+        }
+        return result;
     }
 
-    auto result = convertPfdToFdAndDup(env, jni, pfd);
-    if (pfd) {
-        // Can be closed after dup.
-        env->CallStaticVoidMethod(jni.ioUtils, jni.ioUtilsCloseQuietly, pfd);
+    // local file and possibly signature
+    const std::string filePath(metadata.data, metadata.size);
+    const std::string idsigPath = filePath + ".idsig";
+
+    auto idsigFd = convertPfdToFdAndDup(
+            env, jni,
+            env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
+                                        jni.pmscdGetLocalFile, shellCommand,
+                                        env->NewStringUTF(idsigPath.c_str())));
+    if (idsigFd.ok()) {
+        ALOGE("idsig found, skipping to the tree");
+        auto treeSize = skipIdSigHeaders(idsigFd);
+        result.push_back(InputDesc{
+                .fd = std::move(idsigFd),
+                .size = treeSize,
+                .kind = INCFS_BLOCK_KIND_HASH,
+                .waitOnEof = false,
+        });
     }
 
-    return {std::move(result), stdin};
+    auto fileFd = convertPfdToFdAndDup(
+            env, jni,
+            env->CallStaticObjectMethod(jni.packageManagerShellCommandDataLoader,
+                                        jni.pmscdGetLocalFile, shellCommand,
+                                        env->NewStringUTF(filePath.c_str())));
+    if (fileFd.ok()) {
+        result.push_back(InputDesc{
+                .fd = std::move(fileFd),
+                .size = size,
+                .kind = INCFS_BLOCK_KIND_DATA,
+                .waitOnEof = false,
+        });
+    }
+
+    return result;
 }
 
 static inline JNIEnv* GetJNIEnvironment(JavaVM* vm) {
@@ -187,9 +258,9 @@ private:
         blocks.reserve(BLOCKS_COUNT);
 
         for (auto&& file : addedFiles) {
-            auto [incomingFd, stdin] = openIncomingFile(env, jni, shellCommand, file.metadata);
-            if (incomingFd < 0) {
-                ALOGE("Failed to open an IncFS file for metadata: %.*s, final file name is: %s. "
+            auto inputs = openInputs(env, jni, shellCommand, file.size, file.metadata);
+            if (inputs.empty()) {
+                ALOGE("Failed to open an input file for metadata: %.*s, final file name is: %s. "
                       "Error %d",
                       int(file.metadata.size), file.metadata.data, file.name, errno);
                 return false;
@@ -205,46 +276,15 @@ private:
                 return false;
             }
 
-            IncFsSize size = file.size;
-            IncFsSize remaining = size;
-            IncFsSize totalSize = 0;
-            IncFsBlockIndex blockIdx = 0;
-            while (remaining > 0) {
-                constexpr auto capacity = BUFFER_SIZE;
-                auto size = buffer.size();
-                if (capacity - size < INCFS_DATA_FILE_BLOCK_SIZE) {
-                    if (!flashToIncFs(incfsFd, false, &blocks, &blockIdx, &buffer)) {
-                        return false;
-                    }
-                    continue;
-                }
-
-                auto toRead = std::min<IncFsSize>(remaining, capacity - size);
-                buffer.resize(size + toRead);
-                auto read = ::read(incomingFd, buffer.data() + size, toRead);
-                if (read == 0) {
-                    if (stdin) {
-                        // eof of stdin, waiting...
-                        ALOGE("eof of stdin, waiting...: %d, remaining: %d, block: %d, read: %d",
-                              int(totalSize), int(remaining), int(blockIdx), int(read));
-                        using namespace std::chrono_literals;
-                        std::this_thread::sleep_for(10ms);
-                        continue;
-                    }
-                    break;
-                }
-                if (read < 0) {
-                    ALOGE("Underlying file read error: %.*s: %d", int(file.metadata.size),
-                          file.metadata.data, int(read));
+            for (auto&& input : inputs) {
+                if (!copyToIncFs(incfsFd, input.size, input.kind, input.fd, input.waitOnEof,
+                                 &buffer, &blocks)) {
+                    ALOGE("Failed to copy data to IncFS file for metadata: %.*s, final file name "
+                          "is: %s. "
+                          "Error %d",
+                          int(file.metadata.size), file.metadata.data, file.name, errno);
                     return false;
                 }
-
-                buffer.resize(size + read);
-                remaining -= read;
-                totalSize += read;
-            }
-            if (!buffer.empty() && !flashToIncFs(incfsFd, true, &blocks, &blockIdx, &buffer)) {
-                return false;
             }
         }
 
@@ -252,16 +292,60 @@ private:
         return true;
     }
 
-    bool flashToIncFs(int incfsFd, bool eof, std::vector<IncFsDataBlock>* blocks,
-                      IncFsBlockIndex* blockIdx, std::vector<char>* buffer) {
+    bool copyToIncFs(borrowed_fd incfsFd, IncFsSize size, IncFsBlockKind kind,
+                     borrowed_fd incomingFd, bool waitOnEof, std::vector<char>* buffer,
+                     std::vector<IncFsDataBlock>* blocks) {
+        IncFsSize remaining = size;
+        IncFsSize totalSize = 0;
+        IncFsBlockIndex blockIdx = 0;
+        while (remaining > 0) {
+            constexpr auto capacity = BUFFER_SIZE;
+            auto size = buffer->size();
+            if (capacity - size < INCFS_DATA_FILE_BLOCK_SIZE) {
+                if (!flashToIncFs(incfsFd, kind, false, &blockIdx, buffer, blocks)) {
+                    return false;
+                }
+                continue;
+            }
+
+            auto toRead = std::min<IncFsSize>(remaining, capacity - size);
+            buffer->resize(size + toRead);
+            auto read = ::read(incomingFd.get(), buffer->data() + size, toRead);
+            if (read == 0) {
+                if (waitOnEof) {
+                    // eof of stdin, waiting...
+                    ALOGE("eof of stdin, waiting...: %d, remaining: %d, block: %d, read: %d",
+                          int(totalSize), int(remaining), int(blockIdx), int(read));
+                    using namespace std::chrono_literals;
+                    std::this_thread::sleep_for(10ms);
+                    continue;
+                }
+                break;
+            }
+            if (read < 0) {
+                return false;
+            }
+
+            buffer->resize(size + read);
+            remaining -= read;
+            totalSize += read;
+        }
+        if (!buffer->empty() && !flashToIncFs(incfsFd, kind, true, &blockIdx, buffer, blocks)) {
+            return false;
+        }
+        return true;
+    }
+
+    bool flashToIncFs(borrowed_fd incfsFd, IncFsBlockKind kind, bool eof, IncFsBlockIndex* blockIdx,
+                      std::vector<char>* buffer, std::vector<IncFsDataBlock>* blocks) {
         int consumed = 0;
         const auto fullBlocks = buffer->size() / INCFS_DATA_FILE_BLOCK_SIZE;
         for (int i = 0; i < fullBlocks; ++i) {
             const auto inst = IncFsDataBlock{
-                    .fileFd = incfsFd,
+                    .fileFd = incfsFd.get(),
                     .pageIndex = (*blockIdx)++,
                     .compression = INCFS_COMPRESSION_KIND_NONE,
-                    .kind = INCFS_BLOCK_KIND_DATA,
+                    .kind = kind,
                     .dataSize = INCFS_DATA_FILE_BLOCK_SIZE,
                     .data = buffer->data() + consumed,
             };
@@ -271,10 +355,10 @@ private:
         const auto remain = buffer->size() - fullBlocks * INCFS_DATA_FILE_BLOCK_SIZE;
         if (remain && eof) {
             const auto inst = IncFsDataBlock{
-                    .fileFd = incfsFd,
+                    .fileFd = incfsFd.get(),
                     .pageIndex = (*blockIdx)++,
                     .compression = INCFS_COMPRESSION_KIND_NONE,
-                    .kind = INCFS_BLOCK_KIND_DATA,
+                    .kind = kind,
                     .dataSize = static_cast<uint16_t>(remain),
                     .data = buffer->data() + consumed,
             };

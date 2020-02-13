@@ -62,7 +62,8 @@ abstract class MediaRoute2Provider {
     public abstract void transferToRoute(String sessionId, String routeId);
 
     public abstract void sendControlRequest(String routeId, Intent request);
-    public abstract void requestSetVolume(String routeId, int volume);
+    public abstract void setRouteVolume(String routeId, int volume);
+    public abstract void setSessionVolume(String sessionId, int volume);
 
     @NonNull
     public String getUniqueId() {

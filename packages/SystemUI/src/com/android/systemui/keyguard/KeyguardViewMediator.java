@@ -1651,7 +1651,7 @@ public class KeyguardViewMediator extends SystemUI {
                             "KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
-                    mFalsingManager.onSucccessfulUnlock();
+                    mFalsingManager.onSuccessfulUnlock();
                     Trace.endSection();
                     break;
                 case KEYGUARD_DONE_PENDING_TIMEOUT:

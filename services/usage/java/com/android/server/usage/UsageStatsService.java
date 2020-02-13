@@ -491,6 +491,15 @@ public class UsageStatsService extends SystemService implements
         return true; // hide by default if we can't verify visibility
     }
 
+    private boolean shouldHideLocusIdEvents(int callingPid, int callingUid) {
+        if (callingUid == Process.SYSTEM_UID) {
+            return false;
+        }
+        return !(getContext().checkPermission(
+                android.Manifest.permission.ACCESS_LOCUS_ID_USAGE_STATS, callingPid, callingUid)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
     private static void deleteRecursively(File f) {
         File[] files = f.listFiles();
         if (files != null) {
@@ -1030,7 +1039,8 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime,
-            boolean shouldObfuscateInstantApps, boolean shouldHideShortcutInvocationEvents) {
+            boolean shouldObfuscateInstantApps, boolean shouldHideShortcutInvocationEvents,
+            boolean shouldHideLocusIdEvents) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.get(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
@@ -1042,7 +1052,7 @@ public class UsageStatsService extends SystemService implements
                 return null; // user was stopped or removed
             }
             return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps,
-                    shouldHideShortcutInvocationEvents);
+                    shouldHideShortcutInvocationEvents, shouldHideLocusIdEvents);
         }
     }
 
@@ -1132,7 +1142,11 @@ public class UsageStatsService extends SystemService implements
                             // dump everything for all users
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
-                                ipw.println("user=" + mUserState.keyAt(user));
+                                final int userId = mUserState.keyAt(user);
+                                if (!mUserUnlockedStates.get(userId)) {
+                                    continue;
+                                }
+                                ipw.println("user=" + userId);
                                 ipw.increaseIndent();
                                 mUserState.valueAt(user).dumpFile(ipw, null);
                                 ipw.decreaseIndent();
@@ -1153,7 +1167,11 @@ public class UsageStatsService extends SystemService implements
                             // dump info for all users
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
-                                ipw.println("user=" + mUserState.keyAt(user));
+                                final int userId = mUserState.keyAt(user);
+                                if (!mUserUnlockedStates.get(userId)) {
+                                    continue;
+                                }
+                                ipw.println("user=" + userId);
                                 ipw.increaseIndent();
                                 mUserState.valueAt(user).dumpDatabaseInfo(ipw);
                                 ipw.decreaseIndent();
@@ -1198,11 +1216,13 @@ public class UsageStatsService extends SystemService implements
                 idpw.printPair("user", userId);
                 idpw.println();
                 idpw.increaseIndent();
-                if (checkin) {
-                    mUserState.valueAt(i).checkin(idpw);
-                } else {
-                    mUserState.valueAt(i).dump(idpw, pkg, compact);
-                    idpw.println();
+                if (mUserUnlockedStates.get(userId)) {
+                    if (checkin) {
+                        mUserState.valueAt(i).checkin(idpw);
+                    } else {
+                        mUserState.valueAt(i).dump(idpw, pkg, compact);
+                        idpw.println();
+                    }
                 }
                 mAppStandby.dumpUser(idpw, userId, pkg);
                 idpw.decreaseIndent();
@@ -1224,13 +1244,17 @@ public class UsageStatsService extends SystemService implements
     private int parseUserIdFromArgs(String[] args, int index, IndentingPrintWriter ipw) {
         final int userId;
         try {
-            userId = Integer.valueOf(args[index + 1]);
+            userId = Integer.parseInt(args[index + 1]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             ipw.println("invalid user specified.");
             return UserHandle.USER_NULL;
         }
         if (mUserState.indexOfKey(userId) < 0) {
             ipw.println("the specified user does not exist.");
+            return UserHandle.USER_NULL;
+        }
+        if (!mUserUnlockedStates.get(userId)) {
+            ipw.println("the specified user is currently in a locked state.");
             return UserHandle.USER_NULL;
         }
         return userId;
@@ -1451,8 +1475,10 @@ public class UsageStatsService extends SystemService implements
             try {
                 final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
                         userId, callingPackage, callingPid, callingUid);
+                boolean shouldHideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
                 return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
-                        obfuscateInstantApps, hideShortcutInvocationEvents);
+                        obfuscateInstantApps, hideShortcutInvocationEvents,
+                        shouldHideLocusIdEvents);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1499,8 +1525,10 @@ public class UsageStatsService extends SystemService implements
             try {
                 final boolean hideShortcutInvocationEvents = shouldHideShortcutInvocationEvents(
                         userId, callingPackage, callingPid, callingUid);
+                boolean shouldHideLocusIdEvents = shouldHideLocusIdEvents(callingPid, callingUid);
                 return UsageStatsService.this.queryEvents(userId, beginTime, endTime,
-                        obfuscateInstantApps, hideShortcutInvocationEvents);
+                        obfuscateInstantApps, hideShortcutInvocationEvents,
+                        shouldHideLocusIdEvents);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2117,9 +2145,11 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public UsageEvents queryEventsForUser(int userId, long beginTime, long endTime,
-                boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents) {
+                boolean obfuscateInstantApps, boolean shouldHideShortcutInvocationEvents,
+                boolean shouldHideLocusIdEvents) {
             return UsageStatsService.this.queryEvents(
-                    userId, beginTime, endTime, obfuscateInstantApps, hideShortcutInvocationEvents);
+                    userId, beginTime, endTime, obfuscateInstantApps,
+                    shouldHideShortcutInvocationEvents, shouldHideLocusIdEvents);
         }
 
         @Override

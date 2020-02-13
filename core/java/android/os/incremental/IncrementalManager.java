@@ -50,6 +50,8 @@ import java.nio.file.Paths;
 public final class IncrementalManager {
     private static final String TAG = "IncrementalManager";
 
+    private static final String ALLOWED_PROPERTY = "incremental.allowed";
+
     public static final int CREATE_MODE_TEMPORARY_BIND =
             IIncrementalService.CREATE_MODE_TEMPORARY_BIND;
     public static final int CREATE_MODE_PERMANENT_BIND =
@@ -288,10 +290,18 @@ public final class IncrementalManager {
     }
 
     /**
-     * Checks if Incremental is enabled
+     * Checks if Incremental feature is enabled on this device.
      */
-    public static boolean isEnabled() {
+    public static boolean isFeatureEnabled() {
         return nativeIsEnabled();
+    }
+
+    /**
+     * Checks if Incremental installations are allowed.
+     * A developer can disable Incremental installations by setting the property.
+     */
+    public static boolean isAllowed() {
+        return isFeatureEnabled() && android.os.SystemProperties.getBoolean(ALLOWED_PROPERTY, true);
     }
 
     /**

@@ -157,8 +157,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void onSucccessfulUnlock() {
-        mInternalFalsingManager.onSucccessfulUnlock();
+    public void onSuccessfulUnlock() {
+        mInternalFalsingManager.onSuccessfulUnlock();
     }
 
     @Override

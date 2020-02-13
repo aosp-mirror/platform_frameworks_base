@@ -18,6 +18,7 @@ package com.android.mediaroutertest;
 
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -51,6 +52,8 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_NAME_SPECIAL_FEATURE = "Special Feature Route";
 
     public static final int VOLUME_MAX = 100;
+    public static final int SESSION_VOLUME_MAX = 50;
+    public static final int SESSION_VOLUME_INITIAL = 20;
     public static final String ROUTE_ID_FIXED_VOLUME = "route_fixed_volume";
     public static final String ROUTE_NAME_FIXED_VOLUME = "Fixed Volume Route";
     public static final String ROUTE_ID_VARIABLE_VOLUME = "route_variable_volume";
@@ -141,16 +144,29 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     }
 
     @Override
-    public void onSetVolume(String routeId, int volume) {
+    public void onSetRouteVolume(String routeId, int volume) {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null) {
             return;
         }
-        volume = Math.min(volume, Math.max(0, route.getVolumeMax()));
+        volume = Math.max(0, Math.min(volume, route.getVolumeMax()));
         mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
                 .setVolume(volume)
                 .build());
         publishRoutes();
+    }
+
+    @Override
+    public void onSetSessionVolume(String sessionId, int volume) {
+        RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
+        if (sessionInfo == null) {
+            return;
+        }
+        volume = Math.max(0, Math.min(volume, sessionInfo.getVolumeMax()));
+        RoutingSessionInfo newSessionInfo = new RoutingSessionInfo.Builder(sessionInfo)
+                .setVolume(volume)
+                .build();
+        notifySessionUpdated(newSessionInfo);
     }
 
     @Override
@@ -176,6 +192,9 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 .addSelectedRoute(routeId)
                 .addSelectableRoute(ROUTE_ID4_TO_SELECT_AND_DESELECT)
                 .addTransferrableRoute(ROUTE_ID5_TO_TRANSFER_TO)
+                .setVolumeHandling(PLAYBACK_VOLUME_VARIABLE)
+                .setVolumeMax(SESSION_VOLUME_MAX)
+                .setVolume(SESSION_VOLUME_INITIAL)
                 // Set control hints with given sessionHints
                 .setControlHints(sessionHints)
                 .build();

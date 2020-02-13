@@ -68,6 +68,13 @@ public class TaskOrganizerPipTest extends Service {
     public void onCreate() {
         super.onCreate();
 
+        try {
+            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(mOrganizer,
+                    WINDOWING_MODE_PINNED);
+
+        } catch (Exception e) {
+        }
+
         final WindowManager.LayoutParams wlp = new WindowManager.LayoutParams();
         wlp.setTitle("TaskOrganizerPipTest");
         wlp.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;

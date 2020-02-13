@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
+import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.ICrossProfileApps;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -44,9 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -54,12 +53,10 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.server.LocalServices;
-import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
@@ -71,7 +68,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
     private Context mContext;
     private Injector mInjector;
-    private AppOpsService mAppOpsService;
+    private AppOpsManager mAppOpsManager;
 
     public CrossProfileAppsServiceImpl(Context context) {
         this(context, new InjectorImpl(context));
@@ -81,6 +78,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     CrossProfileAppsServiceImpl(Context context, Injector injector) {
         mContext = context;
         mInjector = injector;
+
+        LocalServices.addService(CrossProfileAppsInternal.class, new LocalService());
     }
 
     @Override
@@ -102,6 +101,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     public void startActivityAsUser(
             IApplicationThread caller,
             String callingPackage,
+            String callingFeatureId,
             ComponentName component,
             @UserIdInt int userId,
             boolean launchMainActivity) throws RemoteException {
@@ -167,7 +167,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         launchIntent.setPackage(null);
         launchIntent.setComponent(component);
         mInjector.getActivityTaskManagerInternal().startActivityAsUser(
-                caller, callingPackage, launchIntent,
+                caller, callingPackage, callingFeatureId, launchIntent,
                 launchMainActivity
                         ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
                         : null,
@@ -178,6 +178,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     public void startActivityAsUserByIntent(
             IApplicationThread caller,
             String callingPackage,
+            String callingFeatureId,
             Intent intent,
             @UserIdInt int userId) throws RemoteException {
         Objects.requireNonNull(callingPackage);
@@ -214,8 +215,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         verifyActivityCanHandleIntent(launchIntent, callingUid, userId);
 
-        mInjector.getActivityTaskManagerInternal().startActivityAsUser(
-                caller, callingPackage, launchIntent, /* options= */ null, userId);
+        mInjector.getActivityTaskManagerInternal().startActivityAsUser(caller, callingPackage,
+                callingFeatureId, launchIntent, /* options= */ null, userId);
     }
 
     @Override
@@ -255,8 +256,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         Objects.requireNonNull(callingPackage);
         verifyCallingPackage(callingPackage);
 
-        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(
-                callingPackage, mInjector.getCallingUserId());
+        final List<UserHandle> targetUserProfiles = getTargetUserProfilesUnchecked(callingPackage,
+                mInjector.getCallingUserId());
         if (targetUserProfiles.isEmpty()) {
             return false;
         }
@@ -540,12 +541,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                 permission, uid, /* owningUid= */-1, /* exported= */ true);
     }
 
-    private AppOpsService getAppOpsService() {
-        if (mAppOpsService == null) {
-            IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-            mAppOpsService = (AppOpsService) IAppOpsService.Stub.asInterface(b);
+    private AppOpsManager getAppOpsManager() {
+        if (mAppOpsManager == null) {
+            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         }
-        return mAppOpsService;
+        return mAppOpsManager;
     }
 
     private static class InjectorImpl implements Injector {
@@ -684,5 +684,31 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         void sendBroadcastAsUser(Intent intent, UserHandle user);
 
         int checkComponentPermission(String permission, int uid, int owningUid, boolean exported);
+    }
+
+    class LocalService extends CrossProfileAppsInternal {
+        @Override
+        public boolean verifyPackageHasInteractAcrossProfilePermission(String packageName,
+                @UserIdInt int userId) throws PackageManager.NameNotFoundException {
+            final int uid = Objects.requireNonNull(
+                    mInjector.getPackageManager().getApplicationInfoAsUser(
+                            Objects.requireNonNull(packageName), /* flags= */ 0, userId)).uid;
+            return verifyUidHasInteractAcrossProfilePermission(packageName, uid);
+        }
+
+        @Override
+        public boolean verifyUidHasInteractAcrossProfilePermission(String packageName, int uid) {
+            Objects.requireNonNull(packageName);
+
+            return isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS_FULL, uid)
+                    || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_USERS, uid)
+                    || isPermissionGranted(Manifest.permission.INTERACT_ACROSS_PROFILES, uid)
+                    || PermissionChecker.checkPermissionForPreflight(
+                            mContext,
+                            Manifest.permission.INTERACT_ACROSS_PROFILES,
+                            PermissionChecker.PID_UNKNOWN,
+                            uid,
+                            packageName) == PermissionChecker.PERMISSION_GRANTED;
+        }
     }
 }

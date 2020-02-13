@@ -105,10 +105,6 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public CharSequence getTileLabel() {
         return mContext.getString(R.string.quick_settings_screen_record_label);
     }

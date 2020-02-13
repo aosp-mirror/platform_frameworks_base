@@ -14,6 +14,7 @@
 
 package com.android.systemui.plugins.qs;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
@@ -106,6 +107,12 @@ public interface QSTile {
 
         public int getPadding() {
             return 0;
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return "Icon";
         }
     }
 

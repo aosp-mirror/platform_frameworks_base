@@ -947,7 +947,7 @@ public class BiometricServiceTest {
                 false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mImpl.cancelAuthentication(mBiometricService.mCurrentAuthSession.mToken,
-                TEST_PACKAGE_NAME);
+                TEST_PACKAGE_NAME, 0 /* callingUId */, 0 /* callingPid */, 0 /* callingUserId */);
         waitForIdle();
 
         // Pretend that the HAL has responded to cancel with ERROR_CANCELED
@@ -1325,7 +1325,8 @@ public class BiometricServiceTest {
 
     private int invokeCanAuthenticate(BiometricService service, int authenticators)
             throws Exception {
-        return service.mImpl.canAuthenticate(TEST_PACKAGE_NAME, 0 /* userId */, authenticators);
+        return service.mImpl.canAuthenticate(
+                TEST_PACKAGE_NAME, 0 /* userId */, 0 /* callingUserId */, authenticators);
     }
 
     private void setupAuthForOnly(int modality, int strength) throws Exception {
@@ -1428,7 +1429,10 @@ public class BiometricServiceTest {
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
                 createTestBiometricPromptBundle(requireConfirmation, authenticators,
-                        false /* checkDevicePolicy */));
+                        false /* checkDevicePolicy */),
+                0 /* callingUid */,
+                0 /* callingPid */,
+                0 /* callingUserId */);
     }
 
     private static void invokeAuthenticateForWorkApp(IBiometricService.Stub service,
@@ -1440,7 +1444,10 @@ public class BiometricServiceTest {
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
                 createTestBiometricPromptBundle(false /* requireConfirmation */, authenticators,
-                        true /* checkDevicePolicy */));
+                        true /* checkDevicePolicy */),
+                0 /* callingUid */,
+                0 /* callingPid */,
+                0 /* callingUserId */);
     }
 
     private static Bundle createTestBiometricPromptBundle(

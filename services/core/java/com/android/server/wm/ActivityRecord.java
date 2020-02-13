@@ -362,6 +362,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final String TAG_PERSISTABLEBUNDLE = "persistable_bundle";
     private static final String ATTR_LAUNCHEDFROMUID = "launched_from_uid";
     private static final String ATTR_LAUNCHEDFROMPACKAGE = "launched_from_package";
+    private static final String ATTR_LAUNCHEDFROMFEATURE = "launched_from_feature";
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
@@ -422,6 +423,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
+    final @Nullable String launchedFromFeatureId; // always the feature in launchedFromPackage
     final Intent intent;    // the original intent that generated us
     final String shortComponentName; // the short component name of the intent
     final String resolvedType; // as per original caller;
@@ -773,6 +775,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" processName="); pw.println(processName);
         pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
                 pw.print(" launchedFromPackage="); pw.print(launchedFromPackage);
+                pw.print(" launchedFromFeature="); pw.print(launchedFromFeatureId);
                 pw.print(" userId="); pw.println(mUserId);
         pw.print(prefix); pw.print("app="); pw.println(app);
         pw.print(prefix); pw.println(intent.toInsecureString());
@@ -1483,9 +1486,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
-            int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage, Intent _intent,
-            String _resolvedType, ActivityInfo aInfo, Configuration _configuration,
-            ActivityRecord _resultTo, String _resultWho, int _reqCode, boolean _componentSpecified,
+            int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage,
+            @Nullable String _launchedFromFeature, Intent _intent, String _resolvedType,
+            ActivityInfo aInfo, Configuration _configuration, ActivityRecord _resultTo,
+            String _resultWho, int _reqCode, boolean _componentSpecified,
             boolean _rootVoiceInteraction, ActivityStackSupervisor supervisor,
             ActivityOptions options, ActivityRecord sourceRecord) {
         super(_service.mWindowManager, new Token(_intent).asBinder(), TYPE_APPLICATION, true,
@@ -1564,6 +1568,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         launchedFromPid = _launchedFromPid;
         launchedFromUid = _launchedFromUid;
         launchedFromPackage = _launchedFromPackage;
+        launchedFromFeatureId = _launchedFromFeature;
         shortComponentName = _intent.getComponent().flattenToShortString();
         resolvedType = _resolvedType;
         componentSpecified = _componentSpecified;
@@ -2284,7 +2289,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @return Whether AppOps allows this package to enter picture-in-picture.
      */
     private boolean checkEnterPictureInPictureAppOpsState() {
-        return mAtmService.getAppOpsService().checkOperation(
+        return mAtmService.getAppOpsManager().checkOpNoThrow(
                 OP_PICTURE_IN_PICTURE, info.applicationInfo.uid, packageName) == MODE_ALLOWED;
     }
 
@@ -7282,6 +7287,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (launchedFromPackage != null) {
             out.attribute(null, ATTR_LAUNCHEDFROMPACKAGE, launchedFromPackage);
         }
+        if (launchedFromFeatureId != null) {
+            out.attribute(null, ATTR_LAUNCHEDFROMFEATURE, launchedFromFeatureId);
+        }
         if (resolvedType != null) {
             out.attribute(null, ATTR_RESOLVEDTYPE, resolvedType);
         }
@@ -7309,6 +7317,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         PersistableBundle persistentState = null;
         int launchedFromUid = 0;
         String launchedFromPackage = null;
+        String launchedFromFeature = null;
         String resolvedType = null;
         boolean componentSpecified = false;
         int userId = 0;
@@ -7327,6 +7336,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 launchedFromUid = Integer.parseInt(attrValue);
             } else if (ATTR_LAUNCHEDFROMPACKAGE.equals(attrName)) {
                 launchedFromPackage = attrValue;
+            } else if (ATTR_LAUNCHEDFROMFEATURE.equals(attrName)) {
+                launchedFromFeature = attrValue;
             } else if (ATTR_RESOLVEDTYPE.equals(attrName)) {
                 resolvedType = attrValue;
             } else if (ATTR_COMPONENTSPECIFIED.equals(attrName)) {
@@ -7374,10 +7385,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     " resolvedType=" + resolvedType);
         }
         final ActivityRecord r = new ActivityRecord(service, null /* caller */,
-                0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, intent, resolvedType,
-                aInfo, service.getConfiguration(), null /* resultTo */, null /* resultWho */,
-                0 /* reqCode */, componentSpecified, false /* rootVoiceInteraction */,
-                stackSupervisor, null /* options */, null /* sourceRecord */);
+                0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, launchedFromFeature,
+                intent, resolvedType, aInfo, service.getConfiguration(), null /* resultTo */,
+                null /* resultWho */, 0 /* reqCode */, componentSpecified,
+                false /* rootVoiceInteraction */, stackSupervisor, null /* options */,
+                null /* sourceRecord */);
 
         r.mPersistentState = persistentState;
         r.taskDescription = taskDescription;

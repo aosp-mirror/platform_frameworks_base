@@ -5481,7 +5481,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void manageNotifications(View v) {
-        Intent intent = new Intent(Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS);
+        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_HISTORY);
         mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
     }
 

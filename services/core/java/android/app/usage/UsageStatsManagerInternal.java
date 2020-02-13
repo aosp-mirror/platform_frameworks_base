@@ -220,9 +220,13 @@ public abstract class UsageStatsManagerInternal {
      *     result.
      * @param hideShortcutInvocationEvents whether the {@link UsageEvents.Event#SHORTCUT_INVOCATION}
      *     events need to be excluded from the result.
+     * @param hideLocusIdEvents whether the {@link UsageEvents.Event#LOCUS_ID_SET}
+     *     events need to be excluded from the result.
+     *
      */
     public abstract UsageEvents queryEventsForUser(@UserIdInt int userId, long beginTime,
-            long endTime, boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents);
+            long endTime, boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents,
+            boolean hideLocusIdEvents);
 
     /**
      * Used to persist the last time a job was run for this app, in order to make decisions later

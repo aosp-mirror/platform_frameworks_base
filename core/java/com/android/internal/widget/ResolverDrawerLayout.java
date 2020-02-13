@@ -66,6 +66,12 @@ public class ResolverDrawerLayout extends ViewGroup {
      */
     private int mMaxCollapsedHeightSmall;
 
+    /**
+     * Whether {@code mMaxCollapsedHeightSmall} was set explicitly as a layout attribute or
+     * inferred by {@code mMaxCollapsedHeight}.
+     */
+    private final boolean mIsMaxCollapsedHeightSmallExplicit;
+
     private boolean mSmallCollapsed;
 
     /**
@@ -146,6 +152,8 @@ public class ResolverDrawerLayout extends ViewGroup {
         mMaxCollapsedHeightSmall = a.getDimensionPixelSize(
                 R.styleable.ResolverDrawerLayout_maxCollapsedHeightSmall,
                 mMaxCollapsedHeight);
+        mIsMaxCollapsedHeightSmallExplicit =
+                a.hasValue(R.styleable.ResolverDrawerLayout_maxCollapsedHeightSmall);
         mShowAtTop = a.getBoolean(R.styleable.ResolverDrawerLayout_showAtTop, false);
         a.recycle();
 
@@ -160,6 +168,21 @@ public class ResolverDrawerLayout extends ViewGroup {
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
 
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    }
+
+    /**
+     * Dynamically set the max collapsed height. Note this also updates the small collapsed
+     * height if it wasn't specified explicitly.
+     */
+    public void setMaxCollapsedHeight(int heightInPixels) {
+        if (heightInPixels == mMaxCollapsedHeight) {
+            return;
+        }
+        mMaxCollapsedHeight = heightInPixels;
+        if (!mIsMaxCollapsedHeightSmallExplicit) {
+            mMaxCollapsedHeightSmall = mMaxCollapsedHeight;
+        }
+        requestLayout();
     }
 
     public void setSmallCollapsed(boolean smallCollapsed) {

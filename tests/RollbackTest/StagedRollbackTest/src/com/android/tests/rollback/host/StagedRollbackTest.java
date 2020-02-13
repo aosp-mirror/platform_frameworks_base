@@ -228,39 +228,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     }
 
     /**
-     * Tests passed network health check does not trigger watchdog staged rollbacks.
-     */
-    @Test
-    public void testNetworkPassedDoesNotRollback() throws Exception {
-        runPhase("testNetworkPassedDoesNotRollback_Phase1");
-        // Reboot device to activate staged package
-        getDevice().reboot();
-
-        // Verify rollback was enabled
-        runPhase("testNetworkPassedDoesNotRollback_Phase2");
-
-        // Connect to internet so network health check passes
-        getDevice().executeShellCommand("svc wifi enable");
-        getDevice().executeShellCommand("svc data enable");
-
-        // Wait for device available because emulator device may restart after turning
-        // on mobile data
-        getDevice().waitForDeviceAvailable();
-
-        // Verify rollback was not executed after health check deadline
-        runPhase("testNetworkPassedDoesNotRollback_Phase3");
-        InputStreamSource logcatStream = mReceiver.getLogcatData();
-        try {
-            List<String> watchdogEvents = getWatchdogLoggingEvents(logcatStream);
-            assertEquals(watchdogEventOccurred(watchdogEvents, null, null,
-                    REASON_EXPLICIT_HEALTH_CHECK, null), false);
-        } finally {
-            logcatStream.close();
-        }
-
-    }
-
-    /**
      * Tests rolling back user data where there are multiple rollbacks for that package.
      */
     @Test
@@ -487,11 +454,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
             getDevice().executeShellCommand("kill " + pid);
             lastPid = pid;
         }
-    }
-
-    private String getNetworkStackPath() throws Exception {
-        // Find the NetworkStack path (can be NetworkStack.apk or NetworkStackNext.apk)
-        return getDevice().executeShellCommand("ls /system/priv-app/NetworkStack*/*.apk");
     }
 
     private boolean isCheckpointSupported() throws Exception {

@@ -94,6 +94,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.util.FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING;
 import static com.android.internal.util.FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
@@ -129,6 +132,7 @@ import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.app.StatsManager;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DeviceAdminInfo;
@@ -221,6 +225,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.accessibility.AccessibilityEvent;
@@ -474,6 +479,8 @@ public class NotificationManagerService extends SystemService {
     private AppOpsManager mAppOps;
     private UsageStatsManagerInternal mAppUsageStats;
     private DevicePolicyManagerInternal mDpm;
+    private StatsManager mStatsManager;
+    private StatsPullAtomCallbackImpl mPullAtomCallback;
 
     private Archive mArchive;
 
@@ -1894,7 +1901,8 @@ public class NotificationManagerService extends SystemService {
             ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
             UsageStatsManagerInternal appUsageStats, DevicePolicyManagerInternal dpm,
             IUriGrantsManager ugm, UriGrantsManagerInternal ugmInternal, AppOpsManager appOps,
-            UserManager userManager, NotificationHistoryManager historyManager) {
+            UserManager userManager, NotificationHistoryManager historyManager,
+            StatsManager statsManager) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2054,6 +2062,7 @@ public class NotificationManagerService extends SystemService {
         mStripRemoteViewsSizeBytes = getContext().getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
 
+        mStatsManager = statsManager;
     }
 
     @Override
@@ -2097,7 +2106,9 @@ public class NotificationManagerService extends SystemService {
                 LocalServices.getService(UriGrantsManagerInternal.class),
                 (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE),
                 getContext().getSystemService(UserManager.class),
-                new NotificationHistoryManager(getContext(), handler));
+                new NotificationHistoryManager(getContext(), handler),
+                mStatsManager = (StatsManager) getContext().getSystemService(
+                        Context.STATS_MANAGER));
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -2170,6 +2181,57 @@ public class NotificationManagerService extends SystemService {
         if (mDeviceConfigChangedListener != null) {
             DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
         }
+    }
+
+    private void registerNotificationPreferencesPullers() {
+        mPullAtomCallback = new StatsPullAtomCallbackImpl();
+        mStatsManager.registerPullAtomCallback(
+                PACKAGE_NOTIFICATION_PREFERENCES,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mPullAtomCallback
+        );
+        mStatsManager.registerPullAtomCallback(
+                PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mPullAtomCallback
+        );
+        mStatsManager.registerPullAtomCallback(
+                PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mPullAtomCallback
+        );
+    }
+
+    private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+        @Override
+        public int onPullAtom(int atomTag, List<StatsEvent> data) {
+            switch (atomTag) {
+                case PACKAGE_NOTIFICATION_PREFERENCES:
+                case PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES:
+                case PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES:
+                    return pullNotificationStates(atomTag, data);
+                default:
+                    throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
+            }
+        }
+    }
+
+    private int pullNotificationStates(int atomTag, List<StatsEvent> data) {
+        switch(atomTag) {
+            case PACKAGE_NOTIFICATION_PREFERENCES:
+                mPreferencesHelper.pullPackagePreferencesStats(data);
+                break;
+            case PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES:
+                mPreferencesHelper.pullPackageChannelPreferencesStats(data);
+                break;
+            case PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES:
+                mPreferencesHelper.pullPackageChannelGroupPreferencesStats(data);
+                break;
+        }
+        return StatsManager.PULL_SUCCESS;
     }
 
     private GroupHelper getGroupHelper() {
@@ -2250,6 +2312,7 @@ public class NotificationManagerService extends SystemService {
             mRoleObserver.init();
             mLauncherAppsService =
                     (LauncherApps) getContext().getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            registerNotificationPreferencesPullers();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.

@@ -146,7 +146,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     private void updateInteractionType(@Classifier.InteractionType int type) {
         logDebug("InteractionType: " + type);
-        mClassifiers.forEach((classifier) -> classifier.setInteractionType(type));
+        mDataProvider.setInteractionType(type);
     }
 
     @Override
@@ -216,7 +216,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void onSucccessfulUnlock() {
+    public void onSuccessfulUnlock() {
         if (mIsFalseTouchCalls != 0) {
             mMetricsLogger.histogram(FALSING_SUCCESS, mIsFalseTouchCalls);
             mIsFalseTouchCalls = 0;
@@ -263,7 +263,12 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void setQsExpanded(boolean b) {
+    public void setQsExpanded(boolean expanded) {
+        if (expanded) {
+            unregisterSensors();
+        } else if (mSessionStarted) {
+            registerSensors();
+        }
     }
 
     @Override
@@ -366,10 +371,14 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public void onBouncerShown() {
+        unregisterSensors();
     }
 
     @Override
     public void onBouncerHidden() {
+        if (mSessionStarted) {
+            registerSensors();
+        }
     }
 
     @Override

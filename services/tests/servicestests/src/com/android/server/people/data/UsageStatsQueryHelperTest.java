@@ -189,7 +189,7 @@ public final class UsageStatsQueryHelperTest {
     private void addUsageEvents(UsageEvents.Event... events) {
         UsageEvents usageEvents = new UsageEvents(Arrays.asList(events), new String[]{});
         when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
-                anyBoolean(), anyBoolean())).thenReturn(usageEvents);
+                anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(usageEvents);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {

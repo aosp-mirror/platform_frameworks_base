@@ -36,5 +36,6 @@ oneway interface IMediaRoute2Provider {
     void transferToRoute(String sessionId, String routeId);
 
     void notifyControlRequestSent(String id, in Intent request);
-    void requestSetVolume(String id, int volume);
+    void setRouteVolume(String routeId, int volume);
+    void setSessionVolume(String sessionId, int volume);
 }

@@ -2436,65 +2436,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     forceRemoveSelfLocked(AutofillManager.STATE_UNKNOWN_COMPAT_MODE);
                     return;
                 }
-
                 if (!Objects.equals(value, viewState.getCurrentValue())) {
-                    if ((value == null || value.isEmpty())
-                            && viewState.getCurrentValue() != null
-                            && viewState.getCurrentValue().isText()
-                            && viewState.getCurrentValue().getTextValue() != null
-                            && getSaveInfoLocked() != null) {
-                        final int length = viewState.getCurrentValue().getTextValue().length();
-                        if (sDebug) {
-                            Slog.d(TAG, "updateLocked(" + id + "): resetting value that was "
-                                    + length + " chars long");
-                        }
-                        final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_VALUE_RESET)
-                                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_PREVIOUS_LENGTH, length);
-                        mMetricsLogger.write(log);
-                    }
-
-                    // Always update the internal state.
-                    viewState.setCurrentValue(value);
-
-                    // Must check if this update was caused by autofilling the view, in which
-                    // case we just update the value, but not the UI.
-                    final AutofillValue filledValue = viewState.getAutofilledValue();
-                    if (filledValue != null) {
-                        if (filledValue.equals(value)) {
-                            if (sVerbose) {
-                                Slog.v(TAG, "ignoring autofilled change on id " + id);
-                            }
-                            viewState.resetState(ViewState.STATE_CHANGED);
-                            return;
-                        }
-                        else {
-                            if ((viewState.id.equals(this.mCurrentViewId)) &&
-                                    (viewState.getState() & ViewState.STATE_AUTOFILLED) != 0) {
-                                // Remove autofilled state once field is changed after autofilling.
-                                if (sVerbose) {
-                                    Slog.v(TAG, "field changed after autofill on id " + id);
-                                }
-                                viewState.resetState(ViewState.STATE_AUTOFILLED);
-                                final ViewState currentView = mViewStates.get(mCurrentViewId);
-                                currentView.maybeCallOnFillReady(flags);
-                            }
-                        }
-                    }
-
-                    // Update the internal state...
-                    viewState.setState(ViewState.STATE_CHANGED);
-
-                    //..and the UI
-                    final String filterText;
-                    if (value == null || !value.isText()) {
-                        filterText = null;
-                    } else {
-                        final CharSequence text = value.getTextValue();
-                        // Text should never be null, but it doesn't hurt to check to avoid a
-                        // system crash...
-                        filterText = (text == null) ? null : text.toString();
-                    }
-                    getUiForShowing().filterFillUi(filterText, this);
+                    logIfViewClearedLocked(id, value, viewState);
+                    updateViewStateAndUiOnValueChangedLocked(id, value, viewState, flags);
                 }
                 break;
             case ACTION_VIEW_ENTERED:
@@ -2573,6 +2517,68 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return ArrayUtils.contains(response.getIgnoredIds(), id);
     }
 
+    @GuardedBy("mLock")
+    private void logIfViewClearedLocked(AutofillId id, AutofillValue value, ViewState viewState) {
+        if ((value == null || value.isEmpty())
+                && viewState.getCurrentValue() != null
+                && viewState.getCurrentValue().isText()
+                && viewState.getCurrentValue().getTextValue() != null
+                && getSaveInfoLocked() != null) {
+            final int length = viewState.getCurrentValue().getTextValue().length();
+            if (sDebug) {
+                Slog.d(TAG, "updateLocked(" + id + "): resetting value that was "
+                        + length + " chars long");
+            }
+            final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_VALUE_RESET)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_PREVIOUS_LENGTH, length);
+            mMetricsLogger.write(log);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void updateViewStateAndUiOnValueChangedLocked(AutofillId id, AutofillValue value,
+            ViewState viewState, int flags) {
+        viewState.setCurrentValue(value);
+
+        final String filterText;
+        if (value == null || !value.isText()) {
+            filterText = null;
+        } else {
+            final CharSequence text = value.getTextValue();
+            // Text should never be null, but it doesn't hurt to check to avoid a
+            // system crash...
+            filterText = (text == null) ? null : text.toString();
+        }
+
+        final AutofillValue filledValue = viewState.getAutofilledValue();
+        if (filledValue != null) {
+            if (filledValue.equals(value)) {
+                // When the update is caused by autofilling the view, just update the
+                // value, not the UI.
+                if (sVerbose) {
+                    Slog.v(TAG, "ignoring autofilled change on id " + id);
+                }
+                viewState.resetState(ViewState.STATE_CHANGED);
+                return;
+            } else if ((viewState.id.equals(this.mCurrentViewId))
+                    && (viewState.getState() & ViewState.STATE_AUTOFILLED) != 0) {
+                // Remove autofilled state once field is changed after autofilling.
+                if (sVerbose) {
+                    Slog.v(TAG, "field changed after autofill on id " + id);
+                }
+                viewState.resetState(ViewState.STATE_AUTOFILLED);
+                final ViewState currentView = mViewStates.get(mCurrentViewId);
+                currentView.maybeCallOnFillReady(flags);
+            }
+        } else if (viewState.id.equals(this.mCurrentViewId)
+                && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
+            requestShowInlineSuggestionsLocked(viewState.getResponse(), filterText);
+        }
+
+        viewState.setState(ViewState.STATE_CHANGED);
+        getUiForShowing().filterFillUi(filterText, this);
+    }
+
     @Override
     public void onFillReady(@NonNull FillResponse response, @NonNull AutofillId filledId,
             @Nullable AutofillValue value) {
@@ -2602,7 +2608,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         if (response.supportsInlineSuggestions()) {
             synchronized (mLock) {
-                if (requestShowInlineSuggestionsLocked(response)) {
+                if (requestShowInlineSuggestionsLocked(response, filterText)) {
+                    final ViewState currentView = mViewStates.get(mCurrentViewId);
+                    currentView.setState(ViewState.STATE_INLINE_SHOWN);
                     //TODO(b/137800469): Fix it to log showed only when IME asks for inflation,
                     // rather than here where framework sends back the response.
                     mService.logDatasetShown(id, mClientState);
@@ -2645,7 +2653,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Returns whether we made a request to show inline suggestions.
      */
-    private boolean requestShowInlineSuggestionsLocked(@NonNull FillResponse response) {
+    private boolean requestShowInlineSuggestionsLocked(@NonNull FillResponse response,
+            @Nullable String filterText) {
         final List<Dataset> datasets = response.getDatasets();
         if (datasets == null) {
             Log.w(TAG, "response returned null datasets");
@@ -2663,7 +2672,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(request,
                         response.getRequestId(),
-                        datasets.toArray(new Dataset[]{}), response.getInlineActions(),
+                        datasets.toArray(new Dataset[]{}), filterText, response.getInlineActions(),
                         mCurrentViewId, mContext, this, () -> {
                             synchronized (mLock) {
                                 requestHideFillUi(mCurrentViewId);

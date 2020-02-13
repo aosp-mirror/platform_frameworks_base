@@ -56,6 +56,11 @@ public final class RoutingSessionInfo implements Parcelable {
     final List<String> mSelectableRoutes;
     final List<String> mDeselectableRoutes;
     final List<String> mTransferrableRoutes;
+
+    final int mVolumeHandling;
+    final int mVolumeMax;
+    final int mVolume;
+
     @Nullable
     final Bundle mControlHints;
     final boolean mIsSystemSession;
@@ -77,6 +82,10 @@ public final class RoutingSessionInfo implements Parcelable {
         mTransferrableRoutes = Collections.unmodifiableList(
                 convertToUniqueRouteIds(builder.mTransferrableRoutes));
 
+        mVolumeHandling = builder.mVolumeHandling;
+        mVolumeMax = builder.mVolumeMax;
+        mVolume = builder.mVolume;
+
         mControlHints = builder.mControlHints;
         mIsSystemSession = builder.mIsSystemSession;
     }
@@ -92,6 +101,10 @@ public final class RoutingSessionInfo implements Parcelable {
         mSelectableRoutes = ensureList(src.createStringArrayList());
         mDeselectableRoutes = ensureList(src.createStringArrayList());
         mTransferrableRoutes = ensureList(src.createStringArrayList());
+
+        mVolumeHandling = src.readInt();
+        mVolumeMax = src.readInt();
+        mVolume = src.readInt();
 
         mControlHints = src.readBundle();
         mIsSystemSession = src.readBoolean();
@@ -188,6 +201,36 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
+     * Gets information about how volume is handled on the session.
+     *
+     * @return {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
+     * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}.
+     */
+    @MediaRoute2Info.PlaybackVolume
+    public int getVolumeHandling() {
+        return mVolumeHandling;
+    }
+
+    /**
+     * Gets the maximum volume of the session.
+     */
+    public int getVolumeMax() {
+        return mVolumeMax;
+    }
+
+    /**
+     * Gets the current volume of the session.
+     * <p>
+     * When it's available, it represents the volume of routing session, which is a group
+     * of selected routes. To get the volume of each route, use {@link MediaRoute2Info#getVolume()}.
+     * </p>
+     * @see MediaRoute2Info#getVolume()
+     */
+    public int getVolume() {
+        return mVolume;
+    }
+
+    /**
      * Gets the control hints
      */
     @Nullable
@@ -218,6 +261,9 @@ public final class RoutingSessionInfo implements Parcelable {
         dest.writeStringList(mSelectableRoutes);
         dest.writeStringList(mDeselectableRoutes);
         dest.writeStringList(mTransferrableRoutes);
+        dest.writeInt(mVolumeHandling);
+        dest.writeInt(mVolumeMax);
+        dest.writeInt(mVolume);
         dest.writeBundle(mControlHints);
         dest.writeBoolean(mIsSystemSession);
     }
@@ -238,13 +284,17 @@ public final class RoutingSessionInfo implements Parcelable {
                 && Objects.equals(mSelectedRoutes, other.mSelectedRoutes)
                 && Objects.equals(mSelectableRoutes, other.mSelectableRoutes)
                 && Objects.equals(mDeselectableRoutes, other.mDeselectableRoutes)
-                && Objects.equals(mTransferrableRoutes, other.mTransferrableRoutes);
+                && Objects.equals(mTransferrableRoutes, other.mTransferrableRoutes)
+                && (mVolumeHandling == other.mVolumeHandling)
+                && (mVolumeMax == other.mVolumeMax)
+                && (mVolume == other.mVolume);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mClientPackageName, mProviderId,
-                mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferrableRoutes);
+                mSelectedRoutes, mSelectableRoutes, mDeselectableRoutes, mTransferrableRoutes,
+                mVolumeMax, mVolumeHandling, mVolume);
     }
 
     @Override
@@ -264,6 +314,9 @@ public final class RoutingSessionInfo implements Parcelable {
                 .append(", transferrableRoutes={")
                 .append(String.join(",", mTransferrableRoutes))
                 .append("}")
+                .append(", volumeHandling=").append(getVolumeHandling())
+                .append(", volumeMax=").append(getVolumeMax())
+                .append(", volume=").append(getVolume())
                 .append(" }");
         return result.toString();
     }
@@ -298,6 +351,9 @@ public final class RoutingSessionInfo implements Parcelable {
         final List<String> mSelectableRoutes;
         final List<String> mDeselectableRoutes;
         final List<String> mTransferrableRoutes;
+        int mVolumeHandling = MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+        int mVolumeMax;
+        int mVolume;
         Bundle mControlHints;
         boolean mIsSystemSession;
 
@@ -345,6 +401,10 @@ public final class RoutingSessionInfo implements Parcelable {
             mSelectableRoutes = new ArrayList<>(sessionInfo.mSelectableRoutes);
             mDeselectableRoutes = new ArrayList<>(sessionInfo.mDeselectableRoutes);
             mTransferrableRoutes = new ArrayList<>(sessionInfo.mTransferrableRoutes);
+
+            mVolumeHandling = sessionInfo.mVolumeHandling;
+            mVolumeMax = sessionInfo.mVolumeMax;
+            mVolume = sessionInfo.mVolume;
 
             mControlHints = sessionInfo.mControlHints;
             mIsSystemSession = sessionInfo.mIsSystemSession;
@@ -493,6 +553,36 @@ public final class RoutingSessionInfo implements Parcelable {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
             mTransferrableRoutes.remove(routeId);
+            return this;
+        }
+
+        /**
+         * Sets the session's volume handling.
+         * {@link MediaRoute2Info#PLAYBACK_VOLUME_FIXED} or
+         * {@link MediaRoute2Info#PLAYBACK_VOLUME_VARIABLE}.
+         */
+        @NonNull
+        public RoutingSessionInfo.Builder setVolumeHandling(
+                @MediaRoute2Info.PlaybackVolume int volumeHandling) {
+            mVolumeHandling = volumeHandling;
+            return this;
+        }
+
+        /**
+         * Sets the session's maximum volume, or 0 if unknown.
+         */
+        @NonNull
+        public RoutingSessionInfo.Builder setVolumeMax(int volumeMax) {
+            mVolumeMax = volumeMax;
+            return this;
+        }
+
+        /**
+         * Sets the session's current volume, or 0 if unknown.
+         */
+        @NonNull
+        public RoutingSessionInfo.Builder setVolume(int volume) {
+            mVolume = volume;
             return this;
         }
 

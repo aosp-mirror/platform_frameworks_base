@@ -88,6 +88,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -260,7 +261,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     /** Short cut */
     private WindowManagerService mWindowManager;
 
-     /** Common synchronization logic used to save things to disks. */
+    private AppOpsManager mAppOpsManager;
+
+    /** Common synchronization logic used to save things to disks. */
     PersisterQueue mPersisterQueue;
     LaunchParamsPersister mLaunchParamsPersister;
     private LaunchParamsController mLaunchParamsController;
@@ -1047,8 +1050,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo, String resultWho,
             int requestCode, int callingPid, int callingUid, String callingPackage,
-            boolean ignoreTargetSecurity, boolean launchingInTask,
-            WindowProcessController callerApp, ActivityRecord resultRecord,
+            @Nullable String callingFeatureId, boolean ignoreTargetSecurity,
+            boolean launchingInTask, WindowProcessController callerApp, ActivityRecord resultRecord,
             ActivityStack resultStack) {
         final boolean isCallerRecents = mService.getRecentTasks() != null
                 && mService.getRecentTasks().isCallerRecents(callingUid);
@@ -1060,10 +1063,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // existing task, then also allow the activity to be fully relaunched.
             return true;
         }
-        final int componentRestriction = getComponentRestrictionForCallingPackage(
-                aInfo, callingPackage, callingPid, callingUid, ignoreTargetSecurity);
+        final int componentRestriction = getComponentRestrictionForCallingPackage(aInfo,
+                callingPackage, callingFeatureId, callingPid, callingUid, ignoreTargetSecurity);
         final int actionRestriction = getActionRestrictionForCallingPackage(
-                intent.getAction(), callingPackage, callingPid, callingUid);
+                intent.getAction(), callingPackage, callingFeatureId, callingPid, callingUid);
         if (componentRestriction == ACTIVITY_RESTRICTION_PERMISSION
                 || actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
             if (resultRecord != null) {
@@ -1194,8 +1197,16 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
+    private AppOpsManager getAppOpsManager() {
+        if (mAppOpsManager == null) {
+            mAppOpsManager = mService.mContext.getSystemService(AppOpsManager.class);
+        }
+        return mAppOpsManager;
+    }
+
     private int getComponentRestrictionForCallingPackage(ActivityInfo activityInfo,
-            String callingPackage, int callingPid, int callingUid, boolean ignoreTargetSecurity) {
+            String callingPackage, @Nullable String callingFeatureId, int callingPid,
+            int callingUid, boolean ignoreTargetSecurity) {
         if (!ignoreTargetSecurity && mService.checkComponentPermission(activityInfo.permission,
                 callingPid, callingUid, activityInfo.applicationInfo.uid, activityInfo.exported)
                 == PERMISSION_DENIED) {
@@ -1211,9 +1222,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        // TODO moltmann b/136595429: Set featureId from caller
-        if (mService.getAppOpsService().noteOperation(opCode, callingUid,
-                callingPackage, /* featureId */ null, false, "") != AppOpsManager.MODE_ALLOWED) {
+        if (getAppOpsManager().noteOpNoThrow(opCode, callingUid,
+                callingPackage, callingFeatureId, "") != AppOpsManager.MODE_ALLOWED) {
             if (!ignoreTargetSecurity) {
                 return ACTIVITY_RESTRICTION_APPOP;
             }
@@ -1222,8 +1232,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return ACTIVITY_RESTRICTION_NONE;
     }
 
-    private int getActionRestrictionForCallingPackage(String action,
-            String callingPackage, int callingPid, int callingUid) {
+    private int getActionRestrictionForCallingPackage(String action, String callingPackage,
+            @Nullable String callingFeatureId, int callingPid, int callingUid) {
         if (action == null) {
             return ACTIVITY_RESTRICTION_NONE;
         }
@@ -1256,9 +1266,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        // TODO moltmann b/136595429: Set featureId from caller
-        if (mService.getAppOpsService().noteOperation(opCode, callingUid,
-                callingPackage, /* featureId */ null, false, "") != AppOpsManager.MODE_ALLOWED) {
+        if (getAppOpsManager().noteOpNoThrow(opCode, callingUid,
+                callingPackage, callingFeatureId, "") != AppOpsManager.MODE_ALLOWED) {
             return ACTIVITY_RESTRICTION_APPOP;
         }
 
@@ -2701,6 +2710,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             SafeActivityOptions options) {
         Task task = null;
         final String callingPackage;
+        final String callingFeatureId;
         final Intent intent;
         final int userId;
         int activityType = ACTIVITY_TYPE_UNDEFINED;
@@ -2780,11 +2790,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingPackage = task.mCallingPackage;
+            callingFeatureId = task.mCallingFeatureId;
             intent = task.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.mUserId;
-            return mService.getActivityStartController().startActivityInPackage(
-                    task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
+            return mService.getActivityStartController().startActivityInPackage(task.mCallingUid,
+                    callingPid, callingUid, callingPackage, callingFeatureId, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
                     false /* allowBackgroundActivityStart */);

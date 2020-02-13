@@ -18,9 +18,7 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import android.os.RemoteException;
 import android.service.notification.NotificationStats;
-import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -29,6 +27,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.NotifInf
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 
 import javax.inject.Inject;
@@ -44,6 +43,7 @@ public class NotifInflaterImpl implements NotifInflater {
 
     private final IStatusBarService mStatusBarService;
     private final NotifCollection mNotifCollection;
+    private final NotifInflationErrorManager mNotifErrorManager;
 
     private NotificationRowBinderImpl mNotificationRowBinder;
     private InflationCallback mExternalInflationCallback;
@@ -51,9 +51,11 @@ public class NotifInflaterImpl implements NotifInflater {
     @Inject
     public NotifInflaterImpl(
             IStatusBarService statusBarService,
-            NotifCollection notifCollection) {
+            NotifCollection notifCollection,
+            NotifInflationErrorManager errorManager) {
         mStatusBarService = statusBarService;
         mNotifCollection = notifCollection;
+        mNotifErrorManager = errorManager;
     }
 
     /**
@@ -81,7 +83,6 @@ public class NotifInflaterImpl implements NotifInflater {
     @Override
     public void inflateViews(NotificationEntry entry) {
         try {
-            entry.setHasInflationError(false);
             requireBinder().inflateViews(entry, getDismissCallback(entry));
         } catch (InflationException e) {
             // logged in mInflationCallback.handleInflationException
@@ -131,25 +132,12 @@ public class NotifInflaterImpl implements NotifInflater {
                 public void handleInflationException(
                         NotificationEntry entry,
                         Exception e) {
-                    entry.setHasInflationError(true);
-                    try {
-                        final StatusBarNotification sbn = entry.getSbn();
-                        // report notification inflation errors back up
-                        // to notification delegates
-                        mStatusBarService.onNotificationError(
-                                sbn.getPackageName(),
-                                sbn.getTag(),
-                                sbn.getId(),
-                                sbn.getUid(),
-                                sbn.getInitialPid(),
-                                e.getMessage(),
-                                sbn.getUserId());
-                    } catch (RemoteException ex) {
-                    }
+                    mNotifErrorManager.setInflationError(entry, e);
                 }
 
                 @Override
                 public void onAsyncInflationFinished(NotificationEntry entry) {
+                    mNotifErrorManager.clearInflationError(entry);
                     if (mExternalInflationCallback != null) {
                         mExternalInflationCallback.onInflationFinished(entry);
                     }

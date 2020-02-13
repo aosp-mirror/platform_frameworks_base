@@ -86,7 +86,11 @@ class ControlsBindingControllerTest : SysuiTestCase() {
 
     @Test
     fun testBindAndLoad() {
-        val callback: (List<Control>) -> Unit = {}
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
         controller.bindAndLoad(TEST_COMPONENT_NAME_1, callback)
 
         assertEquals(1, providers.size)

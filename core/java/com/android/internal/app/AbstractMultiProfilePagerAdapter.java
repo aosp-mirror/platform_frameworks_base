@@ -15,15 +15,25 @@
  */
 package com.android.internal.app;
 
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.app.AppGlobals;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
@@ -213,26 +223,115 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     abstract @Nullable ViewGroup getInactiveAdapterView();
 
-    boolean rebuildActiveTab(boolean post) {
-        return rebuildTab(getActiveListAdapter(), post);
+    /**
+     * Rebuilds the tab that is currently visible to the user.
+     * <p>Returns {@code true} if rebuild has completed.
+     */
+    boolean rebuildActiveTab(boolean doPostProcessing) {
+        return rebuildTab(getActiveListAdapter(), doPostProcessing);
     }
 
-    boolean rebuildInactiveTab(boolean post) {
+    /**
+     * Rebuilds the tab that is not currently visible to the user, if such one exists.
+     * <p>Returns {@code true} if rebuild has completed.
+     */
+    boolean rebuildInactiveTab(boolean doPostProcessing) {
         if (getItemCount() == 1) {
             return false;
         }
-        return rebuildTab(getInactiveListAdapter(), post);
+        return rebuildTab(getInactiveListAdapter(), doPostProcessing);
+    }
+
+    private int userHandleToPageIndex(UserHandle userHandle) {
+        if (userHandle == getPersonalListAdapter().mResolverListController.getUserHandle()) {
+            return PROFILE_PERSONAL;
+        } else {
+            return PROFILE_WORK;
+        }
     }
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
         UserHandle listUserHandle = activeListAdapter.getUserHandle();
-        if (UserHandle.myUserId() != listUserHandle.getIdentifier() &&
-                !hasAppsInOtherProfile(activeListAdapter)) {
-            // TODO(arangelov): Show empty state UX here
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (listUserHandle == mWorkProfileUserHandle
+                && userManager.isQuietModeEnabled(mWorkProfileUserHandle)) {
+            showEmptyState(activeListAdapter,
+                    R.drawable.ic_work_apps_off,
+                    R.string.resolver_turn_on_work_apps,
+                    R.string.resolver_turn_on_work_apps_explanation,
+                    (View.OnClickListener) v ->
+                            userManager.requestQuietModeEnabled(false, mWorkProfileUserHandle));
             return false;
-        } else {
-            return activeListAdapter.rebuildList(doPostProcessing);
         }
+        if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
+            if (!hasCrossProfileIntents(activeListAdapter.getIntents(),
+                    UserHandle.myUserId(), listUserHandle.getIdentifier())) {
+                if (listUserHandle == mPersonalProfileUserHandle) {
+                    showEmptyState(activeListAdapter,
+                            R.drawable.ic_sharing_disabled,
+                            R.string.resolver_cant_share_with_personal_apps,
+                            R.string.resolver_cant_share_cross_profile_explanation);
+                } else {
+                    showEmptyState(activeListAdapter,
+                            R.drawable.ic_sharing_disabled,
+                            R.string.resolver_cant_share_with_work_apps,
+                            R.string.resolver_cant_share_cross_profile_explanation);
+                }
+                return false;
+            }
+        }
+        return activeListAdapter.rebuildList(doPostProcessing);
+    }
+
+    void showEmptyState(ResolverListAdapter listAdapter) {
+        UserHandle listUserHandle = listAdapter.getUserHandle();
+        if (UserHandle.myUserId() == listUserHandle.getIdentifier()
+                || !hasAppsInOtherProfile(listAdapter)) {
+            showEmptyState(listAdapter,
+                    R.drawable.ic_no_apps,
+                    R.string.resolver_no_apps_available,
+                    R.string.resolver_no_apps_available_explanation);
+        }
+    }
+
+    private void showEmptyState(ResolverListAdapter activeListAdapter,
+            @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes) {
+        showEmptyState(activeListAdapter, iconRes, titleRes, subtitleRes, /* buttonOnClick */ null);
+    }
+
+    private void showEmptyState(ResolverListAdapter activeListAdapter,
+            @DrawableRes int iconRes, @StringRes int titleRes, @StringRes int subtitleRes,
+            View.OnClickListener buttonOnClick) {
+        ProfileDescriptor descriptor = getItem(
+                userHandleToPageIndex(activeListAdapter.getUserHandle()));
+        descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
+        View emptyStateView = descriptor.rootView.findViewById(R.id.resolver_empty_state);
+        emptyStateView.setVisibility(View.VISIBLE);
+
+        ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
+        icon.setImageResource(iconRes);
+
+        TextView title = emptyStateView.findViewById(R.id.resolver_empty_state_title);
+        title.setText(titleRes);
+
+        TextView subtitle = emptyStateView.findViewById(R.id.resolver_empty_state_subtitle);
+        subtitle.setText(subtitleRes);
+
+        Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
+        button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
+        button.setOnClickListener(buttonOnClick);
+    }
+
+    private boolean hasCrossProfileIntents(List<Intent> intents, int source, int target) {
+        IPackageManager packageManager = AppGlobals.getPackageManager();
+        ContentResolver contentResolver = mContext.getContentResolver();
+        for (Intent intent : intents) {
+            if (IntentForwarderActivity.canForward(intent, source, target, packageManager,
+                    contentResolver) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasAppsInOtherProfile(ResolverListAdapter adapter) {

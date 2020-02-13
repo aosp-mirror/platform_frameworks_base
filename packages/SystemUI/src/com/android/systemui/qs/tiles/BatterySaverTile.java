@@ -74,6 +74,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         mSetting.setListening(listening);
     }
 

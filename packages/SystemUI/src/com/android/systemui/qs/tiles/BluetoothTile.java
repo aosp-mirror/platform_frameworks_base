@@ -82,10 +82,6 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     protected void handleClick() {
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = mState.value;

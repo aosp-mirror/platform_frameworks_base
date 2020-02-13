@@ -481,8 +481,8 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime,
-                            boolean obfuscateInstantApps, boolean hideShortcutInvocationEvents) {
+    UsageEvents queryEvents(final long beginTime, final long endTime, boolean obfuscateInstantApps,
+            boolean hideShortcutInvocationEvents, boolean hideLocusIdEvents) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
@@ -502,6 +502,10 @@ class UserUsageStatsService {
                             Event event = stats.events.get(i);
                             if (hideShortcutInvocationEvents
                                     && event.mEventType == Event.SHORTCUT_INVOCATION) {
+                                continue;
+                            }
+                            if (hideLocusIdEvents
+                                    && event.mEventType == Event.LOCUS_ID_SET) {
                                 continue;
                             }
                             if (obfuscateInstantApps) {
