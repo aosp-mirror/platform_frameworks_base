@@ -50,6 +50,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.google.android.exoplayer2.video.ColorInfo;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -810,19 +811,17 @@ public final class MediaParser {
     // Private static methods.
 
     private static MediaFormat toMediaFormat(Format format) {
-
         MediaFormat result = new MediaFormat();
-        if (format.bitrate != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_BIT_RATE, format.bitrate);
-        }
-        if (format.channelCount != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_CHANNEL_COUNT, format.channelCount);
-        }
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_BIT_RATE, format.bitrate);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_CHANNEL_COUNT, format.channelCount);
 
-        if (format.colorInfo != null) {
-            result.setInteger(MediaFormat.KEY_COLOR_TRANSFER, format.colorInfo.colorTransfer);
-            result.setInteger(MediaFormat.KEY_COLOR_RANGE, format.colorInfo.colorRange);
-            result.setInteger(MediaFormat.KEY_COLOR_STANDARD, format.colorInfo.colorSpace);
+        ColorInfo colorInfo = format.colorInfo;
+        if (colorInfo != null) {
+            setOptionalMediaFormatInt(
+                    result, MediaFormat.KEY_COLOR_TRANSFER, colorInfo.colorTransfer);
+            setOptionalMediaFormatInt(result, MediaFormat.KEY_COLOR_RANGE, colorInfo.colorRange);
+            setOptionalMediaFormatInt(result, MediaFormat.KEY_COLOR_STANDARD, colorInfo.colorSpace);
+
             if (format.colorInfo.hdrStaticInfo != null) {
                 result.setByteBuffer(
                         MediaFormat.KEY_HDR_STATIC_INFO,
@@ -830,58 +829,35 @@ public final class MediaParser {
             }
         }
 
-        if (format.sampleMimeType != null) {
-            result.setString(MediaFormat.KEY_MIME, format.sampleMimeType);
-        }
-        if (format.codecs != null) {
-            result.setString(MediaFormat.KEY_CODECS_STRING, format.codecs);
-        }
+        setOptionalMediaFormatString(result, MediaFormat.KEY_MIME, format.sampleMimeType);
+        setOptionalMediaFormatString(result, MediaFormat.KEY_CODECS_STRING, format.codecs);
         if (format.frameRate != Format.NO_VALUE) {
             result.setFloat(MediaFormat.KEY_FRAME_RATE, format.frameRate);
         }
-        if (format.width != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_WIDTH, format.width);
-        }
-        if (format.height != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_HEIGHT, format.height);
-        }
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_WIDTH, format.width);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_HEIGHT, format.height);
+
         List<byte[]> initData = format.initializationData;
         if (initData != null) {
             for (int i = 0; i < initData.size(); i++) {
                 result.setByteBuffer("csd-" + i, ByteBuffer.wrap(initData.get(i)));
             }
         }
-        if (format.language != null) {
-            result.setString(MediaFormat.KEY_LANGUAGE, format.language);
-        }
-        if (format.maxInputSize != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
-        }
-        if (format.pcmEncoding != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
-        }
-        if (format.rotationDegrees != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_ROTATION, format.rotationDegrees);
-        }
-        if (format.sampleRate != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
-        }
+        setOptionalMediaFormatString(result, MediaFormat.KEY_LANGUAGE, format.language);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_MAX_INPUT_SIZE, format.maxInputSize);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_PCM_ENCODING, format.pcmEncoding);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_ROTATION, format.rotationDegrees);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_SAMPLE_RATE, format.sampleRate);
+
         int selectionFlags = format.selectionFlags;
-        if ((selectionFlags & C.SELECTION_FLAG_AUTOSELECT) != 0) {
-            result.setInteger(MediaFormat.KEY_IS_AUTOSELECT, 1);
-        }
-        if ((selectionFlags & C.SELECTION_FLAG_DEFAULT) != 0) {
-            result.setInteger(MediaFormat.KEY_IS_DEFAULT, 1);
-        }
-        if ((selectionFlags & C.SELECTION_FLAG_FORCED) != 0) {
-            result.setInteger(MediaFormat.KEY_IS_FORCED_SUBTITLE, 1);
-        }
-        if (format.encoderDelay != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_ENCODER_DELAY, format.encoderDelay);
-        }
-        if (format.encoderPadding != Format.NO_VALUE) {
-            result.setInteger(MediaFormat.KEY_ENCODER_PADDING, format.encoderPadding);
-        }
+        result.setInteger(
+                MediaFormat.KEY_IS_AUTOSELECT, selectionFlags & C.SELECTION_FLAG_AUTOSELECT);
+        result.setInteger(MediaFormat.KEY_IS_DEFAULT, selectionFlags & C.SELECTION_FLAG_DEFAULT);
+        result.setInteger(
+                MediaFormat.KEY_IS_FORCED_SUBTITLE, selectionFlags & C.SELECTION_FLAG_FORCED);
+
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_ENCODER_DELAY, format.encoderDelay);
+        setOptionalMediaFormatInt(result, MediaFormat.KEY_ENCODER_PADDING, format.encoderPadding);
         // TODO: Implement float to fraction conversion.
         // if (format.pixelWidthHeightRatio != Format.NO_VALUE) {
         //     result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_WIDTH, );
@@ -897,6 +873,19 @@ public final class MediaParser {
         //    format.stereoMode;
         //    format.subsampleOffsetUs;
         return result;
+    }
+
+    private static void setOptionalMediaFormatInt(MediaFormat mediaFormat, String key, int value) {
+        if (value != Format.NO_VALUE) {
+            mediaFormat.setInteger(key, value);
+        }
+    }
+
+    private static void setOptionalMediaFormatString(
+            MediaFormat mediaFormat, String key, @Nullable String value) {
+        if (value != null) {
+            mediaFormat.setString(key, value);
+        }
     }
 
     private static DrmInitData toFrameworkDrmInitData(
