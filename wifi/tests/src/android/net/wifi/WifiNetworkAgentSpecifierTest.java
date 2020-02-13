@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
+import android.net.NetworkRequest;
 import android.os.Parcel;
 import android.os.PatternMatcher;
 import android.util.Pair;
@@ -67,6 +68,16 @@ public class WifiNetworkAgentSpecifierTest {
                 WifiNetworkAgentSpecifier.CREATOR.createFromParcel(parcelR);
 
         assertEquals(specifier, parcelSpecifier);
+    }
+
+    /**
+     * Validate that the NetworkAgentSpecifier cannot be used in a {@link NetworkRequest} by apps.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkAgentSpecifierNotUsedInNetworkRequest() {
+        WifiNetworkAgentSpecifier specifier = createDefaultNetworkAgentSpecifier();
+
+        specifier.assertValidFromUid(TEST_UID);
     }
 
     /**

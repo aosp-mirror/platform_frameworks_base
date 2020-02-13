@@ -606,7 +606,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private Set<String> mWolSupportedInterfaces;
 
-    private final TelephonyManager mTelephonyManager;
+    private TelephonyManager mTelephonyManager;
     private final AppOpsManager mAppOpsManager;
 
     private final LocationPermissionChecker mLocationPermissionChecker;
@@ -1166,7 +1166,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             int transportType, NetworkRequest.Type type) {
         final NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
-        netCap.setRequestorUidAndPackageName(Process.myUid(), mContext.getPackageName());
         if (transportType > -1) {
             netCap.addTransportType(transportType);
         }
@@ -1697,12 +1696,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return newLp;
     }
 
-    private void restrictRequestUidsForCallerAndSetRequestorInfo(NetworkCapabilities nc,
-            int callerUid, String callerPackageName) {
+    private void restrictRequestUidsForCaller(NetworkCapabilities nc) {
         if (!checkSettingsPermission()) {
-            nc.setSingleUid(callerUid);
+            nc.setSingleUid(Binder.getCallingUid());
         }
-        nc.setRequestorUidAndPackageName(callerUid, callerPackageName);
         nc.setAdministratorUids(Collections.EMPTY_LIST);
 
         // Clear owner UID; this can never come from an app.
@@ -5307,7 +5304,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // This checks that the passed capabilities either do not request a
     // specific SSID/SignalStrength, or the calling app has permission to do so.
     private void ensureSufficientPermissionsForRequest(NetworkCapabilities nc,
-            int callerPid, int callerUid, String callerPackageName) {
+            int callerPid, int callerUid) {
         if (null != nc.getSSID() && !checkSettingsPermission(callerPid, callerUid)) {
             throw new SecurityException("Insufficient permissions to request a specific SSID");
         }
@@ -5317,7 +5314,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new SecurityException(
                     "Insufficient permissions to request a specific signal strength");
         }
-        mAppOpsManager.checkPackage(callerUid, callerPackageName);
     }
 
     private ArrayList<Integer> getSignalStrengthThresholds(NetworkAgentInfo nai) {
@@ -5364,6 +5360,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
         MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(ns);
+        ns.assertValidFromUid(Binder.getCallingUid());
     }
 
     private void ensureValid(NetworkCapabilities nc) {
@@ -5375,9 +5372,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
-            Messenger messenger, int timeoutMs, IBinder binder, int legacyType,
-            @NonNull String callingPackageName) {
-        final int callingUid = Binder.getCallingUid();
+            Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
         final NetworkRequest.Type type = (networkCapabilities == null)
                 ? NetworkRequest.Type.TRACK_DEFAULT
                 : NetworkRequest.Type.REQUEST;
@@ -5385,7 +5380,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the default network request. This allows callers to keep track of
         // the system default network.
         if (type == NetworkRequest.Type.TRACK_DEFAULT) {
-            networkCapabilities = createDefaultNetworkCapabilitiesForUid(callingUid);
+            networkCapabilities = createDefaultNetworkCapabilitiesForUid(Binder.getCallingUid());
             enforceAccessPermission();
         } else {
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
@@ -5397,14 +5392,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         ensureRequestableCapabilities(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
-                Binder.getCallingPid(), callingUid, callingPackageName);
+                Binder.getCallingPid(), Binder.getCallingUid());
         // Set the UID range for this request to the single UID of the requester, or to an empty
         // set of UIDs if the caller has the appropriate permission and UIDs have not been set.
         // This will overwrite any allowed UIDs in the requested capabilities. Though there
         // are no visible methods to set the UIDs, an app could use reflection to try and get
         // networks for other apps so it's essential that the UIDs are overwritten.
-        restrictRequestUidsForCallerAndSetRequestorInfo(networkCapabilities,
-                callingUid, callingPackageName);
+        restrictRequestUidsForCaller(networkCapabilities);
 
         if (timeoutMs < 0) {
             throw new IllegalArgumentException("Bad timeout specified");
@@ -5479,18 +5473,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public NetworkRequest pendingRequestForNetwork(NetworkCapabilities networkCapabilities,
-            PendingIntent operation, @NonNull String callingPackageName) {
+            PendingIntent operation) {
         checkNotNull(operation, "PendingIntent cannot be null.");
-        final int callingUid = Binder.getCallingUid();
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         enforceNetworkRequestPermissions(networkCapabilities);
         enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
-                Binder.getCallingPid(), callingUid, callingPackageName);
+                Binder.getCallingPid(), Binder.getCallingUid());
         ensureValidNetworkSpecifier(networkCapabilities);
-        restrictRequestUidsForCallerAndSetRequestorInfo(networkCapabilities,
-                callingUid, callingPackageName);
+        restrictRequestUidsForCaller(networkCapabilities);
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId(), NetworkRequest.Type.REQUEST);
@@ -5538,16 +5530,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public NetworkRequest listenForNetwork(NetworkCapabilities networkCapabilities,
-            Messenger messenger, IBinder binder, @NonNull String callingPackageName) {
-        final int callingUid = Binder.getCallingUid();
+            Messenger messenger, IBinder binder) {
         if (!hasWifiNetworkListenPermission(networkCapabilities)) {
             enforceAccessPermission();
         }
 
         NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
-                Binder.getCallingPid(), callingUid, callingPackageName);
-        restrictRequestUidsForCallerAndSetRequestorInfo(nc, callingUid, callingPackageName);
+                Binder.getCallingPid(), Binder.getCallingUid());
+        restrictRequestUidsForCaller(nc);
         // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
         // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
         // onLost and onAvailable callbacks when networks move in and out of the background.
@@ -5567,17 +5558,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void pendingListenForNetwork(NetworkCapabilities networkCapabilities,
-            PendingIntent operation, @NonNull String callingPackageName) {
+            PendingIntent operation) {
         checkNotNull(operation, "PendingIntent cannot be null.");
-        final int callingUid = Binder.getCallingUid();
         if (!hasWifiNetworkListenPermission(networkCapabilities)) {
             enforceAccessPermission();
         }
         ensureValid(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
-                Binder.getCallingPid(), callingUid, callingPackageName);
+                Binder.getCallingPid(), Binder.getCallingUid());
+
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
-        restrictRequestUidsForCallerAndSetRequestorInfo(nc, callingUid, callingPackageName);
+        restrictRequestUidsForCaller(nc);
 
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
@@ -7856,13 +7847,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new IllegalArgumentException("ConnectivityManager.TYPE_* are deprecated."
                     + " Please use NetworkCapabilities instead.");
         }
-        final int callingUid = Binder.getCallingUid();
-        mAppOpsManager.checkPackage(callingUid, callingPackageName);
+        mAppOpsManager.checkPackage(Binder.getCallingUid(), callingPackageName);
 
         // This NetworkCapabilities is only used for matching to Networks. Clear out its owner uid
         // and administrator uids to be safe.
         final NetworkCapabilities nc = new NetworkCapabilities(request.networkCapabilities);
-        restrictRequestUidsForCallerAndSetRequestorInfo(nc, callingUid, callingPackageName);
+        restrictRequestUidsForCaller(nc);
 
         final NetworkRequest requestWithId =
                 new NetworkRequest(

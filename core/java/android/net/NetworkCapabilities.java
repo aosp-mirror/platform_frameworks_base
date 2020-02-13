@@ -27,7 +27,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
@@ -64,16 +63,6 @@ public final class NetworkCapabilities implements Parcelable {
     // Set to true when private DNS is broken.
     private boolean mPrivateDnsBroken;
 
-    /**
-     * Uid of the app making the request.
-     */
-    private int mRequestorUid;
-
-    /**
-     * Package name of the app making the request.
-     */
-    private String mRequestorPackageName;
-
     public NetworkCapabilities() {
         clearAll();
         mNetworkCapabilities = DEFAULT_CAPABILITIES;
@@ -100,8 +89,6 @@ public final class NetworkCapabilities implements Parcelable {
         mOwnerUid = Process.INVALID_UID;
         mSSID = null;
         mPrivateDnsBroken = false;
-        mRequestorUid = Process.INVALID_UID;
-        mRequestorPackageName = null;
     }
 
     /**
@@ -122,8 +109,6 @@ public final class NetworkCapabilities implements Parcelable {
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
         mSSID = nc.mSSID;
         mPrivateDnsBroken = nc.mPrivateDnsBroken;
-        mRequestorUid = nc.mRequestorUid;
-        mRequestorPackageName = nc.mRequestorPackageName;
     }
 
     /**
@@ -825,7 +810,7 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
-     * UID of the app that owns this network, or Process#INVALID_UID if none/unknown.
+     * UID of the app that owns this network, or INVALID_UID if none/unknown.
      *
      * <p>This field keeps track of the UID of the app that created this network and is in charge of
      * its lifecycle. This could be the UID of apps such as the Wifi network suggestor, the running
@@ -836,9 +821,8 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Set the UID of the owner app.
      */
-    public @NonNull NetworkCapabilities setOwnerUid(final int uid) {
+    public void setOwnerUid(final int uid) {
         mOwnerUid = uid;
-        return this;
     }
 
     /**
@@ -881,11 +865,9 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     @SystemApi
-    public @NonNull NetworkCapabilities setAdministratorUids(
-            @NonNull final List<Integer> administratorUids) {
+    public void setAdministratorUids(@NonNull final List<Integer> administratorUids) {
         mAdministratorUids.clear();
         mAdministratorUids.addAll(administratorUids);
-        return this;
     }
 
     /**
@@ -1403,7 +1385,6 @@ public final class NetworkCapabilities implements Parcelable {
         combineSignalStrength(nc);
         combineUids(nc);
         combineSSIDs(nc);
-        combineRequestor(nc);
     }
 
     /**
@@ -1423,8 +1404,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && satisfiedBySpecifier(nc)
                 && (onlyImmutable || satisfiedBySignalStrength(nc))
                 && (onlyImmutable || satisfiedByUids(nc))
-                && (onlyImmutable || satisfiedBySSID(nc)))
-                && (onlyImmutable || satisfiedByRequestor(nc));
+                && (onlyImmutable || satisfiedBySSID(nc)));
     }
 
     /**
@@ -1508,7 +1488,7 @@ public final class NetworkCapabilities implements Parcelable {
     public boolean equals(@Nullable Object obj) {
         if (obj == null || (obj instanceof NetworkCapabilities == false)) return false;
         NetworkCapabilities that = (NetworkCapabilities) obj;
-        return equalsNetCapabilities(that)
+        return (equalsNetCapabilities(that)
                 && equalsTransportTypes(that)
                 && equalsLinkBandwidths(that)
                 && equalsSignalStrength(that)
@@ -1516,8 +1496,7 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsTransportInfo(that)
                 && equalsUids(that)
                 && equalsSSID(that)
-                && equalsPrivateDnsBroken(that)
-                && equalsRequestor(that);
+                && equalsPrivateDnsBroken(that));
     }
 
     @Override
@@ -1535,9 +1514,7 @@ public final class NetworkCapabilities implements Parcelable {
                 + Objects.hashCode(mUids) * 31
                 + Objects.hashCode(mSSID) * 37
                 + Objects.hashCode(mTransportInfo) * 41
-                + Objects.hashCode(mPrivateDnsBroken) * 43
-                + Objects.hashCode(mRequestorUid) * 47
-                + Objects.hashCode(mRequestorPackageName) * 53;
+                + Objects.hashCode(mPrivateDnsBroken) * 43;
     }
 
     @Override
@@ -1560,8 +1537,6 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeBoolean(mPrivateDnsBroken);
         dest.writeList(mAdministratorUids);
         dest.writeInt(mOwnerUid);
-        dest.writeInt(mRequestorUid);
-        dest.writeString(mRequestorPackageName);
     }
 
     public static final @android.annotation.NonNull Creator<NetworkCapabilities> CREATOR =
@@ -1584,8 +1559,6 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mPrivateDnsBroken = in.readBoolean();
                 netCap.setAdministratorUids(in.readArrayList(null));
                 netCap.mOwnerUid = in.readInt();
-                netCap.mRequestorUid = in.readInt();
-                netCap.mRequestorPackageName = in.readString();
                 return netCap;
             }
             @Override
@@ -1651,9 +1624,6 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" Private DNS is broken");
         }
 
-        sb.append(" RequestorUid: ").append(mRequestorUid);
-        sb.append(" RequestorPackageName: ").append(mRequestorPackageName);
-
         sb.append("]");
         return sb.toString();
     }
@@ -1662,7 +1632,6 @@ public final class NetworkCapabilities implements Parcelable {
     private interface NameOf {
         String nameOf(int value);
     }
-
     /**
      * @hide
      */
@@ -1829,121 +1798,5 @@ public final class NetworkCapabilities implements Parcelable {
 
     private boolean equalsPrivateDnsBroken(NetworkCapabilities nc) {
         return mPrivateDnsBroken == nc.mPrivateDnsBroken;
-    }
-
-    /**
-     * Set the uid of the app making the request.
-     *
-     * Note: This works only for {@link NetworkAgent} instances. Any capabilities passed in
-     * via the public {@link ConnectivityManager} API's will have this field overwritten.
-     *
-     * @param uid UID of the app.
-     * @hide
-     */
-    @SystemApi
-    public @NonNull NetworkCapabilities setRequestorUid(int uid) {
-        mRequestorUid = uid;
-        return this;
-    }
-
-    /**
-     * @return the uid of the app making the request.
-     *
-     * Note: This could return {@link Process#INVALID_UID} if the {@link NetworkRequest}
-     * object was not obtained from {@link ConnectivityManager}.
-     * @hide
-     */
-    public int getRequestorUid() {
-        return mRequestorUid;
-    }
-
-    /**
-     * Set the package name of the app making the request.
-     *
-     * Note: This works only for {@link NetworkAgent} instances. Any capabilities passed in
-     * via the public {@link ConnectivityManager} API's will have this field overwritten.
-     *
-     * @param packageName package name of the app.
-     * @hide
-     */
-    @SystemApi
-    public @NonNull NetworkCapabilities setRequestorPackageName(@NonNull String packageName) {
-        mRequestorPackageName = packageName;
-        return this;
-    }
-
-    /**
-     * @return the package name of the app making the request.
-     *
-     * Note: This could return {@code null} if the {@link NetworkRequest} object was not obtained
-     * from {@link ConnectivityManager}.
-     * @hide
-     */
-    @Nullable
-    public String getRequestorPackageName() {
-        return mRequestorPackageName;
-    }
-
-    /**
-     * Set the uid and package name of the app making the request.
-     *
-     * Note: This is intended to be only invoked from within connectivitiy service.
-     *
-     * @param uid UID of the app.
-     * @param packageName package name of the app.
-     * @hide
-     */
-    public @NonNull NetworkCapabilities setRequestorUidAndPackageName(
-            int uid, @NonNull String packageName) {
-        return setRequestorUid(uid).setRequestorPackageName(packageName);
-    }
-
-    /**
-     * Test whether the passed NetworkCapabilities satisfies the requestor restrictions of this
-     * capabilities.
-     *
-     * This method is called on the NetworkCapabilities embedded in a request with the
-     * capabilities of an available network. If the available network, sets a specific
-     * requestor (by uid and optionally package name), then this will only match a request from the
-     * same app. If either of the capabilities have an unset uid or package name, then it matches
-     * everything.
-     * <p>
-     * nc is assumed nonnull. Else, NPE.
-     */
-    private boolean satisfiedByRequestor(NetworkCapabilities nc) {
-        // No uid set, matches everything.
-        if (mRequestorUid == Process.INVALID_UID || nc.mRequestorUid == Process.INVALID_UID) {
-            return true;
-        }
-        // uids don't match.
-        if (mRequestorUid != nc.mRequestorUid) return false;
-        // No package names set, matches everything
-        if (null == nc.mRequestorPackageName || null == mRequestorPackageName) return true;
-        // check for package name match.
-        return TextUtils.equals(mRequestorPackageName, nc.mRequestorPackageName);
-    }
-
-    /**
-     * Combine requestor info of the capabilities.
-     * <p>
-     * This is only legal if either the requestor info of this object is reset, or both info are
-     * equal.
-     * nc is assumed nonnull.
-     */
-    private void combineRequestor(@NonNull NetworkCapabilities nc) {
-        if (mRequestorUid != Process.INVALID_UID && mRequestorUid != nc.mOwnerUid) {
-            throw new IllegalStateException("Can't combine two uids");
-        }
-        if (mRequestorPackageName != null
-                && !mRequestorPackageName.equals(nc.mRequestorPackageName)) {
-            throw new IllegalStateException("Can't combine two package names");
-        }
-        setRequestorUid(nc.mRequestorUid);
-        setRequestorPackageName(nc.mRequestorPackageName);
-    }
-
-    private boolean equalsRequestor(NetworkCapabilities nc) {
-        return mRequestorUid == nc.mRequestorUid
-                && TextUtils.equals(mRequestorPackageName, nc.mRequestorPackageName);
     }
 }
