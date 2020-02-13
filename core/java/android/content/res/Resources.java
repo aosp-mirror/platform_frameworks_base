@@ -62,6 +62,7 @@ import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
@@ -112,7 +113,7 @@ public class Resources {
     static final String TAG = "Resources";
 
     private static final Object sSync = new Object();
-    private final Object mLock = new Object();
+    private final Object mUpdateLock = new Object();
 
     // Used by BridgeResources in layoutlib
     @UnsupportedAppUsage
@@ -139,6 +140,7 @@ public class Resources {
     @UnsupportedAppUsage
     final ClassLoader mClassLoader;
 
+    @GuardedBy("mUpdateLock")
     private UpdateCallbacks mCallbacks = null;
 
     /**
@@ -2375,6 +2377,7 @@ public class Resources {
      *
      * <p>Loaders are listed in increasing precedence order. A loader will override the resources
      * and assets of loaders listed before itself.
+     * @hide
      */
     @NonNull
     public List<ResourcesLoader> getLoaders() {
@@ -2382,87 +2385,81 @@ public class Resources {
     }
 
     /**
-     * Appends a loader to the end of the loader list. If the loader is already present in the
-     * loader list, the list will not be modified.
-     *
-     * @param loader the loader to add
-     */
-    public void addLoader(@NonNull ResourcesLoader loader) {
-        synchronized (mLock) {
-            checkCallbacksRegistered();
-
-            final List<ResourcesLoader> loaders = new ArrayList<>(
-                    mResourcesImpl.getAssets().getLoaders());
-            if (loaders.contains(loader)) {
-                return;
-            }
-
-            loaders.add(loader);
-            mCallbacks.onLoadersChanged(this, loaders);
-            loader.registerOnProvidersChangedCallback(this, mCallbacks);
-        }
-    }
-
-    /**
-     * Removes a loader from the loaders. If the loader is not present in the loader list, the list
+     * Adds a loader to the list of loaders. If the loader is already present in the list, the list
      * will not be modified.
      *
-     * @param loader the loader to remove
+     * @param loaders the loaders to add
      */
-    public void removeLoader(@NonNull ResourcesLoader loader) {
-        synchronized (mLock) {
+    public void addLoaders(@NonNull ResourcesLoader... loaders) {
+        synchronized (mUpdateLock) {
             checkCallbacksRegistered();
+            final List<ResourcesLoader> newLoaders =
+                    new ArrayList<>(mResourcesImpl.getAssets().getLoaders());
+            final ArraySet<ResourcesLoader> loaderSet = new ArraySet<>(newLoaders);
 
-            final List<ResourcesLoader> loaders = new ArrayList<>(
-                    mResourcesImpl.getAssets().getLoaders());
-            if (!loaders.remove(loader)) {
+            for (int i = 0; i < loaders.length; i++) {
+                final ResourcesLoader loader = loaders[i];
+                if (!loaderSet.contains(loader)) {
+                    newLoaders.add(loader);
+                }
+            }
+
+            if (loaderSet.size() == newLoaders.size()) {
                 return;
             }
 
-            mCallbacks.onLoadersChanged(this, loaders);
-            loader.unregisterOnProvidersChangedCallback(this);
+            mCallbacks.onLoadersChanged(this, newLoaders);
+            for (int i = loaderSet.size(), n = newLoaders.size(); i < n; i++) {
+                newLoaders.get(i).registerOnProvidersChangedCallback(this, mCallbacks);
+            }
         }
     }
 
     /**
-     * Sets the list of loaders.
+     * Removes loaders from the list of loaders. If the loader is not present in the list, the list
+     * will not be modified.
      *
-     * @param loaders the new loaders
+     * @param loaders the loaders to remove
      */
-    public void setLoaders(@NonNull List<ResourcesLoader> loaders) {
-        synchronized (mLock) {
+    public void removeLoaders(@NonNull ResourcesLoader... loaders) {
+        synchronized (mUpdateLock) {
             checkCallbacksRegistered();
-
+            final ArraySet<ResourcesLoader> removedLoaders = new ArraySet<>(loaders);
+            final List<ResourcesLoader> newLoaders = new ArrayList<>();
             final List<ResourcesLoader> oldLoaders = mResourcesImpl.getAssets().getLoaders();
-            int index = 0;
-            boolean modified = loaders.size() != oldLoaders.size();
-            final ArraySet<ResourcesLoader> seenLoaders = new ArraySet<>();
-            for (final ResourcesLoader loader : loaders) {
-                if (!seenLoaders.add(loader)) {
-                    throw new IllegalArgumentException("Loader " + loader + " present twice");
-                }
 
-                if (!modified && oldLoaders.get(index++) != loader) {
-                    modified = true;
+            for (int i = 0, n = oldLoaders.size(); i < n; i++) {
+                final ResourcesLoader loader = oldLoaders.get(i);
+                if (!removedLoaders.contains(loader)) {
+                    newLoaders.add(loader);
                 }
             }
 
-            if (!modified) {
+            if (oldLoaders.size() == newLoaders.size()) {
                 return;
             }
 
-            mCallbacks.onLoadersChanged(this, loaders);
-            for (int i = 0, n = oldLoaders.size(); i < n; i++) {
-                oldLoaders.get(i).unregisterOnProvidersChangedCallback(this);
-            }
-            for (ResourcesLoader newLoader : loaders) {
-                newLoader.registerOnProvidersChangedCallback(this, mCallbacks);
+            mCallbacks.onLoadersChanged(this, newLoaders);
+            for (int i = 0; i < loaders.length; i++) {
+                loaders[i].unregisterOnProvidersChangedCallback(this);
             }
         }
     }
 
-    /** Removes all {@link ResourcesLoader ResourcesLoader(s)}. */
+    /**
+     * Removes all {@link ResourcesLoader ResourcesLoader(s)}.
+     * @hide
+     */
+    @VisibleForTesting
     public void clearLoaders() {
-        setLoaders(Collections.emptyList());
+        synchronized (mUpdateLock) {
+            checkCallbacksRegistered();
+            final List<ResourcesLoader> newLoaders = Collections.emptyList();
+            final List<ResourcesLoader> oldLoaders = mResourcesImpl.getAssets().getLoaders();
+            mCallbacks.onLoadersChanged(this, newLoaders);
+            for (ResourcesLoader loader : oldLoaders) {
+                loader.unregisterOnProvidersChangedCallback(this);
+            }
+        }
     }
 }
