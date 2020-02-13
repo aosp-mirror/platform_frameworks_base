@@ -8463,6 +8463,11 @@ public class DevicePolicyManager {
      * From {@link android.os.Build.VERSION_CODES#N} the profile or device owner can still use
      * {@link android.accounts.AccountManager} APIs to add or remove accounts when account
      * management for a specific type is disabled.
+     * <p>
+     * This method may be called on the {@code DevicePolicyManager} instance returned from
+     * {@link #getParentProfileInstance(ComponentName)} by the profile owner on an
+     * organization-owned device, to restrict accounts that may not be managed on the primary
+     * profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param accountType For which account management is disabled or enabled.
@@ -8472,10 +8477,10 @@ public class DevicePolicyManager {
      */
     public void setAccountManagementDisabled(@NonNull ComponentName admin, String accountType,
             boolean disabled) {
-        throwIfParentInstance("setAccountManagementDisabled");
         if (mService != null) {
             try {
-                mService.setAccountManagementDisabled(admin, accountType, disabled);
+                mService.setAccountManagementDisabled(admin, accountType, disabled,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8483,28 +8488,43 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets the array of accounts for which account management is disabled by the profile owner.
+     * Gets the array of accounts for which account management is disabled by the profile owner
+     * or device owner.
      *
      * <p> Account management can be disabled/enabled by calling
      * {@link #setAccountManagementDisabled}.
+     * <p>
+     * This method may be called on the {@code DevicePolicyManager} instance returned from
+     * {@link #getParentProfileInstance(ComponentName)}. Note that only a profile owner on
+     * an organization-deviced can affect account types on the parent profile instance.
      *
      * @return a list of account types for which account management has been disabled.
      *
      * @see #setAccountManagementDisabled
      */
     public @Nullable String[] getAccountTypesWithManagementDisabled() {
-        throwIfParentInstance("getAccountTypesWithManagementDisabled");
-        return getAccountTypesWithManagementDisabledAsUser(myUserId());
+        return getAccountTypesWithManagementDisabledAsUser(myUserId(), mParentInstance);
+    }
+
+    /**
+     * @see #getAccountTypesWithManagementDisabled()
+     * Note that calling this method on the parent profile instance will return the same
+     * value as calling it on the main {@code DevicePolicyManager} instance.
+     * @hide
+     */
+    public @Nullable String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
+        return getAccountTypesWithManagementDisabledAsUser(userId, false);
     }
 
     /**
      * @see #getAccountTypesWithManagementDisabled()
      * @hide
      */
-    public @Nullable String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
+    public @Nullable String[] getAccountTypesWithManagementDisabledAsUser(
+            int userId, boolean parentInstance) {
         if (mService != null) {
             try {
-                return mService.getAccountTypesWithManagementDisabledAsUser(userId);
+                return mService.getAccountTypesWithManagementDisabledAsUser(userId, parentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9842,6 +9862,7 @@ public class DevicePolicyManager {
      * <li>{@link #setTrustAgentConfiguration}</li>
      * <li>{@link #getRequiredStrongAuthTimeout}</li>
      * <li>{@link #setRequiredStrongAuthTimeout}</li>
+     * <li>{@link #getAccountTypesWithManagementDisabled}</li>
      * </ul>
      * <p>
      * The following methods are supported for the parent instance but can only be called by the
@@ -9850,6 +9871,7 @@ public class DevicePolicyManager {
      * <li>{@link #getPasswordComplexity}</li>
      * <li>{@link #setCameraDisabled}</li>
      * <li>{@link #getCameraDisabled}</li>
+     * <li>{@link #setAccountManagementDisabled(ComponentName, String, boolean)}</li>
      * </ul>
      *
      * <p>The following methods can be called by the profile owner of a managed profile

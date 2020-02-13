@@ -248,9 +248,9 @@ interface IDevicePolicyManager {
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);
     boolean installExistingPackage(in ComponentName admin, in String callerPackage, in String packageName);
 
-    void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled);
+    void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled, in boolean parent);
     String[] getAccountTypesWithManagementDisabled();
-    String[] getAccountTypesWithManagementDisabledAsUser(int userId);
+    String[] getAccountTypesWithManagementDisabledAsUser(int userId, in boolean parent);
 
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(int userId);
