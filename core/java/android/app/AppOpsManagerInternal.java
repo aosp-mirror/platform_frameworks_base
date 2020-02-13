@@ -94,14 +94,16 @@ public abstract class AppOpsManagerInternal {
             boolean visible);
 
     /**
-     * Like {@link AppOpsManager#setUidMode}, but allows ignoring a certain callback.
+     * Like {@link AppOpsManager#setUidMode}, but allows ignoring our own callback and not updating
+     * the REVOKED_COMPAT flag.
      */
-    public abstract void setUidModeIgnoringCallback(int code, int uid, int mode,
-            @Nullable IAppOpsCallback callbackToIgnore);
+    public abstract void setUidModeFromPermissionPolicy(int code, int uid, int mode,
+            @Nullable IAppOpsCallback callback);
 
     /**
-     * Like {@link AppOpsManager#setMode}, but allows ignoring a certain callback.
+     * Like {@link AppOpsManager#setMode}, but allows ignoring our own callback and not updating the
+     * REVOKED_COMPAT flag.
      */
-    public abstract void setModeIgnoringCallback(int code, int uid, @NonNull String packageName,
-            int mode, @Nullable IAppOpsCallback callbackToIgnore);
+    public abstract void setModeFromPermissionPolicy(int code, int uid, @NonNull String packageName,
+            int mode, @Nullable IAppOpsCallback callback);
 }
