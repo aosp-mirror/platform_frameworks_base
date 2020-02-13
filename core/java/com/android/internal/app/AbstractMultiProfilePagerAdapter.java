@@ -307,6 +307,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                 return false;
             }
         }
+        showListView(activeListAdapter);
         return activeListAdapter.rebuildList(doPostProcessing);
     }
 
@@ -347,6 +348,14 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
         button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
         button.setOnClickListener(buttonOnClick);
+    }
+
+    private void showListView(ResolverListAdapter activeListAdapter) {
+        ProfileDescriptor descriptor = getItem(
+                userHandleToPageIndex(activeListAdapter.getUserHandle()));
+        descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.VISIBLE);
+        View emptyStateView = descriptor.rootView.findViewById(R.id.resolver_empty_state);
+        emptyStateView.setVisibility(View.GONE);
     }
 
     private boolean hasCrossProfileIntents(List<Intent> intents, int source, int target) {
