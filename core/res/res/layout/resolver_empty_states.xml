@@ -34,7 +34,7 @@
         android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceMedium"
+        android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textColor="@color/resolver_empty_state_text"
         android:textSize="18sp"/>
     <TextView
@@ -52,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:textAppearance="?attr/textAppearanceMedium"
+        android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textSize="14sp"
         android:textColor="@color/resolver_tabs_active_color"/>
 </LinearLayout>
