@@ -932,7 +932,7 @@ public class NotificationManagerService extends SystemService {
                 StatusBarNotification sbn = r.getSbn();
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
-                        FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
+                        FLAG_FOREGROUND_SERVICE | FLAG_BUBBLE, false, r.getUserId(),
                         REASON_CLICK, nv.rank, nv.count, null);
                 nv.recycle();
                 reportUserInteraction(r);
@@ -7986,7 +7986,8 @@ public class NotificationManagerService extends SystemService {
 
                     FlagChecker flagChecker = (int flags) -> {
                         int flagsToCheck = FLAG_ONGOING_EVENT | FLAG_NO_CLEAR;
-                        if (REASON_LISTENER_CANCEL_ALL == reason) {
+                        if (REASON_LISTENER_CANCEL_ALL == reason
+                                || REASON_CANCEL_ALL == reason) {
                             flagsToCheck |= FLAG_BUBBLE;
                         }
                         if ((flags & flagsToCheck) != 0) {

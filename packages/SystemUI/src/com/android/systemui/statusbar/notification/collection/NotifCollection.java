@@ -638,9 +638,9 @@ public class NotifCollection implements Dumpable {
     private static boolean shouldDismissOnClearAll(
             NotificationEntry entry,
             @UserIdInt int userId) {
-        // TODO: (b/149396544) add FLAG_BUBBLE check here + in NoManService
         return userIdMatches(entry, userId)
                 && entry.isClearable()
+                && !hasFlag(entry, Notification.FLAG_BUBBLE)
                 && entry.getDismissState() != DISMISSED;
     }
 
