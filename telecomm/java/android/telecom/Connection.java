@@ -16,9 +16,14 @@
 
 package android.telecom;
 
+import static android.Manifest.permission.MODIFY_PHONE_STATE;
+
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Notification;
@@ -474,7 +479,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
      */
-    public static final int PROPERTY_ASSISTED_DIALING_USED = 1 << 9;
+    public static final int PROPERTY_ASSISTED_DIALING = 1 << 9;
 
     /**
      * Set by the framework to indicate that the network has identified a Connection as an emergency
@@ -2109,19 +2114,24 @@ public abstract class Connection extends Conferenceable {
      */
     @SystemApi
     @TestApi
-    public final long getConnectTimeMillis() {
+    public final @IntRange(from = 0) long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
 
     /**
      * Retrieves the connection start time of the {@link Connection}, if specified.  A value of
      * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
-     * start time of the conference.
+     * start time of the connection.
      * <p>
      * Based on the value of {@link SystemClock#elapsedRealtime()}, which ensures that wall-clock
      * changes do not impact the call duration.
      * <p>
      * Used internally in Telephony when migrating conference participant data for IMS conferences.
+     * <p>
+     * The value returned is the same one set using
+     * {@link #setConnectionStartElapsedRealtimeMillis(long)}.  This value is never updated from
+     * the Telecom framework, so no permission enforcement occurs when retrieving the value with
+     * this method.
      *
      * @return The time at which the {@link Connection} was connected.
      *
@@ -2129,7 +2139,7 @@ public abstract class Connection extends Conferenceable {
      */
     @SystemApi
     @TestApi
-    public final long getConnectElapsedTimeMillis() {
+    public final @ElapsedRealtimeLong long getConnectionStartElapsedRealtimeMillis() {
         return mConnectElapsedTimeMillis;
     }
 
@@ -2550,6 +2560,9 @@ public abstract class Connection extends Conferenceable {
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
      * <p>
+     * This time corresponds to the date/time of connection and is stored in the call log in
+     * {@link android.provider.CallLog.Calls#DATE}.
+     * <p>
      * Used by telephony to maintain calls associated with an IMS Conference.
      *
      * @param connectTimeMillis The connection time, in milliseconds.  Should be set using a value
@@ -2559,7 +2572,8 @@ public abstract class Connection extends Conferenceable {
      */
     @SystemApi
     @TestApi
-    public final void setConnectTimeMillis(long connectTimeMillis) {
+    @RequiresPermission(MODIFY_PHONE_STATE)
+    public final void setConnectTimeMillis(@IntRange(from = 0) long connectTimeMillis) {
         mConnectTimeMillis = connectTimeMillis;
     }
 
@@ -2567,15 +2581,23 @@ public abstract class Connection extends Conferenceable {
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
      * <p>
+     * This time is used to establish the duration of a call.  It uses
+     * {@link SystemClock#elapsedRealtime()} to ensure that the call duration is not impacted by
+     * time zone changes during a call.  The difference between the current
+     * {@link SystemClock#elapsedRealtime()} and the value set at the connection start time is used
+     * to populate {@link android.provider.CallLog.Calls#DURATION} in the call log.
+     * <p>
      * Used by telephony to maintain calls associated with an IMS Conference.
+     *
      * @param connectElapsedTimeMillis The connection time, in milliseconds.  Stored in the format
      *                              {@link SystemClock#elapsedRealtime()}.
-     *
      * @hide
      */
     @SystemApi
     @TestApi
-    public final void setConnectionStartElapsedRealTime(long connectElapsedTimeMillis) {
+    @RequiresPermission(MODIFY_PHONE_STATE)
+    public final void setConnectionStartElapsedRealtimeMillis(
+            @ElapsedRealtimeLong long connectElapsedTimeMillis) {
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 

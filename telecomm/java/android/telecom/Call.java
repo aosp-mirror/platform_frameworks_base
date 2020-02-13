@@ -539,7 +539,7 @@ public final class Call {
          *
          * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
          */
-        public static final int PROPERTY_ASSISTED_DIALING_USED = 0x00000200;
+        public static final int PROPERTY_ASSISTED_DIALING = 0x00000200;
 
         /**
          * Indicates that the call is an RTT call. Use {@link #getRttCall()} to get the
@@ -744,7 +744,7 @@ public final class Call {
             if (hasProperty(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
                 builder.append(" PROPERTY_HAS_CDMA_VOICE_PRIVACY");
             }
-            if (hasProperty(properties, PROPERTY_ASSISTED_DIALING_USED)) {
+            if (hasProperty(properties, PROPERTY_ASSISTED_DIALING)) {
                 builder.append(" PROPERTY_ASSISTED_DIALING_USED");
             }
             if (hasProperty(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
