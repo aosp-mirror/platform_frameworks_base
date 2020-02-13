@@ -14,8 +14,45 @@
   ~ limitations under the License
   -->
 
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/bubble_overflow_recycler"
-    android:layout_gravity="center_horizontal"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bubble_overflow_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center_horizontal">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/bubble_overflow_recycler"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:id="@+id/bubble_overflow_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/bubble_overflow_empty_title"
+            android:text="@string/bubble_overflow_empty_title"
+            android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/bubble_overflow_empty_subtitle"
+            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"
+            android:textColor="?android:attr/textColorSecondary"
+            android:text="@string/bubble_overflow_empty_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"/>
+    </LinearLayout>
+</LinearLayout>

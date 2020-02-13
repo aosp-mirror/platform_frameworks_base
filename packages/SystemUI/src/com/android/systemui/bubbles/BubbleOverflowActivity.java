@@ -26,7 +26,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,6 +49,7 @@ import javax.inject.Inject;
 public class BubbleOverflowActivity extends Activity {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
+    private LinearLayout mEmptyState;
     private BubbleController mBubbleController;
     private BubbleOverflowAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -64,6 +68,7 @@ public class BubbleOverflowActivity extends Activity {
         setBackgroundColor();
 
         mMaxBubbles = getResources().getInteger(R.integer.bubbles_max_rendered);
+        mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
         mRecyclerView.setLayoutManager(
                 new GridLayoutManager(getApplicationContext(),
@@ -73,9 +78,9 @@ public class BubbleOverflowActivity extends Activity {
                 mBubbleController::promoteBubbleFromOverflow);
         mRecyclerView.setAdapter(mAdapter);
 
-        updateData(mBubbleController.getOverflowBubbles());
+        onDataChanged(mBubbleController.getOverflowBubbles());
         mBubbleController.setOverflowCallback(() -> {
-            updateData(mBubbleController.getOverflowBubbles());
+            onDataChanged(mBubbleController.getOverflowBubbles());
         });
     }
 
@@ -87,7 +92,7 @@ public class BubbleOverflowActivity extends Activity {
         findViewById(android.R.id.content).setBackgroundColor(bgColor);
     }
 
-    void updateData(List<Bubble> bubbles) {
+    void onDataChanged(List<Bubble> bubbles) {
         mOverflowBubbles.clear();
         if (bubbles.size() > mMaxBubbles) {
             mOverflowBubbles.addAll(bubbles.subList(mMaxBubbles, bubbles.size()));
@@ -95,6 +100,12 @@ public class BubbleOverflowActivity extends Activity {
             mOverflowBubbles.addAll(bubbles);
         }
         mAdapter.notifyDataSetChanged();
+
+        if (mOverflowBubbles.isEmpty()) {
+            mEmptyState.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyState.setVisibility(View.GONE);
+        }
 
         if (DEBUG_OVERFLOW) {
             Log.d(TAG, "Updated overflow bubbles:\n" + BubbleDebugConfig.formatBubblesString(
