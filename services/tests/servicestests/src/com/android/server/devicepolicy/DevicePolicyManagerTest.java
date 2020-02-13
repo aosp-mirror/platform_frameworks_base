@@ -2087,7 +2087,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
                 .setFactoryResetProtectionAccounts(new ArrayList<>())
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
         dpm.setFactoryResetProtectionPolicy(admin1, policy);
 
@@ -2105,7 +2105,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setupProfileOwner();
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
 
         assertExpectException(SecurityException.class, null,
@@ -2157,7 +2157,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         FactoryResetProtectionPolicy policy = new FactoryResetProtectionPolicy.Builder()
                 .setFactoryResetProtectionAccounts(new ArrayList<>())
-                .setFactoryResetProtectionDisabled(true)
+                .setFactoryResetProtectionEnabled(false)
                 .build();
 
         dpm.setFactoryResetProtectionPolicy(admin1, policy);
@@ -2177,8 +2177,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     private void assertPoliciesAreEqual(FactoryResetProtectionPolicy expectedPolicy,
             FactoryResetProtectionPolicy actualPolicy) {
-        assertThat(actualPolicy.isFactoryResetProtectionDisabled()).isEqualTo(
-                expectedPolicy.isFactoryResetProtectionDisabled());
+        assertThat(actualPolicy.isFactoryResetProtectionEnabled()).isEqualTo(
+                expectedPolicy.isFactoryResetProtectionEnabled());
         assertAccountsAreEqual(expectedPolicy.getFactoryResetProtectionAccounts(),
                 actualPolicy.getFactoryResetProtectionAccounts());
     }
