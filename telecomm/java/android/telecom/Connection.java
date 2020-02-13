@@ -376,8 +376,14 @@ public abstract class Connection extends Conferenceable {
     /** Call supports the deflect feature. */
     public static final int CAPABILITY_SUPPORT_DEFLECT = 0x02000000;
 
+    /**
+     * When set, indicates that this {@link Connection} supports initiation of a conference call
+     * by directly adding participants using {@link #onAddConferenceParticipants(List)}.
+     * @hide
+     */
+    public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x04000000
+    // Next CAPABILITY value: 0x08000000
     //**********************************************************************************************
 
     /**
@@ -953,7 +959,9 @@ public abstract class Connection extends Conferenceable {
         if ((capabilities & CAPABILITY_SUPPORT_DEFLECT) == CAPABILITY_SUPPORT_DEFLECT) {
             builder.append(isLong ? " CAPABILITY_SUPPORT_DEFLECT" : " sup_def");
         }
-
+        if ((capabilities & CAPABILITY_ADD_PARTICIPANT) == CAPABILITY_ADD_PARTICIPANT) {
+            builder.append(isLong ? " CAPABILITY_ADD_PARTICIPANT" : " add_participant");
+        }
         builder.append("]");
         return builder.toString();
     }
@@ -2951,6 +2959,14 @@ public abstract class Connection extends Conferenceable {
      * Notifies this Connection of a request to separate from its parent conference.
      */
     public void onSeparate() {}
+
+    /**
+     * Supports initiation of a conference call by directly adding participants to an ongoing call.
+     *
+     * @param participants with which conference call will be formed.
+     * @hide
+     */
+    public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
 
     /**
      * Notifies this Connection of a request to abort.

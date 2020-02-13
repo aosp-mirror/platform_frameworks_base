@@ -1089,6 +1089,14 @@ public class CarrierConfigManager {
             "support_adhoc_conference_calls_bool";
 
     /**
+     * Determines whether conference participants can be added to existing call.  When {@code true},
+     * adding conference participants to existing call is supported, {@code false otherwise}.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL =
+            "support_add_conference_participants_bool";
+
+    /**
      * Determines whether conference calls are supported by a carrier.  When {@code true},
      * conference calling is supported, {@code false otherwise}.
      */
@@ -3571,6 +3579,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IGNORE_RTT_MODE_SETTING_BOOL, false);
         sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_MANAGE_IMS_CONFERENCE_CALL_BOOL, true);
