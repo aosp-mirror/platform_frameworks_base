@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 
 import java.io.PrintWriter;
 
+
 public interface BasePipManager {
     void showPictureInPictureMenu();
     default void expandPip() {}
