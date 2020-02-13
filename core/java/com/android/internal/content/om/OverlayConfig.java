@@ -46,12 +46,13 @@ import java.util.function.Supplier;
  * @see OverlayConfigParser
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-final public class OverlayConfig {
+public class OverlayConfig {
     static final String TAG = "OverlayConfig";
 
     // The default priority of an overlay that has not been configured. Overlays with default
     // priority have a higher precedence than configured overlays.
-    private static final int DEFAULT_PRIORITY = Integer.MAX_VALUE;
+    @VisibleForTesting
+    public static final int DEFAULT_PRIORITY = Integer.MAX_VALUE;
 
     @VisibleForTesting
     public static final class Configuration {

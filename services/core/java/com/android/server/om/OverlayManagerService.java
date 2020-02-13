@@ -62,6 +62,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.content.om.OverlayConfig;
 import com.android.server.FgThread;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
@@ -248,7 +249,8 @@ public final class OverlayManagerService extends SystemService {
             IdmapManager im = new IdmapManager(mPackageManager);
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
-                    getDefaultOverlayPackages(), new OverlayChangeListener());
+                    OverlayConfig.getSystemInstance(), getDefaultOverlayPackages(),
+                    new OverlayChangeListener());
             mActorEnforcer = new OverlayActorEnforcer(mPackageManager);
 
             final IntentFilter packageFilter = new IntentFilter();
@@ -835,7 +837,7 @@ public final class OverlayManagerService extends SystemService {
                     case "basecodepath":
                     case "state":
                     case "isenabled":
-                    case "isstatic":
+                    case "ismutable":
                     case "priority":
                     case "category":
                         dumpState.setField(arg);
