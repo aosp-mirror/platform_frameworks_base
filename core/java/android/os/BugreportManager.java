@@ -27,8 +27,10 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
-
+import android.widget.Toast;
+import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
@@ -155,12 +157,14 @@ public final class BugreportManager {
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(callback);
 
+            boolean validScreenshotFd = screenshotFd != null;
             if (screenshotFd == null) {
                 // Binder needs a valid File Descriptor to be passed
                 screenshotFd = ParcelFileDescriptor.open(new File("/dev/null"),
                         ParcelFileDescriptor.MODE_READ_ONLY);
             }
-            DumpstateListener dsListener = new DumpstateListener(executor, callback);
+            DumpstateListener dsListener = new DumpstateListener(executor, callback,
+                    validScreenshotFd);
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
@@ -221,10 +225,13 @@ public final class BugreportManager {
     private final class DumpstateListener extends IDumpstateListener.Stub {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
+        private final boolean mValidScreenshotFd;
 
-        DumpstateListener(Executor executor, BugreportCallback callback) {
+        DumpstateListener(Executor executor, BugreportCallback callback,
+                boolean validScreenshotFd) {
             mExecutor = executor;
             mCallback = callback;
+            mValidScreenshotFd = validScreenshotFd;
         }
 
         @Override
@@ -261,6 +268,21 @@ public final class BugreportManager {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Override
+        public void onScreenshotTaken(boolean success) throws RemoteException {
+            if (!mValidScreenshotFd) {
+                return;
+            }
+
+            Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+            mainThreadHandler.post(
+                    () -> {
+                        int message = success ? R.string.bugreport_screenshot_success_toast
+                                : R.string.bugreport_screenshot_failure_toast;
+                        Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+                    });
         }
     }
 }
