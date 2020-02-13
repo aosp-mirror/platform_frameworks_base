@@ -182,6 +182,7 @@ class InsetsStateController {
         }
         if (changed) {
             notifyInsetsChanged();
+            mDisplayContent.getDisplayPolicy().updateSystemUiVisibilityLw();
         }
     }
 
