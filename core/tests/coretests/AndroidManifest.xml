@@ -1330,6 +1330,12 @@
             android:process=":FakeProvider">
         </provider>
 
+        <provider
+            android:name="android.content.SlowProvider"
+            android:authorities="android.content.SlowProvider"
+            android:process=":SlowProvider">
+        </provider>
+
         <!-- Application components used for os tests -->
 
         <service android:name="android.os.MessengerService"

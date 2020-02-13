@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +33,7 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.util.Size;
 
 import androidx.test.InstrumentationRegistry;
@@ -208,5 +211,27 @@ public class ContentResolverTest {
         // in order to acquire the provider
         String type = mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote"));
         assertEquals("fake/remote", type);
+    }
+
+    @Test
+    public void testGetType_slowProvider() {
+        // This provider is running in a different process and is intentionally slow to start.
+        // We are trying to confirm that it does not cause an ANR
+        long start = SystemClock.uptimeMillis();
+        String type = mResolver.getType(Uri.parse("content://android.content.SlowProvider"));
+        long end = SystemClock.uptimeMillis();
+        assertEquals("slow", type);
+        assertThat(end).isLessThan(start + 5000);
+    }
+
+    @Test
+    public void testGetType_unknownProvider() {
+        // This provider does not exist.
+        // We are trying to confirm that getType returns null and does not cause an ANR
+        long start = SystemClock.uptimeMillis();
+        String type = mResolver.getType(Uri.parse("content://android.content.NonexistentProvider"));
+        long end = SystemClock.uptimeMillis();
+        assertThat(type).isNull();
+        assertThat(end).isLessThan(start + 5000);
     }
 }
