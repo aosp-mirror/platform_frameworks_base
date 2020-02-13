@@ -363,8 +363,12 @@ object PhysicsAnimatorTestUtils {
         private val testEndListeners = ArrayList<PhysicsAnimator.EndListener<T>>()
         private val testUpdateListeners = ArrayList<PhysicsAnimator.UpdateListener<T>>()
 
+        /** Whether we're currently in the middle of executing startInternal(). */
+        private var currentlyRunningStartInternal = false
+
         init {
             animator.startAction = ::startForTest
+            animator.cancelAction = ::cancelForTest
         }
 
         internal fun addTestEndListener(listener: PhysicsAnimator.EndListener<T>) {
@@ -437,7 +441,29 @@ object PhysicsAnimatorTestUtils {
                     }
                 })
 
+                currentlyRunningStartInternal = true
                 animator.startInternal()
+                currentlyRunningStartInternal = false
+                unblockLatch.countDown()
+            }
+
+            unblockLatch.await(timeoutMs, TimeUnit.MILLISECONDS)
+        }
+
+        private fun cancelForTest(properties: Set<FloatPropertyCompat<in T>>) {
+            // If this was called from startInternal, we are already on the animation thread, and
+            // should just call cancelInternal rather than posting it. If we post it, the
+            // cancellation will occur after the rest of startInternal() and we'll immediately
+            // cancel the animation we worked so hard to start!
+            if (currentlyRunningStartInternal) {
+                animator.cancelInternal(properties)
+                return
+            }
+
+            val unblockLatch = CountDownLatch(1)
+
+            animationThreadHandler.post {
+                animator.cancelInternal(properties)
                 unblockLatch.countDown()
             }
 
