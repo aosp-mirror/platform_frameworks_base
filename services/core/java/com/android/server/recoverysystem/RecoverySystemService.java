@@ -359,20 +359,23 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
 
         if (!mPreparedForReboot) {
+            Slog.i(TAG, "Reboot requested before prepare completed");
             return false;
         }
 
-        if (updateToken != null && updateToken.equals(mUnattendedRebootToken)) {
-            if (!mInjector.getLockSettingsService().armRebootEscrow()) {
-                return false;
-            }
-
-            PowerManager pm = mInjector.getPowerManager();
-            pm.reboot(reason);
-            return true;
+        if (updateToken != null && !updateToken.equals(mUnattendedRebootToken)) {
+            Slog.i(TAG, "Reboot requested after preparation, but with mismatching token");
+            return false;
         }
 
-        return false;
+        if (!mInjector.getLockSettingsService().armRebootEscrow()) {
+            Slog.w(TAG, "Failure to escrow key for reboot");
+            return false;
+        }
+
+        PowerManager pm = mInjector.getPowerManager();
+        pm.reboot(reason);
+        return true;
     }
 
     /**
