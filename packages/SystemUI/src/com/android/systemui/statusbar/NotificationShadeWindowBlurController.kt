@@ -22,9 +22,9 @@ import android.animation.ValueAnimator
 import android.view.Choreographer
 import android.view.View
 import com.android.internal.util.IndentingPrintWriter
-import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
 import com.android.systemui.Interpolators
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController
@@ -47,7 +47,7 @@ class NotificationShadeWindowBlurController @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val choreographer: Choreographer,
-    dumpController: DumpController
+    dumpManager: DumpManager
 ) : PanelExpansionListener, Dumpable {
     companion object {
         private const val WAKE_UP_ANIMATION_ENABLED = true
@@ -131,7 +131,7 @@ class NotificationShadeWindowBlurController @Inject constructor(
     }
 
     init {
-        dumpController.registerDumpable(this)
+        dumpManager.registerDumpable(javaClass.name, this)
         if (WAKE_UP_ANIMATION_ENABLED) {
             keyguardStateController.addCallback(keyguardStateCallback)
         }

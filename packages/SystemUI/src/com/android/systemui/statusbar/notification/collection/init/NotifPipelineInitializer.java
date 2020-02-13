@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.notification.collection.init;
 
 import android.util.Log;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
@@ -47,7 +47,7 @@ public class NotifPipelineInitializer implements Dumpable {
     private final ShadeListBuilder mListBuilder;
     private final NotifCoordinators mNotifPluggableCoordinators;
     private final NotifInflaterImpl mNotifInflater;
-    private final DumpController mDumpController;
+    private final DumpManager mDumpManager;
     private final FeatureFlags mFeatureFlags;
 
     private final FakePipelineConsumer mFakePipelineConsumer = new FakePipelineConsumer();
@@ -60,14 +60,14 @@ public class NotifPipelineInitializer implements Dumpable {
             ShadeListBuilder listBuilder,
             NotifCoordinators notifCoordinators,
             NotifInflaterImpl notifInflater,
-            DumpController dumpController,
+            DumpManager dumpManager,
             FeatureFlags featureFlags) {
         mPipelineWrapper = pipelineWrapper;
         mGroupCoalescer = groupCoalescer;
         mNotifCollection = notifCollection;
         mListBuilder = listBuilder;
         mNotifPluggableCoordinators = notifCoordinators;
-        mDumpController = dumpController;
+        mDumpManager = dumpManager;
         mNotifInflater = notifInflater;
         mFeatureFlags = featureFlags;
     }
@@ -77,7 +77,7 @@ public class NotifPipelineInitializer implements Dumpable {
             NotificationListener notificationService,
             NotificationRowBinderImpl rowBinder) {
 
-        mDumpController.registerDumpable("NotifPipeline", this);
+        mDumpManager.registerDumpable("NotifPipeline", this);
 
         // Setup inflation
         if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {

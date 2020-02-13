@@ -22,9 +22,9 @@ import android.os.PowerManager;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.DumpController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.FalsingManager;
@@ -59,7 +59,7 @@ public class KeyguardModule {
             Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardUpdateMonitor updateMonitor,
-            DumpController dumpController,
+            DumpManager dumpManager,
             PowerManager powerManager,
             TrustManager trustManager,
             @UiBackground Executor uiBgExecutor) {
@@ -72,7 +72,7 @@ public class KeyguardModule {
                 statusBarKeyguardViewManagerLazy,
                 dismissCallbackRegistry,
                 updateMonitor,
-                dumpController,
+                dumpManager,
                 uiBgExecutor,
                 powerManager,
                 trustManager);

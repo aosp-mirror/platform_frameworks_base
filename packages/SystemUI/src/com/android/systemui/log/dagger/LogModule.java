@@ -56,7 +56,7 @@ public class LogModule {
     public static LogBuffer provideNotificationsLogBuffer(
             LogcatEchoTracker bufferFilter,
             DumpManager dumpManager) {
-        LogBuffer buffer = new LogBuffer("NotifLog2", 1000, 10, bufferFilter);
+        LogBuffer buffer = new LogBuffer("NotifLog", 1000, 10, bufferFilter);
         buffer.attach(dumpManager);
         return buffer;
     }

@@ -35,9 +35,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
@@ -71,7 +71,7 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
     @Mock
     private QSLogger mQSLogger;
     private ViewGroup mParentView;
@@ -87,7 +87,7 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
-            mQsPanel = new QSPanel(mContext, null, mDumpController, mBroadcastDispatcher,
+            mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
                     mQSLogger);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);

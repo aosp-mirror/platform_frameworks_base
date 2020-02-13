@@ -39,8 +39,8 @@ import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeSortListener;
@@ -102,7 +102,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
 
-        mListBuilder = new ShadeListBuilder(mSystemClock, mLogger, mock(DumpController.class));
+        mListBuilder = new ShadeListBuilder(mSystemClock, mLogger, mock(DumpManager.class));
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
         mListBuilder.attach(mNotifCollection);

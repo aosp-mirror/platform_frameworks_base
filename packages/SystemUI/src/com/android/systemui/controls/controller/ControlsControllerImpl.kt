@@ -34,13 +34,13 @@ import android.util.ArrayMap
 import android.util.Log
 import com.android.internal.annotations.GuardedBy
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.DumpController
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -59,7 +59,7 @@ class ControlsControllerImpl @Inject constructor (
     private val listingController: ControlsListingController,
     private val broadcastDispatcher: BroadcastDispatcher,
     optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
-    dumpController: DumpController
+    dumpManager: DumpManager
 ) : Dumpable, ControlsController {
 
     companion object {
@@ -151,7 +151,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     init {
-        dumpController.registerDumpable(this)
+        dumpManager.registerDumpable(javaClass.name, this)
         if (available) {
             loadFavorites()
         }

@@ -16,6 +16,8 @@ package com.android.systemui;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dump.DumpManager;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -23,7 +25,7 @@ import java.io.PrintWriter;
  * Implemented by classes who want to be in:
  *   {@code adb shell dumpsys activity service com.android.systemui}
  *
- * @see DumpController
+ * @see DumpManager
  */
 public interface Dumpable {
 

@@ -30,8 +30,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 
@@ -93,7 +93,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             DeviceConfigHelper deviceConfigHelper,
             Map<AssistHandleBehavior, BehaviorController> behaviorMap,
             NavigationModeController navigationModeController,
-            DumpController dumpController) {
+            DumpManager dumpManager) {
         mContext = context;
         mAssistUtils = assistUtils;
         mHandler = handler;
@@ -115,7 +115,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
                     }
                 });
 
-        dumpController.registerDumpable(TAG, this);
+        dumpManager.registerDumpable(TAG, this);
     }
 
     @Override // AssistHandleCallbacks

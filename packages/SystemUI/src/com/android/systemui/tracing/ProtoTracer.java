@@ -24,14 +24,14 @@ import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.tracing.FrameProtoTracer;
 import com.android.systemui.shared.tracing.FrameProtoTracer.ProtoTraceParams;
 import com.android.systemui.shared.tracing.ProtoTraceable;
-import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.systemui.tracing.nano.SystemUiTraceEntryProto;
 import com.android.systemui.tracing.nano.SystemUiTraceFileProto;
+import com.android.systemui.tracing.nano.SystemUiTraceProto;
 
 import com.google.protobuf.nano.MessageNano;
 
@@ -59,10 +59,10 @@ public class ProtoTracer implements Dumpable, ProtoTraceParams<MessageNano, Syst
             SystemUiTraceProto> mProtoTracer;
 
     @Inject
-    public ProtoTracer(Context context, DumpController dumpController) {
+    public ProtoTracer(Context context, DumpManager dumpManager) {
         mContext = context;
         mProtoTracer = new FrameProtoTracer<>(this);
-        dumpController.registerDumpable(this);
+        dumpManager.registerDumpable(getClass().getName(), this);
     }
 
     @Override

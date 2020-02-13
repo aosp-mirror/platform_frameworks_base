@@ -18,12 +18,14 @@ package com.android.systemui
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.dump.DumpManager
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -35,14 +37,12 @@ class BootCompleteCacheTest : SysuiTestCase() {
     private lateinit var bootCompleteCache: BootCompleteCacheImpl
     @Mock
     private lateinit var bootCompleteListener: BootCompleteCache.BootCompleteListener
-    @Mock
-    private lateinit var dumpController: DumpController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        bootCompleteCache = BootCompleteCacheImpl(dumpController)
+        bootCompleteCache = BootCompleteCacheImpl(mock(DumpManager::class.java))
     }
 
     @Test

@@ -39,8 +39,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
     @Mock
     private AppOpsControllerImpl.H mMockHandler;
     @Mock
-    private DumpController mDumpController;
+    private DumpManager mDumpManager;
 
     private AppOpsControllerImpl mController;
     private TestableLooper mTestableLooper;
@@ -84,7 +84,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
         getContext().setMockPackageManager(mPackageManager);
 
         mController =
-                new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mDumpController);
+                new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mDumpManager);
     }
 
     @Test
