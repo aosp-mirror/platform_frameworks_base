@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tunerresourcemanager;
 
 /**
  * A profile of a resource client. This profile is used to register the client info

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.tv.tuner;
+package com.android.server.tv.tunerresourcemanager;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.media.tv.TvInputManager;
-import android.media.tv.tuner.CasSessionRequest;
-import android.media.tv.tuner.ITunerResourceManager;
-import android.media.tv.tuner.ITunerResourceManagerListener;
-import android.media.tv.tuner.ResourceClientProfile;
-import android.media.tv.tuner.TunerFrontendInfo;
-import android.media.tv.tuner.TunerFrontendRequest;
-import android.media.tv.tuner.TunerLnbRequest;
-import android.media.tv.tuner.TunerResourceManager;
+import android.media.tv.tunerresourcemanager.CasSessionRequest;
+import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
+import android.media.tv.tunerresourcemanager.ITunerResourceManager;
+import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
+import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
+import android.media.tv.tunerresourcemanager.TunerLnbRequest;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -48,7 +48,7 @@ public class TunerResourceManagerService extends SystemService {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private SparseArray<ClientProfile> mClientProfiles = new SparseArray<>();
-    private SparseArray<ITunerResourceManagerListener> mListeners = new SparseArray<>();
+    private SparseArray<IResourcesReclaimListener> mListeners = new SparseArray<>();
     private int mNextUnusedFrontendId = 0;
     private List<Integer> mReleasedClientId = new ArrayList<Integer>();
     private List<Integer> mAvailableFrontendIds = new ArrayList<Integer>();
@@ -69,7 +69,7 @@ public class TunerResourceManagerService extends SystemService {
     private final class BinderService extends ITunerResourceManager.Stub {
         @Override
         public void registerClientProfile(@NonNull ResourceClientProfile profile,
-                            @NonNull ITunerResourceManagerListener listener,
+                            @NonNull IResourcesReclaimListener listener,
                             @NonNull int[] clientId) {
             if (DEBUG) {
                 Slog.d(TAG, "registerClientProfile(clientProfile=" + profile + ")");

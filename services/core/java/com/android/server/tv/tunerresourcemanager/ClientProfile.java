@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.tv.tuner;
+package com.android.server.tv.tunerresourcemanager;
 
 /**
   * A client profile object used by the Tuner Resource Manager to record the registered clients'
@@ -122,6 +122,9 @@ public final class ClientProfile {
                 + this.mUseCase + ", " + this.mProcessId;
     }
 
+    /**
+    * Builder class for {@link ClientProfile}.
+    */
     public static class ClientProfileBuilder {
         private final int mClientId;
         private String mTvInputSessionId;

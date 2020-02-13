@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tunerresourcemanager;
 
-import android.media.tv.tuner.CasSessionRequest;
-import android.media.tv.tuner.ITunerResourceManagerListener;
-import android.media.tv.tuner.ResourceClientProfile;
-import android.media.tv.tuner.TunerFrontendInfo;
-import android.media.tv.tuner.TunerFrontendRequest;
-import android.media.tv.tuner.TunerLnbRequest;
+import android.media.tv.tunerresourcemanager.CasSessionRequest;
+import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
+import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
+import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
+import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 
 /**
  * Interface of the Tuner Resource Manager. It manages resources used by TV Tuners.
@@ -37,10 +37,10 @@ import android.media.tv.tuner.TunerLnbRequest;
  * <ul>
  * <li>Tuner Java/MediaCas/TIF update resources of the current device with TRM.
  * <li>Client registers its profile through {@link #registerClientProfile(ResourceClientProfile,
- * ITunerResourceManagerListener, int[])}.
+ * IResourcesReclaimListener, int[])}.
  * <li>Client requests resources through request APIs.
  * <li>If the resource needs to be handed to a higher priority client from a lower priority
- * one, TRM calls ITunerResourceManagerListener registered by the lower priority client to release
+ * one, TRM calls IResourcesReclaimListener registered by the lower priority client to release
  * the resource.
  * <ul>
  *
@@ -53,13 +53,13 @@ interface ITunerResourceManager {
      * <p>The profile contains information that can show the base priority score of the client.
      *
      * @param profile {@link ResourceClientProfile} profile of the current client
-     * @param listener {@link ITunerResourceManagerListener} a callback to
+     * @param listener {@link IResourcesReclaimListener} a callback to
      *                 reclaim clients' resources when needed.
      * @param clientId returns a clientId from the resource manager when the
      *                 the client registers its profile.
      */
     void registerClientProfile(in ResourceClientProfile profile,
-        ITunerResourceManagerListener listener, out int[] clientId);
+        IResourcesReclaimListener listener, out int[] clientId);
 
     /*
      * This API is used by the client to unregister their profile with the Tuner Resource manager.
@@ -119,7 +119,7 @@ interface ITunerResourceManager {
      *
      * <li>If no Frontend is available but the current request info can show higher priority than
      * other uses of Frontend, the API will send
-     * {@link ITunerResourceManagerListener#onResourcesReclaim()} to the {@link Tuner}. Tuner would
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
      * handle the resource reclaim on the holder of lower priority and notify the holder of its
      * resource loss.
      *
@@ -157,7 +157,7 @@ interface ITunerResourceManager {
      *
      * <li>If no Cas session is available but the current request info can show higher priority than
      * other uses of the sessions under the requested CAS system, the API will send
-     * {@link ITunerResourceManagerCallback#onResourcesReclaim()} to the {@link Tuner}. Tuner would
+     * {@link ITunerResourceManagerCallback#onReclaimResources()} to the {@link Tuner}. Tuner would
      * handle the resource reclaim on the holder of lower priority and notify the holder of its
      * resource loss.
      *
@@ -181,7 +181,7 @@ interface ITunerResourceManager {
      * <li>If there is Lnb available, the API would send the id back.
      *
      * <li>If no Lnb is available but the current request has a higher priority than other uses of
-     * lnbs, the API will send {@link ITunerResourceManagerCallback#onResourcesReclaim()} to the
+     * lnbs, the API will send {@link ITunerResourceManagerCallback#onReclaimResources()} to the
      * {@link Tuner}. Tuner would handle the resource reclaim on the holder of lower priority and
      * notify the holder of its resource loss.
      *

@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package android.media.tv.tuner;
+package android.media.tv.tunerresourcemanager;
 
 /**
- * Information required to request a Tuner Frontend.
+ * Interface to receive callbacks from ITunerResourceManager.
  *
  * @hide
  */
-parcelable TunerFrontendRequest;
+oneway interface IResourcesReclaimListener {
+    /*
+     * TRM invokes this method when the client's resources need to be reclaimed.
+     *
+     * <p>This method is implemented in Tuner Framework to take the reclaiming
+     * actions. It's a synchronous call. TRM would wait on the call to finish
+     * then grant the resource.
+     */
+    void onReclaimResources();
+}
