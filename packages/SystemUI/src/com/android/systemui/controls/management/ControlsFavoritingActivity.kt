@@ -142,8 +142,9 @@ class ControlsFavoritingActivity @Inject constructor(
         val margin = resources.getDimensionPixelSize(R.dimen.controls_card_margin)
         val itemDecorator = MarginItemDecorator(margin, margin)
         val layoutInflater = LayoutInflater.from(applicationContext)
+        val elevation = resources.getFloat(R.dimen.control_card_elevation)
 
-        adapterAll = ControlAdapter(layoutInflater)
+        adapterAll = ControlAdapter(layoutInflater, elevation)
         recyclerViewAll = requireViewById<RecyclerView>(R.id.listAll).apply {
             adapter = adapterAll
             layoutManager = GridLayoutManager(applicationContext, 2).apply {
