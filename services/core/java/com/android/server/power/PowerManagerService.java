@@ -2486,7 +2486,8 @@ public final class PowerManagerService extends SystemService
         boolean changed = false;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_BOOT_COMPLETED
                 | DIRTY_WAKEFULNESS | DIRTY_STAY_ON | DIRTY_PROXIMITY_POSITIVE
-                | DIRTY_DOCK_STATE | DIRTY_ATTENTIVE)) != 0) {
+                | DIRTY_DOCK_STATE | DIRTY_ATTENTIVE | DIRTY_SETTINGS
+                | DIRTY_SCREEN_BRIGHTNESS_BOOST)) != 0) {
             if (mWakefulness == WAKEFULNESS_AWAKE && isItBedTimeYetLocked()) {
                 if (DEBUG_SPEW) {
                     Slog.d(TAG, "updateWakefulnessLocked: Bed time...");
