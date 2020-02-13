@@ -1738,7 +1738,7 @@ public class SyncStorageEngine {
 
     /**
      * Ensure the old pending.bin is deleted, as it has been changed to pending.xml.
-     * pending.xml was used starting in KLP.
+     * pending.xml was used starting in KitKat.
      * @param syncDir directory where the sync files are located.
      */
     private void maybeDeleteLegacyPendingInfoLocked(File syncDir) {
