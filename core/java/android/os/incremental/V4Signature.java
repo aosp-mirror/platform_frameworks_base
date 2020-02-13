@@ -16,6 +16,7 @@
 
 package android.os.incremental;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -43,6 +44,15 @@ public class V4Signature {
             return readFrom(stream);
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    /**
+     * Construct a V4Signature from .idsig file.
+     */
+    public static V4Signature readFrom(byte[] bytes) throws IOException {
+        try (DataInputStream stream = new DataInputStream(new ByteArrayInputStream(bytes))) {
+            return readFrom(stream);
         }
     }
 
