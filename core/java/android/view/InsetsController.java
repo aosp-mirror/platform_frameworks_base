@@ -882,6 +882,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         } else {
             hideDirectly(types);
         }
+        if (mViewRoot.mView == null) {
+            return;
+        }
         mViewRoot.mView.dispatchWindowInsetsAnimationPrepare(animation);
         mViewRoot.mView.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
             @Override
