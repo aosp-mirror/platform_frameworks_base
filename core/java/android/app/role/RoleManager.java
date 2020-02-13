@@ -89,6 +89,7 @@ public final class RoleManager {
      * The name of the dialer role.
      *
      * @see Intent#ACTION_DIAL
+     * @see android.telecom.InCallService
      */
     public static final String ROLE_DIALER = "android.app.role.DIALER";
 
