@@ -37,8 +37,7 @@ cc_library_shared {
         "-Wunused",
         "-Wunreachable-code",
     ],
-    // Re-enable when b/145990493 is fixed
-    // sanitize: {
-    //    cfi: true,
-    // },
+    sanitize: {
+       cfi: true,
+    },
 }
