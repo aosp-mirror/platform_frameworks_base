@@ -998,6 +998,11 @@ public final class ContentCaptureManagerService extends
 
                     sendErrorSignal(mClientAdapterReference, serviceAdapterReference,
                             ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                } finally {
+                    synchronized (parentService.mLock) {
+                        parentService.mPackagesWithShareRequests
+                                .remove(mDataShareRequest.getPackageName());
+                    }
                 }
             });
 
