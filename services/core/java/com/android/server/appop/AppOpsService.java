@@ -411,9 +411,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Slog.e(TAG, "Bad app ops settings", e);
                 }
                 TOP_STATE_SETTLE_TIME = mParser.getDurationMillis(
-                        KEY_TOP_STATE_SETTLE_TIME, 30 * 1000L);
+                        KEY_TOP_STATE_SETTLE_TIME, 5 * 1000L);
                 FG_SERVICE_STATE_SETTLE_TIME = mParser.getDurationMillis(
-                        KEY_FG_SERVICE_STATE_SETTLE_TIME, 10 * 1000L);
+                        KEY_FG_SERVICE_STATE_SETTLE_TIME, 5 * 1000L);
                 BG_STATE_SETTLE_TIME = mParser.getDurationMillis(
                         KEY_BG_STATE_SETTLE_TIME, 1 * 1000L);
             }
