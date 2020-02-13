@@ -27,16 +27,34 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 using ::android::hardware::Void;
+using ::android::hardware::hidl_bitfield;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DataFormat;
+using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterAvSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterDownloadSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterPesDataSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterRecordSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterSectionBits;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterSectionSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxIpFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxIpFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpPid;
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
+using ::android::hardware::tv::tuner::V1_0::DemuxRecordScIndexType;
+using ::android::hardware::tv::tuner::V1_0::DemuxScHevcIndex;
+using ::android::hardware::tv::tuner::V1_0::DemuxScIndex;
+using ::android::hardware::tv::tuner::V1_0::DemuxTlvFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxTlvFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxTsIndex;
 using ::android::hardware::tv::tuner::V1_0::DvrSettings;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSettings;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSifStandard;
@@ -1367,10 +1385,133 @@ static jobject android_media_tv_Tuner_open_time_filter(JNIEnv, jobject) {
     return NULL;
 }
 
-static DemuxFilterSettings getFilterSettings(
+static DemuxFilterSectionBits getFilterSectionBits(JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/SectionSettingsWithSectionBits");
+    jbyteArray jfilterBytes = static_cast<jbyteArray>(
+            env->GetObjectField(settings, env->GetFieldID(clazz, "mFilter", "[B")));
+    jsize size = env->GetArrayLength(jfilterBytes);
+    std::vector<uint8_t> filterBytes(size);
+    env->GetByteArrayRegion(
+            jfilterBytes, 0, size, reinterpret_cast<jbyte*>(&filterBytes[0]));
+
+    jbyteArray jmask = static_cast<jbyteArray>(
+            env->GetObjectField(settings, env->GetFieldID(clazz, "mMask", "[B")));
+    size = env->GetArrayLength(jmask);
+    std::vector<uint8_t> mask(size);
+    env->GetByteArrayRegion(jmask, 0, size, reinterpret_cast<jbyte*>(&mask[0]));
+
+    jbyteArray jmode = static_cast<jbyteArray>(
+            env->GetObjectField(settings, env->GetFieldID(clazz, "mMode", "[B")));
+    size = env->GetArrayLength(jmode);
+    std::vector<uint8_t> mode(size);
+    env->GetByteArrayRegion(jmode, 0, size, reinterpret_cast<jbyte*>(&mode[0]));
+
+    DemuxFilterSectionBits filterSectionBits {
+        .filter = filterBytes,
+        .mask = mask,
+        .mode = mode,
+    };
+    return filterSectionBits;
+}
+
+static DemuxFilterSectionSettings::Condition::TableInfo getFilterTableInfo(
+        JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/SectionSettingsWithTableInfo");
+    uint16_t tableId = static_cast<uint16_t>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mTableId", "I")));
+    uint16_t version = static_cast<uint16_t>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mVersion", "I")));
+    DemuxFilterSectionSettings::Condition::TableInfo tableInfo {
+        .tableId = tableId,
+        .version = version,
+    };
+    return tableInfo;
+}
+
+static DemuxFilterSectionSettings getFilterSectionSettings(JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/SectionSettings");
+    bool isCheckCrc = static_cast<bool>(
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mCrcEnabled", "Z")));
+    bool isRepeat = static_cast<bool>(
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsRepeat", "Z")));
+    bool isRaw = static_cast<bool>(
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsRaw", "Z")));
+
+    DemuxFilterSectionSettings filterSectionSettings {
+        .isCheckCrc = isCheckCrc,
+        .isRepeat = isRepeat,
+        .isRaw = isRaw,
+    };
+    if (env->IsInstanceOf(
+            settings,
+            env->FindClass("android/media/tv/tuner/filter/SectionSettingsWithSectionBits"))) {
+        filterSectionSettings.condition.sectionBits(getFilterSectionBits(env, settings));
+    } else if (env->IsInstanceOf(
+            settings,
+            env->FindClass("android/media/tv/tuner/filter/SectionSettingsWithTableInfo"))) {
+        filterSectionSettings.condition.tableInfo(getFilterTableInfo(env, settings));
+    }
+    return filterSectionSettings;
+}
+
+static DemuxFilterAvSettings getFilterAvSettings(JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/AvSettings");
+    bool isPassthrough = static_cast<bool>(
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsPassthrough", "Z")));
+    DemuxFilterAvSettings filterAvSettings {
+        .isPassthrough = isPassthrough,
+    };
+    return filterAvSettings;
+}
+
+static DemuxFilterPesDataSettings getFilterPesDataSettings(JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/PesSettings");
+    uint16_t streamId = static_cast<uint16_t>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mStreamId", "I")));
+    bool isRaw = static_cast<bool>(
+            env->GetBooleanField(settings, env->GetFieldID(clazz, "mIsRaw", "Z")));
+    DemuxFilterPesDataSettings filterPesDataSettings {
+        .streamId = streamId,
+        .isRaw = isRaw,
+    };
+    return filterPesDataSettings;
+}
+
+static DemuxFilterRecordSettings getFilterRecordSettings(JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/RecordSettings");
+    hidl_bitfield<DemuxTsIndex> tsIndexMask = static_cast<hidl_bitfield<DemuxTsIndex>>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mTsIndexMask", "I")));
+    DemuxRecordScIndexType scIndexType = static_cast<DemuxRecordScIndexType>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mScIndexType", "I")));
+    jint scIndexMask = env->GetIntField(settings, env->GetFieldID(clazz, "mScIndexMask", "I"));
+
+    DemuxFilterRecordSettings filterRecordSettings {
+        .tsIndexMask = tsIndexMask,
+        .scIndexType = scIndexType,
+    };
+    if (scIndexType == DemuxRecordScIndexType::SC) {
+        filterRecordSettings.scIndexMask.sc(static_cast<hidl_bitfield<DemuxScIndex>>(scIndexMask));
+    } else if (scIndexType == DemuxRecordScIndexType::SC_HEVC) {
+        filterRecordSettings.scIndexMask.scHevc(
+                static_cast<hidl_bitfield<DemuxScHevcIndex>>(scIndexMask));
+    }
+    return filterRecordSettings;
+}
+
+static DemuxFilterDownloadSettings getFilterDownloadSettings(JNIEnv *env, const jobject& settings) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/filter/DownloadSettings");
+    uint32_t downloadId = static_cast<uint32_t>(
+            env->GetIntField(settings, env->GetFieldID(clazz, "mDownloadId", "I")));
+
+    DemuxFilterDownloadSettings filterDownloadSettings {
+        .downloadId = downloadId,
+    };
+    return filterDownloadSettings;
+}
+
+static DemuxFilterSettings getFilterConfiguration(
         JNIEnv *env, int type, int subtype, jobject filterSettingsObj) {
     DemuxFilterSettings filterSettings;
-    // TODO: more setting types
     jobject settingsObj =
             env->GetObjectField(
                     filterSettingsObj,
@@ -1378,27 +1519,121 @@ static DemuxFilterSettings getFilterSettings(
                             env->FindClass("android/media/tv/tuner/filter/FilterConfiguration"),
                             "mSettings",
                             "Landroid/media/tv/tuner/filter/Settings;"));
-    if (type == (int)DemuxFilterMainType::TS) {
-        // DemuxTsFilterSettings
-        jclass clazz = env->FindClass("android/media/tv/tuner/filter/TsFilterConfiguration");
-        int tpid = env->GetIntField(filterSettingsObj, env->GetFieldID(clazz, "mTpid", "I"));
-        if (subtype == (int)DemuxTsFilterType::PES) {
-            // DemuxFilterPesDataSettings
-            jclass settingClazz =
-                    env->FindClass("android/media/tv/tuner/filter/PesSettings");
-            int streamId = env->GetIntField(
-                    settingsObj, env->GetFieldID(settingClazz, "mStreamId", "I"));
-            bool isRaw = (bool)env->GetBooleanField(
-                    settingsObj, env->GetFieldID(settingClazz, "mIsRaw", "Z"));
-            DemuxFilterPesDataSettings filterPesDataSettings {
-                    .streamId = static_cast<uint16_t>(streamId),
-                    .isRaw = isRaw,
-            };
+    DemuxFilterMainType mainType = static_cast<DemuxFilterMainType>(type);
+    switch (mainType) {
+        case DemuxFilterMainType::TS: {
+            jclass clazz = env->FindClass("android/media/tv/tuner/filter/TsFilterConfiguration");
+            int tpid = env->GetIntField(filterSettingsObj, env->GetFieldID(clazz, "mTpid", "I"));
             DemuxTsFilterSettings tsFilterSettings {
-                    .tpid = static_cast<uint16_t>(tpid),
+                .tpid = static_cast<uint16_t>(tpid),
             };
-            tsFilterSettings.filterSettings.pesData(filterPesDataSettings);
+
+            DemuxTsFilterType tsType = static_cast<DemuxTsFilterType>(subtype);
+            switch (tsType) {
+                case DemuxTsFilterType::SECTION:
+                    tsFilterSettings.filterSettings.section(
+                            getFilterSectionSettings(env, settingsObj));
+                    break;
+                case DemuxTsFilterType::AUDIO:
+                case DemuxTsFilterType::VIDEO:
+                    tsFilterSettings.filterSettings.av(getFilterAvSettings(env, settingsObj));
+                    break;
+                case DemuxTsFilterType::PES:
+                    tsFilterSettings.filterSettings.pesData(
+                            getFilterPesDataSettings(env, settingsObj));
+                    break;
+                case DemuxTsFilterType::RECORD:
+                    tsFilterSettings.filterSettings.record(
+                            getFilterRecordSettings(env, settingsObj));
+                    break;
+                default:
+                    break;
+            }
             filterSettings.ts(tsFilterSettings);
+            break;
+        }
+        case DemuxFilterMainType::MMTP: {
+            DemuxMmtpFilterSettings mmtpFilterSettings;
+            DemuxMmtpFilterType mmtpType = static_cast<DemuxMmtpFilterType>(subtype);
+            switch (mmtpType) {
+                case DemuxMmtpFilterType::SECTION:
+                    mmtpFilterSettings.filterSettings.section(
+                            getFilterSectionSettings(env, settingsObj));
+                    break;
+                case DemuxMmtpFilterType::AUDIO:
+                case DemuxMmtpFilterType::VIDEO:
+                    mmtpFilterSettings.filterSettings.av(getFilterAvSettings(env, settingsObj));
+                    break;
+                case DemuxMmtpFilterType::PES:
+                    mmtpFilterSettings.filterSettings.pesData(
+                            getFilterPesDataSettings(env, settingsObj));
+                    break;
+                case DemuxMmtpFilterType::RECORD:
+                    mmtpFilterSettings.filterSettings.record(
+                            getFilterRecordSettings(env, settingsObj));
+                    break;
+                case DemuxMmtpFilterType::DOWNLOAD:
+                    mmtpFilterSettings.filterSettings.download(
+                            getFilterDownloadSettings(env, settingsObj));
+                    break;
+                default:
+                    break;
+            }
+            filterSettings.mmtp(mmtpFilterSettings);
+            break;
+        }
+        case DemuxFilterMainType::IP: {
+            DemuxIpFilterSettings ipFilterSettings;
+            DemuxIpFilterType ipType = static_cast<DemuxIpFilterType>(subtype);
+            switch (ipType) {
+                case DemuxIpFilterType::SECTION:
+                    ipFilterSettings.filterSettings.section(
+                            getFilterSectionSettings(env, settingsObj));
+                    break;
+                case DemuxIpFilterType::IP:
+                    // TODO: handle passthrough
+                    ipFilterSettings.filterSettings.bPassthrough(false);
+                    break;
+                default:
+                    break;
+            }
+            filterSettings.ip(ipFilterSettings);
+            break;
+        }
+        case DemuxFilterMainType::TLV: {
+            DemuxTlvFilterSettings tlvFilterSettings;
+            DemuxTlvFilterType tlvType = static_cast<DemuxTlvFilterType>(subtype);
+            switch (tlvType) {
+                case DemuxTlvFilterType::SECTION:
+                    tlvFilterSettings.filterSettings.section(
+                            getFilterSectionSettings(env, settingsObj));
+                    break;
+                case DemuxTlvFilterType::TLV:
+                    // TODO: handle passthrough
+                    tlvFilterSettings.filterSettings.bPassthrough(false);
+                    break;
+                default:
+                    break;
+            }
+            filterSettings.tlv(tlvFilterSettings);
+            break;
+        }
+        case DemuxFilterMainType::ALP: {
+            DemuxAlpFilterSettings alpFilterSettings;
+            DemuxAlpFilterType alpType = static_cast<DemuxAlpFilterType>(subtype);
+            switch (alpType) {
+                case DemuxAlpFilterType::SECTION:
+                    alpFilterSettings.filterSettings.section(
+                            getFilterSectionSettings(env, settingsObj));
+                    break;
+                default:
+                    break;
+            }
+            filterSettings.alp(alpFilterSettings);
+            break;
+        }
+        default: {
+            break;
         }
     }
     return filterSettings;
@@ -1439,7 +1674,7 @@ static int android_media_tv_Tuner_configure_filter(
         ALOGD("Failed to configure filter: filter not found");
         return (int)Result::INVALID_STATE;
     }
-    DemuxFilterSettings filterSettings = getFilterSettings(env, type, subtype, settings);
+    DemuxFilterSettings filterSettings = getFilterConfiguration(env, type, subtype, settings);
     Result res = iFilterSp->configure(filterSettings);
     MQDescriptorSync<uint8_t> filterMQDesc;
     if (res == Result::SUCCESS && filterSp->mFilterMQ == NULL) {
