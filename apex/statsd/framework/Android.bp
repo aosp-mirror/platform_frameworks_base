@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_visibility: [ ":__pkg__" ]
+}
+
 genrule {
     name: "statslog-statsd-java-gen",
     tools: ["stats-log-api-gen"],
@@ -25,6 +29,9 @@ java_library_static {
     srcs: [
         ":statslog-statsd-java-gen",
     ],
+    visibility: [
+        "//cts/hostsidetests/statsd/apps:__subpackages__",
+    ]
 }
 
 filegroup {
@@ -33,6 +40,9 @@ filegroup {
         "java/**/*.java",
         ":framework-statsd-aidl-sources",
         ":statslog-statsd-java-gen",
+    ],
+    visibility: [
+        "//frameworks/base", // For the "global" stubs.
     ],
 }
 
@@ -139,6 +149,10 @@ java_library {
         "framework-statsd-defaults",
     ],
     srcs: [ ":framework-statsd-stubs-srcs-publicapi" ],
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/statsd", // statsd apex
+    ]
 }
 
 java_library {
@@ -147,6 +161,10 @@ java_library {
         "framework-statsd-defaults",
     ],
     srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/statsd", // statsd apex
+    ]
 }
 
 java_library {
@@ -155,4 +173,9 @@ java_library {
         "framework-statsd-defaults",
     ],
     srcs: [ ":framework-statsd-stubs-srcs-module_libs_api" ],
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/statsd", // statsd apex
+        "//frameworks/opt/net/wifi/service" // wifi service
+    ]
 }
