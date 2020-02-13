@@ -3560,25 +3560,16 @@
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
 
-    <!-- The package name for the default system textclassifier service.
+    <!-- The package name for the OEM custom system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          Example: "com.android.textclassifier"
-         If no textclassifier service with the specified name exists on the device (or if this is
-         set to empty string), a default textclassifier will be loaded in the calling app's process.
+         If this is empty, the default textclassifier service (i.e. config_servicesExtensionPackage)
+         will be used.
+
          See android.view.textclassifier.TextClassificationManager.
     -->
-    <!-- TODO(b/144896755) remove the config -->
     <string name="config_defaultTextClassifierPackage" translatable="false"></string>
 
-    <!-- A list of supported system textClassifier service package names. Only one of the packages
-         will be activated. The first package in the list is the default system textClassifier
-         service. OS only tries to bind and grant permissions to the first trusted service and the
-         others can be selected via device config. These services must be trusted, as they can be
-         activated without explicit consent of the user. Example: "com.android.textclassifier"
-    -->
-    <string-array name="config_defaultTextClassifierPackages" translatable="false">
-        <item>android.ext.services</item>
-    </string-array>
 
     <!-- The package name for the system companion device manager service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -4352,4 +4343,7 @@
          Determines whether the specified key groups can be used to wake up the device. -->
     <bool name="config_wakeOnDpadKeyPress">true</bool>
     <bool name="config_wakeOnAssistKeyPress">true</bool>
+
+    <!-- Whether to default to an expanded list of users on the lock screen user switcher. -->
+    <bool name="config_expandLockScreenUserSwitcher">false</bool>
 </resources>

@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSection;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 
@@ -66,7 +67,7 @@ import javax.inject.Singleton;
  *  9. The list is handed off to the view layer to be rendered
  */
 @Singleton
-public class NotifPipeline {
+public class NotifPipeline implements CommonNotifCollection {
     private final NotifCollection mNotifCollection;
     private final ShadeListBuilder mShadeListBuilder;
 
@@ -89,10 +90,7 @@ public class NotifPipeline {
         return mNotifCollection.getActiveNotifs();
     }
 
-    /**
-     * Registers a listener to be informed when there is a notification entry event such as an add,
-     * update, or remove.
-     */
+    @Override
     public void addCollectionListener(NotifCollectionListener listener) {
         mNotifCollection.addCollectionListener(listener);
     }

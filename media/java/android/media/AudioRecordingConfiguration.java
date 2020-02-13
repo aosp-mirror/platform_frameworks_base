@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -229,13 +230,19 @@ public final class AudioRecordingConfiguration implements Parcelable {
      * <p>This information is only available if the caller has the
      * {@link android.Manifest.permission.MODIFY_AUDIO_ROUTING}
      * permission.
-     * <br>The result is -1 without the permission.
      * @return the user id
+     * @throws SecurityException Thrown if the caller is missing the MODIFY_AUDIO_ROUTING permission
      *
      * @hide
      */
     @SystemApi
-    public int getClientUid() { return mClientUid; }
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getClientUid() {
+        if (mClientUid == -1) {
+            throw new SecurityException("MODIFY_AUDIO_ROUTING permission is missing");
+        }
+        return mClientUid;
+    }
 
     /**
      * Returns information about the audio input device used for this recording.

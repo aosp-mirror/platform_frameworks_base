@@ -59,6 +59,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
+import com.android.settingslib.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -495,7 +496,7 @@ public class ApplicationsState {
             return;
         }
         synchronized (entry) {
-            entry.ensureIconLocked(mContext, mDrawableFactory);
+            entry.ensureIconLocked(mContext);
         }
     }
 
@@ -1216,7 +1217,7 @@ public class ApplicationsState {
                                 AppEntry entry = mAppEntries.get(i);
                                 if (entry.icon == null || !entry.mounted) {
                                     synchronized (entry) {
-                                        if (entry.ensureIconLocked(mContext, mDrawableFactory)) {
+                                        if (entry.ensureIconLocked(mContext)) {
                                             if (!mRunning) {
                                                 mRunning = true;
                                                 Message m = mMainHandler.obtainMessage(
@@ -1587,10 +1588,10 @@ public class ApplicationsState {
             }
         }
 
-        boolean ensureIconLocked(Context context, IconDrawableFactory drawableFactory) {
+        boolean ensureIconLocked(Context context) {
             if (this.icon == null) {
                 if (this.apkFile.exists()) {
-                    this.icon = drawableFactory.getBadgedIcon(info);
+                    this.icon = Utils.getBadgedIcon(context, info);
                     return true;
                 } else {
                     this.mounted = false;
@@ -1601,7 +1602,7 @@ public class ApplicationsState {
                 // its icon.
                 if (this.apkFile.exists()) {
                     this.mounted = true;
-                    this.icon = drawableFactory.getBadgedIcon(info);
+                    this.icon = Utils.getBadgedIcon(context, info);
                     return true;
                 }
             }

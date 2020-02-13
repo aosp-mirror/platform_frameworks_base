@@ -17,7 +17,6 @@
 package android.timezone;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -45,7 +44,6 @@ import java.util.Objects;
  * @hide
  */
 @VisibleForTesting
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TzDataSetVersion {
 
     /**
@@ -88,7 +86,6 @@ public final class TzDataSetVersion {
      * A checked exception used in connection with time zone data sets.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final class TzDataSetException extends Exception {
 
         /** Creates an instance with a message. */

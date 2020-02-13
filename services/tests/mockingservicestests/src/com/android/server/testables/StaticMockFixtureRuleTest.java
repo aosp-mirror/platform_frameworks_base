@@ -16,8 +16,10 @@
 
 package com.android.server.testables;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -30,6 +32,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
 import org.junit.After;
+import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.Description;
@@ -57,6 +60,8 @@ public class StaticMockFixtureRuleTest {
     @Mock private Supplier<StaticMockFixture> mSupplyA;
     @Mock private Supplier<StaticMockFixture> mSupplyB;
     @Mock private Statement mStatement;
+    @Mock private Statement mSkipStatement;
+    @Mock private Statement mThrowStatement;
     @Mock private Description mDescription;
 
     @Before
@@ -91,17 +96,22 @@ public class StaticMockFixtureRuleTest {
         when(mB1.setUpMockedClasses(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(mB1).setUpMockBehaviors();
         doNothing().when(mStatement).evaluate();
+        doThrow(new AssumptionViolatedException("bad assumption, test should be skipped"))
+                .when(mSkipStatement).evaluate();
+        doThrow(new IllegalArgumentException("bad argument, test should be failed"))
+                .when(mThrowStatement).evaluate();
         doNothing().when(mA1).tearDown();
         doNothing().when(mB1).tearDown();
     }
 
     private InOrder mocksInOrder()  {
-        return inOrder(mSessionBuilder, mSession, mSupplyA, mSupplyB,
-                mA1, mA2, mB1, mB2, mStatement, mDescription);
+        return inOrder(mSessionBuilder, mSession, mSupplyA, mSupplyB, mA1, mA2, mB1, mB2,
+                mStatement, mSkipStatement, mThrowStatement, mDescription);
     }
 
     private void verifyNoMoreImportantMockInteractions()  {
-        verifyNoMoreInteractions(mSupplyA, mSupplyB, mA1, mA2, mB1, mB2, mStatement);
+        verifyNoMoreInteractions(mSupplyA, mSupplyB, mA1, mA2, mB1, mB2, mStatement,
+                mSkipStatement, mThrowStatement);
     }
 
     @Test
@@ -180,6 +190,68 @@ public class StaticMockFixtureRuleTest {
         // note: tearDown in reverse order
         inOrder.verify(mB2).tearDown();
         inOrder.verify(mA2).tearDown();
+
+        verifyNoMoreImportantMockInteractions();
+    }
+
+    @Test
+    public void testTearDownOnSkippedTests() throws Throwable {
+        InOrder inOrder = mocksInOrder();
+
+        StaticMockFixtureRule rule = new StaticMockFixtureRule(mA1, mB1) {
+            @Override public StaticMockitoSessionBuilder getSessionBuilder() {
+                return mSessionBuilder;
+            }
+        };
+        Statement skipStatement = rule.apply(mSkipStatement, mDescription);
+
+        inOrder.verify(mA1).setUpMockedClasses(any(StaticMockitoSessionBuilder.class));
+        inOrder.verify(mB1).setUpMockedClasses(any(StaticMockitoSessionBuilder.class));
+        inOrder.verify(mA1).setUpMockBehaviors();
+        inOrder.verify(mB1).setUpMockBehaviors();
+
+        try {
+            skipStatement.evaluate();
+            fail("AssumptionViolatedException should have been thrown");
+        } catch (AssumptionViolatedException e) {
+            // expected
+        }
+
+        inOrder.verify(mSkipStatement).evaluate();
+        // note: tearDown in reverse order
+        inOrder.verify(mB1).tearDown();
+        inOrder.verify(mA1).tearDown();
+
+        verifyNoMoreImportantMockInteractions();
+    }
+
+    @Test
+    public void testTearDownOnFailedTests() throws Throwable {
+        InOrder inOrder = mocksInOrder();
+
+        StaticMockFixtureRule rule = new StaticMockFixtureRule(mA1, mB1) {
+            @Override public StaticMockitoSessionBuilder getSessionBuilder() {
+                return mSessionBuilder;
+            }
+        };
+        Statement failStatement = rule.apply(mThrowStatement, mDescription);
+
+        inOrder.verify(mA1).setUpMockedClasses(any(StaticMockitoSessionBuilder.class));
+        inOrder.verify(mB1).setUpMockedClasses(any(StaticMockitoSessionBuilder.class));
+        inOrder.verify(mA1).setUpMockBehaviors();
+        inOrder.verify(mB1).setUpMockBehaviors();
+
+        try {
+            failStatement.evaluate();
+            fail("IllegalArgumentException should have been thrown");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        inOrder.verify(mThrowStatement).evaluate();
+        // note: tearDown in reverse order
+        inOrder.verify(mB1).tearDown();
+        inOrder.verify(mA1).tearDown();
 
         verifyNoMoreImportantMockInteractions();
     }

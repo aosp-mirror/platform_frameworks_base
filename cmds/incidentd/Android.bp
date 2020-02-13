@@ -43,7 +43,7 @@ cc_binary {
     ],
 
     local_include_dirs: ["src"],
-    generated_headers: ["gen-platform-proto-constants"],
+    generated_headers: ["framework-cppstream-protos"],
 
     proto: {
         type: "lite",
@@ -54,7 +54,7 @@ cc_binary {
         "libbinder",
         "libdebuggerd_client",
         "libdumputils",
-        "libincident",
+        "libincidentpriv",
         "liblog",
         "libprotoutil",
         "libservices",
@@ -98,7 +98,7 @@ cc_test {
     ],
 
     local_include_dirs: ["src"],
-    generated_headers: ["gen-platform-proto-constants"],
+    generated_headers: ["framework-cppstream-protos"],
 
     srcs: [
         "tests/**/*.cpp",
@@ -128,7 +128,7 @@ cc_test {
         "libbinder",
         "libdebuggerd_client",
         "libdumputils",
-        "libincident",
+        "libincidentpriv",
         "liblog",
         "libprotobuf-cpp-full",
         "libprotoutil",

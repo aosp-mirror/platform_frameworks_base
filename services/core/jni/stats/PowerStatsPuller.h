@@ -29,7 +29,7 @@ namespace stats {
 class PowerStatsPuller {
 public:
     PowerStatsPuller();
-    status_pull_atom_return_t Pull(int32_t atomTag, pulled_stats_event_list* data);
+    AStatsManager_PullAtomCallbackReturn Pull(int32_t atomTag, AStatsEventList* data);
 };
 
 } // namespace stats

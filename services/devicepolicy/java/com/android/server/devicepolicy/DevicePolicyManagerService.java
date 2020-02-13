@@ -4680,12 +4680,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void ensureMinimumQuality(
             int userId, ActiveAdmin admin, int minimumQuality, String operation) {
-        if (admin.mPasswordPolicy.quality < minimumQuality
-                && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
-                userId)) {
-            throw new IllegalStateException(String.format(
-                    "password quality should be at least %d for %s", minimumQuality, operation));
-        }
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            if (admin.mPasswordPolicy.quality < minimumQuality
+                    && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
+                    userId)) {
+                throw new IllegalStateException(String.format(
+                        "password quality should be at least %d for %s",
+                        minimumQuality, operation));
+            }
+        });
     }
 
     @Override
@@ -5343,7 +5346,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin admin = getAdminWithMinimumFailedPasswordsForWipeLocked(
                     userHandle, parent);
-            return admin != null ? admin.getUserHandle().getIdentifier() : UserHandle.USER_NULL;
+            return admin != null ? getUserIdToWipeForFailedPasswords(admin) : UserHandle.USER_NULL;
         }
     }
 
@@ -5354,7 +5357,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      *   <li>this user and all profiles that don't have their own challenge otherwise.
      * </ul>
      * <p>If the policy for the primary and any other profile are equal, it returns the admin for
-     * the primary profile.
+     * the primary profile. Policy of a PO on an organization-owned device applies to the primary
+     * profile.
      * Returns {@code null} if no participating admin has that policy set.
      */
     private ActiveAdmin getAdminWithMinimumFailedPasswordsForWipeLocked(
@@ -5373,7 +5377,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             // We always favor the primary profile if several profiles have the same value set.
-            int userId = admin.getUserHandle().getIdentifier();
+            final int userId = getUserIdToWipeForFailedPasswords(admin);
             if (count == 0 ||
                     count > admin.maximumFailedPasswordsForWipe ||
                     (count == admin.maximumFailedPasswordsForWipe &&
@@ -7170,7 +7174,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (wipeData && strictestAdmin != null) {
-            final int userId = strictestAdmin.getUserHandle().getIdentifier();
+            final int userId = getUserIdToWipeForFailedPasswords(strictestAdmin);
             Slog.i(LOG_TAG, "Max failed password attempts policy reached for admin: "
                     + strictestAdmin.info.getComponent().flattenToShortString()
                     + ". Calling wipeData for user " + userId);
@@ -7199,6 +7203,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
                     /*result*/ 0, /*method strength*/ 1);
         }
+    }
+
+    /**
+     * Returns which user should be wiped if this admin's maximum filed password attempts policy is
+     * violated.
+     */
+    private int getUserIdToWipeForFailedPasswords(ActiveAdmin admin) {
+        final int userId = admin.getUserHandle().getIdentifier();
+        final ComponentName component = admin.info.getComponent();
+        return isProfileOwnerOfOrganizationOwnedDevice(component, userId)
+                ? getProfileParentId(userId) : userId;
     }
 
     @Override
@@ -11583,6 +11598,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 millis, "DevicePolicyManagerService: setTime");
         mInjector.binderWithCleanCallingIdentity(
                 () -> mInjector.getTimeDetector().suggestManualTime(manualTimeSuggestion));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_TIME)
+                .setAdmin(who)
+                .write();
         return true;
     }
 
@@ -11599,6 +11619,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         timeZone, "DevicePolicyManagerService: setTimeZone");
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getTimeZoneDetector().suggestManualTimeZone(manualTimeZoneSuggestion));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_TIME_ZONE)
+                .setAdmin(who)
+                .write();
         return true;
     }
 

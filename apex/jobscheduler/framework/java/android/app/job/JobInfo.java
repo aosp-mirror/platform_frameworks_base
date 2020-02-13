@@ -1287,7 +1287,7 @@ public class JobInfo implements Parcelable {
          * {@link #setPeriodic(long)} or {@link #setPersisted(boolean)}.  To continually monitor
          * for content changes, you need to schedule a new JobInfo observing the same URIs
          * before you finish execution of the JobService handling the most recent changes.
-         * Following this pattern will ensure you do not lost any content changes: while your
+         * Following this pattern will ensure you do not lose any content changes: while your
          * job is running, the system will continue monitoring for content changes, and propagate
          * any it sees over to the next job you schedule.</p>
          *

@@ -25,6 +25,7 @@ import android.media.IMediaRoute2Provider;
 import android.media.IMediaRoute2ProviderClient;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -93,6 +94,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     }
 
     @Override
+    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+        if (mConnectionReady) {
+            mActiveConnection.updateDiscoveryPreference(discoveryPreference);
+            updateBinding();
+        }
+    }
+
+    @Override
     public void selectRoute(String sessionId, String routeId) {
         if (mConnectionReady) {
             mActiveConnection.selectRoute(sessionId, routeId);
@@ -125,14 +134,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     public void requestSetVolume(String routeId, int volume) {
         if (mConnectionReady) {
             mActiveConnection.requestSetVolume(routeId, volume);
-            updateBinding();
-        }
-    }
-
-    @Override
-    public void requestUpdateVolume(String routeId, int delta) {
-        if (mConnectionReady) {
-            mActiveConnection.requestUpdateVolume(routeId, delta);
             updateBinding();
         }
     }
@@ -461,6 +462,14 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
             }
         }
 
+        public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+            try {
+                mProvider.updateDiscoveryPreference(discoveryPreference);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "updateDiscoveryPreference(): Failed to deliver request.");
+            }
+        }
+
         public void selectRoute(String sessionId, String routeId) {
             try {
                 mProvider.selectRoute(sessionId, routeId);
@@ -498,14 +507,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
                 mProvider.requestSetVolume(routeId, volume);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to request set volume.", ex);
-            }
-        }
-
-        public void requestUpdateVolume(String routeId, int delta) {
-            try {
-                mProvider.requestUpdateVolume(routeId, delta);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to deliver request to request update volume.", ex);
             }
         }
 

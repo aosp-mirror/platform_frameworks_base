@@ -20,7 +20,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Application;
 import android.net.MacAddress;
 import android.net.MatchAllNetworkSpecifier;
 import android.net.NetworkRequest;
@@ -28,13 +27,9 @@ import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
-import android.os.Process;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -438,24 +433,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
             return new WifiNetworkSpecifier(
                     mSsidPatternMatcher,
                     mBssidPatternMatcher,
-                    buildWifiConfiguration(),
-                    Process.myUid(),
-                    getCurrentApplicationReflectively().getApplicationContext().getOpPackageName());
-        }
-
-        // TODO(b/144102365): Remove once refactor is complete
-        private static Application getCurrentApplicationReflectively() {
-            try {
-                // reflection for static method android.app.ActivityThread#currentApplication()
-                Class<?> klass = Class.forName("android.app.ActivityThread");
-                Method currentApplicationMethod = klass.getDeclaredMethod("currentApplication");
-                Object result = currentApplicationMethod.invoke(null);
-                return (Application) result;
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
-                    | InvocationTargetException e) {
-                Log.e(TAG, "Failed to call ActivityThread#currentApplication() reflectively!", e);
-                throw new RuntimeException(e);
-            }
+                    buildWifiConfiguration());
         }
     }
 
@@ -483,20 +461,6 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
      */
     public final WifiConfiguration wifiConfiguration;
 
-    /**
-     * The UID of the process initializing this network specifier. Validated by receiver using
-     * checkUidIfNecessary() and is used by satisfiedBy() to determine whether the specifier
-     * matches the offered network.
-     * @hide
-     */
-    public final int requestorUid;
-
-    /**
-     * The package name of the app initializing this network specifier.
-     * @hide
-     */
-    public final String requestorPackageName;
-
     /** @hide */
     public WifiNetworkSpecifier() throws IllegalAccessException {
         throw new IllegalAccessException("Use the builder to create an instance");
@@ -505,18 +469,14 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
     /** @hide */
     public WifiNetworkSpecifier(@NonNull PatternMatcher ssidPatternMatcher,
                                 @NonNull Pair<MacAddress, MacAddress> bssidPatternMatcher,
-                                @NonNull WifiConfiguration wifiConfiguration,
-                                int requestorUid, @NonNull String requestorPackageName) {
+                                @NonNull WifiConfiguration wifiConfiguration) {
         checkNotNull(ssidPatternMatcher);
         checkNotNull(bssidPatternMatcher);
         checkNotNull(wifiConfiguration);
-        checkNotNull(requestorPackageName);
 
         this.ssidPatternMatcher = ssidPatternMatcher;
         this.bssidPatternMatcher = bssidPatternMatcher;
         this.wifiConfiguration = wifiConfiguration;
-        this.requestorUid = requestorUid;
-        this.requestorPackageName = requestorPackageName;
     }
 
     public static final @NonNull Creator<WifiNetworkSpecifier> CREATOR =
@@ -529,10 +489,8 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                     Pair<MacAddress, MacAddress> bssidPatternMatcher =
                             Pair.create(baseAddress, mask);
                     WifiConfiguration wifiConfiguration = in.readParcelable(null);
-                    int requestorUid = in.readInt();
-                    String requestorPackageName = in.readString();
                     return new WifiNetworkSpecifier(ssidPatternMatcher, bssidPatternMatcher,
-                            wifiConfiguration, requestorUid, requestorPackageName);
+                            wifiConfiguration);
                 }
 
                 @Override
@@ -552,18 +510,13 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         dest.writeParcelable(bssidPatternMatcher.first, flags);
         dest.writeParcelable(bssidPatternMatcher.second, flags);
         dest.writeParcelable(wifiConfiguration, flags);
-        dest.writeInt(requestorUid);
-        dest.writeString(requestorPackageName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
-                ssidPatternMatcher.getPath(),
-                ssidPatternMatcher.getType(),
-                bssidPatternMatcher,
-                wifiConfiguration.allowedKeyManagement,
-                requestorUid, requestorPackageName);
+                ssidPatternMatcher.getPath(), ssidPatternMatcher.getType(), bssidPatternMatcher,
+                wifiConfiguration.allowedKeyManagement);
     }
 
     @Override
@@ -582,9 +535,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                 && Objects.equals(this.bssidPatternMatcher,
                     lhs.bssidPatternMatcher)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
-                    lhs.wifiConfiguration.allowedKeyManagement)
-                && requestorUid == lhs.requestorUid
-                && TextUtils.equals(requestorPackageName, lhs.requestorPackageName);
+                    lhs.wifiConfiguration.allowedKeyManagement);
     }
 
     @Override
@@ -595,8 +546,6 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
                 .append(", BSSID Match pattern=").append(bssidPatternMatcher)
                 .append(", SSID=").append(wifiConfiguration.SSID)
                 .append(", BSSID=").append(wifiConfiguration.BSSID)
-                .append(", requestorUid=").append(requestorUid)
-                .append(", requestorPackageName=").append(requestorPackageName)
                 .append("]")
                 .toString();
     }
@@ -617,13 +566,5 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         // Specific requests are checked for equality although testing for equality of 2 patterns do
         // not make much sense!
         return equals(other);
-    }
-
-    /** @hide */
-    @Override
-    public void assertValidFromUid(int requestorUid) {
-        if (this.requestorUid != requestorUid) {
-            throw new SecurityException("mismatched UIDs");
-        }
     }
 }

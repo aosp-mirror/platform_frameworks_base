@@ -18,7 +18,6 @@
 
 #include "FieldValue.h"
 
-#include <android/frameworks/stats/1.0/types.h>
 #include <android/util/ProtoOutputStream.h>
 #include <private/android_logger.h>
 #include <stats_event_list.h>
@@ -26,8 +25,6 @@
 
 #include <string>
 #include <vector>
-
-using namespace android::frameworks::stats::V1_0;
 
 namespace android {
 namespace os {
@@ -103,9 +100,6 @@ public:
                       const std::vector<uint8_t>& experimentIds, int32_t userId);
 
     explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                      const VendorAtom& vendorAtom);
-
-    explicit LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                       const InstallTrainInfo& installTrainInfo);
 
     ~LogEvent();
@@ -144,6 +138,7 @@ public:
     const char* GetString(size_t key, status_t* err) const;
     bool GetBool(size_t key, status_t* err) const;
     float GetFloat(size_t key, status_t* err) const;
+    std::vector<uint8_t> GetStorage(size_t key, status_t* err) const;
 
     /**
      * Write test data to the LogEvent. This can only be used when the LogEvent is constructed
@@ -212,6 +207,22 @@ public:
 
     inline LogEvent makeCopy() {
         return LogEvent(*this);
+    }
+
+    template <class T>
+    status_t updateValue(size_t key, T& value, Type type) {
+        int field = getSimpleField(key);
+        for (auto& fieldValue : mValues) {
+            if (fieldValue.mField.getField() == field) {
+                if (fieldValue.mValue.getType() == type) {
+                    fieldValue.mValue = Value(value);
+                   return OK;
+               } else {
+                   return BAD_TYPE;
+                }
+            }
+        }
+        return BAD_INDEX;
     }
 
 private:

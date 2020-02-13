@@ -2480,7 +2480,7 @@ public class StatsPullAtomService extends SystemService {
                 .writeString(Build.BRAND)
                 .writeString(Build.PRODUCT)
                 .writeString(Build.DEVICE)
-                .writeString(Build.VERSION.RELEASE)
+                .writeString(Build.VERSION.RELEASE_OR_CODENAME)
                 .writeString(Build.ID)
                 .writeString(Build.VERSION.INCREMENTAL)
                 .writeString(Build.TYPE)

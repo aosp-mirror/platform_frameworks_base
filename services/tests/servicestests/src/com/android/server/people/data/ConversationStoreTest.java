@@ -37,6 +37,7 @@ import java.util.Set;
 public final class ConversationStoreTest {
 
     private static final String SHORTCUT_ID = "abc";
+    private static final String NOTIFICATION_CHANNEL_ID = "test : abc";
     private static final LocusId LOCUS_ID = new LocusId("def");
     private static final Uri CONTACT_URI = Uri.parse("tel:+1234567890");
     private static final String PHONE_NUMBER = "+1234567890";
@@ -59,16 +60,19 @@ public final class ConversationStoreTest {
 
     @Test
     public void testUpdateConversation() {
-        ConversationInfo original =
-                buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI, PHONE_NUMBER);
+        ConversationInfo original = buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI,
+                PHONE_NUMBER, null);
         mConversationStore.addOrUpdate(original);
         assertEquals(LOCUS_ID, mConversationStore.getConversation(SHORTCUT_ID).getLocusId());
+        assertNull(mConversationStore.getConversation(SHORTCUT_ID).getNotificationChannelId());
 
         LocusId newLocusId = new LocusId("ghi");
         ConversationInfo update = buildConversationInfo(
-                SHORTCUT_ID, newLocusId, CONTACT_URI, PHONE_NUMBER);
+                SHORTCUT_ID, newLocusId, CONTACT_URI, PHONE_NUMBER, NOTIFICATION_CHANNEL_ID);
         mConversationStore.addOrUpdate(update);
-        assertEquals(newLocusId, mConversationStore.getConversation(SHORTCUT_ID).getLocusId());
+        ConversationInfo updated = mConversationStore.getConversation(SHORTCUT_ID);
+        assertEquals(newLocusId, updated.getLocusId());
+        assertEquals(NOTIFICATION_CHANNEL_ID, updated.getNotificationChannelId());
     }
 
     @Test
@@ -97,8 +101,8 @@ public final class ConversationStoreTest {
 
     @Test
     public void testGetConversationByLocusId() {
-        ConversationInfo in =
-                buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI, PHONE_NUMBER);
+        ConversationInfo in = buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI,
+                PHONE_NUMBER, NOTIFICATION_CHANNEL_ID);
         mConversationStore.addOrUpdate(in);
         ConversationInfo out = mConversationStore.getConversationByLocusId(LOCUS_ID);
         assertNotNull(out);
@@ -110,8 +114,8 @@ public final class ConversationStoreTest {
 
     @Test
     public void testGetConversationByContactUri() {
-        ConversationInfo in =
-                buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI, PHONE_NUMBER);
+        ConversationInfo in = buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI,
+                PHONE_NUMBER, NOTIFICATION_CHANNEL_ID);
         mConversationStore.addOrUpdate(in);
         ConversationInfo out = mConversationStore.getConversationByContactUri(CONTACT_URI);
         assertNotNull(out);
@@ -123,8 +127,8 @@ public final class ConversationStoreTest {
 
     @Test
     public void testGetConversationByPhoneNumber() {
-        ConversationInfo in =
-                buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI, PHONE_NUMBER);
+        ConversationInfo in = buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI,
+                PHONE_NUMBER, NOTIFICATION_CHANNEL_ID);
         mConversationStore.addOrUpdate(in);
         ConversationInfo out = mConversationStore.getConversationByPhoneNumber(PHONE_NUMBER);
         assertNotNull(out);
@@ -134,17 +138,34 @@ public final class ConversationStoreTest {
         assertNull(mConversationStore.getConversationByPhoneNumber(PHONE_NUMBER));
     }
 
+    @Test
+    public void testGetConversationByNotificationChannelId() {
+        ConversationInfo in = buildConversationInfo(SHORTCUT_ID, LOCUS_ID, CONTACT_URI,
+                PHONE_NUMBER, NOTIFICATION_CHANNEL_ID);
+        mConversationStore.addOrUpdate(in);
+        ConversationInfo out = mConversationStore.getConversationByNotificationChannelId(
+                NOTIFICATION_CHANNEL_ID);
+        assertNotNull(out);
+        assertEquals(SHORTCUT_ID, out.getShortcutId());
+
+        mConversationStore.deleteConversation(SHORTCUT_ID);
+        assertNull(
+                mConversationStore.getConversationByNotificationChannelId(NOTIFICATION_CHANNEL_ID));
+    }
+
     private static ConversationInfo buildConversationInfo(String shortcutId) {
-        return buildConversationInfo(shortcutId, null, null, null);
+        return buildConversationInfo(shortcutId, null, null, null, null);
     }
 
     private static ConversationInfo buildConversationInfo(
-            String shortcutId, LocusId locusId, Uri contactUri, String phoneNumber) {
+            String shortcutId, LocusId locusId, Uri contactUri, String phoneNumber,
+            String notificationChannelId) {
         return new ConversationInfo.Builder()
                 .setShortcutId(shortcutId)
                 .setLocusId(locusId)
                 .setContactUri(contactUri)
                 .setContactPhoneNumber(phoneNumber)
+                .setNotificationChannelId(notificationChannelId)
                 .setShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED)
                 .setVip(true)
                 .setBubbled(true)

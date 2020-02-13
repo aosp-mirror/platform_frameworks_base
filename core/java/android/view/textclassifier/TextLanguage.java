@@ -230,6 +230,7 @@ public final class TextLanguage implements Parcelable {
         @Nullable private String mCallingPackageName;
         @UserIdInt
         private int mUserId = UserHandle.USER_NULL;
+        private boolean mUseDefaultTextClassifier;
 
         private Request(CharSequence text, Bundle bundle) {
             mText = text;
@@ -283,6 +284,26 @@ public final class TextLanguage implements Parcelable {
         }
 
         /**
+         * Sets whether to use the default text classifier to handle this request.
+         * This will be ignored if it is not the system text classifier to handle this request.
+         *
+         * @hide
+         */
+        void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
+            mUseDefaultTextClassifier = useDefaultTextClassifier;
+        }
+
+        /**
+         * Returns whether to use the default text classifier to handle this request. This
+         * will be ignored if it is not the system text classifier to handle this request.
+         *
+         * @hide
+         */
+        public boolean getUseDefaultTextClassifier() {
+            return mUseDefaultTextClassifier;
+        }
+
+        /**
          * Returns a bundle containing non-structured extra information about this request.
          *
          * <p><b>NOTE: </b>Do not modify this bundle.
@@ -303,6 +324,7 @@ public final class TextLanguage implements Parcelable {
             dest.writeString(mCallingPackageName);
             dest.writeInt(mUserId);
             dest.writeBundle(mExtra);
+            dest.writeBoolean(mUseDefaultTextClassifier);
         }
 
         private static Request readFromParcel(Parcel in) {
@@ -310,10 +332,12 @@ public final class TextLanguage implements Parcelable {
             final String callingPackageName = in.readString();
             final int userId = in.readInt();
             final Bundle extra = in.readBundle();
+            final boolean useDefaultTextClassifier = in.readBoolean();
 
             final Request request = new Request(text, extra);
             request.setCallingPackageName(callingPackageName);
             request.setUserId(userId);
+            request.setUseDefaultTextClassifier(useDefaultTextClassifier);
             return request;
         }
 

@@ -181,14 +181,14 @@ public class AlwaysOnHotwordDetector {
      * Returned by {@link #getSupportedAudioCapabilities()}
      */
     public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION =
-            SoundTrigger.ModuleProperties.CAPABILITY_ECHO_CANCELLATION;
+            SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION;
 
     /**
      * If set, the underlying module supports noise suppression.
      * Returned by {@link #getSupportedAudioCapabilities()}
      */
     public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION =
-            SoundTrigger.ModuleProperties.CAPABILITY_NOISE_SUPPRESSION;
+            SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -249,21 +249,21 @@ public class AlwaysOnHotwordDetector {
         }
 
         /**
-         * The inclusive start of supported range.
+         * Get the beginning of the param range
          *
-         * @return start of range
+         * @return The inclusive start of the supported range.
          */
-        public int start() {
-            return mModelParamRange.start;
+        public int getStart() {
+            return mModelParamRange.getStart();
         }
 
         /**
-         * The inclusive end of supported range.
+         * Get the end of the param range
          *
-         * @return end of range
+         * @return The inclusive end of the supported range.
          */
-        public int end() {
-            return mModelParamRange.end;
+        public int getEnd() {
+            return mModelParamRange.getEnd();
         }
 
         @Override

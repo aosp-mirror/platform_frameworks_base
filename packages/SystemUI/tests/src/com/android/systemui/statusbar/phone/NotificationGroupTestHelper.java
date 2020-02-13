@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -87,7 +86,6 @@ public final class NotificationGroupTestHelper {
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
         entry.setRow(row);
         when(row.getEntry()).thenReturn(entry);
-        when(row.isInflationFlagSet(anyInt())).thenReturn(true);
         return entry;
     }
 }

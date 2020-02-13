@@ -16,6 +16,7 @@
 
 package android.net.wifi.wificond;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -33,7 +34,7 @@ import java.util.Objects;
  */
 @SystemApi
 public final class PnoSettings implements Parcelable {
-    private int mIntervalMs;
+    private long mIntervalMs;
     private int mMin2gRssi;
     private int mMin5gRssi;
     private int mMin6gRssi;
@@ -47,17 +48,17 @@ public final class PnoSettings implements Parcelable {
      *
      * @return An interval in milliseconds.
      */
-    public int getIntervalMillis() {
+    public @DurationMillisLong long getIntervalMillis() {
         return mIntervalMs;
     }
 
     /**
      * Set the requested PNO scan interval in milliseconds.
      *
-     * @param intervalMs An interval in milliseconds.
+     * @param intervalMillis An interval in milliseconds.
      */
-    public void setIntervalMillis(int intervalMs) {
-        this.mIntervalMs = intervalMs;
+    public void setIntervalMillis(@DurationMillisLong long intervalMillis) {
+        this.mIntervalMs = intervalMillis;
     }
 
     /**
@@ -176,7 +177,7 @@ public final class PnoSettings implements Parcelable {
      **/
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeInt(mIntervalMs);
+        out.writeLong(mIntervalMs);
         out.writeInt(mMin2gRssi);
         out.writeInt(mMin5gRssi);
         out.writeInt(mMin6gRssi);
@@ -189,7 +190,7 @@ public final class PnoSettings implements Parcelable {
         @Override
         public PnoSettings createFromParcel(Parcel in) {
             PnoSettings result = new PnoSettings();
-            result.mIntervalMs = in.readInt();
+            result.mIntervalMs = in.readLong();
             result.mMin2gRssi = in.readInt();
             result.mMin5gRssi = in.readInt();
             result.mMin6gRssi = in.readInt();

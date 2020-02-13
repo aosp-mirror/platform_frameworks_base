@@ -34,10 +34,13 @@
          http://smscoin.net/software/engine/WordPress/Paid+SMS-registration/ -->
 
     <!-- Arab Emirates -->
-    <shortcode country="ae" pattern="\\d{1,5}" free="3214|1017" />
+    <shortcode country="ae" pattern="\\d{1,5}" free="1017|1355|3214" />
 
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
+
+    <!-- Argentia: 5 digits, known short codes listed -->
+    <shortcode country="ar" pattern="\\d{5}" free="11711|28291" />
 
     <!-- Armenia: 3-4 digits, emergency numbers 10[123] -->
     <shortcode country="am" pattern="\\d{3,4}" premium="11[2456]1|3024" free="10[123]" />
@@ -80,7 +83,7 @@
     <shortcode country="cn" premium="1066.*" free="1065.*" />
 
     <!-- Colombia: 1-6 digits (not confirmed) -->
-    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160" />
+    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960" />
 
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
@@ -181,7 +184,7 @@
     <shortcode country="mk" pattern="\\d{1,6}" free="129005|122" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="46645|5050|26259|50025|50052|9963|76551" />
+    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288" />
@@ -196,7 +199,7 @@
     <shortcode country="no" pattern="\\d{4,5}" premium="2201|222[67]" free="2171" />
 
     <!-- New Zealand: 3-4 digits, known premium codes listed -->
-    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
+    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|176|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
 
     <!-- Peru: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="pe" pattern="\\d{4,5}" free="9963" />
@@ -263,5 +266,8 @@
 
     <!-- Mayotte (French Territory): 1-5 digits (not confirmed) -->
     <shortcode country="yt" pattern="\\d{1,5}" free="38600,36300,36303,959" />
+
+    <!-- South Africa -->
+    <shortcode country="za" pattern="\d{1,5}" free="44136" />
 
 </shortcodes>

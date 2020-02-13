@@ -36,7 +36,6 @@ import com.android.server.appop.AppOpsService;
 import com.android.server.testables.TestableDeviceConfig;
 
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -268,7 +267,9 @@ public final class CachedAppOptimizerTest {
 
     @Test
     public void useFreeze_doesNotListenToDeviceConfigChanges() throws InterruptedException {
-        Assume.assumeTrue(mCachedAppOptimizerUnderTest.isFreezerSupported());
+        if (!mCachedAppOptimizerUnderTest.isFreezerSupported()) {
+            return;
+        }
 
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isEqualTo(
                 CachedAppOptimizer.DEFAULT_USE_FREEZER);

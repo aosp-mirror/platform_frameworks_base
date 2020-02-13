@@ -384,4 +384,38 @@ public class LocalMediaManagerTest {
 
         verify(mCallback).onDeviceAttributesChanged();
     }
+
+    @Test
+    public void getActiveMediaDevice_checkList() {
+        final List<MediaDevice> devices = new ArrayList<>();
+        final MediaDevice device1 = mock(MediaDevice.class);
+        final MediaDevice device2 = mock(MediaDevice.class);
+        final MediaDevice device3 = mock(MediaDevice.class);
+        device1.mType = MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE;
+        device2.mType = MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE;
+        device3.mType = MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
+        when(device1.getClientPackageName()).thenReturn(TEST_DEVICE_ID_1);
+        when(device2.getClientPackageName()).thenReturn(TEST_DEVICE_ID_2);
+        when(device3.getClientPackageName()).thenReturn(TEST_DEVICE_ID_3);
+        when(device1.getId()).thenReturn(TEST_DEVICE_ID_1);
+        when(device2.getId()).thenReturn(TEST_DEVICE_ID_2);
+        when(device3.getId()).thenReturn(TEST_DEVICE_ID_3);
+        devices.add(device1);
+        devices.add(device2);
+        devices.add(device3);
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
+
+        List<MediaDevice> activeDevices = mLocalMediaManager.getActiveMediaDevice(
+                MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE);
+        assertThat(activeDevices).containsExactly(device1);
+
+        activeDevices = mLocalMediaManager.getActiveMediaDevice(
+                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
+        assertThat(activeDevices).containsExactly(device2);
+
+        activeDevices = mLocalMediaManager.getActiveMediaDevice(
+                MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE);
+        assertThat(activeDevices).containsExactly(device3);
+    }
 }

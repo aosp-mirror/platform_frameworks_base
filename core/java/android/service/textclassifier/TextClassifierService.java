@@ -27,7 +27,6 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
@@ -394,21 +393,39 @@ public abstract class TextClassifierService extends Service {
      */
     @Deprecated
     public final TextClassifier getLocalTextClassifier() {
-        // Deprecated: In the future, we may not guarantee that this runs in the service's process.
-        return getDefaultTextClassifierImplementation(this);
+        return TextClassifier.NO_OP;
     }
 
     /**
      * Returns the platform's default TextClassifier implementation.
+     *
+     * @throws RuntimeException if the TextClassifier from
+     *                          PackageManager#getDefaultTextClassifierPackageName() calls
+     *                          this method.
      */
     @NonNull
     public static TextClassifier getDefaultTextClassifierImplementation(@NonNull Context context) {
         final TextClassificationManager tcm =
                 context.getSystemService(TextClassificationManager.class);
-        if (tcm != null) {
+        if (tcm == null) {
+            return TextClassifier.NO_OP;
+        }
+        TextClassificationConstants settings = new TextClassificationConstants();
+        if (settings.getUseDefaultTextClassifierAsDefaultImplementation()) {
+            final String defaultTextClassifierPackageName =
+                    context.getPackageManager().getDefaultTextClassifierPackageName();
+            if (TextUtils.isEmpty(defaultTextClassifierPackageName)) {
+                return TextClassifier.NO_OP;
+            }
+            if (defaultTextClassifierPackageName.equals(context.getPackageName())) {
+                throw new RuntimeException(
+                        "The default text classifier itself should not call the"
+                                + "getDefaultTextClassifierImplementation() method.");
+            }
+            return tcm.getTextClassifier(TextClassifier.DEFAULT_SERVICE);
+        } else {
             return tcm.getTextClassifier(TextClassifier.LOCAL);
         }
-        return TextClassifier.NO_OP;
     }
 
     /** @hide **/
@@ -434,46 +451,20 @@ public abstract class TextClassifierService extends Service {
     }
 
     /**
-     * Returns the component name of the system default textclassifier service if it can be found
-     * on the system. Otherwise, returns null.
+     * Returns the component name of the textclassifier service from the given package.
+     * Otherwise, returns null.
      *
-     * @param context the text classification context
+     * @param context
+     * @param packageName  the package to look for.
+     * @param resolveFlags the flags that are used by PackageManager to resolve the component name.
      * @hide
      */
     @Nullable
-    public static ComponentName getServiceComponentName(@NonNull Context context) {
-        final TextClassificationConstants settings = TextClassificationManager.getSettings(context);
-        // get override TextClassifierService package name
-        String packageName = settings.getTextClassifierServicePackageOverride();
-
-        ComponentName serviceComponent = null;
-        final boolean isOverrideService = !TextUtils.isEmpty(packageName);
-        if (isOverrideService) {
-            serviceComponent = getServiceComponentNameByPackage(context, packageName,
-                    isOverrideService);
-        }
-        if (serviceComponent != null) {
-            return serviceComponent;
-        }
-        // If no TextClassifierService override or invalid override package name, read the first
-        // package defined in the config
-        final String[] packages = context.getPackageManager().getSystemTextClassifierPackages();
-        if (packages.length == 0 || TextUtils.isEmpty(packages[0])) {
-            Slog.d(LOG_TAG, "No configured system TextClassifierService");
-            return null;
-        }
-        packageName = packages[0];
-        serviceComponent = getServiceComponentNameByPackage(context, packageName,
-                isOverrideService);
-        return serviceComponent;
-    }
-
-    private static ComponentName getServiceComponentNameByPackage(Context context,
-            String packageName, boolean isOverrideService) {
+    public static ComponentName getServiceComponentName(
+            Context context, String packageName, int resolveFlags) {
         final Intent intent = new Intent(SERVICE_INTERFACE).setPackage(packageName);
 
-        final int flags = isOverrideService ? 0 : PackageManager.MATCH_SYSTEM_ONLY;
-        final ResolveInfo ri = context.getPackageManager().resolveService(intent, flags);
+        final ResolveInfo ri = context.getPackageManager().resolveService(intent, resolveFlags);
 
         if ((ri == null) || (ri.serviceInfo == null)) {
             Slog.w(LOG_TAG, String.format("Package or service not found in package %s for user %d",

@@ -19,6 +19,10 @@ package com.android.systemui.statusbar.notification.dagger;
 import android.content.Context;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
@@ -44,5 +48,17 @@ public class NotificationsModule {
         } else {
             return stubController.get();
         }
+    }
+
+    /**
+     * Provide the active notification collection managing the notifications to render.
+     */
+    @Provides
+    @Singleton
+    public CommonNotifCollection provideCommonNotifCollection(
+            FeatureFlags featureFlags,
+            Lazy<NotifPipeline> pipeline,
+            NotificationEntryManager entryManager) {
+        return featureFlags.isNewNotifPipelineRenderingEnabled() ? pipeline.get() : entryManager;
     }
 }

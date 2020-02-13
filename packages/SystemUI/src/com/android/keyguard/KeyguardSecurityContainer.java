@@ -39,7 +39,6 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.SurfaceControl;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -149,8 +148,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mViewConfiguration = ViewConfiguration.get(context);
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mSecondaryLockScreenController = new AdminSecondaryLockScreenController(context, this,
-                mUpdateMonitor, mCallback, new Handler(Looper.myLooper()),
-                new SurfaceControl.Transaction());
+                mUpdateMonitor, mCallback, new Handler(Looper.myLooper()));
     }
 
     public void setSecurityCallback(SecurityCallback callback) {

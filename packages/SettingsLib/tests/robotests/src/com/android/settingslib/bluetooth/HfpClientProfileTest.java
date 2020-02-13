@@ -16,12 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
-import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
-import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -65,18 +61,6 @@ public class HfpClientProfileTest {
                 mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.HEADSET_CLIENT, mService);
-    }
-
-    @Test
-    public void connect_shouldConnectBluetoothHeadsetClient() {
-        mProfile.connect(mBluetoothDevice);
-        verify(mService).setConnectionPolicy(mBluetoothDevice, CONNECTION_POLICY_ALLOWED);
-    }
-
-    @Test
-    public void disconnect_shouldDisconnectBluetoothHeadsetClient() {
-        mProfile.disconnect(mBluetoothDevice);
-        verify(mService).setConnectionPolicy(mBluetoothDevice, CONNECTION_POLICY_FORBIDDEN);
     }
 
     @Test

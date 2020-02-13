@@ -280,7 +280,7 @@ public class NotificationConversationInfo extends LinearLayout implements
 
         Button favorite = findViewById(R.id.fave);
         favorite.setOnClickListener(mOnFavoriteClick);
-        if (mNotificationChannel.canBypassDnd()) {
+        if (mNotificationChannel.isImportantConversation()) {
             favorite.setText(R.string.notification_conversation_unfavorite);
             favorite.setCompoundDrawablesRelative(
                     mContext.getDrawable(R.drawable.ic_star), null, null, null);
@@ -621,8 +621,8 @@ public class NotificationConversationInfo extends LinearLayout implements
                         }
                         break;
                     case ACTION_FAVORITE:
-                        // TODO: extend beyond DND
-                        mChannelToUpdate.setBypassDnd(!mChannelToUpdate.canBypassDnd());
+                        mChannelToUpdate.setImportantConversation(
+                                !mChannelToUpdate.isImportantConversation());
                         break;
                     case ACTION_MUTE:
                         if (mChannelToUpdate.getImportance() == IMPORTANCE_UNSPECIFIED

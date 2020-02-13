@@ -423,7 +423,8 @@ public class AppIntegrityManagerServiceImplTest {
         PackageInfo packageInfo =
                 mRealContext
                         .getPackageManager()
-                        .getPackageInfo(TEST_FRAMEWORK_PACKAGE, PackageManager.GET_SIGNATURES);
+                        .getPackageInfo(TEST_FRAMEWORK_PACKAGE,
+                                PackageManager.GET_SIGNING_CERTIFICATES);
         doReturn(packageInfo).when(mSpyPackageManager).getPackageInfo(eq(INSTALLER), anyInt());
         doReturn(1).when(mSpyPackageManager).getPackageUid(eq(INSTALLER), anyInt());
         return makeVerificationIntent(INSTALLER);

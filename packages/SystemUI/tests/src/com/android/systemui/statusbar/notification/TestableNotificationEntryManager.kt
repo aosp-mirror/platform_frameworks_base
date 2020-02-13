@@ -22,7 +22,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder
-import com.android.systemui.statusbar.notification.logging.NotifLog
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.NotificationGroupManager
@@ -34,7 +33,7 @@ import java.util.concurrent.CountDownLatch
  * Enable some test capabilities for NEM without making everything public on the base class
  */
 class TestableNotificationEntryManager(
-    log: NotifLog,
+    logger: NotificationEntryManagerLogger,
     gm: NotificationGroupManager,
     rm: NotificationRankingManager,
     ke: KeyguardEnvironment,
@@ -43,13 +42,13 @@ class TestableNotificationEntryManager(
     notificationRemoteInputManagerLazy: dagger.Lazy<NotificationRemoteInputManager>,
     leakDetector: LeakDetector,
     fgsFeatureController: ForegroundServiceDismissalFeatureController
-) : NotificationEntryManager(log, gm, rm, ke, ff, rb,
+) : NotificationEntryManager(logger, gm, rm, ke, ff, rb,
         notificationRemoteInputManagerLazy, leakDetector, fgsFeatureController) {
 
     public var countDownLatch: CountDownLatch = CountDownLatch(1)
 
-    override fun onAsyncInflationFinished(entry: NotificationEntry?, inflatedFlags: Int) {
-        super.onAsyncInflationFinished(entry, inflatedFlags)
+    override fun onAsyncInflationFinished(entry: NotificationEntry) {
+        super.onAsyncInflationFinished(entry)
         countDownLatch.countDown()
     }
 

@@ -140,7 +140,7 @@ public class RankingHelperTest extends UiServiceTestCase {
                 .thenReturn(SOUND_URI);
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
-                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND);
+                NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new RankingHelper(getContext(), mHandler, mConfig, mMockZenModeHelper,
                 mUsageStats, new String[] {ImportanceExtractor.class.getName()});

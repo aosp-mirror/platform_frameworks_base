@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
+import android.service.textclassifier.TextClassifierService;
 import android.text.Spannable;
 import android.text.SpannableString;
 
@@ -58,11 +59,12 @@ import java.util.List;
 public class TextClassifierTest {
     private static final String LOCAL = "local";
     private static final String SESSION = "session";
+    private static final String DEFAULT = "default";
 
     // TODO: Add SYSTEM, which tests TextClassifier.SYSTEM.
     @Parameterized.Parameters(name = "{0}")
     public static Iterable<Object> textClassifierTypes() {
-        return Arrays.asList(LOCAL, SESSION);
+        return Arrays.asList(LOCAL, SESSION, DEFAULT);
     }
 
     @Parameterized.Parameter
@@ -84,13 +86,15 @@ public class TextClassifierTest {
 
         if (mTextClassifierType.equals(LOCAL)) {
             mClassifier = mTcm.getTextClassifier(TextClassifier.LOCAL);
-        } else {
+        } else if (mTextClassifierType.equals(SESSION)) {
             mClassifier = mTcm.createTextClassificationSession(
                     new TextClassificationContext.Builder(
                             "android",
                             TextClassifier.WIDGET_TYPE_NOTIFICATION)
                             .build(),
                     mTcm.getTextClassifier(TextClassifier.LOCAL));
+        } else {
+            mClassifier = TextClassifierService.getDefaultTextClassifierImplementation(mContext);
         }
     }
 
@@ -369,16 +373,14 @@ public class TextClassifierTest {
                 mClassifier.generateLinks(request).apply(url, 0, null));
     }
 
-
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateLinks_tooLong() {
-        if (isTextClassifierDisabled()) {
-            throw new IllegalArgumentException("pass if disabled");
-        }
+        if (isTextClassifierDisabled()) return;
         char[] manySpaces = new char[mClassifier.getMaxGenerateLinksTextLength() + 1];
         Arrays.fill(manySpaces, ' ');
         TextLinks.Request request = new TextLinks.Request.Builder(new String(manySpaces)).build();
-        mClassifier.generateLinks(request);
+        TextLinks links = mClassifier.generateLinks(request);
+        assertTrue(links.getLinks().isEmpty());
     }
 
     @Test

@@ -5205,6 +5205,7 @@ public final class Telephony {
         /**
          * TelephonyProvider column name for allowed network types. Indicate which network types
          * are allowed. Default is -1.
+         * <P>Type: BIGINT (long) </P>
          */
         public static final String ALLOWED_NETWORK_TYPES = "allowed_network_types";
     }

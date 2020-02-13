@@ -32,12 +32,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.DumpController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ControlStatus
+import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -82,7 +83,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var broadcastReceiverCaptor: ArgumentCaptor<BroadcastReceiver>
 
     private lateinit var delayableExecutor: FakeExecutor
-    private lateinit var controller: ControlsController
+    private lateinit var controller: ControlsControllerImpl
 
     companion object {
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
@@ -416,5 +417,70 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(listingController).changeUser(UserHandle.of(otherUser))
         assertTrue(controller.getFavoriteControls().isEmpty())
         assertEquals(otherUser, controller.currentUserId)
+        assertTrue(controller.available)
+    }
+
+    @Test
+    fun testDisableFeature_notAvailable() {
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
+        controller.settingObserver.onChange(false, ControlsControllerImpl.URI, 0)
+        assertFalse(controller.available)
+    }
+
+    @Test
+    fun testDisableFeature_clearFavorites() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        assertFalse(controller.getFavoriteControls().isEmpty())
+
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
+        controller.settingObserver.onChange(false, ControlsControllerImpl.URI, user)
+        assertTrue(controller.getFavoriteControls().isEmpty())
+    }
+
+    @Test
+    fun testDisableFeature_noChangeForNotCurrentUser() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
+        controller.settingObserver.onChange(false, ControlsControllerImpl.URI, otherUser)
+
+        assertTrue(controller.available)
+        assertFalse(controller.getFavoriteControls().isEmpty())
+    }
+
+    @Test
+    fun testCorrectUserSettingOnUserChange() {
+        Settings.Secure.putIntForUser(mContext.contentResolver,
+                ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
+
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
+            putExtra(Intent.EXTRA_USER_HANDLE, otherUser)
+        }
+        val pendingResult = mock(BroadcastReceiver.PendingResult::class.java)
+        `when`(pendingResult.sendingUserId).thenReturn(otherUser)
+        broadcastReceiverCaptor.value.pendingResult = pendingResult
+
+        broadcastReceiverCaptor.value.onReceive(mContext, intent)
+
+        assertFalse(controller.available)
+    }
+
+    @Test
+    fun testCountFavoritesForComponent_singleComponent() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+
+        assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(0, controller.countFavoritesForComponent(TEST_COMPONENT_2))
+    }
+
+    @Test
+    fun testCountFavoritesForComponent_multipleComponents() {
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO, true)
+        controller.changeFavoriteStatus(TEST_CONTROL_INFO_2, true)
+
+        assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT_2))
     }
 }

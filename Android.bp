@@ -402,7 +402,7 @@ java_defaults {
         "ext",
         "unsupportedappusage",
         "framework-media-stubs-systemapi",
-        "framework_mediaprovider_stubs",
+        "framework-mediaprovider-stubs-systemapi",
         "framework-tethering",
         "framework-telephony-stubs",
     ],
@@ -491,14 +491,11 @@ java_library {
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base",
-        // TODO(b/144149403) remove the below lines
+        // TODO(b/147128803) remove the below lines
         "//frameworks/base/apex/appsearch/framework",
         "//frameworks/base/apex/blobstore/framework",
         "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/apex/permission/framework",
         "//frameworks/base/apex/statsd/service",
-        "//frameworks/base/telephony",
-        "//frameworks/opt/net/wifi/service",
     ],
 }
 
@@ -517,9 +514,9 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "framework-media-stubs-systemapi",
-        "framework_mediaprovider_stubs",
         "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
+        "framework-media-stubs-systemapi",
+        "framework-mediaprovider-stubs-systemapi",
         "framework-permission-stubs-systemapi",
         "framework-sdkextensions-stubs-systemapi",
         // TODO(b/146167933): Use framework-statsd-stubs instead.
@@ -654,6 +651,33 @@ gensrcs {
         "libs/incident/**/*.proto",
     ],
     output_extension: "srcjar",
+}
+
+gensrcs {
+    name: "framework-cppstream-protos",
+    depfile: true,
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-cppstream",
+    ],
+
+    cmd: "mkdir -p $(genDir) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-cppstream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --cppstream_out=$(genDir) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in)",
+
+    srcs: [
+        ":ipconnectivity-proto-src",
+        "core/proto/**/*.proto",
+        "libs/incident/**/*.proto",
+    ],
+
+    output_extension: "proto.h",
 }
 
 filegroup {
@@ -945,7 +969,7 @@ filegroup {
     name: "incremental_manager_aidl",
     srcs: [
         "core/java/android/os/incremental/IIncrementalManager.aidl",
-        "core/java/android/os/incremental/IIncrementalManagerNative.aidl",
+        "core/java/android/os/incremental/IIncrementalService.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IncrementalSignature.aidl",
     ],
@@ -1011,43 +1035,6 @@ aidl_interface {
             enabled: false,
         },
     },
-}
-
-gensrcs {
-    name: "gen-platform-proto-constants",
-    depfile: true,
-
-    tools: [
-        "aprotoc",
-        "protoc-gen-cppstream",
-    ],
-
-    srcs: [
-        "core/proto/android/os/backtrace.proto",
-        "core/proto/android/os/batterytype.proto",
-        "core/proto/android/os/cpufreq.proto",
-        "core/proto/android/os/cpuinfo.proto",
-        "core/proto/android/os/data.proto",
-        "core/proto/android/os/kernelwake.proto",
-        "core/proto/android/os/pagetypeinfo.proto",
-        "core/proto/android/os/procrank.proto",
-        "core/proto/android/os/ps.proto",
-        "core/proto/android/os/system_properties.proto",
-        "core/proto/android/util/event_log_tags.proto",
-        "core/proto/android/util/log.proto",
-    ],
-
-    // Append protoc-gen-cppstream tool's PATH otherwise aprotoc can't find the plugin tool
-    cmd: "mkdir -p $(genDir) " +
-        "&& $(location aprotoc) " +
-        "  --plugin=$(location protoc-gen-cppstream) " +
-        "  --dependency_out=$(depfile) " +
-        "  --cppstream_out=$(genDir) " +
-        "  -Iexternal/protobuf/src " +
-        "  -I . " +
-        "  $(in)",
-
-    output_extension: "proto.h",
 }
 
 

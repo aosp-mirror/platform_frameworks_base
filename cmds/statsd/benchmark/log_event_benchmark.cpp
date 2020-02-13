@@ -23,14 +23,14 @@ namespace os {
 namespace statsd {
 
 static size_t createAndParseStatsEvent(uint8_t* msg) {
-    struct stats_event* event = stats_event_obtain();
-    stats_event_set_atom_id(event, 100);
-    stats_event_write_int32(event, 2);
-    stats_event_write_float(event, 2.0);
-    stats_event_build(event);
+    AStatsEvent* event = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(event, 100);
+    AStatsEvent_writeInt32(event, 2);
+    AStatsEvent_writeFloat(event, 2.0);
+    AStatsEvent_build(event);
 
     size_t size;
-    uint8_t* buf = stats_event_get_buffer(event, &size);
+    uint8_t* buf = AStatsEvent_getBuffer(event, &size);
     memcpy(msg, buf, size);
     return size;
 }

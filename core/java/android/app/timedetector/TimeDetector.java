@@ -18,7 +18,6 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.SystemClock;
@@ -29,7 +28,6 @@ import android.os.TimestampedValue;
  *
  * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @SystemService(Context.TIME_DETECTOR_SERVICE)
 public interface TimeDetector {
 
@@ -47,12 +45,12 @@ public interface TimeDetector {
     }
 
     /**
-     * Suggests the current phone-signal derived time to the detector. The detector may ignore the
-     * signal if better signals are available such as those that come from more reliable sources or
-     * were determined more recently.
+     * Suggests a telephony-signal derived time to the detector. The detector may ignore the signal
+     * if better signals are available such as those that come from more reliable sources or were
+     * determined more recently.
      */
-    @RequiresPermission(android.Manifest.permission.SUGGEST_PHONE_TIME_AND_ZONE)
-    void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion);
+    @RequiresPermission(android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE)
+    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
     /**
      * Suggests the user's manually entered current time to the detector.

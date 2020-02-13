@@ -425,7 +425,8 @@ final class SettingsState {
             }
             newState = oldState;
         } else {
-            newState = new Setting(name, value, makeDefault, packageName, tag);
+            newState = new Setting(name, value, makeDefault, packageName, tag,
+                    forceNonSystemPackage);
             mSettings.put(name, newState);
         }
 
@@ -1173,11 +1174,15 @@ final class SettingsState {
 
         public Setting(String name, String value, boolean makeDefault, String packageName,
                 String tag) {
+            this(name, value, makeDefault, packageName, tag, false);
+        }
+
+        Setting(String name, String value, boolean makeDefault, String packageName,
+                String tag, boolean forceNonSystemPackage) {
             this.name = name;
             // overrideableByRestore = true as the first initialization isn't considered a
             // modification.
-            update(value, makeDefault, packageName, tag, false,
-                    /* overrideableByRestore */ true);
+            update(value, makeDefault, packageName, tag, forceNonSystemPackage, true);
         }
 
         public Setting(String name, String value, String defaultValue,

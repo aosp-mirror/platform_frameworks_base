@@ -74,6 +74,8 @@ public class Tuner implements AutoCloseable  {
     private List<Integer> mFrontendIds;
     private Frontend mFrontend;
     private EventHandler mHandler;
+    @Nullable
+    private FrontendInfo mFrontendInfo;
 
     private List<Integer> mLnbIds;
     private Lnb mLnb;
@@ -97,6 +99,7 @@ public class Tuner implements AutoCloseable  {
     public Tuner(@NonNull Context context, @NonNull String tvInputSessionId,
             @TvInputService.PriorityHintUseCaseType int useCase,
             @Nullable OnResourceLostListener listener) {
+        nativeSetup();
         mContext = context;
     }
 
@@ -185,7 +188,7 @@ public class Tuner implements AutoCloseable  {
     /**
      * Listener for resource lost.
      *
-     * <p>Resource is reclaimed and tuner instance is forced to close.
+     * <p>Insufficient resources are reclaimed by higher priority clients.
      */
     public interface OnResourceLostListener {
         /**
@@ -292,6 +295,7 @@ public class Tuner implements AutoCloseable  {
     @Result
     public int tune(@NonNull FrontendSettings settings) {
         TunerUtils.checkTunerPermission(mContext);
+        mFrontendInfo = null;
         return nativeTune(settings.getType(), settings);
     }
 
@@ -333,6 +337,7 @@ public class Tuner implements AutoCloseable  {
         }
         mScanCallback = scanCallback;
         mScanCallbackExecutor = executor;
+        mFrontendInfo = null;
         return nativeScan(settings.getType(), settings, scanType);
     }
 
@@ -468,7 +473,10 @@ public class Tuner implements AutoCloseable  {
         if (mFrontend == null) {
             throw new IllegalStateException("frontend is not initialized");
         }
-        return nativeGetFrontendInfo(mFrontend.mId);
+        if (mFrontendInfo == null) {
+            mFrontendInfo = nativeGetFrontendInfo(mFrontend.mId);
+        }
+        return mFrontendInfo;
     }
 
     /**

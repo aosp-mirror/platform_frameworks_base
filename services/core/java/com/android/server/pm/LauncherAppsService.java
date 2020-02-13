@@ -29,12 +29,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageManager;
+import android.content.pm.IShortcutChangeCallback;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
@@ -661,8 +663,8 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public ParceledListSlice getShortcuts(String callingPackage, long changedSince,
-                String packageName, List shortcutIds, ComponentName componentName, int flags,
-                UserHandle targetUser) {
+                String packageName, List shortcutIds, List<LocusId> locusIds,
+                ComponentName componentName, int flags, UserHandle targetUser) {
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot get shortcuts")) {
                 return new ParceledListSlice<>(Collections.EMPTY_LIST);
@@ -671,13 +673,28 @@ public class LauncherAppsService extends SystemService {
                 throw new IllegalArgumentException(
                         "To query by shortcut ID, package name must also be set");
             }
+            if (locusIds != null && packageName == null) {
+                throw new IllegalArgumentException(
+                        "To query by locus ID, package name must also be set");
+            }
 
             // TODO(b/29399275): Eclipse compiler requires explicit List<ShortcutInfo> cast below.
             return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
-                            callingPackage, changedSince, packageName, shortcutIds,
+                            callingPackage, changedSince, packageName, shortcutIds, locusIds,
                             componentName, flags, targetUser.getIdentifier(),
                             injectBinderCallingPid(), injectBinderCallingUid()));
+        }
+
+        @Override
+        public void registerShortcutChangeCallback(String callingPackage, long changedSince,
+                String packageName, List shortcutIds, List<LocusId> locusIds,
+                ComponentName componentName, int flags, IShortcutChangeCallback callback,
+                int callbackId) {
+        }
+
+        @Override
+        public void unregisterShortcutChangeCallback(String callingPackage, int callbackId) {
         }
 
         @Override
@@ -1137,7 +1154,7 @@ public class LauncherAppsService extends SystemService {
                                 mShortcutServiceInternal.getShortcuts(launcherUserId,
                                         cookie.packageName,
                                         /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
-                                        /* component= */ null,
+                                        /* locusIds=*/ null, /* component= */ null,
                                         ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
                                         | ShortcutQuery.FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED
                                         , userId, cookie.callingPid, cookie.callingUid);

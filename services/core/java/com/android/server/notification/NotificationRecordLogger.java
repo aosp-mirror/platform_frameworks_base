@@ -88,12 +88,12 @@ public interface NotificationRecordLogger {
                 return true;
             }
 
-            return !(Objects.equals(r.sbn.getChannelIdLogTag(), old.sbn.getChannelIdLogTag())
-                    && Objects.equals(r.sbn.getGroupLogTag(), old.sbn.getGroupLogTag())
-                    && (r.sbn.getNotification().isGroupSummary()
-                        == old.sbn.getNotification().isGroupSummary())
-                    && Objects.equals(r.sbn.getNotification().category,
-                        old.sbn.getNotification().category)
+            return !(Objects.equals(r.getSbn().getChannelIdLogTag(), old.getSbn().getChannelIdLogTag())
+                    && Objects.equals(r.getSbn().getGroupLogTag(), old.getSbn().getGroupLogTag())
+                    && (r.getSbn().getNotification().isGroupSummary()
+                        == old.getSbn().getNotification().isGroupSummary())
+                    && Objects.equals(r.getSbn().getNotification().category,
+                        old.getSbn().getNotification().category)
                     && (r.getImportance() == old.getImportance()));
         }
 
@@ -106,7 +106,7 @@ public interface NotificationRecordLogger {
          * @return hash code for the notification style class, or 0 if none exists.
          */
         public int getStyle() {
-            return getStyle(r.sbn.getNotification().extras);
+            return getStyle(r.getSbn().getNotification().extras);
         }
 
         private int getStyle(@Nullable Bundle extras) {
@@ -120,7 +120,7 @@ public interface NotificationRecordLogger {
         }
 
         int getNumPeople() {
-            return getNumPeople(r.sbn.getNotification().extras);
+            return getNumPeople(r.getSbn().getNotification().extras);
         }
 
         private int getNumPeople(@Nullable Bundle extras) {
@@ -140,7 +140,7 @@ public interface NotificationRecordLogger {
         }
 
         int getInstanceId() {
-            return (r.sbn.getInstanceId() == null ? 0 : r.sbn.getInstanceId().getId());
+            return (r.getSbn().getInstanceId() == null ? 0 : r.getSbn().getInstanceId().getId());
         }
     }
 }

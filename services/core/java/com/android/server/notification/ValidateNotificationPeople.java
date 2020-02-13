@@ -38,6 +38,8 @@ import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
 
+import libcore.util.EmptyArray;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -301,7 +303,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         for (String person: second) {
             people.add(person);
         }
-        return (String[]) people.toArray();
+        return people.toArray(EmptyArray.STRING);
     }
 
     @Nullable

@@ -24,7 +24,6 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
 /**
  * Listener interface for changes sent by NotificationEntryManager.
@@ -62,7 +61,7 @@ public interface NotificationEntryListener {
     /**
      * Called when a notification's views are inflated for the first time.
      */
-    default void onEntryInflated(NotificationEntry entry, @InflationFlag int inflatedFlags) {
+    default void onEntryInflated(NotificationEntry entry) {
     }
 
     /**

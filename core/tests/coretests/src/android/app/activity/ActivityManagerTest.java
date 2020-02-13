@@ -24,6 +24,9 @@ import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.SmallTest;
@@ -137,21 +140,7 @@ public class ActivityManagerTest extends AndroidTestCase {
         // Must overwrite all the fields
         td2.copyFrom(td1);
 
-        assertEquals(td1.getLabel(), td2.getLabel());
-        assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
-        assertEquals(td1.getIconFilename(), td2.getIconFilename());
-        assertEquals(td1.getIconResource(), td2.getIconResource());
-        assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
-        assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
-        assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
-        assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
-        assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),
-                td2.getEnsureStatusBarContrastWhenTransparent());
-        assertEquals(td1.getEnsureNavigationBarContrastWhenTransparent(),
-                td2.getEnsureNavigationBarContrastWhenTransparent());
-        assertEquals(td1.getResizeMode(), td2.getResizeMode());
-        assertEquals(td1.getMinWidth(), td2.getMinWidth());
-        assertEquals(td1.getMinHeight(), td2.getMinHeight());
+        assertTaskDescriptionEqual(td1, td2, true, true);
     }
 
     @SmallTest
@@ -191,44 +180,101 @@ public class ActivityManagerTest extends AndroidTestCase {
         // Must overwrite all public and hidden fields, since other has all fields set.
         td2.copyFromPreserveHiddenFields(td1);
 
-        assertEquals(td1.getLabel(), td2.getLabel());
-        assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
-        assertEquals(td1.getIconFilename(), td2.getIconFilename());
-        assertEquals(td1.getIconResource(), td2.getIconResource());
-        assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
-        assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
-        assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
-        assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
-        assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),
-                td2.getEnsureStatusBarContrastWhenTransparent());
-        assertEquals(td1.getEnsureNavigationBarContrastWhenTransparent(),
-                td2.getEnsureNavigationBarContrastWhenTransparent());
-        assertEquals(td1.getResizeMode(), td2.getResizeMode());
-        assertEquals(td1.getMinWidth(), td2.getMinWidth());
-        assertEquals(td1.getMinHeight(), td2.getMinHeight());
+        assertTaskDescriptionEqual(td1, td2, true, true);
 
         TaskDescription td3 = new TaskDescription();
         // Must overwrite only public fields, and preserve hidden fields.
         td2.copyFromPreserveHiddenFields(td3);
 
-        // Overwritten fields
-        assertEquals(td3.getLabel(), td2.getLabel());
-        assertEquals(td3.getInMemoryIcon(), td2.getInMemoryIcon());
-        assertEquals(td3.getIconFilename(), td2.getIconFilename());
-        assertEquals(td3.getIconResource(), td2.getIconResource());
-        assertEquals(td3.getPrimaryColor(), td2.getPrimaryColor());
-        assertEquals(td3.getEnsureStatusBarContrastWhenTransparent(),
-                td2.getEnsureStatusBarContrastWhenTransparent());
-        assertEquals(td3.getEnsureNavigationBarContrastWhenTransparent(),
-                td2.getEnsureNavigationBarContrastWhenTransparent());
+        assertTaskDescriptionEqual(td3, td2, true, false);
+        assertTaskDescriptionEqual(td1, td2, false, true);
+    }
 
-        // Preserved fields
-        assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
-        assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
-        assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
-        assertEquals(td1.getResizeMode(), td2.getResizeMode());
-        assertEquals(td1.getMinWidth(), td2.getMinWidth());
-        assertEquals(td1.getMinHeight(), td2.getMinHeight());
+    @SmallTest
+    public void testTaskDescriptionParceling() throws Exception {
+        TaskDescription tdBitmapNull = new TaskDescription(
+                "test label",              // label
+                null,                      // bitmap
+                21,                        // iconRes
+                "dummy file",              // iconFilename
+                0x111111,                  // colorPrimary
+                0x222222,                  // colorBackground
+                0x333333,                  // statusBarColor
+                0x444444,                  // navigationBarColor
+                false,                     // ensureStatusBarContrastWhenTransparent
+                false,                     // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_UNRESIZEABLE,  // resizeMode
+                10,                        // minWidth
+                20                         // minHeight
+        );
+
+        // Normal parceling should keep everything the same.
+        TaskDescription tdParcelled = new TaskDescription(parcelingRoundTrip(tdBitmapNull));
+        assertTaskDescriptionEqual(tdBitmapNull, tdParcelled, true, true);
+
+        Bitmap recycledBitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.ARGB_8888);
+        recycledBitmap.recycle();
+        assertTrue(recycledBitmap.isRecycled());
+        TaskDescription tdBitmapRecycled = new TaskDescription(
+                "test label",              // label
+                recycledBitmap,                      // bitmap
+                21,                        // iconRes
+                "dummy file",              // iconFilename
+                0x111111,                  // colorPrimary
+                0x222222,                  // colorBackground
+                0x333333,                  // statusBarColor
+                0x444444,                  // navigationBarColor
+                false,                     // ensureStatusBarContrastWhenTransparent
+                false,                     // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_UNRESIZEABLE,  // resizeMode
+                10,                        // minWidth
+                20                         // minHeight
+        );
+        // Recycled bitmap will be ignored while parceling.
+        tdParcelled = new TaskDescription(parcelingRoundTrip(tdBitmapRecycled));
+        assertTaskDescriptionEqual(tdBitmapNull, tdParcelled, true, true);
+
+    }
+
+    private void assertTaskDescriptionEqual(TaskDescription td1, TaskDescription td2,
+            boolean checkOverwrittenFields, boolean checkPreservedFields) {
+        if (checkOverwrittenFields) {
+            assertEquals(td1.getLabel(), td2.getLabel());
+            assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
+            assertEquals(td1.getIconFilename(), td2.getIconFilename());
+            assertEquals(td1.getIconResource(), td2.getIconResource());
+            assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
+            assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),
+                    td2.getEnsureStatusBarContrastWhenTransparent());
+            assertEquals(td1.getEnsureNavigationBarContrastWhenTransparent(),
+                    td2.getEnsureNavigationBarContrastWhenTransparent());
+        }
+        if (checkPreservedFields) {
+            assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
+            assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
+            assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
+            assertEquals(td1.getResizeMode(), td2.getResizeMode());
+            assertEquals(td1.getMinWidth(), td2.getMinWidth());
+            assertEquals(td1.getMinHeight(), td2.getMinHeight());
+        }
+    }
+
+    private <T extends Parcelable> T parcelingRoundTrip(final T in) throws Exception {
+        final Parcel p = Parcel.obtain();
+        in.writeToParcel(p, /* flags */ 0);
+        p.setDataPosition(0);
+        final byte[] marshalledData = p.marshall();
+        p.recycle();
+
+        final Parcel q = Parcel.obtain();
+        q.unmarshall(marshalledData, 0, marshalledData.length);
+        q.setDataPosition(0);
+
+        final Parcelable.Creator<T> creator = (Parcelable.Creator<T>)
+                in.getClass().getField("CREATOR").get(null); // static object, so null receiver
+        final T unmarshalled = (T) creator.createFromParcel(q);
+        q.recycle();
+        return unmarshalled;
     }
 
     // If any entries in appear in the list, sanity check them against all running applications

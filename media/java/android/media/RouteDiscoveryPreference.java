@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A media route discovery preference  describing the kinds of routes that media router
+ * A media route discovery preference describing the kinds of routes that media router
  * would like to discover and whether to perform active scanning.
  *
  * @see MediaRouter2#registerRouteCallback
@@ -58,6 +58,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
     private final Bundle mExtras;
 
     /**
+     * An empty discovery preference.
      * @hide
      */
     public static final RouteDiscoveryPreference EMPTY =

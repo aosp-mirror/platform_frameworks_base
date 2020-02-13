@@ -97,8 +97,8 @@ public class SoundTrigger {
          */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "AUDIO_CAPABILITY_" }, value = {
-                CAPABILITY_ECHO_CANCELLATION,
-                CAPABILITY_NOISE_SUPPRESSION
+                AUDIO_CAPABILITY_ECHO_CANCELLATION,
+                AUDIO_CAPABILITY_NOISE_SUPPRESSION
         })
         public @interface AudioCapabilities {}
 
@@ -106,12 +106,12 @@ public class SoundTrigger {
          * If set the underlying module supports AEC.
          * Describes bit field {@link ModuleProperties#audioCapabilities}
          */
-        public static final int CAPABILITY_ECHO_CANCELLATION = 0x1;
+        public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 0x1;
         /**
          * If set, the underlying module supports noise suppression.
          * Describes bit field {@link ModuleProperties#audioCapabilities}
          */
-        public static final int CAPABILITY_NOISE_SUPPRESSION = 0x2;
+        public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 0x2;
 
         /** Unique module ID provided by the native service */
         public final int id;
@@ -735,22 +735,40 @@ public class SoundTrigger {
         /**
          * The inclusive start of supported range.
          */
-        public final int start;
+        private final int mStart;
 
         /**
          * The inclusive end of supported range.
          */
-        public final int end;
+        private final int mEnd;
 
         ModelParamRange(int start, int end) {
-            this.start = start;
-            this.end = end;
+            this.mStart = start;
+            this.mEnd = end;
         }
 
         /** @hide */
         private ModelParamRange(@NonNull Parcel in) {
-            this.start = in.readInt();
-            this.end = in.readInt();
+            this.mStart = in.readInt();
+            this.mEnd = in.readInt();
+        }
+
+        /**
+         * Get the beginning of the param range
+         *
+         * @return The inclusive start of the supported range.
+         */
+        public int getStart() {
+            return mStart;
+        }
+
+        /**
+         * Get the end of the param range
+         *
+         * @return The inclusive end of the supported range.
+         */
+        public int getEnd() {
+            return mEnd;
         }
 
         @NonNull
@@ -780,8 +798,8 @@ public class SoundTrigger {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (start);
-            result = prime * result + (end);
+            result = prime * result + (mStart);
+            result = prime * result + (mEnd);
             return result;
         }
 
@@ -797,10 +815,10 @@ public class SoundTrigger {
                 return false;
             }
             ModelParamRange other = (ModelParamRange) obj;
-            if (start != other.start) {
+            if (mStart != other.mStart) {
                 return false;
             }
-            if (end != other.end) {
+            if (mEnd != other.mEnd) {
                 return false;
             }
             return true;
@@ -808,14 +826,14 @@ public class SoundTrigger {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeInt(start);
-            dest.writeInt(end);
+            dest.writeInt(mStart);
+            dest.writeInt(mEnd);
         }
 
         @Override
         @NonNull
         public String toString() {
-            return "ModelParamRange [start=" + start + ", end=" + end + "]";
+            return "ModelParamRange [start=" + mStart + ", end=" + mEnd + "]";
         }
     }
 

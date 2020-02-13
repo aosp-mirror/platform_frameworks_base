@@ -29,6 +29,7 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -118,6 +119,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     public void releaseSession(String sessionId) {
         // Do nothing
     }
+    @Override
+    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+        // Do nothing
+    }
 
     @Override
     public void selectRoute(String sessionId, String routeId) {
@@ -146,11 +151,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     //TODO: implement method
     @Override
     public void requestSetVolume(String routeId, int volume) {
-    }
-
-    //TODO: implement method
-    @Override
-    public void requestUpdateVolume(String routeId, int delta) {
     }
 
     private void initializeDefaultRoute() {

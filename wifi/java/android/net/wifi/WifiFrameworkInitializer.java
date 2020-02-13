@@ -102,20 +102,19 @@ public class WifiFrameworkInitializer {
                 }
         );
         SystemServiceRegistry.registerContextAwareService(
-                Context.WIFI_RTT_SERVICE,
-                RttManager.class,
-                (context, serviceBinder) -> {
-                    IWifiRttManager service = IWifiRttManager.Stub.asInterface(serviceBinder);
-                    WifiRttManager wifiRttManager = new WifiRttManager(context, service);
-                    return new RttManager(context, wifiRttManager);
-                }
-        );
-        SystemServiceRegistry.registerContextAwareService(
                 Context.WIFI_RTT_RANGING_SERVICE,
                 WifiRttManager.class,
                 (context, serviceBinder) -> {
                     IWifiRttManager service = IWifiRttManager.Stub.asInterface(serviceBinder);
                     return new WifiRttManager(context, service);
+                }
+        );
+        SystemServiceRegistry.registerContextAwareService(
+                Context.WIFI_RTT_SERVICE,
+                RttManager.class,
+                context -> {
+                    WifiRttManager wifiRttManager = context.getSystemService(WifiRttManager.class);
+                    return new RttManager(context, wifiRttManager);
                 }
         );
     }

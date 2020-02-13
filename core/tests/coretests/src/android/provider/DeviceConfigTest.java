@@ -376,6 +376,24 @@ public class DeviceConfigTest {
     }
 
     @Test
+    public void resetToDefault_makeDefault() {
+        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, true);
+        assertThat(DeviceConfig.getProperty(NAMESPACE, KEY)).isEqualTo(VALUE);
+
+        DeviceConfig.resetToDefaults(Settings.RESET_MODE_PACKAGE_DEFAULTS, NAMESPACE);
+        assertThat(DeviceConfig.getProperty(NAMESPACE, KEY)).isEqualTo(VALUE);
+    }
+
+    @Test
+    public void resetToDefault_doNotMakeDefault() {
+        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
+        assertThat(DeviceConfig.getProperty(NAMESPACE, KEY)).isEqualTo(VALUE);
+
+        DeviceConfig.resetToDefaults(Settings.RESET_MODE_PACKAGE_DEFAULTS, NAMESPACE);
+        assertThat(DeviceConfig.getProperty(NAMESPACE, KEY)).isNull();
+    }
+
+    @Test
     public void getProperties_fullNamespace() {
         Properties properties = DeviceConfig.getProperties(NAMESPACE);
         assertThat(properties.getKeyset()).isEmpty();

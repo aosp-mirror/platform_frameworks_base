@@ -117,17 +117,16 @@ DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
 void SkiaVulkanPipeline::onStop() {}
 
 bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
-                                    ColorMode colorMode, uint32_t extraBuffers) {
+                                    uint32_t extraBuffers) {
     if (mVkSurface) {
         mVkManager.destroySurface(mVkSurface);
         mVkSurface = nullptr;
     }
 
-    setSurfaceColorProperties(colorMode);
     if (surface) {
         mRenderThread.requireVkContext();
         mVkSurface =
-                mVkManager.createSurface(surface, colorMode, mSurfaceColorSpace, mSurfaceColorType,
+                mVkManager.createSurface(surface, mColorMode, mSurfaceColorSpace, mSurfaceColorType,
                                          mRenderThread.getGrContext(), extraBuffers);
     }
 

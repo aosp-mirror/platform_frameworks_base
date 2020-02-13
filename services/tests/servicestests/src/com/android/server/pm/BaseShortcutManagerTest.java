@@ -52,6 +52,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
@@ -1600,6 +1601,22 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
+     * Make a shortcut with an ID and a locus ID.
+     */
+    protected ShortcutInfo makeShortcutWithLocusId(String id, LocusId locusId) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setLocusId(locusId);
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
      * Make an intent.
      */
     protected Intent makeIntent(String action, Class<?> clazz, Object... bundleKeysAndValues) {
@@ -1615,6 +1632,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected Person makePerson(CharSequence name, String key, String uri) {
         final Person.Builder builder = new Person.Builder();
         return builder.setName(name).setKey(key).setUri(uri).build();
+    }
+
+    /**
+     * Make a LocusId.
+     */
+    protected LocusId makeLocusId(String id) {
+        return new LocusId(id);
     }
 
     /**
@@ -1955,16 +1979,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static ShortcutQuery buildQuery(long changedSince,
             String packageName, ComponentName componentName,
             /* @ShortcutQuery.QueryFlags */ int flags) {
-        return buildQuery(changedSince, packageName, null, componentName, flags);
+        return buildQuery(changedSince, packageName, null, null, componentName, flags);
     }
 
     protected static ShortcutQuery buildQuery(long changedSince,
-            String packageName, List<String> shortcutIds, ComponentName componentName,
-            /* @ShortcutQuery.QueryFlags */ int flags) {
+            String packageName, List<String> shortcutIds, List<LocusId> locusIds,
+            ComponentName componentName, /* @ShortcutQuery.QueryFlags */ int flags) {
         final ShortcutQuery q = new ShortcutQuery();
         q.setChangedSince(changedSince);
         q.setPackage(packageName);
         q.setShortcutIds(shortcutIds);
+        q.setLocusIds(locusIds);
         q.setActivity(componentName);
         q.setQueryFlags(flags);
         return q;

@@ -286,8 +286,10 @@ public final class TextClassifierImpl implements TextClassifier {
     @WorkerThread
     public TextLinks generateLinks(@NonNull TextLinks.Request request) {
         Objects.requireNonNull(request);
-        Utils.checkTextLength(request.getText(), getMaxGenerateLinksTextLength());
         Utils.checkMainThread();
+        if (!Utils.checkTextLength(request.getText(), getMaxGenerateLinksTextLength())) {
+            return mFallback.generateLinks(request);
+        }
 
         if (!mSettings.isSmartLinkifyEnabled() && request.isLegacyFallback()) {
             return Utils.generateLegacyLinks(request);

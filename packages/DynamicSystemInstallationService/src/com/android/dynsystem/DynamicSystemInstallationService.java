@@ -46,6 +46,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,6 +61,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -146,10 +149,26 @@ public class DynamicSystemInstallationService extends Service
         prepareNotification();
 
         mDynSystem = (DynamicSystemManager) getSystemService(Context.DYNAMIC_SYSTEM_SERVICE);
+
+        // Install an HttpResponseCache in the application cache directory so we can cache
+        // gsi key revocation list. The http(s) protocol handler uses this cache transparently.
+        // The cache size is chosen heuristically. Since we don't have too much traffic right now,
+        // a moderate size of 1MiB should be enough.
+        try {
+            File httpCacheDir = new File(getCacheDir(), "httpCache");
+            long httpCacheSize = 1 * 1024 * 1024; // 1 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            Log.d(TAG, "HttpResponseCache.install() failed: " + e);
+        }
     }
 
     @Override
     public void onDestroy() {
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
         // Cancel the persistent notification.
         mNM.cancel(NOTIFICATION_ID);
     }

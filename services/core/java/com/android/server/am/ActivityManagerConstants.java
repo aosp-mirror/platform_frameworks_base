@@ -287,7 +287,7 @@ final class ActivityManagerConstants extends ContentObserver {
     // When the restriction is enabled, foreground service started from background will not have
     // while-in-use permissions like location, camera and microphone. (The foreground service can be
     // started, the restriction is on while-in-use permissions.)
-    volatile boolean mFlagBackgroundFgsStartRestrictionEnabled;
+    volatile boolean mFlagBackgroundFgsStartRestrictionEnabled = true;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
@@ -304,18 +304,19 @@ final class ActivityManagerConstants extends ContentObserver {
     // we have no limit on the number of service, visible, foreground, or other such
     // processes and the number of those processes does not count against the cached
     // process limit.
-    public int CUR_MAX_CACHED_PROCESSES;
+    public int CUR_MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
 
     // The maximum number of empty app processes we will let sit around.
-    public int CUR_MAX_EMPTY_PROCESSES;
+    public int CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
     // The number of empty apps at which we don't consider it necessary to do
     // memory trimming.
-    public int CUR_TRIM_EMPTY_PROCESSES;
+    public int CUR_TRIM_EMPTY_PROCESSES = computeEmptyProcessLimit(MAX_CACHED_PROCESSES) / 2;
 
     // The number of cached at which we don't consider it necessary to do
     // memory trimming.
-    public int CUR_TRIM_CACHED_PROCESSES;
+    public int CUR_TRIM_CACHED_PROCESSES =
+            (MAX_CACHED_PROCESSES - computeEmptyProcessLimit(MAX_CACHED_PROCESSES)) / 3;
 
     /**
      * Packages that can't be killed even if it's requested to be killed on imperceptible.
@@ -419,6 +420,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 context.getResources().getIntArray(
                 com.android.internal.R.array.config_defaultImperceptibleKillingExemptionProcStates))
                 .boxed().collect(Collectors.toList());
+        IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.addAll(mDefaultImperceptibleKillExemptPackages);
+        IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.addAll(mDefaultImperceptibleKillExemptProcStates);
     }
 
     public void start(ContentResolver resolver) {
@@ -550,8 +553,6 @@ final class ActivityManagerConstants extends ContentObserver {
 
             // For new flags that are intended for server-side experiments, please use the new
             // DeviceConfig package.
-
-            updateMaxCachedProcesses();
         }
     }
 
@@ -580,6 +581,9 @@ final class ActivityManagerConstants extends ContentObserver {
     }
 
     private void updateOomAdjUpdatePolicy() {
+
+
+
         OOMADJ_UPDATE_QUICK = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_OOMADJ_UPDATE_POLICY,

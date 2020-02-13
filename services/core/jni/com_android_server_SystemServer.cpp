@@ -29,6 +29,7 @@
 #include <schedulerservice/SchedulingPolicyService.h>
 #include <sensorservice/SensorService.h>
 #include <sensorservicehidl/SensorManager.h>
+#include <stats/StatsHal.h>
 
 #include <bionic/malloc.h>
 #include <bionic/reserved_signals.h>
@@ -59,6 +60,8 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     using ::android::frameworks::schedulerservice::V1_0::implementation::SchedulingPolicyService;
     using ::android::frameworks::sensorservice::V1_0::ISensorManager;
     using ::android::frameworks::sensorservice::V1_0::implementation::SensorManager;
+    using ::android::frameworks::stats::V1_0::IStats;
+    using ::android::frameworks::stats::V1_0::implementation::StatsHal;
     using ::android::hardware::configureRpcThreadpool;
 
     status_t err;
@@ -75,6 +78,10 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
     err = schedulingService->registerAsService();
     ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
+
+    sp<IStats> statsHal = new StatsHal();
+    err = statsHal->registerAsService();
+    ALOGE_IF(err != OK, "Cannot register %s: %d", IStats::descriptor, err);
 }
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,

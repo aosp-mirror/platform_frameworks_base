@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.content.Intent;
 import android.os.LocaleList;
-import android.service.textclassifier.TextClassifierService;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -64,9 +63,7 @@ public class TextClassificationManagerTest {
 
     @Test
     public void testGetSystemTextClassifier() {
-        assertTrue(
-                TextClassifierService.getServiceComponentName(mContext) == null
-                || mTcm.getTextClassifier(TextClassifier.SYSTEM) instanceof SystemTextClassifier);
+        assertTrue(mTcm.getTextClassifier(TextClassifier.SYSTEM) instanceof SystemTextClassifier);
     }
 
     @Test

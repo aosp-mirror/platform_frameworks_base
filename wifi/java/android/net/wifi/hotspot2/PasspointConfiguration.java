@@ -432,7 +432,7 @@ public final class PasspointConfiguration implements Parcelable {
      * considered for auto-connection. If true then yes, if false then it isn't considered as part
      * of auto-connection - but can still be manually connected to.
      */
-    private boolean mIsAutoJoinEnabled = true;
+    private boolean mIsAutojoinEnabled = true;
 
     /**
      * The mac randomization setting specifies whether a randomized or device MAC address will
@@ -459,11 +459,11 @@ public final class PasspointConfiguration implements Parcelable {
      * indicates that only manual connection will work - the framework will not auto-associate to
      * this Passpoint network.
      *
-     * @param autoJoinEnabled true to be considered for framework auto-connection, false otherwise.
+     * @param autojoinEnabled true to be considered for framework auto-connection, false otherwise.
      * @hide
      */
-    public void setAutoJoinEnabled(boolean autoJoinEnabled) {
-        mIsAutoJoinEnabled = autoJoinEnabled;
+    public void setAutojoinEnabled(boolean autojoinEnabled) {
+        mIsAutojoinEnabled = autojoinEnabled;
     }
 
     /**
@@ -499,8 +499,8 @@ public final class PasspointConfiguration implements Parcelable {
      * @hide
      */
     @SystemApi
-    public boolean isAutoJoinEnabled() {
-        return mIsAutoJoinEnabled;
+    public boolean isAutojoinEnabled() {
+        return mIsAutojoinEnabled;
     }
 
     /**
@@ -570,7 +570,7 @@ public final class PasspointConfiguration implements Parcelable {
         mServiceFriendlyNames = source.mServiceFriendlyNames;
         mAaaServerTrustedNames = source.mAaaServerTrustedNames;
         mCarrierId = source.mCarrierId;
-        mIsAutoJoinEnabled = source.mIsAutoJoinEnabled;
+        mIsAutojoinEnabled = source.mIsAutojoinEnabled;
         mIsMacRandomizationEnabled = source.mIsMacRandomizationEnabled;
         mMeteredOverride = source.mMeteredOverride;
     }
@@ -602,7 +602,7 @@ public final class PasspointConfiguration implements Parcelable {
                 (HashMap<String, String>) mServiceFriendlyNames);
         dest.writeBundle(bundle);
         dest.writeInt(mCarrierId);
-        dest.writeBoolean(mIsAutoJoinEnabled);
+        dest.writeBoolean(mIsAutojoinEnabled);
         dest.writeBoolean(mIsMacRandomizationEnabled);
         dest.writeInt(mMeteredOverride);
     }
@@ -635,7 +635,7 @@ public final class PasspointConfiguration implements Parcelable {
                 && mUsageLimitDataLimit == that.mUsageLimitDataLimit
                 && mUsageLimitTimeLimitInMinutes == that.mUsageLimitTimeLimitInMinutes
                 && mCarrierId == that.mCarrierId
-                && mIsAutoJoinEnabled == that.mIsAutoJoinEnabled
+                && mIsAutojoinEnabled == that.mIsAutojoinEnabled
                 && mIsMacRandomizationEnabled == that.mIsMacRandomizationEnabled
                 && mMeteredOverride == that.mMeteredOverride
                 && (mServiceFriendlyNames == null ? that.mServiceFriendlyNames == null
@@ -648,7 +648,7 @@ public final class PasspointConfiguration implements Parcelable {
                 mUpdateIdentifier, mCredentialPriority, mSubscriptionCreationTimeInMillis,
                 mSubscriptionExpirationTimeInMillis, mUsageLimitUsageTimePeriodInMinutes,
                 mUsageLimitStartTimeInMillis, mUsageLimitDataLimit, mUsageLimitTimeLimitInMinutes,
-                mServiceFriendlyNames, mCarrierId, mIsAutoJoinEnabled, mIsMacRandomizationEnabled,
+                mServiceFriendlyNames, mCarrierId, mIsAutojoinEnabled, mIsMacRandomizationEnabled,
                 mMeteredOverride);
     }
 
@@ -703,7 +703,7 @@ public final class PasspointConfiguration implements Parcelable {
             builder.append("ServiceFriendlyNames: ").append(mServiceFriendlyNames);
         }
         builder.append("CarrierId:" + mCarrierId);
-        builder.append("IsAutoJoinEnabled:" + mIsAutoJoinEnabled);
+        builder.append("IsAutojoinEnabled:" + mIsAutojoinEnabled);
         builder.append("mIsMacRandomizationEnabled:" + mIsMacRandomizationEnabled);
         builder.append("mMeteredOverride:" + mMeteredOverride);
         return builder.toString();
@@ -811,7 +811,7 @@ public final class PasspointConfiguration implements Parcelable {
                         "serviceFriendlyNames");
                 config.setServiceFriendlyNames(friendlyNamesMap);
                 config.mCarrierId = in.readInt();
-                config.mIsAutoJoinEnabled = in.readBoolean();
+                config.mIsAutojoinEnabled = in.readBoolean();
                 config.mIsMacRandomizationEnabled = in.readBoolean();
                 config.mMeteredOverride = in.readInt();
                 return config;

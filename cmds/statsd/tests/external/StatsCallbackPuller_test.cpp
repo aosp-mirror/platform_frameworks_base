@@ -50,11 +50,11 @@ int64_t pullTimeoutNs;
 int64_t pullCoolDownNs;
 std::thread pullThread;
 
-stats_event* createSimpleEvent(int64_t value) {
-    stats_event* event = stats_event_obtain();
-    stats_event_set_atom_id(event, pullTagId);
-    stats_event_write_int64(event, value);
-    stats_event_build(event);
+AStatsEvent* createSimpleEvent(int64_t value) {
+    AStatsEvent* event = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(event, pullTagId);
+    AStatsEvent_writeInt64(event, value);
+    AStatsEvent_build(event);
     return event;
 }
 
@@ -62,16 +62,16 @@ void executePull(const sp<IPullAtomResultReceiver>& resultReceiver) {
     // Convert stats_events into StatsEventParcels.
     std::vector<android::util::StatsEventParcel> parcels;
     for (int i = 0; i < values.size(); i++) {
-        stats_event* event = createSimpleEvent(values[i]);
+        AStatsEvent* event = createSimpleEvent(values[i]);
         size_t size;
-        uint8_t* buffer = stats_event_get_buffer(event, &size);
+        uint8_t* buffer = AStatsEvent_getBuffer(event, &size);
 
         android::util::StatsEventParcel p;
         // vector.assign() creates a copy, but this is inevitable unless
         // stats_event.h/c uses a vector as opposed to a buffer.
         p.buffer.assign(buffer, buffer + size);
         parcels.push_back(std::move(p));
-        stats_event_release(event);
+        AStatsEvent_release(event);
     }
 
     sleep_for(std::chrono::nanoseconds(pullDelayNs));

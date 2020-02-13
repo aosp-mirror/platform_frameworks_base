@@ -28,6 +28,7 @@ LOCAL_REQUIRED_MODULES := \
 	DisplayCutoutEmulationDoubleOverlay \
         DisplayCutoutEmulationHoleOverlay \
 	DisplayCutoutEmulationTallOverlay \
+	DisplayCutoutEmulationWaterfallOverlay \
 	FontNotoSerifSourceOverlay \
 	IconPackCircularAndroidOverlay \
 	IconPackCircularLauncherOverlay \
@@ -48,7 +49,6 @@ LOCAL_REQUIRED_MODULES := \
 	IconShapeSquircleOverlay \
 	IconShapeTeardropOverlay \
 	NavigationBarMode3ButtonOverlay \
-	NavigationBarMode2ButtonOverlay \
 	NavigationBarModeGesturalOverlay \
 	NavigationBarModeGesturalOverlayNarrowBack \
 	NavigationBarModeGesturalOverlayWideBack \

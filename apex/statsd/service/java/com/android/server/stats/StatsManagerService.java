@@ -171,8 +171,8 @@ public class StatsManagerService extends IStatsManagerService.Stub {
     @Override
     public void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
             int[] additiveFields, IPullAtomCallback pullerCallback) {
+        enforceRegisterStatsPullAtomPermission();
         int callingUid = Binder.getCallingUid();
-        final long token = Binder.clearCallingIdentity();
         PullerKey key = new PullerKey(callingUid, atomTag);
         PullerValue val = new PullerValue(coolDownNs, timeoutNs, additiveFields, pullerCallback);
 
@@ -187,6 +187,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             return;
         }
 
+        final long token = Binder.clearCallingIdentity();
         try {
             statsd.registerPullAtomCallback(
                     callingUid, atomTag, coolDownNs, timeoutNs, additiveFields, pullerCallback);
@@ -199,8 +200,8 @@ public class StatsManagerService extends IStatsManagerService.Stub {
 
     @Override
     public void unregisterPullAtomCallback(int atomTag) {
+        enforceRegisterStatsPullAtomPermission();
         int callingUid = Binder.getCallingUid();
-        final long token = Binder.clearCallingIdentity();
         PullerKey key = new PullerKey(callingUid, atomTag);
 
         // Always remove the puller from StatsManagerService even if statsd is down. When statsd
@@ -214,6 +215,7 @@ public class StatsManagerService extends IStatsManagerService.Stub {
             return;
         }
 
+        final long token = Binder.clearCallingIdentity();
         try {
             statsd.unregisterPullAtomCallback(callingUid, atomTag);
         } catch (RemoteException e) {
@@ -501,6 +503,13 @@ public class StatsManagerService extends IStatsManagerService.Stub {
                 );
         }
     }
+
+    private void enforceRegisterStatsPullAtomPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.REGISTER_STATS_PULL_ATOM,
+                "Need REGISTER_STATS_PULL_ATOM permission.");
+    }
+
 
     /**
      * Clients should call this if blocking until statsd to be ready is desired

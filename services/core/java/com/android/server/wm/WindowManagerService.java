@@ -2505,7 +2505,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState win = windowForClientLocked(session, client, false);
                 ProtoLog.d(WM_DEBUG_ADD_REMOVE, "finishDrawingWindow: %s mDrawState=%s",
                         win, (win != null ? win.mWinAnimator.drawStateToString() : "null"));
-                if (win != null && win.mWinAnimator.finishDrawingLocked(postDrawTransaction)) {
+                if (win != null && win.finishDrawing(postDrawTransaction)) {
                     if ((win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                         win.getDisplayContent().pendingLayoutChanges |=
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -5687,6 +5687,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setForceShowSystemBars(boolean show) {
+        boolean isAutomotive = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE);
+        if (!isAutomotive) {
+            throw new UnsupportedOperationException("Force showing system bars is only supported"
+                    + "for Automotive use cases.");
+        }
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
@@ -7557,6 +7563,29 @@ public class WindowManagerService extends IWindowManager.Stub
                     SurfaceControl.closeTransaction();
                 }
             }
+        }
+
+        @Override
+        public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
+                int displayId) {
+            final IBinder destinationInputToken;
+
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent == null) {
+                    return false;
+                }
+                final WindowState imeWindow = displayContent.mInputMethodWindow;
+                if (imeWindow == null) {
+                    return false;
+                }
+                if (imeWindow.mInputChannel == null) {
+                    return false;
+                }
+                destinationInputToken = imeWindow.mInputChannel.getToken();
+            }
+
+            return mInputManager.transferTouchFocus(sourceInputToken, destinationInputToken);
         }
     }
 

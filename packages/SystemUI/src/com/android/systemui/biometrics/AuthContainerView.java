@@ -87,7 +87,7 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting @Nullable AuthBiometricView mBiometricView;
     @VisibleForTesting @Nullable AuthCredentialView mCredentialView;
 
-    private final ImageView mBackgroundView;
+    @VisibleForTesting final ImageView mBackgroundView;
     @VisibleForTesting final ScrollView mBiometricScrollView;
     private final View mPanelView;
 
@@ -332,6 +332,12 @@ public class AuthContainerView extends LinearLayout
             default:
                 throw new IllegalStateException("Unknown credential type: " + credentialType);
         }
+
+        // The background is used for detecting taps / cancelling authentication. Since the
+        // credential view is full-screen and should not be canceled from background taps,
+        // disable it.
+        mBackgroundView.setOnClickListener(null);
+        mBackgroundView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
 
         mCredentialView.setContainerView(this);
         mCredentialView.setEffectiveUserId(mEffectiveUserId);
@@ -583,11 +589,13 @@ public class AuthContainerView extends LinearLayout
      * @return
      */
     public static WindowManager.LayoutParams getLayoutParams(IBinder windowToken) {
+        final int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                | WindowManager.LayoutParams.FLAG_SECURE;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("BiometricPrompt");

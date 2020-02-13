@@ -169,11 +169,11 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     public void testCleanupContextShouldRemovePersistedRecord() {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r, "context");
-        mSnoozeHelper.cleanupPersistedContext(r.sbn.getKey());
+        mSnoozeHelper.cleanupPersistedContext(r.getSbn().getKey());
         assertNull(mSnoozeHelper.getSnoozeContextForUnpostedNotification(
                 r.getUser().getIdentifier(),
-                r.sbn.getPackageName(),
-                r.sbn.getKey()
+                r.getSbn().getPackageName(),
+                r.getSbn().getKey()
         ));
     }
 
@@ -201,7 +201,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         long actualSnoozedUntilDuration = captor.getValue() - SystemClock.elapsedRealtime();
         assertTrue(Math.abs(actualSnoozedUntilDuration - 1000) < 250);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         verify(mAm, never()).setExactAndAllowWhileIdle(
                 anyInt(), anyLong(), any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
     }
 
     @Test
@@ -221,17 +221,17 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r, 1000);
         mSnoozeHelper.snooze(r2 , 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
 
-        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.sbn.getPackageName(), "one", 1);
+        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), "one", 1);
         // 2 = one for each snooze, above, zero for the cancel.
         verify(mAm, times(2)).cancel(any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
     }
 
     @Test
@@ -243,21 +243,21 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r2, 1000);
         mSnoozeHelper.snooze(r3, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_ALL, r3.sbn.getPackageName(), r3.getKey()));
+                UserHandle.USER_ALL, r3.getSbn().getPackageName(), r3.getKey()));
 
         mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, false);
         // 3 = once for each snooze above (3), only.
         verify(mAm, times(3)).cancel(any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_ALL, r3.sbn.getPackageName(), r3.getKey()));
+                UserHandle.USER_ALL, r3.getSbn().getPackageName(), r3.getKey()));
     }
 
     @Test
@@ -269,21 +269,21 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r2, 1000);
         mSnoozeHelper.snooze(r3, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+                UserHandle.USER_SYSTEM, r3.getSbn().getPackageName(), r3.getKey()));
 
         mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, "pkg2");
         // 3 = once for each snooze above (3), only.
         verify(mAm, times(3)).cancel(any(PendingIntent.class));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+                UserHandle.USER_SYSTEM, r3.getSbn().getPackageName(), r3.getKey()));
     }
 
     @Test
@@ -291,12 +291,12 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         mSnoozeHelper.snooze(r, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
 
-        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.sbn.getPackageName(), "one", 1);
+        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), "one", 1);
 
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
     }
 
     @Test
@@ -306,11 +306,11 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r, 1000);
         mSnoozeHelper.snooze(r2 , 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
 
-        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.sbn.getPackageName(), "one", 1);
+        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), "one", 1);
 
         mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
         verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r);
@@ -507,18 +507,18 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r, 1000);
         mSnoozeHelper.snooze(r2, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
 
         // clear data
         mSnoozeHelper.clearData(UserHandle.USER_SYSTEM, "pkg");
 
         // nothing snoozed; alarms canceled
         assertFalse(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertFalse(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_SYSTEM, r2.getSbn().getPackageName(), r2.getKey()));
         // twice for initial snooze, twice for canceling the snooze
         verify(mAm, times(4)).cancel(any(PendingIntent.class));
     }
@@ -533,21 +533,21 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r2, 1000);
         mSnoozeHelper.snooze(r3, 1000);
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_ALL, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_ALL, r2.getSbn().getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+                UserHandle.USER_SYSTEM, r3.getSbn().getPackageName(), r3.getKey()));
 
         // clear data
         mSnoozeHelper.clearData(UserHandle.USER_SYSTEM, "pkg");
 
         assertFalse(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r.sbn.getPackageName(), r.getKey()));
+                UserHandle.USER_SYSTEM, r.getSbn().getPackageName(), r.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_ALL, r2.sbn.getPackageName(), r2.getKey()));
+                UserHandle.USER_ALL, r2.getSbn().getPackageName(), r2.getKey()));
         assertTrue(mSnoozeHelper.isSnoozed(
-                UserHandle.USER_SYSTEM, r3.sbn.getPackageName(), r3.getKey()));
+                UserHandle.USER_SYSTEM, r3.getSbn().getPackageName(), r3.getKey()));
         // once for each initial snooze, once for canceling one snooze
         verify(mAm, times(4)).cancel(any(PendingIntent.class));
     }

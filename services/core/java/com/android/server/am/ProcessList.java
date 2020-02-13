@@ -3271,6 +3271,9 @@ public final class ProcessList {
     }
 
     final ProcessRecord getLRURecordForAppLocked(IApplicationThread thread) {
+        if (thread == null) {
+            return null;
+        }
         final IBinder threadBinder = thread.asBinder();
         // Find the application record.
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {

@@ -330,6 +330,7 @@ public final class OomAdjuster {
             // If this proc state is changed, need to update its uid record here
             if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
                     && (uidRec.setProcState != uidRec.getCurProcState()
+                    || uidRec.setCapability != uidRec.curCapability
                     || uidRec.setWhitelist != uidRec.curWhitelist)) {
                 ActiveUids uids = mTmpUidRecords;
                 uids.clear();

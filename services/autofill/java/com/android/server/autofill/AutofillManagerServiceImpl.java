@@ -818,27 +818,26 @@ final class AutofillManagerServiceImpl
         }
     }
 
-    void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
-            @Nullable Bundle clientState) {
+    void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId) {
         synchronized (mLock) {
             if (mAugmentedAutofillEventHistory == null
                     || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
                 return;
             }
             mAugmentedAutofillEventHistory.addEvent(
-                    new Event(Event.TYPE_DATASET_SELECTED, suggestionId, clientState, null, null,
+                    new Event(Event.TYPE_DATASET_SELECTED, suggestionId, null, null, null,
                             null, null, null, null, null, null));
         }
     }
 
-    void logAugmentedAutofillShown(int sessionId, @Nullable Bundle clientState) {
+    void logAugmentedAutofillShown(int sessionId) {
         synchronized (mLock) {
             if (mAugmentedAutofillEventHistory == null
                     || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
                 return;
             }
             mAugmentedAutofillEventHistory.addEvent(
-                    new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
+                    new Event(Event.TYPE_DATASETS_SHOWN, null, null, null, null, null,
                             null, null, null, null, null));
 
         }
@@ -1227,16 +1226,15 @@ final class AutofillManagerServiceImpl
                         }
 
                         @Override
-                        public void logAugmentedAutofillShown(int sessionId, Bundle clientState) {
-                            AutofillManagerServiceImpl.this.logAugmentedAutofillShown(sessionId,
-                                    clientState);
+                        public void logAugmentedAutofillShown(int sessionId) {
+                            AutofillManagerServiceImpl.this.logAugmentedAutofillShown(sessionId);
                         }
 
                         @Override
-                        public void logAugmentedAutofillSelected(int sessionId, String suggestionId,
-                                Bundle clientState) {
+                        public void logAugmentedAutofillSelected(int sessionId,
+                                String suggestionId) {
                             AutofillManagerServiceImpl.this.logAugmentedAutofillSelected(sessionId,
-                                    suggestionId, clientState);
+                                    suggestionId);
                         }
 
                         @Override

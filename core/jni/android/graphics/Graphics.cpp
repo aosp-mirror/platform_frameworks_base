@@ -569,8 +569,8 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     // mRecycledBitmap specifies the width and height of the bitmap that we
     // want to reuse.  Neither can be changed.  We will try to find a way
     // to reuse the memory.
-    const int maxWidth = SkTMax(bitmap->width(), mRecycledBitmap->info().width());
-    const int maxHeight = SkTMax(bitmap->height(), mRecycledBitmap->info().height());
+    const int maxWidth = std::max(bitmap->width(), mRecycledBitmap->info().width());
+    const int maxHeight = std::max(bitmap->height(), mRecycledBitmap->info().height());
     const SkImageInfo maxInfo = bitmap->info().makeWH(maxWidth, maxHeight);
     const size_t rowBytes = maxInfo.minRowBytes();
     const size_t bytesNeeded = maxInfo.computeByteSize(rowBytes);

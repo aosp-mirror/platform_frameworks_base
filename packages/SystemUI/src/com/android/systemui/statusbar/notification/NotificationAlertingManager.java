@@ -28,7 +28,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import javax.inject.Inject;
@@ -64,8 +63,8 @@ public class NotificationAlertingManager {
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onEntryInflated(NotificationEntry entry, int inflatedFlags) {
-                showAlertingView(entry, inflatedFlags);
+            public void onEntryInflated(NotificationEntry entry) {
+                showAlertingView(entry);
             }
 
             @Override
@@ -90,12 +89,11 @@ public class NotificationAlertingManager {
     /**
      * Adds the entry to the respective alerting manager if the content view was inflated and
      * the entry should still alert.
-     *
-     * @param entry         entry to add
-     * @param inflatedFlags flags representing content views that were inflated
      */
-    private void showAlertingView(NotificationEntry entry, @InflationFlag int inflatedFlags) {
-        if ((inflatedFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
+    private void showAlertingView(NotificationEntry entry) {
+        // TODO: Instead of this back and forth, we should listen to changes in heads up and
+        // cancel on-going heads up view inflation using the bind pipeline.
+        if (entry.getRow().getPrivateLayout().getHeadsUpChild() != null) {
             // Possible for shouldHeadsUp to change between the inflation starting and ending.
             // If it does and we no longer need to heads up, we should free the view.
             if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {

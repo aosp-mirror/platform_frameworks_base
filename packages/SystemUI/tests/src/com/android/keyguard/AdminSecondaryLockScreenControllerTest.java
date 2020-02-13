@@ -39,7 +39,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -54,7 +54,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 @RunWithLooper
 @RunWith(AndroidTestingRunner.class)
@@ -77,8 +76,8 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     private KeyguardSecurityCallback mKeyguardCallback;
     @Mock
     private KeyguardUpdateMonitor mUpdateMonitor;
-    @Spy
-    private StubTransaction mTransaction;
+    @Mock
+    private SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
     @Before
     public void setUp() {
@@ -97,21 +96,20 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         when(mKeyguardClient.asBinder()).thenReturn(mKeyguardClient);
 
         mTestController = new AdminSecondaryLockScreenController(
-                mContext, mParent, mUpdateMonitor, mKeyguardCallback, mHandler, mTransaction);
+                mContext, mParent, mUpdateMonitor, mKeyguardCallback, mHandler);
     }
 
     @Test
     public void testShow() throws Exception {
         doAnswer(invocation -> {
             IKeyguardCallback callback = (IKeyguardCallback) invocation.getArguments()[1];
-            callback.onSurfaceControlCreated(new SurfaceControl());
+            callback.onRemoteContentReady(mSurfacePackage);
             return null;
         }).when(mKeyguardClient).onSurfaceReady(any(), any(IKeyguardCallback.class));
 
         mTestController.show(mServiceIntent);
 
         verifySurfaceReady();
-        verify(mTransaction).reparent(any(), any());
         assertThat(mContext.isBound(mComponentName)).isTrue();
     }
 
@@ -133,7 +131,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         // Show the view first, then hide.
         doAnswer(invocation -> {
             IKeyguardCallback callback = (IKeyguardCallback) invocation.getArguments()[1];
-            callback.onSurfaceControlCreated(new SurfaceControl());
+            callback.onRemoteContentReady(mSurfacePackage);
             return null;
         }).when(mKeyguardClient).onSurfaceReady(any(), any(IKeyguardCallback.class));
 
@@ -188,20 +186,5 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         verify(mParent).removeView(v);
         verify(mKeyguardCallback).dismiss(true, TARGET_USER_ID);
         assertThat(mContext.isBound(mComponentName)).isFalse();
-    }
-
-    /**
-     * Stubbed {@link SurfaceControl.Transaction} class that can be used when unit testing to
-     * avoid calls to native code.
-     */
-    private class StubTransaction extends SurfaceControl.Transaction {
-        @Override
-        public void apply() {
-        }
-
-        @Override
-        public SurfaceControl.Transaction reparent(SurfaceControl sc, SurfaceControl newParent) {
-            return this;
-        }
     }
 }

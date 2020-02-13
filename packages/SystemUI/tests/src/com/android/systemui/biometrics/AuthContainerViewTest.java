@@ -36,6 +36,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.UserManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -43,6 +44,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -173,6 +175,28 @@ public class AuthContainerViewTest extends SysuiTestCase {
         assertTrue(mAuthContainer.mCredentialView instanceof AuthCredentialPatternView);
         assertEquals(dummyEffectiveUserId, mAuthContainer.mCredentialView.mEffectiveUserId);
         assertEquals(Utils.CREDENTIAL_PATTERN, mAuthContainer.mCredentialView.mCredentialType);
+    }
+
+    @Test
+    public void testCredentialUI_disablesClickingOnBackground() {
+        // In the credential view, clicking on the background (to cancel authentication) is not
+        // valid. Thus, the listener should be null, and it should not be in the accessibility
+        // hierarchy.
+        initializeContainer(Authenticators.DEVICE_CREDENTIAL);
+
+        mAuthContainer.onAttachedToWindowInternal();
+
+        verify(mAuthContainer.mBackgroundView).setOnClickListener(eq(null));
+        verify(mAuthContainer.mBackgroundView).setImportantForAccessibility(
+                eq(View.IMPORTANT_FOR_ACCESSIBILITY_NO));
+    }
+
+    @Test
+    public void testLayoutParams_hasSecureWindowFlag() {
+        final IBinder windowToken = mock(IBinder.class);
+        final WindowManager.LayoutParams layoutParams =
+                AuthContainerView.getLayoutParams(windowToken);
+        assertTrue((layoutParams.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0);
     }
 
     private void initializeContainer(int authenticators) {
