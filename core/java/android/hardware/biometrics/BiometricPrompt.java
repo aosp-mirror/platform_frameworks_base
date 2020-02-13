@@ -75,6 +75,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
+    public static final String KEY_DEVICE_CREDENTIAL_TITLE = "device_credential_title";
+    /**
+     * @hide
+     */
+    public static final String KEY_DEVICE_CREDENTIAL_SUBTITLE = "device_credential_subtitle";
+    /**
+     * @hide
+     */
+    public static final String KEY_DEVICE_CREDENTIAL_DESCRIPTION = "device_credential_description";
+    /**
+     * @hide
+     */
     public static final String KEY_NEGATIVE_TEXT = "negative_text";
     /**
      * @hide
@@ -217,6 +229,30 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public Builder setDescription(@NonNull CharSequence description) {
             mBundle.putCharSequence(KEY_DESCRIPTION, description);
+            return this;
+        }
+
+        /**
+         * Sets an optional title, subtitle, and/or description that will override other text when
+         * the user is authenticating with PIN/pattern/password. Currently for internal use only.
+         * @return This builder.
+         * @hide
+         */
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        @NonNull
+        public Builder setTextForDeviceCredential(
+                @Nullable CharSequence title,
+                @Nullable CharSequence subtitle,
+                @Nullable CharSequence description) {
+            if (title != null) {
+                mBundle.putCharSequence(KEY_DEVICE_CREDENTIAL_TITLE, title);
+            }
+            if (subtitle != null) {
+                mBundle.putCharSequence(KEY_DEVICE_CREDENTIAL_SUBTITLE, subtitle);
+            }
+            if (description != null) {
+                mBundle.putCharSequence(KEY_DEVICE_CREDENTIAL_DESCRIPTION, description);
+            }
             return this;
         }
 
