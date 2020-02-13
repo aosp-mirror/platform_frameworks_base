@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.Network;
+import android.net.TetheredClient;
 import android.net.TetheringConfigurationParcel;
 import android.net.TetherStatesParcel;
 
@@ -29,4 +30,5 @@ parcelable TetheringCallbackStartedParcel {
     Network upstreamNetwork;
     TetheringConfigurationParcel config;
     TetherStatesParcel states;
+    List<TetheredClient> tetheredClients;
 }
