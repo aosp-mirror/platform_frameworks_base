@@ -4376,10 +4376,7 @@
     service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_toogle_warning">
         When the shortcut is on, pressing both volume buttons for 3 seconds will start an
-        accessibility feature.\n\n
-        Current accessibility feature:\n
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>\n\n
-        You can change the feature in Settings > Accessibility.
+        accessibility feature.
     </string>
 
     <!-- Text in button that edit the accessibility shortcut menu, user can delete
