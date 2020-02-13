@@ -11553,7 +11553,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setLockdownAdminConfiguredNetworks(ComponentName who, boolean lockdown) {
+    public void setConfiguredNetworksLockdownState(ComponentName who, boolean lockdown) {
         if (!mHasFeature) {
             return;
         }
@@ -11572,7 +11572,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isLockdownAdminConfiguredNetworks(ComponentName who) {
+    public boolean hasLockdownAdminConfiguredNetworks(ComponentName who) {
         if (!mHasFeature) {
             return false;
         }
