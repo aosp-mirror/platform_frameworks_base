@@ -30,6 +30,7 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.ProcessInfo;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedComponent;
 import android.content.pm.parsing.component.ParsedFeature;
@@ -405,6 +406,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private boolean cantSaveState;
     private boolean allowNativeHeapPointerTagging;
     private boolean preserveLegacyExternalStorage;
+
+    @Nullable
+    @DataClass.ParcelWith(ForBoolean.class)
+    protected Boolean enableGwpAsan = null;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -904,7 +909,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
         appInfo.crossProfile = isCrossProfile();
-
+        appInfo.setGwpAsanEnabled(enableGwpAsan);
         appInfo.setBaseCodePath(baseCodePath);
         appInfo.setBaseResourcePath(baseCodePath);
         appInfo.setCodePath(codePath);
@@ -1086,6 +1091,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.allowNativeHeapPointerTagging);
         dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
+        sForBoolean.parcel(this.enableGwpAsan, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1243,6 +1249,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.allowNativeHeapPointerTagging = in.readBoolean();
         this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
+        this.enableGwpAsan = sForBoolean.unparcel(in);
     }
 
     public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
@@ -1965,6 +1972,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    @Nullable
+    public Boolean isGwpAsanEnabled() {
+        return enableGwpAsan;
+    }
+
+    @Override
     public boolean isPartiallyDirectBootAware() {
         return partiallyDirectBootAware;
     }
@@ -2416,6 +2429,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setDirectBootAware(boolean value) {
         directBootAware = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setGwpAsanEnabled(@Nullable Boolean value) {
+        enableGwpAsan = value;
         return this;
     }
 

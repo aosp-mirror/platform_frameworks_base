@@ -384,6 +384,9 @@ class ProcessRecord implements WindowProcessListener {
                     pw.println(processInfo.deniedPermissions.valueAt(i));
                 }
             }
+            if (processInfo.enableGwpAsan != null) {
+                pw.print(prefix); pw.println("  enableGwpAsan=" + processInfo.enableGwpAsan);
+            }
         }
         pw.print(prefix); pw.print("mRequiredAbi="); pw.print(mRequiredAbi);
                 pw.print(" instructionSet="); pw.println(instructionSet);
