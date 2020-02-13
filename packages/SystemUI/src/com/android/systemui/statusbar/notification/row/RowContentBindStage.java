@@ -38,13 +38,16 @@ import javax.inject.Singleton;
 public class RowContentBindStage extends BindStage<RowContentBindParams> {
     private final NotificationRowContentBinder mBinder;
     private final NotifInflationErrorManager mNotifInflationErrorManager;
+    private final RowContentBindStageLogger mLogger;
 
     @Inject
     RowContentBindStage(
             NotificationRowContentBinder binder,
-            NotifInflationErrorManager errorManager) {
+            NotifInflationErrorManager errorManager,
+            RowContentBindStageLogger logger) {
         mBinder = binder;
         mNotifInflationErrorManager = errorManager;
+        mLogger = logger;
     }
 
     @Override
@@ -53,6 +56,8 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
             @NonNull ExpandableNotificationRow row,
             @NonNull StageCallback callback) {
         RowContentBindParams params = getStageParams(entry);
+
+        mLogger.logStageParams(entry.getKey(), params.toString());
 
         // Resolve content to bind/unbind.
         @InflationFlag int inflationFlags = params.getContentViews();

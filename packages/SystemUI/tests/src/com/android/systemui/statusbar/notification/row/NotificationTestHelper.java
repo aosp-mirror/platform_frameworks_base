@@ -111,11 +111,13 @@ public class NotificationTestHelper {
                 mock(NotifRemoteViewCache.class),
                 mock(NotificationRemoteInputManager.class));
         contentBinder.setInflateSynchronously(true);
-        mBindStage = new RowContentBindStage(contentBinder, mock(NotifInflationErrorManager.class));
+        mBindStage = new RowContentBindStage(contentBinder,
+                mock(NotifInflationErrorManager.class),
+                mock(RowContentBindStageLogger.class));
 
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
-        mBindPipeline = new NotifBindPipeline(collection);
+        mBindPipeline = new NotifBindPipeline(collection, mock(NotifBindPipelineLogger.class));
         mBindPipeline.setStage(mBindStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
