@@ -160,6 +160,12 @@ public class IpFilterConfiguration extends FilterConfiguration {
          */
         @NonNull
         public IpFilterConfiguration build() {
+            int ipAddrLength = mSrcIpAddress.length;
+            if (ipAddrLength != mDstIpAddress.length || (ipAddrLength != 4 && ipAddrLength != 16)) {
+                throw new IllegalArgumentException(
+                    "The lengths of src and dst IP address must be 4 or 16 and must be the same."
+                            + "srcLength=" + ipAddrLength + ", dstLength=" + mDstIpAddress.length);
+            }
             return new IpFilterConfiguration(
                     mSettings, mSrcIpAddress, mDstIpAddress, mSrcPort, mDstPort, mPassthrough);
         }

@@ -532,6 +532,8 @@ public class Tuner implements AutoCloseable  {
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
+            filter.setMainType(mainType);
+            filter.setSubtype(subType);
             filter.setCallback(cb);
             if (mHandler == null) {
                 mHandler = createEventHandler();
