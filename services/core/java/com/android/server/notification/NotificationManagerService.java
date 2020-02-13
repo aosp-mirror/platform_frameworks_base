@@ -1055,7 +1055,7 @@ public class NotificationManagerService extends SystemService {
                         if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
                         reportSeen(r);
                     }
-                    r.setVisibility(true, nv.rank, nv.count);
+                    r.setVisibility(true, nv.rank, nv.count, mNotificationRecordLogger);
                     mAssistants.notifyAssistantVisibilityChangedLocked(r.getSbn(), true);
                     boolean isHun = (nv.location
                             == NotificationVisibility.NotificationLocation.LOCATION_FIRST_HEADS_UP);
@@ -1074,7 +1074,7 @@ public class NotificationManagerService extends SystemService {
                 for (NotificationVisibility nv : noLongerVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
-                    r.setVisibility(false, nv.rank, nv.count);
+                    r.setVisibility(false, nv.rank, nv.count, mNotificationRecordLogger);
                     mAssistants.notifyAssistantVisibilityChangedLocked(r.getSbn(), false);
                     nv.recycle();
                 }
@@ -6468,7 +6468,7 @@ public class NotificationManagerService extends SystemService {
                         mUsageStats.registerPostedByApp(r);
                         r.setInterruptive(isVisuallyInterruptive(null, r));
                     } else {
-                        old = mNotificationList.get(index);
+                        old = mNotificationList.get(index);  // Potentially *changes* old
                         mNotificationList.set(index, r);
                         mUsageStats.registerUpdatedByApp(r, old);
                         // Make sure we don't lose the foreground service state.
@@ -6537,7 +6537,7 @@ public class NotificationManagerService extends SystemService {
                     maybeRecordInterruptionLocked(r);
 
                     // Log event to statsd
-                    mNotificationRecordLogger.logNotificationReported(r, old, position,
+                    mNotificationRecordLogger.maybeLogNotificationPosted(r, old, position,
                             buzzBeepBlinkLoggingCode);
                 } finally {
                     int N = mEnqueuedNotifications.size();
