@@ -18,6 +18,7 @@ package com.android.server.location;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
@@ -25,6 +26,8 @@ import android.hardware.contexthub.V1_0.HubAppInfo;
 import android.hardware.contexthub.V1_0.IContexthubCallback;
 import android.hardware.contexthub.V1_0.Result;
 import android.hardware.contexthub.V1_0.TransactionResult;
+import android.hardware.contexthub.V1_1.Setting;
+import android.hardware.contexthub.V1_1.SettingValue;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubTransaction;
@@ -39,8 +42,11 @@ import android.hardware.location.NanoAppFilter;
 import android.hardware.location.NanoAppInstanceInfo;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
+import android.location.LocationManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -188,6 +194,19 @@ public class ContextHubService extends IContextHubService.Stub {
             queryNanoAppsInternal(contextHubId);
         }
         mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+
+        if (mContextHubWrapper.supportsSettingNotifications()) {
+            sendLocationSettingUpdate();
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
+                    true /* notifyForDescendants */,
+                    new ContentObserver(null /* handler */) {
+                        @Override
+                        public void onChange(boolean selfChange) {
+                            sendLocationSettingUpdate();
+                        }
+                    }, UserHandle.USER_ALL);
+        }
     }
 
     /**
@@ -557,6 +576,8 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     private void handleHubEventCallback(int contextHubId, int eventType) {
         if (eventType == AsyncEventType.RESTARTED) {
+            sendLocationSettingUpdate();
+
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
 
@@ -891,5 +912,16 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         return true;
+    }
+
+    /**
+     * Obtains the latest location setting value and notifies the Contexthub.
+     */
+    private void sendLocationSettingUpdate() {
+        boolean enabled = mContext.getSystemService(LocationManager.class)
+                .isLocationEnabledForUser(UserHandle.CURRENT);
+
+        mContextHubWrapper.onSettingChanged(Setting.LOCATION,
+                enabled ? SettingValue.ENABLED : SettingValue.DISABLED);
     }
 }
