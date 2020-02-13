@@ -212,7 +212,7 @@ public class TetheringManager {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(CONNECTOR_POLL_INTERVAL_MILLIS);
                 } catch (InterruptedException e) {
                     // Not much to do here, the system needs to wait for the connector
                 }
