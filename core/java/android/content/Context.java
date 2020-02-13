@@ -4064,16 +4064,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.net.wifi.WifiCondManager} for handling management of the Wi-Fi control
-     * daemon.
+     * {@link android.net.wifi.wificond.WifiNl80211Manager} for handling management of the
+     * Wi-Fi nl802.11 daemon (wificond).
      *
      * @see #getSystemService(String)
-     * @see android.net.wifi.WifiCondManager
+     * @see android.net.wifi.wificond.WifiNl80211Manager
      * @hide
      */
     @SystemApi
     @SuppressLint("ServiceName")
-    public static final String WIFI_COND_SERVICE = "wificond";
+    public static final String WIFI_NL80211_SERVICE = "wifinl80211";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

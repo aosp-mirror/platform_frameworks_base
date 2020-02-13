@@ -132,7 +132,7 @@ import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
 import android.net.wifi.WifiFrameworkInitializer;
-import android.net.wifi.wificond.WifiCondManager;
+import android.net.wifi.wificond.WifiNl80211Manager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -761,11 +761,11 @@ public final class SystemServiceRegistry {
                 return new EthernetManager(ctx.getOuterContext(), service);
             }});
 
-        registerService(Context.WIFI_COND_SERVICE, WifiCondManager.class,
-                new CachedServiceFetcher<WifiCondManager>() {
+        registerService(Context.WIFI_NL80211_SERVICE, WifiNl80211Manager.class,
+                new CachedServiceFetcher<WifiNl80211Manager>() {
                     @Override
-                    public WifiCondManager createService(ContextImpl ctx) {
-                        return new WifiCondManager(ctx.getOuterContext());
+                    public WifiNl80211Manager createService(ContextImpl ctx) {
+                        return new WifiNl80211Manager(ctx.getOuterContext());
                     }
                 });
 

@@ -71,10 +71,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Unit tests for {@link android.net.wifi.WifiCondManager}.
+ * Unit tests for {@link android.net.wifi.wificond.WifiNl80211Manager}.
  */
 @SmallTest
-public class WifiCondManagerTest {
+public class WifiNl80211ManagerTest {
     @Mock
     private IWificond mWificond;
     @Mock
@@ -86,21 +86,21 @@ public class WifiCondManagerTest {
     @Mock
     private IApInterface mApInterface;
     @Mock
-    private WifiCondManager.SoftApCallback mSoftApListener;
+    private WifiNl80211Manager.SoftApCallback mSoftApListener;
     @Mock
-    private WifiCondManager.SendMgmtFrameCallback mSendMgmtFrameCallback;
+    private WifiNl80211Manager.SendMgmtFrameCallback mSendMgmtFrameCallback;
     @Mock
-    private WifiCondManager.ScanEventCallback mNormalScanCallback;
+    private WifiNl80211Manager.ScanEventCallback mNormalScanCallback;
     @Mock
-    private WifiCondManager.ScanEventCallback mPnoScanCallback;
+    private WifiNl80211Manager.ScanEventCallback mPnoScanCallback;
     @Mock
-    private WifiCondManager.PnoScanRequestCallback mPnoScanRequestCallback;
+    private WifiNl80211Manager.PnoScanRequestCallback mPnoScanRequestCallback;
     @Mock
     private Context mContext;
     private TestLooper mLooper;
     private TestAlarmManager mTestAlarmManager;
     private AlarmManager mAlarmManager;
-    private WifiCondManager mWificondControl;
+    private WifiNl80211Manager mWificondControl;
     private static final String TEST_INTERFACE_NAME = "test_wlan_if";
     private static final String TEST_INTERFACE_NAME1 = "test_wlan_if1";
     private static final String TEST_INVALID_INTERFACE_NAME = "asdf";
@@ -180,7 +180,7 @@ public class WifiCondManagerTest {
         when(mWificond.tearDownApInterface(any())).thenReturn(true);
         when(mClientInterface.getWifiScannerImpl()).thenReturn(mWifiScannerImpl);
         when(mClientInterface.getInterfaceName()).thenReturn(TEST_INTERFACE_NAME);
-        mWificondControl = new WifiCondManager(mContext, mWificond);
+        mWificondControl = new WifiNl80211Manager(mContext, mWificond);
         assertEquals(true,
                 mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, Runnable::run,
                         mNormalScanCallback, mPnoScanCallback));
@@ -492,7 +492,7 @@ public class WifiCondManagerTest {
         // getScanResults should fail.
         assertEquals(0,
                 mWificondControl.getScanResults(TEST_INTERFACE_NAME,
-                        WifiCondManager.SCAN_TYPE_SINGLE_SCAN).size());
+                        WifiNl80211Manager.SCAN_TYPE_SINGLE_SCAN).size());
     }
 
     /**
@@ -786,10 +786,10 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameCalledTwiceBeforeFinished() throws Exception {
-        WifiCondManager.SendMgmtFrameCallback cb1 = mock(
-                WifiCondManager.SendMgmtFrameCallback.class);
-        WifiCondManager.SendMgmtFrameCallback cb2 = mock(
-                WifiCondManager.SendMgmtFrameCallback.class);
+        WifiNl80211Manager.SendMgmtFrameCallback cb1 = mock(
+                WifiNl80211Manager.SendMgmtFrameCallback.class);
+        WifiNl80211Manager.SendMgmtFrameCallback cb2 = mock(
+                WifiNl80211Manager.SendMgmtFrameCallback.class);
 
         mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
                 Runnable::run, cb1);
@@ -800,7 +800,7 @@ public class WifiCondManagerTest {
 
         mWificondControl.sendMgmtFrame(TEST_INTERFACE_NAME, TEST_PROBE_FRAME, TEST_MCS_RATE,
                 Runnable::run, cb2);
-        verify(cb2).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_ALREADY_STARTED);
+        verify(cb2).onFailure(WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_ALREADY_STARTED);
         // verify SendMgmtFrame() still was only called once i.e. not called again
         verify(mClientInterface, times(1))
                 .SendMgmtFrame(any(), any(), anyInt());
@@ -811,8 +811,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameThrowsException() throws Exception {
-        WifiCondManager.SendMgmtFrameCallback cb = mock(
-                WifiCondManager.SendMgmtFrameCallback.class);
+        WifiNl80211Manager.SendMgmtFrameCallback cb = mock(
+                WifiNl80211Manager.SendMgmtFrameCallback.class);
 
         final ArgumentCaptor<ISendMgmtFrameEvent> sendMgmtFrameEventCaptor =
                 ArgumentCaptor.forClass(ISendMgmtFrameEvent.class);
@@ -834,7 +834,7 @@ public class WifiCondManagerTest {
         verify(mAlarmManager).cancel(eq(alarmListenerCaptor.getValue()));
 
         sendMgmtFrameEventCaptor.getValue().OnFailure(
-                WifiCondManager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
+                WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
         mLooper.dispatchAll();
 
         handlerCaptor.getValue().post(() -> alarmListenerCaptor.getValue().onAlarm());
@@ -848,8 +848,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameSuccess() throws Exception {
-        WifiCondManager.SendMgmtFrameCallback cb = mock(
-                WifiCondManager.SendMgmtFrameCallback.class);
+        WifiNl80211Manager.SendMgmtFrameCallback cb = mock(
+                WifiNl80211Manager.SendMgmtFrameCallback.class);
 
         final ArgumentCaptor<ISendMgmtFrameEvent> sendMgmtFrameEventCaptor =
                 ArgumentCaptor.forClass(ISendMgmtFrameEvent.class);
@@ -882,8 +882,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameFailure() throws Exception {
-        WifiCondManager.SendMgmtFrameCallback cb = mock(
-                WifiCondManager.SendMgmtFrameCallback.class);
+        WifiNl80211Manager.SendMgmtFrameCallback cb = mock(
+                WifiNl80211Manager.SendMgmtFrameCallback.class);
 
         final ArgumentCaptor<ISendMgmtFrameEvent> sendMgmtFrameEventCaptor =
                 ArgumentCaptor.forClass(ISendMgmtFrameEvent.class);
@@ -898,10 +898,10 @@ public class WifiCondManagerTest {
                 Runnable::run, cb);
 
         sendMgmtFrameEventCaptor.getValue().OnFailure(
-                WifiCondManager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
+                WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
         mLooper.dispatchAll();
         verify(cb, never()).onAck(anyInt());
-        verify(cb).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
+        verify(cb).onFailure(WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
         verify(mAlarmManager).cancel(eq(alarmListenerCaptor.getValue()));
 
         // verify that even if timeout is triggered afterwards, SendMgmtFrameCallback is not
@@ -917,8 +917,8 @@ public class WifiCondManagerTest {
      */
     @Test
     public void testSendMgmtFrameTimeout() throws Exception {
-        WifiCondManager.SendMgmtFrameCallback cb = mock(
-                WifiCondManager.SendMgmtFrameCallback.class);
+        WifiNl80211Manager.SendMgmtFrameCallback cb = mock(
+                WifiNl80211Manager.SendMgmtFrameCallback.class);
 
         final ArgumentCaptor<ISendMgmtFrameEvent> sendMgmtFrameEventCaptor =
                 ArgumentCaptor.forClass(ISendMgmtFrameEvent.class);
@@ -935,7 +935,7 @@ public class WifiCondManagerTest {
         handlerCaptor.getValue().post(() -> alarmListenerCaptor.getValue().onAlarm());
         mLooper.dispatchAll();
         verify(cb, never()).onAck(anyInt());
-        verify(cb).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
+        verify(cb).onFailure(WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
 
         // verify that even if onAck() callback is triggered after timeout,
         // SendMgmtFrameCallback is not triggered again
@@ -1006,7 +1006,8 @@ public class WifiCondManagerTest {
         sendMgmtFrameEventCaptor.getValue().OnAck(TEST_SEND_MGMT_FRAME_ELAPSED_TIME_MS);
         mLooper.dispatchAll();
         verify(mSendMgmtFrameCallback, never()).onAck(anyInt());
-        verify(mSendMgmtFrameCallback).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
+        verify(mSendMgmtFrameCallback).onFailure(
+                WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
     }
 
     /**
@@ -1032,9 +1033,10 @@ public class WifiCondManagerTest {
         handlerCaptor.getValue().post(() -> alarmListenerCaptor.getValue().onAlarm());
         // OnFailure posts to the handler
         sendMgmtFrameEventCaptor.getValue().OnFailure(
-                WifiCondManager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
+                WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_UNKNOWN);
         mLooper.dispatchAll();
-        verify(mSendMgmtFrameCallback).onFailure(WifiCondManager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
+        verify(mSendMgmtFrameCallback).onFailure(
+                WifiNl80211Manager.SEND_MGMT_FRAME_ERROR_TIMEOUT);
     }
 
     /**
