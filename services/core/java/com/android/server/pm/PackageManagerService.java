@@ -14000,20 +14000,18 @@ public class PackageManagerService extends IPackageManager.Stub
         final String fromUuid;
         final String toUuid;
         final String packageName;
-        final String dataAppName;
         final int appId;
         final String seinfo;
         final int targetSdkVersion;
         final String fromCodePath;
 
         public MoveInfo(int moveId, String fromUuid, String toUuid, String packageName,
-                String dataAppName, int appId, String seinfo, int targetSdkVersion,
+                int appId, String seinfo, int targetSdkVersion,
                 String fromCodePath) {
             this.moveId = moveId;
             this.fromUuid = fromUuid;
             this.toUuid = toUuid;
             this.packageName = packageName;
-            this.dataAppName = dataAppName;
             this.appId = appId;
             this.seinfo = seinfo;
             this.targetSdkVersion = targetSdkVersion;
@@ -15137,7 +15135,7 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mInstaller) {
                 try {
                     mInstaller.moveCompleteApp(move.fromUuid, move.toUuid, move.packageName,
-                            move.dataAppName, move.appId, move.seinfo, move.targetSdkVersion,
+                            move.appId, move.seinfo, move.targetSdkVersion,
                             move.fromCodePath);
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to move app", e);
@@ -15145,7 +15143,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            codeFile = new File(Environment.getDataAppDirectory(move.toUuid), move.dataAppName);
+            final String toPathName = new File(move.fromCodePath).getName();
+            codeFile = new File(Environment.getDataAppDirectory(move.toUuid), toPathName);
             resourceFile = codeFile;
             if (DEBUG_INSTALL) Slog.d(TAG, "codeFile after move is " + codeFile);
 
@@ -15197,8 +15196,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         private boolean cleanUp(String volumeUuid) {
+            final String toPathName = new File(move.fromCodePath).getName();
             final File codeFile = new File(Environment.getDataAppDirectory(volumeUuid),
-                    move.dataAppName);
+                    toPathName);
             Slog.d(TAG, "Cleaning up " + move.packageName + " on " + volumeUuid);
             final int[] userIds = mUserManager.getUserIds();
             synchronized (mInstallLock) {
@@ -22152,7 +22152,11 @@ public class PackageManagerService extends IPackageManager.Stub
             targetSdkVersion = pkg.getTargetSdkVersion();
             freezer = freezePackage(packageName, "movePackageInternal");
             installedUserIds = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
-            fromCodePath = pkg.getCodePath();
+            if (codeFile.getParentFile().getName().startsWith(RANDOM_DIR_PREFIX)) {
+                fromCodePath = codeFile.getParentFile().getAbsolutePath();
+            } else {
+                fromCodePath = codeFile.getAbsolutePath();
+            }
         }
 
         final Bundle extras = new Bundle();
@@ -22279,9 +22283,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }).start();
 
-            final String dataAppName = codeFile.getName();
             move = new MoveInfo(moveId, currentVolumeUuid, volumeUuid, packageName,
-                    dataAppName, appId, seinfo, targetSdkVersion, fromCodePath);
+                    appId, seinfo, targetSdkVersion, fromCodePath);
         } else {
             move = null;
         }
