@@ -175,11 +175,7 @@ public final class Trace {
     }
 
     /**
-     * Set whether tracing is enabled in this process.  Tracing is disabled shortly after Zygote
-     * initializes and re-enabled after processes fork from Zygote.  This is done because Zygote
-     * has no way to be notified about changes to the tracing tags, and if Zygote ever reads and
-     * caches the tracing tags, forked processes will inherit those stale tags.
-     *
+     * Set whether tracing is enabled in this process.
      * @hide
      */
     public static void setTracingEnabled(boolean enabled, int debugFlags) {
