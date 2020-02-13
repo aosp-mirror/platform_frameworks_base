@@ -61,7 +61,7 @@ public class ThumbnailData {
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         rotation = snapshot.getRotation();
-        reducedResolution = snapshot.isReducedResolution();
+        reducedResolution = snapshot.isLowResolution();
         scale = snapshot.getScale();
         isRealSnapshot = snapshot.isRealSnapshot();
         isTranslucent = snapshot.isTranslucent();

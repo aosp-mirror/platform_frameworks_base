@@ -3638,10 +3638,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
-    public TaskSnapshot getTaskSnapshot(int taskId, int userId, boolean reducedResolution,
+    /**
+     * Retrieves a snapshot. If restoreFromDisk equals equals {@code true}, DO NOT HOLD THE WINDOW
+     * MANAGER LOCK WHEN CALLING THIS METHOD!
+     */
+    public TaskSnapshot getTaskSnapshot(int taskId, int userId, boolean isLowResolution,
             boolean restoreFromDisk) {
         return mTaskSnapshotController.getSnapshot(taskId, userId, restoreFromDisk,
-                reducedResolution);
+                isLowResolution);
     }
 
     /**

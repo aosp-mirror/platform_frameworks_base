@@ -204,7 +204,7 @@ public class RecentsAnimationController implements DeathRecipient {
                             snapshotController.snapshotTasks(tasks);
                             snapshotController.addSkipClosingAppSnapshotTasks(tasks);
                             return snapshotController.getSnapshot(taskId, 0 /* userId */,
-                                    false /* restoreFromDisk */, false /* reducedResolution */);
+                                    false /* restoreFromDisk */, false /* isLowResolution */);
                         }
                     }
                     return null;
@@ -633,7 +633,7 @@ public class RecentsAnimationController implements DeathRecipient {
         snapshotController.snapshotTasks(tasks);
         snapshotController.addSkipClosingAppSnapshotTasks(tasks);
         final TaskSnapshot taskSnapshot = snapshotController.getSnapshot(task.mTaskId,
-                task.mUserId, false /* restoreFromDisk */, false /* reducedResolution */);
+                task.mUserId, false /* restoreFromDisk */, false /* isLowResolution */);
         if (taskSnapshot == null) {
             return null;
         }

@@ -6426,8 +6426,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution) {
-        return mActivityTaskManager.getTaskSnapshot(taskId, reducedResolution);
+    public ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
+        return mActivityTaskManager.getTaskSnapshot(taskId, isLowResolution);
     }
 
     @Override

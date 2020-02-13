@@ -57,7 +57,7 @@ class TaskSnapshotCache {
      * If {@param restoreFromDisk} equals {@code true}, DO NOT HOLD THE WINDOW MANAGER LOCK!
      */
     @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
-            boolean reducedResolution) {
+            boolean isLowResolution) {
 
         synchronized (mService.mGlobalLock) {
             // Try the running cache.
@@ -71,14 +71,14 @@ class TaskSnapshotCache {
         if (!restoreFromDisk) {
             return null;
         }
-        return tryRestoreFromDisk(taskId, userId, reducedResolution);
+        return tryRestoreFromDisk(taskId, userId, isLowResolution);
     }
 
     /**
      * DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING THIS METHOD!
      */
-    private TaskSnapshot tryRestoreFromDisk(int taskId, int userId, boolean reducedResolution) {
-        final TaskSnapshot snapshot = mLoader.loadTask(taskId, userId, reducedResolution);
+    private TaskSnapshot tryRestoreFromDisk(int taskId, int userId, boolean isLowResolution) {
+        final TaskSnapshot snapshot = mLoader.loadTask(taskId, userId, isLowResolution);
         if (snapshot == null) {
             return null;
         }

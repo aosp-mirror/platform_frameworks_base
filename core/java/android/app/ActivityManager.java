@@ -1955,7 +1955,7 @@ public class ActivityManager {
         private final Rect mContentInsets;
         // Whether this snapshot is a down-sampled version of the full resolution, used mainly for
         // low-ram devices
-        private final boolean mReducedResolution;
+        private final boolean mIsLowResolution;
         // Whether or not the snapshot is a real snapshot or an app-theme generated snapshot due to
         // the task having a secure window or having previews disabled
         private final boolean mIsRealSnapshot;
@@ -1969,7 +1969,7 @@ public class ActivityManager {
         public TaskSnapshot(long id,
                 @NonNull ComponentName topActivityComponent, GraphicBuffer snapshot,
                 @NonNull ColorSpace colorSpace, int orientation, int rotation, Rect contentInsets,
-                boolean reducedResolution, float scale, boolean isRealSnapshot, int windowingMode,
+                boolean isLowResolution, float scale, boolean isRealSnapshot, int windowingMode,
                 int systemUiVisibility, boolean isTranslucent) {
             mId = id;
             mTopActivityComponent = topActivityComponent;
@@ -1979,7 +1979,7 @@ public class ActivityManager {
             mOrientation = orientation;
             mRotation = rotation;
             mContentInsets = new Rect(contentInsets);
-            mReducedResolution = reducedResolution;
+            mIsLowResolution = isLowResolution;
             mScale = scale;
             mIsRealSnapshot = isRealSnapshot;
             mWindowingMode = windowingMode;
@@ -1998,7 +1998,7 @@ public class ActivityManager {
             mOrientation = source.readInt();
             mRotation = source.readInt();
             mContentInsets = source.readParcelable(null /* classLoader */);
-            mReducedResolution = source.readBoolean();
+            mIsLowResolution = source.readBoolean();
             mScale = source.readFloat();
             mIsRealSnapshot = source.readBoolean();
             mWindowingMode = source.readInt();
@@ -2063,8 +2063,8 @@ public class ActivityManager {
          * @return Whether this snapshot is a down-sampled version of the full resolution.
          */
         @UnsupportedAppUsage
-        public boolean isReducedResolution() {
-            return mReducedResolution;
+        public boolean isLowResolution() {
+            return mIsLowResolution;
         }
 
         /**
@@ -2121,7 +2121,7 @@ public class ActivityManager {
             dest.writeInt(mOrientation);
             dest.writeInt(mRotation);
             dest.writeParcelable(mContentInsets, 0);
-            dest.writeBoolean(mReducedResolution);
+            dest.writeBoolean(mIsLowResolution);
             dest.writeFloat(mScale);
             dest.writeBoolean(mIsRealSnapshot);
             dest.writeInt(mWindowingMode);
@@ -2141,7 +2141,7 @@ public class ActivityManager {
                     + " mOrientation=" + mOrientation
                     + " mRotation=" + mRotation
                     + " mContentInsets=" + mContentInsets.toShortString()
-                    + " mReducedResolution=" + mReducedResolution + " mScale=" + mScale
+                    + " mIsLowResolution=" + mIsLowResolution + " mScale=" + mScale
                     + " mIsRealSnapshot=" + mIsRealSnapshot + " mWindowingMode=" + mWindowingMode
                     + " mSystemUiVisibility=" + mSystemUiVisibility
                     + " mIsTranslucent=" + mIsTranslucent;
@@ -2165,7 +2165,7 @@ public class ActivityManager {
             private int mOrientation;
             private int mRotation;
             private Rect mContentInsets;
-            private boolean mReducedResolution;
+            private boolean mIsLowResolution;
             private float mScaleFraction;
             private boolean mIsRealSnapshot;
             private int mWindowingMode;
@@ -2208,8 +2208,11 @@ public class ActivityManager {
                 return this;
             }
 
-            public Builder setReducedResolution(boolean reducedResolution) {
-                mReducedResolution = reducedResolution;
+            /**
+             * Set to true if this is a low-resolution snapshot stored in *_reduced.jpg.
+             */
+            public Builder setIsLowResolution(boolean isLowResolution) {
+                mIsLowResolution = isLowResolution;
                 return this;
             }
 
@@ -2260,7 +2263,7 @@ public class ActivityManager {
                         mOrientation,
                         mRotation,
                         mContentInsets,
-                        mReducedResolution,
+                        mIsLowResolution,
                         mScaleFraction,
                         mIsRealSnapshot,
                         mWindowingMode,

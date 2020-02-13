@@ -1714,7 +1714,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityManager.TaskSnapshot snapshot =
                 mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
-                        false /* restoreFromDisk */, false /* reducedResolution */);
+                        false /* restoreFromDisk */, false /* isLowResolution */);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, fromRecents, snapshot);
 

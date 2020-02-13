@@ -170,13 +170,13 @@ public class TaskInfo {
     }
 
     /**
-     * @param reducedResolution
+     * @param isLowResolution
      * @return
      * @hide
      */
-    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean reducedResolution) {
+    public ActivityManager.TaskSnapshot getTaskSnapshot(boolean isLowResolution) {
         try {
-            return ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            return ActivityManager.getService().getTaskSnapshot(taskId, isLowResolution);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;

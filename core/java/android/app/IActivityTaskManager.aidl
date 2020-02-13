@@ -401,11 +401,11 @@ interface IActivityTaskManager {
 
     /**
      * @param taskId the id of the task to retrieve the sAutoapshots for
-     * @param reducedResolution if set, if the snapshot needs to be loaded from disk, this will load
+     * @param isLowResolution if set, if the snapshot needs to be loaded from disk, this will load
      *                          a reduced resolution of it, which is much faster
      * @return a graphic buffer representing a screenshot of a task
      */
-    ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution);
+    ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
 
     /**
      * See {@link android.app.Activity#setDisablePreviewScreenshots}
