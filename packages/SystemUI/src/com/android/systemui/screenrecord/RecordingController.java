@@ -24,6 +24,9 @@ import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.android.systemui.qs.tiles.ScreenRecordTile;
+import com.android.systemui.statusbar.policy.CallbackController;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,7 +35,8 @@ import javax.inject.Singleton;
  * Helper class to initiate a screen recording
  */
 @Singleton
-public class RecordingController {
+public class RecordingController
+        implements CallbackController<RecordingController.RecordingStateChangeCallback> {
     private static final String TAG = "RecordingController";
     private static final String SYSUI_PACKAGE = "com.android.systemui";
     private static final String SYSUI_SCREENRECORD_LAUNCHER =
@@ -41,9 +45,10 @@ public class RecordingController {
     private final Context mContext;
     private boolean mIsStarting;
     private boolean mIsRecording;
-    private ScreenRecordTile mTileToUpdate;
     private PendingIntent mStopIntent;
     private CountDownTimer mCountDownTimer = null;
+
+    private ArrayList<RecordingStateChangeCallback> mListeners = new ArrayList<>();
 
     /**
      * Create a new RecordingController
@@ -63,10 +68,7 @@ public class RecordingController {
         final Intent intent = new Intent();
         intent.setComponent(launcherComponent);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("com.android.systemui.screenrecord.EXTRA_SETTINGS_ONLY", true);
         mContext.startActivity(intent);
-
-        mTileToUpdate = tileToUpdate;
     }
 
     /**
@@ -82,16 +84,21 @@ public class RecordingController {
         mCountDownTimer = new CountDownTimer(ms, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                refreshTile(millisUntilFinished);
+                for (RecordingStateChangeCallback cb : mListeners) {
+                    cb.onCountdown(millisUntilFinished);
+                }
             }
 
             @Override
             public void onFinish() {
                 mIsStarting = false;
                 mIsRecording = true;
-                refreshTile();
+                for (RecordingStateChangeCallback cb : mListeners) {
+                    cb.onRecordingEnd();
+                }
                 try {
                     startIntent.send();
+                    Log.d(TAG, "sent start intent");
                 } catch (PendingIntent.CanceledException e) {
                     Log.e(TAG, "Pending intent was cancelled: " + e.getMessage());
                 }
@@ -99,18 +106,6 @@ public class RecordingController {
         };
 
         mCountDownTimer.start();
-    }
-
-    private void refreshTile() {
-        refreshTile(0);
-    }
-
-    private void refreshTile(long millisUntilFinished) {
-        if (mTileToUpdate != null) {
-            mTileToUpdate.refreshState(millisUntilFinished);
-        } else {
-            Log.e(TAG, "No tile to refresh");
-        }
     }
 
     /**
@@ -123,7 +118,10 @@ public class RecordingController {
             Log.e(TAG, "Timer was null");
         }
         mIsStarting = false;
-        refreshTile();
+
+        for (RecordingStateChangeCallback cb : mListeners) {
+            cb.onRecordingEnd();
+        }
     }
 
     /**
@@ -152,7 +150,10 @@ public class RecordingController {
         } catch (PendingIntent.CanceledException e) {
             Log.e(TAG, "Error stopping: " + e.getMessage());
         }
-        refreshTile();
+
+        for (RecordingStateChangeCallback cb : mListeners) {
+            cb.onRecordingEnd();
+        }
     }
 
     /**
@@ -161,6 +162,44 @@ public class RecordingController {
      */
     public void updateState(boolean isRecording) {
         mIsRecording = isRecording;
-        refreshTile();
+        for (RecordingStateChangeCallback cb : mListeners) {
+            if (isRecording) {
+                cb.onRecordingStart();
+            } else {
+                cb.onRecordingEnd();
+            }
+        }
+    }
+
+    @Override
+    public void addCallback(RecordingStateChangeCallback listener) {
+        mListeners.add(listener);
+    }
+
+    @Override
+    public void removeCallback(RecordingStateChangeCallback listener) {
+        mListeners.remove(listener);
+    }
+
+    /**
+     * A callback for changes in the screen recording state
+     */
+    public interface RecordingStateChangeCallback {
+        /**
+         * Called when a countdown to recording has updated
+         *
+         * @param millisUntilFinished Time in ms remaining in the countdown
+         */
+        default void onCountdown(long millisUntilFinished) {}
+
+        /**
+         * Called when a screen recording has started
+         */
+        default void onRecordingStart() {}
+
+        /**
+         * Called when a screen recording has ended
+         */
+        default void onRecordingEnd() {}
     }
 }
