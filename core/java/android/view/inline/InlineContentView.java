@@ -19,8 +19,7 @@ package android.view.inline;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.view.SurfaceControl;
-import android.view.SurfaceHolder;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceView;
 
 /**
@@ -30,31 +29,10 @@ import android.view.SurfaceView;
  */
 public class InlineContentView extends SurfaceView {
     public InlineContentView(@NonNull Context context,
-            @NonNull SurfaceControl surfaceControl) {
+            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
         super(context);
         setZOrderOnTop(true);
-        getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                holder.setFormat(PixelFormat.TRANSPARENT);
-                new SurfaceControl.Transaction()
-                        .reparent(surfaceControl, getSurfaceControl())
-                        .setVisibility(surfaceControl, /* visible */ true)
-                        .apply();
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                // TODO(b/137800469): implement this.
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                new SurfaceControl.Transaction()
-                        .setVisibility(surfaceControl, false)
-                        .reparent(surfaceControl, null)
-                        .apply();
-            }
-        });
+        setChildSurfacePackage(surfacePackage);
+        getHolder().setFormat(PixelFormat.TRANSPARENT);
     }
 }

@@ -32,7 +32,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
-import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
@@ -104,14 +103,14 @@ public abstract class InlineSuggestionRenderService extends Service {
                 }
             });
 
-            sendResult(callback, host.getSurfacePackage().getSurfaceControl());
+            sendResult(callback, host.getSurfacePackage());
         } finally {
             updateDisplay(Display.DEFAULT_DISPLAY);
         }
     }
 
     private void sendResult(@NonNull IInlineSuggestionUiCallback callback,
-            @Nullable SurfaceControl surface) {
+            @Nullable SurfaceControlViewHost.SurfacePackage surface) {
         try {
             callback.onContent(surface);
         } catch (RemoteException e) {

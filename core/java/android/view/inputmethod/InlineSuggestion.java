@@ -27,7 +27,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Size;
 import android.util.Slog;
-import android.view.SurfaceControl;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.inline.InlineContentView;
 import android.view.inline.InlinePresentationSpec;
@@ -151,7 +151,7 @@ public final class InlineSuggestion implements Parcelable {
         }
 
         @Override
-        public void onContent(SurfaceControl content) {
+        public void onContent(SurfaceControlViewHost.SurfacePackage content) {
             final InlineContentCallbackImpl callbackImpl = mCallbackImpl.get();
             if (callbackImpl != null) {
                 callbackImpl.onContent(content);
@@ -173,7 +173,7 @@ public final class InlineSuggestion implements Parcelable {
             mCallback = callback;
         }
 
-        public void onContent(SurfaceControl content) {
+        public void onContent(SurfaceControlViewHost.SurfacePackage content) {
             if (content == null) {
                 mCallbackExecutor.execute(() -> mCallback.accept(/* view */null));
             } else {
