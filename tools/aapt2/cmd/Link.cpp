@@ -1578,37 +1578,35 @@ class Linker {
   }
 
   void AliasAdaptiveIcon(xml::XmlResource* manifest, ResourceTable* table) {
-    xml::Element* application = manifest->root->FindChild("", "application");
+    const xml::Element* application = manifest->root->FindChild("", "application");
     if (!application) {
       return;
     }
 
-    xml::Attribute* icon = application->FindAttribute(xml::kSchemaAndroid, "icon");
-    xml::Attribute* round_icon = application->FindAttribute(xml::kSchemaAndroid, "roundIcon");
+    const xml::Attribute* icon = application->FindAttribute(xml::kSchemaAndroid, "icon");
+    const xml::Attribute* round_icon = application->FindAttribute(xml::kSchemaAndroid, "roundIcon");
     if (!icon || !round_icon) {
       return;
     }
 
     // Find the icon resource defined within the application.
-    auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
+    const auto icon_reference = ValueCast<Reference>(icon->compiled_value.get());
     if (!icon_reference || !icon_reference->name) {
       return;
     }
-    auto package = table->FindPackageById(icon_reference->id.value().package_id());
-    if (!package) {
-      return;
+
+    auto icon_name = ResourceNameRef(icon_reference->name.value());
+    if (icon_name.package.empty()) {
+      icon_name.package = context_->GetCompilationPackage();
     }
-    auto type = package->FindType(icon_reference->name.value().type);
-    if (!type) {
-      return;
-    }
-    auto icon_entry = type->FindEntry(icon_reference->name.value().entry);
-    if (!icon_entry) {
+
+    const auto icon_entry_result = table->FindResource(icon_name);
+    if (!icon_entry_result) {
       return;
     }
 
     int icon_max_sdk = 0;
-    for (auto& config_value : icon_entry->values) {
+    for (auto& config_value : icon_entry_result.value().entry->values) {
       icon_max_sdk = (icon_max_sdk < config_value->config.sdkVersion)
           ? config_value->config.sdkVersion : icon_max_sdk;
     }
@@ -1618,25 +1616,23 @@ class Linker {
     }
 
     // Find the roundIcon resource defined within the application.
-    auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
+    const auto round_icon_reference = ValueCast<Reference>(round_icon->compiled_value.get());
     if (!round_icon_reference || !round_icon_reference->name) {
       return;
     }
-    package = table->FindPackageById(round_icon_reference->id.value().package_id());
-    if (!package) {
-      return;
+
+    auto round_icon_name = ResourceNameRef(round_icon_reference->name.value());
+    if (round_icon_name.package.empty()) {
+      round_icon_name.package = context_->GetCompilationPackage();
     }
-    type = package->FindType(round_icon_reference->name.value().type);
-    if (!type) {
-      return;
-    }
-    auto round_icon_entry = type->FindEntry(round_icon_reference->name.value().entry);
-    if (!round_icon_entry) {
+
+    const auto round_icon_entry_result = table->FindResource(round_icon_name);
+    if (!round_icon_entry_result) {
       return;
     }
 
     int round_icon_max_sdk = 0;
-    for (auto& config_value : round_icon_entry->values) {
+    for (auto& config_value : round_icon_entry_result.value().entry->values) {
       round_icon_max_sdk = (round_icon_max_sdk < config_value->config.sdkVersion)
                      ? config_value->config.sdkVersion : round_icon_max_sdk;
     }
@@ -1647,7 +1643,7 @@ class Linker {
     }
 
     // Add an equivalent v26 entry to the roundIcon for each v26 variant of the regular icon.
-    for (auto& config_value : icon_entry->values) {
+    for (auto& config_value : icon_entry_result.value().entry->values) {
       if (config_value->config.sdkVersion < SDK_O) {
         continue;
       }
@@ -1658,7 +1654,7 @@ class Linker {
                                                      << "\" for round icon compatibility");
 
       auto value = icon_reference->Clone(&table->string_pool);
-      auto round_config_value = round_icon_entry->FindOrCreateValue(
+      auto round_config_value = round_icon_entry_result.value().entry->FindOrCreateValue(
           config_value->config, config_value->product);
       round_config_value->value.reset(value);
     }
