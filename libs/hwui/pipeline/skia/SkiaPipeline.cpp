@@ -600,27 +600,24 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
 // Overdraw debugging
 
 // These colors should be kept in sync with Caches::getOverdrawColor() with a few differences.
-// This implementation:
-// (1) Requires transparent entries for "no overdraw" and "single draws".
-// (2) Requires premul colors (instead of unpremul).
-// (3) Requires RGBA colors (instead of BGRA).
-static const uint32_t kOverdrawColors[2][6] = {
-        {
-                0x00000000,
-                0x00000000,
-                0x2f2f0000,
-                0x2f002f00,
-                0x3f00003f,
-                0x7f00007f,
-        },
-        {
-                0x00000000,
-                0x00000000,
-                0x2f2f0000,
-                0x4f004f4f,
-                0x5f50335f,
-                0x7f00007f,
-        },
+// This implementation requires transparent entries for "no overdraw" and "single draws".
+static const SkColor kOverdrawColors[2][6] = {
+    {
+        0x00000000,
+        0x00000000,
+        0x2f0000ff,
+        0x2f00ff00,
+        0x3fff0000,
+        0x7fff0000,
+    },
+    {
+        0x00000000,
+        0x00000000,
+        0x2f0000ff,
+        0x4fffff00,
+        0x5fff89d7,
+        0x7fff0000,
+    },
 };
 
 void SkiaPipeline::renderOverdraw(const SkRect& clip,
@@ -642,8 +639,8 @@ void SkiaPipeline::renderOverdraw(const SkRect& clip,
 
     // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.
     SkPaint paint;
-    const SkPMColor* colors = kOverdrawColors[static_cast<int>(Properties::overdrawColorSet)];
-    paint.setColorFilter(SkOverdrawColorFilter::Make(colors));
+    const SkColor* colors = kOverdrawColors[static_cast<int>(Properties::overdrawColorSet)];
+    paint.setColorFilter(SkOverdrawColorFilter::MakeWithSkColors(colors));
     surface->getCanvas()->drawImage(counts.get(), 0.0f, 0.0f, &paint);
 }
 
