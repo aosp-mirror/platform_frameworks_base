@@ -3494,7 +3494,7 @@ public abstract class Connection extends Conferenceable {
      * ATIS-1000082.
      * @return the verification status.
      */
-    public @VerificationStatus int getCallerNumberVerificationStatus() {
+    public final @VerificationStatus int getCallerNumberVerificationStatus() {
         return mCallerNumberVerificationStatus;
     }
 
@@ -3506,7 +3506,7 @@ public abstract class Connection extends Conferenceable {
      * by
      * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}.
      */
-    public void setCallerNumberVerificationStatus(
+    public final void setCallerNumberVerificationStatus(
             @VerificationStatus int callerNumberVerificationStatus) {
         mCallerNumberVerificationStatus = callerNumberVerificationStatus;
     }
