@@ -45,7 +45,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class ControlsBindingControllerTest : SysuiTestCase() {
+class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     companion object {
         fun <T> any(): T = Mockito.any<T>()
@@ -95,7 +95,7 @@ class ControlsBindingControllerTest : SysuiTestCase() {
 
         assertEquals(1, providers.size)
         val provider = providers.first()
-        verify(provider).maybeBindAndLoad(callback)
+        verify(provider).maybeBindAndLoad(any())
     }
 
     @Test

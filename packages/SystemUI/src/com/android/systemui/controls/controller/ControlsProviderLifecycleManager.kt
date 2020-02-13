@@ -29,7 +29,6 @@ import android.service.controls.ControlsProviderService
 import android.service.controls.ControlsProviderService.CALLBACK_BUNDLE
 import android.service.controls.ControlsProviderService.CALLBACK_TOKEN
 import android.service.controls.IControlsActionCallback
-import android.service.controls.IControlsLoadCallback
 import android.service.controls.IControlsProvider
 import android.service.controls.IControlsSubscriber
 import android.service.controls.IControlsSubscription
@@ -48,8 +47,6 @@ import java.util.concurrent.TimeUnit
  *
  * @property context A SystemUI context for binding to the services
  * @property executor A delayable executor for posting timeouts
- * @property loadCallbackService a callback interface to hand the remote service for loading
- *                               controls
  * @property actionCallbackService a callback interface to hand the remote service for sending
  *                                 action responses
  * @property subscriberService an "subscriber" interface for requesting and accepting updates for
@@ -60,15 +57,12 @@ import java.util.concurrent.TimeUnit
 class ControlsProviderLifecycleManager(
     private val context: Context,
     private val executor: DelayableExecutor,
-    private val loadCallbackService: IControlsLoadCallback.Stub,
     private val actionCallbackService: IControlsActionCallback.Stub,
     private val subscriberService: IControlsSubscriber.Stub,
     val user: UserHandle,
     val componentName: ComponentName
 ) : IBinder.DeathRecipient {
 
-    var lastLoadCallback: ControlsBindingController.LoadCallback? = null
-        private set
     val token: IBinder = Binder()
     @GuardedBy("subscriptions")
     private val subscriptions = mutableListOf<IControlsSubscription>()
@@ -156,9 +150,12 @@ class ControlsProviderLifecycleManager(
             bindService(false)
             return
         }
-        if (Message.Load in queue) {
-            load()
+
+        queue.filter { it is Message.Load }.forEach {
+            val msg = it as Message.Load
+            load(msg.subscriber)
         }
+
         queue.filter { it is Message.Subscribe }.flatMap { (it as Message.Subscribe).list }.run {
             if (this.isNotEmpty()) {
                 subscribe(this)
@@ -193,12 +190,12 @@ class ControlsProviderLifecycleManager(
         }
     }
 
-    private fun load() {
+    private fun load(subscriber: IControlsSubscriber.Stub) {
         if (DEBUG) {
             Log.d(TAG, "load $componentName")
         }
-        if (!(wrapper?.load(loadCallbackService) ?: false)) {
-            queueMessage(Message.Load)
+        if (!(wrapper?.load(subscriber) ?: false)) {
+            queueMessage(Message.Load(subscriber))
             binderDied()
         }
     }
@@ -213,27 +210,23 @@ class ControlsProviderLifecycleManager(
     }
 
     /**
-     * Request a call to [ControlsProviderService.loadAvailableControls].
+     * Request a call to [IControlsProvider.load].
      *
      * If the service is not bound, the call will be queued and the service will be bound first.
-     * The service will be bound after the controls are returned or the call times out.
+     * The service will be unbound after the controls are returned or the call times out.
      *
-     * @param callback a callback in which to return the result back. If the call times out
-     *                 [ControlsBindingController.LoadCallback.error] will be called instead.
+     * @param subscriber the subscriber that manages coordination for loading controls
      */
-    fun maybeBindAndLoad(callback: ControlsBindingController.LoadCallback) {
+    fun maybeBindAndLoad(subscriber: IControlsSubscriber.Stub) {
         unqueueMessage(Message.Unbind)
-        lastLoadCallback = callback
         onLoadCanceller = executor.executeDelayed({
             // Didn't receive a response in time, log and send back error
             Log.d(TAG, "Timeout waiting onLoad for $componentName")
-            callback.error("Timeout waiting onLoad")
-            // Don't accept load callbacks after this
-            lastLoadCallback = null
+            subscriber.onError(token, "Timeout waiting onLoad")
             unbindService()
         }, LOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 
-        invokeOrQueue(::load, Message.Load)
+        invokeOrQueue({ load(subscriber) }, Message.Load(subscriber))
     }
 
     /**
@@ -324,7 +317,6 @@ class ControlsProviderLifecycleManager(
      * Request unbind from the service.
      */
     fun unbindService() {
-        lastLoadCallback = null
         onLoadCanceller?.run()
         onLoadCanceller = null
 
@@ -344,7 +336,7 @@ class ControlsProviderLifecycleManager(
      */
     sealed class Message {
         abstract val type: Int
-        object Load : Message() {
+        class Load(val subscriber: IControlsSubscriber.Stub) : Message() {
             override val type = MSG_LOAD
         }
         object Unbind : Message() {

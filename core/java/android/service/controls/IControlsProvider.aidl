@@ -17,7 +17,6 @@
 package android.service.controls;
 
 import android.service.controls.IControlsActionCallback;
-import android.service.controls.IControlsLoadCallback;
 import android.service.controls.IControlsSubscriber;
 import android.service.controls.actions.ControlActionWrapper;
 
@@ -25,9 +24,9 @@ import android.service.controls.actions.ControlActionWrapper;
  * @hide
  */
 oneway interface IControlsProvider {
-    void load(IControlsLoadCallback cb);
+    void load(IControlsSubscriber subscriber);
 
-    void loadSuggested(int maxNumber, IControlsLoadCallback cb);
+    void loadSuggested(IControlsSubscriber subscriber);
 
     void subscribe(in List<String> controlIds,
              IControlsSubscriber subscriber);

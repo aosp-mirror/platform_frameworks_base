@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,8 +63,6 @@ public class ControlProviderServiceTest {
     @Mock
     private IControlsActionCallback.Stub mActionCallback;
     @Mock
-    private IControlsLoadCallback.Stub mLoadCallback;
-    @Mock
     private IControlsSubscriber.Stub mSubscriber;
     @Mock
     private IIntentSender mIIntentSender;
@@ -79,8 +78,6 @@ public class ControlProviderServiceTest {
 
         when(mActionCallback.asBinder()).thenCallRealMethod();
         when(mActionCallback.queryLocalInterface(any())).thenReturn(mActionCallback);
-        when(mLoadCallback.asBinder()).thenCallRealMethod();
-        when(mLoadCallback.queryLocalInterface(any())).thenReturn(mLoadCallback);
         when(mSubscriber.asBinder()).thenCallRealMethod();
         when(mSubscriber.queryLocalInterface(any())).thenReturn(mSubscriber);
 
@@ -102,22 +99,28 @@ public class ControlProviderServiceTest {
         Control control2 = new Control.StatelessBuilder("TEST_ID_2", mPendingIntent)
                 .setDeviceType(DeviceTypes.TYPE_AIR_FRESHENER).build();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Control>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
 
         ArrayList<Control> list = new ArrayList<>();
         list.add(control1);
         list.add(control2);
 
         mControlsProviderService.setControls(list);
-        mControlsProvider.load(mLoadCallback);
+        mControlsProvider.load(mSubscriber);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-        verify(mLoadCallback).accept(eq(mToken), captor.capture());
-        List<Control> l = captor.getValue();
-        assertEquals(2, l.size());
-        assertTrue(equals(control1, l.get(0)));
-        assertTrue(equals(control2, l.get(1)));
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1000);
+
+        verify(mSubscriber, times(2)).onNext(eq(mToken), controlCaptor.capture());
+        List<Control> values = controlCaptor.getAllValues();
+        assertTrue(equals(values.get(0), list.get(0)));
+        assertTrue(equals(values.get(1), list.get(1)));
+
+        verify(mSubscriber).onComplete(eq(mToken));
     }
 
     @Test
@@ -128,50 +131,57 @@ public class ControlProviderServiceTest {
                 .build();
         Control statelessControl = new Control.StatelessBuilder(control).build();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Control>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
 
         ArrayList<Control> list = new ArrayList<>();
         list.add(control);
 
         mControlsProviderService.setControls(list);
-        mControlsProvider.load(mLoadCallback);
+        mControlsProvider.load(mSubscriber);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-        verify(mLoadCallback).accept(eq(mToken), captor.capture());
-        List<Control> l = captor.getValue();
-        assertEquals(1, l.size());
-        assertFalse(equals(control, l.get(0)));
-        assertTrue(equals(statelessControl, l.get(0)));
-        assertEquals(Control.STATUS_UNKNOWN, l.get(0).getStatus());
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1000);
+
+        verify(mSubscriber).onNext(eq(mToken), controlCaptor.capture());
+        Control c = controlCaptor.getValue();
+        assertFalse(equals(control, c));
+        assertTrue(equals(statelessControl, c));
+        assertEquals(Control.STATUS_UNKNOWN, c.getStatus());
+
+        verify(mSubscriber).onComplete(eq(mToken));
     }
 
     @Test
-    public void testLoadSuggested_withMaxNumber() throws RemoteException {
+    public void testOnLoadSuggested_allStateless() throws RemoteException {
         Control control1 = new Control.StatelessBuilder("TEST_ID", mPendingIntent).build();
         Control control2 = new Control.StatelessBuilder("TEST_ID_2", mPendingIntent)
                 .setDeviceType(DeviceTypes.TYPE_AIR_FRESHENER).build();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Control>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<IControlsSubscription.Stub> subscriptionCaptor =
+                ArgumentCaptor.forClass(IControlsSubscription.Stub.class);
+        ArgumentCaptor<Control> controlCaptor =
+                ArgumentCaptor.forClass(Control.class);
 
         ArrayList<Control> list = new ArrayList<>();
         list.add(control1);
         list.add(control2);
 
-        final int maxSuggested = 1;
-
         mControlsProviderService.setControls(list);
-        mControlsProvider.loadSuggested(maxSuggested, mLoadCallback);
+        mControlsProvider.loadSuggested(mSubscriber);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
-        verify(mLoadCallback).accept(eq(mToken), captor.capture());
-        List<Control> l = captor.getValue();
-        assertEquals(maxSuggested, l.size());
+        verify(mSubscriber).onSubscribe(eq(mToken), subscriptionCaptor.capture());
+        subscriptionCaptor.getValue().request(1);
 
-        for (int i = 0; i < maxSuggested; ++i) {
-            assertTrue(equals(list.get(i), l.get(i)));
-        }
+        verify(mSubscriber).onNext(eq(mToken), controlCaptor.capture());
+        Control c = controlCaptor.getValue();
+        assertTrue(equals(c, list.get(0)));
+
+        verify(mSubscriber).onComplete(eq(mToken));
     }
 
     @Test
@@ -244,22 +254,19 @@ public class ControlProviderServiceTest {
         }
 
         @Override
-        public void loadSuggestedControls(int maxNumber, Consumer<List<Control>> cb) {
-            cb.accept(mControls);
-        }
-
-        @Override
         public Publisher<Control> publisherFor(List<String> ids) {
             return new Publisher<Control>() {
                 public void subscribe(final Subscriber s) {
-                    s.onSubscribe(new Subscription() {
-                            public void request(long n) {
-                                for (Control c : mControls) {
-                                    s.onNext(c);
-                                }
-                            }
-                            public void cancel() {}
-                        });
+                    s.onSubscribe(createSubscription(s, mControls));
+                }
+            };
+        }
+
+        @Override
+        public Publisher<Control> publisherForSuggested() {
+            return new Publisher<Control>() {
+                public void subscribe(final Subscriber s) {
+                    s.onSubscribe(createSubscription(s, mControls));
                 }
             };
         }
@@ -269,7 +276,19 @@ public class ControlProviderServiceTest {
                 Consumer<Integer> cb) {
             cb.accept(ControlAction.RESPONSE_OK);
         }
+
+        private Subscription createSubscription(Subscriber s, List<Control> controls) {
+            return new Subscription() {
+                public void request(long n) {
+                    int i = 0;
+                    for (Control c : mControls) {
+                        if (i++ < n) s.onNext(c);
+                        else break;
+                    }
+                    s.onComplete();
+                }
+                public void cancel() {}
+            };
+        }
     }
 }
-
-
