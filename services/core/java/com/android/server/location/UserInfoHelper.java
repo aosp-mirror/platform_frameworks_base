@@ -18,6 +18,9 @@ package com.android.server.location;
 
 import static android.os.UserManager.DISALLOW_SHARE_LOCATION;
 
+import static com.android.server.LocationManagerService.D;
+import static com.android.server.LocationManagerService.TAG;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -30,6 +33,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -122,13 +126,13 @@ public class UserInfoHelper {
                     case Intent.ACTION_USER_STARTED:
                         userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                         if (userId != UserHandle.USER_NULL) {
-                            onUserChanged(userId, UserListener.USER_STARTED);
+                            onUserStarted(userId);
                         }
                         break;
                     case Intent.ACTION_USER_STOPPED:
                         userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                         if (userId != UserHandle.USER_NULL) {
-                            onUserChanged(userId, UserListener.USER_STOPPED);
+                            onUserStopped(userId);
                         }
                         break;
                     case Intent.ACTION_MANAGED_PROFILE_ADDED:
@@ -161,11 +165,31 @@ public class UserInfoHelper {
             return;
         }
 
+        if (D) {
+            Log.d(TAG, "current user switched from u" + mCurrentUserId + " to u" + newUserId);
+        }
+
         int oldUserId = mCurrentUserId;
         mCurrentUserId = newUserId;
 
         onUserChanged(oldUserId, UserListener.USER_SWITCHED);
         onUserChanged(newUserId, UserListener.USER_SWITCHED);
+    }
+
+    private void onUserStarted(@UserIdInt int userId) {
+        if (D) {
+            Log.d(TAG, "u" + userId + " started");
+        }
+
+        onUserChanged(userId, UserListener.USER_STARTED);
+    }
+
+    private void onUserStopped(@UserIdInt int userId) {
+        if (D) {
+            Log.d(TAG, "u" + userId + " stopped");
+        }
+
+        onUserChanged(userId, UserListener.USER_STOPPED);
     }
 
     private void onUserChanged(@UserIdInt int userId, @UserListener.UserChange int change) {
