@@ -294,7 +294,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         ta.recycle();
 
         mPointerDrawable.setTint(bgColor);
-        if (ScreenDecorationsUtils.supportsRoundedCornersOnWindows(mContext.getResources())) {
+        if (mActivityView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
+                mContext.getResources())) {
             mActivityView.setCornerRadius(cornerRadius);
         }
     }
