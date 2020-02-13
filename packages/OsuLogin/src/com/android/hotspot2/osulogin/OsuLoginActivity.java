@@ -18,7 +18,6 @@ package com.android.hotspot2.osulogin;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -40,6 +39,7 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.net.MalformedURLException;
