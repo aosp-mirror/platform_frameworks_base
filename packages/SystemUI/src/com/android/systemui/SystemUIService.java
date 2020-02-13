@@ -23,11 +23,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.os.BinderInternal;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.SystemUIAuxiliaryDumpService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -72,6 +74,11 @@ public class SystemUIService extends Service {
                         }
                     }, mMainHandler);
         }
+
+        // Bind the dump service so we can dump extra info during a bug report
+        startServiceAsUser(
+                new Intent(getApplicationContext(), SystemUIAuxiliaryDumpService.class),
+                UserHandle.SYSTEM);
     }
 
     @Override
