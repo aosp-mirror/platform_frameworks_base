@@ -5201,11 +5201,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final TransitionInfoSnapshot info = mStackSupervisor
                 .getActivityMetricsLogger().notifyWindowsDrawn(this, timestampNs);
-        final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
-        final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
-        mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
-                windowsDrawnDelayMs, launchState);
-        mStackSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs);
+        final boolean validInfo = info != null;
+        final int windowsDrawnDelayMs = validInfo ? info.windowsDrawnDelayMs : INVALID_DELAY;
+        final @LaunchState int launchState = validInfo ? info.getLaunchState() : -1;
+        // The activity may have been requested to be invisible (another activity has been launched)
+        // so there is no valid info. But if it is the current top activity (e.g. sleeping), the
+        // invalid state is still reported to make sure the waiting result is notified.
+        if (validInfo || this == mDisplayContent.topRunningActivity()) {
+            mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
+                    windowsDrawnDelayMs, launchState);
+            mStackSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs);
+        }
         finishLaunchTickingLocked();
         if (task != null) {
             task.hasBeenVisible = true;
