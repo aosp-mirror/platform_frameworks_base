@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
@@ -1622,11 +1623,13 @@ public class WifiManager {
          * @param wifiConfiguration WifiConfiguration object corresponding to the network
          *                          user selected.
          */
+        @SuppressLint("CallbackMethodName")
         default void select(@NonNull WifiConfiguration wifiConfiguration) {}
 
         /**
          * User rejected the app's request.
          */
+        @SuppressLint("CallbackMethodName")
         default void reject() {}
     }
 
