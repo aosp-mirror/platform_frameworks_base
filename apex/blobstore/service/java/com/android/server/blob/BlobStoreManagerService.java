@@ -96,10 +96,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -122,7 +124,14 @@ public class BlobStoreManagerService extends SystemService {
 
     // Contains all ids that are currently in use.
     @GuardedBy("mBlobsLock")
+    private final ArraySet<Long> mActiveBlobIds = new ArraySet<>();
+    // Contains all ids that are currently in use and those that were in use but got deleted in the
+    // current boot session.
+    @GuardedBy("mBlobsLock")
     private final ArraySet<Long> mKnownBlobIds = new ArraySet<>();
+
+    // Random number generator for new session ids.
+    private final Random mRandom = new SecureRandom();
 
     private final Context mContext;
     private final Handler mHandler;
@@ -181,7 +190,16 @@ public class BlobStoreManagerService extends SystemService {
 
     @GuardedBy("mBlobsLock")
     private long generateNextSessionIdLocked() {
-        return ++mCurrentMaxSessionId;
+        // Logic borrowed from PackageInstallerService.
+        int n = 0;
+        long sessionId;
+        do {
+            sessionId = Math.abs(mRandom.nextLong());
+            if (mKnownBlobIds.indexOf(sessionId) < 0 && sessionId != 0) {
+                return sessionId;
+            }
+        } while (n++ < 32);
+        throw new IllegalStateException("Failed to allocate session ID");
     }
 
     private void registerReceivers() {
@@ -228,11 +246,18 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void addKnownIdsForTest(long... knownIds) {
+    void addActiveIdsForTest(long... activeIds) {
         synchronized (mBlobsLock) {
-            for (long id : knownIds) {
-                mKnownBlobIds.add(id);
+            for (long id : activeIds) {
+                addActiveBlobIdLocked(id);
             }
+        }
+    }
+
+    @VisibleForTesting
+    Set<Long> getActiveIdsForTest() {
+        synchronized (mBlobsLock) {
+            return mActiveBlobIds;
         }
     }
 
@@ -246,7 +271,7 @@ public class BlobStoreManagerService extends SystemService {
     @GuardedBy("mBlobsLock")
     private void addSessionForUserLocked(BlobStoreSession session, int userId) {
         getUserSessionsLocked(userId).put(session.getSessionId(), session);
-        mKnownBlobIds.add(session.getSessionId());
+        addActiveBlobIdLocked(session.getSessionId());
     }
 
     @GuardedBy("mBlobsLock")
@@ -258,7 +283,13 @@ public class BlobStoreManagerService extends SystemService {
     private void addBlobForUserLocked(BlobMetadata blobMetadata,
             ArrayMap<BlobHandle, BlobMetadata> userBlobs) {
         userBlobs.put(blobMetadata.getBlobHandle(), blobMetadata);
-        mKnownBlobIds.add(blobMetadata.getBlobId());
+        addActiveBlobIdLocked(blobMetadata.getBlobId());
+    }
+
+    @GuardedBy("mBlobsLock")
+    private void addActiveBlobIdLocked(long id) {
+        mActiveBlobIds.add(id);
+        mKnownBlobIds.add(id);
     }
 
     private long createSessionInternal(BlobHandle blobHandle,
@@ -391,7 +422,7 @@ public class BlobStoreManagerService extends SystemService {
                     session.getSessionFile().delete();
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
-                    mKnownBlobIds.remove(session.getSessionId());
+                    mActiveBlobIds.remove(session.getSessionId());
                     if (LOGV) {
                         Slog.v(TAG, "Session is invalid; deleted " + session);
                     }
@@ -698,7 +729,7 @@ public class BlobStoreManagerService extends SystemService {
                 if (session.getOwnerUid() == uid
                         && session.getOwnerPackageName().equals(packageName)) {
                     session.getSessionFile().delete();
-                    mKnownBlobIds.remove(session.getSessionId());
+                    mActiveBlobIds.remove(session.getSessionId());
                     indicesToRemove.add(i);
                 }
             }
@@ -718,7 +749,7 @@ public class BlobStoreManagerService extends SystemService {
                 // Delete the blob if it doesn't have any active leases.
                 if (!blobMetadata.hasLeases()) {
                     blobMetadata.getBlobFile().delete();
-                    mKnownBlobIds.remove(blobMetadata.getBlobId());
+                    mActiveBlobIds.remove(blobMetadata.getBlobId());
                     indicesToRemove.add(i);
                 }
             }
@@ -741,7 +772,7 @@ public class BlobStoreManagerService extends SystemService {
                 for (int i = 0, count = userSessions.size(); i < count; ++i) {
                     final BlobStoreSession session = userSessions.valueAt(i);
                     session.getSessionFile().delete();
-                    mKnownBlobIds.remove(session.getSessionId());
+                    mActiveBlobIds.remove(session.getSessionId());
                 }
             }
 
@@ -751,7 +782,7 @@ public class BlobStoreManagerService extends SystemService {
                 for (int i = 0, count = userBlobs.size(); i < count; ++i) {
                     final BlobMetadata blobMetadata = userBlobs.valueAt(i);
                     blobMetadata.getBlobFile().delete();
-                    mKnownBlobIds.remove(blobMetadata.getBlobId());
+                    mActiveBlobIds.remove(blobMetadata.getBlobId());
                 }
             }
             if (LOGV) {
@@ -771,7 +802,7 @@ public class BlobStoreManagerService extends SystemService {
             for (File file : blobsDir.listFiles()) {
                 try {
                     final long id = Long.parseLong(file.getName());
-                    if (mKnownBlobIds.indexOf(id) < 0) {
+                    if (mActiveBlobIds.indexOf(id) < 0) {
                         filesToDelete.add(file);
                         deletedBlobIds.add(id);
                     }
@@ -806,7 +837,7 @@ public class BlobStoreManagerService extends SystemService {
 
                 if (shouldRemove) {
                     blobMetadata.getBlobFile().delete();
-                    mKnownBlobIds.remove(blobMetadata.getBlobId());
+                    mActiveBlobIds.remove(blobMetadata.getBlobId());
                     deletedBlobIds.add(blobMetadata.getBlobId());
                 }
                 return shouldRemove;
@@ -836,7 +867,7 @@ public class BlobStoreManagerService extends SystemService {
 
                 if (shouldRemove) {
                     blobStoreSession.getSessionFile().delete();
-                    mKnownBlobIds.remove(blobStoreSession.getSessionId());
+                    mActiveBlobIds.remove(blobStoreSession.getSessionId());
                     indicesToRemove.add(j);
                     deletedBlobIds.add(blobStoreSession.getSessionId());
                 }
@@ -883,7 +914,7 @@ public class BlobStoreManagerService extends SystemService {
             }
             blobMetadata.getBlobFile().delete();
             userBlobs.remove(blobHandle);
-            mKnownBlobIds.remove(blobMetadata.getBlobId());
+            mActiveBlobIds.remove(blobMetadata.getBlobId());
             writeBlobsInfoAsync();
         }
     }
