@@ -381,6 +381,8 @@ applications that come with the platform
         <permission name="android.permission.REBOOT"/>
         <!-- Permission required for access VIBRATOR_STATE. -->
         <permission name="android.permission.ACCESS_VIBRATOR_STATE"/>
+        <!-- Permission required for UsageStatsTest CTS test. -->
+        <permission name="android.permission.MANAGE_NOTIFICATIONS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

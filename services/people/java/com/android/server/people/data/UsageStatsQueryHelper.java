@@ -59,7 +59,7 @@ class UsageStatsQueryHelper {
      */
     boolean querySince(long sinceTime) {
         UsageEvents usageEvents = mUsageStatsManagerInternal.queryEventsForUser(
-                mUserId, sinceTime, System.currentTimeMillis(), false, false, false);
+                mUserId, sinceTime, System.currentTimeMillis(), UsageEvents.SHOW_ALL_EVENT_DATA);
         if (usageEvents == null) {
             return false;
         }

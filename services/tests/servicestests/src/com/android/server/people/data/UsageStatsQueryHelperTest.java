@@ -19,9 +19,9 @@ package com.android.server.people.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
@@ -189,7 +189,7 @@ public final class UsageStatsQueryHelperTest {
     private void addUsageEvents(UsageEvents.Event... events) {
         UsageEvents usageEvents = new UsageEvents(Arrays.asList(events), new String[]{});
         when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
-                anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(usageEvents);
+                eq(UsageEvents.SHOW_ALL_EVENT_DATA))).thenReturn(usageEvents);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
