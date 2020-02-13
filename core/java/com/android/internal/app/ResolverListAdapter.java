@@ -87,6 +87,7 @@ public class ResolverListAdapter extends BaseAdapter {
     private final ResolverListCommunicator mResolverListCommunicator;
     private Runnable mPostListReadyRunnable;
     private final boolean mIsAudioCaptureDevice;
+    private boolean mIsListLoaded;
 
     public ResolverListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
@@ -191,6 +192,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mLastChosenPosition = -1;
         mAllTargetsAreBrowsers = false;
         mDisplayList.clear();
+        mIsListLoaded = false;
 
         if (mBaseResolveList != null) {
             currentResolveList = mUnfilteredResolveList = new ArrayList<>();
@@ -352,6 +354,7 @@ public class ResolverListAdapter extends BaseAdapter {
 
         mResolverListCommunicator.sendVoiceChoicesIfNeeded();
         postListReadyRunnable(doPostProcessing);
+        mIsListLoaded = true;
     }
 
     /**
@@ -609,6 +612,10 @@ public class ResolverListAdapter extends BaseAdapter {
 
     protected List<Intent> getIntents() {
         return mIntents;
+    }
+
+    protected boolean isListLoaded() {
+        return mIsListLoaded;
     }
 
     /**
