@@ -145,6 +145,7 @@ public class AppStandbyControllerTests {
     static class MyInjector extends AppStandbyController.Injector {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
+        boolean mIsCharging;
         List<String> mPowerSaveWhitelistExceptIdle = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
@@ -176,6 +177,11 @@ public class AppStandbyControllerTests {
         @Override
         boolean isAppIdleEnabled() {
             return mIsAppIdleEnabled;
+        }
+
+        @Override
+        boolean isCharging() {
+            return mIsCharging;
         }
 
         @Override
@@ -281,6 +287,13 @@ public class AppStandbyControllerTests {
         } catch (PackageManager.NameNotFoundException nnfe) {}
     }
 
+    private void setChargingState(AppStandbyController controller, boolean charging) {
+        mInjector.mIsCharging = charging;
+        if (controller != null) {
+            controller.setChargingState(charging);
+        }
+    }
+
     private void setAppIdleEnabled(AppStandbyController controller, boolean enabled) {
         mInjector.mIsAppIdleEnabled = enabled;
         if (controller != null) {
@@ -297,6 +310,7 @@ public class AppStandbyControllerTests {
         controller.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mInjector.setDisplayOn(false);
         mInjector.setDisplayOn(true);
+        setChargingState(controller, false);
         controller.checkIdleStates(USER_ID);
         assertNotEquals(STANDBY_BUCKET_EXEMPTED,
                 controller.getAppStandbyBucket(PACKAGE_1, USER_ID,
@@ -322,6 +336,46 @@ public class AppStandbyControllerTests {
         assertEquals(STANDBY_BUCKET_EXEMPTED,
                 mController.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
+    }
+
+    @Test
+    public void testIsAppIdle_Charging() throws Exception {
+        setChargingState(mController, false);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+
+        setChargingState(mController, true);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+
+        setChargingState(mController, false);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+    }
+
+    @Test
+    public void testIsAppIdle_Enabled() throws Exception {
+        setChargingState(mController, false);
+        setAppIdleEnabled(mController, true);
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_SYSTEM);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+
+        setAppIdleEnabled(mController, false);
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertFalse(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
+
+        setAppIdleEnabled(mController, true);
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, 0));
+        assertTrue(mController.isAppIdleFiltered(PACKAGE_1, UID_1, USER_ID, false));
     }
 
     private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket) {
