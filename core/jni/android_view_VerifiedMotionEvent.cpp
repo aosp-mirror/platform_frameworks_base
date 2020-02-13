@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MotionEvent-JNI"
+#define LOG_TAG "VerifiedMotion-JNI"
 
 #include "android_view_VerifiedMotionEvent.h"
 #include <input/Input.h>
@@ -22,18 +22,30 @@
 
 namespace android {
 
+static struct {
+    jclass clazz;
+
+    jmethodID constructor;
+} gVerifiedMotionEventClassInfo;
+
 // ----------------------------------------------------------------------------
 
 jobject android_view_VerifiedMotionEvent(JNIEnv* env, const VerifiedMotionEvent& event) {
-    static jclass clazz = FindClassOrDie(env, "android/view/VerifiedMotionEvent");
+    return env->NewObject(gVerifiedMotionEventClassInfo.clazz,
+                          gVerifiedMotionEventClassInfo.constructor, event.deviceId,
+                          event.eventTimeNanos, event.source, event.displayId, event.rawX,
+                          event.rawY, event.actionMasked, event.downTimeNanos, event.flags,
+                          event.metaState, event.buttonState);
+}
 
-    static jmethodID constructor = GetMethodIDOrDie(env, clazz, "<init>", "(IJIIFFIJIII)V");
+int register_android_view_VerifiedMotionEvent(JNIEnv* env) {
+    jclass clazz = FindClassOrDie(env, "android/view/VerifiedMotionEvent");
+    gVerifiedMotionEventClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    jobject object =
-            env->NewObject(clazz, constructor, event.deviceId, event.eventTimeNanos, event.source,
-                           event.displayId, event.rawX, event.rawY, event.actionMasked,
-                           event.downTimeNanos, event.flags, event.metaState, event.buttonState);
-    return object;
+    gVerifiedMotionEventClassInfo.constructor =
+            GetMethodIDOrDie(env, clazz, "<init>", "(IJIIFFIJIII)V");
+
+    return OK;
 }
 
 } // namespace android
