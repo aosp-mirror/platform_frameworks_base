@@ -324,6 +324,13 @@ public abstract class Conference extends Conferenceable {
     public void onConnectionAdded(Connection connection) {}
 
     /**
+     * Notifies the {@link Conference} of a request to add a new participants to the conference call
+     * @param participants that will be added to this conference call
+     * @hide
+     */
+    public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
+
+    /**
      * Notifies this Conference, which is in {@code STATE_RINGING}, of
      * a request to accept.
      * For managed {@link ConnectionService}s, this will be called when the user answers a call via
