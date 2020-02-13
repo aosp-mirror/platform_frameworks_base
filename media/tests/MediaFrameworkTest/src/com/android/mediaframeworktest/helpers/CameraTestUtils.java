@@ -58,6 +58,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
+import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -2210,14 +2211,14 @@ public class CameraTestUtils extends Assert {
     }
 
     public static Size getPreviewSizeBound(WindowManager windowManager, Size bound) {
-        Rect windowBounds = windowManager.getCurrentWindowMetrics().getBounds();
+        Display display = windowManager.getDefaultDisplay();
 
-        int width = windowBounds.width();
-        int height = windowBounds.height();
+        int width = display.getWidth();
+        int height = display.getHeight();
 
         if (height > width) {
             height = width;
-            width = windowBounds.height();
+            width = display.getHeight();
         }
 
         if (bound.getWidth() <= width &&

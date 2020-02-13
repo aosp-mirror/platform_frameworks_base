@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.Toast;
+import android.window.WindowMetricsHelper;
 
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.exif.ExifInterface;
@@ -357,7 +358,8 @@ public class WallpaperCropActivity extends Activity {
         // Get the crop
         boolean ltr = mCropView.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
 
-        Rect windowBounds = getWindowManager().getCurrentWindowMetrics().getBounds();
+        Rect windowBounds = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                getWindowManager().getCurrentWindowMetrics());
         boolean isPortrait = windowBounds.width() < windowBounds.height();
 
         Point defaultWallpaperSize = getDefaultWallpaperSize(getResources(),

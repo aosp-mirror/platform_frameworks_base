@@ -372,11 +372,7 @@ public class VirtualDisplayTaskEmbedder extends TaskEmbedder {
 
     /** Get density of the hosting display. */
     private int getBaseDisplayDensity() {
-        if (mTmpDisplayMetrics == null) {
-            mTmpDisplayMetrics = new DisplayMetrics();
-        }
-        mContext.getDisplayNoVerify().getRealMetrics(mTmpDisplayMetrics);
-        return mTmpDisplayMetrics.densityDpi;
+        return mContext.getResources().getConfiguration().densityDpi;
     }
 
     /**

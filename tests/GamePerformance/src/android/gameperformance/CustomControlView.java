@@ -15,20 +15,21 @@
  */
 package android.gameperformance;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.graphics.drawable.AnimationDrawable;
+import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
+import android.window.WindowMetricsHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * View that holds requested number of UI controls as ImageView with an infinite animation.
@@ -42,9 +43,10 @@ public class CustomControlView extends AbsoluteLayout {
     public CustomControlView(@NonNull Context context) {
         super(context);
 
-        final Point size = new Point();
-        context.getDisplay().getSize(size);
-        mPerRowControlCount = size.x / CONTROL_DIMENSION;
+        final WindowManager wm = context.getSystemService(WindowManager.class);
+        final int width = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                wm.getCurrentWindowMetrics()).width();
+        mPerRowControlCount = width / CONTROL_DIMENSION;
     }
 
     /**

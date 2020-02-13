@@ -39,6 +39,7 @@ import android.view.WindowManagerGlobal;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.window.WindowMetricsHelper;
 
 public class MirrorSurfaceActivity extends Activity implements View.OnClickListener,
         View.OnLongClickListener, View.OnTouchListener {
@@ -89,7 +90,8 @@ public class MirrorSurfaceActivity extends Activity implements View.OnClickListe
                 .getSystemService(WindowManager.class);
         mIWm = WindowManagerGlobal.getWindowManagerService();
 
-        Rect windowBounds = mWm.getCurrentWindowMetrics().getBounds();
+        Rect windowBounds = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                mWm.getCurrentWindowMetrics());
         mWindowBounds.set(0, 0, windowBounds.width(), windowBounds.height());
 
         mScaleText = findViewById(R.id.scale);

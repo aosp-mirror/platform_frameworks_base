@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.window.WindowMetricsHelper;
 
 /**
  * Most bodacious scenario yet!
@@ -65,8 +66,9 @@ public class AdjacentListsWithAdjacentISVsInside extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final int desiredHeight =
-                (int) (0.8 * getWindowManager().getCurrentWindowMetrics().getBounds().height());
+        final int desiredHeight = (int) (0.8 * WindowMetricsHelper
+                .getBoundsExcludingNavigationBarAndCutout(
+                        getWindowManager().getCurrentWindowMetrics()).height());
 
         mLeftListView = new ListView(this);
         mLeftListView.setAdapter(new AdjacentISVAdapter(desiredHeight));

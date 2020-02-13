@@ -1461,7 +1461,10 @@
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
            </intent-filter>
        </activity>
-
+        <activity android:name="android.window.WindowMetricsHelperTest$TestActivity"
+                  android:resizeableActivity="true"
+                  android:exported="true">
+        </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

@@ -48,22 +48,19 @@ public final class WindowMetrics {
      * and display cutout areas. The value reported by {@link Display#getSize(Point)} can be
      * obtained by using:
      * <pre class="prettyprint">
-     * final WindowMetrics metrics = windowManager.getCurrentMetrics();
+     * final WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
      * // Gets all excluding insets
      * final WindowInsets windowInsets = metrics.getWindowInsets();
-     * Insets insets = windowInsets.getInsets(WindowInsets.Type.navigationBars());
-     * final DisplayCutout cutout = windowInsets.getCutout();
-     * if (cutout != null) {
-     *     final Insets cutoutSafeInsets = Insets.of(cutout.getSafeInsetsLeft(), ...);
-     *     insets = insets.max(insets, cutoutSafeInsets);
-     * }
+     * Insets insets = windowInsets.getInsetsIgnoreVisibility(WindowInsets.Type.navigationBars()
+     *         | WindowInsets.Type.displayCutout());
      *
      * int insetsWidth = insets.right + insets.left;
      * int insetsHeight = insets.top + insets.bottom;
      *
      * // Legacy size that Display#getSize reports
-     * final Size legacySize = new Size(metrics.getWidth() - insetsWidth,
-     *         metrics.getHeight() - insetsHeight);
+     * final Rect bounds = metrics.getBounds();
+     * final Size legacySize = new Size(bounds.width() - insetsWidth,
+     *         bounds.height() - insetsHeight);
      * </pre>
      * </p>
      *

@@ -16,16 +16,23 @@
 
 package android.test;
 
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.navigationBars;
+
 import android.app.Activity;
 import android.app.Instrumentation;
-import android.graphics.Point;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.os.SystemClock;
-import android.view.Display;
+import android.util.Size;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 /**
  * Reusable methods for generating touch events. These methods can be used with
@@ -59,13 +66,12 @@ public class TouchUtils {
      * @param activity The activity that is in the foreground of the test case
      */
     public static void dragQuarterScreenDown(InstrumentationTestCase test, Activity activity) {
-        Display display = activity.getWindowManager().getDefaultDisplay();
-        final Point size = new Point();
-        display.getSize(size);
+        WindowManager wm = activity.getWindowManager();
+        final Size size = getSizeExcludingNavigationBarAndCutout(wm.getCurrentWindowMetrics());
 
-        final float x = size.x / 2.0f;
-        final float fromY = size.y * 0.5f;
-        final float toY = size.y * 0.75f;
+        final float x = size.getWidth() / 2.0f;
+        final float fromY = size.getHeight() * 0.5f;
+        final float toY = size.getHeight() * 0.75f;
 
         drag(test, x, x, fromY, toY, 4);
     }
@@ -89,15 +95,25 @@ public class TouchUtils {
      * @param activity The activity that is in the foreground of the test case
      */
     public static void dragQuarterScreenUp(InstrumentationTestCase test, Activity activity) {
-        Display display = activity.getWindowManager().getDefaultDisplay();
-        final Point size = new Point();
-        display.getSize(size);
+        WindowManager wm = activity.getWindowManager();
+        final Size size = getSizeExcludingNavigationBarAndCutout(wm.getCurrentWindowMetrics());
 
-        final float x = size.x / 2.0f;
-        final float fromY = size.y * 0.5f;
-        final float toY = size.y * 0.25f;
+        final float x = size.getWidth() / 2.0f;
+        final float fromY = size.getHeight() * 0.5f;
+        final float toY = size.getHeight() * 0.25f;
 
         drag(test, x, x, fromY, toY, 4);
+    }
+
+    private static Size getSizeExcludingNavigationBarAndCutout(WindowMetrics windowMetrics) {
+        WindowInsets windowInsets = windowMetrics.getWindowInsets();
+        final Insets insetsWithCutout = windowInsets
+                .getInsetsIgnoringVisibility(navigationBars() | displayCutout());
+        final int insetsWidth = insetsWithCutout.left + insetsWithCutout.right;
+        final int insetsHeight = insetsWithCutout.top + insetsWithCutout.bottom;
+
+        Rect bounds = windowMetrics.getBounds();
+        return new Size(bounds.width() - insetsWidth, bounds.height() - insetsHeight);
     }
 
     /**
@@ -222,8 +238,9 @@ public class TouchUtils {
      */
     public static void dragViewToBottom(InstrumentationTestCase test, Activity activity, View v,
             int stepCount) {
-        int screenHeight =
-                activity.getWindowManager().getCurrentWindowMetrics().getBounds().height();
+        WindowManager wm = activity.getWindowManager();
+        final int screenHeight = getSizeExcludingNavigationBarAndCutout(
+                wm.getCurrentWindowMetrics()).getHeight();
 
         int[] xy = new int[2];
         v.getLocationOnScreen(xy);

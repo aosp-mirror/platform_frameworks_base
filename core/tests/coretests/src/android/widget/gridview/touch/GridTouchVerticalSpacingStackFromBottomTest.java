@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.GridView;
 import android.widget.gridview.GridVerticalSpacingStackFromBottom;
+import android.window.WindowMetricsHelper;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.MediumTest;
@@ -106,8 +107,8 @@ public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrum
 
         int firstTop = firstChild.getTop();
 
-        int windowHeight = mActivity.getWindowManager().getCurrentWindowMetrics().getBounds()
-                .height();
+        int windowHeight = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                mActivity.getWindowManager().getCurrentWindowMetrics()).height();
         int distance = TouchUtils.dragViewBy(this, firstChild, 
                 Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, (int) (windowHeight * 0.75f));
         

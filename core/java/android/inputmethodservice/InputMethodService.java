@@ -90,6 +90,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
@@ -1438,8 +1439,8 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public int getMaxWidth() {
         final WindowManager windowManager = getSystemService(WindowManager.class);
-        final Rect windowBounds = windowManager.getCurrentWindowMetrics().getBounds();
-        return windowBounds.width();
+        return WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                windowManager.getCurrentWindowMetrics()).width();
     }
     
     /**

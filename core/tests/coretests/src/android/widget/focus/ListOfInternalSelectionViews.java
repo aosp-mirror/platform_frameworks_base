@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.window.WindowMetricsHelper;
 
 /**
  * A list of {@link InternalSelectionView}s paramatarized by the number of items,
@@ -111,7 +112,8 @@ public class ListOfInternalSelectionViews extends Activity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mScreenHeight = getWindowManager().getCurrentWindowMetrics().getBounds().height();
+        mScreenHeight = WindowMetricsHelper.getBoundsExcludingNavigationBarAndCutout(
+                getWindowManager().getCurrentWindowMetrics()).height();
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
