@@ -5373,21 +5373,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCancelAllNotifications_cancelsBubble() throws Exception {
-        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
-        nr.getSbn().getNotification().flags |= FLAG_BUBBLE;
-        mService.addNotification(nr);
-
-        mBinderService.cancelAllNotifications(PKG, nr.getSbn().getUserId());
-        waitForIdle();
-
-        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
-        assertEquals(0, notifs.length);
-        assertEquals(0, mService.getNotificationRecordCount());
-    }
-
-    @Test
-    public void testAppCancelNotifications_cancelsBubbles() throws Exception {
+    public void testCancelNotificationsFromApp_cancelsBubbles() throws Exception {
         final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
         nrBubble.getSbn().getNotification().flags |= FLAG_BUBBLE;
 
@@ -5409,6 +5395,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         StatusBarNotification[] notifs2 = mBinderService.getActiveNotifications(PKG);
         assertEquals(0, notifs2.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelAllNotificationsFromApp_cancelsBubble() throws Exception {
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        nr.getSbn().getNotification().flags |= FLAG_BUBBLE;
+        mService.addNotification(nr);
+
+        mBinderService.cancelAllNotifications(PKG, nr.getSbn().getUserId());
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
         assertEquals(0, mService.getNotificationRecordCount());
     }
 
@@ -5446,6 +5446,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, notifs.length);
         assertEquals(1, mService.getNotificationRecordCount());
     }
+
+    @Test
+    public void testCancelAllNotificationsFromStatusBar_ignoresBubble() throws Exception {
+        // GIVEN a notification bubble
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        nr.getSbn().getNotification().flags |= FLAG_BUBBLE;
+        mService.addNotification(nr);
+
+        // WHEN the status bar clears all notifications
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                nr.getSbn().getUserId());
+        waitForIdle();
+
+        // THEN the bubble notification does not get removed
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
 
     @Test
     public void testGetAllowedAssistantAdjustments() throws Exception {
@@ -6100,6 +6119,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         // The bubble should still exist
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+    }
+
+    @Test
+    public void testNotificationBubbles_bubbleStays_whenClicked()
+            throws Exception {
+        // GIVEN a notification that has the auto cancels flag (cancel on click) and is a bubble
+        setUpPrefsForBubbles(PKG, mUid, true /* global */, true /* app */, true /* channel */);
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        nr.getSbn().getNotification().flags |= FLAG_BUBBLE | FLAG_AUTO_CANCEL;
+        mService.addNotification(nr);
+
+        // WHEN we click the notification
+        final NotificationVisibility nv = NotificationVisibility.obtain(nr.getKey(), 1, 2, true);
+        mService.mNotificationDelegate.onNotificationClick(mUid, Binder.getCallingPid(),
+                nr.getKey(), nv);
+        waitForIdle();
+
+        // THEN the bubble should still exist
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
     }

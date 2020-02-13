@@ -365,8 +365,12 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         } catch (RemoteException ex) {
             // system process is dead if we're here.
         }
+
         if (!isBubble) {
             if (parentToCancelFinal != null) {
+                // TODO: (b/145659174) remove - this cancels the parent if the notification clicked
+                // on will auto-cancel and is the only child in the group. This won't be
+                // necessary in the new pipeline due to group pruning in ShadeListBuilder.
                 removeNotification(parentToCancelFinal);
             }
             if (shouldAutoCancel(sbn)
