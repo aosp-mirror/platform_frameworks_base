@@ -858,11 +858,21 @@ public final class MediaParser {
 
         setOptionalMediaFormatInt(result, MediaFormat.KEY_ENCODER_DELAY, format.encoderDelay);
         setOptionalMediaFormatInt(result, MediaFormat.KEY_ENCODER_PADDING, format.encoderPadding);
-        // TODO: Implement float to fraction conversion.
-        // if (format.pixelWidthHeightRatio != Format.NO_VALUE) {
-        //     result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_WIDTH, );
-        //     result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_HEIGHT, );
-        // }
+
+        if (format.pixelWidthHeightRatio != Format.NO_VALUE && format.pixelWidthHeightRatio != 0) {
+            int parWidth = 1;
+            int parHeight = 1;
+            if (format.pixelWidthHeightRatio < 1.0f) {
+                parHeight = 1 << 30;
+                parWidth = (int) (format.pixelWidthHeightRatio * parHeight);
+            } else if (format.pixelWidthHeightRatio > 1.0f) {
+                parWidth = 1 << 30;
+                parHeight = (int) (parWidth / format.pixelWidthHeightRatio);
+            }
+            result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_WIDTH, parWidth);
+            result.setInteger(MediaFormat.KEY_PIXEL_ASPECT_RATIO_HEIGHT, parHeight);
+            result.setFloat("pixel-width-height-ratio-float", format.pixelWidthHeightRatio);
+        }
 
         // LACK OF SUPPORT FOR:
         //    format.accessibilityChannel;
