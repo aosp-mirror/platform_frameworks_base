@@ -86,7 +86,7 @@ public class WindowMagnification extends SystemUI {
 
     private void enableMagnification() {
         if (mWindowMagnificationController == null) {
-            mWindowMagnificationController = new WindowMagnificationController(mContext, mHandler);
+            mWindowMagnificationController = new WindowMagnificationController(mContext, null);
         }
         mWindowMagnificationController.createWindowMagnification();
     }
