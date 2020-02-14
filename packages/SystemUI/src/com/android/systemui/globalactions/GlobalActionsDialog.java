@@ -335,45 +335,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         } else {
             mSilentModeAction = new SilentModeTriStateAction(mAudioManager, mHandler);
         }
-        mAirplaneModeOn = new ToggleAction(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
-                R.string.global_actions_toggle_airplane_mode,
-                R.string.global_actions_airplane_mode_on_status,
-                R.string.global_actions_airplane_mode_off_status) {
-
-            void onToggle(boolean on) {
-                if (mHasTelephony && TelephonyProperties.in_ecm_mode().orElse(false)) {
-                    mIsWaitingForEcmExit = true;
-                    // Launch ECM exit dialog
-                    Intent ecmDialogIntent =
-                            new Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
-                    ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(ecmDialogIntent);
-                } else {
-                    changeAirplaneModeSystemSetting(on);
-                }
-            }
-
-            @Override
-            protected void changeStateFromPress(boolean buttonOn) {
-                if (!mHasTelephony) return;
-
-                // In ECM mode airplane state cannot be changed
-                if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
-                    mState = buttonOn ? State.TurningOn : State.TurningOff;
-                    mAirplaneState = mState;
-                }
-            }
-
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
-        };
+        mAirplaneModeOn = new AirplaneModeAction();
         onAirplaneModeChanged();
 
         mItems = new ArrayList<Action>();
@@ -537,7 +499,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public boolean shouldBeSeparated() {
-            return !shouldShowControls();
+            return true;
         }
 
         @Override
@@ -1333,6 +1295,48 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+    private class AirplaneModeAction extends ToggleAction {
+        AirplaneModeAction() {
+            super(
+                R.drawable.ic_lock_airplane_mode,
+                R.drawable.ic_lock_airplane_mode_off,
+                R.string.global_actions_toggle_airplane_mode,
+                R.string.global_actions_airplane_mode_on_status,
+                R.string.global_actions_airplane_mode_off_status);
+        }
+        void onToggle(boolean on) {
+            if (mHasTelephony && TelephonyProperties.in_ecm_mode().orElse(false)) {
+                mIsWaitingForEcmExit = true;
+                // Launch ECM exit dialog
+                Intent ecmDialogIntent =
+                        new Intent(TelephonyManager.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
+                ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(ecmDialogIntent);
+            } else {
+                changeAirplaneModeSystemSetting(on);
+            }
+        }
+
+        @Override
+        protected void changeStateFromPress(boolean buttonOn) {
+            if (!mHasTelephony) return;
+
+            // In ECM mode airplane state cannot be changed
+            if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
+                mState = buttonOn ? State.TurningOn : State.TurningOff;
+                mAirplaneState = mState;
+            }
+        }
+
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
+    }
+
     private class SilentModeToggleAction extends ToggleAction {
         public SilentModeToggleAction() {
             super(R.drawable.ic_audio_vol_mute,
@@ -1555,6 +1559,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private ControlsUiController mControlsUiController;
         private ViewGroup mControlsView;
+        private ViewGroup mContainerView;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin, BlurUtils blurUtils,
@@ -1672,6 +1677,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mScrimAlpha = ScrimController.BUSY_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
+
+            if (mControlsView != null) {
+                mContainerView = findViewById(com.android.systemui.R.id.global_actions_container);
+                mContainerView.setOnTouchListener((v, e) -> {
+                    dismiss();
+                    return true;
+                });
+            }
         }
 
         private void fixNavBarClipping() {
@@ -1892,14 +1905,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private static boolean isForceGridEnabled(Context context) {
         return isPanelDebugModeEnabled(context);
-    }
-
-
-    /**
-     * Determines whether the Global Actions menu should use a separated view for emergency actions.
-     */
-    private static boolean shouldUseSeparatedView() {
-        return true;
     }
 
     private boolean shouldShowControls() {
