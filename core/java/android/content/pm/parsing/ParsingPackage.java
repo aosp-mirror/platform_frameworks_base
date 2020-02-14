@@ -191,6 +191,8 @@ public interface ParsingPackage extends AndroidPackage {
 
     ParsingPackage setRequestLegacyExternalStorage(boolean requestLegacyExternalStorage);
 
+    ParsingPackage setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging);
+
     ParsingPackage setRestoreAnyVersion(boolean restoreAnyVersion);
 
     ParsingPackage setSplitHasCode(int splitIndex, boolean splitHasCode);

@@ -1509,6 +1509,16 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     }
 
     @Override
+    public PackageImpl setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging) {
+        this.privateFlags = allowNativeHeapPointerTagging
+                ? this.privateFlags | ApplicationInfo
+                        .PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
+                : this.privateFlags & ~ApplicationInfo
+                        .PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING;
+        return this;
+    }
+
+    @Override
     public PackageImpl setUsesNonSdkApi(boolean usesNonSdkApi) {
         this.privateFlags = usesNonSdkApi
                 ? this.privateFlags | ApplicationInfo.PRIVATE_FLAG_USES_NON_SDK_API
