@@ -696,7 +696,15 @@ public class DataManager {
                     break;
             }
             conversationStore.addOrUpdate(builder.build());
-            // TODO: Cache the shortcut when a conversation's notification setting is changed.
+
+            if (modificationType == NOTIFICATION_CHANNEL_OR_GROUP_UPDATED
+                    && conversationInfo.isShortcutLongLived()
+                    && !conversationInfo.isShortcutCached()) {
+                mShortcutServiceInternal.cacheShortcuts(user.getIdentifier(),
+                        mContext.getPackageName(), pkg,
+                        Collections.singletonList(conversationInfo.getShortcutId()),
+                        user.getIdentifier());
+            }
         }
     }
 

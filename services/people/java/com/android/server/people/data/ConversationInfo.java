@@ -137,6 +137,11 @@ public class ConversationInfo {
         return hasShortcutFlags(ShortcutInfo.FLAG_LONG_LIVED);
     }
 
+    /** Whether the shortcut for this conversation is cached in Shortcut Service. */
+    public boolean isShortcutCached() {
+        return hasShortcutFlags(ShortcutInfo.FLAG_CACHED);
+    }
+
     /** Whether this conversation is marked as important by the user. */
     public boolean isImportant() {
         return hasConversationFlags(FLAG_IMPORTANT);
@@ -212,6 +217,9 @@ public class ConversationInfo {
         sb.append(" [");
         if (isShortcutLongLived()) {
             sb.append("Liv");
+        }
+        if (isShortcutCached()) {
+            sb.append("Cac");
         }
         sb.append("]");
         sb.append(", conversationFlags=0x").append(Integer.toHexString(mConversationFlags));

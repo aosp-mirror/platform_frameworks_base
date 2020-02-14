@@ -416,6 +416,9 @@ public final class DataManagerTest {
         assertTrue(conversationInfo.isImportant());
         assertFalse(conversationInfo.isNotificationSilenced());
         assertFalse(conversationInfo.isDemoted());
+        verify(mShortcutServiceInternal).cacheShortcuts(
+                anyInt(), any(), eq(TEST_PKG_NAME),
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
     }
 
     @Test
@@ -612,6 +615,7 @@ public final class DataManagerTest {
         when(mockContext.getUser()).thenReturn(UserHandle.of(userId));
         ShortcutInfo.Builder builder = new ShortcutInfo.Builder(mockContext, id)
                 .setShortLabel(id)
+                .setLongLived(true)
                 .setIntent(new Intent("TestIntent"));
         if (person != null) {
             builder.setPersons(new Person[] {person});
