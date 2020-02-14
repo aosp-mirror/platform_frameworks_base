@@ -77,6 +77,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
@@ -247,6 +248,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      * do not synchronize access to this list.
      */
     private final List<JobRestriction> mJobRestrictions;
+
+    @NonNull
+    private final String mSystemGalleryPackage;
 
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
@@ -1394,6 +1398,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         mJobRestrictions = new ArrayList<>();
         mJobRestrictions.add(new ThermalStatusRestriction(this));
 
+        mSystemGalleryPackage = Objects.requireNonNull(
+                context.getString(R.string.config_systemGallery));
+
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
         if (!mJobs.jobTimesInflatedValid()) {
@@ -2356,6 +2363,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
                 }
             }
+        }
+
+        @Override
+        public String getMediaBackupPackage() {
+            return mSystemGalleryPackage;
         }
 
         @Override
