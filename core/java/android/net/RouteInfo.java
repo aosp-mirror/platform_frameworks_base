@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.NetUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -484,7 +483,21 @@ public final class RouteInfo implements Parcelable {
     @UnsupportedAppUsage
     @Nullable
     public static RouteInfo selectBestRoute(Collection<RouteInfo> routes, InetAddress dest) {
-        return NetUtils.selectBestRoute(routes, dest);
+        if ((routes == null) || (dest == null)) return null;
+
+        RouteInfo bestRoute = null;
+        // pick a longest prefix match under same address type
+        for (RouteInfo route : routes) {
+            if (NetworkUtils.addressTypeMatches(route.mDestination.getAddress(), dest)) {
+                if ((bestRoute != null) &&
+                        (bestRoute.mDestination.getPrefixLength() >=
+                        route.mDestination.getPrefixLength())) {
+                    continue;
+                }
+                if (route.matches(dest)) bestRoute = route;
+            }
+        }
+        return bestRoute;
     }
 
     /**
