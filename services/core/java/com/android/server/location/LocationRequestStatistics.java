@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.TimeUtils;
@@ -25,6 +26,7 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Holds statistics for location requests (active requests by provider).
@@ -43,13 +45,14 @@ public class LocationRequestStatistics {
     /**
      * Signals that a package has started requesting locations.
      *
-     * @param packageName Name of package that has requested locations.
+     * @param packageName  Name of package that has requested locations.
+     * @param featureId    Feature id associated with the request.
      * @param providerName Name of provider that is requested (e.g. "gps").
-     * @param intervalMs The interval that is requested in ms.
+     * @param intervalMs   The interval that is requested in ms.
      */
-    public void startRequesting(String packageName, String providerName, long intervalMs,
-            boolean isForeground) {
-        PackageProviderKey key = new PackageProviderKey(packageName, providerName);
+    public void startRequesting(String packageName, @Nullable String featureId, String providerName,
+            long intervalMs, boolean isForeground) {
+        PackageProviderKey key = new PackageProviderKey(packageName, featureId, providerName);
         PackageStatistics stats = statistics.get(key);
         if (stats == null) {
             stats = new PackageStatistics();
@@ -57,32 +60,36 @@ public class LocationRequestStatistics {
         }
         stats.startRequesting(intervalMs);
         stats.updateForeground(isForeground);
-        history.addRequest(packageName, providerName, intervalMs);
+        history.addRequest(packageName, featureId, providerName, intervalMs);
     }
 
     /**
      * Signals that a package has stopped requesting locations.
      *
-     * @param packageName Name of package that has stopped requesting locations.
+     * @param packageName  Name of package that has stopped requesting locations.
+     * @param featureId    Feature id associated with the request.
      * @param providerName Provider that is no longer being requested.
      */
-    public void stopRequesting(String packageName, String providerName) {
-        PackageProviderKey key = new PackageProviderKey(packageName, providerName);
+    public void stopRequesting(String packageName, @Nullable String featureId,
+            String providerName) {
+        PackageProviderKey key = new PackageProviderKey(packageName, featureId, providerName);
         PackageStatistics stats = statistics.get(key);
         if (stats != null) {
             stats.stopRequesting();
         }
-        history.removeRequest(packageName, providerName);
+        history.removeRequest(packageName, featureId, providerName);
     }
 
     /**
      * Signals that a package possibly switched background/foreground.
      *
-     * @param packageName Name of package that has stopped requesting locations.
+     * @param packageName  Name of package that has stopped requesting locations.
+     * @param featureId    Feature id associated with the request.
      * @param providerName Provider that is no longer being requested.
      */
-    public void updateForeground(String packageName, String providerName, boolean isForeground) {
-        PackageProviderKey key = new PackageProviderKey(packageName, providerName);
+    public void updateForeground(String packageName, @Nullable String featureId,
+            String providerName, boolean isForeground) {
+        PackageProviderKey key = new PackageProviderKey(packageName, featureId, providerName);
         PackageStatistics stats = statistics.get(key);
         if (stats != null) {
             stats.updateForeground(isForeground);
@@ -90,30 +97,37 @@ public class LocationRequestStatistics {
     }
 
     /**
-     * A key that holds both package and provider names.
+     * A key that holds package, feature id, and provider names.
      */
     public static class PackageProviderKey implements Comparable<PackageProviderKey> {
         /**
          * Name of package requesting location.
          */
-        public final String packageName;
+        public final String mPackageName;
+        /**
+         * Feature id associated with the request, which can be used to attribute location access to
+         * different parts of the application.
+         */
+        @Nullable
+        public final String mFeatureId;
         /**
          * Name of provider being requested (e.g. "gps").
          */
-        public final String providerName;
+        public final String mProviderName;
 
-        PackageProviderKey(String packageName, String providerName) {
-            this.packageName = packageName;
-            this.providerName = providerName;
+        PackageProviderKey(String packageName, @Nullable String featureId, String providerName) {
+            this.mPackageName = packageName;
+            this.mFeatureId = featureId;
+            this.mProviderName = providerName;
         }
 
         @Override
         public int compareTo(PackageProviderKey other) {
-            final int providerCompare = providerName.compareTo(other.providerName);
+            final int providerCompare = mProviderName.compareTo(other.mProviderName);
             if (providerCompare != 0) {
                 return providerCompare;
             } else {
-                return packageName.compareTo(other.packageName);
+                return mProviderName.compareTo(other.mProviderName);
             }
         }
 
@@ -124,13 +138,18 @@ public class LocationRequestStatistics {
             }
 
             PackageProviderKey otherKey = (PackageProviderKey) other;
-            return packageName.equals(otherKey.packageName)
-                    && providerName.equals(otherKey.providerName);
+            return mPackageName.equals(otherKey.mPackageName)
+                    && mProviderName.equals(otherKey.mProviderName)
+                    && Objects.equals(mFeatureId, otherKey.mFeatureId);
         }
 
         @Override
         public int hashCode() {
-            return packageName.hashCode() + 31 * providerName.hashCode();
+            int hash = mPackageName.hashCode() + 31 * mProviderName.hashCode();
+            if (mFeatureId != null) {
+                hash += mFeatureId.hashCode() + 31 * hash;
+            }
+            return hash;
         }
     }
 
@@ -147,17 +166,18 @@ public class LocationRequestStatistics {
          * Append an added location request to the history
          */
         @VisibleForTesting
-        void addRequest(String packageName, String providerName, long intervalMs) {
-            addRequestSummary(new RequestSummary(packageName, providerName, intervalMs));
+        void addRequest(String packageName, @Nullable String featureId, String providerName,
+                long intervalMs) {
+            addRequestSummary(new RequestSummary(packageName, featureId, providerName, intervalMs));
         }
 
         /**
          * Append a removed location request to the history
          */
         @VisibleForTesting
-        void removeRequest(String packageName, String providerName) {
+        void removeRequest(String packageName, @Nullable String featureId, String providerName) {
             addRequestSummary(new RequestSummary(
-                    packageName, providerName, RequestSummary.REQUEST_ENDED_INTERVAL));
+                    packageName, featureId, providerName, RequestSummary.REQUEST_ENDED_INTERVAL));
         }
 
         private void addRequestSummary(RequestSummary summary) {
@@ -193,6 +213,12 @@ public class LocationRequestStatistics {
          * Name of package requesting location.
          */
         private final String mPackageName;
+
+        /**
+         * Feature id associated with the request for identifying subsystem of an application.
+         */
+        @Nullable
+        private final String mFeatureId;
         /**
          * Name of provider being requested (e.g. "gps").
          */
@@ -211,8 +237,10 @@ public class LocationRequestStatistics {
          */
         static final long REQUEST_ENDED_INTERVAL = -1;
 
-        RequestSummary(String packageName, String providerName, long intervalMillis) {
+        RequestSummary(String packageName, @Nullable String featureId, String providerName,
+                long intervalMillis) {
             this.mPackageName = packageName;
+            this.mFeatureId = featureId;
             this.mProviderName = providerName;
             this.mIntervalMillis = intervalMillis;
             this.mElapsedRealtimeMillis = SystemClock.elapsedRealtime();
@@ -225,6 +253,9 @@ public class LocationRequestStatistics {
                     .append(mIntervalMillis == REQUEST_ENDED_INTERVAL ? "- " : "+ ")
                     .append(String.format("%7s", mProviderName)).append(" request from ")
                     .append(mPackageName);
+            if (mFeatureId != null) {
+                s.append(" with feature ").append(mFeatureId);
+            }
             if (mIntervalMillis != REQUEST_ENDED_INTERVAL) {
                 s.append(" at interval ").append(mIntervalMillis / 1000).append(" seconds");
             }
@@ -246,14 +277,15 @@ public class LocationRequestStatistics {
         private long mFastestIntervalMs;
         // The slowest interval this package has ever requested.
         private long mSlowestIntervalMs;
-        // The total time this app has requested location (not including currently running requests).
+        // The total time this app has requested location (not including currently running
+        // requests).
         private long mTotalDurationMs;
 
         // Time when this package most recently went to foreground, requesting location. 0 means
         // not currently in foreground.
         private long mLastForegroundElapsedTimeMs;
-        // The time this app has requested location (not including currently running requests), while
-        // in foreground.
+        // The time this app has requested location (not including currently running requests),
+        // while in foreground.
         private long mForegroundDurationMs;
 
         // Time when package last went dormant (stopped requesting location)
@@ -328,7 +360,7 @@ public class LocationRequestStatistics {
          */
         public long getForegroundDurationMs() {
             long currentDurationMs = mForegroundDurationMs;
-            if (mLastForegroundElapsedTimeMs != 0 ) {
+            if (mLastForegroundElapsedTimeMs != 0) {
                 currentDurationMs
                         += SystemClock.elapsedRealtime() - mLastForegroundElapsedTimeMs;
             }

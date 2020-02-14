@@ -35,6 +35,7 @@ import java.io.StringWriter;
 @RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class LocationRequestStatisticsTest {
+    private static final String FEATURE_ID = "featureId";
 
     /**
      * Check adding and removing requests & strings
@@ -43,17 +44,18 @@ public class LocationRequestStatisticsTest {
     public void testRequestSummary() {
         LocationRequestStatistics.RequestSummary summary =
                 new LocationRequestStatistics.RequestSummary(
-                "com.example", "gps", 1000);
+                        "com.example", FEATURE_ID, "gps", 1000);
         StringWriter stringWriter = new StringWriter();
         summary.dump(new IndentingPrintWriter(new PrintWriter(stringWriter), "  "), 1234);
         assertThat(stringWriter.toString()).startsWith("At");
 
         StringWriter stringWriterRemove = new StringWriter();
         summary = new LocationRequestStatistics.RequestSummary(
-                "com.example", "gps",
+                "com.example", "gps", FEATURE_ID,
                 LocationRequestStatistics.RequestSummary.REQUEST_ENDED_INTERVAL);
         summary.dump(new IndentingPrintWriter(new PrintWriter(stringWriterRemove), "  "), 2345);
         assertThat(stringWriterRemove.toString()).contains("-");
+        assertThat(stringWriterRemove.toString()).contains(FEATURE_ID);
     }
 
     /**
@@ -62,11 +64,11 @@ public class LocationRequestStatisticsTest {
     @Test
     public void testSummaryList() {
         LocationRequestStatistics statistics = new LocationRequestStatistics();
-        statistics.history.addRequest("com.example", "gps", 1000);
+        statistics.history.addRequest("com.example", FEATURE_ID, "gps", 1000);
         assertThat(statistics.history.mList.size()).isEqualTo(1);
         // Try (not) to overflow
         for (int i = 0; i < LocationRequestStatistics.RequestSummaryLimitedHistory.MAX_SIZE; i++) {
-            statistics.history.addRequest("com.example", "gps", 1000);
+            statistics.history.addRequest("com.example", FEATURE_ID, "gps", 1000);
         }
         assertThat(statistics.history.mList.size()).isEqualTo(
                 LocationRequestStatistics.RequestSummaryLimitedHistory.MAX_SIZE);

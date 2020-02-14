@@ -1452,7 +1452,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         throw new SecurityException("uid " + Binder.getCallingUid() + " does not have "
-            + ACCESS_COARSE_LOCATION + " or " + ACCESS_FINE_LOCATION + ".");
+                + ACCESS_COARSE_LOCATION + " or " + ACCESS_FINE_LOCATION + ".");
     }
 
     private void enforceCallingOrSelfPackageName(String packageName) {
@@ -1830,8 +1830,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // Update statistics for historical location requests by package/provider
             mRequestStatistics.startRequesting(
-                    mReceiver.mCallerIdentity.mPackageName, provider, request.getInterval(),
-                    mIsForegroundUid);
+                    mReceiver.mCallerIdentity.mPackageName, mReceiver.mCallerIdentity.mFeatureId,
+                    provider, request.getInterval(), mIsForegroundUid);
         }
 
         /**
@@ -1840,7 +1840,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         private void updateForeground(boolean isForeground) {
             mIsForegroundUid = isForeground;
             mRequestStatistics.updateForeground(
-                    mReceiver.mCallerIdentity.mPackageName, mProvider, isForeground);
+                    mReceiver.mCallerIdentity.mPackageName, mReceiver.mCallerIdentity.mFeatureId,
+                    mProvider, isForeground);
         }
 
         /**
@@ -1848,7 +1849,8 @@ public class LocationManagerService extends ILocationManager.Stub {
          */
         private void disposeLocked(boolean removeReceiver) {
             String packageName = mReceiver.mCallerIdentity.mPackageName;
-            mRequestStatistics.stopRequesting(packageName, mProvider);
+            mRequestStatistics.stopRequesting(packageName, mReceiver.mCallerIdentity.mFeatureId,
+                    mProvider);
 
             mLocationUsageLogger.logLocationApiUsage(
                     LocationStatsEnums.USAGE_ENDED,
@@ -1883,6 +1885,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             StringBuilder b = new StringBuilder("UpdateRecord[");
             b.append(mProvider).append(" ");
             b.append(mReceiver.mCallerIdentity.mPackageName);
+            String featureId = mReceiver.mCallerIdentity.mFeatureId;
+            if (featureId != null) {
+                b.append(" ").append(featureId).append(" ");
+            }
             b.append("(").append(mReceiver.mCallerIdentity.mUid);
             if (mIsForegroundUid) {
                 b.append(" foreground");
@@ -2886,7 +2892,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             for (Map.Entry<PackageProviderKey, PackageStatistics> entry
                     : sorted.entrySet()) {
                 PackageProviderKey key = entry.getKey();
-                ipw.println(key.providerName + ": " + key.packageName + ": " + entry.getValue());
+                ipw.println(key.mPackageName + ": " + key.mProviderName + ": " + entry.getValue());
             }
             ipw.decreaseIndent();
 
