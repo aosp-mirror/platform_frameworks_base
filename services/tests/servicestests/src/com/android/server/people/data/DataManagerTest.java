@@ -184,6 +184,7 @@ public final class DataManagerTest {
         when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
         when(mStatusBarNotification.getPackageName()).thenReturn(TEST_PKG_NAME);
         when(mStatusBarNotification.getUser()).thenReturn(UserHandle.of(USER_ID_PRIMARY));
+        when(mStatusBarNotification.getPostTime()).thenReturn(System.currentTimeMillis());
         when(mNotification.getShortcutId()).thenReturn(TEST_SHORTCUT_ID);
 
         mNotificationChannel = new NotificationChannel(
@@ -322,6 +323,28 @@ public final class DataManagerTest {
         assertEquals(TEST_SHORTCUT_ID, conversations.get(0).getShortcutId());
         assertTrue(conversations.get(0).isContactStarred());
         assertEquals(newPhoneNumber, conversations.get(0).getContactPhoneNumber());
+    }
+
+    @Test
+    public void testNotificationPosted() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        mDataManager.onShortcutAddedOrUpdated(shortcut);
+
+        NotificationListenerService listenerService =
+                mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
+
+        listenerService.onNotificationPosted(mStatusBarNotification);
+
+        List<Range<Long>> activeNotificationOpenTimeSlots = new ArrayList<>();
+        mDataManager.forAllPackages(packageData ->
+                activeNotificationOpenTimeSlots.addAll(
+                        packageData.getEventHistory(TEST_SHORTCUT_ID)
+                                .getEventIndex(Event.TYPE_NOTIFICATION_POSTED)
+                                .getActiveTimeSlots()));
+        assertEquals(1, activeNotificationOpenTimeSlots.size());
     }
 
     @Test

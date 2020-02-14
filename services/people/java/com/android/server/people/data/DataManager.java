@@ -640,6 +640,14 @@ public class DataManager {
     private class NotificationListener extends NotificationListenerService {
 
         @Override
+        public void onNotificationPosted(StatusBarNotification sbn) {
+            EventHistoryImpl eventHistory = getEventHistoryIfEligible(sbn);
+            if (eventHistory != null) {
+                eventHistory.addEvent(new Event(sbn.getPostTime(), Event.TYPE_NOTIFICATION_POSTED));
+            }
+        }
+
+        @Override
         public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
                 int reason) {
             if (reason != REASON_CLICK) {

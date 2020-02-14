@@ -80,10 +80,6 @@ class UsageStatsQueryHelper {
                     addEventByShortcutId(packageData, e.getShortcutId(),
                             new Event(e.getTimeStamp(), Event.TYPE_SHORTCUT_INVOCATION));
                     break;
-                case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
-                    addEventByNotificationChannelId(packageData, e.getNotificationChannelId(),
-                            new Event(e.getTimeStamp(), Event.TYPE_NOTIFICATION_POSTED));
-                    break;
                 case UsageEvents.Event.LOCUS_ID_SET:
                     onInAppConversationEnded(packageData, e);
                     LocusId locusId = e.getLocusId() != null ? new LocusId(e.getLocusId()) : null;
@@ -140,19 +136,6 @@ class UsageStatsQueryHelper {
         }
         EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
                 EventStore.CATEGORY_LOCUS_ID_BASED, locusId.getId());
-        eventHistory.addEvent(event);
-    }
-
-    private void addEventByNotificationChannelId(PackageData packageData,
-            String notificationChannelId, Event event) {
-        ConversationInfo conversationInfo =
-                packageData.getConversationStore().getConversationByNotificationChannelId(
-                        notificationChannelId);
-        if (conversationInfo == null) {
-            return;
-        }
-        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
-                EventStore.CATEGORY_SHORTCUT_BASED, conversationInfo.getShortcutId());
         eventHistory.addEvent(event);
     }
 }

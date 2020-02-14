@@ -59,7 +59,6 @@ public final class UsageStatsQueryHelperTest {
     private static final String PKG_NAME = "pkg";
     private static final String ACTIVITY_NAME = "TestActivity";
     private static final String SHORTCUT_ID = "abc";
-    private static final String NOTIFICATION_CHANNEL_ID = "test : abc";
     private static final LocusId LOCUS_ID_1 = new LocusId("locus_1");
     private static final LocusId LOCUS_ID_2 = new LocusId("locus_2");
 
@@ -83,7 +82,6 @@ public final class UsageStatsQueryHelperTest {
                 scheduledExecutorService, testDir, helper);
         mPackageData.mConversationStore.mConversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
-                .setNotificationChannelId(NOTIFICATION_CHANNEL_ID)
                 .setLocusId(LOCUS_ID_1)
                 .build();
 
@@ -107,19 +105,6 @@ public final class UsageStatsQueryHelperTest {
         assertTrue(mHelper.querySince(50L));
         assertEquals(100L, mHelper.getLastEventTimestamp());
         Event expectedEvent = new Event(100L, Event.TYPE_SHORTCUT_INVOCATION);
-        List<Event> events = mPackageData.mEventStore.mShortcutEventHistory.queryEvents(
-                Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
-        assertEquals(1, events.size());
-        assertEquals(expectedEvent, events.get(0));
-    }
-
-    @Test
-    public void testQueryNotificationInterruptionEvent() {
-        addUsageEvents(createNotificationInterruptionEvent(100L));
-
-        assertTrue(mHelper.querySince(50L));
-        assertEquals(100L, mHelper.getLastEventTimestamp());
-        Event expectedEvent = new Event(100L, Event.TYPE_NOTIFICATION_POSTED);
         List<Event> events = mPackageData.mEventStore.mShortcutEventHistory.queryEvents(
                 Event.ALL_EVENT_TYPES, 0L, Long.MAX_VALUE);
         assertEquals(1, events.size());
@@ -200,13 +185,6 @@ public final class UsageStatsQueryHelperTest {
     private static UsageEvents.Event createShortcutInvocationEvent(long timestamp) {
         UsageEvents.Event e = createUsageEvent(UsageEvents.Event.SHORTCUT_INVOCATION, timestamp);
         e.mShortcutId = SHORTCUT_ID;
-        return e;
-    }
-
-    private static UsageEvents.Event createNotificationInterruptionEvent(long timestamp) {
-        UsageEvents.Event e = createUsageEvent(UsageEvents.Event.NOTIFICATION_INTERRUPTION,
-                timestamp);
-        e.mNotificationChannelId = NOTIFICATION_CHANNEL_ID;
         return e;
     }
 
