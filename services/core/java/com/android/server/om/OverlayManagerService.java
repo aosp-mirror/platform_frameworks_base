@@ -50,6 +50,7 @@ import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -66,7 +67,6 @@ import android.util.SparseArray;
 
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.FgThread;
-import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
@@ -89,7 +89,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -239,8 +238,6 @@ public final class OverlayManagerService extends SystemService {
 
     private final OverlayActorEnforcer mActorEnforcer;
 
-    private final AtomicBoolean mPersistSettingsScheduled = new AtomicBoolean(false);
-
     private final Consumer<PackageAndUser> mOnOverlaysChanged = (pair) -> {
         onOverlaysChanged(pair.packageName, pair.userId);
     };
@@ -259,13 +256,16 @@ public final class OverlayManagerService extends SystemService {
                     OverlayConfig.getSystemInstance(), getDefaultOverlayPackages());
             mActorEnforcer = new OverlayActorEnforcer(mPackageManager);
 
+            HandlerThread packageReceiverThread = new HandlerThread(TAG);
+            packageReceiverThread.start();
+
             final IntentFilter packageFilter = new IntentFilter();
             packageFilter.addAction(ACTION_PACKAGE_ADDED);
             packageFilter.addAction(ACTION_PACKAGE_CHANGED);
             packageFilter.addAction(ACTION_PACKAGE_REMOVED);
             packageFilter.addDataScheme("package");
             getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL,
-                    packageFilter, null, null);
+                    packageFilter, null, packageReceiverThread.getThreadHandler());
 
             final IntentFilter userFilter = new IntentFilter();
             userFilter.addAction(ACTION_USER_ADDED);
@@ -318,7 +318,7 @@ public final class OverlayManagerService extends SystemService {
                 final List<String> targets = mImpl.updateOverlaysForUser(newUserId);
                 updateAssets(newUserId, targets);
             }
-            schedulePersistSettings();
+            persistSettings();
         } finally {
             traceEnd(TRACE_TAG_RRO);
         }
@@ -973,7 +973,7 @@ public final class OverlayManagerService extends SystemService {
     };
 
     private void onOverlaysChanged(@NonNull final String targetPackageName, final int userId) {
-        schedulePersistSettings();
+        persistSettings();
         FgThread.getHandler().post(() -> {
             updateAssets(userId, targetPackageName);
 
@@ -1065,27 +1065,21 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    private void schedulePersistSettings() {
-        if (mPersistSettingsScheduled.getAndSet(true)) {
-            return;
+    private void persistSettings() {
+        if (DEBUG) {
+            Slog.d(TAG, "Writing overlay settings");
         }
-        IoThread.getHandler().post(() -> {
-            mPersistSettingsScheduled.set(false);
-            if (DEBUG) {
-                Slog.d(TAG, "Writing overlay settings");
+        synchronized (mLock) {
+            FileOutputStream stream = null;
+            try {
+                stream = mSettingsFile.startWrite();
+                mSettings.persist(stream);
+                mSettingsFile.finishWrite(stream);
+            } catch (IOException | XmlPullParserException e) {
+                mSettingsFile.failWrite(stream);
+                Slog.e(TAG, "failed to persist overlay state", e);
             }
-            synchronized (mLock) {
-                FileOutputStream stream = null;
-                try {
-                    stream = mSettingsFile.startWrite();
-                    mSettings.persist(stream);
-                    mSettingsFile.finishWrite(stream);
-                } catch (IOException | XmlPullParserException e) {
-                    mSettingsFile.failWrite(stream);
-                    Slog.e(TAG, "failed to persist overlay state", e);
-                }
-            }
-        });
+        }
     }
 
     private void restoreSettings() {
