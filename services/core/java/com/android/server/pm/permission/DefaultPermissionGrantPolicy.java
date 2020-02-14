@@ -150,6 +150,12 @@ public final class DefaultPermissionGrantPolicy {
         ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
     }
 
+    private static final Set<String> FOREGROUND_LOCATION_PERMISSIONS = new ArraySet<>();
+    static {
+        ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+    }
+
     private static final Set<String> COARSE_BACKGROUND_LOCATION_PERMISSIONS = new ArraySet<>();
     static {
         COARSE_BACKGROUND_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -587,11 +593,6 @@ public final class DefaultPermissionGrantPolicy {
                         DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE, userId),
                 userId, CONTACTS_PERMISSIONS);
 
-        // Maps
-        grantPermissionsToSystemPackage(
-                getDefaultSystemHandlerActivityPackageForCategory(Intent.CATEGORY_APP_MAPS, userId),
-                userId, ALWAYS_LOCATION_PERMISSIONS);
-
         // Email
         grantPermissionsToSystemPackage(
                 getDefaultSystemHandlerActivityPackageForCategory(
@@ -609,7 +610,7 @@ public final class DefaultPermissionGrantPolicy {
             }
         }
         grantPermissionsToPackage(browserPackage, userId, false /* ignoreSystemPackage */,
-                true /*whitelistRestrictedPermissions*/, ALWAYS_LOCATION_PERMISSIONS);
+                true /*whitelistRestrictedPermissions*/, FOREGROUND_LOCATION_PERMISSIONS);
 
         // Voice interaction
         if (voiceInteractPackageNames != null) {
