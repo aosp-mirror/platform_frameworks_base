@@ -101,8 +101,8 @@ public class DataManager {
     private final SparseArray<NotificationListenerService> mNotificationListeners =
             new SparseArray<>();
     private final SparseArray<PackageMonitor> mPackageMonitors = new SparseArray<>();
-    private final ContentObserver mCallLogContentObserver;
-    private final ContentObserver mMmsSmsContentObserver;
+    private ContentObserver mCallLogContentObserver;
+    private ContentObserver mMmsSmsContentObserver;
 
     private ShortcutServiceInternal mShortcutServiceInternal;
     private PackageManagerInternal mPackageManagerInternal;
@@ -118,10 +118,6 @@ public class DataManager {
         mContext = context;
         mInjector = injector;
         mUsageStatsQueryExecutor = mInjector.createScheduledExecutor();
-        mCallLogContentObserver = new CallLogContentObserver(
-                BackgroundThread.getHandler());
-        mMmsSmsContentObserver = new MmsSmsContentObserver(
-                BackgroundThread.getHandler());
         mDiskReadWriterExecutor = mInjector.createScheduledExecutor();
     }
 
@@ -189,9 +185,12 @@ public class DataManager {
             // The call log and MMS/SMS messages are shared across user profiles. So only need to
             // register the content observers once for the primary user.
             // TODO: Register observers after the conversations and events being loaded from disk.
+            mCallLogContentObserver = new CallLogContentObserver(BackgroundThread.getHandler());
             mContext.getContentResolver().registerContentObserver(
                     CallLog.CONTENT_URI, /* notifyForDescendants= */ true,
                     mCallLogContentObserver, UserHandle.USER_SYSTEM);
+
+            mMmsSmsContentObserver = new MmsSmsContentObserver(BackgroundThread.getHandler());
             mContext.getContentResolver().registerContentObserver(
                     MmsSms.CONTENT_URI, /* notifyForDescendants= */ false,
                     mMmsSmsContentObserver, UserHandle.USER_SYSTEM);
@@ -226,8 +225,14 @@ public class DataManager {
             mPackageMonitors.get(userId).unregister();
         }
         if (userId == UserHandle.USER_SYSTEM) {
-            mContext.getContentResolver().unregisterContentObserver(mCallLogContentObserver);
-            mContext.getContentResolver().unregisterContentObserver(mMmsSmsContentObserver);
+            if (mCallLogContentObserver != null) {
+                mContext.getContentResolver().unregisterContentObserver(mCallLogContentObserver);
+                mCallLogContentObserver = null;
+            }
+            if (mMmsSmsContentObserver != null) {
+                mContext.getContentResolver().unregisterContentObserver(mMmsSmsContentObserver);
+                mCallLogContentObserver = null;
+            }
         }
 
         DataMaintenanceService.cancelJob(mContext, userId);
