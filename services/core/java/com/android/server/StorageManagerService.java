@@ -4030,7 +4030,7 @@ class StorageManagerService extends IStorageManager.Stub
             if (!hasLegacy && !mIsFuseEnabled) {
                 ApplicationInfo ai = mIPackageManager.getApplicationInfo(packageName,
                         0, UserHandle.getUserId(uid));
-                hasLegacy = ai.hasRequestedLegacyExternalStorage();
+                hasLegacy = (ai != null && ai.hasRequestedLegacyExternalStorage());
             }
 
             if (hasLegacy && hasWrite) {
