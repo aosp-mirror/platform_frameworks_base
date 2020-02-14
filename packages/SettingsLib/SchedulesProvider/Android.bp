@@ -1,0 +1,12 @@
+android_library {
+    name: "SettingsLibSchedulesProvider",
+
+    srcs: ["src/**/*.java"],
+
+    static_libs: [
+          "androidx.annotation_annotation",
+    ],
+
+    sdk_version: "system_current",
+    min_sdk_version: "21",
+}
