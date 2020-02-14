@@ -306,7 +306,7 @@
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физическая активность"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"доступ к данным о физической активности"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Открыть приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о физической активности?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о физической активности?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"снимать фото и видео"</string>
     <string name="permgrouprequest_camera" msgid="2697305443703328372">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снимать фото и видео?"</string>
@@ -1184,7 +1184,7 @@
     <string name="whichEditApplication" msgid="6191568491456092812">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Редактировать с помощью приложения \"%1$s\""</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"Изменить"</string>
-    <string name="whichSendApplication" msgid="4143847974460792029">"Отправка данных"</string>
+    <string name="whichSendApplication" msgid="4143847974460792029">"Поделиться"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Поделиться через %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Поделиться"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Выберите приложение"</string>

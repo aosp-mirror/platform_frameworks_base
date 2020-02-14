@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6638755728961013003">"SIM tidak di-provisioning MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="5562215652599183258">"SIM tidak diizinkan MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="822496463303720579">"Ponsel tidak diizinkan MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="1070849538022865416">"SIM tidak di-provisioning MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="499832197298480670">"SIM tidak diizinkan MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="2346111479504469688">"Ponsel tidak diizinkan MM#6"</string>
 </resources>

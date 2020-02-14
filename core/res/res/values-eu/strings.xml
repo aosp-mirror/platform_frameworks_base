@@ -488,7 +488,7 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"onartu Wi-Fi Multicast harrera"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Wi-Fi sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Wifi-sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telefonoa soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetooth ezarpenak"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Tokiko Bluetooth tableta konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
@@ -526,7 +526,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Argazki-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"multimedia-edukien bildumako kokapena irakurri"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Multimedia-edukien bildumako kokapena irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Egiaztatu zu zarela"</string>
+    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Egiaztatu zeu zarela"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrikoa ez dago erabilgarri"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Utzi da autentifikazioa"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ez da ezagutu"</string>
