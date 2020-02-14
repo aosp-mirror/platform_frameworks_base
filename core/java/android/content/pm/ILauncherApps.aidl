@@ -25,6 +25,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IShortcutChangeCallback;
 import android.content.pm.PackageInstaller;
@@ -67,9 +68,8 @@ interface ILauncherApps {
     LauncherApps.AppUsageLimit getAppUsageLimit(String callingPackage, String packageName,
             in UserHandle user);
 
-    ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
-            in List shortcutIds, in List<LocusId> locusIds, in ComponentName componentName,
-            int flags, in UserHandle user);
+    ParceledListSlice getShortcuts(String callingPackage, in ShortcutQueryWrapper query,
+            in UserHandle user);
     void pinShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
     boolean startShortcut(String callingPackage, String packageName, String featureId, String id,
@@ -93,9 +93,8 @@ interface ILauncherApps {
             in IPackageInstallerCallback callback);
     ParceledListSlice getAllSessions(String callingPackage);
 
-    void registerShortcutChangeCallback(String callingPackage, long changedSince,
-            String packageName, in List shortcutIds, in List<LocusId> locusIds,
-            in ComponentName componentName, int flags, in IShortcutChangeCallback callback);
+    void registerShortcutChangeCallback(String callingPackage, in ShortcutQueryWrapper query,
+	    in IShortcutChangeCallback callback);
     void unregisterShortcutChangeCallback(String callingPackage,
             in IShortcutChangeCallback callback);
 
