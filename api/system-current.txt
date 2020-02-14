@@ -3349,8 +3349,14 @@ package android.hardware.usb {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
     field public static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
+    field public static final long FUNCTION_ACCESSORY = 2L; // 0x2L
+    field public static final long FUNCTION_ADB = 1L; // 0x1L
+    field public static final long FUNCTION_AUDIO_SOURCE = 64L; // 0x40L
+    field public static final long FUNCTION_MIDI = 8L; // 0x8L
+    field public static final long FUNCTION_MTP = 4L; // 0x4L
     field public static final long FUNCTION_NCM = 1024L; // 0x400L
     field public static final long FUNCTION_NONE = 0L; // 0x0L
+    field public static final long FUNCTION_PTP = 16L; // 0x10L
     field public static final long FUNCTION_RNDIS = 32L; // 0x20L
     field public static final String USB_CONFIGURED = "configured";
     field public static final String USB_CONNECTED = "connected";
