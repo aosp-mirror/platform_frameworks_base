@@ -49,7 +49,6 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
-#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -59,7 +58,6 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
-#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -76,10 +74,8 @@
 #include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
-#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
-#include <bionic/page.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <cutils/sockets.h>
@@ -1905,25 +1901,6 @@ static void UnmountStorageOnInit(JNIEnv* env) {
   UnmountTree("/storage");
 }
 
-static int DisableExecuteOnly(struct dl_phdr_info* info,
-                              size_t size [[maybe_unused]],
-                              void* data [[maybe_unused]]) {
-  // Search for any execute-only segments and mark them read+execute.
-  for (int i = 0; i < info->dlpi_phnum; i++) {
-    const auto& phdr = info->dlpi_phdr[i];
-    if ((phdr.p_type == PT_LOAD) && (phdr.p_flags == PF_X)) {
-      auto addr = reinterpret_cast<void*>(info->dlpi_addr + PAGE_START(phdr.p_vaddr));
-      size_t len = PAGE_OFFSET(phdr.p_vaddr) + phdr.p_memsz;
-      if (mprotect(addr, len, PROT_READ | PROT_EXEC) == -1) {
-        ALOGE("mprotect(%p, %zu, PROT_READ | PROT_EXEC) failed: %m", addr, len);
-        return -1;
-      }
-    }
-  }
-  // Return non-zero to exit dl_iterate_phdr.
-  return 0;
-}
-
 }  // anonymous namespace
 
 namespace android {
@@ -2286,14 +2263,6 @@ static void com_android_internal_os_Zygote_nativeEmptyUsapPool(JNIEnv* env, jcla
   }
 }
 
-/**
- * @param env  Managed runtime environment
- * @return  True if disable was successful.
- */
-static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
-  return dl_iterate_phdr(DisableExecuteOnly, nullptr) == 0;
-}
-
 static void com_android_internal_os_Zygote_nativeBlockSigTerm(JNIEnv* env, jclass) {
   auto fail_fn = std::bind(ZygoteFailure, env, "usap", nullptr, _1);
   BlockSignal(SIGTERM, fail_fn);
@@ -2375,8 +2344,6 @@ static const JNINativeMethod gMethods[] = {
         {"nativeGetUsapPoolCount", "()I",
          (void*)com_android_internal_os_Zygote_nativeGetUsapPoolCount},
         {"nativeEmptyUsapPool", "()V", (void*)com_android_internal_os_Zygote_nativeEmptyUsapPool},
-        {"nativeDisableExecuteOnly", "()Z",
-         (void*)com_android_internal_os_Zygote_nativeDisableExecuteOnly},
         {"nativeBlockSigTerm", "()V", (void*)com_android_internal_os_Zygote_nativeBlockSigTerm},
         {"nativeUnblockSigTerm", "()V", (void*)com_android_internal_os_Zygote_nativeUnblockSigTerm},
         {"nativeBoostUsapPriority", "()V",
