@@ -15206,10 +15206,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // We purposefully exclude FLAG_STORAGE_EXTERNAL here, since
                 // this task was only focused on moving data on internal storage.
+                // We don't want ART profiles cleared, because they don't move,
+                // so we would be deleting the only copy (b/149200535).
+                final int flags = FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                        | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
                 for (int userId : userIds) {
                     try {
-                        mInstaller.destroyAppData(volumeUuid, move.packageName, userId,
-                                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE, 0);
+                        mInstaller.destroyAppData(volumeUuid, move.packageName, userId, flags, 0);
                     } catch (InstallerException e) {
                         Slog.w(TAG, String.valueOf(e));
                     }
