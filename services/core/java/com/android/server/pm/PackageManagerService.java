@@ -14707,8 +14707,7 @@ public class PackageManagerService extends IPackageManager.Stub
         void handleVerificationFinished() {
             if (!mVerificationCompleted) {
                 mVerificationCompleted = true;
-                if (mIntegrityVerificationCompleted || mRet != INSTALL_SUCCEEDED) {
-                    mIntegrityVerificationCompleted = true;
+                if (mIntegrityVerificationCompleted) {
                     handleReturnCode();
                 }
                 // integrity verification still pending.
@@ -14718,8 +14717,7 @@ public class PackageManagerService extends IPackageManager.Stub
         void handleIntegrityVerificationFinished() {
             if (!mIntegrityVerificationCompleted) {
                 mIntegrityVerificationCompleted = true;
-                if (mVerificationCompleted || mRet != INSTALL_SUCCEEDED) {
-                    mVerificationCompleted = true;
+                if (mVerificationCompleted) {
                     handleReturnCode();
                 }
                 // verifier still pending
