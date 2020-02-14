@@ -20,6 +20,7 @@ import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.DEVICE_TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.media.MediaRoute2Info;
@@ -31,9 +32,13 @@ import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.concurrent.GuardedBy;
 
 public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService {
     private static final String TAG = "SampleMR2ProviderSvc";
+    private static final Object sLock = new Object();
 
     public static final String ROUTE_ID1 = "route_id1";
     public static final String ROUTE_NAME1 = "Sample Route 1";
@@ -59,9 +64,6 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public static final String ROUTE_ID_VARIABLE_VOLUME = "route_variable_volume";
     public static final String ROUTE_NAME_VARIABLE_VOLUME = "Variable Volume Route";
 
-    public static final String ACTION_REMOVE_ROUTE =
-            "com.android.mediarouteprovider.action_remove_route";
-
     public static final String FEATURE_SAMPLE =
             "com.android.mediarouteprovider.FEATURE_SAMPLE";
     public static final String FEATURE_SPECIAL =
@@ -70,6 +72,9 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     Map<String, String> mRouteIdToSessionId = new HashMap<>();
     private int mNextSessionId = 1000;
+
+    @GuardedBy("sLock")
+    private static SampleMediaRoute2ProviderService sInstance;
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
@@ -92,6 +97,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 ROUTE_ID5_TO_TRANSFER_TO, ROUTE_NAME5)
                 .addFeature(FEATURE_SAMPLE)
                 .build();
+
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_FEATURE, ROUTE_NAME_SPECIAL_FEATURE)
                         .addFeature(FEATURE_SAMPLE)
@@ -114,33 +120,62 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         mRoutes.put(route3.getId(), route3);
         mRoutes.put(route4.getId(), route4);
         mRoutes.put(route5.getId(), route5);
+
         mRoutes.put(routeSpecial.getId(), routeSpecial);
         mRoutes.put(fixedVolumeRoute.getId(), fixedVolumeRoute);
         mRoutes.put(variableVolumeRoute.getId(), variableVolumeRoute);
     }
 
+    public static SampleMediaRoute2ProviderService getInstance() {
+        synchronized (sLock) {
+            return sInstance;
+        }
+    }
+
+    /**
+     * Adds a route and publishes it. It could replace a route in the provider if
+     * they have the same route id.
+     */
+    public void addRoute(@NonNull MediaRoute2Info route) {
+        Objects.requireNonNull(route, "route must not be null");
+        mRoutes.put(route.getOriginalId(), route);
+        publishRoutes();
+    }
+
+    /**
+     * Removes a route and publishes it.
+     */
+    public void removeRoute(@NonNull String routeId) {
+        Objects.requireNonNull(routeId, "routeId must not be null");
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route != null) {
+            mRoutes.remove(routeId);
+            publishRoutes();
+        }
+    }
+
     @Override
     public void onCreate() {
+        synchronized (sLock) {
+            sInstance = this;
+        }
         initializeRoutes();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        synchronized (sLock) {
+            if (sInstance == this) {
+                sInstance = null;
+            }
+        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         publishRoutes();
         return super.onBind(intent);
-    }
-
-    @Override
-    public void onControlRequest(String routeId, Intent request) {
-        String action = request.getAction();
-        if (ACTION_REMOVE_ROUTE.equals(action)) {
-            MediaRoute2Info route = mRoutes.get(routeId);
-            if (route != null) {
-                mRoutes.remove(routeId);
-                publishRoutes();
-                mRoutes.put(routeId, route);
-            }
-        }
     }
 
     @Override

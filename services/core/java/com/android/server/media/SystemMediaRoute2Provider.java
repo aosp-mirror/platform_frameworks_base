@@ -151,11 +151,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
     }
 
-    //TODO: implement method
-    @Override
-    public void sendControlRequest(@NonNull String routeId, @NonNull Intent request) {
-    }
-
     @Override
     public void setRouteVolume(String routeId, int volume) {
         if (!TextUtils.equals(routeId, mSelectedRouteId)) {
