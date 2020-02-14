@@ -90,13 +90,11 @@ public class HapticFeedbackConstants {
 
     /**
      * The user has started a gesture (e.g. on the soft keyboard).
-     * @hide
      */
     public static final int GESTURE_START = 12;
 
     /**
      * The user has finished a gesture (e.g. on the soft keyboard).
-     * @hide
      */
     public static final int GESTURE_END = 13;
 
