@@ -181,7 +181,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mCqi = CellInfo.UNAVAILABLE;
         mTimingAdvance = CellInfo.UNAVAILABLE;
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        mParametersUseForLevel = USE_RSRP | USE_RSSNR;
+        mParametersUseForLevel = USE_RSRP;
     }
 
     /** {@inheritDoc} */
@@ -236,7 +236,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         int[] rsrpThresholds, rsrqThresholds, rssnrThresholds;
         boolean rsrpOnly;
         if (cc == null) {
-            mParametersUseForLevel = USE_RSRP | USE_RSSNR;
+            mParametersUseForLevel = USE_RSRP;
             rsrpThresholds = sRsrpThresholds;
             rsrqThresholds = sRsrqThresholds;
             rssnrThresholds = sRssnrThresholds;

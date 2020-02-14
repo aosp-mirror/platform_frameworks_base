@@ -2377,7 +2377,7 @@ public class CarrierConfigManager {
      *  {@link CellSignalStrengthLte#USE_RSRQ}, {@link CellSignalStrengthLte#USE_RSSNR}.
      *
      * For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
-     * If the key is invalid or not configured, a default value (RSRP | RSSNR = 1 << 0 | 1 << 2)
+     * If the key is invalid or not configured, a default value (RSRP = 1 << 0)
      * will apply.
      *
      * @hide
@@ -4334,7 +4334,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
-                CellSignalStrengthLte.USE_RSRP | CellSignalStrengthLte.USE_RSSNR);
+                CellSignalStrengthLte.USE_RSRP);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
