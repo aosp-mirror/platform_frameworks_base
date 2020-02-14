@@ -404,6 +404,11 @@ public class NavigationModeController implements Dumpable {
             defaultOverlays = "failed_to_fetch";
         }
         pw.println("  defaultOverlays=" + defaultOverlays);
+        pw.println("  restoreGesturalNavMode:");
+        for (int i = 0; i < mRestoreGesturalNavBarMode.size(); i++) {
+            pw.println("    userId=" + mRestoreGesturalNavBarMode.keyAt(i)
+                    + " shouldRestore=" + mRestoreGesturalNavBarMode.valueAt(i));
+        }
         dumpAssetPaths(mCurrentUserContext);
     }
 
