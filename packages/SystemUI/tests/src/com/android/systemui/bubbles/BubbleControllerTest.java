@@ -44,7 +44,6 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.face.FaceManager;
 import android.service.notification.ZenModeConfig;
@@ -857,42 +856,6 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // THEN the summary is removed from GroupManager
         verify(mNotificationGroupManager, times(1)).onEntryRemoved(groupSummary.getEntry());
-    }
-
-    static class TestableBubbleController extends BubbleController {
-        // Let's assume surfaces can be synchronized immediately.
-        TestableBubbleController(Context context,
-                NotificationShadeWindowController notificationShadeWindowController,
-                StatusBarStateController statusBarStateController,
-                ShadeController shadeController,
-                BubbleData data,
-                ConfigurationController configurationController,
-                NotificationInterruptionStateProvider interruptionStateProvider,
-                ZenModeController zenModeController,
-                NotificationLockscreenUserManager lockscreenUserManager,
-                NotificationGroupManager groupManager,
-                NotificationEntryManager entryManager,
-                NotifPipeline notifPipeline,
-                FeatureFlags featureFlags,
-                DumpController dumpController) {
-            super(context,
-                    notificationShadeWindowController, statusBarStateController, shadeController,
-                    data, Runnable::run, configurationController, interruptionStateProvider,
-                    zenModeController, lockscreenUserManager, groupManager, entryManager,
-                     notifPipeline, featureFlags, dumpController);
-            setInflateSynchronously(true);
-        }
-    }
-
-    static class TestableNotificationInterruptionStateProvider extends
-            NotificationInterruptionStateProvider {
-
-        TestableNotificationInterruptionStateProvider(Context context,
-                NotificationFilter filter, StatusBarStateController controller,
-                BatteryController batteryController) {
-            super(context, filter, controller, batteryController);
-            mUseHeadsUp = true;
-        }
     }
 
     /**
