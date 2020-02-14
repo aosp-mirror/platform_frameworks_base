@@ -1024,7 +1024,18 @@ public class AudioSystem
                                                       String device_name,
                                                       int codecFormat);
     @UnsupportedAppUsage
-    public static native int setPhoneState(int state);
+    public static int setPhoneState(int state) {
+        Log.w(TAG, "Do not use this method! Use AudioManager.setMode() instead.");
+        return 0;
+    }
+    /**
+     * @hide
+     * Send the current audio mode to audio policy manager and audio HAL.
+     * @param state the audio mode
+     * @param uid the UID of the app owning the audio mode
+     * @return command completion status.
+     */
+    public static native int setPhoneState(int state, int uid);
     @UnsupportedAppUsage
     public static native int setForceUse(int usage, int config);
     @UnsupportedAppUsage
