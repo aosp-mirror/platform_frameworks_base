@@ -697,7 +697,7 @@ public class Vpn {
                 // correctly parsed, and the VPN has started running in a different thread. The only
                 // other possibility is that the above call threw an exception, which will be
                 // caught below, and returns false (clearing the always-on VPN). Once started, the
-                // Platform VPN cannot permanantly fail, and is resiliant to temporary failures. It
+                // Platform VPN cannot permanently fail, and is resilient to temporary failures. It
                 // will continue retrying until shut down by the user, or always-on is toggled off.
                 return true;
             }
