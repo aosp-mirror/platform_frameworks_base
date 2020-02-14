@@ -69,6 +69,7 @@ import android.text.TextUtils;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -196,6 +197,12 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     + " due to " + getEnableDisableReasonString(mReason) + " by " + mPackageName;
         }
 
+        void dump(ProtoOutputStream proto) {
+            proto.write(BluetoothManagerServiceDumpProto.ActiveLog.TIMESTAMP_MS, mTimestamp);
+            proto.write(BluetoothManagerServiceDumpProto.ActiveLog.ENABLE, mEnable);
+            proto.write(BluetoothManagerServiceDumpProto.ActiveLog.PACKAGE_NAME, mPackageName);
+            proto.write(BluetoothManagerServiceDumpProto.ActiveLog.REASON, mReason);
+        }
     }
 
     private final LinkedList<ActiveLog> mActiveLogs = new LinkedList<>();
@@ -2408,56 +2415,56 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) {
             return;
         }
+        if ((args.length > 0) && args[0].startsWith("--proto")) {
+            dumpProto(fd);
+            return;
+        }
         String errorMsg = null;
 
-        boolean protoOut = (args.length > 0) && args[0].startsWith("--proto");
+        writer.println("Bluetooth Status");
+        writer.println("  enabled: " + isEnabled());
+        writer.println("  state: " + BluetoothAdapter.nameForState(mState));
+        writer.println("  address: " + mAddress);
+        writer.println("  name: " + mName);
+        if (mEnable) {
+            long onDuration = SystemClock.elapsedRealtime() - mLastEnabledTime;
+            String onDurationString = String.format(Locale.US, "%02d:%02d:%02d.%03d",
+                    (int) (onDuration / (1000 * 60 * 60)),
+                    (int) ((onDuration / (1000 * 60)) % 60), (int) ((onDuration / 1000) % 60),
+                    (int) (onDuration % 1000));
+            writer.println("  time since enabled: " + onDurationString);
+        }
 
-        if (!protoOut) {
-            writer.println("Bluetooth Status");
-            writer.println("  enabled: " + isEnabled());
-            writer.println("  state: " + BluetoothAdapter.nameForState(mState));
-            writer.println("  address: " + mAddress);
-            writer.println("  name: " + mName);
-            if (mEnable) {
-                long onDuration = SystemClock.elapsedRealtime() - mLastEnabledTime;
-                String onDurationString = String.format(Locale.US, "%02d:%02d:%02d.%03d",
-                        (int) (onDuration / (1000 * 60 * 60)),
-                        (int) ((onDuration / (1000 * 60)) % 60), (int) ((onDuration / 1000) % 60),
-                        (int) (onDuration % 1000));
-                writer.println("  time since enabled: " + onDurationString);
+        if (mActiveLogs.size() == 0) {
+            writer.println("\nBluetooth never enabled!");
+        } else {
+            writer.println("\nEnable log:");
+            for (ActiveLog log : mActiveLogs) {
+                writer.println("  " + log);
             }
+        }
 
-            if (mActiveLogs.size() == 0) {
-                writer.println("\nBluetooth never enabled!");
-            } else {
-                writer.println("\nEnable log:");
-                for (ActiveLog log : mActiveLogs) {
-                    writer.println("  " + log);
-                }
-            }
+        writer.println(
+                "\nBluetooth crashed " + mCrashes + " time" + (mCrashes == 1 ? "" : "s"));
+        if (mCrashes == CRASH_LOG_MAX_SIZE) {
+            writer.println("(last " + CRASH_LOG_MAX_SIZE + ")");
+        }
+        for (Long time : mCrashTimestamps) {
+            writer.println("  " + timeToLog(time));
+        }
 
-            writer.println(
-                    "\nBluetooth crashed " + mCrashes + " time" + (mCrashes == 1 ? "" : "s"));
-            if (mCrashes == CRASH_LOG_MAX_SIZE) {
-                writer.println("(last " + CRASH_LOG_MAX_SIZE + ")");
-            }
-            for (Long time : mCrashTimestamps) {
-                writer.println("  " + timeToLog(time));
-            }
+        writer.println("\n" + mBleApps.size() + " BLE app" + (mBleApps.size() == 1 ? "" : "s")
+                + " registered");
+        for (ClientDeathRecipient app : mBleApps.values()) {
+            writer.println("  " + app.getPackageName());
+        }
 
-            writer.println("\n" + mBleApps.size() + " BLE app" + (mBleApps.size() == 1 ? "" : "s")
-                    + "registered");
-            for (ClientDeathRecipient app : mBleApps.values()) {
-                writer.println("  " + app.getPackageName());
-            }
-
-            writer.println("");
-            writer.flush();
-            if (args.length == 0) {
-                // Add arg to produce output
-                args = new String[1];
-                args[0] = "--print";
-            }
+        writer.println("");
+        writer.flush();
+        if (args.length == 0) {
+            // Add arg to produce output
+            args = new String[1];
+            args[0] = "--print";
         }
 
         if (mBluetoothBinder == null) {
@@ -2470,12 +2477,40 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
         }
         if (errorMsg != null) {
-            // Silently return if we are extracting metrics in Protobuf format
-            if (protoOut) {
-                return;
-            }
             writer.println(errorMsg);
         }
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+        proto.write(BluetoothManagerServiceDumpProto.ENABLED, isEnabled());
+        proto.write(BluetoothManagerServiceDumpProto.STATE, mState);
+        proto.write(BluetoothManagerServiceDumpProto.STATE_NAME,
+                BluetoothAdapter.nameForState(mState));
+        proto.write(BluetoothManagerServiceDumpProto.ADDRESS, mAddress);
+        proto.write(BluetoothManagerServiceDumpProto.NAME, mName);
+        if (mEnable) {
+            proto.write(BluetoothManagerServiceDumpProto.LAST_ENABLED_TIME_MS, mLastEnabledTime);
+        }
+        proto.write(BluetoothManagerServiceDumpProto.CURR_TIMESTAMP_MS,
+                SystemClock.elapsedRealtime());
+        for (ActiveLog log : mActiveLogs) {
+            long token = proto.start(BluetoothManagerServiceDumpProto.ACTIVE_LOGS);
+            log.dump(proto);
+            proto.end(token);
+        }
+        proto.write(BluetoothManagerServiceDumpProto.NUM_CRASHES, mCrashes);
+        proto.write(BluetoothManagerServiceDumpProto.CRASH_LOG_MAXED,
+                mCrashes == CRASH_LOG_MAX_SIZE);
+        for (Long time : mCrashTimestamps) {
+            proto.write(BluetoothManagerServiceDumpProto.CRASH_TIMESTAMPS_MS, time);
+        }
+        proto.write(BluetoothManagerServiceDumpProto.NUM_BLE_APPS, mBleApps.size());
+        for (ClientDeathRecipient app : mBleApps.values()) {
+            proto.write(BluetoothManagerServiceDumpProto.BLE_APP_PACKAGE_NAMES,
+                    app.getPackageName());
+        }
+        proto.flush();
     }
 
     private static String getEnableDisableReasonString(int reason) {
