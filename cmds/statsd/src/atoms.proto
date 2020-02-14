@@ -8000,6 +8000,18 @@ message SurfaceflingerStatsGlobalInfo {
     // of this pull. If this number grows prohibitively large, then this can
     // cause jank due to resource contention.
     optional int32 event_connection_count = 6;
+    // Set of timings measured from when SurfaceFlinger began compositing a
+    // frame, until the frame was requested to be presented to the display. This
+    // measures SurfaceFlinger's total CPU walltime on the critical path per
+    // frame.
+    optional FrameTimingHistogram frame_duration = 7
+        [(android.os.statsd.log_mode) = MODE_BYTES];
+    // Set of timings measured from when SurfaceFlinger first began using the
+    // GPU to composite a frame, until the GPU has finished compositing that
+    // frame. This measures the total additional time SurfaceFlinger needed to
+    // perform due to falling back into GPU composition.
+    optional FrameTimingHistogram render_engine_timing = 8
+        [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**
