@@ -13135,7 +13135,7 @@ public class TelephonyManager {
     */
     static IPhoneSubInfo getSubscriberInfoService() {
         // Keeps cache disabled until test fixes are checked into AOSP.
-        if (true) {
+        if (!sServiceHandleCacheEnabled) {
             return IPhoneSubInfo.Stub.asInterface(
                 TelephonyFrameworkInitializer
                         .getTelephonyServiceManager()
@@ -13169,7 +13169,7 @@ public class TelephonyManager {
     */
     static ISub getSubscriptionService() {
         // Keeps cache disabled until test fixes are checked into AOSP.
-        if (true) {
+        if (!sServiceHandleCacheEnabled) {
             return ISub.Stub.asInterface(
                     TelephonyFrameworkInitializer
                             .getTelephonyServiceManager()
@@ -13203,7 +13203,7 @@ public class TelephonyManager {
     */
     static ISms getSmsService() {
         // Keeps cache disabled until test fixes are checked into AOSP.
-        if (true) {
+        if (!sServiceHandleCacheEnabled) {
             return ISms.Stub.asInterface(
                     TelephonyFrameworkInitializer
                             .getTelephonyServiceManager()
