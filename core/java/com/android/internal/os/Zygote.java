@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.os.Build;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
@@ -254,16 +253,13 @@ public final class Zygote {
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-            int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            int targetSdkVersion) {
+            int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
         ZygoteHooks.preFork();
 
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir);
         if (pid == 0) {
-            Zygote.disableExecuteOnly(targetSdkVersion);
-
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
         }
@@ -649,8 +645,6 @@ public final class Zygote {
                     args.mSeInfo, args.mNiceName, args.mStartChildZygote,
                     args.mInstructionSet, args.mAppDataDir);
 
-            disableExecuteOnly(args.mTargetSdkVersion);
-
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
@@ -728,17 +722,6 @@ public final class Zygote {
                     + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
         }
     }
-
-    /**
-     * Mark execute-only segments of libraries read+execute for apps with targetSdkVersion<Q.
-     */
-    protected static void disableExecuteOnly(int targetSdkVersion) {
-        if ((targetSdkVersion < Build.VERSION_CODES.Q) && !nativeDisableExecuteOnly()) {
-            Log.e("Zygote", "Failed to set libraries to read+execute.");
-        }
-    }
-
-    private static native boolean nativeDisableExecuteOnly();
 
     /**
      * @return  Raw file descriptors for the read-end of USAP reporting pipes.
