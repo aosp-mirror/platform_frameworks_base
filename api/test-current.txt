@@ -3188,6 +3188,7 @@ package android.service.autofill.augmented {
     method public void onConnected();
     method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
+    method public final boolean requestAutofill(@NonNull android.content.ComponentName, @NonNull android.view.autofill.AutofillId);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }
 

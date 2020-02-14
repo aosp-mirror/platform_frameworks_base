@@ -3363,14 +3363,8 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm == null) return null;
 
-            final AutofillClient client = afm.getClient();
-            if (client == null) {
-                Log.w(TAG, "getViewCoordinates(" + id + "): no autofill client");
-                return null;
-            }
-            final View view = client.autofillClientFindViewByAutofillIdTraversal(id);
+            final View view = getView(afm, id);
             if (view == null) {
-                Log.w(TAG, "getViewCoordinates(" + id + "): could not find view");
                 return null;
             }
             final Rect windowVisibleDisplayFrame = new Rect();
@@ -3410,6 +3404,43 @@ public final class AutofillManager {
             if (afm != null) {
                 afm.post(() -> afm.requestHideFillUi(id, false));
             }
+        }
+
+        @Override
+        public boolean requestAutofill(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm == null || afm.mSessionId != sessionId) {
+                if (sDebug) {
+                    Slog.d(TAG, "Autofill not available or sessionId doesn't match");
+                }
+                return false;
+            }
+            final View view = getView(afm, id);
+            if (view == null || !view.isFocused()) {
+                if (sDebug) {
+                    Slog.d(TAG, "View not available or is not on focus");
+                }
+                return false;
+            }
+            if (sVerbose) {
+                Log.v(TAG, "requestAutofill() by AugmentedAutofillService.");
+            }
+            afm.post(() -> afm.requestAutofill(view));
+            return true;
+        }
+
+        @Nullable
+        private View getView(@NonNull AutofillManager afm, @NonNull AutofillId id) {
+            final AutofillClient client = afm.getClient();
+            if (client == null) {
+                Log.w(TAG, "getView(" + id + "): no autofill client");
+                return null;
+            }
+            View view = client.autofillClientFindViewByAutofillIdTraversal(id);
+            if (view == null) {
+                Log.w(TAG, "getView(" + id + "): could not find view");
+            }
+            return view;
         }
     }
 }

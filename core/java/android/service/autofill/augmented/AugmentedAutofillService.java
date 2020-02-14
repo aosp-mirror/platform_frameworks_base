@@ -89,6 +89,8 @@ public abstract class AugmentedAutofillService extends Service {
 
     private SparseArray<AutofillProxy> mAutofillProxies;
 
+    private AutofillProxy mAutofillProxyForLastRequest;
+
     // Used for metrics / debug only
     private ComponentName mServiceComponentName;
 
@@ -155,6 +157,38 @@ public abstract class AugmentedAutofillService extends Service {
      * <p>You should generally do initialization here rather than in {@link #onCreate}.
      */
     public void onConnected() {
+    }
+
+    /**
+     * The child class of the service can call this method to initiate an Autofill flow.
+     *
+     * <p> The request would be respected only if the previous augmented autofill request was
+     * made for the same {@code activityComponent} and {@code autofillId}, and the field is
+     * currently on focus.
+     *
+     * <p> The request would start a new autofill flow. It doesn't guarantee that the
+     * {@link AutofillManager} will proceed with the request.
+     *
+     * @param activityComponent the client component for which the autofill is requested for
+     * @param autofillId        the client field id for which the autofill is requested for
+     * @return true if the request makes the {@link AutofillManager} start a new Autofill flow,
+     * false otherwise.
+     */
+    public final boolean requestAutofill(@NonNull ComponentName activityComponent,
+            @NonNull AutofillId autofillId) {
+        // TODO(b/149531989): revisit this. The request should start a new autofill session
+        //  rather than reusing the existing session.
+        final AutofillProxy proxy = mAutofillProxyForLastRequest;
+        if (proxy == null || !proxy.mComponentName.equals(activityComponent)
+                || !proxy.mFocusedId.equals(autofillId)) {
+            return false;
+        }
+        try {
+            return proxy.requestAutofill();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /**
@@ -241,6 +275,7 @@ public abstract class AugmentedAutofillService extends Service {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        mAutofillProxyForLastRequest = proxy;
         onFillRequest(new FillRequest(proxy, inlineSuggestionsRequest), cancellationSignal,
                 new FillController(proxy), new FillCallback(proxy));
     }
@@ -268,6 +303,7 @@ public abstract class AugmentedAutofillService extends Service {
                 proxy.destroy();
             }
             mAutofillProxies.clear();
+            mAutofillProxyForLastRequest = null;
         }
     }
 
@@ -287,6 +323,7 @@ public abstract class AugmentedAutofillService extends Service {
             }
         }
         mAutofillProxies = null;
+        mAutofillProxyForLastRequest = null;
     }
 
     @Override
@@ -479,6 +516,11 @@ public abstract class AugmentedAutofillService extends Service {
 
         public void requestHideFillUi() throws RemoteException {
             mClient.requestHideFillUi(mSessionId, mFocusedId);
+        }
+
+
+        private boolean requestAutofill() throws RemoteException {
+            return mClient.requestAutofill(mSessionId, mFocusedId);
         }
 
         private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue,
