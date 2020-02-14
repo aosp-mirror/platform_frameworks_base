@@ -129,8 +129,8 @@ class UsageStatsQueryHelper {
         if (packageData.getConversationStore().getConversation(shortcutId) == null) {
             return;
         }
-        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateShortcutEventHistory(
-                shortcutId);
+        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
         eventHistory.addEvent(event);
     }
 
@@ -138,8 +138,8 @@ class UsageStatsQueryHelper {
         if (packageData.getConversationStore().getConversationByLocusId(locusId) == null) {
             return;
         }
-        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateLocusEventHistory(
-                locusId);
+        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                EventStore.CATEGORY_LOCUS_ID_BASED, locusId.getId());
         eventHistory.addEvent(event);
     }
 
@@ -151,8 +151,8 @@ class UsageStatsQueryHelper {
         if (conversationInfo == null) {
             return;
         }
-        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateShortcutEventHistory(
-                conversationInfo.getShortcutId());
+        EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                EventStore.CATEGORY_SHORTCUT_BASED, conversationInfo.getShortcutId());
         eventHistory.addEvent(event);
     }
 }

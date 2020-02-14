@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps.ShortcutQuery;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutManager.ShareShortcutInfo;
@@ -40,6 +41,7 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
@@ -53,16 +55,20 @@ import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.telephony.SmsApplication;
 import com.android.server.LocalServices;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -94,10 +100,12 @@ public class DataManager {
     private final SparseArray<ScheduledFuture<?>> mUsageStatsQueryFutures = new SparseArray<>();
     private final SparseArray<NotificationListenerService> mNotificationListeners =
             new SparseArray<>();
+    private final SparseArray<PackageMonitor> mPackageMonitors = new SparseArray<>();
     private final ContentObserver mCallLogContentObserver;
     private final ContentObserver mMmsSmsContentObserver;
 
     private ShortcutServiceInternal mShortcutServiceInternal;
+    private PackageManagerInternal mPackageManagerInternal;
     private ShortcutManager mShortcutManager;
     private UserManager mUserManager;
 
@@ -120,6 +128,7 @@ public class DataManager {
     /** Initialization. Called when the system services are up running. */
     public void initialize() {
         mShortcutServiceInternal = LocalServices.getService(ShortcutServiceInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mShortcutManager = mContext.getSystemService(ShortcutManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
 
@@ -172,6 +181,10 @@ public class DataManager {
             // Should never occur for local calls.
         }
 
+        PackageMonitor packageMonitor = new PerUserPackageMonitor();
+        packageMonitor.register(mContext, null, UserHandle.of(userId), true);
+        mPackageMonitors.put(userId, packageMonitor);
+
         if (userId == UserHandle.USER_SYSTEM) {
             // The call log and MMS/SMS messages are shared across user profiles. So only need to
             // register the content observers once for the primary user.
@@ -183,6 +196,8 @@ public class DataManager {
                     MmsSms.CONTENT_URI, /* notifyForDescendants= */ false,
                     mMmsSmsContentObserver, UserHandle.USER_SYSTEM);
         }
+
+        DataMaintenanceService.scheduleJob(mContext, userId);
     }
 
     /** This method is called when a user is stopped. */
@@ -207,10 +222,15 @@ public class DataManager {
                 // Should never occur for local calls.
             }
         }
+        if (mPackageMonitors.indexOfKey(userId) >= 0) {
+            mPackageMonitors.get(userId).unregister();
+        }
         if (userId == UserHandle.USER_SYSTEM) {
             mContext.getContentResolver().unregisterContentObserver(mCallLogContentObserver);
             mContext.getContentResolver().unregisterContentObserver(mMmsSmsContentObserver);
         }
+
+        DataMaintenanceService.cancelJob(mContext, userId);
     }
 
     /**
@@ -274,9 +294,8 @@ public class DataManager {
                     || TextUtils.isEmpty(mimeType)) {
                 return;
             }
-            EventHistoryImpl eventHistory =
-                    packageData.getEventStore().getOrCreateShortcutEventHistory(
-                            shortcutInfo.getId());
+            EventHistoryImpl eventHistory = packageData.getEventStore().getOrCreateEventHistory(
+                    EventStore.CATEGORY_SHORTCUT_BASED, shortcutInfo.getId());
             @Event.EventType int eventType;
             if (mimeType.startsWith("text/")) {
                 eventType = Event.TYPE_SHARE_TEXT;
@@ -288,6 +307,45 @@ public class DataManager {
                 eventType = Event.TYPE_SHARE_OTHER;
             }
             eventHistory.addEvent(new Event(System.currentTimeMillis(), eventType));
+        }
+    }
+
+    /** Prunes the data for the specified user. */
+    public void pruneDataForUser(@UserIdInt int userId, @NonNull CancellationSignal signal) {
+        UserData userData = getUnlockedUserData(userId);
+        if (userData == null || signal.isCanceled()) {
+            return;
+        }
+        pruneUninstalledPackageData(userData);
+
+        long currentTimeMillis = System.currentTimeMillis();
+        userData.forAllPackages(packageData -> {
+            if (signal.isCanceled()) {
+                return;
+            }
+            packageData.getEventStore().pruneOldEvents(currentTimeMillis);
+            if (!packageData.isDefaultDialer()) {
+                packageData.getEventStore().deleteEventHistories(EventStore.CATEGORY_CALL);
+            }
+            if (!packageData.isDefaultSmsApp()) {
+                packageData.getEventStore().deleteEventHistories(EventStore.CATEGORY_SMS);
+            }
+            packageData.pruneOrphanEvents();
+        });
+    }
+
+    private void pruneUninstalledPackageData(@NonNull UserData userData) {
+        Set<String> installApps = new ArraySet<>();
+        mPackageManagerInternal.forEachInstalledPackage(
+                pkg -> installApps.add(pkg.getPackageName()), userData.getUserId());
+        List<String> packagesToDelete = new ArrayList<>();
+        userData.forAllPackages(packageData -> {
+            if (!installApps.contains(packageData.getPackageName())) {
+                packagesToDelete.add(packageData.getPackageName());
+            }
+        });
+        for (String packageName : packagesToDelete) {
+            userData.deletePackageData(packageName);
         }
     }
 
@@ -347,7 +405,8 @@ public class DataManager {
                 || packageData.getConversationStore().getConversation(shortcutId) == null) {
             return null;
         }
-        return packageData.getEventStore().getOrCreateShortcutEventHistory(shortcutId);
+        return packageData.getEventStore().getOrCreateEventHistory(
+                EventStore.CATEGORY_SHORTCUT_BASED, shortcutId);
     }
 
     @VisibleForTesting
@@ -410,6 +469,11 @@ public class DataManager {
     @VisibleForTesting
     NotificationListenerService getNotificationListenerServiceForTesting(@UserIdInt int userId) {
         return mNotificationListeners.get(userId);
+    }
+
+    @VisibleForTesting
+    PackageMonitor getPackageMonitorForTesting(@UserIdInt int userId) {
+        return mPackageMonitors.get(userId);
     }
 
     @VisibleForTesting
@@ -499,7 +563,8 @@ public class DataManager {
                     return;
                 }
                 EventStore eventStore = defaultDialer.getEventStore();
-                eventStore.getOrCreateCallEventHistory(phoneNumber).addEvent(event);
+                eventStore.getOrCreateEventHistory(
+                        EventStore.CATEGORY_CALL, phoneNumber).addEvent(event);
             });
         }
     }
@@ -544,7 +609,8 @@ public class DataManager {
                     return;
                 }
                 EventStore eventStore = defaultSmsApp.getEventStore();
-                eventStore.getOrCreateSmsEventHistory(phoneNumber).addEvent(event);
+                eventStore.getOrCreateEventHistory(
+                        EventStore.CATEGORY_SMS, phoneNumber).addEvent(event);
             });
         }
     }
@@ -666,6 +732,20 @@ public class DataManager {
             } else if (SmsApplication.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL.equals(
                     intent.getAction())) {
                 updateDefaultSmsApp(userData);
+            }
+        }
+    }
+
+    private class PerUserPackageMonitor extends PackageMonitor {
+
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            super.onPackageRemoved(packageName, uid);
+
+            int userId = getChangingUserId();
+            UserData userData = getUnlockedUserData(userId);
+            if (userData != null) {
+                userData.deletePackageData(packageName);
             }
         }
     }

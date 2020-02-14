@@ -104,6 +104,14 @@ class UserData {
         return mPackageDataMap.get(packageName);
     }
 
+    /** Deletes the specified package data. */
+    void deletePackageData(@NonNull String packageName) {
+        PackageData packageData = mPackageDataMap.remove(packageName);
+        if (packageData != null) {
+            packageData.onDestroy();
+        }
+    }
+
     void setDefaultDialer(@Nullable String packageName) {
         mDefaultDialer = packageName;
     }

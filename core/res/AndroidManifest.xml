@@ -5344,6 +5344,10 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
+        <service android:name="com.android.server.people.data.DataMaintenanceService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
         <service
                 android:name="com.android.server.autofill.AutofillCompatAccessibilityService"
                 android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

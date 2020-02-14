@@ -17,6 +17,7 @@
 package com.android.server.people;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
 import android.app.prediction.AppTarget;
@@ -24,6 +25,7 @@ import android.app.prediction.AppTargetEvent;
 import android.app.prediction.IPredictionCallback;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -138,6 +140,21 @@ public class PeopleService extends SystemService {
             });
         }
 
+        @Override
+        public void pruneDataForUser(@UserIdInt int userId, @NonNull CancellationSignal signal) {
+            mDataManager.pruneDataForUser(userId, signal);
+        }
+
+        @Override
+        public byte[] backupConversationInfos(@UserIdInt int userId) {
+            return new byte[0];
+        }
+
+        @Override
+        public void restoreConversationInfos(@UserIdInt int userId, @NonNull String key,
+                @NonNull byte[] payload) {
+        }
+
         @VisibleForTesting
         SessionInfo getSessionInfo(AppPredictionSessionId sessionId) {
             return mSessions.get(sessionId);
@@ -159,15 +176,6 @@ public class PeopleService extends SystemService {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to calling callback" + e);
             }
-        }
-
-        @Override
-        public byte[] backupConversationInfos(int userId) {
-            return new byte[0];
-        }
-
-        @Override
-        public void restoreConversationInfos(int userId, String key, byte[] payload) {
         }
     }
 }
