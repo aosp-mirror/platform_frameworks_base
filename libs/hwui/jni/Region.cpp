@@ -19,10 +19,10 @@
 #include "GraphicsJNI.h"
 
 #ifdef __ANDROID__ // Layoutlib does not support parcel
-#include <binder/Parcel.h>
+#include <android/binder_parcel.h>
+#include <android/binder_parcel_jni.h>
+#include <android/binder_parcel_utils.h>
 #endif
-#include "android_os_Parcel.h"
-#include "android_util_Binder.h"
 
 namespace android {
 
@@ -207,10 +207,11 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
         return 0;
     }
 
-    android::Parcel* p = android::parcelForJavaObject(env, parcel);
-
     std::vector<int32_t> rects;
-    p->readInt32Vector(&rects);
+
+    AParcel* p = AParcel_fromJavaParcel(env, parcel);
+    ndk::AParcel_readVector(p, &rects);
+    AParcel_delete(p);
 
     if ((rects.size() % 4) != 0) {
         return 0;
@@ -235,8 +236,6 @@ static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHan
         return JNI_FALSE;
     }
 
-    android::Parcel* p = android::parcelForJavaObject(env, parcel);
-
     std::vector<int32_t> rects;
     SkRegion::Iterator it(*region);
     while (!it.done()) {
@@ -248,7 +247,10 @@ static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHan
         it.next();
     }
 
-    p->writeInt32Vector(rects);
+    AParcel* p = AParcel_fromJavaParcel(env, parcel);
+    ndk::AParcel_writeVector(p, rects);
+    AParcel_delete(p);
+
     return JNI_TRUE;
 #else
     return JNI_FALSE;
