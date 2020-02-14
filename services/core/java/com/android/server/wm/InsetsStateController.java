@@ -168,7 +168,6 @@ class InsetsStateController {
             mLastState.set(mState, true /* copySources */);
             notifyInsetsChanged();
         }
-        getImeSourceProvider().onPostInsetsDispatched();
     }
 
     void onInsetsModified(InsetsControlTarget windowState, InsetsState state) {
