@@ -1236,9 +1236,16 @@ public class AppOpsService extends IAppOpsService.Stub {
             UserHandle.formatUid(sb, mWatchingUid);
             sb.append(" flags=0x");
             sb.append(Integer.toHexString(mFlags));
-            if (mWatchedOpCode != OP_NONE) {
-                sb.append(" op=");
-                sb.append(opToName(mWatchedOpCode));
+            switch (mWatchedOpCode) {
+                case OP_NONE:
+                    break;
+                case ALL_OPS:
+                    sb.append(" op=(all)");
+                    break;
+                default:
+                    sb.append(" op=");
+                    sb.append(opToName(mWatchedOpCode));
+                    break;
             }
             sb.append(" from uid=");
             UserHandle.formatUid(sb, mCallingUid);
