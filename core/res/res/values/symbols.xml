@@ -3902,4 +3902,6 @@
 
   <!-- Whether to expand the lock screen user switcher by default -->
   <java-symbol type="bool" name="config_expandLockScreenUserSwitcher" />
+
+  <java-symbol type="string" name="loading" />
 </resources>
