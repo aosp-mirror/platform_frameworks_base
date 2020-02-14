@@ -16,8 +16,14 @@
 
 package com.android.server.connectivity
 
+import android.net.ConnectivityManager.TYPE_WIFI
+import android.net.LinkProperties
+import android.net.Network
+import android.net.NetworkAgentConfig
 import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import android.net.NetworkRequest
+import android.net.NetworkScore
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import org.junit.Test
@@ -33,10 +39,24 @@ import kotlin.test.assertNull
 class NetworkRankerTest {
     private val ranker = NetworkRanker()
 
-    private fun makeNai(satisfy: Boolean, score: Int) = mock(NetworkAgentInfo::class.java).also {
-        doReturn(satisfy).`when`(it).satisfies(any())
-        doReturn(score).`when`(it).currentScore
-        it.networkCapabilities = NetworkCapabilities()
+    private fun makeNai(satisfy: Boolean, score: Int) = object : NetworkAgentInfo(
+            null /* messenger */,
+            null /* asyncChannel*/,
+            Network(100),
+            NetworkInfo(TYPE_WIFI, 0 /* subtype */, "" /* typename */, "" /* subtypename */),
+            LinkProperties(),
+            NetworkCapabilities(),
+            NetworkScore.Builder().setLegacyScore(score).build(),
+            null /* context */,
+            null /* handler */,
+            NetworkAgentConfig(),
+            null /* connectivityService */,
+            null /* netd */,
+            null /* dnsResolver */,
+            null /* networkManagementService */,
+            0 /* factorySerialNumber */) {
+        override fun satisfies(request: NetworkRequest?): Boolean = satisfy
+        override fun getCurrentScore(): Int = score
     }
 
     @Test
