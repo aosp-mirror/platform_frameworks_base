@@ -31,20 +31,26 @@ import javax.inject.Inject;
 /**
  * Quick settings tile for screen recording
  */
-public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState> {
+public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
+        implements RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "ScreenRecordTile";
     private RecordingController mController;
     private long mMillisUntilFinished = 0;
+    private Callback mCallback = new Callback();
 
     @Inject
     public ScreenRecordTile(QSHost host, RecordingController controller) {
         super(host);
         mController = controller;
+        mController.observe(this, mCallback);
     }
 
     @Override
     public BooleanState newTileState() {
-        return new BooleanState();
+        BooleanState state = new BooleanState();
+        state.label = mContext.getString(R.string.quick_settings_screen_record_label);
+        state.handlesLongClick = false;
+        return state;
     }
 
     @Override
@@ -59,24 +65,13 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState> {
         refreshState();
     }
 
-    /**
-     * Refresh tile state
-     * @param millisUntilFinished Time until countdown completes, or 0 if not counting down
-     */
-    public void refreshState(long millisUntilFinished) {
-        mMillisUntilFinished = millisUntilFinished;
-        refreshState();
-    }
-
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         boolean isStarting = mController.isStarting();
         boolean isRecording = mController.isRecording();
 
-        state.label = mContext.getString(R.string.quick_settings_screen_record_label);
         state.value = isRecording || isStarting;
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.handlesLongClick = false;
 
         if (isRecording) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_screenrecord);
@@ -124,5 +119,23 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState> {
     private void stopRecording() {
         Log.d(TAG, "Stopping recording from tile");
         mController.stopRecording();
+    }
+
+    private final class Callback implements RecordingController.RecordingStateChangeCallback {
+        @Override
+        public void onCountdown(long millisUntilFinished) {
+            mMillisUntilFinished = millisUntilFinished;
+            refreshState();
+        }
+
+        @Override
+        public void onRecordingStart() {
+            refreshState();
+        }
+
+        @Override
+        public void onRecordingEnd() {
+            refreshState();
+        }
     }
 }
