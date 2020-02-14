@@ -162,6 +162,7 @@ interface INotificationManager
     void applyAdjustmentFromAssistant(in INotificationListener token, in Adjustment adjustment);
     void applyAdjustmentsFromAssistant(in INotificationListener token, in List<Adjustment> adjustments);
     void unsnoozeNotificationFromAssistant(in INotificationListener token, String key);
+    void unsnoozeNotificationFromSystemListener(in INotificationListener token, String key);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);

@@ -3979,6 +3979,29 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
+         * Allows the notification assistant to un-snooze a single notification.
+         *
+         * @param token The binder for the listener, to check that the caller is allowed
+         */
+        @Override
+        public void unsnoozeNotificationFromSystemListener(INotificationListener token,
+                String key) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info =
+                            mListeners.checkServiceTokenLocked(token);
+                    if (!info.isSystem) {
+                        throw new SecurityException("Not allowed to unsnooze before deadline");
+                    }
+                    unsnoozeNotificationInt(key, info);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        /**
          * Allow an INotificationListener to simulate clearing (dismissing) a single notification.
          *
          * {@see com.android.server.StatusBarManagerService.NotificationCallbacks#onNotificationClear}

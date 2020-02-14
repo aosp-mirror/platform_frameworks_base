@@ -15,15 +15,18 @@
  */
 package com.android.server.notification;
 
+import static com.android.server.notification.SnoozeHelper.EXTRA_KEY;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -322,8 +325,12 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r, 1000);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
         mSnoozeHelper.snooze(r2, 1000);
+        reset(mAm);
         mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        ArgumentCaptor<PendingIntent> captor = ArgumentCaptor.forClass(PendingIntent.class);
+        verify(mAm).cancel(captor.capture());
+        assertEquals(r.getKey(), captor.getValue().getIntent().getStringExtra(EXTRA_KEY));
     }
 
     @Test
@@ -332,8 +339,10 @@ public class SnoozeHelperTest extends UiServiceTestCase {
         mSnoozeHelper.snooze(r, 1000);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "one", UserHandle.ALL);
         mSnoozeHelper.snooze(r2, 1000);
+        reset(mAm);
         mSnoozeHelper.repost(r.getKey());
         verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        verify(mAm).cancel(any(PendingIntent.class));
     }
 
     @Test
@@ -370,31 +379,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetSnoozedByUser() throws Exception {
-        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
-        NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
-        NotificationRecord r3 = getNotificationRecord("pkg2", 3, "three", UserHandle.SYSTEM);
-        NotificationRecord r4 = getNotificationRecord("pkg2", 3, "three", UserHandle.CURRENT);
-        mSnoozeHelper.snooze(r, 1000);
-        mSnoozeHelper.snooze(r2, 1000);
-        mSnoozeHelper.snooze(r3, 1000);
-        mSnoozeHelper.snooze(r4, 1000);
-        IntArray profileIds = new IntArray();
-        profileIds.add(UserHandle.USER_SYSTEM);
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
-        assertEquals(3, mSnoozeHelper.getSnoozed().size());
-        profileIds = new IntArray();
-        profileIds.add(UserHandle.USER_CURRENT);
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
-        assertEquals(1, mSnoozeHelper.getSnoozed().size());
-    }
-
-    @Test
-    public void testGetSnoozedByUser_managedProfiles() throws Exception {
-        IntArray profileIds = new IntArray();
-        profileIds.add(UserHandle.USER_CURRENT);
-        profileIds.add(UserHandle.USER_SYSTEM);
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
+    public void testGetSnoozedBy() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
         NotificationRecord r3 = getNotificationRecord("pkg2", 3, "three", UserHandle.SYSTEM);
