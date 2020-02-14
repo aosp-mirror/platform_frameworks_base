@@ -860,6 +860,26 @@ public class RootActivityContainerTests extends ActivityTestsBase {
                 secondaryDisplay.mDisplayId, result.getDisplayId());
     }
 
+    @Test
+    public void testSwitchUser_missingHomeRootTask() {
+        doReturn(mFullscreenStack).when(mRootWindowContainer).getTopDisplayFocusedStack();
+
+        DisplayContent defaultDisplay = mRootWindowContainer.getDefaultDisplay();
+        ActivityStack homeStack = defaultDisplay.getRootHomeTask();
+        if (homeStack != null) {
+            homeStack.removeImmediately();
+        }
+        assertNull(defaultDisplay.getRootHomeTask());
+
+        int currentUser = mRootWindowContainer.mCurrentUser;
+        int otherUser = currentUser + 1;
+
+        mRootWindowContainer.switchUser(otherUser, null);
+
+        assertNotNull(defaultDisplay.getRootHomeTask());
+        assertEquals(defaultDisplay.getTopStack(), defaultDisplay.getRootHomeTask());
+    }
+
     /**
      * Mock {@link RootWindowContainer#resolveHomeActivity} for returning consistent activity
      * info for test cases (the original implementation will resolve from the real package manager).
