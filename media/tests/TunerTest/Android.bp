@@ -1,0 +1,18 @@
+android_test {
+    name: "mediatunertest",
+
+    srcs: ["**/*.java"],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+
+    static_libs: [
+        "android-support-test",
+        "testng"
+    ],
+
+    platform_apis: true,
+    certificate: "platform",
+}
