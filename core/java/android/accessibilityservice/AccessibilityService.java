@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
+import android.graphics.ParcelableColorSpace;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
@@ -39,6 +40,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -600,8 +602,12 @@ public abstract class AccessibilityService extends Service {
             "screenshot_hardwareBuffer";
 
     /** @hide */
-    public static final String KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID =
-            "screenshot_colorSpaceId";
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE =
+            "screenshot_colorSpace";
+
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP =
+            "screenshot_timestamp";
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -1920,6 +1926,8 @@ public abstract class AccessibilityService extends Service {
      *                  default display.
      * @param executor Executor on which to run the callback.
      * @param callback The callback invoked when the taking screenshot is done.
+     *                 The {@link AccessibilityService.ScreenshotResult} will be null for an
+     *                 invalid display.
      *
      * @return {@code true} if the taking screenshot accepted, {@code false} if not.
      */
@@ -1941,14 +1949,11 @@ public abstract class AccessibilityService extends Service {
                 }
                 final HardwareBuffer hardwareBuffer =
                         result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER);
-                final int colorSpaceId =
-                        result.getInt(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE_ID);
-                ColorSpace colorSpace = null;
-                if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
-                    colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
-                }
+                final ParcelableColorSpace colorSpace =
+                        result.getParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE);
                 ScreenshotResult screenshot = new ScreenshotResult(hardwareBuffer,
-                        colorSpace, System.currentTimeMillis());
+                        colorSpace.getColorSpace(),
+                        result.getLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP));
                 sendScreenshotResult(executor, callback, screenshot);
             }));
         } catch (RemoteException re) {
@@ -2361,41 +2366,38 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Class including hardwareBuffer, colorSpace, and timestamp to be the result for
+     * Can be used to construct a bitmap of the screenshot or any other operations for
      * {@link AccessibilityService#takeScreenshot} API.
-     * <p>
-     * <strong>Note:</strong> colorSpace would be null if the name of this colorSpace isn't at
-     * {@link ColorSpace.Named}.
-     * </p>
      */
     public static final class ScreenshotResult {
         private final @NonNull HardwareBuffer mHardwareBuffer;
-        private final @Nullable ColorSpace mColorSpace;
+        private final @NonNull ColorSpace mColorSpace;
         private final long mTimestamp;
 
         private ScreenshotResult(@NonNull HardwareBuffer hardwareBuffer,
-                @Nullable ColorSpace colorSpace, long timestamp) {
+                @NonNull ColorSpace colorSpace, long timestamp) {
             Preconditions.checkNotNull(hardwareBuffer, "hardwareBuffer cannot be null");
+            Preconditions.checkNotNull(colorSpace, "colorSpace cannot be null");
             mHardwareBuffer = hardwareBuffer;
             mColorSpace = colorSpace;
             mTimestamp = timestamp;
         }
 
         /**
-         * Gets the colorSpace identifying a specific organization of colors of the screenshot.
+         * Gets the {@link ColorSpace} identifying a specific organization of colors of the
+         * screenshot.
          *
-         * @return the colorSpace or {@code null} if the name of colorSpace isn't at
-         * {@link ColorSpace.Named}
+         * @return the color space
          */
-        @Nullable
+        @NonNull
         public ColorSpace getColorSpace() {
             return mColorSpace;
         }
 
         /**
-         * Gets the hardwareBuffer representing a memory buffer of the screenshot.
+         * Gets the {@link HardwareBuffer} representing a memory buffer of the screenshot.
          *
-         * @return the hardwareBuffer
+         * @return the hardware buffer
          */
         @NonNull
         public HardwareBuffer getHardwareBuffer() {
@@ -2405,7 +2407,8 @@ public abstract class AccessibilityService extends Service {
         /**
          * Gets the timestamp of taking the screenshot.
          *
-         * @return the timestamp from {@link System#currentTimeMillis()}
+         * @return milliseconds of non-sleep uptime before screenshot since boot and it's from
+         * {@link SystemClock#uptimeMillis()}
          */
         public long getTimestamp() {
             return mTimestamp;
