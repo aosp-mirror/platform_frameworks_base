@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.util.LinkPropertiesUtils;
-import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -91,6 +89,36 @@ public final class LinkProperties implements Parcelable {
     // Stores the properties of links that are "stacked" above this link.
     // Indexed by interface name to allow modification and to prevent duplicates being added.
     private Hashtable<String, LinkProperties> mStackedLinks = new Hashtable<>();
+
+    /**
+     * @hide
+     */
+    public static class CompareResult<T> {
+        public final List<T> removed = new ArrayList<>();
+        public final List<T> added = new ArrayList<>();
+
+        public CompareResult() {}
+
+        public CompareResult(Collection<T> oldItems, Collection<T> newItems) {
+            if (oldItems != null) {
+                removed.addAll(oldItems);
+            }
+            if (newItems != null) {
+                for (T newItem : newItems) {
+                    if (!removed.remove(newItem)) {
+                        added.add(newItem);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "removed=[" + TextUtils.join(",", removed)
+                    + "] added=[" + TextUtils.join(",", added)
+                    + "]";
+        }
+    }
 
     /**
      * @hide
@@ -1298,7 +1326,7 @@ public final class LinkProperties implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean isIdenticalInterfaceName(@NonNull LinkProperties target) {
-        return LinkPropertiesUtils.isIdenticalInterfaceName(target, this);
+        return TextUtils.equals(getInterfaceName(), target.getInterfaceName());
     }
 
     /**
@@ -1321,7 +1349,10 @@ public final class LinkProperties implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean isIdenticalAddresses(@NonNull LinkProperties target) {
-        return LinkPropertiesUtils.isIdenticalAddresses(target, this);
+        Collection<InetAddress> targetAddresses = target.getAddresses();
+        Collection<InetAddress> sourceAddresses = getAddresses();
+        return (sourceAddresses.size() == targetAddresses.size()) ?
+                    sourceAddresses.containsAll(targetAddresses) : false;
     }
 
     /**
@@ -1333,7 +1364,15 @@ public final class LinkProperties implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean isIdenticalDnses(@NonNull LinkProperties target) {
-        return LinkPropertiesUtils.isIdenticalDnses(target, this);
+        Collection<InetAddress> targetDnses = target.getDnsServers();
+        String targetDomains = target.getDomains();
+        if (mDomains == null) {
+            if (targetDomains != null) return false;
+        } else {
+            if (!mDomains.equals(targetDomains)) return false;
+        }
+        return (mDnses.size() == targetDnses.size()) ?
+                mDnses.containsAll(targetDnses) : false;
     }
 
     /**
@@ -1386,7 +1425,9 @@ public final class LinkProperties implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean isIdenticalRoutes(@NonNull LinkProperties target) {
-        return LinkPropertiesUtils.isIdenticalRoutes(target, this);
+        Collection<RouteInfo> targetRoutes = target.getRoutes();
+        return (mRoutes.size() == targetRoutes.size()) ?
+                mRoutes.containsAll(targetRoutes) : false;
     }
 
     /**
@@ -1398,7 +1439,8 @@ public final class LinkProperties implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean isIdenticalHttpProxy(@NonNull LinkProperties target) {
-        return LinkPropertiesUtils.isIdenticalHttpProxy(target, this);
+        return getHttpProxy() == null ? target.getHttpProxy() == null :
+                getHttpProxy().equals(target.getHttpProxy());
     }
 
     /**
@@ -1618,6 +1660,26 @@ public final class LinkProperties implements Parcelable {
                 && isIdenticalWakeOnLan(target)
                 && isIdenticalCaptivePortalApiUrl(target)
                 && isIdenticalCaptivePortalData(target);
+    }
+
+    /**
+     * Compares the addresses in this LinkProperties with another
+     * LinkProperties, examining only addresses on the base link.
+     *
+     * @param target a LinkProperties with the new list of addresses
+     * @return the differences between the addresses.
+     * @hide
+     */
+    public @NonNull CompareResult<LinkAddress> compareAddresses(@Nullable LinkProperties target) {
+        /*
+         * Duplicate the LinkAddresses into removed, we will be removing
+         * address which are common between mLinkAddresses and target
+         * leaving the addresses that are different. And address which
+         * are in target but not in mLinkAddresses are placed in the
+         * addedAddresses.
+         */
+        return new CompareResult<>(mLinkAddresses,
+                target != null ? target.getLinkAddresses() : null);
     }
 
     /**
