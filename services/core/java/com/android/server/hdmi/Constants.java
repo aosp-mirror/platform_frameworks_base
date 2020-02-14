@@ -395,7 +395,7 @@ final class Constants {
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
 
     // TODO(OEM): Set this to false to keep the playback device in sleep upon hotplug event.
-    //            True by default.
+    //            False by default.
     static final String PROPERTY_WAKE_ON_HOTPLUG = "ro.hdmi.wake_on_hotplug";
 
     /**
