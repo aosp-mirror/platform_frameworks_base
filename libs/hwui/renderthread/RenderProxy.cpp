@@ -317,8 +317,9 @@ void RenderProxy::setRenderAheadDepth(int renderAhead) {
 int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
                                  SkBitmap* bitmap) {
     auto& thread = RenderThread::getInstance();
+    ANativeWindow* window = surface.get();
     return static_cast<int>(thread.queue().runSync([&]() -> auto {
-        return thread.readback().copySurfaceInto(*surface, Rect(left, top, right, bottom), bitmap);
+        return thread.readback().copySurfaceInto(window, Rect(left, top, right, bottom), bitmap);
     }));
 }
 
