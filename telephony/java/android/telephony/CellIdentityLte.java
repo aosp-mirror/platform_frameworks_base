@@ -23,11 +23,13 @@ import android.os.Build;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * CellIdentity is to represent a unique LTE cell
@@ -54,7 +56,7 @@ public final class CellIdentityLte extends CellIdentity {
     private final int mBandwidth;
 
     // a list of additional PLMN-IDs reported for this cell
-    private final List<String> mAdditionalPlmns;
+    private final ArraySet<String> mAdditionalPlmns;
 
     private ClosedSubscriberGroupInfo mCsgInfo;
 
@@ -69,7 +71,7 @@ public final class CellIdentityLte extends CellIdentity {
         mTac = CellInfo.UNAVAILABLE;
         mEarfcn = CellInfo.UNAVAILABLE;
         mBandwidth = CellInfo.UNAVAILABLE;
-        mAdditionalPlmns = Collections.emptyList();
+        mAdditionalPlmns = new ArraySet<>();
         mCsgInfo = null;
     }
 
@@ -86,7 +88,7 @@ public final class CellIdentityLte extends CellIdentity {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public CellIdentityLte(int mcc, int mnc, int ci, int pci, int tac) {
         this(ci, pci, tac, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, String.valueOf(mcc),
-                String.valueOf(mnc), null, null, Collections.emptyList(), null);
+                String.valueOf(mnc), null, null, new ArraySet<>(), null);
     }
 
     /**
@@ -107,7 +109,7 @@ public final class CellIdentityLte extends CellIdentity {
      */
     public CellIdentityLte(int ci, int pci, int tac, int earfcn, int bandwidth,
             @Nullable String mccStr, @Nullable String mncStr, @Nullable String alphal,
-            @Nullable String alphas, @NonNull List<String> additionalPlmns,
+            @Nullable String alphas, @NonNull Collection<String> additionalPlmns,
             @Nullable ClosedSubscriberGroupInfo csgInfo) {
         super(TAG, CellInfo.TYPE_LTE, mccStr, mncStr, alphal, alphas);
         mCi = inRangeOrUnavailable(ci, 0, MAX_CI);
@@ -115,7 +117,7 @@ public final class CellIdentityLte extends CellIdentity {
         mTac = inRangeOrUnavailable(tac, 0, MAX_TAC);
         mEarfcn = inRangeOrUnavailable(earfcn, 0, MAX_EARFCN);
         mBandwidth = inRangeOrUnavailable(bandwidth, 0, MAX_BANDWIDTH);
-        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        mAdditionalPlmns = new ArraySet<>(additionalPlmns.size());
         for (String plmn : additionalPlmns) {
             if (isValidPlmn(plmn)) {
                 mAdditionalPlmns.add(plmn);
@@ -127,14 +129,14 @@ public final class CellIdentityLte extends CellIdentity {
     /** @hide */
     public CellIdentityLte(@NonNull android.hardware.radio.V1_0.CellIdentityLte cid) {
         this(cid.ci, cid.pci, cid.tac, cid.earfcn,
-                CellInfo.UNAVAILABLE, cid.mcc, cid.mnc, "", "", Collections.emptyList(), null);
+                CellInfo.UNAVAILABLE, cid.mcc, cid.mnc, "", "", new ArraySet<>(), null);
     }
 
     /** @hide */
     public CellIdentityLte(@NonNull android.hardware.radio.V1_2.CellIdentityLte cid) {
         this(cid.base.ci, cid.base.pci, cid.base.tac, cid.base.earfcn, cid.bandwidth,
                 cid.base.mcc, cid.base.mnc, cid.operatorNames.alphaLong,
-                cid.operatorNames.alphaShort, Collections.emptyList(), null);
+                cid.operatorNames.alphaShort, new ArraySet<>(), null);
     }
 
     /** @hide */
@@ -270,8 +272,8 @@ public final class CellIdentityLte extends CellIdentity {
      * @return a list of additional PLMN IDs supported by this cell.
      */
     @NonNull
-    public List<String> getAdditionalPlmns() {
-        return mAdditionalPlmns;
+    public Set<String> getAdditionalPlmns() {
+        return Collections.unmodifiableSet(mAdditionalPlmns);
     }
 
     /**
@@ -361,7 +363,7 @@ public final class CellIdentityLte extends CellIdentity {
         dest.writeInt(mTac);
         dest.writeInt(mEarfcn);
         dest.writeInt(mBandwidth);
-        dest.writeList(mAdditionalPlmns);
+        dest.writeArraySet(mAdditionalPlmns);
         dest.writeParcelable(mCsgInfo, flags);
     }
 
@@ -373,7 +375,7 @@ public final class CellIdentityLte extends CellIdentity {
         mTac = in.readInt();
         mEarfcn = in.readInt();
         mBandwidth = in.readInt();
-        mAdditionalPlmns = in.readArrayList(null);
+        mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
         mCsgInfo = in.readParcelable(null);
         if (DBG) log(toString());
     }
