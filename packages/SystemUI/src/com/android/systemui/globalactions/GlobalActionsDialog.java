@@ -64,12 +64,12 @@ import android.util.ArraySet;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -88,13 +88,13 @@ import com.android.internal.util.ScreenRecordHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.view.RotationPolicy;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.controls.ui.ControlsUiController;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -110,6 +110,7 @@ import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolat
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -155,6 +156,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ContentResolver mContentResolver;
     private final Resources mResources;
+    private final ConfigurationController mConfigurationController;
     private final UserManager mUserManager;
     private final TrustManager mTrustManager;
     private final IActivityManager mIActivityManager;
@@ -186,6 +188,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private GlobalActionsPanelPlugin mPanelPlugin;
     private ControlsUiController mControlsUiController;
+    private final IWindowManager mIWindowManager;
+    private final Executor mBackgroundExecutor;
 
     /**
      * @param context everything needs a context :(
@@ -204,7 +208,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             BlurUtils blurUtils, SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
-            ControlsUiController controlsUiController) {
+            ControlsUiController controlsUiController, IWindowManager iWindowManager,
+            @Background Executor backgroundExecutor) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -215,6 +220,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mBroadcastDispatcher = broadcastDispatcher;
         mContentResolver = contentResolver;
         mResources = resources;
+        mConfigurationController = configurationController;
         mUserManager = userManager;
         mTrustManager = trustManager;
         mIActivityManager = iActivityManager;
@@ -225,6 +231,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mControlsUiController = controlsUiController;
+        mIWindowManager = iWindowManager;
+        mBackgroundExecutor = backgroundExecutor;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -249,7 +257,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mScreenshotHelper = new ScreenshotHelper(context);
         mScreenRecordHelper = new ScreenRecordHelper(context);
 
-        configurationController.addCallback(this);
+        mConfigurationController.addCallback(this);
 
         mActivityStarter = activityStarter;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
@@ -495,7 +503,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     public void destroy() {
-        Dependency.get(ConfigurationController.class).removeCallback(this);
+        mConfigurationController.removeCallback(this);
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
@@ -836,14 +844,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             @Override
             public void onPress() {
-                new LockPatternUtils(mContext)
-                        .requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
-                                UserHandle.USER_ALL);
+                mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
+                        UserHandle.USER_ALL);
                 try {
-                    WindowManagerGlobal.getWindowManagerService().lockNow(null);
+                    mIWindowManager.lockNow(null);
                     // Lock profiles (if any) on the background thread.
-                    final Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-                    bgHandler.post(() -> lockProfiles());
+                    mBackgroundExecutor.execute(() -> lockProfiles());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error while trying to lock device.", e);
                 }
