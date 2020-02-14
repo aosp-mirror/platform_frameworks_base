@@ -18,6 +18,7 @@ package android.view.inline;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcelable;
 import android.util.Size;
 
@@ -55,6 +56,7 @@ public final class InlinePresentationSpec implements Parcelable {
     /**
      * @hide
      */
+    @SystemApi
     public @Nullable String getStyle() {
         return mStyle;
     }
@@ -281,10 +283,10 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1577145109444L,
+            time = 1581117017522L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inline/InlinePresentationSpec.java",
-            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.Nullable java.lang.String mStyle\nprivate static  java.lang.String defaultStyle()\npublic @android.annotation.Nullable java.lang.String getStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.Nullable java.lang.String mStyle\nprivate static  java.lang.String defaultStyle()\npublic @android.annotation.SystemApi @android.annotation.Nullable java.lang.String getStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

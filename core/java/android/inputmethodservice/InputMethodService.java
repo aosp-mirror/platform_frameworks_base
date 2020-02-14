@@ -789,6 +789,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Log.w(TAG, "onCreateInlineSuggestionsRequest() returned null request");
                 requestCallback.onInlineSuggestionsUnsupported();
             } else {
+                request.setHostInputToken(getHostInputToken());
                 final IInlineSuggestionsResponseCallback inlineSuggestionsResponseCallback =
                         new InlineSuggestionsResponseCallbackImpl(this,
                                 mInlineSuggestionsRequestInfo.mComponentName,
@@ -831,6 +832,18 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         onInlineSuggestionsResponse(response);
+    }
+
+    /**
+     * Returns the {@link IBinder} input token from the host view root.
+     */
+    @Nullable
+    private IBinder getHostInputToken() {
+        ViewRootImpl viewRoot = null;
+        if (mRootView != null) {
+            viewRoot = mRootView.getViewRootImpl();
+        }
+        return viewRoot == null ? null : viewRoot.getInputToken();
     }
 
     private void notifyImeHidden() {
