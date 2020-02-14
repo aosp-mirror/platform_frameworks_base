@@ -194,6 +194,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     // time
     private static final int MAX_PROVIDER_SCHEDULING_JITTER_MS = 100;
 
+    private static final String FEATURE_ID = "LocationService";
+
     private static final LocationRequest DEFAULT_LOCATION_REQUEST = new LocationRequest();
 
     private final Object mLock = new Object();
@@ -243,7 +245,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int mBatterySaverMode;
 
     private LocationManagerService(Context context) {
-        mContext = context;
+        mContext = context.createFeatureContext(FEATURE_ID);
         mHandler = FgThread.getHandler();
         mLocalService = new LocalService();
 
