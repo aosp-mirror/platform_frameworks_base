@@ -17,6 +17,9 @@
 package android.net
 
 import android.net.NetworkScore.Metrics.BANDWIDTH_UNKNOWN
+import android.net.NetworkScore.POLICY_DEFAULT_SUBSCRIPTION
+import android.net.NetworkScore.POLICY_IGNORE_ON_WIFI
+import android.net.NetworkScore.RANGE_MEDIUM
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.testutils.assertParcelSane
@@ -39,19 +42,19 @@ class NetworkScoreTest {
         assertEquals(TEST_SCORE, builder.build().getLegacyScore())
         assertParcelSane(builder.build(), 7)
 
-        builder.addPolicy(NetworkScore.POLICY_IGNORE_ON_WIFI)
-                .addPolicy(NetworkScore.POLICY_DEFAULT_SUBSCRIPTION)
+        builder.addPolicy(POLICY_IGNORE_ON_WIFI)
+                .addPolicy(POLICY_DEFAULT_SUBSCRIPTION)
                 .setLinkLayerMetrics(NetworkScore.Metrics(44 /* latency */,
                         380 /* downlinkBandwidth */, BANDWIDTH_UNKNOWN /* uplinkBandwidth */))
                 .setEndToEndMetrics(NetworkScore.Metrics(11 /* latency */,
                         BANDWIDTH_UNKNOWN /* downlinkBandwidth */, 100_000 /* uplinkBandwidth */))
                 .setRange(NetworkScore.RANGE_MEDIUM)
         assertParcelSane(builder.build(), 7)
-        builder.clearPolicy(NetworkScore.POLICY_IGNORE_ON_WIFI)
+        builder.clearPolicy(POLICY_IGNORE_ON_WIFI)
         val ns = builder.build()
         assertParcelSane(ns, 7)
-        assertFalse(ns.hasPolicy(NetworkScore.POLICY_IGNORE_ON_WIFI))
-        assertTrue(ns.hasPolicy(NetworkScore.POLICY_DEFAULT_SUBSCRIPTION))
+        assertFalse(ns.hasPolicy(POLICY_IGNORE_ON_WIFI))
+        assertTrue(ns.hasPolicy(POLICY_DEFAULT_SUBSCRIPTION))
 
         val exitingNs = ns.withExiting(true)
         assertNotEquals(ns.isExiting, exitingNs.isExiting)
@@ -72,5 +75,18 @@ class NetworkScoreTest {
         builder2.setLegacyScore(TEST_SCORE)
         assertTrue(builder1.build().equals(builder2.build()))
         assertEquals(builder1.build().hashCode(), builder2.build().hashCode())
+    }
+
+    @Test
+    fun testBuilderEquals() {
+        val ns = NetworkScore.Builder()
+                .addPolicy(POLICY_IGNORE_ON_WIFI)
+                .addPolicy(POLICY_DEFAULT_SUBSCRIPTION)
+                .setExiting(true)
+                .setEndToEndMetrics(NetworkScore.Metrics(145, 2500, 1430))
+                .setRange(RANGE_MEDIUM)
+                .setSignalStrength(400)
+                .build()
+        assertEquals(ns, NetworkScore.Builder(ns).build())
     }
 }
