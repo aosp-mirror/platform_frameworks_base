@@ -259,7 +259,7 @@ public class MediaRouter2Manager {
     /**
      * Selects media route for the specified package name.
      *
-     * If the given route is {@link RoutingController#getTransferrableRoutes() a transferrable
+     * If the given route is {@link RoutingController#getTransferableRoutes() a transferable
      * route} of a routing session of the application, the session will be transferred to
      * the route. If not, a new routing session will be created.
      *
@@ -274,7 +274,7 @@ public class MediaRouter2Manager {
         //TODO: instead of release all controllers, add an API to specify controllers that
         // should be released (or is the system controller).
         for (RoutingSessionInfo sessionInfo : getRoutingSessions(packageName)) {
-            if (!transferred && sessionInfo.getTransferrableRoutes().contains(route.getId())) {
+            if (!transferred && sessionInfo.getTransferableRoutes().contains(route.getId())) {
                 new RoutingController(sessionInfo).transferToRoute(route);
                 transferred = true;
             } else if (!sessionInfo.isSystemSession()) {
@@ -543,13 +543,13 @@ public class MediaRouter2Manager {
         }
 
         /**
-         * @return the unmodifiable list of transferrable routes for the session.
+         * @return the unmodifiable list of transferable routes for the session.
          */
         @NonNull
-        public List<MediaRoute2Info> getTransferrableRoutes() {
+        public List<MediaRoute2Info> getTransferableRoutes() {
             List<String> routeIds;
             synchronized (mControllerLock) {
-                routeIds = mSessionInfo.getTransferrableRoutes();
+                routeIds = mSessionInfo.getTransferableRoutes();
             }
             return getRoutesWithIds(routeIds);
         }
@@ -643,12 +643,12 @@ public class MediaRouter2Manager {
          * all of the following conditions:
          * <ul>
          * <li>ID should not be included in {@link #getSelectedRoutes()}</li>
-         * <li>ID should be included in {@link #getTransferrableRoutes()}</li>
+         * <li>ID should be included in {@link #getTransferableRoutes()}</li>
          * </ul>
          * If the route doesn't meet any of above conditions, it will be ignored.
          *
          * @see #getSelectedRoutes()
-         * @see #getTransferrableRoutes()
+         * @see #getTransferableRoutes()
          */
         public void transferToRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
@@ -663,8 +663,8 @@ public class MediaRouter2Manager {
                 return;
             }
 
-            if (!sessionInfo.getTransferrableRoutes().contains(route.getId())) {
-                Log.w(TAG, "Ignoring transferring to a non-transferrable route=" + route);
+            if (!sessionInfo.getTransferableRoutes().contains(route.getId())) {
+                Log.w(TAG, "Ignoring transferring to a non-transferable route=" + route);
                 return;
             }
 
