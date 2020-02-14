@@ -245,8 +245,6 @@ public class AccessibilityShortcutController {
         String toastMessage = String.format(toastMessageFormatString, serviceName);
         Toast warningToast = mFrameworkObjectProvider.makeToastFromText(
                 mContext, toastMessage, Toast.LENGTH_LONG);
-        warningToast.getWindowParams().privateFlags |=
-                WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         warningToast.show();
     }
 
