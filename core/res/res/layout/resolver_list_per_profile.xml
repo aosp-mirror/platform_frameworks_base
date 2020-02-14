@@ -29,7 +29,6 @@
         android:elevation="@dimen/resolver_elevation"
         android:nestedScrollingEnabled="true"
         android:scrollbarStyle="outsideOverlay"
-        android:scrollIndicators="top|bottom"
         android:divider="@null"
         android:footerDividersEnabled="false"
         android:headerDividersEnabled="false"
