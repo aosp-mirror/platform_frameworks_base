@@ -72,11 +72,12 @@ public class KeyguardDisplayManager {
         @Override
         public void onDisplayChanged(int displayId) {
             if (displayId == DEFAULT_DISPLAY) return;
-            final Display display = mDisplayService.getDisplay(displayId);
-            if (display != null && mShowing) {
-                final Presentation presentation = mPresentations.get(displayId);
-                if (presentation != null && !presentation.getDisplay().equals(display)) {
-                    hidePresentation(displayId);
+            final Presentation presentation = mPresentations.get(displayId);
+            if (presentation != null && mShowing) {
+                hidePresentation(displayId);
+                // update DisplayInfo.
+                final Display display = mDisplayService.getDisplay(displayId);
+                if (display != null) {
                     showPresentation(display);
                 }
             }
@@ -263,6 +264,11 @@ public class KeyguardDisplayManager {
             mInjectableInflater = injectionInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
+        }
+
+        @Override
+        public void cancel() {
+            // Do not allow anything to cancel KeyguardPresetation except KeyguardDisplayManager.
         }
 
         @Override
