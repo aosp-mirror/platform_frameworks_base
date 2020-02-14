@@ -15,6 +15,7 @@ package android {
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
+    field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
@@ -1641,7 +1642,7 @@ package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
     method public void logEvent(int, @NonNull String);
-    method public void reevaluateNetwork();
+    method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void reevaluateNetwork();
     method public void useNetwork();
     field public static final int APP_REQUEST_REEVALUATION_REQUIRED = 100; // 0x64
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
@@ -2450,8 +2451,8 @@ package android.os {
   }
 
   public class PowerWhitelistManager {
-    method @RequiresPermission("android.permission.DEVICE_POWER") public boolean addToWhitelist(@NonNull String);
-    method @RequiresPermission("android.permission.DEVICE_POWER") public int addToWhitelist(@NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission("android.permission.DEVICE_POWER") public void addToWhitelist(@NonNull String);
+    method @RequiresPermission("android.permission.DEVICE_POWER") public void addToWhitelist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission("android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST") public void whitelistAppTemporarily(@NonNull String, long);
     method @RequiresPermission("android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST") public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
@@ -3440,23 +3441,22 @@ package android.telecom {
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
-    method public final long getConnectionStartElapsedRealTime();
     method public android.telecom.Connection getPrimaryConnection();
     method @NonNull public final String getTelecomCallId();
-    method public final void setAddress(@NonNull android.net.Uri, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setAddress(@NonNull android.net.Uri, int);
     method public final void setCallerDisplayName(@NonNull String, int);
-    method public void setConferenceState(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setConferenceState(boolean);
   }
 
   public abstract class Connection extends android.telecom.Conferenceable {
-    method public final long getConnectElapsedTimeMillis();
-    method public final long getConnectTimeMillis();
+    method @IntRange(from=0) public final long getConnectTimeMillis();
+    method public final long getConnectionStartElapsedRealtimeMillis();
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
-    method public final void setConnectTimeMillis(long);
-    method public final void setConnectionStartElapsedRealTime(long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectionStartElapsedRealtimeMillis(long);
     method public void setPhoneAccountHandle(@NonNull android.telecom.PhoneAccountHandle);
     method public void setTelecomCallId(@NonNull String);
     field public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 2097152; // 0x200000
@@ -3488,7 +3488,7 @@ package android.telecom {
   }
 
   public static class PhoneAccount.Builder {
-    method @NonNull public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
   }
 
   public class PhoneAccountSuggestionService extends android.app.Service {
@@ -3502,7 +3502,7 @@ package android.telecom {
   public class TelecomManager {
     method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
-    method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDefaultDialerPackage(int);
+    method @Nullable @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getDefaultDialerPackage(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
     field public static final int TTY_MODE_FULL = 1; // 0x1
@@ -3720,6 +3720,7 @@ package android.telephony {
     method public void notifyDataActivityChanged(int, int);
     method public void notifyDataConnectionForSubscriber(int, int, int, @Nullable android.telephony.PreciseDataConnectionState);
     method public void notifyDisconnectCause(int, int, int, int);
+    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.DisplayInfo);
     method public void notifyEmergencyNumberList(int, int);
     method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifyMessageWaitingChanged(int, int, boolean);

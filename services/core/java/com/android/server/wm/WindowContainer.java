@@ -1425,6 +1425,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom, Task excludedTask) {
+        final int count = mChildren.size();
+        if (traverseTopToBottom) {
+            for (int i = count - 1; i >= 0; --i) {
+                mChildren.get(i).forAllTasks(callback, traverseTopToBottom, excludedTask);
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllTasks(callback, traverseTopToBottom, excludedTask);
+            }
+        }
+    }
+
     Task getTaskAbove(Task t) {
         return getTask(
                 (above) -> true, t, false /*includeBoundary*/, false /*traverseTopToBottom*/);

@@ -104,6 +104,9 @@ oneway interface IConnectionService {
 
     void swapConference(String conferenceCallId, in Session.Info sessionInfo);
 
+    void addConferenceParticipants(String CallId, in List<Uri> participants,
+    in Session.Info sessionInfo);
+
     void onPostDialContinue(String callId, boolean proceed, in Session.Info sessionInfo);
 
     void pullExternalCall(String callId, in Session.Info sessionInfo);

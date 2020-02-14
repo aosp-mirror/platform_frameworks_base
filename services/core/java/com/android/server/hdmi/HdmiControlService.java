@@ -105,32 +105,57 @@ import java.util.stream.Collectors;
  */
 public class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
-    private final Locale HONG_KONG = new Locale("zh", "HK");
-    private final Locale MACAU = new Locale("zh", "MO");
+    private static final Locale HONG_KONG = new Locale("zh", "HK");
+    private static final Locale MACAU = new Locale("zh", "MO");
 
-    private static final Map<String, String> mTerminologyToBibliographicMap;
-    static {
-        mTerminologyToBibliographicMap = new HashMap<>();
+    private static final Map<String, String> sTerminologyToBibliographicMap =
+            createsTerminologyToBibliographicMap();
+
+    private static Map<String, String> createsTerminologyToBibliographicMap() {
+        Map<String, String> temp = new HashMap<>();
         // NOTE: (TERMINOLOGY_CODE, BIBLIOGRAPHIC_CODE)
-        mTerminologyToBibliographicMap.put("sqi", "alb"); // Albanian
-        mTerminologyToBibliographicMap.put("hye", "arm"); // Armenian
-        mTerminologyToBibliographicMap.put("eus", "baq"); // Basque
-        mTerminologyToBibliographicMap.put("mya", "bur"); // Burmese
-        mTerminologyToBibliographicMap.put("ces", "cze"); // Czech
-        mTerminologyToBibliographicMap.put("nld", "dut"); // Dutch
-        mTerminologyToBibliographicMap.put("kat", "geo"); // Georgian
-        mTerminologyToBibliographicMap.put("deu", "ger"); // German
-        mTerminologyToBibliographicMap.put("ell", "gre"); // Greek
-        mTerminologyToBibliographicMap.put("fra", "fre"); // French
-        mTerminologyToBibliographicMap.put("isl", "ice"); // Icelandic
-        mTerminologyToBibliographicMap.put("mkd", "mac"); // Macedonian
-        mTerminologyToBibliographicMap.put("mri", "mao"); // Maori
-        mTerminologyToBibliographicMap.put("msa", "may"); // Malay
-        mTerminologyToBibliographicMap.put("fas", "per"); // Persian
-        mTerminologyToBibliographicMap.put("ron", "rum"); // Romanian
-        mTerminologyToBibliographicMap.put("slk", "slo"); // Slovak
-        mTerminologyToBibliographicMap.put("bod", "tib"); // Tibetan
-        mTerminologyToBibliographicMap.put("cym", "wel"); // Welsh
+        temp.put("sqi", "alb"); // Albanian
+        temp.put("hye", "arm"); // Armenian
+        temp.put("eus", "baq"); // Basque
+        temp.put("mya", "bur"); // Burmese
+        temp.put("ces", "cze"); // Czech
+        temp.put("nld", "dut"); // Dutch
+        temp.put("kat", "geo"); // Georgian
+        temp.put("deu", "ger"); // German
+        temp.put("ell", "gre"); // Greek
+        temp.put("fra", "fre"); // French
+        temp.put("isl", "ice"); // Icelandic
+        temp.put("mkd", "mac"); // Macedonian
+        temp.put("mri", "mao"); // Maori
+        temp.put("msa", "may"); // Malay
+        temp.put("fas", "per"); // Persian
+        temp.put("ron", "rum"); // Romanian
+        temp.put("slk", "slo"); // Slovak
+        temp.put("bod", "tib"); // Tibetan
+        temp.put("cym", "wel"); // Welsh
+        return Collections.unmodifiableMap(temp);
+    }
+
+    @VisibleForTesting static String localeToMenuLanguage(Locale locale) {
+        if (locale.equals(Locale.TAIWAN) || locale.equals(HONG_KONG) || locale.equals(MACAU)) {
+            // Android always returns "zho" for all Chinese variants.
+            // Use "bibliographic" code defined in CEC639-2 for traditional
+            // Chinese used in Taiwan/Hong Kong/Macau.
+            return "chi";
+        } else {
+            String language = locale.getISO3Language();
+
+            // locale.getISO3Language() returns terminology code and need to
+            // send it as bibliographic code instead since the Bibliographic
+            // codes of ISO/FDIS 639-2 shall be used.
+            // NOTE: Chinese also has terminology/bibliographic code "zho" and "chi"
+            // But, as it depends on the locale, is not handled here.
+            if (sTerminologyToBibliographicMap.containsKey(language)) {
+                language = sTerminologyToBibliographicMap.get(language);
+            }
+
+            return language;
+        }
     }
 
     static final String PERMISSION = "android.permission.HDMI_CEC";
@@ -208,8 +233,8 @@ public class HdmiControlService extends SystemService {
                     }
                     break;
                 case Intent.ACTION_CONFIGURATION_CHANGED:
-                    String language = getMenuLanguage();
-                    if (!mLanguage.equals(language)) {
+                    String language = HdmiControlService.localeToMenuLanguage(Locale.getDefault());
+                    if (!mMenuLanguage.equals(language)) {
                         onLanguageChanged(language);
                     }
                     break;
@@ -221,28 +246,6 @@ public class HdmiControlService extends SystemService {
             }
         }
 
-        private String getMenuLanguage() {
-            Locale locale = Locale.getDefault();
-            if (locale.equals(Locale.TAIWAN) || locale.equals(HONG_KONG) || locale.equals(MACAU)) {
-                // Android always returns "zho" for all Chinese variants.
-                // Use "bibliographic" code defined in CEC639-2 for traditional
-                // Chinese used in Taiwan/Hong Kong/Macau.
-                return "chi";
-            } else {
-                String language = locale.getISO3Language();
-
-                // locale.getISO3Language() returns terminology code and need to
-                // send it as bibliographic code instead since the Bibliographic
-                // codes of ISO/FDIS 639-2 shall be used.
-                // NOTE: Chinese also has terminology/bibliographic code "zho" and "chi"
-                // But, as it depends on the locale, is not handled here.
-                if (mTerminologyToBibliographicMap.containsKey(language)) {
-                    language = mTerminologyToBibliographicMap.get(language);
-                }
-
-                return language;
-            }
-        }
     }
 
     // A thread to handle synchronous IO of CEC and MHL control service.
@@ -339,7 +342,7 @@ public class HdmiControlService extends SystemService {
     private int mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
 
     @ServiceThreadOnly
-    private String mLanguage = Locale.getDefault().getISO3Language();
+    private String mMenuLanguage = localeToMenuLanguage(Locale.getDefault());
 
     @ServiceThreadOnly
     private boolean mStandbyMessageReceived = false;
@@ -759,7 +762,7 @@ public class HdmiControlService extends SystemService {
     private void initializeCec(int initiatedBy) {
         mAddressAllocated = false;
         mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, true);
-        mCecController.setLanguage(mLanguage);
+        mCecController.setLanguage(mMenuLanguage);
         initializeLocalDevices(initiatedBy);
     }
 
@@ -2818,7 +2821,7 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void onLanguageChanged(String language) {
         assertRunOnServiceThread();
-        mLanguage = language;
+        mMenuLanguage = language;
 
         if (isTvDeviceEnabled()) {
             tv().broadcastMenuLanguage(language);
@@ -2826,10 +2829,19 @@ public class HdmiControlService extends SystemService {
         }
     }
 
+    /**
+     * Gets the CEC menu language.
+     *
+     * <p>This is the ISO/FDIS 639-2 3 letter language code sent in the CEC message @{code <Set Menu
+     * Language>}.
+     * See HDMI 1.4b section CEC 13.6.2
+     *
+     * @see {@link Locale#getISO3Language()}
+     */
     @ServiceThreadOnly
     String getLanguage() {
         assertRunOnServiceThread();
-        return mLanguage;
+        return mMenuLanguage;
     }
 
     private void disableDevices(PendingActionClearedCallback callback) {
@@ -2838,7 +2850,6 @@ public class HdmiControlService extends SystemService {
                 device.disableDevice(mStandbyMessageReceived, callback);
             }
         }
-
         mMhlController.clearAllLocalDevices();
     }
 

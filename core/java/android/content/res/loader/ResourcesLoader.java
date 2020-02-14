@@ -40,8 +40,8 @@ import java.util.List;
  * of {@link ResourcesProvider ResourcesProvider(s)} a loader contains propagates to all Resources
  * objects that use the loader.
  *
- * <p>Loaders retrieved with {@link Resources#getLoaders()} are listed in increasing precedence
- * order. A loader will override the resources and assets of loaders listed before itself.
+ * <p>Loaders must be added to Resources objects in increasing precedence order. A loader will
+ * override the resources and assets of loaders added before itself.
  *
  * <p>Providers retrieved with {@link #getProviders()} are listed in increasing precedence order. A
  * provider will override the resources and assets of providers listed before itself.

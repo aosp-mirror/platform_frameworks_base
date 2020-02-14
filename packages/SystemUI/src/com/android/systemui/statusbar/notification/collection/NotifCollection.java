@@ -44,12 +44,16 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
@@ -191,59 +195,121 @@ public class NotifCollection implements Dumpable {
     }
 
     /**
-     * Dismiss a notification on behalf of the user.
+     * Dismisses multiple notifications on behalf of the user.
      */
-    public void dismissNotification(NotificationEntry entry, @NonNull DismissedByUserStats stats) {
+    public void dismissNotifications(
+            List<Pair<NotificationEntry, DismissedByUserStats>> entriesToDismiss) {
         Assert.isMainThread();
-        requireNonNull(stats);
         checkForReentrantCall();
 
-        if (entry != mNotificationSet.get(entry.getKey())) {
-            throw new IllegalStateException("Invalid entry: " + entry.getKey());
-        }
+        final List<NotificationEntry> entriesToLocallyDismiss = new ArrayList<>();
+        for (int i = 0; i < entriesToDismiss.size(); i++) {
+            NotificationEntry entry = entriesToDismiss.get(i).first;
+            DismissedByUserStats stats = entriesToDismiss.get(i).second;
 
-        if (entry.getDismissState() == DISMISSED) {
-            return;
-        }
-
-        updateDismissInterceptors(entry);
-        if (isDismissIntercepted(entry)) {
-            mLogger.logNotifDismissedIntercepted(entry.getKey());
-            return;
-        }
-
-        // Optimistically mark the notification as dismissed -- we'll wait for the signal from
-        // system server before removing it from our notification set.
-        entry.setDismissState(DISMISSED);
-        mLogger.logNotifDismissed(entry.getKey());
-
-        List<NotificationEntry> canceledEntries = new ArrayList<>();
-
-        if (isCanceled(entry)) {
-            canceledEntries.add(entry);
-        } else {
-            // Ask system server to remove it for us
-            try {
-                mStatusBarService.onNotificationClear(
-                        entry.getSbn().getPackageName(),
-                        entry.getSbn().getTag(),
-                        entry.getSbn().getId(),
-                        entry.getSbn().getUser().getIdentifier(),
-                        entry.getSbn().getKey(),
-                        stats.dismissalSurface,
-                        stats.dismissalSentiment,
-                        stats.notificationVisibility);
-            } catch (RemoteException e) {
-                // system process is dead if we're here.
+            requireNonNull(stats);
+            if (entry != mNotificationSet.get(entry.getKey())) {
+                throw new IllegalStateException("Invalid entry: " + entry.getKey());
             }
 
-            // Also mark any children as dismissed as system server will auto-dismiss them as well
-            if (entry.getSbn().getNotification().isGroupSummary()) {
-                for (NotificationEntry otherEntry : mNotificationSet.values()) {
-                    if (shouldAutoDismiss(otherEntry, entry.getSbn().getGroupKey())) {
-                        otherEntry.setDismissState(PARENT_DISMISSED);
-                        if (isCanceled(otherEntry)) {
-                            canceledEntries.add(otherEntry);
+            if (entry.getDismissState() == DISMISSED) {
+                continue;
+            }
+
+            updateDismissInterceptors(entry);
+            if (isDismissIntercepted(entry)) {
+                mLogger.logNotifDismissedIntercepted(entry.getKey());
+                continue;
+            }
+
+            entriesToLocallyDismiss.add(entry);
+            if (!isCanceled(entry)) {
+                // send message to system server if this notification hasn't already been cancelled
+                try {
+                    mStatusBarService.onNotificationClear(
+                            entry.getSbn().getPackageName(),
+                            entry.getSbn().getTag(),
+                            entry.getSbn().getId(),
+                            entry.getSbn().getUser().getIdentifier(),
+                            entry.getSbn().getKey(),
+                            stats.dismissalSurface,
+                            stats.dismissalSentiment,
+                            stats.notificationVisibility);
+                } catch (RemoteException e) {
+                    // system process is dead if we're here.
+                }
+            }
+        }
+
+        locallyDismissNotifications(entriesToLocallyDismiss);
+        rebuildList();
+    }
+
+    /**
+     * Dismisses a single notification on behalf of the user.
+     */
+    public void dismissNotification(
+            NotificationEntry entry,
+            @NonNull DismissedByUserStats stats) {
+        dismissNotifications(List.of(
+                new Pair<NotificationEntry, DismissedByUserStats>(entry, stats)));
+    }
+
+    /**
+     * Dismisses all clearable notifications for a given userid on behalf of the user.
+     */
+    public void dismissAllNotifications(@UserIdInt int userId) {
+        Assert.isMainThread();
+        checkForReentrantCall();
+
+        try {
+            mStatusBarService.onClearAllNotifications(userId);
+        } catch (RemoteException e) {
+            // system process is dead if we're here.
+        }
+
+        final List<NotificationEntry> entries = new ArrayList(getActiveNotifs());
+        for (int i = entries.size() - 1; i >= 0; i--) {
+            NotificationEntry entry = entries.get(i);
+            if (!shouldDismissOnClearAll(entry, userId)) {
+                // system server won't be removing these notifications, but we still give dismiss
+                // interceptors the chance to filter the notification
+                updateDismissInterceptors(entry);
+                if (isDismissIntercepted(entry)) {
+                    mLogger.logNotifClearAllDismissalIntercepted(entry.getKey());
+                }
+                entries.remove(i);
+            }
+        }
+
+        locallyDismissNotifications(entries);
+        rebuildList();
+    }
+
+    /**
+     * Optimistically marks the given notifications as dismissed -- we'll wait for the signal
+     * from system server before removing it from our notification set.
+     */
+    private void locallyDismissNotifications(List<NotificationEntry> entries) {
+        final List<NotificationEntry> canceledEntries = new ArrayList<>();
+
+        for (int i = 0; i < entries.size(); i++) {
+            NotificationEntry entry = entries.get(i);
+
+            entry.setDismissState(DISMISSED);
+            mLogger.logNotifDismissed(entry.getKey());
+
+            if (isCanceled(entry)) {
+                canceledEntries.add(entry);
+            } else {
+                // Mark any children as dismissed as system server will auto-dismiss them as well
+                if (entry.getSbn().getNotification().isGroupSummary()) {
+                    for (NotificationEntry otherEntry : mNotificationSet.values()) {
+                        if (shouldAutoDismissChildren(otherEntry, entry.getSbn().getGroupKey())) {
+                            otherEntry.setDismissState(PARENT_DISMISSED);
+                            if (isCanceled(otherEntry)) {
+                                canceledEntries.add(otherEntry);
+                            }
                         }
                     }
                 }
@@ -255,7 +321,6 @@ public class NotifCollection implements Dumpable {
         for (NotificationEntry canceledEntry : canceledEntries) {
             tryRemoveNotification(canceledEntry);
         }
-        rebuildList();
     }
 
     private void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
@@ -552,7 +617,7 @@ public class NotifCollection implements Dumpable {
      *
      * See NotificationManager.cancelGroupChildrenByListLocked() for corresponding code.
      */
-    private static boolean shouldAutoDismiss(
+    private static boolean shouldAutoDismissChildren(
             NotificationEntry entry,
             String dismissedGroupKey) {
         return entry.getSbn().getGroupKey().equals(dismissedGroupKey)
@@ -562,8 +627,37 @@ public class NotifCollection implements Dumpable {
                 && entry.getDismissState() != DISMISSED;
     }
 
+    /**
+     * When the user 'clears all notifications' through SystemUI, NotificationManager will not
+     * dismiss unclearable notifications.
+     * @return true if we think NotificationManager will dismiss the entry when asked to
+     * cancel this notification with {@link NotificationListenerService#REASON_CANCEL_ALL}
+     *
+     * See NotificationManager.cancelAllLocked for corresponding code.
+     */
+    private static boolean shouldDismissOnClearAll(
+            NotificationEntry entry,
+            @UserIdInt int userId) {
+        return userIdMatches(entry, userId)
+                && entry.isClearable()
+                && !hasFlag(entry, Notification.FLAG_BUBBLE)
+                && entry.getDismissState() != DISMISSED;
+    }
+
     private static boolean hasFlag(NotificationEntry entry, int flag) {
         return (entry.getSbn().getNotification().flags & flag) != 0;
+    }
+
+    /**
+     * Determine whether the userId applies to the notification in question, either because
+     * they match exactly, or one of them is USER_ALL (which is treated as a wildcard).
+     *
+     * See NotificationManager#notificationMatchesUserId
+     */
+    private static boolean userIdMatches(NotificationEntry entry, int userId) {
+        return userId == UserHandle.USER_ALL
+                || entry.getSbn().getUser().getIdentifier() == UserHandle.USER_ALL
+                || entry.getSbn().getUser().getIdentifier() == userId;
     }
 
     private void dispatchOnEntryInit(NotificationEntry entry) {
@@ -613,6 +707,7 @@ public class NotifCollection implements Dumpable {
         }
         mAmDispatchingToOtherCode = false;
     }
+
     @Override
     public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
         final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());

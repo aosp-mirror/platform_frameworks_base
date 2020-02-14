@@ -37,8 +37,6 @@ import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -57,7 +55,6 @@ import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -90,7 +87,6 @@ import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.compat.PlatformCompat;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.controllers.BackgroundJobsController;
@@ -154,16 +150,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
-
-    /**
-     * {@link #schedule(JobInfo)}, {@link #scheduleAsPackage(JobInfo, String, int, String)}, and
-     * {@link #enqueue(JobInfo, JobWorkItem)} will throw a {@link IllegalStateException} if the app
-     * calls the APIs too frequently.
-     */
-    @ChangeId
-    // This means the change will be enabled for target SDK larger than 29 (Q), meaning R and up.
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    protected static final long CRASH_ON_EXCEEDED_LIMIT = 144363383L;
 
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();
@@ -264,7 +250,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
-    private final PlatformCompat mPlatformCompat;
 
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
@@ -986,9 +971,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
                 mAppStandbyInternal.restrictApp(
                         pkg, userId, UsageStatsManager.REASON_SUB_RESTRICT_BUGGY);
-                if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION
-                        && mPlatformCompat.isChangeEnabledByPackageName(
-                                CRASH_ON_EXCEEDED_LIMIT, pkg, userId)) {
+                if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION) {
                     final boolean isDebuggable;
                     synchronized (mLock) {
                         if (!mDebuggableApps.containsKey(packageName)) {
@@ -1370,8 +1353,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Set up the app standby bucketing tracker
         mStandbyTracker = new StandbyTracker();
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
-        mPlatformCompat =
-                (PlatformCompat) ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         mQuotaTracker = new CountQuotaTracker(context, Categorizer.SINGLE_CATEGORIZER);
         mQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
                 mConstants.API_QUOTA_SCHEDULE_COUNT,

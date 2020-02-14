@@ -16,15 +16,20 @@
 
 package android.content.integrity;
 
+import static android.content.integrity.InstallerAllowedByManifestFormula.INSTALLER_CERTIFICATE_NOT_EVALUATED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+@RunWith(JUnit4.class)
 public class InstallerAllowedByManifestFormulaTest {
 
     private static final InstallerAllowedByManifestFormula
@@ -70,7 +75,7 @@ public class InstallerAllowedByManifestFormulaTest {
     }
 
     @Test
-    public void testFormulaMatches_certificateNotInManifest() {
+    public void testFormulaMatches_certificateDoesNotMatchManifest() {
         AppInstallMetadata appInstallMetadata = getAppInstallMetadataBuilder()
                 .setInstallerName("installer1")
                 .setInstallerCertificates(Arrays.asList("installer_cert3", "random_cert"))
@@ -88,6 +93,19 @@ public class InstallerAllowedByManifestFormulaTest {
                 .setInstallerName("installer1")
                 .setInstallerCertificates(Arrays.asList("installer_cert3", "random_cert"))
                 .setAllowedInstallersAndCert(ImmutableMap.of()).build();
+
+        assertThat(FORMULA.matches(appInstallMetadata)).isTrue();
+    }
+
+    @Test
+    public void testFormulaMatches_certificateNotSpecifiedInManifest() {
+        AppInstallMetadata appInstallMetadata = getAppInstallMetadataBuilder()
+                .setInstallerName("installer1")
+                .setInstallerCertificates(Arrays.asList("installer_cert3", "random_cert"))
+                .setAllowedInstallersAndCert(ImmutableMap.of(
+                        "installer1", INSTALLER_CERTIFICATE_NOT_EVALUATED,
+                        "installer2", "installer_cert1"
+                )).build();
 
         assertThat(FORMULA.matches(appInstallMetadata)).isTrue();
     }

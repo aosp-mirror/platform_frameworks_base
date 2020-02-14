@@ -997,8 +997,9 @@ public final class Settings {
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
      * <p>
-     * Input: Optionally, in versions of Android prior to 11, the Intent's data URI can specify the
-     * application package name to directly invoke the management GUI specific to the package name.
+     * Input: Optionally, in versions of Android prior to {@link android.os.Build.VERSION_CODES#R},
+     * the Intent's data URI can specify the application package name to directly invoke the
+     * management GUI specific to the package name.
      * For example "package:com.my.app".
      * <p>
      * Output: Nothing.
@@ -1011,9 +1012,10 @@ public final class Settings {
      * Activity Action: Show screen for controlling if the app specified in the data URI of the
      * intent can draw on top of other apps.
      * <p>
-     * Unlike {@link #ACTION_MANAGE_OVERLAY_PERMISSION}, which in Android 11 can't be used to show
-     * a GUI for a specific package, permission {@code android.permission.INTERNAL_SYSTEM_WINDOW} is
-     * needed to start an activity with this intent.
+     * Unlike {@link #ACTION_MANAGE_OVERLAY_PERMISSION}, which in Android {@link
+     * android.os.Build.VERSION_CODES#R} can't be used to show a GUI for a specific package,
+     * permission {@code android.permission.INTERNAL_SYSTEM_WINDOW} is needed to start an activity
+     * with this intent.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.

@@ -1483,6 +1483,8 @@
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
     <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor.</string>
+    <!-- Generic error message shown when fingerprint is not available due to a security vulnerability. [CHAR LIMIT=50] -->
+    <string name="fingerprint_error_security_update_required">Sensor temporarily disabled.</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -1574,6 +1576,8 @@
     <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
     <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
     <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
+    <!-- Generic error message shown when face unlock is not available due to a security vulnerability. [CHAR LIMIT=50] -->
+    <string name="face_error_security_update_required">Sensor temporarily disabled.</string>
 
     <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
     <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
@@ -4372,10 +4376,7 @@
     service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_toogle_warning">
         When the shortcut is on, pressing both volume buttons for 3 seconds will start an
-        accessibility feature.\n\n
-        Current accessibility feature:\n
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>\n\n
-        You can change the feature in Settings > Accessibility.
+        accessibility feature.
     </string>
 
     <!-- Text in button that edit the accessibility shortcut menu, user can delete

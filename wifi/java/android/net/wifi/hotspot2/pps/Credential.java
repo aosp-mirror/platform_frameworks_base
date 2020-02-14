@@ -738,7 +738,16 @@ public final class Credential implements Parcelable {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("IMSI: ").append(mImsi).append("\n");
+            String imsi;
+            if (mImsi != null) {
+                if (mImsi.length() > 6 && mImsi.charAt(6) != '*') {
+                    // Truncate the full IMSI from the log
+                    imsi = mImsi.substring(0, 6) + "****";
+                } else {
+                    imsi = mImsi;
+                }
+                builder.append("IMSI: ").append(imsi).append("\n");
+            }
             builder.append("EAPType: ").append(mEapType).append("\n");
             return builder.toString();
         }

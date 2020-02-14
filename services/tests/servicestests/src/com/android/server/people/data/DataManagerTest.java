@@ -142,7 +142,8 @@ public final class DataManagerTest {
         when(mContext.getSystemService(Context.TELECOM_SERVICE)).thenReturn(mTelecomManager);
         when(mContext.getSystemServiceName(TelecomManager.class)).thenReturn(
                 Context.TELECOM_SERVICE);
-        when(mTelecomManager.getDefaultDialerPackage(anyInt())).thenReturn(TEST_PKG_NAME);
+        when(mTelecomManager.getDefaultDialerPackage(any(UserHandle.class)))
+                .thenReturn(TEST_PKG_NAME);
 
         when(mExecutorService.scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(
                 TimeUnit.class))).thenReturn(mScheduledFuture);

@@ -60,8 +60,10 @@ public class RowContentBindStageTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mRowContentBindStage = new RowContentBindStage(mBinder,
-                mock(NotifInflationErrorManager.class));
+        mRowContentBindStage = new RowContentBindStage(
+                mBinder,
+                mock(NotifInflationErrorManager.class),
+                mock(RowContentBindStageLogger.class));
         mRowContentBindStage.createStageParams(mEntry);
     }
 

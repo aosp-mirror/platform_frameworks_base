@@ -322,7 +322,8 @@ public class DataManager {
     private void updateDefaultDialer(@NonNull UserData userData) {
         TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
         String defaultDialer = telecomManager != null
-                ? telecomManager.getDefaultDialerPackage(userData.getUserId()) : null;
+                ? telecomManager.getDefaultDialerPackage(
+                        new UserHandle(userData.getUserId())) : null;
         userData.setDefaultDialer(defaultDialer);
     }
 

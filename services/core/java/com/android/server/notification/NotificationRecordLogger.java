@@ -41,13 +41,14 @@ import java.util.Objects;
 public interface NotificationRecordLogger {
 
     /**
-     * Logs a NotificationReported atom reflecting the posting or update of a notification.
+     * May log a NotificationReported atom reflecting the posting or update of a notification.
      * @param r The new NotificationRecord. If null, no action is taken.
      * @param old The previous NotificationRecord.  Null if there was no previous record.
      * @param position The position at which this notification is ranked.
      * @param buzzBeepBlink Logging code reflecting whether this notification alerted the user.
      */
-    void logNotificationReported(@Nullable NotificationRecord r, @Nullable NotificationRecord old,
+    void maybeLogNotificationPosted(@Nullable NotificationRecord r,
+            @Nullable NotificationRecord old,
             int position, int buzzBeepBlink);
 
     /**
@@ -60,6 +61,14 @@ public interface NotificationRecordLogger {
     void logNotificationCancelled(@Nullable NotificationRecord r,
             @NotificationListenerService.NotificationCancelReason int reason,
             @NotificationStats.DismissalSurface int dismissalSurface);
+
+    /**
+     * Logs a notification visibility change event using UiEventReported (event ids from the
+     * NotificationEvents enum).
+     * @param r The NotificationRecord. If null, no action is taken.
+     * @param visible True if the notification became visible.
+     */
+    void logNotificationVisibility(@Nullable NotificationRecord r, boolean visible);
 
     /**
      * The UiEvent enums that this class can log.
@@ -145,6 +154,7 @@ public interface NotificationRecordLogger {
         @Override public int getId() {
             return mId;
         }
+
         public static NotificationCancelledEvent fromCancelReason(
                 @NotificationListenerService.NotificationCancelReason int reason,
                 @NotificationStats.DismissalSurface int surface) {
@@ -191,6 +201,24 @@ public interface NotificationRecordLogger {
         }
     }
 
+    enum NotificationEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Notification became visible.")
+        NOTIFICATION_OPEN(197),
+        @UiEvent(doc = "Notification stopped being visible.")
+        NOTIFICATION_CLOSE(198);
+
+        private final int mId;
+        NotificationEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
+        }
+
+        public static NotificationEvent fromVisibility(boolean visible) {
+            return visible ? NOTIFICATION_OPEN : NOTIFICATION_CLOSE;
+        }
+    }
     /**
      * A helper for extracting logging information from one or two NotificationRecords.
      */
@@ -209,7 +237,7 @@ public interface NotificationRecordLogger {
         /**
          * @return True if old is null, alerted, or important logged fields have changed.
          */
-        boolean shouldLog(int buzzBeepBlink) {
+        boolean shouldLogReported(int buzzBeepBlink) {
             if (r == null) {
                 return false;
             }

@@ -34,13 +34,13 @@ public class DisplayAreaProviderTest {
     @Test
     public void testFromResources_emptyProvider() {
         Assert.assertThat(DisplayAreaPolicy.Provider.fromResources(resourcesWithProvider("")),
-                Matchers.instanceOf(DisplayAreaPolicy.Default.Provider.class));
+                Matchers.instanceOf(DisplayAreaPolicy.DefaultProvider.class));
     }
 
     @Test
     public void testFromResources_nullProvider() {
         Assert.assertThat(DisplayAreaPolicy.Provider.fromResources(resourcesWithProvider(null)),
-                Matchers.instanceOf(DisplayAreaPolicy.Default.Provider.class));
+                Matchers.instanceOf(DisplayAreaPolicy.DefaultProvider.class));
     }
 
     @Test

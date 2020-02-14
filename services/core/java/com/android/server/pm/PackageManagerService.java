@@ -4600,7 +4600,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final AndroidPackage p = mPackages.get(packageName);
             if (p != null && p.isMatch(flags)) {
-                PackageSetting ps = getPackageSetting(p.getPackageName());
+                PackageSetting ps = getPackageSettingInternal(p.getPackageName(), callingUid);
                 if (shouldFilterApplicationLocked(ps, callingUid, userId)) {
                     return -1;
                 }
@@ -5924,7 +5924,10 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public String[] getPackagesForUid(int uid) {
-        final int callingUid = Binder.getCallingUid();
+        return getPackagesForUidInternal(uid, Binder.getCallingUid());
+    }
+
+    private String[] getPackagesForUidInternal(int uid, int callingUid) {
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
         final int appId = UserHandle.getAppId(uid);
@@ -17380,6 +17383,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mLock")
     private String resolveInternalPackageNameLPr(String packageName, long versionCode) {
+        final int callingUid = Binder.getCallingUid();
+        return resolveInternalPackageNameInternalLocked(packageName, versionCode,
+                callingUid);
+    }
+
+    private String resolveInternalPackageNameInternalLocked(
+            String packageName, long versionCode, int callingUid) {
         // Handle renamed packages
         String normalizedPackageName = mSettings.getRenamedPackageLPr(packageName);
         packageName = normalizedPackageName != null ? normalizedPackageName : packageName;
@@ -17393,12 +17403,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Figure out which lib versions the caller can see
         LongSparseLongArray versionsCallerCanSee = null;
-        final int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
+        final int callingAppId = UserHandle.getAppId(callingUid);
         if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.SHELL_UID
                 && callingAppId != Process.ROOT_UID) {
             versionsCallerCanSee = new LongSparseLongArray();
             String libName = versionedLib.valueAt(0).getName();
-            String[] uidPackages = getPackagesForUid(Binder.getCallingUid());
+            String[] uidPackages = getPackagesForUidInternal(callingUid, callingUid);
             if (uidPackages != null) {
                 for (String uidPackage : uidPackages) {
                     PackageSetting ps = mSettings.getPackageLPr(uidPackage);
@@ -23003,7 +23013,7 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public AndroidPackage getPackage(int uid) {
             synchronized (mLock) {
-                final String[] packageNames = getPackagesForUid(uid);
+                final String[] packageNames = getPackagesForUidInternal(uid, Process.SYSTEM_UID);
                 AndroidPackage pkg = null;
                 final int numPackages = packageNames == null ? 0 : packageNames.length;
                 for (int i = 0; pkg == null && i < numPackages; i++) {
@@ -24017,9 +24027,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Nullable
     public PackageSetting getPackageSetting(String packageName) {
+        return getPackageSettingInternal(packageName, Binder.getCallingUid());
+    }
+
+    private PackageSetting getPackageSettingInternal(String packageName, int callingUid) {
         synchronized (mLock) {
-            packageName = resolveInternalPackageNameLPr(
-                    packageName, PackageManager.VERSION_CODE_HIGHEST);
+            packageName = resolveInternalPackageNameInternalLocked(
+                    packageName, PackageManager.VERSION_CODE_HIGHEST, callingUid);
             return mSettings.mPackages.get(packageName);
         }
     }

@@ -74,11 +74,15 @@ import javax.inject.Singleton;
 @Singleton
 public final class NotifBindPipeline {
     private final Map<NotificationEntry, BindEntry> mBindEntries = new ArrayMap<>();
+    private final NotifBindPipelineLogger mLogger;
     private BindStage mStage;
 
     @Inject
-    NotifBindPipeline(CommonNotifCollection collection) {
+    NotifBindPipeline(
+            CommonNotifCollection collection,
+            NotifBindPipelineLogger logger) {
         collection.addCollectionListener(mCollectionListener);
+        mLogger = logger;
     }
 
     /**
@@ -86,6 +90,8 @@ public final class NotifBindPipeline {
      */
     public void setStage(
             BindStage stage) {
+        mLogger.logStageSet(stage.getClass().getName());
+
         mStage = stage;
         mStage.setBindRequestListener(this::onBindRequested);
     }
@@ -96,6 +102,8 @@ public final class NotifBindPipeline {
     public void manageRow(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row) {
+        mLogger.logManagedRow(entry.getKey());
+
         final BindEntry bindEntry = getBindEntry(entry);
         bindEntry.row = row;
         if (bindEntry.invalidated) {
@@ -130,6 +138,8 @@ public final class NotifBindPipeline {
      * callbacks when the run finishes. If a run is already in progress, it is restarted.
      */
     private void startPipeline(NotificationEntry entry) {
+        mLogger.logStartPipeline(entry.getKey());
+
         if (mStage == null) {
             throw new IllegalStateException("No stage was ever set on the pipeline");
         }
@@ -147,10 +157,11 @@ public final class NotifBindPipeline {
 
     private void onPipelineComplete(NotificationEntry entry) {
         final BindEntry bindEntry = getBindEntry(entry);
+        final Set<BindCallback> callbacks = bindEntry.callbacks;
+
+        mLogger.logFinishedPipeline(entry.getKey(), callbacks.size());
 
         bindEntry.invalidated = false;
-
-        final Set<BindCallback> callbacks = bindEntry.callbacks;
         for (BindCallback cb : callbacks) {
             cb.onBindFinished(entry);
         }

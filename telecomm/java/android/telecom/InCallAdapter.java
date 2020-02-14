@@ -283,6 +283,20 @@ public final class InCallAdapter {
     }
 
     /**
+     * Instructs Telecom to pull participants to existing call
+     *
+     * @param callId The unique ID of the call.
+     * @param participants participants to be pulled to existing call.
+     */
+    public void addConferenceParticipants(String callId, List<Uri> participants) {
+        try {
+            mAdapter.addConferenceParticipants(callId, participants);
+        } catch (RemoteException ignored) {
+        }
+    }
+
+
+    /**
      * Instructs Telecom to split the specified call from any conference call with which it may be
      * connected.
      *

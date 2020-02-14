@@ -932,7 +932,7 @@ public class NotificationManagerService extends SystemService {
                 StatusBarNotification sbn = r.getSbn();
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
-                        FLAG_FOREGROUND_SERVICE, false, r.getUserId(),
+                        FLAG_FOREGROUND_SERVICE | FLAG_BUBBLE, false, r.getUserId(),
                         REASON_CLICK, nv.rank, nv.count, null);
                 nv.recycle();
                 reportUserInteraction(r);
@@ -1055,7 +1055,7 @@ public class NotificationManagerService extends SystemService {
                         if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
                         reportSeen(r);
                     }
-                    r.setVisibility(true, nv.rank, nv.count);
+                    r.setVisibility(true, nv.rank, nv.count, mNotificationRecordLogger);
                     mAssistants.notifyAssistantVisibilityChangedLocked(r.getSbn(), true);
                     boolean isHun = (nv.location
                             == NotificationVisibility.NotificationLocation.LOCATION_FIRST_HEADS_UP);
@@ -1074,7 +1074,7 @@ public class NotificationManagerService extends SystemService {
                 for (NotificationVisibility nv : noLongerVisibleKeys) {
                     NotificationRecord r = mNotificationsByKey.get(nv.key);
                     if (r == null) continue;
-                    r.setVisibility(false, nv.rank, nv.count);
+                    r.setVisibility(false, nv.rank, nv.count, mNotificationRecordLogger);
                     mAssistants.notifyAssistantVisibilityChangedLocked(r.getSbn(), false);
                     nv.recycle();
                 }
@@ -6468,7 +6468,7 @@ public class NotificationManagerService extends SystemService {
                         mUsageStats.registerPostedByApp(r);
                         r.setInterruptive(isVisuallyInterruptive(null, r));
                     } else {
-                        old = mNotificationList.get(index);
+                        old = mNotificationList.get(index);  // Potentially *changes* old
                         mNotificationList.set(index, r);
                         mUsageStats.registerUpdatedByApp(r, old);
                         // Make sure we don't lose the foreground service state.
@@ -6537,7 +6537,7 @@ public class NotificationManagerService extends SystemService {
                     maybeRecordInterruptionLocked(r);
 
                     // Log event to statsd
-                    mNotificationRecordLogger.logNotificationReported(r, old, position,
+                    mNotificationRecordLogger.maybeLogNotificationPosted(r, old, position,
                             buzzBeepBlinkLoggingCode);
                 } finally {
                     int N = mEnqueuedNotifications.size();
@@ -7986,7 +7986,8 @@ public class NotificationManagerService extends SystemService {
 
                     FlagChecker flagChecker = (int flags) -> {
                         int flagsToCheck = FLAG_ONGOING_EVENT | FLAG_NO_CLEAR;
-                        if (REASON_LISTENER_CANCEL_ALL == reason) {
+                        if (REASON_LISTENER_CANCEL_ALL == reason
+                                || REASON_CANCEL_ALL == reason) {
                             flagsToCheck |= FLAG_BUBBLE;
                         }
                         if ((flags & flagsToCheck) != 0) {

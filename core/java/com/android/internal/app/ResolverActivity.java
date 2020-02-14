@@ -1278,10 +1278,9 @@ public class ResolverActivity extends Activity implements
             throw new IllegalStateException("mMultiProfilePagerAdapter.getCurrentListAdapter() "
                     + "cannot be null.");
         }
-        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
-
         // We partially rebuild the inactive adapter to determine if we should auto launch
-        mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+        boolean rebuildActiveCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+        boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
 
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
@@ -1290,7 +1289,7 @@ public class ResolverActivity extends Activity implements
         }
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
-        return postRebuildList(rebuildCompleted);
+        return postRebuildList(rebuildActiveCompleted && rebuildInactiveCompleted);
     }
 
     /**
@@ -1338,10 +1337,11 @@ public class ResolverActivity extends Activity implements
         int numberOfProfiles = mMultiProfilePagerAdapter.getItemCount();
         if (numberOfProfiles == 1 && maybeAutolaunchIfSingleTarget()) {
             return true;
-        } else if (numberOfProfiles == 2 && maybeAutolaunchIfCrossProfileSupported()) {
-            // note that autolaunching when we have 2 profiles, 1 resolved target on the active
-            // tab and 0 resolved targets on the inactive tab, is already handled before launching
-            // ResolverActivity
+        } else if (numberOfProfiles == 2
+                && mMultiProfilePagerAdapter.getActiveListAdapter().isListLoaded()
+                && mMultiProfilePagerAdapter.getInactiveListAdapter().isListLoaded()
+                && (maybeAutolaunchIfNoAppsOnInactiveTab()
+                        || maybeAutolaunchIfCrossProfileSupported())) {
             return true;
         }
         return false;
@@ -1362,6 +1362,23 @@ public class ResolverActivity extends Activity implements
             return true;
         }
         return false;
+    }
+
+    private boolean maybeAutolaunchIfNoAppsOnInactiveTab() {
+        int count = mMultiProfilePagerAdapter.getActiveListAdapter().getUnfilteredCount();
+        if (count != 1) {
+            return false;
+        }
+        ResolverListAdapter inactiveListAdapter =
+                mMultiProfilePagerAdapter.getInactiveListAdapter();
+        if (inactiveListAdapter.getUnfilteredCount() != 0) {
+            return false;
+        }
+        TargetInfo target = mMultiProfilePagerAdapter.getActiveListAdapter()
+                .targetInfoForPosition(0, false);
+        safelyStartActivity(target);
+        finish();
+        return true;
     }
 
     /**

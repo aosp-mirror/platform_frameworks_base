@@ -57,6 +57,7 @@ import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLE
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
+import static android.app.admin.DevicePolicyManager.NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
@@ -522,7 +523,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /** Keyguard features that are allowed to be set on a managed profile */
     private static final int PROFILE_KEYGUARD_FEATURES =
-            PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER | PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY;
+            NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER
+                    | PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY;
 
     private static final int DEVICE_ADMIN_DEACTIVATE_TIMEOUT = 10000;
 
@@ -2542,7 +2544,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * corporate owned device.
      */
     @GuardedBy("getLockObject()")
-    private void maybeMigrateToProfileOnOrganizationOwnedDeviceLocked() {
+    private void migrateToProfileOnOrganizationOwnedDeviceIfCompLocked() {
         logIfVerbose("Checking whether we need to migrate COMP ");
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
@@ -2605,6 +2607,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // Note: KeyChain keys are not removed and will remain accessible for the apps that have
         // been given grants to use them.
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.COMP_TO_ORG_OWNED_PO_MIGRATED)
+                .setAdmin(poAdminComponent)
+                .write();
     }
 
     private void moveDoPoliciesToProfileParentAdmin(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
@@ -3865,7 +3872,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 synchronized (getLockObject()) {
-                    maybeMigrateToProfileOnOrganizationOwnedDeviceLocked();
+                    migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
                 }
                 final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
                 if (userId >= 0) {
@@ -8163,16 +8170,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
-        if (isManagedProfile(userHandle)) {
-            if (parent) {
-                which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
-            } else {
-                which = which & PROFILE_KEYGUARD_FEATURES;
-            }
-        }
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES, parent);
+            if (isManagedProfile(userHandle)) {
+                if (parent) {
+                    if (isProfileOwnerOfOrganizationOwnedDevice(ap)) {
+                        which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+                    } else {
+                        which = which & NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+                    }
+                } else {
+                    which = which & PROFILE_KEYGUARD_FEATURES;
+                }
+            }
             if (ap.disabledKeyguardFeatures != which) {
                 ap.disabledKeyguardFeatures = which;
                 saveSettingsLocked(userHandle);
@@ -11553,7 +11564,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setLockdownAdminConfiguredNetworks(ComponentName who, boolean lockdown) {
+    public void setConfiguredNetworksLockdownState(ComponentName who, boolean lockdown) {
         if (!mHasFeature) {
             return;
         }
@@ -11572,7 +11583,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isLockdownAdminConfiguredNetworks(ComponentName who) {
+    public boolean hasLockdownAdminConfiguredNetworks(ComponentName who) {
         if (!mHasFeature) {
             return false;
         }
@@ -15551,6 +15562,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mInjector.binderWithCleanCallingIdentity(
                 () -> applyPersonalAppsSuspension(callingUserId, suspended));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)
+                .setAdmin(who)
+                .setBoolean(suspended)
+                .write();
     }
 
     /**
@@ -15722,9 +15739,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mInjector.binderWithCleanCallingIdentity(
                 () -> updatePersonalAppSuspension(userId, mUserManager.isUserUnlocked()));
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_MANAGED_PROFILE_MAXIMUM_TIME_OFF)
+                .setAdmin(who)
+                .setTimePeriod(timeoutMs)
+                .write();
     }
 
-    void enforceHandlesCheckPolicyComplianceIntent(@UserIdInt int userId, String packageName) {
+    private void enforceHandlesCheckPolicyComplianceIntent(
+            @UserIdInt int userId, String packageName) {
         mInjector.binderWithCleanCallingIdentity(() -> {
             final Intent intent = new Intent(DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
             intent.setPackage(packageName);

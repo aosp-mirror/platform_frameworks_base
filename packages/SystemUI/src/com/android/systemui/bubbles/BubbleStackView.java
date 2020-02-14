@@ -528,6 +528,12 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.addView(mOverflowBtn, 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
 
+        setOverflowBtnTheme();
+        mOverflowBtn.setVisibility(GONE);
+    }
+
+    // TODO(b/149146374) Propagate theme change to bubbles in overflow.
+    private void setOverflowBtnTheme() {
         TypedArray ta = mContext.obtainStyledAttributes(
                 new int[]{android.R.attr.colorBackgroundFloating});
         int bgColor = ta.getColor(0, Color.WHITE /* default */);
@@ -537,8 +543,6 @@ public class BubbleStackView extends FrameLayout {
         ColorDrawable bg = new ColorDrawable(bgColor);
         AdaptiveIconDrawable adaptiveIcon = new AdaptiveIconDrawable(bg, fg);
         mOverflowBtn.setImageDrawable(adaptiveIcon);
-
-        mOverflowBtn.setVisibility(GONE);
     }
 
     void showExpandedViewContents(int displayId) {
@@ -568,6 +572,9 @@ public class BubbleStackView extends FrameLayout {
      */
     public void onThemeChanged() {
         setUpFlyout();
+        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
+            setOverflowBtnTheme();
+        }
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -795,6 +802,7 @@ public class BubbleStackView extends FrameLayout {
         if (removedIndex >= 0) {
             mBubbleContainer.removeViewAt(removedIndex);
             bubble.cleanupExpandedState();
+            bubble.setInflated(false);
             logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);

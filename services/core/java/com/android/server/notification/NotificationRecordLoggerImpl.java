@@ -26,13 +26,13 @@ import com.android.internal.util.FrameworkStatsLog;
  */
 public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
 
-    UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+    private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
 
     @Override
-    public void logNotificationReported(NotificationRecord r, NotificationRecord old,
+    public void maybeLogNotificationPosted(NotificationRecord r, NotificationRecord old,
             int position, int buzzBeepBlink) {
         NotificationRecordPair p = new NotificationRecordPair(r, old);
-        if (!p.shouldLog(buzzBeepBlink)) {
+        if (!p.shouldLogReported(buzzBeepBlink)) {
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_REPORTED,
@@ -66,8 +66,19 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
 
     @Override
     public void logNotificationCancelled(NotificationRecord r, int reason, int dismissalSurface) {
-        mUiEventLogger.logWithInstanceId(
-                NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface),
-                r.getUid(), r.getSbn().getPackageName(), r.getSbn().getInstanceId());
+        log(NotificationCancelledEvent.fromCancelReason(reason, dismissalSurface), r);
+    }
+
+    @Override
+    public void logNotificationVisibility(NotificationRecord r, boolean visible) {
+        log(NotificationEvent.fromVisibility(visible), r);
+    }
+
+    void log(UiEventLogger.UiEventEnum event, NotificationRecord r) {
+        if (r == null) {
+            return;
+        }
+        mUiEventLogger.logWithInstanceId(event, r.getUid(), r.getSbn().getPackageName(),
+                r.getSbn().getInstanceId());
     }
 }

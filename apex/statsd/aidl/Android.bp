@@ -38,6 +38,10 @@ aidl_interface {
         },
         ndk: {
             enabled: true,
+            apex_available: [
+                "com.android.os.statsd",
+            ],
         }
-    }
+
+    },
 }

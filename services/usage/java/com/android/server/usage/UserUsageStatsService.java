@@ -18,6 +18,10 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
 import static android.app.usage.UsageEvents.Event.DEVICE_STARTUP;
+import static android.app.usage.UsageEvents.HIDE_LOCUS_EVENTS;
+import static android.app.usage.UsageEvents.HIDE_SHORTCUT_EVENTS;
+import static android.app.usage.UsageEvents.OBFUSCATE_INSTANT_APPS;
+import static android.app.usage.UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
 import static android.app.usage.UsageStatsManager.INTERVAL_BEST;
 import static android.app.usage.UsageStatsManager.INTERVAL_COUNT;
 import static android.app.usage.UsageStatsManager.INTERVAL_DAILY;
@@ -481,8 +485,7 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime, boolean obfuscateInstantApps,
-            boolean hideShortcutInvocationEvents, boolean hideLocusIdEvents) {
+    UsageEvents queryEvents(final long beginTime, final long endTime, int flags) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
@@ -500,15 +503,22 @@ class UserUsageStatsService {
                             }
 
                             Event event = stats.events.get(i);
-                            if (hideShortcutInvocationEvents
-                                    && event.mEventType == Event.SHORTCUT_INVOCATION) {
+                            final int eventType = event.mEventType;
+                            if (eventType == Event.SHORTCUT_INVOCATION
+                                    && (flags & HIDE_SHORTCUT_EVENTS) == HIDE_SHORTCUT_EVENTS) {
                                 continue;
                             }
-                            if (hideLocusIdEvents
-                                    && event.mEventType == Event.LOCUS_ID_SET) {
+                            if (eventType == Event.LOCUS_ID_SET
+                                    && (flags & HIDE_LOCUS_EVENTS) == HIDE_LOCUS_EVENTS) {
                                 continue;
                             }
-                            if (obfuscateInstantApps) {
+                            if ((eventType == Event.NOTIFICATION_SEEN
+                                    || eventType == Event.NOTIFICATION_INTERRUPTION)
+                                    && (flags & OBFUSCATE_NOTIFICATION_EVENTS)
+                                    == OBFUSCATE_NOTIFICATION_EVENTS) {
+                                event = event.getObfuscatedNotificationEvent();
+                            }
+                            if ((flags & OBFUSCATE_INSTANT_APPS) == OBFUSCATE_INSTANT_APPS) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
                             if (event.mPackage != null) {

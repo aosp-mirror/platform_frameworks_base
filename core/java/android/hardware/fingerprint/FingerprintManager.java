@@ -1011,6 +1011,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ERROR_HW_NOT_PRESENT:
                 return context.getString(
                         com.android.internal.R.string.fingerprint_error_hw_not_present);
+            case BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED:
+                return context.getString(
+                        com.android.internal.R.string.fingerprint_error_security_update_required);
             case FINGERPRINT_ERROR_VENDOR: {
                     String[] msgArray = context.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_error_vendor);

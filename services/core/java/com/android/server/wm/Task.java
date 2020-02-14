@@ -3070,17 +3070,11 @@ class Task extends WindowContainer<WindowContainer> {
         return matchParentBounds();
     }
 
+    @Override
     void forAllTasks(Consumer<Task> callback, boolean traverseTopToBottom, Task excludedTask) {
-        if (traverseTopToBottom) {
-            super.forAllTasks(callback, traverseTopToBottom);
-            if (excludedTask != this) {
-                callback.accept(this);
-            }
-        } else {
-            super.forAllTasks(callback, traverseTopToBottom);
-            if (excludedTask != this) {
-                callback.accept(this);
-            }
+        super.forAllTasks(callback, traverseTopToBottom, excludedTask);
+        if (excludedTask != this) {
+            callback.accept(this);
         }
     }
 

@@ -4718,15 +4718,40 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_FEATURES_ALL = 0x7fffffff;
 
     /**
-     * Keyguard features that when set on a managed profile that doesn't have its own challenge will
-     * affect the profile's parent user. These can also be set on the managed profile's parent
+     * Keyguard features that when set on a non-organization-owned managed profile that doesn't
+     * have its own challenge will affect the profile's parent user. These can also be set on the
+     * managed profile's parent {@link DevicePolicyManager} instance to explicitly control the
+     * parent user.
+     *
+     * <p>
+     * Organization-owned managed profile supports disabling additional keyguard features on the
+     * parent user as defined in {@link #ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY}.
+     *
+     * @hide
+     */
+    public static final int NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
+            DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
+            | DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS;
+
+    /**
+     * Keyguard features that when set by the profile owner of an organization-owned managed
+     * profile will affect the profile's parent user if set on the managed profile's parent
      * {@link DevicePolicyManager} instance.
      *
      * @hide
      */
+    public static final int ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY =
+            KEYGUARD_DISABLE_SECURE_CAMERA;
+
+    /**
+     * Keyguard features that when set on a normal or organization-owned managed profile, have
+     * the potential to affect the profile's parent user.
+     *
+     * @hide
+     */
     public static final int PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
-            DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
-            | DevicePolicyManager.KEYGUARD_DISABLE_BIOMETRICS;
+            DevicePolicyManager.NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER
+                    | DevicePolicyManager.ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY;
 
     /**
      * @deprecated This method does not actually modify the storage encryption of the device.
@@ -6115,11 +6140,20 @@ public class DevicePolicyManager {
      * <li>{@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS} which affects notifications generated
      * by applications in the managed profile.
      * </ul>
+     * <p>
+     * From version {@link android.os.Build.VERSION_CODES#R} the profile owner of an
+     * organization-owned managed profile can set:
+     * <ul>
+     * <li>{@link #KEYGUARD_DISABLE_SECURE_CAMERA} which affects the parent user when called on the
+     * parent profile.
+     * </ul>
      * {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, {@link #KEYGUARD_DISABLE_FINGERPRINT},
-     * {@link #KEYGUARD_DISABLE_FACE} and {@link #KEYGUARD_DISABLE_IRIS} can also be
-     * set on the {@link DevicePolicyManager} instance returned by
-     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
-     * profile.
+     * {@link #KEYGUARD_DISABLE_FACE}, {@link #KEYGUARD_DISABLE_IRIS} and
+     * {@link #KEYGUARD_DISABLE_SECURE_CAMERA} can also be set on the {@link DevicePolicyManager}
+     * instance returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile. {@link #KEYGUARD_DISABLE_SECURE_CAMERA} can only be set
+     * on the parent profile instance if the calling device admin is the profile owner of an
+     * organization-owned managed profile.
      * <p>
      * Requests to disable other features on a managed profile will be ignored.
      * <p>
@@ -8789,11 +8823,11 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner or a profile owner of an
      *                           organization-owned managed profile.
      */
-    public void setLockdownAdminConfiguredNetworks(@NonNull ComponentName admin, boolean lockdown) {
-        throwIfParentInstance("setLockdownAdminConfiguredNetworks");
+    public void setConfiguredNetworksLockdownState(@NonNull ComponentName admin, boolean lockdown) {
+        throwIfParentInstance("setConfiguredNetworksLockdownState");
         if (mService != null) {
             try {
-                mService.setLockdownAdminConfiguredNetworks(admin, lockdown);
+                mService.setConfiguredNetworksLockdownState(admin, lockdown);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8809,11 +8843,11 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner or a profile owner of an
      *                           organization-owned managed profile.
      */
-    public boolean isLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
-        throwIfParentInstance("setLockdownAdminConfiguredNetworks");
+    public boolean hasLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
+        throwIfParentInstance("hasLockdownAdminConfiguredNetworks");
         if (mService != null) {
             try {
-                return mService.isLockdownAdminConfiguredNetworks(admin);
+                return mService.hasLockdownAdminConfiguredNetworks(admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

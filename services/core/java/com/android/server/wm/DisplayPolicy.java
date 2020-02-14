@@ -145,7 +145,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.DisplayCutout;
 import android.view.Gravity;
-import android.view.IApplicationToken;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -332,8 +331,6 @@ public class DisplayPolicy {
     // The windows we were told about in focusChanged.
     private WindowState mFocusedWindow;
     private WindowState mLastFocusedWindow;
-
-    IApplicationToken mFocusedApp;
 
     // The states of decor windows from the last layout. These are used to generate another display
     // layout in different bounds but with the same states.
@@ -3287,7 +3284,6 @@ public class DisplayPolicy {
                 && mLastBehavior == behavior
                 && mLastFocusIsFullscreen == isFullscreen
                 && mLastFocusIsImmersive == isImmersive
-                && mFocusedApp == win.getAppToken()
                 && mLastNonDockedStackBounds.equals(mNonDockedStackBounds)
                 && mLastDockedStackBounds.equals(mDockedStackBounds)) {
             return 0;
@@ -3304,7 +3300,6 @@ public class DisplayPolicy {
         mLastBehavior = behavior;
         mLastFocusIsFullscreen = isFullscreen;
         mLastFocusIsImmersive = isImmersive;
-        mFocusedApp = win.getAppToken();
         mLastNonDockedStackBounds.set(mNonDockedStackBounds);
         mLastDockedStackBounds.set(mDockedStackBounds);
         final Rect fullscreenStackBounds = new Rect(mNonDockedStackBounds);
@@ -3802,9 +3797,6 @@ public class DisplayPolicy {
         }
         if (mFocusedWindow != null) {
             pw.print(prefix); pw.print("mFocusedWindow="); pw.println(mFocusedWindow);
-        }
-        if (mFocusedApp != null) {
-            pw.print(prefix); pw.print("mFocusedApp="); pw.println(mFocusedApp);
         }
         if (mTopFullscreenOpaqueWindowState != null) {
             pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
