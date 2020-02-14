@@ -223,7 +223,7 @@ class ControlsUiControllerImpl @Inject constructor (
             val item = inflater.inflate(
                 R.layout.controls_base_item, lastRow, false) as ViewGroup
             lastRow.addView(item)
-            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor)
+            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor, bgExecutor)
             val key = ControlKey(it.component, it.controlId)
             cvh.bindData(controlsById.getValue(key))
             controlViewsById.put(key, cvh)

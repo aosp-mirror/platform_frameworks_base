@@ -635,16 +635,16 @@
 
     <style name="TextAppearance.Control.Status">
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/control_primary_text</item>
     </style>
 
     <style name="TextAppearance.Control.Title">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">@color/control_primary_text</item>
     </style>
     <style name="TextAppearance.Control.Subtitle">
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">@color/control_secondary_text</item>
     </style>
 
 </resources>
