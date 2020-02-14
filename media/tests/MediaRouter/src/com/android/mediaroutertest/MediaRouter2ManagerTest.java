@@ -70,8 +70,8 @@ import java.util.function.Predicate;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class MediaRouterManagerTest {
-    private static final String TAG = "MediaRouterManagerTest";
+public class MediaRouter2ManagerTest {
+    private static final String TAG = "MediaRouter2ManagerTest";
     private static final int TIMEOUT_MS = 5000;
 
     private Context mContext;
