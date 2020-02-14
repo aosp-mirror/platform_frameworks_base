@@ -36,6 +36,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.WorkSource;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -743,6 +744,25 @@ public class WifiScanner {
              */
             public PnoNetwork(String ssid) {
                 this.ssid = ssid;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(ssid, flags, authBitField);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (!(obj instanceof PnoNetwork)) {
+                    return false;
+                }
+                PnoNetwork lhs = (PnoNetwork) obj;
+                return TextUtils.equals(this.ssid, lhs.ssid)
+                        && this.flags == lhs.flags
+                        && this.authBitField == lhs.authBitField;
             }
         }
 
