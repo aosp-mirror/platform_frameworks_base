@@ -690,14 +690,16 @@ void StorageManager::trimToFit(const char* path, bool parseTimestampOnly) {
         if (name[0] == '.') continue;
 
         FileName output;
+        string file_name;
         if (parseTimestampOnly) {
+            file_name = StringPrintf("%s/%s", path, name);
             output.mTimestampSec = StrToInt64(strtok(name, "_"));
             output.mIsHistory = false;
         } else {
             parseFileName(name, &output);
+            file_name = output.getFullFileName(path);
         }
         if (output.mTimestampSec == -1) continue;
-        string file_name = output.getFullFileName(path);
 
         // Check for timestamp and delete if it's too old.
         long fileAge = nowSec - output.mTimestampSec;
