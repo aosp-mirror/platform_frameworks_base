@@ -321,14 +321,12 @@ public final class SurfaceControl implements Parcelable {
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
 
     /**
-     * Surface creation flag: Creates a Dim surface.
-     * Everything behind this surface is dimmed by the amount specified
-     * in {@link Transaction#setAlpha(SurfaceControl, float)}.  It is an error to lock a Dim
-     * surface, since it doesn't have a backing store.
+     * Surface creation flag: Creates a effect surface which
+     * represents a solid color and or shadows.
      *
      * @hide
      */
-    public static final int FX_SURFACE_DIM = 0x00020000;
+    public static final int FX_SURFACE_EFFECT = 0x00020000;
 
     /**
      * Surface creation flag: Creates a container surface.
@@ -739,11 +737,11 @@ public final class SurfaceControl implements Parcelable {
          */
         public Builder setColorLayer() {
             unsetBufferSize();
-            return setFlags(FX_SURFACE_DIM, FX_SURFACE_MASK);
+            return setFlags(FX_SURFACE_EFFECT, FX_SURFACE_MASK);
         }
 
         private boolean isColorLayerSet() {
-            return  (mFlags & FX_SURFACE_DIM) == FX_SURFACE_DIM;
+            return  (mFlags & FX_SURFACE_EFFECT) == FX_SURFACE_EFFECT;
         }
 
         /**
@@ -2078,6 +2076,7 @@ public final class SurfaceControl implements Parcelable {
 
         private final ArrayMap<SurfaceControl, Point> mResizedSurfaces = new ArrayMap<>();
         Runnable mFreeNativeResources;
+        private static final float[] INVALID_COLOR = {-1, -1, -1};
 
         /**
          * @hide
@@ -2533,14 +2532,25 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets a color for the Surface.
-         * @param color A float array with three values to represent r, g, b in range [0..1]
+         * Fills the surface with the specified color.
+         * @param color A float array with three values to represent r, g, b in range [0..1]. An
+         * invalid color will remove the color fill.
          * @hide
          */
         @UnsupportedAppUsage
         public Transaction setColor(SurfaceControl sc, @Size(3) float[] color) {
             checkPreconditions(sc);
             nativeSetColor(mNativeObject, sc.mNativeObject, color);
+            return this;
+        }
+
+        /**
+         * Removes color fill.
+        * @hide
+        */
+        public Transaction unsetColor(SurfaceControl sc) {
+            checkPreconditions(sc);
+            nativeSetColor(mNativeObject, sc.mNativeObject, INVALID_COLOR);
             return this;
         }
 
