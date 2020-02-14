@@ -645,10 +645,12 @@ struct GnssCallback : public IGnssCallback_V2_1 {
     Return<void> gnssSvStatusCb_2_0(const hidl_vec<IGnssCallback_V2_0::GnssSvInfo>& svInfoList) override {
         return gnssSvStatusCbImpl(svInfoList);
     }
+
+    // New in 2.1
     Return<void> gnssSvStatusCb_2_1(const hidl_vec<IGnssCallback_V2_1::GnssSvInfo>& svInfoList) override {
         return gnssSvStatusCbImpl(svInfoList);
     }
-    Return<void> gnssSetCapabilitesCbImpl(uint32_t capabilities, bool hasSubHalCapabilityFlags);
+    Return<void> gnssSetCapabilitiesCb_2_1(uint32_t capabilities) override;
 
     // TODO: Reconsider allocation cost vs threadsafety on these statics
     static const char* sNmeaString;
@@ -848,6 +850,10 @@ Return<void> GnssCallback::gnssSetCapabilitesCb(uint32_t capabilities) {
 }
 
 Return<void> GnssCallback::gnssSetCapabilitiesCb_2_0(uint32_t capabilities) {
+    return GnssCallback::gnssSetCapabilitesCb(capabilities);
+}
+
+Return<void> GnssCallback::gnssSetCapabilitiesCb_2_1(uint32_t capabilities) {
     return GnssCallback::gnssSetCapabilitesCb(capabilities);
 }
 
