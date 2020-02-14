@@ -102,12 +102,6 @@ public final class AudioPlaybackCaptureConfiguration {
                                 criterion -> criterion.getIntProp());
     }
 
-    /** @return the userId's passed to {@link Builder#addMatchingUserId(int)}. */
-    public @NonNull int[] getMatchingUserIds() {
-        return getIntPredicates(AudioMixingRule.RULE_MATCH_USERID,
-                criterion -> criterion.getIntProp());
-    }
-
     /** @return the usages passed to {@link Builder#excludeUsage(int)}. */
     @AttributeUsage
     public @NonNull int[] getExcludeUsages() {
@@ -119,12 +113,6 @@ public final class AudioPlaybackCaptureConfiguration {
     public @NonNull int[] getExcludeUids() {
         return getIntPredicates(AudioMixingRule.RULE_EXCLUDE_UID,
                                 criterion -> criterion.getIntProp());
-    }
-
-    /** @return the userId's passed to {@link Builder#excludeUserId(int)}.  */
-    public @NonNull int[] getExcludeUserIds() {
-        return getIntPredicates(AudioMixingRule.RULE_EXCLUDE_USERID,
-                criterion -> criterion.getIntProp());
     }
 
     private int[] getIntPredicates(int rule,
@@ -165,7 +153,6 @@ public final class AudioPlaybackCaptureConfiguration {
         private final MediaProjection mProjection;
         private int mUsageMatchType = MATCH_TYPE_UNSPECIFIED;
         private int mUidMatchType = MATCH_TYPE_UNSPECIFIED;
-        private int mUserIdMatchType = MATCH_TYPE_UNSPECIFIED;
 
         /** @param projection A MediaProjection that supports audio projection. */
         public Builder(@NonNull MediaProjection projection) {
@@ -215,23 +202,6 @@ public final class AudioPlaybackCaptureConfiguration {
         }
 
         /**
-         * Only capture audio output by app with the matching {@code userId}.
-         *
-         * <p>If called multiple times, will capture audio output by apps whose userId is any of the
-         * given userId's.
-         *
-         * @throws IllegalStateException if called in conjunction with {@link #excludeUserId(int)}.
-         */
-        public @NonNull Builder addMatchingUserId(int userId) {
-            Preconditions.checkState(
-                    mUserIdMatchType != MATCH_TYPE_EXCLUSIVE,
-                    ERROR_MESSAGE_MISMATCHED_RULES);
-            mAudioMixingRuleBuilder.addMixRule(AudioMixingRule.RULE_MATCH_USERID, userId);
-            mUserIdMatchType = MATCH_TYPE_INCLUSIVE;
-            return this;
-        }
-
-        /**
          * Only capture audio output that does not match the given {@link AudioAttributes}.
          *
          * <p>If called multiple times, will capture audio output that does not match any of the
@@ -264,24 +234,6 @@ public final class AudioPlaybackCaptureConfiguration {
                     mUidMatchType != MATCH_TYPE_INCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
             mAudioMixingRuleBuilder.excludeMixRule(AudioMixingRule.RULE_MATCH_UID, uid);
             mUidMatchType = MATCH_TYPE_EXCLUSIVE;
-            return this;
-        }
-
-        /**
-         * Only capture audio output by apps that do not have the matching {@code userId}.
-         *
-         * <p>If called multiple times, will capture audio output by apps whose userId is not any of
-         * the given userId's.
-         *
-         * @throws IllegalStateException if called in conjunction with
-         * {@link #addMatchingUserId(int)}.
-         */
-        public @NonNull Builder excludeUserId(int userId) {
-            Preconditions.checkState(
-                    mUserIdMatchType != MATCH_TYPE_INCLUSIVE,
-                    ERROR_MESSAGE_MISMATCHED_RULES);
-            mAudioMixingRuleBuilder.excludeMixRule(AudioMixingRule.RULE_MATCH_USERID, userId);
-            mUserIdMatchType = MATCH_TYPE_EXCLUSIVE;
             return this;
         }
 
