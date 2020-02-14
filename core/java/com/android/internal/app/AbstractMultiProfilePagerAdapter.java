@@ -61,6 +61,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private Set<Integer> mLoadedPages;
     private final UserHandle mPersonalProfileUserHandle;
     private final UserHandle mWorkProfileUserHandle;
+    private Injector mInjector;
 
     AbstractMultiProfilePagerAdapter(Context context, int currentPage,
             UserHandle personalProfileUserHandle,
@@ -70,6 +71,33 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         mLoadedPages = new HashSet<>();
         mPersonalProfileUserHandle = personalProfileUserHandle;
         mWorkProfileUserHandle = workProfileUserHandle;
+        UserManager userManager = context.getSystemService(UserManager.class);
+        mInjector = new Injector() {
+            @Override
+            public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
+                    int targetUserId) {
+                return AbstractMultiProfilePagerAdapter.this
+                        .hasCrossProfileIntents(intents, sourceUserId, targetUserId);
+            }
+
+            @Override
+            public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
+                return userManager.isQuietModeEnabled(workProfileUserHandle);
+            }
+
+            @Override
+            public void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle) {
+                userManager.requestQuietModeEnabled(enabled, workProfileUserHandle);
+            }
+        };
+    }
+
+    /**
+     * Overrides the default {@link Injector} for testing purposes.
+     */
+    @VisibleForTesting
+    public void setInjector(Injector injector) {
+        mInjector = injector;
     }
 
     void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
@@ -252,19 +280,18 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
         UserHandle listUserHandle = activeListAdapter.getUserHandle();
-        UserManager userManager = mContext.getSystemService(UserManager.class);
         if (listUserHandle == mWorkProfileUserHandle
-                && userManager.isQuietModeEnabled(mWorkProfileUserHandle)) {
+                && mInjector.isQuietModeEnabled(mWorkProfileUserHandle)) {
             showEmptyState(activeListAdapter,
                     R.drawable.ic_work_apps_off,
                     R.string.resolver_turn_on_work_apps,
                     R.string.resolver_turn_on_work_apps_explanation,
                     (View.OnClickListener) v ->
-                            userManager.requestQuietModeEnabled(false, mWorkProfileUserHandle));
+                            mInjector.requestQuietModeEnabled(false, mWorkProfileUserHandle));
             return false;
         }
         if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
-            if (!hasCrossProfileIntents(activeListAdapter.getIntents(),
+            if (!mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
                     UserHandle.myUserId(), listUserHandle.getIdentifier())) {
                 if (listUserHandle == mPersonalProfileUserHandle) {
                     showEmptyState(activeListAdapter,
@@ -365,5 +392,27 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
          * {@link #PROFILE_WORK} if the work profile was selected.
          */
         void onProfileSelected(int profileIndex);
+    }
+
+    /**
+     * Describes an injector to be used for cross profile functionality. Overridable for testing.
+     */
+    @VisibleForTesting
+    public interface Injector {
+        /**
+         * Returns {@code true} if at least one of the provided {@code intents} can be forwarded
+         * from {@code sourceUserId} to {@code targetUserId}.
+         */
+        boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId, int targetUserId);
+
+        /**
+         * Returns whether the given profile is in quiet mode or not.
+         */
+        boolean isQuietModeEnabled(UserHandle workProfileUserHandle);
+
+        /**
+         * Enables or disables quiet mode for a managed profile.
+         */
+        void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle);
     }
 }
