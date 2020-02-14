@@ -1366,7 +1366,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             mConfig.allowedKeyManagement.set(KeyMgmt.NONE);
         } else {
             mConfig.allowedKeyManagement.set(KeyMgmt.OWE);
-            mConfig.requirePMF = true;
+            mConfig.requirePmf = true;
         }
     }
 
