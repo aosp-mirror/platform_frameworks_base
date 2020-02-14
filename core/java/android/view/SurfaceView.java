@@ -1643,8 +1643,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void updateScreenMatrixForEmbeddedHierarchy() {
+        getBoundsOnScreen(mTmpRect, true);
         mTmpMatrix.reset();
-        mTmpMatrix.setTranslate(mScreenRect.left, mScreenRect.top);
+        mTmpMatrix.setTranslate(mTmpRect.left, mTmpRect.top);
         mTmpMatrix.postScale(mScreenRect.width() / (float) mSurfaceWidth,
                 mScreenRect.height() / (float) mSurfaceHeight);
 
