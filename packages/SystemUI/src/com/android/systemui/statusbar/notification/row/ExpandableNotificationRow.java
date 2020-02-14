@@ -1197,6 +1197,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {
             mMenuRow.onConfigurationChanged();
         }
+        if (mImageResolver != null) {
+            mImageResolver.updateMaxImageSizes();
+        }
     }
 
     public void onUiModeChanged() {
