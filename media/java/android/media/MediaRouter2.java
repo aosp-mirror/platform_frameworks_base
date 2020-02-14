@@ -875,12 +875,12 @@ public class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of transferrable routes for the session.
+         * @return the unmodifiable list of transferable routes for the session.
          */
         @NonNull
-        public List<MediaRoute2Info> getTransferrableRoutes() {
+        public List<MediaRoute2Info> getTransferableRoutes() {
             synchronized (mControllerLock) {
-                return getRoutesWithIdsLocked(mSessionInfo.getTransferrableRoutes());
+                return getRoutesWithIdsLocked(mSessionInfo.getTransferableRoutes());
             }
         }
 
@@ -1033,12 +1033,12 @@ public class MediaRouter2 {
          * all of the following conditions:
          * <ul>
          * <li>ID should not be included in {@link #getSelectedRoutes()}</li>
-         * <li>ID should be included in {@link #getTransferrableRoutes()}</li>
+         * <li>ID should be included in {@link #getTransferableRoutes()}</li>
          * </ul>
          * If the route doesn't meet any of above conditions, it will be ignored.
          *
          * @see #getSelectedRoutes()
-         * @see #getTransferrableRoutes()
+         * @see #getTransferableRoutes()
          * @see RoutingControllerCallback#onControllerUpdated
          */
         public void transferToRoute(@NonNull MediaRoute2Info route) {
@@ -1057,9 +1057,9 @@ public class MediaRouter2 {
                 return;
             }
 
-            List<MediaRoute2Info> transferrableRoutes = getTransferrableRoutes();
-            if (!checkRouteListContainsRouteId(transferrableRoutes, route.getId())) {
-                Log.w(TAG, "Ignoring transferring to a non-transferrable route=" + route);
+            List<MediaRoute2Info> transferableRoutes = getTransferableRoutes();
+            if (!checkRouteListContainsRouteId(transferableRoutes, route.getId())) {
+                Log.w(TAG, "Ignoring transferring to a non-transferable route=" + route);
                 return;
             }
 
@@ -1156,7 +1156,7 @@ public class MediaRouter2 {
                     .map(MediaRoute2Info::getId).collect(Collectors.toList());
             List<String> deselectableRoutes = getDeselectableRoutes().stream()
                     .map(MediaRoute2Info::getId).collect(Collectors.toList());
-            List<String> transferrableRoutes = getTransferrableRoutes().stream()
+            List<String> transferableRoutes = getTransferableRoutes().stream()
                     .map(MediaRoute2Info::getId).collect(Collectors.toList());
 
             StringBuilder result = new StringBuilder()
@@ -1171,8 +1171,8 @@ public class MediaRouter2 {
                     .append(", deselectableRoutes={")
                     .append(deselectableRoutes)
                     .append("}")
-                    .append(", transferrableRoutes={")
-                    .append(transferrableRoutes)
+                    .append(", transferableRoutes={")
+                    .append(transferableRoutes)
                     .append("}")
                     .append(" }");
             return result.toString();

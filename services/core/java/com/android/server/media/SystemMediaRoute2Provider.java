@@ -257,12 +257,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         builder.addSelectedRoute(mSelectedRouteId);
 
         if (!TextUtils.isEmpty(activeBtDeviceAddress)) {
-            builder.addTransferrableRoute(mDefaultRoute.getId());
+            builder.addTransferableRoute(mDefaultRoute.getId());
         }
 
         for (MediaRoute2Info route : mBluetoothRoutes) {
             if (!TextUtils.equals(mSelectedRouteId, route.getId())) {
-                builder.addTransferrableRoute(route.getId());
+                builder.addTransferableRoute(route.getId());
             }
         }
 
