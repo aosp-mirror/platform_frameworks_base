@@ -22,6 +22,8 @@ import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -57,6 +59,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledRunnable;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,8 +84,6 @@ import java.util.function.Consumer;
 @RequiresFeature(PackageManager.FEATURE_LOCATION)
 public class LocationManager {
 
-    private static final String TAG = "LocationManager";
-
     /**
      * For apps targeting Android K and above, supplied {@link PendingIntent}s must be targeted to a
      * specific package.
@@ -91,7 +92,7 @@ public class LocationManager {
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.JELLY_BEAN)
-    public static final long TARGETED_PENDING_INTENT = 148963590L;
+    private static final long TARGETED_PENDING_INTENT = 148963590L;
 
     /**
      * For apps targeting Android K and above, incomplete locations may not be passed to
@@ -2604,18 +2605,28 @@ public class LocationManager {
                 return;
             }
 
-            mExecutor.execute(() -> {
-                Consumer<Location> consumer;
-                synchronized (GetCurrentLocationTransport.this) {
-                    if (mConsumer == null) {
-                        return;
-                    }
-                    consumer = mConsumer;
-                    cancel();
-                }
+            PooledRunnable runnable =
+                    obtainRunnable(GetCurrentLocationTransport::acceptResult, this, location)
+                            .recycleOnUse();
+            try {
+                mExecutor.execute(runnable);
+            } catch (RejectedExecutionException e) {
+                runnable.recycle();
+                throw e;
+            }
+        }
 
-                consumer.accept(location);
-            });
+        private void acceptResult(Location location) {
+            Consumer<Location> consumer;
+            synchronized (this) {
+                if (mConsumer == null) {
+                    return;
+                }
+                consumer = mConsumer;
+                cancel();
+            }
+
+            consumer.accept(location);
         }
     }
 
@@ -2649,27 +2660,33 @@ public class LocationManager {
                 return;
             }
 
+            PooledRunnable runnable =
+                    obtainRunnable(LocationListenerTransport::acceptLocation, this, currentExecutor,
+                            location).recycleOnUse();
             try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onLocationChanged(location);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
+                currentExecutor.execute(runnable);
             } catch (RejectedExecutionException e) {
+                runnable.recycle();
                 locationCallbackFinished();
                 throw e;
+            }
+        }
+
+        private void acceptLocation(Executor currentExecutor, Location location) {
+            try {
+                if (currentExecutor != mExecutor) {
+                    return;
+                }
+
+                // we may be under the binder identity if a direct executor is used
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    mListener.onLocationChanged(location);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } finally {
+                locationCallbackFinished();
             }
         }
 
@@ -2680,25 +2697,13 @@ public class LocationManager {
                 return;
             }
 
+            PooledRunnable runnable =
+                    obtainRunnable(LocationListenerTransport::acceptProviderChange, this,
+                            currentExecutor, provider, true).recycleOnUse();
             try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onProviderEnabled(provider);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
+                currentExecutor.execute(runnable);
             } catch (RejectedExecutionException e) {
+                runnable.recycle();
                 locationCallbackFinished();
                 throw e;
             }
@@ -2711,27 +2716,38 @@ public class LocationManager {
                 return;
             }
 
+            PooledRunnable runnable =
+                    obtainRunnable(LocationListenerTransport::acceptProviderChange, this,
+                            currentExecutor, provider, false).recycleOnUse();
             try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onProviderDisabled(provider);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
+                currentExecutor.execute(runnable);
             } catch (RejectedExecutionException e) {
+                runnable.recycle();
                 locationCallbackFinished();
                 throw e;
+            }
+        }
+
+        private void acceptProviderChange(Executor currentExecutor, String provider,
+                boolean enabled) {
+            try {
+                if (currentExecutor != mExecutor) {
+                    return;
+                }
+
+                // we may be under the binder identity if a direct executor is used
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    if (enabled) {
+                        mListener.onProviderEnabled(provider);
+                    } else {
+                        mListener.onProviderDisabled(provider);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } finally {
+                locationCallbackFinished();
             }
         }
 

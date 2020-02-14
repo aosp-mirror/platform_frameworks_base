@@ -27,6 +27,9 @@ import static android.provider.Settings.Secure.LOCATION_COARSE_ACCURACY_M;
 import static android.provider.Settings.Secure.LOCATION_MODE;
 import static android.provider.Settings.Secure.LOCATION_MODE_OFF;
 
+import static com.android.server.LocationManagerService.D;
+import static com.android.server.LocationManagerService.TAG;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -37,6 +40,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -423,6 +427,10 @@ public class SettingsHelper {
 
         @Override
         public void onChange(boolean selfChange, Uri uri, int userId) {
+            if (D) {
+                Log.d(TAG, "location setting changed [u" + userId + "]: " + uri);
+            }
+
             for (UserSettingChangedListener listener : mListeners) {
                 listener.onSettingChanged(userId);
             }

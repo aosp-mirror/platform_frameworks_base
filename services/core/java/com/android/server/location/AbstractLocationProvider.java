@@ -16,6 +16,8 @@
 
 package com.android.server.location;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.location.Location;
@@ -335,7 +337,8 @@ public abstract class AbstractLocationProvider {
      */
     public final void setRequest(ProviderRequest request) {
         // all calls into the provider must be moved onto the provider thread to prevent deadlock
-        mExecutor.execute(() -> onSetRequest(request));
+        mExecutor.execute(obtainRunnable(AbstractLocationProvider::onSetRequest, this, request)
+                .recycleOnUse());
     }
 
     /**
@@ -348,7 +351,13 @@ public abstract class AbstractLocationProvider {
      */
     public final void sendExtraCommand(int uid, int pid, String command, Bundle extras) {
         // all calls into the provider must be moved onto the provider thread to prevent deadlock
-        mExecutor.execute(() -> onExtraCommand(uid, pid, command, extras));
+
+        // the integer boxing done here likely cancels out any gains from removing lambda
+        // allocation, but since this an infrequently used api with no real performance needs, we
+        // we use pooled lambdas anyways for consistency.
+        mExecutor.execute(
+                obtainRunnable(AbstractLocationProvider::onExtraCommand, this, uid, pid, command,
+                        extras).recycleOnUse());
     }
 
     /**
@@ -361,7 +370,9 @@ public abstract class AbstractLocationProvider {
      */
     public final void requestSetAllowed(boolean allowed) {
         // all calls into the provider must be moved onto the provider thread to prevent deadlock
-        mExecutor.execute(() -> onRequestSetAllowed(allowed));
+        mExecutor.execute(
+                obtainRunnable(AbstractLocationProvider::onRequestSetAllowed, this, allowed)
+                        .recycleOnUse());
     }
 
     /**
