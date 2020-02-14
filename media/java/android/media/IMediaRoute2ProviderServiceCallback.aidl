@@ -31,4 +31,5 @@ oneway interface IMediaRoute2ProviderServiceCallback {
     void notifySessionCreationFailed(long requestId);
     void notifySessionUpdated(in RoutingSessionInfo sessionInfo);
     void notifySessionReleased(in RoutingSessionInfo sessionInfo);
+    void notifyRequestFailed(long requestId, int reason);
 }

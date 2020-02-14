@@ -817,7 +817,7 @@ public class MediaRouter2 {
          * @return An optional bundle of app-specific arguments to send to the provider,
          *         or null if none. The contents of this bundle may affect the result of
          *         controller creation.
-         * @see MediaRoute2ProviderService#onCreateSession(String, String, long, Bundle)
+         * @see MediaRoute2ProviderService#onCreateSession(long, String, String, Bundle)
          */
         @Nullable
         Bundle onGetControllerHints(@NonNull MediaRoute2Info route);
