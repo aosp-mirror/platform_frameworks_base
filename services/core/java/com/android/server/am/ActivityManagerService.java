@@ -8387,6 +8387,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setActivityController(IActivityController controller, boolean imAMonkey) {
+        if (controller != null) {
+            Binder.allowBlocking(controller.asBinder());
+        }
         mActivityTaskManager.setActivityController(controller, imAMonkey);
     }
 
