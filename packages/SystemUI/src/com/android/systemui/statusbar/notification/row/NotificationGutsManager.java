@@ -34,6 +34,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
@@ -42,8 +43,10 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -58,7 +61,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -388,6 +390,10 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 notificationInfoView.closeControls(v, false);
             };
         }
+        ConversationIconFactory iconFactoryLoader = new ConversationIconFactory(mContext,
+                launcherApps, pmUser, IconDrawableFactory.newInstance(mContext),
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_guts_conversation_icon_size));
 
         notificationInfoView.bindNotification(
                 shortcutManager,
@@ -401,8 +407,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 onSettingsClick,
                 onAppSettingsClick,
                 onSnoozeClickListener,
+                iconFactoryLoader,
                 mDeviceProvisionedController.isDeviceProvisioned());
-
     }
 
     /**
