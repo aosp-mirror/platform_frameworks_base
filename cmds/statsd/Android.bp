@@ -120,14 +120,13 @@ cc_defaults {
         "libstatslog",
         "libstatsmetadata",
         "libsysutils",
-	// TODO(b/145923087): move to shared when statsd is moved to the apex
-        "libstatssocket",
         "libutils",
     ],
     shared_libs: [
         "libbinder",
         "libincident",
         "liblog",
+        "libstatssocket",
         "statsd-aidl-cpp",
     ],
 }
