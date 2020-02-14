@@ -16,9 +16,6 @@
 
 package android.view;
 
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -70,6 +67,10 @@ public final class WindowManagerImpl implements WindowManager {
 
     private IBinder mDefaultToken;
 
+    private boolean mIsViewAdded;
+    private View mLastView;
+    private WindowManager.LayoutParams mLastParams;
+
     public WindowManagerImpl(Context context) {
         this(context, null);
     }
@@ -101,6 +102,9 @@ public final class WindowManagerImpl implements WindowManager {
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
         mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+        mIsViewAdded = true;
+        mLastView = view;
+        mLastParams = (WindowManager.LayoutParams) params;
     }
 
     @Override
@@ -246,15 +250,18 @@ public final class WindowManagerImpl implements WindowManager {
         // TODO(window-context): This can only be properly implemented
         //  once we flip the new insets mode flag.
         if (mParentWindow != null) {
+            if (mParentWindow.getDecorView().isAttachedToWindow()) {
+                return mParentWindow.getDecorView().getViewRootImpl()
+                        .getWindowInsets(true /* forceConstruct */);
+            }
             return getWindowInsetsFromServer(mParentWindow.getAttributes());
         }
-        return getWindowInsetsFromServer(getDefaultParams());
-    }
+        if (mIsViewAdded) {
+            return mLastView.getViewRootImpl().getWindowInsets(true /* forceConstruct */);
+        } else {
+            return getWindowInsetsFromServer(new WindowManager.LayoutParams());
+        }
 
-    private static WindowManager.LayoutParams getDefaultParams() {
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
-        return params;
     }
 
     private WindowInsets getWindowInsetsFromServer(WindowManager.LayoutParams attrs) {
