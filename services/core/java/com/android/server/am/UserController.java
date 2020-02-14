@@ -408,6 +408,7 @@ class UserController implements Handler.Callback {
      */
     private boolean finishUserUnlocking(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
+        Slog.d(TAG, "UserController event: finishUserUnlocking(" + userId + ")");
         // Only keep marching forward if user is actually unlocked
         if (!StorageManager.isUserKeyUnlocked(userId)) return false;
         synchronized (mLock) {
@@ -452,6 +453,7 @@ class UserController implements Handler.Callback {
      */
     void finishUserUnlocked(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
+        Slog.d(TAG, "UserController event: finishUserUnlocked(" + userId + ")");
         // Only keep marching forward if user is actually unlocked
         if (!StorageManager.isUserKeyUnlocked(userId)) return;
         synchronized (mLock) {
@@ -522,6 +524,7 @@ class UserController implements Handler.Callback {
 
     private void finishUserUnlockedCompleted(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
+        Slog.d(TAG, "UserController event: finishUserUnlockedCompleted(" + userId + ")");
         synchronized (mLock) {
             // Bail if we ended up with a stale user
             if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
@@ -739,6 +742,7 @@ class UserController implements Handler.Callback {
     }
 
     void finishUserStopping(final int userId, final UserState uss) {
+        Slog.d(TAG, "UserController event: finishUserStopping(" + userId + ")");
         // On to the next.
         final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
         // This is the result receiver for the final shutdown broadcast.
@@ -778,6 +782,7 @@ class UserController implements Handler.Callback {
 
     void finishUserStopped(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
+        Slog.d(TAG, "UserController event: finishUserStopped(" + userId + ")");
         final boolean stopped;
         boolean lockUser = true;
         final ArrayList<IStopUserCallback> stopCallbacks;
@@ -1259,7 +1264,7 @@ class UserController implements Handler.Callback {
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-
+        Slog.i(TAG, "unlocking user " + userId);
         final long binderToken = Binder.clearCallingIdentity();
         try {
             return unlockUserCleared(userId, token, secret, listener);
@@ -1344,6 +1349,7 @@ class UserController implements Handler.Callback {
 
     boolean switchUser(final int targetUserId) {
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, targetUserId);
+        Slog.i(TAG, "switching to user " + targetUserId);
         int currentUserId = getCurrentUserId();
         UserInfo targetUserInfo = getUserInfo(targetUserId);
         if (targetUserId == currentUserId) {
