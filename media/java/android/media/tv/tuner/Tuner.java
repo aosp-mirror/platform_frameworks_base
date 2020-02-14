@@ -612,10 +612,10 @@ public class Tuner implements AutoCloseable  {
      *
      * @return  a {@link Descrambler} object.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
+    @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
-        TunerUtils.checkTunerPermission(mContext);
+        TunerUtils.checkDescramblerPermission(mContext);
         return nativeOpenDescrambler();
     }
 
