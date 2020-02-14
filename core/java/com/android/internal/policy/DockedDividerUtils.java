@@ -16,13 +16,14 @@
 
 package com.android.internal.policy;
 
-import android.graphics.Rect;
-
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+
+import android.content.res.Resources;
+import android.graphics.Rect;
 
 /**
  * Utility functions for docked stack divider used by both window manager and System UI.
@@ -105,23 +106,6 @@ public class DockedDividerUtils {
         return start + (end - start) / 2 - dividerSize / 2;
     }
 
-    public static int getDockSideFromCreatedMode(boolean dockOnTopOrLeft,
-            boolean isHorizontalDivision) {
-        if (dockOnTopOrLeft) {
-            if (isHorizontalDivision) {
-                return DOCKED_TOP;
-            } else {
-                return DOCKED_LEFT;
-            }
-        } else {
-            if (isHorizontalDivision) {
-                return DOCKED_BOTTOM;
-            } else {
-                return DOCKED_RIGHT;
-            }
-        }
-    }
-
     public static int invertDockSide(int dockSide) {
         switch (dockSide) {
             case DOCKED_LEFT:
@@ -135,5 +119,22 @@ public class DockedDividerUtils {
             default:
                 return DOCKED_INVALID;
         }
+    }
+
+    /** Returns the inset distance from the divider window edge to the dividerview. */
+    public static int getDividerInsets(Resources res) {
+        return res.getDimensionPixelSize(com.android.internal.R.dimen.docked_stack_divider_insets);
+    }
+
+    /** Returns the size of the divider */
+    public static int getDividerSize(Resources res, int dividerInsets) {
+        final int windowWidth = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_thickness);
+        return windowWidth - 2 * dividerInsets;
+    }
+
+    /** Returns the docked-stack side */
+    public static int getDockSide(int displayWidth, int displayHeight) {
+        return displayWidth > displayHeight ? DOCKED_LEFT : DOCKED_TOP;
     }
 }

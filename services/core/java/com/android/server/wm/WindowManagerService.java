@@ -7320,7 +7320,9 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
                 if (imeTarget != null) {
-                    imeTarget.getDisplayContent().updateImeControlTarget(imeTarget);
+                    InsetsControlTarget controlTarget =
+                            imeTarget.getDisplayContent().computeImeControlTarget(imeTarget);
+                    imeTarget.getDisplayContent().updateImeControlTarget(controlTarget);
                 }
             }
         }

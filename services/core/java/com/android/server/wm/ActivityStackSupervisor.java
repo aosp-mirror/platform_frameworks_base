@@ -2447,7 +2447,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                moveTasksToFullscreenStackLocked(dockedStack, actualStack == dockedStack);
+                dockedStack.getDisplay().onSplitScreenModeDismissed();
+                dockedStack.getDisplay().ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
+                        true /* notifyClients */);
             }
             return;
         }
@@ -2809,7 +2811,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 final DisplayContent display = task.getStack().getDisplay();
                 final ActivityStack topSecondaryStack =
                         display.getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-                if (topSecondaryStack.isActivityTypeHome()) {
+                if (topSecondaryStack != null && topSecondaryStack.isActivityTypeHome()) {
                     // If the home activity is the top split-screen secondary stack, then the
                     // primary split-screen stack is in the minimized mode which means it can't
                     // receive input keys, so we should move the focused app to the home app so that
