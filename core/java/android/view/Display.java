@@ -67,7 +67,7 @@ import java.util.List;
  * </ul>
  * </p><p>
  * A logical display does not necessarily represent a particular physical display device
- * such as the built-in screen or an external monitor.  The contents of a logical
+ * such as the internal display or an external display.  The contents of a logical
  * display may be presented on one or more physical displays according to the devices
  * that are currently attached and whether mirroring has been enabled.
  * </p>
@@ -104,8 +104,7 @@ public final class Display {
     private int mCachedAppHeightCompat;
 
     /**
-     * The default Display id, which is the id of the built-in primary display
-     * assuming there is one.
+     * The default Display id, which is the id of the primary display assuming there is one.
      */
     public static final int DEFAULT_DISPLAY = 0;
 
@@ -188,7 +187,7 @@ public final class Display {
      * Display flag: Indicates that the display is a presentation display.
      * <p>
      * This flag identifies secondary displays that are suitable for
-     * use as presentation displays such as HDMI or Wireless displays.  Applications
+     * use as presentation displays such as external or wireless displays.  Applications
      * may automatically project their content to presentation displays to provide
      * richer second screen experiences.
      * </p>
@@ -257,17 +256,17 @@ public final class Display {
     public static final int TYPE_UNKNOWN = 0;
 
     /**
-     * Display type: Built-in display.
+     * Display type: Physical display connected through an internal port.
      * @hide
      */
-    public static final int TYPE_BUILT_IN = 1;
+    public static final int TYPE_INTERNAL = 1;
 
     /**
-     * Display type: HDMI display.
+     * Display type: Physical display connected through an external port.
      * @hide
      */
     @UnsupportedAppUsage
-    public static final int TYPE_HDMI = 2;
+    public static final int TYPE_EXTERNAL = 2;
 
     /**
      * Display type: WiFi display.
@@ -562,8 +561,8 @@ public final class Display {
      * @return The display type.
      *
      * @see #TYPE_UNKNOWN
-     * @see #TYPE_BUILT_IN
-     * @see #TYPE_HDMI
+     * @see #TYPE_INTERNAL
+     * @see #TYPE_EXTERNAL
      * @see #TYPE_WIFI
      * @see #TYPE_OVERLAY
      * @see #TYPE_VIRTUAL
@@ -1251,10 +1250,10 @@ public final class Display {
         switch (type) {
             case TYPE_UNKNOWN:
                 return "UNKNOWN";
-            case TYPE_BUILT_IN:
-                return "BUILT_IN";
-            case TYPE_HDMI:
-                return "HDMI";
+            case TYPE_INTERNAL:
+                return "INTERNAL";
+            case TYPE_EXTERNAL:
+                return "EXTERNAL";
             case TYPE_WIFI:
                 return "WIFI";
             case TYPE_OVERLAY:

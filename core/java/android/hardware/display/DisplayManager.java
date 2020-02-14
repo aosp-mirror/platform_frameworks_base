@@ -80,7 +80,7 @@ public final class DisplayManager {
      * Display category: Presentation displays.
      * <p>
      * This category can be used to identify secondary displays that are suitable for
-     * use as presentation displays such as HDMI or Wireless displays.  Applications
+     * use as presentation displays such as external or wireless displays.  Applications
      * may automatically project their content to presentation displays to provide
      * richer second screen experiences.
      * </p>
@@ -100,7 +100,7 @@ public final class DisplayManager {
      * When this flag is set, the virtual display is public.
      * </p><p>
      * A public virtual display behaves just like most any other display that is connected
-     * to the system such as an HDMI or Wireless display.  Applications can open
+     * to the system such as an external or wireless display.  Applications can open
      * windows on the display and the system may mirror the contents of other displays
      * onto it.
      * </p><p>
@@ -364,7 +364,7 @@ public final class DisplayManager {
                     addAllDisplaysLocked(mTempDisplays, displayIds);
                 } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
-                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_HDMI);
+                    addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                 }

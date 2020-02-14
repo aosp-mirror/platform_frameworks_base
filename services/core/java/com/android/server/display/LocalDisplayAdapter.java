@@ -35,7 +35,6 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.BrightnessSynchronizer;
@@ -53,7 +52,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A display adapter for the local displays managed by Surface Flinger.
+ * A display adapter for the local displays managed by SurfaceFlinger.
  * <p>
  * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
@@ -129,10 +128,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             LocalDisplayDevice device = mDevices.get(physicalDisplayId);
             if (device == null) {
                 // Display was added.
-                final boolean isInternal = mDevices.size() == 0;
+                final boolean isDefaultDisplay = mDevices.size() == 0;
                 device = new LocalDisplayDevice(displayToken, physicalDisplayId, info,
                         configs, activeConfig, configSpecs, colorModes, activeColorMode,
-                        hdrCapabilities, isInternal);
+                        hdrCapabilities, isDefaultDisplay);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
             } else if (device.updateDisplayProperties(configs, activeConfig,
@@ -175,7 +174,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final LogicalLight mBacklight;
         private final SparseArray<DisplayModeRecord> mSupportedModes = new SparseArray<>();
         private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
-        private final boolean mIsInternal;
+        private final boolean mIsDefaultDisplay;
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
@@ -207,15 +206,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 SurfaceControl.DisplayInfo info, SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
                 int[] colorModes, int activeColorMode, Display.HdrCapabilities hdrCapabilities,
-                boolean isInternal) {
+                boolean isDefaultDisplay) {
             super(LocalDisplayAdapter.this, displayToken, UNIQUE_ID_PREFIX + physicalDisplayId);
             mPhysicalDisplayId = physicalDisplayId;
-            mIsInternal = isInternal;
+            mIsDefaultDisplay = isDefaultDisplay;
             mDisplayInfo = info;
             updateDisplayProperties(configs, activeConfigId, configSpecs, colorModes,
                     activeColorMode, hdrCapabilities);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
-            if (mIsInternal) {
+            if (mIsDefaultDisplay) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
             } else {
@@ -523,11 +522,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
 
                 final Resources res = getOverlayContext().getResources();
-                if (mIsInternal) {
-                    mInfo.name = res.getString(
-                            com.android.internal.R.string.display_manager_built_in_display_name);
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
-                            | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+
+                if (mIsDefaultDisplay) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY;
+
                     if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
                             || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
@@ -539,28 +537,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
                     mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
                             mInfo.width, mInfo.height);
-                    mInfo.type = Display.TYPE_BUILT_IN;
-                    mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
-                    mInfo.displayCutout = null;
-                    mInfo.type = Display.TYPE_HDMI;
-                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
-                    mInfo.name = getContext().getResources().getString(
-                            com.android.internal.R.string.display_manager_hdmi_display_name);
-                    mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
-
-                    // For demonstration purposes, allow rotation of the external display.
-                    // In the future we might allow the user to configure this directly.
-                    if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
-                        mInfo.rotation = Surface.ROTATION_270;
-                    }
-
-                    // For demonstration purposes, allow rotation of the external display
-                    // to follow the built-in display.
-                    if (SystemProperties.getBoolean("persist.demo.hdmirotates", false)) {
-                        mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
-                    }
-
                     if (!res.getBoolean(
                                 com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
@@ -569,6 +546,20 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     if (isDisplayPrivate(physicalAddress)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
+                }
+
+                if (mDisplayInfo.isInternal) {
+                    mInfo.type = Display.TYPE_INTERNAL;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                    mInfo.name = res.getString(
+                            com.android.internal.R.string.display_manager_built_in_display_name);
+                } else {
+                    mInfo.type = Display.TYPE_EXTERNAL;
+                    mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
+                    mInfo.name = getContext().getResources().getString(
+                            com.android.internal.R.string.display_manager_hdmi_display_name);
                 }
             }
             return mInfo;
