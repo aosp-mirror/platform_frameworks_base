@@ -52,12 +52,14 @@ class StaticBehavior(
         val template = control.getControlTemplate()
         if (template is ThumbnailTemplate) {
             bgExecutor.execute {
+                // clear the default tinting in favor of only using alpha
                 val drawable = template.getThumbnail().loadDrawable(cvh.context)
+                drawable.setTintList(null)
+                drawable.setAlpha((0.45 * 255).toInt())
                 uiExecutor.execute {
                     val radius = cvh.context.getResources()
                             .getDimensionPixelSize(R.dimen.control_corner_radius).toFloat()
                     clipLayer.setDrawable(CornerDrawable(drawable, radius))
-                    cvh.applyRenderInfo(RenderInfo.lookup(control.getDeviceType(), true))
                 }
             }
         }

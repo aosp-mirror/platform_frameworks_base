@@ -201,6 +201,7 @@
     <color name="GM2_grey_900">#202124</color>
 
     <color name="GM2_red_50">#FCE8E6</color>
+    <color name="GM2_red_200">#F6AEA9</color>
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#B71C1C</color>
     <color name="GM2_red_700">#C5221F</color>
@@ -213,6 +214,7 @@
     <color name="GM2_blue_700">#1967D2</color>
 
     <color name="GM2_yellow_50">#FEF7E0</color>
+    <color name="GM2_yellow_200">#FDE293</color>
     <color name="GM2_yellow_500">#FFFBBC04</color>
 
     <color name="GM2_green_500">#FF34A853</color>
@@ -222,6 +224,8 @@
     <color name="magnification_border_color">#FF9900</color>
 
     <!-- controls -->
-    <color name="control_default_foreground">?android:attr/textColorPrimary</color>
-    <color name="control_default_background">?android:attr/colorBackgroundFloating</color>
+    <color name="control_primary_text">@*android:color/foreground_material_dark</color>
+    <color name="control_secondary_text">@*android:color/dim_foreground_dark</color>
+    <color name="control_default_foreground">@*android:color/foreground_material_dark</color>
+    <color name="control_default_background">@*android:color/background_floating_material_dark</color>
 </resources>
