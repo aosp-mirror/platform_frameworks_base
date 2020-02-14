@@ -780,9 +780,6 @@
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 
-    <!-- Assistant handles -->
-    <dimen name="assist_handle_shadow_radius">2dp</dimen>
-
     <!-- For Waterfall Display -->
     <dimen name="waterfall_display_left_edge_size">0px</dimen>
     <dimen name="waterfall_display_top_edge_size">0px</dimen>

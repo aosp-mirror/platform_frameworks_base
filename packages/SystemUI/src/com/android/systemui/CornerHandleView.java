@@ -57,7 +57,6 @@ public class CornerHandleView extends View {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(getStrokePx());
-        setLayerType(View.LAYER_TYPE_SOFTWARE, mPaint);
 
         final int dualToneDarkTheme = Utils.getThemeAttr(mContext, R.attr.darkIconTheme);
         final int dualToneLightTheme = Utils.getThemeAttr(mContext, R.attr.lightIconTheme);
@@ -118,14 +117,8 @@ public class CornerHandleView extends View {
         // Handle color is same as home handle color.
         int color = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
                 mLightColor, mDarkColor);
-        // Shadow color is inverse of handle color.
-        int shadowColor = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
-                mDarkColor, mLightColor);
         if (mPaint.getColor() != color) {
             mPaint.setColor(color);
-            mPaint.setShadowLayer(/** radius */ getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.assist_handle_shadow_radius), /** shadowDx */ 0,
-                    /** shadowDy */ 0, /** color */ shadowColor);
             if (getVisibility() == VISIBLE && getAlpha() > 0) {
                 invalidate();
             } else {
