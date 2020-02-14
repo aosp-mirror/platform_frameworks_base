@@ -48,6 +48,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
@@ -499,6 +500,14 @@ class WindowToken extends WindowContainer<WindowState> {
         rotator.unrotateInsets(outStableInsets);
         rotator.unrotateInsets(outSurfaceInsets);
     }
+
+    /**
+     * Gives a chance to this {@link WindowToken} to adjust the {@link
+     * android.view.WindowManager.LayoutParams} of its windows.
+     */
+    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
+    }
+
 
     @CallSuper
     @Override

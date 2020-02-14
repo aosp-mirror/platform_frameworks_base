@@ -28,6 +28,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.DisplayInfo;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 
 import java.util.function.Consumer;
@@ -166,6 +168,23 @@ class WallpaperWindowToken extends WindowToken {
             if (DEBUG_LAYERS || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "adjustWallpaper win "
                     + wallpaper);
         }
+    }
+
+    @Override
+    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
+        if (attrs.height == ViewGroup.LayoutParams.MATCH_PARENT
+                || attrs.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+            return;
+        }
+
+        final DisplayInfo displayInfo = win.getDisplayInfo();
+
+        final float layoutScale = Math.max(
+                (float) displayInfo.logicalHeight / (float) attrs.height,
+                (float) displayInfo.logicalWidth / (float) attrs.width);
+        attrs.height = (int) (attrs.height * layoutScale);
+        attrs.width = (int) (attrs.width * layoutScale);
+        attrs.flags |= WindowManager.LayoutParams.FLAG_SCALED;
     }
 
     boolean hasVisibleNotDrawnWallpaper() {
