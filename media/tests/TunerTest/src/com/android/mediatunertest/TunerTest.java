@@ -48,13 +48,13 @@ public class TunerTest {
 
     @Test
     public void testTunerConstructor() throws Exception {
-        Tuner tuner = new Tuner(mContext, "123", 1, null);
+        Tuner tuner = new Tuner(mContext, "123", 1);
         assertNotNull(tuner);
     }
 
     @Test
     public void testOpenDescrambler() throws Exception {
-        Tuner tuner = new Tuner(mContext, "123", 1, null);
+        Tuner tuner = new Tuner(mContext, "123", 1);
         Descrambler descrambler = tuner.openDescrambler();
         assertNotNull(descrambler);
     }
