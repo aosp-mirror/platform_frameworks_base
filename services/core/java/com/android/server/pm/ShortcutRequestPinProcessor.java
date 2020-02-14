@@ -26,7 +26,6 @@ import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.PinItemRequest;
 import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
@@ -35,6 +34,9 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Handles {@link android.content.pm.ShortcutManager#requestPinShortcut} related tasks.
@@ -452,6 +454,8 @@ class ShortcutRequestPinProcessor {
         final String launcherPackage = request.launcherPackage;
         final String shortcutId = original.getId();
 
+        List<ShortcutInfo> changedShortcuts = null;
+
         synchronized (mLock) {
             if (!(mService.isUserUnlockedL(appUserId)
                     && mService.isUserUnlockedL(request.launcherUserId))) {
@@ -506,8 +510,13 @@ class ShortcutRequestPinProcessor {
                 Slog.d(TAG, "Pinning " + shortcutId);
             }
 
+
             launcher.addPinnedShortcut(appPackageName, appUserId, shortcutId,
                     /*forPinRequest=*/ true);
+            if (changedShortcuts == null) {
+                changedShortcuts = new ArrayList<>(1);
+            }
+            changedShortcuts.add(original);
 
             if (current == null) {
                 if (DEBUG) {
@@ -520,7 +529,7 @@ class ShortcutRequestPinProcessor {
         }
 
         mService.verifyStates();
-        mService.packageShortcutsChanged(appPackageName, appUserId);
+        mService.packageShortcutsChanged(appPackageName, appUserId, changedShortcuts, null);
 
         return true;
     }
