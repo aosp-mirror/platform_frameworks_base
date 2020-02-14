@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.internal.view.animation;
+package android.graphics.animation;
 
-public interface NativeInterpolatorFactory {
+/**
+ * @hide
+ */
+public interface NativeInterpolator {
+    /**
+     * Generates a native interpolator object that can be used by HardwareRenderer to draw
+     * RenderNodes.
+     * @return ptr to native object
+     */
     long createNativeInterpolator();
 }

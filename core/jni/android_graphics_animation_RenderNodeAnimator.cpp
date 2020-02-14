@@ -190,7 +190,7 @@ static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/RenderNodeAnimator";
+const char* const kClassPathName = "android/graphics/animation/RenderNodeAnimator";
 
 static const JNINativeMethod gMethods[] = {
     { "nCreateAnimator", "(IF)J", (void*) createAnimator },
@@ -203,12 +203,12 @@ static const JNINativeMethod gMethods[] = {
     { "nSetStartDelay", "(JJ)V", (void*) setStartDelay },
     { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
     { "nSetAllowRunningAsync", "(JZ)V", (void*) setAllowRunningAsync },
-    { "nSetListener", "(JLandroid/view/RenderNodeAnimator;)V", (void*) setListener},
+    { "nSetListener", "(JLandroid/graphics/animation/RenderNodeAnimator;)V", (void*) setListener},
     { "nStart", "(J)V", (void*) start},
     { "nEnd", "(J)V", (void*) end },
 };
 
-int register_android_view_RenderNodeAnimator(JNIEnv* env) {
+int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env) {
     sLifecycleChecker.incStrong(0);
     gRenderNodeAnimatorClassInfo.clazz = FindClassOrDie(env, kClassPathName);
     gRenderNodeAnimatorClassInfo.clazz = MakeGlobalRefOrDie(env,
@@ -216,7 +216,7 @@ int register_android_view_RenderNodeAnimator(JNIEnv* env) {
 
     gRenderNodeAnimatorClassInfo.callOnFinished = GetStaticMethodIDOrDie(
             env, gRenderNodeAnimatorClassInfo.clazz, "callOnFinished",
-            "(Landroid/view/RenderNodeAnimator;)V");
+            "(Landroid/graphics/animation/RenderNodeAnimator;)V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

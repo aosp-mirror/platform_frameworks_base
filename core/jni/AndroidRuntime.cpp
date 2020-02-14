@@ -119,13 +119,11 @@ extern int register_android_graphics_BLASTBufferQueue(JNIEnv* env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
 extern int register_android_view_InputApplicationHandle(JNIEnv* env);
 extern int register_android_view_InputWindowHandle(JNIEnv* env);
-extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_CompositionSamplingListener(JNIEnv* env);
 extern int register_android_view_TextureView(JNIEnv* env);
-extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
@@ -1461,7 +1459,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_VintfRuntimeInfo),
         REG_JNI(register_android_service_DataLoaderService),
         REG_JNI(register_android_view_DisplayEventReceiver),
-        REG_JNI(register_android_view_RenderNodeAnimator),
         REG_JNI(register_android_view_InputApplicationHandle),
         REG_JNI(register_android_view_InputWindowHandle),
         REG_JNI(register_android_view_Surface),
@@ -1469,7 +1466,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_view_SurfaceSession),
         REG_JNI(register_android_view_CompositionSamplingListener),
         REG_JNI(register_android_view_TextureView),
-        REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper),
         REG_JNI(register_com_google_android_gles_jni_EGLImpl),
         REG_JNI(register_com_google_android_gles_jni_GLImpl),
         REG_JNI(register_android_opengl_jni_EGL14),
