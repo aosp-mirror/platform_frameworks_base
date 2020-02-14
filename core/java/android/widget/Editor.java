@@ -83,6 +83,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
@@ -394,6 +395,19 @@ public class Editor {
     // Specifies whether the new magnifier (with fish-eye effect) is enabled.
     private final boolean mNewMagnifierEnabled;
 
+    // Line height range in DP for the new magnifier.
+    static private final int MIN_LINE_HEIGHT_FOR_MAGNIFIER = 20;
+    static private final int MAX_LINE_HEIGHT_FOR_MAGNIFIER = 32;
+    // Line height range in pixels for the new magnifier.
+    //  - If the line height is bigger than the max, magnifier should be dismissed.
+    //  - If the line height is smaller than the min, magnifier should apply a bigger zoom factor
+    //    to make sure the text can be seen clearly.
+    private int mMinLineHeightForMagnifier;
+    private int mMaxLineHeightForMagnifier;
+    // The zoom factor initially configured.
+    // The actual zoom value may changes based on this initial zoom value.
+    private float mInitialZoom = 1f;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -440,8 +454,6 @@ public class Editor {
     private Magnifier.Builder createBuilderWithInlineMagnifierDefaults() {
         final Magnifier.Builder params = new Magnifier.Builder(mTextView);
 
-        // TODO: supports changing the height/width dynamically because the text height can be
-        // dynamically changed.
         float zoom = AppGlobals.getFloatCoreSetting(
                 WidgetFlags.KEY_MAGNIFIER_ZOOM_FACTOR, 1.5f);
         float aspectRatio = AppGlobals.getFloatCoreSetting(
@@ -454,13 +466,20 @@ public class Editor {
             aspectRatio = 5.5f;
         }
 
+        mInitialZoom = zoom;
+        mMinLineHeightForMagnifier = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, MIN_LINE_HEIGHT_FOR_MAGNIFIER,
+                mTextView.getContext().getResources().getDisplayMetrics());
+        mMaxLineHeightForMagnifier = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, MAX_LINE_HEIGHT_FOR_MAGNIFIER,
+                mTextView.getContext().getResources().getDisplayMetrics());
+
         final Layout layout = mTextView.getLayout();
         final int line = layout.getLineForOffset(mTextView.getSelectionStart());
         final int sourceHeight =
             layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
-        // Slightly increase the height to avoid tooLargeTextForMagnifier() returns true.
-        int height = (int)(sourceHeight * zoom) + 2;
-        int width = (int)(aspectRatio * height);
+        final int height = (int)(sourceHeight * zoom);
+        final int width = (int)(aspectRatio * Math.max(sourceHeight, mMinLineHeightForMagnifier));
 
         params.setFishEyeStyle()
                 .setSize(width, height)
@@ -4902,6 +4921,12 @@ public class Editor {
         }
 
         private boolean tooLargeTextForMagnifier() {
+            if (mNewMagnifierEnabled) {
+                Layout layout = mTextView.getLayout();
+                final int line = layout.getLineForOffset(getCurrentCursorOffset());
+                return layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line)
+                        >= mMaxLineHeightForMagnifier;
+            }
             final float magnifierContentHeight = Math.round(
                     mMagnifierAnimator.mMagnifier.getHeight()
                             / mMagnifierAnimator.mMagnifier.getZoom());
@@ -5111,9 +5136,16 @@ public class Editor {
                     int lineRight = (int) layout.getLineRight(line);
                     lineRight += mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
                     mMagnifierAnimator.mMagnifier.setSourceHorizontalBounds(lineLeft, lineRight);
+                    final int lineHeight =
+                            layout.getLineBottomWithoutSpacing(line) - layout.getLineTop(line);
+                    float zoom = mInitialZoom;
+                    if (lineHeight < mMinLineHeightForMagnifier) {
+                        zoom = zoom * mMinLineHeightForMagnifier / lineHeight;
+                    }
+                    mMagnifierAnimator.mMagnifier.updateSourceFactors(lineHeight, zoom);
                     mMagnifierAnimator.mMagnifier.show(showPosInView.x, showPosInView.y);
                 } else {
-                  mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
+                    mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
                 }
                 updateHandlesVisibility();
             } else {
