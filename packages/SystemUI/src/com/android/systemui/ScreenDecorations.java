@@ -22,12 +22,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.systemui.tuner.TunablePadding.FLAG_END;
-import static com.android.systemui.tuner.TunablePadding.FLAG_START;
-
 import android.annotation.Dimension;
 import android.app.ActivityManager;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -69,13 +65,7 @@ import com.android.internal.util.Preconditions;
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.fragments.FragmentHostManager;
-import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
-import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.SecureSetting;
-import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.tuner.TunablePadding;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
@@ -85,8 +75,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
@@ -102,7 +90,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
     private static final boolean VERBOSE = false;
-    private final Lazy<StatusBar> mStatusBarLazy;
 
     private DisplayManager mDisplayManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -146,12 +133,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     @Inject
     public ScreenDecorations(Context context,
-            Lazy<StatusBar> statusBarLazy,
             @Main Handler handler,
             BroadcastDispatcher broadcastDispatcher,
             TunerService tunerService) {
         super(context);
-        mStatusBarLazy = statusBarLazy;
         mMainHandler = handler;
         mBroadcastDispatcher = broadcastDispatcher;
         mTunerService = tunerService;
@@ -161,7 +146,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     public void start() {
         mHandler = startHandlerThread();
         mHandler.post(this::startOnScreenDecorationsThread);
-        setupStatusBarPaddingIfNeeded();
     }
 
     @VisibleForTesting
@@ -440,42 +424,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout);
     }
 
-
-    private void setupStatusBarPaddingIfNeeded() {
-        // TODO: This should be moved to a more appropriate place, as it is not related to the
-        // screen decorations overlay.
-        int padding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.rounded_corner_content_padding);
-        if (padding != 0) {
-            setupStatusBarPadding(padding);
-        }
-
-    }
-
-    private void setupStatusBarPadding(int padding) {
-        // Add some padding to all the content near the edge of the screen.
-        StatusBar statusBar = mStatusBarLazy.get();
-        final View notificationShadeWindowView = statusBar.getNotificationShadeWindowView();
-        if (notificationShadeWindowView != null) {
-            TunablePadding.addTunablePadding(
-                    notificationShadeWindowView.findViewById(R.id.keyguard_header),
-                    PADDING, padding, FLAG_END);
-
-            final FragmentHostManager fragmentHostManager =
-                    FragmentHostManager.get(notificationShadeWindowView);
-            fragmentHostManager.addTagListener(QS.TAG,
-                    new TunablePaddingTagListener(padding, R.id.header));
-        }
-
-        final View statusBarWindow = statusBar.getStatusBarWindow();
-        if (statusBarWindow != null) {
-            final FragmentHostManager fragmentHostManager =
-                    FragmentHostManager.get(statusBarWindow);
-            fragmentHostManager.addTagListener(CollapsedStatusBarFragment.TAG,
-                    new TunablePaddingTagListener(padding, R.id.status_bar));
-        }
-    }
-
     @VisibleForTesting
     WindowManager.LayoutParams getWindowLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -564,32 +512,6 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         params.width = pixelSize;
         params.height = pixelSize;
         view.setLayoutParams(params);
-    }
-
-    @VisibleForTesting
-    static class TunablePaddingTagListener implements FragmentListener {
-
-        private final int mPadding;
-        private final int mId;
-        private TunablePadding mTunablePadding;
-
-        public TunablePaddingTagListener(int padding, int id) {
-            mPadding = padding;
-            mId = id;
-        }
-
-        @Override
-        public void onFragmentViewCreated(String tag, Fragment fragment) {
-            if (mTunablePadding != null) {
-                mTunablePadding.destroy();
-            }
-            View view = fragment.getView();
-            if (mId != 0) {
-                view = view.findViewById(mId);
-            }
-            mTunablePadding = TunablePadding.addTunablePadding(view, PADDING, mPadding,
-                    FLAG_START | FLAG_END);
-        }
     }
 
     public static class DisplayCutoutView extends View implements DisplayManager.DisplayListener,
@@ -763,11 +685,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 return false;
             }
             if (mStart) {
-                return displayCutout.getSafeInsetLeft() > 0
-                        || displayCutout.getSafeInsetTop() > 0;
+                return !displayCutout.getBoundingRectLeft().isEmpty()
+                        || !displayCutout.getBoundingRectTop().isEmpty();
             } else {
-                return displayCutout.getSafeInsetRight() > 0
-                        || displayCutout.getSafeInsetBottom() > 0;
+                return !displayCutout.getBoundingRectRight().isEmpty()
+                        || !displayCutout.getBoundingRectBottom().isEmpty();
             }
         }
 
@@ -809,15 +731,15 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         private int getGravity(DisplayCutout displayCutout) {
             if (mStart) {
-                if (displayCutout.getSafeInsetLeft() > 0) {
+                if (!displayCutout.getBoundingRectLeft().isEmpty()) {
                     return Gravity.LEFT;
-                } else if (displayCutout.getSafeInsetTop() > 0) {
+                } else if (!displayCutout.getBoundingRectTop().isEmpty()) {
                     return Gravity.TOP;
                 }
             } else {
-                if (displayCutout.getSafeInsetRight() > 0) {
+                if (!displayCutout.getBoundingRectRight().isEmpty()) {
                     return Gravity.RIGHT;
-                } else if (displayCutout.getSafeInsetBottom() > 0) {
+                } else if (!displayCutout.getBoundingRectBottom().isEmpty()) {
                     return Gravity.BOTTOM;
                 }
             }

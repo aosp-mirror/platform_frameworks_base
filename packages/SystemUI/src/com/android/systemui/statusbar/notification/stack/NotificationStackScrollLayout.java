@@ -60,6 +60,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Pair;
 import android.view.ContextThemeWrapper;
+import android.view.DisplayCutout;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -523,6 +524,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
+
+    private int mWaterfallTopInset;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -1738,6 +1741,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mBottomInset = insets.getSystemWindowInsetBottom();
+
+        mWaterfallTopInset = 0;
+        final DisplayCutout cutout = insets.getDisplayCutout();
+        if (cutout != null) {
+            mWaterfallTopInset = cutout.getWaterfallInsets().top;
+        }
 
         if (ANCHOR_SCROLLING) {
             // TODO
@@ -5335,7 +5344,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getMinExpansionHeight() {
-        return mShelf.getIntrinsicHeight() - (mShelf.getIntrinsicHeight() - mStatusBarHeight) / 2;
+        return mShelf.getIntrinsicHeight()
+                - (mShelf.getIntrinsicHeight() - mStatusBarHeight + mWaterfallTopInset) / 2
+                + mWaterfallTopInset;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
